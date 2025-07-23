@@ -93,7 +93,7 @@ export const PrivilegedAccessInfoPopover = () => {
           {
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.swimLanesDescription"
-              defaultMessage="Swim lanes provide an overview of the data buckets analyzed within the selected time period. A swim lane reflects the top 10 privileged users based on their anomaly scores, showing the maximum influencer score in each block."
+              defaultMessage="Swim lanes provide an overview of the data buckets analyzed within the selected time period. A swim lane reflects the top 10 privileged users based on their anomaly scores, showing the highest anomaly score for that user in each block."
             />
           }
         </p>
