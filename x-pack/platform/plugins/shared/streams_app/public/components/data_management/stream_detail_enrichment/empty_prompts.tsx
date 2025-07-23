@@ -67,3 +67,61 @@ export const NoProcessorsEmptyPrompt = () => {
     />
   );
 };
+
+export const NoPreviewDocumentsEmptyPrompt = () => {
+  return (
+    <EuiEmptyPrompt
+      aria-live="polite"
+      icon={<AssetImage type="noResults" />}
+      titleSize="s"
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsTitle',
+            { defaultMessage: 'No documents available' }
+          )}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsBody',
+            {
+              defaultMessage: 'The current filter settings do not match any documents.',
+            }
+          )}
+        </p>
+      }
+    />
+  );
+};
+
+export const NoProcessingDataAvailableEmptyPrompt = () => {
+  return (
+    <EuiEmptyPrompt
+      aria-live="polite"
+      color="warning"
+      iconType="warning"
+      titleSize="s"
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
+            { defaultMessage: 'No data available to validate processor changes' }
+          )}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
+            {
+              defaultMessage:
+                'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
+            }
+          )}
+        </p>
+      }
+    />
+  );
+};

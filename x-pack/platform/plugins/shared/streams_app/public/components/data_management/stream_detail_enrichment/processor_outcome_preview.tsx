@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -17,7 +16,7 @@ import {
   EuiDataGridRowHeightsOptions,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -43,16 +42,20 @@ import { isProcessorUnderEdit } from './state_management/processor_state_machine
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
 import { isGrokProcessor } from './utils';
-import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
 import { MemoProcessingPreviewTable } from './processing_preview_table';
-
-export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
+import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewRecords(snapshot.context)
+  );
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
     state.context.dataSourcesRefs.some((ref) => {
@@ -74,33 +77,7 @@ export const ProcessorOutcomePreview = () => {
       );
     }
 
-    return (
-      <EuiEmptyPrompt
-        aria-live="polite"
-        color="warning"
-        iconType="warning"
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
-              { defaultMessage: 'No data available to validate processor changes' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
-              {
-                defaultMessage:
-                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
+    return <NoProcessingDataAvailableEmptyPrompt />;
   }
 
   return (
@@ -109,7 +86,11 @@ export const ProcessorOutcomePreview = () => {
         <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable />
+      {isEmpty(previewDocuments) ? (
+        <NoPreviewDocumentsEmptyPrompt />
+      ) : (
+        <OutcomePreviewTable previewDocuments={previewDocuments} />
+      )}
     </>
   );
 };
@@ -188,7 +169,7 @@ const PreviewDocumentsGroupBy = () => {
   );
 };
 
-const OutcomePreviewTable = () => {
+const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
@@ -201,9 +182,6 @@ const OutcomePreviewTable = () => {
     (state) => state.context.explicitlyDisabledPreviewColumns
   );
   const previewColumnsOrder = useSimulatorSelector((state) => state.context.previewColumnsOrder);
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewRecords(snapshot.context)
-  );
   const originalSamples = useSimulatorSelector((snapshot) =>
     selectOriginalPreviewRecords(snapshot.context)
   );
@@ -443,30 +421,7 @@ const OutcomePreviewTable = () => {
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
   if (isEmpty(previewDocuments)) {
-    return (
-      <EuiEmptyPrompt
-        icon={<AssetImage type="noResults" />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsTitle',
-              { defaultMessage: 'No documents available' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsBody',
-              {
-                defaultMessage: 'The current filter settings do not match any documents.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
+    return <NoPreviewDocumentsEmptyPrompt />;
   }
 
   return (
