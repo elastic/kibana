@@ -386,7 +386,6 @@ export class IndexUpdateService {
               return [...acc, action.payload];
             }
             if (action.type === 'saved') {
-              action.payload.updates.forEach((update) => {});
               // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
               const unsavedColumns = acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
