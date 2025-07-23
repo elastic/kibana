@@ -15,17 +15,20 @@ import {
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
 } from '../api_calls/prebuilt_rules';
+import { deletePrebuiltRulesAssets } from '../api_calls/common';
 
 interface SetUpRulesParams {
   currentRuleAssets: Array<typeof SAMPLE_PREBUILT_RULE>;
   newRuleAssets: Array<typeof SAMPLE_PREBUILT_RULE>;
   rulePatches: Array<{ rule_id: RuleSignatureId } & Partial<RuleResponse>>;
+  cleanUpCurrentRuleAssets?: boolean;
 }
 
 export function setUpRuleUpgrades({
   currentRuleAssets,
   newRuleAssets,
   rulePatches,
+  cleanUpCurrentRuleAssets,
 }: SetUpRulesParams): void {
   installPrebuiltRuleAssets(currentRuleAssets);
   installSpecificPrebuiltRulesRequest(currentRuleAssets);
@@ -33,6 +36,10 @@ export function setUpRuleUpgrades({
   for (const rule of rulePatches) {
     const { rule_id: ruleId, ...update } = rule;
     patchRule(ruleId, update);
+  }
+
+  if (cleanUpCurrentRuleAssets) {
+    deletePrebuiltRulesAssets();
   }
 
   /* Create a second version of the prebuilt rules, making them available for an upgrade */

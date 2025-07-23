@@ -1016,6 +1016,95 @@ describe(
           expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
         });
       });
+
+      describe('-AB diff case (missing base version)', () => {
+        const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 2,
+          name: 'Prebuilt rule',
+          query: 'fieldA : someValue',
+          index: ['test-index-*'],
+        });
+        const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 3,
+          name: 'New Prebuilt rule',
+          query: 'fieldB : someValue AND fieldC : anotherValue',
+          index: ['another-test-index-*', 'test-index-*'],
+        });
+
+        it('upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [
+              {
+                rule_id: PREBUILT_RULE_ID,
+                query: '*:*',
+                index: ['my-index'],
+                tags: ['custom-tag'],
+              },
+            ],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+            cleanUpCurrentRuleAssets: true,
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          acceptFieldValue('name');
+          acceptFieldValue('kql_query');
+          acceptFieldValue('data_source');
+          acceptFieldValue('tags');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, [
+            NEW_PREBUILT_RULE_ASSET['security-rule'].name,
+          ]);
+        });
+
+        it('customizes via flyout and upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [
+              {
+                rule_id: PREBUILT_RULE_ID,
+                query: '*:*',
+                index: ['my-index'],
+                tags: ['custom-tag'],
+              },
+            ],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+            cleanUpCurrentRuleAssets: true,
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          acceptFieldValue('kql_query');
+          acceptFieldValue('data_source');
+          acceptFieldValue('tags');
+
+          // Enter a new rule name
+          switchFieldToEditMode('name');
+          typeRuleName('Custom rule name');
+          saveFieldValue('name');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
+        });
+      });
     });
 
     describe('type change upgrade', () => {

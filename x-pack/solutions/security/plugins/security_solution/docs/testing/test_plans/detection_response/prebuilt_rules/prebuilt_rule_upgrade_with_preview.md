@@ -60,6 +60,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-and-accepting-edited-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
     - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-suggested-field-value-abc-diff-case-non-solvable-by-diff-algo)
     - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-edited-field-value-abc-diff-case-non-solvable-by-diff-algo)
+    - [**Scenario: Customized rule upgrade after preview solvable conflicts and accepting suggested field value (-AB diff case)**](#scenario-customized-rule-upgrade-after-preview-solvable-conflicts-and-accepting-suggested-field-value--ab-diff-case)
+    - [**Scenario: Customized rule upgrade after preview solvable conflicts and accepting edited field value (-AB diff case)**](#scenario-customized-rule-upgrade-after-preview-solvable-conflicts-and-accepting-edited-field-value--ab-diff-case)
   - [Rule type upgrade](#rule-type-upgrade)
     - [**Scenario: Non-customized rule upgrade to a different rule type after preview**](#scenario-non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
     - [**Scenario: Customized rule upgrade to a different rule type after preview**](#scenario-customized-rule-upgrade-to-a-different-rule-type-after-preview)
@@ -710,6 +712,54 @@ Then user should see <field> has an upgraded value accepted by user
 `<field>` = all customizable fields
 
 #### **Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)**
+
+**Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
+
+```Gherkin
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
+And it has an upgrade resulting to a non-solvable conflict
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+And <field> has a conflict
+And <field> edit form is shown
+And <field> edit form inputs have current customized value
+When user edits <field> form and saves it
+Then user should see an ACTIVE CTA to upgrade the prebuilt rule
+When user clicks on CTA
+Then success message should be displayed after upgrade
+And upgraded prebuilt rule should be removed from the table
+When user opens rule details page for that prebuilt rule
+Then user should see <field> has an upgraded value user entered and saved in the form
+```
+
+#### **Scenario: Customized rule upgrade after preview solvable conflicts and accepting suggested field value (-AB diff case)**
+
+**Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
+
+```Gherkin
+Given a prebuilt rule is installed
+And this rule's <field> is customized
+And the <field> has an upgrade resulting to a non-solvable conflict
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+And <field> has a conflict
+And <field> edit form is shown
+And <field> edit form inputs have current customized value
+When user saves the form without changes
+Then user should see an ACTIVE CTA to upgrade the prebuilt rule
+When user clicks on CTA
+Then success message should be displayed after upgrade
+And upgraded prebuilt rule should be removed from the table
+When user opens rule details page for that prebuilt rule
+Then user should see <field> has an upgraded value accepted by user
+```
+
+**Examples:**
+
+`<field>` = all customizable fields
+
+#### **Scenario: Customized rule upgrade after preview solvable conflicts and accepting edited field value (-AB diff case)**
 
 **Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
 
