@@ -114,6 +114,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     };
   }, [previewTimer]);
 
+  useEffect(() => {
+    if (stopPreviewOnHover && previewTimer) {
+      clearTimeout(previewTimer);
+    }
+  }, [previewTimer, stopPreviewOnHover]);
+
   const handleMouseEnter = useCallback(() => {
     if (stopPreviewOnHover) return;
 
