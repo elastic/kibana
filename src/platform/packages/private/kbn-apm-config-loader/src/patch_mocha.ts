@@ -32,6 +32,7 @@ export function patchMocha(agent: Agent) {
       EVENT_TEST_BEGIN,
       EVENT_TEST_END,
       EVENT_SUITE_END,
+      EVENT_TEST_FAIL,
     } = Mocha.Runner.constants;
 
     const originalRunnerRun = Runner.prototype.run;
@@ -122,6 +123,14 @@ export function patchMocha(agent: Agent) {
             fileTransactions.delete(file);
             fileSuiteCount.delete(file);
           }
+        })
+        .on(EVENT_TEST_FAIL, function onTestFail(test: Runnable, error: Error) {
+          const span = spanMap.get(test);
+          span?.setOutcome('failure');
+
+          const fileName = getFileName(test);
+          const fileTx = fileTransactions.get(fileName);
+          fileTx?.setOutcome('failure');
         });
 
       return originalRunnerRun.call(runner, fn);
