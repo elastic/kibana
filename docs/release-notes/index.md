@@ -220,8 +220,8 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
 **Elastic Observability solution**:
 * Alerting rules:
   * Fixes chat on the Alerts page [#197126]({{kib-pull}}197126).
-* Infrastructure Inventory:
-  * Fixes an error that could prevent the Observability Infrastructure Inventory view from loading after an upgrade due to missing versioning on inventory_view_saved_object [#207007]({{kib-pull}}207007).
+* Infrastructure inventory:
+  * Fixes an error that could prevent the Observability Infrastructure inventory view from loading after an upgrade due to missing versioning on inventory_view_saved_object [#207007]({{kib-pull}}207007).
 * SLOs:
   * Fixes an issue where clicking on the name badge for a synthetics monitor on an SLO details page would lead to a page that failed to load monitor details [#210695]({{kib-pull}}210695).
   * Allows use of wildcard filters in SLO queries when DSL filters are also used [#213119]({{kib-pull}}213119).
