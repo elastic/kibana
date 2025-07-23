@@ -35,15 +35,15 @@ import type {
   // CredentialsType,
 } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
-import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
+import { DEFAULT_EKS_VARS_GROUP } from './cnvm_kspm/eks_credentials_form';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../common/utils/get_template_url_package_info';
-import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
+const AWS_SINGLE_ACCOUNT = 'single-account';
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }

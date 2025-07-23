@@ -5,16 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
-import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
-import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
+import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { EksCredentialsForm } from './eks_credentials_form';
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
   policy: NewPackagePolicy;
@@ -59,102 +55,5 @@ export const PolicyTemplateSelector = ({
         disabled={disabled}
       />
     </div>
-  );
-};
-
-interface PolicyTemplateVarsFormProps {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
-  packageInfo: PackageInfo;
-  onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
-  setIsValid: (isValid: boolean) => void;
-  disabled: boolean;
-  isEditPage?: boolean;
-}
-
-export const PolicyTemplateVarsForm = ({
-  input,
-  isEditPage,
-  ...props
-}: PolicyTemplateVarsFormProps) => {
-  return <EksCredentialsForm {...props} input={input} />;
-};
-
-interface PolicyTemplateInfoProps {
-  postureType: CloudSecurityPolicyTemplate;
-}
-
-export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => (
-  <EuiText color="subdued" size="s">
-    {postureType === KSPM_POLICY_TEMPLATE && (
-      <FormattedMessage
-        id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"
-        defaultMessage="Select the Kubernetes cluster type you want to monitor and then fill in the name and description to help identify this integration"
-      />
-    )}
-    {postureType === VULN_MGMT_POLICY_TEMPLATE && (
-      <>
-        <EuiCallOut
-          iconType="info"
-          color="primary"
-          data-test-subj="additionalChargeCalloutTestSubj"
-          title={
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"
-              defaultMessage="Additional charges on cloud provider billing account."
-            />
-          }
-        >
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutDescription"
-                defaultMessage="Please note that using this service may result in additional charges on your next cloud provider billing statement due to increased usage."
-              />
-            </p>
-          </EuiText>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.cnvm.awsSupportText"
-          defaultMessage="We currently support <b>AWS(Amazon Web Services)</b> cloud provider"
-          values={{
-            b: (chunks) => <b>{chunks}</b>,
-          }}
-        />
-        <EuiSpacer size="s" />
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.cnvm.chooseNameAndDescriptionText"
-          defaultMessage="Choose a name and description to help identify this integration"
-        />
-      </>
-    )}
-  </EuiText>
-);
-
-interface Props {
-  disabled: boolean;
-  input: NewPackagePolicyPostureInput;
-  setInput: (inputType: PostureInput) => void;
-}
-
-export const PolicyTemplateInputSelector = ({ input, disabled, setInput }: Props) => {
-  const baseOptions = getPolicyTemplateInputOptions(input.policy_template);
-  const options = baseOptions.map((option) => ({
-    ...option,
-    disabled: option.disabled || disabled,
-    label: option.label,
-    icon: option.icon,
-  }));
-
-  return (
-    <RadioGroup
-      disabled={disabled}
-      idSelected={input.type}
-      options={options}
-      onChange={(inputType) => setInput(inputType as PostureInput)}
-      size="m"
-    />
   );
 };

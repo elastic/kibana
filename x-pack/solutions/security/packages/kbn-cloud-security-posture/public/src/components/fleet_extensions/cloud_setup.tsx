@@ -8,7 +8,11 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import semverGte from 'semver/functions/gte';
 import { EuiAccordion, EuiCallOut, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NamespaceComboBox, SetupTechnology } from '@kbn/fleet-plugin/public';
+import {
+  NamespaceComboBox,
+  SetupTechnology,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/public/types';
 import type { CloudSetup as CloudSetupType } from '@kbn/cloud-plugin/public';
@@ -34,8 +38,7 @@ import {
 } from './utils';
 import { PolicyTemplateInputSelector } from './policy_template_selectors';
 import { usePackagePolicyList } from './hooks/use_package_policy_list';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
-import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
+import { useSetupTechnology } from './hooks/use_setup_technology';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_selector';
 import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_selector';
@@ -395,29 +398,35 @@ export const CloudSetup = memo<CloudSetupProps>(
           </>
         )}
         {shouldRenderAgentlessSelector && (
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
-            disabled={isEditPage}
-            isAgentless={!!newPolicy?.supports_agentless}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >,
-                    packageInfo,
-                    showCloudConnectors
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >,
+                      packageInfo,
+                      showCloudConnectors
+                    )
                   )
-                )
-              );
-            }}
-          />
+                );
+              }}
+            />
+          </>
         )}
 
         {input.type === 'cloudbeat/cis_aws' && setupTechnology === SetupTechnology.AGENTLESS && (
