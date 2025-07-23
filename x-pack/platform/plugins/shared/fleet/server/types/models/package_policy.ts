@@ -426,7 +426,6 @@ export const PackagePolicyResponseSchema = PackagePolicySchema.extends({
       })
     ),
     SimplifiedPackagePolicyInputsSchema,
-    schema.any(),
   ]),
   spaceIds: schema.maybe(schema.arrayOf(schema.string())),
   agents: schema.maybe(schema.number()),

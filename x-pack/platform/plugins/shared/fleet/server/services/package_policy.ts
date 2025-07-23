@@ -2966,8 +2966,13 @@ export function _compilePackagePolicyInputs(
   assetsMap: PackagePolicyAssetsMap,
   packagePolicyId?: string
 ): PackagePolicyInput[] {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   return inputs.map((input) => {
-    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+    if (
+      experimentalFeature.enableOtelIntegrations &&
+      input.type === OTEL_COLLECTOR_INPUT_TYPE
+    ) {
       return {
         ...input,
         streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),

@@ -795,10 +795,13 @@ export interface IndexTemplateEntry {
   indexTemplate: IndexTemplate;
 }
 
+// Experimental support for Otel integrations
 export interface OTelCollectorConfig {
   extensions?: Record<OTelCollectorComponentID, any>;
   receivers?: Record<OTelCollectorComponentID, any>;
   processors?: Record<OTelCollectorComponentID, any>;
+  connectors?: Record<OTelCollectorComponentID, any>;
+  exporters?: Record<OTelCollectorComponentID, any>;
   service?: {
     extensions?: OTelCollectorComponentID[];
     pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
@@ -813,4 +816,5 @@ export interface OTelCollectorPipeline {
 
 export type OTelCollectorComponentID = string;
 
-export type OTelCollectorPipelineID = 'logs' | 'metrics' | 'traces' | string;
+export type OTelCollectorPipelineGroup = 'logs' | 'metrics' | 'traces';
+export type OTelCollectorPipelineID = OTelCollectorPipelineGroup | string;

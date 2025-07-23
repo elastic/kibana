@@ -159,7 +159,7 @@ export async function getFullAgentPolicy(
   );
 
   let otelcolConfig;
-  if (experimentalFeature.enableOtelInputIntegrations) {
+  if (experimentalFeature.enableOtelIntegrations) {
     otelcolConfig = generateOtelcolConfig(agentInputs);
   }
 

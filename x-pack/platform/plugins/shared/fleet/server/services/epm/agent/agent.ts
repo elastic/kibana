@@ -53,7 +53,7 @@ export function compileTemplate(
 
     let patchedYaml = yamlFromCompiledTemplate;
     if (
-      experimentalFeature.enableOtelInputIntegrations &&
+      experimentalFeature.enableOtelIntegrations &&
       inputType === OTEL_COLLECTOR_INPUT_TYPE &&
       packagePolicyId
     ) {
