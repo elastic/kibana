@@ -48,25 +48,30 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('plain index sync', () => {
       log.info(`Syncing plain index`);
+      const indexName = 'tatooine-privileged-users';
+      const entitySource = {
+        type: 'index' as const,
+        name: 'StarWars',
+        managed: true,
+        indexPattern: indexName,
+        enabled: true,
+        matchers: [
+          {
+            fields: ['user.role'],
+            values: ['admin'],
+          },
+        ],
+        filter: {},
+      };
+      afterEach(async () => {
+        log.info(`Cleaning up after test`);
+        await es.indices.delete({ index: indexName }, { ignore: [404] });
+        await privmon.deleteEngine(true);
+      });
       // Want to make sure that monitoring saved objects are created and have something in them,
       before(async () => {
         await es.indices.delete({ index: indexName }, { ignore: [404] });
         await privmon.deleteEngine(true);
-        const indexName = 'tatooine-privileged-users';
-        const entitySource = {
-          type: 'index' as const,
-          name: 'StarWars',
-          managed: true,
-          indexPattern: indexName,
-          enabled: true,
-          matchers: [
-            {
-              fields: ['user.role'],
-              values: ['admin'],
-            },
-          ],
-          filter: {},
-        };
         /*
         const soId = await kibanaServer.savedObjects.find<{
           // do you need this?
@@ -145,10 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         // expect(userNames).contain('Luke Skywalker');
         // expect(userNames).contain('Leia Organa');
       });
-
-      it('should handle duplicate user names', () => {
-        // Test logic for handling duplicate user names
-      });
+      // add a test to handle duplicate users
     });
   });
 };
