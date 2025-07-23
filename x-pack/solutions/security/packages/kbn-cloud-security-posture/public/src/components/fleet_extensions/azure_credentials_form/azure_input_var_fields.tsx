@@ -24,9 +24,23 @@ export const AzureInputVarFields = ({
   onChange: (key: string, value: string) => void;
   hasInvalidRequiredVars: boolean;
 }) => {
+  const azureFields = fields.map((field) => {
+    const varDef = findVariableDef(packageInfo, field.id);
+    if (varDef) {
+      return {
+        ...field,
+        varDef,
+      };
+    }
+    return null;
+  });
   return (
     <div>
-      {fields.map((field, index) => {
+      {azureFields.map((field, index) => {
+        if (!field) {
+          return null;
+        }
+
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
           defaultMessage: '{field} is required',
@@ -54,7 +68,7 @@ export const AzureInputVarFields = ({
                   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                     <LazyPackagePolicyInputVarField
                       varDef={{
-                        ...findVariableDef(packageInfo, field.id)!,
+                        ...field.varDef,
                         required: true,
                         type: 'password',
                       }}

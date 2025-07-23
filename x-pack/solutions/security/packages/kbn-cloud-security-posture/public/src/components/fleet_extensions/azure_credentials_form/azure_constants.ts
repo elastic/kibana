@@ -22,7 +22,7 @@ export const AZURE_CREDENTIALS_TYPE = {
   SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
     'service_principal_with_client_username_and_password',
   MANAGED_IDENTITY: 'managed_identity',
-};
+} as const;
 
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';

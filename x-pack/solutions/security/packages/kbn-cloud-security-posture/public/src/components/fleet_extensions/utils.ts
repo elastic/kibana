@@ -219,19 +219,37 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     testId: o.testId,
   }));
 
+// export const getMaxPackageName = (
+//   packageName: string,
+//   packagePolicies?: Array<{ name: string }>
+// ) => {
+//   // Retrieve the highest number appended to package policy name and increment it by one
+//   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+
+//   const maxPkgPolicyName = Math.max(
+//     ...(packagePolicies ?? [])
+//       .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+//       .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+//     0
+//   );
+
+//   return `${packageName}-${maxPkgPolicyName + 1}`;
+// };
+
 export const getMaxPackageName = (
   packageName: string,
   packagePolicies?: Array<{ name: string }>
 ) => {
-  // Retrieve the highest number appended to package policy name and increment it by one
   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
 
-  const maxPkgPolicyName = Math.max(
-    ...(packagePolicies ?? [])
-      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
-    0
-  );
+  const numbers = (packagePolicies ?? [])
+    .map((ds) => {
+      const match = ds.name.match(pkgPoliciesNamePattern);
+      return match ? parseInt(match[1], 10) : undefined;
+    })
+    .filter((num): num is number => num !== undefined);
+
+  const maxPkgPolicyName = numbers.length > 0 ? Math.max(...numbers) : 0;
 
   return `${packageName}-${maxPkgPolicyName + 1}`;
 };

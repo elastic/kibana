@@ -39,8 +39,11 @@ export const usePackagePolicyList = (packageInfoName: string, { enabled = true }
         });
 
         return res;
-      } catch (error: any) {
-        throw new Error(`Failed to fetch package policy list: ${error.message}`);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          throw new Error(`Failed to fetch package policy list: ${error.message}`);
+        }
+        throw new Error('Failed to fetch package policy list: Unknown error');
       }
     },
     {

@@ -84,6 +84,9 @@ export const GcpInputVarFields = ({
   );
 
   const credentialJSONFields = getFieldById('gcp.credentials.json');
+  const credentialsJsonFieldDef = credentialJSONFields
+    ? findVariableDef(packageInfo, credentialJSONFields?.id)
+    : undefined;
   const credentialJSONFieldsInvalid = fieldIsInvalid(
     credentialJSONFields?.value,
     hasInvalidRequiredVars
@@ -163,47 +166,49 @@ export const GcpInputVarFields = ({
             />
           </EuiFormRow>
         )}
-        {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
-          <div
-            css={css`
-              width: 100%;
-              .euiFormControlLayout,
-              .euiFormControlLayout__childrenWrapper,
-              .euiFormRow,
-              input {
-                max-width: 100%;
+        {credentialsTypeValue === credentialJSONValue &&
+          credentialJSONFields &&
+          credentialsJsonFieldDef && (
+            <div
+              css={css`
                 width: 100%;
-              }
-            `}
-          >
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              label={gcpField.fields['gcp.credentials.json'].label}
-              isInvalid={credentialJSONFieldsInvalid}
-              error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
+                .euiFormControlLayout,
+                .euiFormControlLayout__childrenWrapper,
+                .euiFormRow,
+                input {
+                  max-width: 100%;
+                  width: 100%;
+                }
+              `}
             >
-              <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                <LazyPackagePolicyInputVarField
-                  data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
-                  varDef={{
-                    ...findVariableDef(packageInfo, credentialJSONFields.id)!,
-                    required: true,
-                    type: 'textarea',
-                    secret: true,
-                    full_width: true,
-                  }}
-                  value={credentialJSONFields.value || ''}
-                  onChange={(value) => {
-                    onChange(credentialJSONFields.id, value);
-                  }}
-                  isEditPage={isEditPage}
-                />
-              </Suspense>
-            </EuiFormRow>
-          </div>
-        )}
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                label={gcpField.fields['gcp.credentials.json'].label}
+                isInvalid={credentialJSONFieldsInvalid}
+                error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
+                data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
+              >
+                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                  <LazyPackagePolicyInputVarField
+                    data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+                    varDef={{
+                      ...credentialsJsonFieldDef,
+                      required: true,
+                      type: 'textarea',
+                      secret: true,
+                      full_width: true,
+                    }}
+                    value={credentialJSONFields.value || ''}
+                    onChange={(value) => {
+                      onChange(credentialJSONFields.id, value);
+                    }}
+                    isEditPage={isEditPage}
+                  />
+                </Suspense>
+              </EuiFormRow>
+            </div>
+          )}
       </EuiForm>
     </div>
   );

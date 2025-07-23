@@ -6,30 +6,18 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import semverGte from 'semver/functions/gte';
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NamespaceComboBox, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  NewPackagePolicyInput,
-  PackagePolicyReplaceDefineStepExtensionComponentProps,
-} from '@kbn/fleet-plugin/public/types';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/public/types';
 import type { CloudSetup as CloudSetupType } from '@kbn/cloud-plugin/public';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 // import { assert } from '../../../common/utils/helpers';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
 import {
   SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
@@ -39,11 +27,10 @@ import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
-  // isPostureInput,
   hasErrors,
-  POLICY_TEMPLATE_FORM_DTS,
   getCloudConnectorRemoteRoleTemplate,
   getDefaultCloudCredentialsType,
+  isPostureInput,
 } from './utils';
 import { PolicyTemplateInputSelector } from './policy_template_selectors';
 import { usePackagePolicyList } from './hooks/use_package_policy_list';
@@ -122,6 +109,15 @@ const usePolicyTemplateInitialName = ({
   }, [integration, isEditPage, packagePolicyList]);
 };
 
+const assert: (condition: unknown, msg?: string) => asserts condition = (
+  condition: unknown,
+  msg?: string
+): asserts condition => {
+  if (!condition) {
+    throw new Error(msg);
+  }
+};
+
 const getSelectedOption = (
   options: NewPackagePolicyInput[],
   policyTemplate: string = CSPM_POLICY_TEMPLATE
@@ -134,18 +130,31 @@ const getSelectedOption = (
     options.find((i) => i.policy_template === policyTemplate) ||
     options[0];
 
-  // assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  // assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
+  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
+  assert(isPostureInput(selectedOption), `Unknown option: ${selectedOption.type}`);
 
   return selectedOption;
 };
 
-type CloudSetupProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
+interface CloudSetupProps {
   cloud: CloudSetupType;
   uiSettings: IUiSettingsClient;
-  cloudConnectorsEnabled: boolean;
   namespaceSupportEnabled?: boolean;
-};
+  isEditPage: boolean;
+  newPolicy: NewPackagePolicy;
+  onChange: (opts: {
+    isValid: boolean;
+    updatedPolicy: NewPackagePolicy;
+    isExtensionLoaded?: boolean;
+  }) => void;
+  validationResults?: PackagePolicyValidationResults;
+  packageInfo: PackageInfo;
+  handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
+  isAgentlessEnabled?: boolean;
+  defaultSetupTechnology?: SetupTechnology;
+  integrationToEnable?: CloudSecurityPolicyTemplate;
+  setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
+}
 
 export const CloudSetup = memo<CloudSetupProps>(
   // eslint-disable-next-line complexity
@@ -440,8 +449,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
-            isEditPage={isEditPage}
-            setupTechnology={setupTechnology}
+            disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
@@ -461,8 +469,6 @@ export const CloudSetup = memo<CloudSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
-            isEditPage={isEditPage}
-            setupTechnology={setupTechnology}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}

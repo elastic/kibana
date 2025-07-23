@@ -71,7 +71,6 @@ interface PolicyTemplateVarsFormProps {
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   isEditPage?: boolean;
-  showCloudConnectors: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({

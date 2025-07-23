@@ -26,10 +26,11 @@ import type {
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CloudSetup } from '@kbn/cloud-security-posture';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { assert } from '../../../common/utils/helpers';
@@ -202,12 +203,22 @@ const useCloudFormationTemplate = ({
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };
 
-type CnvmEksPolicyTemplateProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
+interface CnvmEksPolicyTemplateProps {
+  isEditPage: boolean;
+  integrationToEnable: CloudSecurityPolicyTemplate;
   setIsValid: (isValid: boolean) => void;
   isLoading: boolean;
   setEnabledPolicyInput: (input: PostureInput) => void;
   updatePolicy: (policy: NewPackagePolicy) => void;
-};
+  newPolicy: NewPackagePolicy;
+  onChange: (opts: {
+    isValid: boolean;
+    updatedPolicy: NewPackagePolicy;
+    isExtensionLoaded?: boolean;
+  }) => void;
+  validationResults?: PackagePolicyValidationResults;
+  packageInfo: PackageInfo;
+}
 
 const CnvmEksPolicyTemplate = memo<CnvmEksPolicyTemplateProps>(
   ({
@@ -463,7 +474,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
     }
-
     // If the input type is one of the cloud providers, we need to render the account type selector
     return (
       <>
@@ -520,7 +530,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           />
         )}
 
-        {(input.type === 'cloudbeat/cis_eks' || input.type === 'cloudbeat/cis_k8s') && (
+        {(input.type === 'cloudbeat/cis_eks' ||
+          input.type === 'cloudbeat/cis_k8s' ||
+          input.type === 'cloudbeat/vuln_mgmt_aws') && (
           <CnvmEksPolicyTemplate
             newPolicy={newPolicy}
             packageInfo={packageInfo}
