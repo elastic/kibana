@@ -50,7 +50,7 @@ import {
   ControlOutputOption,
   DEFAULT_CONTROL_INPUT,
   DEFAULT_CONTROL_OUTPUT,
-  ESQL_COMPATIBLE_CONTROL_TYPES,
+  OPTIONS_LIST_CONTROL,
 } from '../../../../common';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../../control_factory_registry';
@@ -95,12 +95,14 @@ const CompatibleControlTypesComponent = ({
   selectedControlType,
   setSelectedControlType,
   isESQLOutputMode,
+  isStaticInputMode,
 }: {
   fieldRegistry?: DataControlFieldRegistry;
   selectedFieldName?: string;
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
   isESQLOutputMode: boolean;
+  isStaticInputMode: boolean;
 }) => {
   const [dataControlFactories, setDataControlFactories] = useState<
     DataControlFactory[] | undefined
@@ -148,11 +150,12 @@ const CompatibleControlTypesComponent = ({
     >
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
         {(dataControlFactories ?? []).map((factory) => {
-          const disabled = isESQLOutputMode
-            ? !ESQL_COMPATIBLE_CONTROL_TYPES.includes(factory.type)
-            : fieldRegistry && selectedFieldName
-            ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
-            : true;
+          const disabled =
+            isStaticInputMode || isESQLOutputMode
+              ? factory.type !== OPTIONS_LIST_CONTROL
+              : fieldRegistry && selectedFieldName
+              ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
+              : true;
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={factory.type}
@@ -176,6 +179,7 @@ const CompatibleControlTypesComponent = ({
                   fieldSelected: Boolean(selectedFieldName),
                   controlType: factory.type,
                   isESQLOutputMode,
+                  isStaticInputMode,
                 }
               )}
             >
@@ -545,6 +549,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
                 isESQLOutputMode={isESQLOutputMode}
+                isStaticInputMode={isStaticInputMode}
               />
             </div>
           </EuiFormRow>

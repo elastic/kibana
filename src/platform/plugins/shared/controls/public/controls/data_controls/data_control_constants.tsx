@@ -51,16 +51,27 @@ export const DataControlEditorStrings = {
         fieldSelected,
         controlType,
         isESQLOutputMode,
+        isStaticInputMode,
       }: {
         fieldSelected?: boolean;
         controlType?: string;
         isESQLOutputMode?: boolean;
+        isStaticInputMode?: boolean;
       }) => {
         if (!fieldSelected) {
           return i18n.translate(
             'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
             {
               defaultMessage: 'Select a field first.',
+            }
+          );
+        }
+
+        if (isStaticInputMode) {
+          return i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.notStaticCompatible',
+            {
+              defaultMessage: 'This control type cannot display static values.',
             }
           );
         }

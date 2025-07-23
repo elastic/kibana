@@ -33,8 +33,6 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export const ESQL_CONTROL = 'esqlControl';
 
-export const ESQL_COMPATIBLE_CONTROL_TYPES = [OPTIONS_LIST_CONTROL];
-
 export enum ControlOutputOption {
   DSL = 'dsl',
   ESQL = 'esql',
