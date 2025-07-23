@@ -118,3 +118,5 @@ export enum EditorComponentStatus {
   INCOMPLETE,
   ERROR,
 }
+
+export const getESQLVariableInvalidRegex = () => /[^a-zA-Z0-9_]/g;

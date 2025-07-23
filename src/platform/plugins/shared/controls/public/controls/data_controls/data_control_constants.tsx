@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiCode } from '@elastic/eui';
 import { RANGE_SLIDER_CONTROL } from '../../../common';
 
 export const DataControlEditorStrings = {
@@ -253,6 +254,75 @@ export const DataControlEditorStrings = {
           : i18n.translate('controls.controlGroup.manageControl.fieldOutput.selectFieldTitle', {
               defaultMessage: 'Select',
             }),
+    },
+    esqlOutput: {
+      getInvalidPrefixError: () =>
+        i18n.translate('controls.controlGroup.manageControl.esqlOutput.invalidPrefixError', {
+          defaultMessage: '?? prefix can only be used with Static values',
+        }),
+      getInvalidCharactersError: () =>
+        i18n.translate('controls.controlGroup.manageControl.esqlOutput.invalidCharsError', {
+          defaultMessage: 'Invalid characters in variable name',
+        }),
+      getVariableNameInUseError: () =>
+        i18n.translate('controls.controlGroup.manageControl.esqlOutput.nameInUseError', {
+          defaultMessage: 'Variable name already in use',
+        }),
+      getEsqlVariableHelpText: (isStaticInputMode: boolean) => {
+        const values = {
+          valuesPrefix: <EuiCode>?</EuiCode>,
+          fieldsPrefix: <EuiCode>??</EuiCode>,
+          valuesBold: (
+            <strong>
+              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.valuesText', {
+                defaultMessage: 'values',
+              })}
+            </strong>
+          ),
+          fieldsBold: (
+            <strong>
+              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.fieldsTexst', {
+                defaultMessage: 'fields',
+              })}
+            </strong>
+          ),
+          functionsBold: (
+            <strong>
+              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.functionsText', {
+                defaultMessage: 'functions',
+              })}
+            </strong>
+          ),
+        };
+        if (isStaticInputMode)
+          return (
+            <FormattedMessage
+              id="controls.controlGroup.manageControl.esqlOutput.variableHelpTextStaticInput"
+              defaultMessage="Start your variable name with {valuesPrefix} to replace {valuesBold} or with {fieldsPrefix} to replace {fieldsBold} or {functionsBold}."
+              values={values}
+            />
+          );
+        else
+          return (
+            <FormattedMessage
+              id="controls.controlGroup.manageControl.esqlOutput.variableHelpTextDynamicInput"
+              defaultMessage="Start your variable name with {valuesPrefix} to replace {valuesBold}. To use {fieldsPrefix} to replace {fieldsBold} or {functionsBold}, change your control input to {staticValuesBold}."
+              values={{
+                ...values,
+                staticValuesBold: (
+                  <strong>
+                    {i18n.translate(
+                      'controls.controlGroup.manageControl.esqlOutput.staticValuesText',
+                      {
+                        defaultMessage: 'Static values',
+                      }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
+          );
+      },
     },
   },
   management: {

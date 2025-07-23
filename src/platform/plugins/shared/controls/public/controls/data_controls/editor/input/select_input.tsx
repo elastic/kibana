@@ -24,13 +24,17 @@ import {
 import { ListOptionsInput } from '../../../../common/list_options_input/list_options_input';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker, useDataViewAndFieldContext } from '../data_view_and_field_picker';
-import { CONTROL_INPUT_OPTIONS, EditorComponentStatus } from '../editor_constants';
+import {
+  CONTROL_INPUT_OPTIONS,
+  getESQLVariableInvalidRegex,
+  EditorComponentStatus,
+} from '../editor_constants';
 import { ESQLLangEditor } from '../esql_lang_editor';
 import { InputValuesPreview } from './input_values_preview';
 import { getESQLSingleColumnValues } from '../../common/get_esql_single_column_values';
 
 const fieldToESQLVariable = (fieldName: string) =>
-  `?${fieldName.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '')}`;
+  `?${fieldName.replace(/\./g, '_').replace(getESQLVariableInvalidRegex(), '')}`;
 
 interface SelectInputProps<State> {
   inputMode: ControlInputOption;
@@ -60,7 +64,9 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   const [previewOptions, setPreviewOptions] = useState<string[]>([]);
   const [previewColumns, setPreviewColumns] = useState<string[]>([]);
   const [previewError, setPreviewError] = useState<Error | undefined>();
-  const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(isEdit);
+  const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(
+    isEdit && inputMode === ControlInputOption.ESQL
+  );
 
   const isESQLVariableEmpty = useMemo(
     () => !editorState.esqlVariableString || editorState.esqlVariableString === '?',

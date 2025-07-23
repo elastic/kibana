@@ -270,7 +270,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               const variableType = esqlVariableString.startsWith('??')
                 ? ESQLVariableType.FIELDS
                 : ESQLVariableType.VALUES;
-              const variableName = esqlVariableString.replace('?', '');
+              const variableName = esqlVariableString.replace(/\?/g, '');
               dataControlManager.internalApi.setESQLVariable({
                 key: variableName,
                 type: variableType,

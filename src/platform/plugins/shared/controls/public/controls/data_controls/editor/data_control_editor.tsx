@@ -32,15 +32,12 @@ import {
   EuiToolTip,
   EuiSteps,
   EuiText,
-  EuiCheckableCard,
-  useGeneratedHtmlId,
-  EuiPopover,
-  EuiPanel,
 } from '@elastic/eui';
 
 import { asyncMap } from '@kbn/std';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { css } from '@emotion/react';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
@@ -58,7 +55,6 @@ import type { ControlGroupApi } from '../../../control_group/types';
 import { DataControlEditorStrings } from '../data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import {
-  CONTROL_OUTPUT_OPTIONS,
   CONTROL_WIDTH_OPTIONS,
   DEFAULT_ESQL_VARIABLE_NAME,
   EditorComponentStatus,
@@ -70,11 +66,10 @@ import {
 } from '../types';
 import { ControlFactory } from '../../types';
 import { confirmDeleteControl } from '../../../common';
-import {
-  DataViewAndFieldContextProvider,
-  DataViewAndFieldPicker,
-} from './data_view_and_field_picker';
+import { DataViewAndFieldContextProvider } from './data_view_and_field_picker';
 import { SelectInput } from './input/select_input';
+import { SelectOutput } from './output/select_output';
+import { validateESQLVariableString } from './output/validate_esql_variable_string';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -232,13 +227,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
-  const [esqlQueryValidation, setEsqlQueryValidation] = useState<EditorComponentStatus>(
-    isEdit ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
-  );
-
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
-
-  const [isFieldOutputPopoverOpen, setIsFieldOutputPopoverOpen] = useState<boolean>(false);
+  const existingESQLVariables = useStateFromPublishingSubject(controlGroupApi.esqlVariables$);
 
   const isDSLInputMode = useMemo(
     () => (editorState.input ?? DEFAULT_CONTROL_INPUT) === ControlInputOption.DSL,
@@ -256,6 +246,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const isESQLOutputMode = useMemo(
     () => editorState.output === ControlOutputOption.ESQL,
     [editorState.output]
+  );
+
+  const [esqlQueryValidation, setESQLQueryValidation] = useState<EditorComponentStatus>(
+    isEdit && isESQLInputMode ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
   );
 
   const [hasTouchedOutput, setHasTouchedOutput] = useState(isEdit);
@@ -370,6 +364,22 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     );
   }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
 
+  const [esqlVariableValidation, esqlVariableError] = useMemo(
+    () =>
+      validateESQLVariableString(
+        editorState.esqlVariableString,
+        initialState.esqlVariableString,
+        existingESQLVariables,
+        isStaticInputMode
+      ),
+    [
+      editorState.esqlVariableString,
+      initialState.esqlVariableString,
+      isStaticInputMode,
+      existingESQLVariables,
+    ]
+  );
+
   const inputStatus = useMemo(() => {
     if (isDSLInputMode) {
       const hasFieldName = !!editorState.fieldName;
@@ -394,15 +404,13 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
 
   const outputStatus = useMemo(() => {
     if (isESQLOutputMode) {
-      return editorState.esqlVariableString
-        ? EditorComponentStatus.COMPLETE
-        : EditorComponentStatus.INCOMPLETE;
+      return esqlVariableValidation;
     } else {
       return editorState.fieldName
         ? EditorComponentStatus.COMPLETE
         : EditorComponentStatus.INCOMPLETE;
     }
-  }, [isESQLOutputMode, editorState.esqlVariableString, editorState.fieldName]);
+  }, [isESQLOutputMode, editorState.fieldName, esqlVariableValidation]);
 
   const controlConfigStatus = useMemo(() => {
     if (!selectedControlType) return EditorComponentStatus.INCOMPLETE;
@@ -424,7 +432,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setDefaultPanelTitle={setDefaultPanelTitle}
           setSelectedControlType={setSelectedControlType}
           setControlOptionsValid={setControlOptionsValid}
-          setESQLQueryValidation={setEsqlQueryValidation}
+          setESQLQueryValidation={setESQLQueryValidation}
           isEdit={isEdit}
         />
       ),
@@ -433,104 +441,16 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       title: 'Select output',
       status: useStepStatus(outputStatus, isEdit),
       children: (
-        <>
-          <EuiFormRow data-test-subj="control-editor-output-settings">
-            <div>
-              <OutputSelectRadioGroup
-                idSelected={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
-                onChangeOutput={(output) => {
-                  setEditorState({ ...editorState, output });
-                  setHasTouchedOutput(true);
-                }}
-                isDSLInputMode={isDSLInputMode}
-                fieldName={editorState.fieldName}
-              />
-            </div>
-          </EuiFormRow>
-          {editorState.output === ControlOutputOption.ESQL ? (
-            <EuiFormRow label="Variable name">
-              <EuiFieldText
-                placeholder={DEFAULT_ESQL_VARIABLE_NAME}
-                value={editorState.esqlVariableString}
-                compressed
-                onChange={({ target: { value } }) => {
-                  const esqlVariableString = value.startsWith('?')
-                    ? value.startsWith('???')
-                      ? `??${value.replace(/\?/g, '')}`
-                      : value
-                    : `?${value}`;
-                  setEditorState({ ...editorState, esqlVariableString });
-                  setDefaultPanelTitle(esqlVariableString);
-                }}
-              />
-            </EuiFormRow>
-          ) : isESQLInputMode ? (
-            <EuiPanel hasBorder>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="center"
-                direction="column"
-                wrap
-                gutterSize="s"
-              >
-                <EuiFlexItem>
-                  <EuiText textAlign="center" size="s">
-                    {DataControlEditorStrings.manageControl.fieldOutput.getFieldOutputDescription(
-                      editorState.fieldName
-                    )}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiPopover
-                    isOpen={isFieldOutputPopoverOpen}
-                    closePopover={() => setIsFieldOutputPopoverOpen(false)}
-                    button={
-                      <EuiButtonEmpty onClick={() => setIsFieldOutputPopoverOpen(true)}>
-                        {DataControlEditorStrings.manageControl.fieldOutput.getSelectFieldTitle(
-                          !!editorState.fieldName
-                        )}
-                      </EuiButtonEmpty>
-                    }
-                  >
-                    <DataViewAndFieldPicker
-                      editorConfig={editorConfig}
-                      dataViewId={editorState.dataViewId}
-                      onChangeDataViewId={(newDataViewId) => {
-                        setEditorState({ ...editorState, dataViewId: newDataViewId });
-                      }}
-                      onSelectField={(field) => {
-                        setEditorState({ ...editorState, fieldName: field.name });
-                        /**
-                         * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
-                         */
-                        const newDefaultTitle = field.displayName ?? field.name;
-                        setDefaultPanelTitle(newDefaultTitle);
-                      }}
-                      fieldName={editorState.fieldName}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          ) : isStaticInputMode ? (
-            <DataViewAndFieldPicker
-              editorConfig={editorConfig}
-              dataViewId={editorState.dataViewId}
-              onChangeDataViewId={(newDataViewId) => {
-                setEditorState({ ...editorState, dataViewId: newDataViewId });
-              }}
-              onSelectField={(field) => {
-                setEditorState({ ...editorState, fieldName: field.name });
-                /**
-                 * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
-                 */
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultPanelTitle(newDefaultTitle);
-              }}
-              fieldName={editorState.fieldName}
-            />
-          ) : null}
-        </>
+        <SelectOutput
+          outputMode={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
+          inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
+          editorState={editorState}
+          editorConfig={editorConfig}
+          setEditorState={setEditorState}
+          setDefaultPanelTitle={setDefaultPanelTitle}
+          setHasTouchedOutput={setHasTouchedOutput}
+          variableStringError={esqlVariableError}
+        />
       ),
     },
     {
@@ -706,55 +626,5 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </DataViewAndFieldContextProvider>
-  );
-};
-
-const OutputSelectRadioGroup: React.FC<{
-  idSelected?: ControlOutputOption;
-  onChangeOutput: (option: string) => void;
-  fieldName?: string;
-  isDSLInputMode: boolean;
-}> = ({ idSelected = DEFAULT_CONTROL_OUTPUT, onChangeOutput, fieldName, isDSLInputMode }) => {
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'radioGroup' });
-  return CONTROL_OUTPUT_OPTIONS.map(
-    ({ id, label, description, 'data-test-subj': dataTestSubj }) => (
-      <>
-        <EuiCheckableCard
-          id={id}
-          name={radioGroupId}
-          key={radioGroupId}
-          checkableType="radio"
-          label={<strong>{label}</strong>}
-          checked={idSelected === id}
-          onChange={() => onChangeOutput(id)}
-          data-test-subj={dataTestSubj}
-        >
-          <EuiText size="s">{description(isDSLInputMode, fieldName)}</EuiText>
-          {/**
-           * Add a click target to allow the user to click anywhere on the EuiCheckableCard to select an output
-           * option, instead of having to target the radio button or the title label.
-           * EuiCheckableCard does not make the whole body clickable to allow for interactive children
-           * https://github.com/elastic/eui/issues/8900
-           * Overlay the inner card panel with an invisible clickable div; disable a11y linting rule
-           * because the radio group is already the a11y target, and clickable div is purely a
-           * workaround for mouse interaction
-           */}
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-          <div
-            onClick={() => onChangeOutput(id)}
-            data-test-subj="output-select-click-target"
-            css={css`
-              cursor: pointer;
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-            `}
-          />
-        </EuiCheckableCard>
-        <EuiSpacer size="s" />
-      </>
-    )
   );
 };
