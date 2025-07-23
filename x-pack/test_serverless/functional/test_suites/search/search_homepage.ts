@@ -82,6 +82,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('uploadFileButton');
           await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
         });
+
+        it('does not render the "Add sample data" card', async () => {
+          await testSubjects.missingOrFail('sampleDataSection');
+        });
       });
 
       describe('AI search capabilities', function () {

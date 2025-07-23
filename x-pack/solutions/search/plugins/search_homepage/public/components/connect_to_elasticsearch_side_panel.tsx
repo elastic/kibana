@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataActionButton, useIngestSampleData } from '@kbn/search-indices/public';
 import { useKibana } from '../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
+import { generateRandomIndexName } from '../utils/indices';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;
@@ -19,6 +21,9 @@ export const ConnectToElasticsearchSidePanel = () => {
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
+
+  const indexName = useMemo(() => generateRandomIndexName(), []);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -50,28 +55,30 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        <EuiCard
-          display="plain"
-          hasBorder
-          textAlign="left"
-          titleSize="xs"
-          data-test-subj="sampleDataSection"
-          title={
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
-              defaultMessage="Add sample data"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-              defaultMessage="Add data sets with sample visualizations, dashboards, and more."
-            />
-          }
-          footer={
-            <SampleDataActionButton isLoading={isLoading} onIngestSampleData={ingestSampleData} />
-          }
-        />
+        {userPrivileges?.privileges?.canManageIndex === true && (
+          <EuiCard
+            display="plain"
+            hasBorder
+            textAlign="left"
+            titleSize="xs"
+            data-test-subj="sampleDataSection"
+            title={
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
+                defaultMessage="Add sample data"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
+                defaultMessage="Add data sets with sample visualizations, dashboards, and more."
+              />
+            }
+            footer={
+              <SampleDataActionButton isLoading={isLoading} onIngestSampleData={ingestSampleData} />
+            }
+          />
+        )}
 
         {/* TODO: Enable CE block once we can discern the billing type.
         <EuiCard
