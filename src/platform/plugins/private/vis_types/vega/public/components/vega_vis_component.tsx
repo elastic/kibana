@@ -10,7 +10,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import {
   EuiResizeObserver,
-  EuiResizeObserverProps,
+  type EuiResizeObserverProps,
   euiScrollBarStyles,
   type UseEuiTheme,
 } from '@elastic/eui';
