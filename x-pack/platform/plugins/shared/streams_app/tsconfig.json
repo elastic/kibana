@@ -75,7 +75,6 @@
     "@kbn/unified-doc-viewer",
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/esql-ast",
     "@kbn/utility-types"
   ]
 }

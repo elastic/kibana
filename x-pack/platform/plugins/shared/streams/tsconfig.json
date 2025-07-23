@@ -57,6 +57,5 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
-    "@kbn/esql-ast",
   ]
 }
