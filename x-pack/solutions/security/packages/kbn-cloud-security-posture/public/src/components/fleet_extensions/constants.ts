@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CloudPostureIntegrations } from './types';
-import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
+import googleCloudLogo from '../../assets/icons/google_cloud_logo.svg';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
 import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/gcp_constants';
