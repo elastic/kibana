@@ -237,7 +237,7 @@
     "@kbn/cloud-links-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_links",
     "@kbn/cloud-plugin": "link:x-pack/platform/plugins/shared/cloud",
     "@kbn/cloud-security-posture": "link:x-pack/solutions/security/packages/kbn-cloud-security-posture/public",
-    "@kbn/cloud-security-posture-common": "link:x-pack/platform/packages/shared/kbn-cloud-security-posture/common",
+    "@kbn/cloud-security-posture-common": "link:x-pack/solutions/security/packages/kbn-cloud-security-posture/common",
     "@kbn/cloud-security-posture-graph": "link:x-pack/solutions/security/packages/kbn-cloud-security-posture/graph",
     "@kbn/cloud-security-posture-plugin": "link:x-pack/solutions/security/plugins/cloud_security_posture",
     "@kbn/code-editor": "link:src/platform/packages/shared/shared-ux/code_editor/impl",

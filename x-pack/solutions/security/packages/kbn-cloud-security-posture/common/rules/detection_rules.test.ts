@@ -23,7 +23,7 @@ it('Should generate search tags for a CSP benchmark rule', () => {
 });
 
 it('Should handle undefined benchmark object gracefully', () => {
-  const cspBenchmarkRule = { benchmark: {} } as any;
+  const cspBenchmarkRule = { benchmark: {} } as unknown as CspBenchmarkRuleMetadata;
   const expectedTags: string[] = [];
   const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
   expect(result).toEqual(expectedTags);
