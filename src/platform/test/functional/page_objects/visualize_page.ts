@@ -69,11 +69,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   /**
-   *  Try to speed resets a bit if the Visualize Library breadcrumb is available
+   *  Try to speed resets a bit if the Visualize library breadcrumb is available
    */
   private async clickOnVisualizeLibraryBreadcrumb() {
     // Try to navigate to the Visualize Listing page from breadcrumb if available
-    const selector = '[data-test-subj="breadcrumb first"][title="Visualize Library"]';
+    const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
     const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
     if (visualizeLibraryBreadcrumb) {
       await this.find.clickByCssSelector(selector);

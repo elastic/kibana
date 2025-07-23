@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
