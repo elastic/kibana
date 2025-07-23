@@ -14,34 +14,6 @@ interface RoundTimerProps {
   isStopped: boolean;
 }
 
-const formatDuration = (seconds: number): string => {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-
-  if (seconds < 3600) {
-    // Under 1 hour: show minutes and seconds
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-
-    if (remainingSeconds === 0) {
-      return `${minutes}m`;
-    }
-
-    return `${minutes}m ${remainingSeconds}s`;
-  }
-
-  // Over 1 hour: show only hours and minutes (no seconds)
-  const hours = Math.floor(seconds / 3600);
-  const remainingMinutes = Math.floor((seconds % 3600) / 60);
-
-  if (remainingMinutes === 0) {
-    return `${hours}h`;
-  }
-
-  return `${hours}h ${remainingMinutes}m`;
-};
-
 export const RoundTimer: React.FC<RoundTimerProps> = ({ elapsedTime, isStopped }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -55,9 +27,5 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({ elapsedTime, isStopped }
     color: ${euiTheme.colors.success};
   `;
 
-  return (
-    <EuiBadge css={isStopped ? successStyles : loadingStyles}>
-      {formatDuration(elapsedTime)}
-    </EuiBadge>
-  );
+  return <EuiBadge css={isStopped ? successStyles : loadingStyles}>{`${elapsedTime}s`}</EuiBadge>;
 };
