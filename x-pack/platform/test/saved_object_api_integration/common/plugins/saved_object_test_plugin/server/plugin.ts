@@ -97,6 +97,7 @@ export class Plugin {
           missingData: { type: 'keyword' },
           numericValue: { type: 'short' },
           created_at: { type: 'keyword' }, // This conflicts with the root field 'created_at'
+          originId: { type: 'keyword' }, // This field exists at type level for sortTestingType only, fallback to root for others
         },
       },
     });

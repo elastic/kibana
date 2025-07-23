@@ -359,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('multi type sorting when root and type field exists', async () => {
-          // When a field exists at both root and type levels, multi-type queries use the ROOT field
+          // When a field exists at both root and type levels, multi-type queries use the TYPE field (consistent with single-type behavior)
           const query = queryString.stringify({
             type: sortTestTypes,
             sort_field: 'created_at',
@@ -376,17 +376,55 @@ export default function ({ getService }: FtrProviderContext) {
             (o: any) => o.attributes.created_at
           );
 
-          // Assert root field is used for sorting
-          // All objects now have root created_at values and should be sorted chronologically
-          expect(rootCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
-          const sortedRootValues = [...rootCreatedAtValues].sort();
-          expect(rootCreatedAtValues).to.eql(sortedRootValues);
-
-          // Assert type field is NOT used for sorting
-          // Type field values exist but should NOT be in alphabetical order (proving root field was used)
+          // Assert type field is used for sorting (values in sorted order) - matches single-type behavior
           expect(typeCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
           const sortedTypeValues = [...typeCreatedAtValues].sort();
-          expect(typeCreatedAtValues).to.not.eql(sortedTypeValues);
+          expect(typeCreatedAtValues).to.eql(sortedTypeValues);
+
+          // Assert root field is NOT used for sorting (values not in sorted order)
+          expect(rootCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
+          const sortedRootValues = [...rootCreatedAtValues].sort();
+          expect(rootCreatedAtValues).to.not.eql(sortedRootValues);
+        });
+
+        it('multi type sorting with mixed field availability (type vs root field)', async () => {
+          // Test true mixed scenario: sortTestingType has originId at type level,
+          // sortTestingType2 only has originId at root level. This tests that the
+          // sorting logic correctly uses type-level field when available and falls
+          // back to root-level field when not available.
+          const query = queryString.stringify({
+            type: sortTestTypes,
+            sort_field: 'originId',
+            sort_order: 'asc',
+          });
+          const response = await supertest.get(
+            `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+          );
+          expect(response.status).to.eql(200);
+          expect(response.body.saved_objects).to.have.length(6);
+
+          // Verify that results are correctly sorted by originId field in ascending order
+          // For sortTestingType: should use type-level originId (e.g., "type-origin-alpha")
+          // For sortTestingType2: should use root-level originId (e.g., "root-origin-alpha2")
+          const originIdValues = response.body.saved_objects.map((o: any) => {
+            const type = o.type;
+            if (type === 'sortTestingType') {
+              // Should use type-level field
+              return o.attributes.originId;
+            } else {
+              // Should use root-level field
+              return o.originId;
+            }
+          });
+
+          // Values should be sorted in ascending order
+          const sortedAscending = [...originIdValues].sort();
+          expect(originIdValues).to.eql(sortedAscending);
+
+          // Verify that both types are represented in the results
+          const types = response.body.saved_objects.map((o: any) => o.type);
+          expect(types.filter((t: any) => t === 'sortTestingType')).to.have.length(3);
+          expect(types.filter((t: any) => t === 'sortTestingType2')).to.have.length(3);
         });
       });
     });

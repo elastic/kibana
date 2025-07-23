@@ -72,14 +72,16 @@ export function getSortingParams(
     }
 
     // Use consistent precedence for multi-type queries:
-    // For multi-type: prefer root-level field if it exists, otherwise use type-level field
-    // This maintains existing Kibana behavior for multi-type queries
+    // For each type: prefer type-level field if it exists, otherwise fallback to root-level field
+    // This maintains consistent sorting behavior with single-type queries.
     const typeFieldChoices = types.map((t) => {
       const typeField = getProperty(mappings, `${t}.${sortField}`);
-      if (rootField) {
-        return { fieldPath: sortField, mapping: rootField }; // Use root-level field if available
+      if (typeField) {
+        return { fieldPath: `${t}.${sortField}`, mapping: typeField }; // Use type-level field if available
+      } else if (rootField) {
+        return { fieldPath: sortField, mapping: rootField }; // Fallback to root-level field
       } else {
-        return { fieldPath: `${t}.${sortField}`, mapping: typeField! }; // Use type-level field
+        throw new Error(`Field ${sortField} not found for type ${t}`); // This should be caught by validation above
       }
     });
 
