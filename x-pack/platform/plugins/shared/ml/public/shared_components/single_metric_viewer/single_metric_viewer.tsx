@@ -223,12 +223,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   );
 
   const onForecastComplete = (forecastEndTimestamp?: number) => {
-    // eslint-disable-next-line no-console
-    console.log(
-      'forecastEndTimestamp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
-      forecastEndTimestamp
-    );
-
     const { timefilter } = pluginStart.data.query.timefilter;
     const currentBounds = timefilter.getActiveBounds();
 

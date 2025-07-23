@@ -40,8 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   // Failing: See https://github.com/elastic/kibana/issues/164381
-  // eslint-disable-next-line ban/ban
-  describe.only('forecasts', function () {
+  describe.skip('forecasts', function () {
     this.tags(['ml']);
 
     describe('with single metric job', function () {
@@ -93,8 +92,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');
         await ml.forecast.clickForecastModalRunButton();
-
-        await ml.forecast.moveZoomSlider();
 
         await ml.testExecution.logTestStep('should display the forecasts toggle checkbox');
         await ml.forecast.assertForecastCheckboxExists();

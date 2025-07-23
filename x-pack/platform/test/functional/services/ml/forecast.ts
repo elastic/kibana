@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
-import moment from 'moment';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -15,7 +13,6 @@ export function MachineLearningForecastProvider({ getPageObject, getService }: F
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const headerPage = getPageObject('header');
-  const browser = getService('browser');
 
   return {
     async assertForecastButtonExists() {
@@ -140,53 +137,6 @@ export function MachineLearningForecastProvider({ getPageObject, getService }: F
         0,
         `Forecast table should have at least one row (got '${tableRows.length}')`
       );
-    },
-
-    //
-    async moveZoomSlider(shiftAmount: string = '1d') {
-      // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-      await retry.tryForTime(3000, async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        const url = new URL(currentUrl);
-        const searchParams = new URLSearchParams(url.searchParams);
-        const _g = rison.decode(searchParams.get('_g')!) as { time: { from: string; to: string } };
-        const _a = rison.decode(searchParams.get('_a')!) as {
-          timeseriesexplorer: { mlTimeSeriesExplorer: { zoom: { from: string; to: string } } };
-        };
-        const time = _g.time;
-        const zoom = _a.timeseriesexplorer.mlTimeSeriesExplorer.zoom;
-
-        // console.log('Time:', time);
-        // console.log('Zoom:', zoom);
-
-        if (time.from !== zoom.from) {
-          return;
-        }
-
-        const newFrom = moment(zoom.from).add(moment.duration(shiftAmount)).toISOString();
-        const newTo = moment(zoom.to).add(moment.duration(shiftAmount)).toISOString();
-
-        // eslint-disable-next-line no-console
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-
-        // eslint-disable-next-line no-console
-        console.log(
-          `Moving zoom slider from ${zoom.from} to ${newFrom} and ${zoom.to} to ${newTo}`
-        );
-
-        // Update the URL with the new zoom range
-        _a.timeseriesexplorer.mlTimeSeriesExplorer.zoom = { from: newFrom, to: newTo };
-
-        // Construct the new URL
-        searchParams.set('_a', rison.encode(_a));
-        const newUrl = `${url.origin}${url.pathname}?${searchParams.toString()}`;
-
-        // Navigate to the new URL
-        await browser.get(newUrl);
-
-        // expect(_a).to.not.be(null, 'URL parameter _a should exist');
-        return _a;
-      });
     },
   };
 }
