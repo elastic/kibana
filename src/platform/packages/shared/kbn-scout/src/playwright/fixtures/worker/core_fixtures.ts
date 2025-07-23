@@ -11,7 +11,6 @@ import { test as base } from '@playwright/test';
 import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 import { Flags } from '@kbn/dev-cli-runner';
-import { DEFAULT_LOG_LEVEL, LOG_LEVEL_FLAGS } from '@kbn/tooling-log';
 import {
   createKbnUrl,
   getEsClient,
@@ -67,20 +66,9 @@ export const coreWorkerFixtures = base.extend<
       const workersCount = workerInfo.config.workers;
       const loggerContext =
         workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
-
-      // Playwright should be able to use the config directly. In that case we cannot
-      // use command-line flags to determine the log level - e.g., `--debug` starts the
-      // Playwright debugger. This is why we look at LOG_LEVEL.
-      const envLogLevel = process.env.LOG_LEVEL;
-
-      const validLogLevel = LOG_LEVEL_FLAGS.find(({ name }) => name === envLogLevel)?.name;
-
-      use(
-        new ScoutLogger(
-          loggerContext,
-          validLogLevel === 'quiet' ? 'error' : validLogLevel ?? DEFAULT_LOG_LEVEL
-        )
-      );
+      // The log level is resolved inside the ScoutLogger constructor, which checks the argument,
+      // then SCOUT_LOG_LEVEL, then LOG_LEVEL, and finally defaults to 'info'.
+      use(new ScoutLogger(loggerContext));
     },
     { scope: 'worker' },
   ],
