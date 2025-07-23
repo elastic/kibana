@@ -33,6 +33,7 @@ export const services = {
   inspector: platformfunctionalServices.inspector,
   listingTable: platformfunctionalServices.listingTable,
   menuToggle: platformfunctionalServices.menuToggle,
+  ml: platformfunctionalServices.ml,
   monacoEditor: platformfunctionalServices.monacoEditor,
   esql: platformfunctionalServices.esql,
   pieChart: platformfunctionalServices.pieChart,

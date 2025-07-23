@@ -33,6 +33,7 @@ import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
+import { SearchPlaygroundPageProvider } from './search_playground_page';
 
 export const pageObjects = {
   ...xpackPlatformFunctionalPageObjects,
@@ -63,4 +64,5 @@ export const pageObjects = {
   infraLogs: InfraLogsPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
   searchQueryRules: SearchQueryRulesPageProvider,
+  searchPlayground: SearchPlaygroundPageProvider,
 };

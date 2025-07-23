@@ -43,6 +43,5 @@ export const services = {
   console,
   securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
-  ml: platformApiIntegrationServices.ml,
   ingestManager: platformApiIntegrationServices.ingestManager,
 };

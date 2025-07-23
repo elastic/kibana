@@ -1539,7 +1539,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # Fleet
 /x-pack/platform/test/api_integration/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
-/x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
+/x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_packages @elastic/fleet
@@ -1965,7 +1965,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/platform/test/common/lib/test_data_loader.ts @elastic/kibana-core
-/x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
+/x-pack/platform/test/api_integration/services/usage_api.ts @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
 /x-pack/platform/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
