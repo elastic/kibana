@@ -21,7 +21,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
   // Failing: See https://github.com/elastic/kibana/issues/209913
-  describe.skip('getActionErrorLog', () => {
+  describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -115,7 +115,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       }
     });
 
-    it('get and filter action error logs for rules with multiple action errors', async () => {
+    it.only('get and filter action error logs for rules with multiple action errors', async () => {
       const { body: createdConnector1 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
@@ -173,6 +173,9 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_action_error_log?date_start=${dateStart}`
       );
 
+      // eslint-disable-next-line no-console
+      console.log('action errors', response.body);
+
       expect(response.body.totalErrors).to.eql(2);
 
       const filteredResponse = await supertest.get(
@@ -190,7 +193,12 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_execution_log?date_start=${dateStart}`
       );
 
+      // eslint-disable-next-line no-console
+      console.log('execResponse', execResponse.body);
+
       const runId = execResponse.body.data[0].id;
+
+      expect(runId).to.be.a('string');
 
       const filteredByIdResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
