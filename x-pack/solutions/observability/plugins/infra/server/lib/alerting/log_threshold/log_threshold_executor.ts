@@ -33,9 +33,8 @@ import type {
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
 import {
-  getEcsGroups,
+  getEcsGroupsFromGrouping,
   getFormattedGroups,
-  getGroupByObject,
   unflattenGrouping,
   type Group,
 } from '@kbn/alerting-rule-utils';
@@ -106,7 +105,8 @@ export type LogThresholdAlertReporter = (
   value: number,
   threshold: number,
   actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertContext }>,
-  rootLevelContext?: AdditionalContext
+  rootLevelContext?: AdditionalContext,
+  flattenGrouping?: Record<string, string>
 ) => void;
 
 const COMPOSITE_GROUP_SIZE = 2000;
@@ -143,13 +143,14 @@ export const createLogThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: LogThresholdAlertReporter = async (
+    const alertReporter: LogThresholdAlertReporter = (
       id,
       reason,
       value,
       threshold,
       actions,
-      rootLevelContext
+      rootLevelContext,
+      flattenGrouping
     ) => {
       const alertContext =
         actions != null
@@ -175,18 +176,6 @@ export const createLogThresholdExecutor =
             relativeViewInAppUrl
           );
 
-          const instances = alertInstanceId.split(',');
-          const flattenGrouping =
-            alertInstanceId !== '*'
-              ? params.groupBy?.reduce<Record<string, string>>(
-                  (resultGroups, groupByItem, index) => {
-                    resultGroups[groupByItem] = instances[index].trim();
-                    return resultGroups;
-                  },
-                  {}
-                )
-              : undefined;
-
           const groups = getFormattedGroups(flattenGrouping);
           const grouping = unflattenGrouping(flattenGrouping);
 
@@ -205,7 +194,7 @@ export const createLogThresholdExecutor =
             [ALERT_CONTEXT]: alertContext,
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroups(groups),
+            ...getEcsGroupsFromGrouping(grouping),
             [ALERT_GROUPING]: grouping,
           };
 
@@ -531,12 +520,26 @@ interface ReducedGroupByResult {
   name: string;
   documentCount: number;
   context?: AdditionalContext;
+  flattenGrouping?: Record<string, string>;
 }
 
 type ReducedGroupByResults = ReducedGroupByResult[];
 
+const getFlattenGrouping = ({
+  groupBy,
+  keyValues,
+}: {
+  groupBy: LogThresholdRuleTypeParams['groupBy'];
+  keyValues: string[];
+}) => {
+  return groupBy?.reduce((acc, value, index) => {
+    return { ...acc, [value]: keyValues[index] };
+  }, {} as Record<string, string>);
+};
+
 const getReducedGroupByResults = (
-  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
+  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
+  groupBy: LogThresholdRuleTypeParams['groupBy']
 ): ReducedGroupByResults => {
   const getGroupName = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
@@ -551,6 +554,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
+        flattenGrouping: getFlattenGrouping({ groupBy, keyValues: Object.values(groupBucket.key) }),
       });
     }
   } else {
@@ -561,6 +565,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
+        flattenGrouping: getFlattenGrouping({ groupBy, keyValues: Object.values(groupBucket.key) }),
       });
     }
   }
@@ -578,9 +583,9 @@ export const processGroupByResults = (
     LogThresholdActionGroups
   >
 ) => {
-  const { count, criteria, timeSize, timeUnit } = params;
+  const { count, criteria, timeSize, timeUnit, groupBy } = params;
 
-  const groupResults = getReducedGroupByResults(results);
+  const groupResults = getReducedGroupByResults(results, groupBy);
 
   let remainingAlertCount = alertsClient.getAlertLimitValue();
 
@@ -602,11 +607,6 @@ export const processGroupByResults = (
         timeUnit
       );
 
-      const groupByKeysObjectMapping = getGroupByObject(
-        params.groupBy,
-        new Set<string>(groupResults.map((groupResult) => groupResult.name))
-      );
-
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -614,14 +614,22 @@ export const processGroupByResults = (
             matchingDocuments: documentCount,
             conditions: createConditionsMessageForCriteria(criteria),
             group: group.name,
-            groupByKeys: groupByKeysObjectMapping[group.name],
+            groupByKeys: unflattenGrouping(group.flattenGrouping),
             isRatio: false,
             reason: reasonMessage,
             ...group.context,
           },
         },
       ];
-      alertReporter(group.name, reasonMessage, documentCount, count.value, actions, group.context);
+      alertReporter(
+        group.name,
+        reasonMessage,
+        documentCount,
+        count.value,
+        actions,
+        group.context,
+        group.flattenGrouping
+      );
     }
   }
 
@@ -640,10 +648,10 @@ export const processGroupByRatioResults = (
     LogThresholdActionGroups
   >
 ) => {
-  const { count, criteria, timeSize, timeUnit } = params;
+  const { count, criteria, timeSize, timeUnit, groupBy } = params;
 
-  const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
-  const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
+  const numeratorGroupResults = getReducedGroupByResults(numeratorResults, groupBy);
+  const denominatorGroupResults = getReducedGroupByResults(denominatorResults, groupBy);
 
   let remainingAlertCount = alertsClient.getAlertLimitValue();
 
@@ -674,11 +682,6 @@ export const processGroupByRatioResults = (
         timeUnit
       );
 
-      const groupByKeysObjectMapping = getGroupByObject(
-        params.groupBy,
-        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name))
-      );
-
       const actions = [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -687,7 +690,7 @@ export const processGroupByRatioResults = (
             numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
             denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
             group: numeratorGroup.name,
-            groupByKeys: groupByKeysObjectMapping[numeratorGroup.name],
+            groupByKeys: unflattenGrouping(numeratorGroup.flattenGrouping),
             isRatio: true,
             reason: reasonMessage,
             ...numeratorGroup.context,
@@ -700,7 +703,8 @@ export const processGroupByRatioResults = (
         ratio,
         count.value,
         actions,
-        numeratorGroup.context
+        numeratorGroup.context,
+        numeratorGroup.flattenGrouping
       );
     }
   }
@@ -913,11 +917,6 @@ const processRecoveredAlerts = ({
   startedAt: Date;
   validatedParams: RuleParams;
 }) => {
-  const groupByKeysObjectForRecovered = getGroupByObject(
-    validatedParams.groupBy,
-    new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-  );
-
   for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
@@ -930,7 +929,7 @@ const processRecoveredAlerts = ({
     const baseContext = {
       alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
-      groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
+      groupByKeys: alertHits?.[ALERT_GROUPING],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
       reason: alertHits?.[ALERT_REASON],
