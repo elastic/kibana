@@ -38,7 +38,24 @@
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.ObservabilitySharedPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<object>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -63,7 +80,9 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; }"
+              "[]>) => void; }; config: ",
+              "ObservabilitySharedBrowserConfig",
+              "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -135,7 +154,9 @@
               "AppUpdater",
               ">; pricing: ",
               "PricingServiceStart",
-              "; }) => void; }"
+              "; }) => void; config: ",
+              "ObservabilitySharedBrowserConfig",
+              "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -3903,7 +3924,9 @@
             "section": "def-public.NavigationSection",
             "text": "NavigationSection"
           },
-          "[]>) => void; }; }"
+          "[]>) => void; }; config: ",
+          "ObservabilitySharedBrowserConfig",
+          "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
@@ -3938,7 +3961,9 @@
           "AppUpdater",
           ">; pricing: ",
           "PricingServiceStart",
-          "; }) => void; }"
+          "; }) => void; config: ",
+          "ObservabilitySharedBrowserConfig",
+          "; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
         "deprecated": false,
@@ -4089,11 +4114,150 @@
     "objects": []
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-server.ObservabilitySharedPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "ObservabilitySharedPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observabilityShared",
+            "scope": "server",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-server.ObservabilitySharedPlugin",
+            "text": "ObservabilitySharedPlugin"
+          },
+          " implements ",
+          "Plugin",
+          "<void, void, {}, {}>"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-server.ObservabilitySharedPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-server.ObservabilitySharedPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [],
+                "signature": [
+                  "PluginInitializerContext",
+                  "<Readonly<{ unsafe?: Readonly<{ investigativeExperienceEnabled?: boolean | undefined; } & {}> | undefined; } & {}>>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-server.ObservabilitySharedPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => { config: Readonly<{ unsafe?: Readonly<{ investigativeExperienceEnabled?: boolean | undefined; } & {}> | undefined; } & {}>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-server.ObservabilitySharedPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { config: Readonly<{ unsafe?: Readonly<{ investigativeExperienceEnabled?: boolean | undefined; } & {}> | undefined; } & {}>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-server.ObservabilitySharedPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-server.ObservabilitySharedPluginSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilitySharedPluginSetup",
+        "description": [],
+        "signature": [
+          "{ config: Readonly<{ unsafe?: Readonly<{ investigativeExperienceEnabled?: boolean | undefined; } & {}> | undefined; } & {}>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-server.ObservabilitySharedPluginStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ObservabilitySharedPluginStart",
+        "description": [],
+        "signature": [
+          "{ config: Readonly<{ unsafe?: Readonly<{ investigativeExperienceEnabled?: boolean | undefined; } & {}> | undefined; } & {}>; }"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
