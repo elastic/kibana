@@ -6,7 +6,7 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../functional_search/ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 
 import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
