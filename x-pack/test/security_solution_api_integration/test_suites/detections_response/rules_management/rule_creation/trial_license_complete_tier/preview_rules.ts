@@ -12,10 +12,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../../utils';
 import { deleteAllRules } from '../../../../../config/services/detections_response';
 
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
