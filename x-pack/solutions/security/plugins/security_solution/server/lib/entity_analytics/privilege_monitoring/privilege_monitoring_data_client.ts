@@ -18,7 +18,7 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { merge } from 'lodash';
+import { merge, uniq } from 'lodash';
 import Papa from 'papaparse';
 import { Readable } from 'stream';
 
@@ -555,7 +555,7 @@ export class PrivilegeMonitoringDataClient {
     indexName: string;
     kuery?: string | unknown;
   }): Promise<string[]> {
-    const batchUsernames: string[] = [];
+    let batchUniqueUsernames: string[] = [];
     let searchAfter: SortResults | undefined;
     const batchSize = 100;
 
@@ -571,13 +571,18 @@ export class PrivilegeMonitoringDataClient {
       const hits = response.hits.hits;
       if (hits.length === 0) break;
 
-      // Collect usernames from the hits
-      for (const hit of hits) {
-        const username = hit._source?.user?.name;
-        if (username) batchUsernames.push(username);
-      }
+      const batchUsernames = hits
+        .map((hit) => hit._source?.user?.name)
+        .filter((username): username is string => !!username);
 
-      const existingUserRes = await this.getMonitoredUsers(batchUsernames);
+      batchUniqueUsernames = uniq(batchUsernames);
+
+      this.log(
+        'debug',
+        `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
+      );
+
+      const existingUserRes = await this.getMonitoredUsers(batchUniqueUsernames);
 
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
@@ -586,13 +591,13 @@ export class PrivilegeMonitoringDataClient {
         if (username) existingUserMap.set(username, hit._id);
       }
 
-      const usersToWrite: PrivMonBulkUser[] = batchUsernames.map((username) => ({
+      const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
         indexName,
         existingUserId: existingUserMap.get(username),
       }));
 
-      if (usersToWrite.length === 0) return batchUsernames;
+      if (usersToWrite.length === 0) return batchUniqueUsernames;
 
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
@@ -604,7 +609,7 @@ export class PrivilegeMonitoringDataClient {
       }
       searchAfter = hits[hits.length - 1].sort;
     }
-    return batchUsernames;
+    return batchUniqueUsernames;
   }
 
   private async findStaleUsersForIndex(
