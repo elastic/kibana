@@ -790,7 +790,6 @@ export class PrivilegeMonitoringDataClient {
 
   public async disable() {
     this.log('info', 'Disabling Privileged Monitoring Engine');
-    const errors: string[] = [];
     // Check the current status of the engine
     const currentEngineStatus = await this.getEngineStatus();
     if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
@@ -835,7 +834,6 @@ export class PrivilegeMonitoringDataClient {
     } catch (e) {
       const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
       this.log('error', msg);
-      errors.push(msg);
 
       this.audit(
         PrivilegeMonitoringEngineActions.DISABLE,
@@ -843,10 +841,7 @@ export class PrivilegeMonitoringDataClient {
         'Failed to disable Privileged Monitoring Engine',
         e
       );
-      return {
-        status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
-        error: errors,
-      };
+      throw new Error(msg);
     }
   }
 }
