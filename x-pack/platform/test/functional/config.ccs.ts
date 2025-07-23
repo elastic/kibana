@@ -15,13 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    // testFiles: [
-    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/canvas'),
-    //   require.resolve('./apps/lens/group1'),
-    //   require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
-    //   require.resolve('./apps/rollup_job'),
-    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/ml/anomaly_detection_jobs'),
-    // ],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
+      require.resolve('./apps/rollup_job'),
+      require.resolve('./apps/ml/anomaly_detection_jobs'),
+    ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',

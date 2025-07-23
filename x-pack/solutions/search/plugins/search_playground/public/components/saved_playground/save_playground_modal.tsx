@@ -46,12 +46,12 @@ function makePlaygroundName(name?: string) {
 export interface SavePlaygroundModalProps {
   playgroundName?: string;
   saveAs?: boolean;
-  navigateToNewPlayground: (id: string) => void;
+  onNavigateToNewPlayground: (id: string) => void;
   onClose: () => void;
 }
 
 export const SavePlaygroundModal = ({
-  navigateToNewPlayground,
+  onNavigateToNewPlayground,
   playgroundName,
   saveAs,
   onClose,
@@ -82,7 +82,18 @@ export const SavePlaygroundModal = ({
         onSuccess: (data) => {
           onClose();
           reset(newPlayground);
-          navigateToNewPlayground(data._meta.id);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.title', {
+              defaultMessage: 'Playground saved',
+            }),
+            text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
+              defaultMessage: '{name} was saved.',
+              values: {
+                name: newPlayground.name,
+              },
+            }),
+          });
+          onNavigateToNewPlayground(data._meta.id);
         },
         onError: (error) => {
           const errorMessage = getErrorMessage(error);
@@ -96,7 +107,15 @@ export const SavePlaygroundModal = ({
         },
       });
     },
-    [navigateToNewPlayground, onClose, name, getValues, reset, notifications.toasts, savePlayground]
+    [
+      onNavigateToNewPlayground,
+      onClose,
+      name,
+      getValues,
+      reset,
+      notifications.toasts,
+      savePlayground,
+    ]
   );
   const isInvalid = nameError !== null;
 
