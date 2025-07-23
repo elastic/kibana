@@ -14,6 +14,8 @@ type AlertingPageId = 'alerts';
 type AlertDetailsPageId = 'alert_details';
 type SloPageId = 'slos';
 type SyntheticsPageId = 'synthetics';
+type RulesListPageId = 'rules_list';
+type RuleDetailsPageId = 'rule_details';
 
 export type Key =
   | `${ApmPageId}`
@@ -22,6 +24,8 @@ export type Key =
   | `${AlertingPageId}`
   | `${AlertDetailsPageId}`
   | `${SloPageId}`
-  | `${SyntheticsPageId}`;
+  | `${SyntheticsPageId}`
+  | `${RulesListPageId}`
+  | `${RuleDetailsPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
