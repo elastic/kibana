@@ -27,7 +27,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt49f2b5a80
 [[manually-generate-reports]]
 == Export as a file
 
-NOTE: For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
+NOTE: For more information on how to grant access and configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
 
 Create and download PDF, PNG, or CSV reports of saved Discover sessions, dashboards, visualizations, and workpads.
 
@@ -57,8 +57,6 @@ image::user/reporting/images/shareable-container.png["Shareable Container"]
 . Open the saved Discover session, dashboard, visualization, or **Canvas** workpad you want to share.
 
 . From the toolbar, click the **Export** icon, then choose a file type. 
-
-* If you are creating dashboard PDFs, select *For printing* to create printer-friendly PDFs with multiple A4 portrait pages and two visualizations per page.
 +
 NOTE: When you create a dashboard report that includes a data table or Discover session, the PDF includes only the visible data.
 +
