@@ -82,8 +82,8 @@ ${
       If the user asks how to change the language, reply in the same language the user asked in.`);
   }
 
-  const { kbState } = await client.getKnowledgeBaseStatus();
-  const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
+  const { inferenceModelState } = await client.getKnowledgeBaseStatus();
+  const isKnowledgeBaseReady = inferenceModelState === KnowledgeBaseState.READY;
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];

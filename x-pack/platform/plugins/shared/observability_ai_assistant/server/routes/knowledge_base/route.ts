@@ -35,7 +35,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
-    kbState: KnowledgeBaseState;
+    inferenceModelState: KnowledgeBaseState;
     currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
@@ -284,9 +284,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    const { kbState } = await client.getKnowledgeBaseStatus();
+    const { inferenceModelState } = await client.getKnowledgeBaseStatus();
 
-    if (kbState !== KnowledgeBaseState.READY) {
+    if (inferenceModelState !== KnowledgeBaseState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 

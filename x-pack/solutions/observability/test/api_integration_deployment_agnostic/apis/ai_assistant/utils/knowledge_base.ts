@@ -65,18 +65,18 @@ export async function waitForKnowledgeBaseReady(
     log.debug(`Waiting for knowledge base to be ready...`);
     const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
-    const { kbState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
-    if (status !== 200 || kbState !== KnowledgeBaseState.READY) {
+    const { inferenceModelState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
+    if (status !== 200 || inferenceModelState !== KnowledgeBaseState.READY) {
       log.warning(`Knowledge base is not ready yet:
         Status code: ${status}
-        State: ${kbState}
+        State: ${inferenceModelState}
         isReIndexing: ${isReIndexing}
         concreteWriteIndex: ${concreteWriteIndex}
         currentInferenceId: ${currentInferenceId}`);
     }
 
     expect(status).to.be(200);
-    expect(kbState).to.be(KnowledgeBaseState.READY);
+    expect(inferenceModelState).to.be(KnowledgeBaseState.READY);
     expect(isReIndexing).to.be(false);
     log.info(`Knowledge base is in ready state.`);
   });

@@ -226,7 +226,7 @@ export function KnowledgeBaseTab() {
     query,
     sortBy,
     sortDirection,
-    kbState: knowledgeBase.status.value?.kbState,
+    inferenceModelState: knowledgeBase.status.value?.inferenceModelState,
   });
 
   const categorizedEntries = categorizeEntries({ entries });
@@ -253,7 +253,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === KnowledgeBaseState.READY) {
     return (
       <>
         <EuiFlexGroup direction="column">

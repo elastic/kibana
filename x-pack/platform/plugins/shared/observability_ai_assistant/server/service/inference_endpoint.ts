@@ -135,7 +135,7 @@ export async function getKbModelStatus({
   endpoint?: InferenceInferenceEndpointInfo;
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
-  kbState: KnowledgeBaseState;
+  inferenceModelState: KnowledgeBaseState;
   currentInferenceId?: string | undefined;
   concreteWriteIndex: string | undefined;
   isReIndexing: boolean;
@@ -152,7 +152,7 @@ export async function getKbModelStatus({
         enabled,
         errorMessage: 'Inference ID not found in write index',
         currentInferenceId: undefined,
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
         concreteWriteIndex,
         isReIndexing,
         productDocStatus: 'uninstalled',
@@ -182,7 +182,7 @@ export async function getKbModelStatus({
       return {
         endpoint,
         enabled,
-        kbState: KnowledgeBaseState.READY,
+        inferenceModelState: KnowledgeBaseState.READY,
         currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
@@ -198,7 +198,7 @@ export async function getKbModelStatus({
     return {
       enabled,
       errorMessage: error.message,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
@@ -222,7 +222,7 @@ export async function getKbModelStatus({
       enabled,
       endpoint,
       errorMessage: error.message,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
@@ -234,40 +234,40 @@ export async function getKbModelStatus({
     (stats) => stats.deployment_stats?.deployment_id === inferenceId
   );
 
-  let kbState: KnowledgeBaseState;
+  let inferenceModelState: KnowledgeBaseState;
 
   if (trainedModelStatsResponse.trained_model_stats?.length && !modelStats) {
     // model has been deployed at least once, but stopped later
-    kbState = KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
+    inferenceModelState = KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
   } else if (modelStats?.deployment_stats?.state === 'failed') {
-    kbState = KnowledgeBaseState.ERROR;
+    inferenceModelState = KnowledgeBaseState.ERROR;
   } else if (
     modelStats?.deployment_stats?.state === 'starting' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
   ) {
-    kbState = KnowledgeBaseState.DEPLOYING_MODEL;
+    inferenceModelState = KnowledgeBaseState.DEPLOYING_MODEL;
   } else if (
     modelStats?.deployment_stats?.state === 'started' &&
     modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
   ) {
-    kbState = KnowledgeBaseState.READY;
+    inferenceModelState = KnowledgeBaseState.READY;
   } else if (
     modelStats?.deployment_stats?.state === 'started' &&
     modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
   ) {
     // model has been scaled down due to inactivity
-    kbState = KnowledgeBaseState.MODEL_PENDING_ALLOCATION;
+    inferenceModelState = KnowledgeBaseState.MODEL_PENDING_ALLOCATION;
   } else {
-    kbState = KnowledgeBaseState.ERROR;
+    inferenceModelState = KnowledgeBaseState.ERROR;
   }
 
   return {
     endpoint,
     enabled,
     modelStats,
-    kbState,
+    inferenceModelState,
     concreteWriteIndex,
     currentInferenceId,
     isReIndexing,
@@ -299,7 +299,7 @@ export async function waitForKbModel({
   return pRetry(
     async () => {
       logger.debug(`Checking knowledge base model status for inference ID "${inferenceId}"`);
-      const { kbState } = await getKbModelStatus({
+      const { inferenceModelState } = await getKbModelStatus({
         core,
         esClient,
         logger,
@@ -308,8 +308,8 @@ export async function waitForKbModel({
         productDoc,
       });
 
-      if (kbState !== KnowledgeBaseState.READY) {
-        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, `;
+      if (inferenceModelState !== KnowledgeBaseState.READY) {
+        const message = `Knowledge base model is not yet ready. inferenceModelState = ${inferenceModelState}, `;
         logger.debug(message);
         throw new Error(message);
       }

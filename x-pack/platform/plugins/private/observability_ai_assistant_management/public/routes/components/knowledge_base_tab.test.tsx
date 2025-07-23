@@ -64,7 +64,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.NOT_INSTALLED,
+            inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
             enabled: true,
           },
           loading: true,
@@ -86,7 +86,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.NOT_INSTALLED,
+            inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
             enabled: true,
           },
           loading: false,
@@ -109,7 +109,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.READY,
+            inferenceModelState: KnowledgeBaseState.READY,
             enabled: true,
             isReIndexing: true,
           },
@@ -127,7 +127,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.READY,
+            inferenceModelState: KnowledgeBaseState.READY,
             enabled: true,
             isReIndexing: false,
           },
@@ -150,7 +150,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            kbState: KnowledgeBaseState.READY,
+            inferenceModelState: KnowledgeBaseState.READY,
             enabled: true,
           },
         },

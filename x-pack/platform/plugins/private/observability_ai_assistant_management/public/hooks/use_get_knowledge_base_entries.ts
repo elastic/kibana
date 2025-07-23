@@ -14,12 +14,12 @@ export function useGetKnowledgeBaseEntries({
   query,
   sortBy,
   sortDirection,
-  kbState,
+  inferenceModelState,
 }: {
   query: string;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
-  kbState?: KnowledgeBaseState;
+  inferenceModelState?: KnowledgeBaseState;
 }) {
   const { observabilityAIAssistant } = useKibana().services;
 
@@ -44,7 +44,7 @@ export function useGetKnowledgeBaseEntries({
         },
       });
     },
-    enabled: kbState === KnowledgeBaseState.READY,
+    enabled: inferenceModelState === KnowledgeBaseState.READY,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });

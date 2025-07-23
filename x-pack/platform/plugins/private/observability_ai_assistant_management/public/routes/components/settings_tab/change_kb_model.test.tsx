@@ -60,7 +60,7 @@ const createMockStatus = (
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    kbState: KnowledgeBaseState.READY,
+    inferenceModelState: KnowledgeBaseState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',

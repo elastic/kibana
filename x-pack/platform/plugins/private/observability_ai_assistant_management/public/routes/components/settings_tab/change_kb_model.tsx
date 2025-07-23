@@ -55,8 +55,10 @@ export function ChangeKbModel({
   );
 
   const doesModelNeedRedeployment =
-    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
-    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
+    knowledgeBase.status?.value?.inferenceModelState ===
+      KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
+    knowledgeBase.status?.value?.inferenceModelState ===
+      KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
 
   const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
 
@@ -86,7 +88,7 @@ export function ChangeKbModel({
   }, [knowledgeBase.isInstalling, knowledgeBase.isPolling, isUpdatingModel]);
 
   const buttonText = useMemo(() => {
-    if (knowledgeBase.status?.value?.kbState === KnowledgeBaseState.NOT_INSTALLED) {
+    if (knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.NOT_INSTALLED) {
       return i18n.translate(
         'xpack.observabilityAiAssistantManagement.knowledgeBase.installModelLabel',
         {
@@ -113,7 +115,7 @@ export function ChangeKbModel({
   }, [
     doesModelNeedRedeployment,
     isSelectedModelCurrentModel,
-    knowledgeBase.status?.value?.kbState,
+    knowledgeBase.status?.value?.inferenceModelState,
   ]);
 
   const confirmationMessages = useMemo(
@@ -143,7 +145,7 @@ export function ChangeKbModel({
   const handleInstall = useCallback(() => {
     if (selectedInferenceId) {
       if (
-        knowledgeBase.status?.value?.kbState === KnowledgeBaseState.NOT_INSTALLED ||
+        knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.NOT_INSTALLED ||
         (doesModelNeedRedeployment && isSelectedModelCurrentModel)
       ) {
         setIsUpdatingModel(true);
@@ -236,7 +238,8 @@ export function ChangeKbModel({
               isKnowledgeBaseInLoadingState ||
               (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
                 selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
-              (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
+              (knowledgeBase.status?.value?.inferenceModelState !==
+                KnowledgeBaseState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)
             }
@@ -255,7 +258,7 @@ export function ChangeKbModel({
     setSelectedInferenceId,
     isKnowledgeBaseInLoadingState,
     doesModelNeedRedeployment,
-    knowledgeBase.status?.value?.kbState,
+    knowledgeBase.status?.value?.inferenceModelState,
     knowledgeBase.status?.value?.endpoint?.inference_id,
     handleInstall,
   ]);
@@ -294,7 +297,7 @@ export function ChangeKbModel({
               )}
             </EuiLink>
           </EuiText>
-          {knowledgeBase.status?.value?.kbState && (
+          {knowledgeBase.status?.value?.inferenceModelState && (
             <EuiFlexGroup gutterSize="s" alignItems="center" css={{ marginTop: 8 }}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
@@ -312,14 +315,14 @@ export function ChangeKbModel({
                     <EuiBadge
                       data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
                       color={
-                        knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
+                        knowledgeBase.status.value.inferenceModelState === KnowledgeBaseState.READY
                           ? isKnowledgeBaseInLoadingState
                             ? 'warning'
                             : 'success'
                           : 'default'
                       }
                     >
-                      {knowledgeBase.status.value.kbState === KnowledgeBaseState.READY
+                      {knowledgeBase.status.value.inferenceModelState === KnowledgeBaseState.READY
                         ? isKnowledgeBaseInLoadingState
                           ? i18n.translate(
                               'xpack.observabilityAiAssistantManagement.knowledgeBase.stateUpdatingModel',
@@ -333,7 +336,7 @@ export function ChangeKbModel({
                                 defaultMessage: 'Installed',
                               }
                             )
-                        : knowledgeBase.status.value.kbState}
+                        : knowledgeBase.status.value.inferenceModelState}
                     </EuiBadge>
                   </EuiFlexItem>
                   {isKnowledgeBaseInLoadingState && (

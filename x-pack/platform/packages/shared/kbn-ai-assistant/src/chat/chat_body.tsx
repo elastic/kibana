@@ -413,7 +413,7 @@ export function ChatBody({
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
-    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.inferenceModelState === KnowledgeBaseState.READY &&
     knowledgeBase.status.value?.isReIndexing === true;
 
   const isPublic = conversation.value?.public;

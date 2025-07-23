@@ -31,7 +31,7 @@ function createMockKnowledgeBase(
       value: {
         enabled: true,
         errorMessage: undefined,
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
         concreteWriteIndex: undefined,
         currentInferenceId: undefined,
         isReIndexing: false,
@@ -60,7 +60,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.NOT_INSTALLED,
+          inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
           errorMessage: 'no model',
           concreteWriteIndex: undefined,
           currentInferenceId: undefined,
@@ -85,7 +85,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -109,7 +109,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.NOT_INSTALLED,
+          inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -133,7 +133,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           ...kb.status.value,
           enabled: true,
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: KnowledgeBaseState.READY,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -159,7 +159,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -193,7 +193,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.ERROR,
+          inferenceModelState: KnowledgeBaseState.ERROR,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -229,7 +229,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: KnowledgeBaseState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -260,7 +260,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     const kb = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: KnowledgeBaseState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',

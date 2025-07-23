@@ -38,7 +38,7 @@ export function WelcomeMessageKnowledgeBase({
     );
   }
 
-  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === KnowledgeBaseState.READY) {
     return showSuccessBanner ? (
       <div>
         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
