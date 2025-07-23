@@ -9,7 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import {
   Instruction,
   KnowledgeBaseEntry,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
@@ -66,7 +66,7 @@ export async function waitForKnowledgeBaseReady(
     const { body, status } = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
     const { inferenceModelState, isReIndexing, concreteWriteIndex, currentInferenceId } = body;
-    if (status !== 200 || inferenceModelState !== KnowledgeBaseState.READY) {
+    if (status !== 200 || inferenceModelState !== InferenceModelState.READY) {
       log.warning(`Knowledge base is not ready yet:
         Status code: ${status}
         State: ${inferenceModelState}
@@ -76,7 +76,7 @@ export async function waitForKnowledgeBaseReady(
     }
 
     expect(status).to.be(200);
-    expect(inferenceModelState).to.be(KnowledgeBaseState.READY);
+    expect(inferenceModelState).to.be(InferenceModelState.READY);
     expect(isReIndexing).to.be(false);
     log.info(`Knowledge base is in ready state.`);
   });

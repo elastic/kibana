@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
   createLlmProxy,
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(response.body?.inferenceModelState).to.eql(
-          KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT
+          InferenceModelState.MODEL_PENDING_DEPLOYMENT
         );
       });
     });
