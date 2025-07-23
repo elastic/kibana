@@ -25,18 +25,3 @@
  */
 process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION = 'true';
 require('../src/setup_node_env');
-
-var getFlags = require('@kbn/dev-cli-runner/src/flags').getFlags;
-var pickLevelFromFlags = require('@kbn/tooling-log').pickLevelFromFlags;
-
-process.env.LOG_LEVEL = pickLevelFromFlags(getFlags(process.argv));
-
-var logLevels = require('@kbn/tooling-log')
-  .LOG_LEVEL_FLAGS.map(function handleFlag(flag) {
-    return '--' + flag.name;
-  })
-  .concat('-v');
-
-process.argv = process.argv.filter(function handleArg(arg) {
-  return !logLevels.includes(arg);
-});

@@ -40,7 +40,10 @@ import {
   type EngineComponentResource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { ApiKeyManager } from './auth/api_key';
-import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
+import {
+  startPrivilegeMonitoringTask,
+  removePrivilegeMonitoringTask,
+} from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
@@ -123,16 +126,29 @@ export class PrivilegeMonitoringDataClient {
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
     // create default index source for privilege monitoring for each namespace
-    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
-      name: 'default-monitoring-index',
-    });
-    this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+    try {
+      const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
+        type: 'index',
+        managed: true,
+        indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
+        name: `default-monitoring-index-${this.opts.namespace}`,
+      });
+      this.log(
+        'debug',
+        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+      );
+    } catch (e) {
+      this.log(
+        'error',
+        `Failed to create default index source for privilege monitoring: ${e.message}`
+      );
+      this.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to create default index source for privilege monitoring',
+        e
+      );
+    }
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await this.createIngestPipelineIfDoesNotExist();
@@ -732,5 +748,62 @@ export class PrivilegeMonitoringDataClient {
       search_after: searchAfter,
       query,
     });
+  }
+
+  public async disable() {
+    this.log('info', 'Disabling Privileged Monitoring Engine');
+    // Check the current status of the engine
+    const currentEngineStatus = await this.getEngineStatus();
+    if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      this.log(
+        'info',
+        'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
+      );
+      return {
+        status: currentEngineStatus.status,
+        error: null,
+      };
+    }
+    try {
+      // 1. Remove the privileged user monitoring task
+      if (!this.opts.taskManager) {
+        throw new Error('Task Manager is not available');
+      }
+      this.log('debug', 'Disabling Privileged Monitoring Engine: removing task');
+      await removePrivilegeMonitoringTask({
+        logger: this.opts.logger,
+        namespace: this.opts.namespace,
+        taskManager: this.opts.taskManager,
+      });
+
+      // 2. Update status in Saved Objects
+      this.log(
+        'debug',
+        'Disabling Privileged Monitoring Engine: Updating status to DISABLED in Saved Objects'
+      );
+      await this.engineClient.updateStatus(PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Privilege Monitoring Engine disabled'
+      );
+      this.log('info', 'Privileged Monitoring Engine disabled successfully');
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
+        error: null,
+      };
+    } catch (e) {
+      const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
+      this.log('error', msg);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to disable Privileged Monitoring Engine',
+        e
+      );
+      throw new Error(msg);
+    }
   }
 }

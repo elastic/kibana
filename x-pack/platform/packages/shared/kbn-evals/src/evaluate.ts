@@ -100,6 +100,9 @@ export const evaluate = base.extend<
         config: connector.config,
         connectorId: connector.id,
         name: connector.name,
+        capabilities: {
+          contextWindowSize: 32000,
+        },
       };
 
       const model: Model = {

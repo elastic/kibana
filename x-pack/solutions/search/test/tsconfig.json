@@ -23,11 +23,9 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/expect",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/test-suites-src",
-    "@kbn/guided-onboarding",
     "@kbn/search-playground",
     "@kbn/tooling-log",
-    "@kbn/test-suites-xpack",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/core-chrome-browser",
   ]
 }

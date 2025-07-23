@@ -13314,6 +13314,19 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
+      operationId: DisableMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Disable the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
       operationId: InitMonitoringEngine
@@ -13346,7 +13359,7 @@ paths:
                       - status
                   status:
                     oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                       - enum:
                           - not_found
                         type: string
@@ -40030,6 +40043,82 @@ paths:
       summary: Initiate Fleet setup
       tags:
         - Fleet internals
+  /api/fleet/space_settings:
+    get:
+      operationId: get-fleet-space-settings
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      allowed_namespace_prefixes:
+                        items:
+                          type: string
+                        type: array
+                      managed_by:
+                        type: string
+                    required:
+                      - allowed_namespace_prefixes
+                required:
+                  - item
+      summary: Get space settings
+      tags: []
+      x-state: Generally available; added in 9.1.0
+    put:
+      description: '[Required authorization] Route required privileges: fleet-settings-all.'
+      operationId: put-fleet-space-settings
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allowed_namespace_prefixes:
+                  items:
+                    type: string
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      allowed_namespace_prefixes:
+                        items:
+                          type: string
+                        type: array
+                      managed_by:
+                        type: string
+                    required:
+                      - allowed_namespace_prefixes
+                required:
+                  - item
+      summary: Create space settings
+      tags: []
+      x-state: Generally available; added in 9.1.0
   /api/fleet/uninstall_tokens:
     get:
       description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
@@ -56147,6 +56236,84 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/synthetics/monitor/test/{monitorId}:
+    post:
+      description: |
+        Trigger an immediate test execution for the specified monitor. The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
+      operationId: post-synthetics-monitor-test
+      parameters:
+        - description: The ID (config_id) of the monitor to test.
+          in: path
+          name: monitorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                testNowMonitorResponseExample1:
+                  value: |-
+                    {
+                      "testRunId": "2bd506e5-4f9a-4aa6-a019-7988500afba0",
+                      "errors": [
+                        {
+                          "locationId": "us_central_staging",
+                          "error": {
+                            "status": 401,
+                            "reason": "no auth credentials provided",
+                            "failed_monitors": null
+                          }
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Array of errors encountered while triggering the test, one per service location.
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          type: object
+                          properties:
+                            failed_monitors:
+                              description: Optional list of monitors that failed at the location.
+                              items:
+                                type: object
+                              nullable: true
+                              type: array
+                            reason:
+                              description: Human-readable explanation of the failure.
+                              type: string
+                            status:
+                              description: HTTP status code returned by the agent.
+                              type: integer
+                          required:
+                            - status
+                            - reason
+                            - failed_monitors
+                        locationId:
+                          description: Identifier of the service location where the error occurred.
+                          type: string
+                      required:
+                        - locationId
+                        - error
+                    type: array
+                  testRunId:
+                    description: Unique identifier for the triggered test run.
+                    type: string
+                required:
+                  - testRunId
+          description: Test run triggered successfully.
+        '404':
+          description: Monitor not found.
+      summary: Trigger an on-demand test run for a monitor
+      tags:
+        - synthetics
+      x-state: Generally available; added in 9.2.0
   /api/synthetics/monitors:
     get:
       description: |
@@ -74169,6 +74336,8 @@ components:
         - type: string
         - items:
             type: string
+          maxItems: 5
+          minItems: 0
           type: array
     Security_Detections_API_ThresholdRule:
       allOf:
@@ -77001,10 +77170,19 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - type
         - status
+    Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+        - disabled
+      type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object
       properties:

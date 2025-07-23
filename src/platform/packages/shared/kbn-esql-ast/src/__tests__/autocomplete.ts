@@ -13,6 +13,7 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
@@ -38,7 +39,6 @@ import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
-
 export const expectSuggestions = async (
   query: string,
   expectedSuggestions: string[],
@@ -130,7 +130,9 @@ export function getFunctionSignaturesByReturnType(
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
-  option?: string
+  option?: string,
+  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+    license === 'platinum'
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -157,6 +159,20 @@ export function getFunctionSignaturesByReturnType(
 
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
+      const hasRestrictedSignature = signatures.some((signature) => signature.license);
+      if (hasRestrictedSignature) {
+        const availableSignatures = signatures.filter((signature) => {
+          if (!signature.license) return true;
+          return hasMinimumLicenseRequired(
+            signature.license.toLocaleLowerCase() as ESQLLicenseType
+          );
+        });
+
+        if (availableSignatures.length === 0) {
+          return false;
+        }
+      }
+
       if (ignoreAsSuggestion) {
         return false;
       }
