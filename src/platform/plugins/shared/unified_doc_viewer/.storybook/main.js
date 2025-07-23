@@ -6,9 +6,4 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-// These are the html tags that will replace the highlight tags.
-export const htmlTags = {
-  pre: '<mark class="ffSearch__highlight">',
-  post: '</mark>',
-};
+module.exports = require('@kbn/storybook').defaultConfig;
