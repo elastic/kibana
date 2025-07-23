@@ -86,7 +86,6 @@ async function getUnprocessedOtelErrors({
       return {
         id: event.span?.id,
         error: {
-          message: '',
           exception: {
             type: event.exception?.type,
             message: event.exception?.message,
@@ -99,7 +98,7 @@ async function getUnprocessedOtelErrors({
         doc
       ): doc is {
         id: string;
-        error: { message: string; exception: { type: string; message: string } };
+        error: { exception: { type: string; message: string } };
       } => !!doc
     );
 }
