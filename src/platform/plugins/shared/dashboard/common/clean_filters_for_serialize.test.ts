@@ -9,10 +9,11 @@
 
 import { Filter } from '@kbn/es-query';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
+import { DashboardFilter } from '../server';
 
 describe('cleanFiltersForSerialize', () => {
-  test('should return an empty array if filters is not provided', () => {
-    expect(cleanFiltersForSerialize()).toEqual([]);
+  test('should return undefined if filters is not provided', () => {
+    expect(cleanFiltersForSerialize()).toBeUndefined();
   });
 
   test('should remove "meta.value" property from each filter', () => {
@@ -21,7 +22,7 @@ describe('cleanFiltersForSerialize', () => {
       { query: { b: 'b' }, meta: { value: 'value2' } },
     ];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters);
+    const cleanedFilters = cleanFiltersForSerialize(filters) as DashboardFilter[];
 
     expect(cleanedFilters[0]).toEqual({ query: { a: 'a' }, meta: {} });
     expect(cleanedFilters[1]).toEqual({ query: { b: 'b' }, meta: {} });
@@ -30,7 +31,9 @@ describe('cleanFiltersForSerialize', () => {
   test('should not fail if meta is missing from filters', () => {
     const filters: Filter[] = [{ query: { a: 'a' } }, { query: { b: 'b' } }] as unknown as Filter[];
 
-    const cleanedFilters = cleanFiltersForSerialize(filters as unknown as Filter[]);
+    const cleanedFilters = cleanFiltersForSerialize(
+      filters as unknown as Filter[]
+    ) as DashboardFilter[];
 
     expect(cleanedFilters[0]).toEqual({ query: { a: 'a' } });
     expect(cleanedFilters[1]).toEqual({ query: { b: 'b' } });
