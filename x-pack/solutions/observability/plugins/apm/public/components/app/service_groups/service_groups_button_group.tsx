@@ -6,7 +6,7 @@
  */
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 const buttonGroupOptions = {
@@ -39,15 +39,8 @@ export function ServiceGroupsButtonGroup({
 }) {
   const history = useHistory();
 
-  useEffect(() => {
-    const group = document.querySelector('[data-test-subj="apmServiceGroupsButtonGroup"]');
-    const button = group?.querySelector('button[aria-pressed="true"]') as HTMLButtonElement | null;
-    button?.focus();
-  }, [selectedNavButton]);
-
   return (
     <EuiButtonGroup
-      data-test-subj="apmServiceGroupsButtonGroup"
       color="primary"
       options={[buttonGroupOptions.allServices.option, buttonGroupOptions.serviceGroups.option]}
       idSelected={selectedNavButton as string}
