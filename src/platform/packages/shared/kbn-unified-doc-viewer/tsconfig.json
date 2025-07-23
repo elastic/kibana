@@ -19,5 +19,7 @@
     "@kbn/i18n",
     "@kbn/react-field",
     "@kbn/field-utils",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/shared-ux-error-boundary",
   ]
 }
