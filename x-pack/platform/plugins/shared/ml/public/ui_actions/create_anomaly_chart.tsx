@@ -70,11 +70,11 @@ export function createAddAnomalyChartsPanelAction(
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
-          const { ResolveEmbeddableAnomalyChartsUserInput } = await import(
+          const { EmbeddableAnomalyChartsUserInput } = await import(
             '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
           );
           return (
-            <ResolveEmbeddableAnomalyChartsUserInput
+            <EmbeddableAnomalyChartsUserInput
               coreStart={coreStart}
               pluginStart={pluginStart}
               onConfirm={(initialState) => {

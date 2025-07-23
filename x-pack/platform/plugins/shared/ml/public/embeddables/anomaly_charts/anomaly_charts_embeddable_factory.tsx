@@ -116,11 +116,11 @@ export const getAnomalyChartsReactEmbeddableFactory = (
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
-              const { ResolveEmbeddableAnomalyChartsUserInput } = await import(
+              const { EmbeddableAnomalyChartsUserInput } = await import(
                 './anomaly_charts_setup_flyout'
               );
               return (
-                <ResolveEmbeddableAnomalyChartsUserInput
+                <EmbeddableAnomalyChartsUserInput
                   coreStart={coreStartServices}
                   pluginStart={pluginsStartServices}
                   onConfirm={(result) => {

@@ -20,7 +20,7 @@ type AnomalyChartsEmbeddableOverridableState = Pick<
   'title' | 'jobIds' | 'maxSeriesToPlot'
 >;
 
-export function ResolveEmbeddableAnomalyChartsUserInput({
+export function EmbeddableAnomalyChartsUserInput({
   coreStart,
   pluginStart,
   onConfirm,
