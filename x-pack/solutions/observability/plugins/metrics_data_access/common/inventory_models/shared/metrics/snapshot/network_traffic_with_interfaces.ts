@@ -26,7 +26,7 @@ export const networkTrafficWithInterfaces = (
   [`${id}_deriv`]: {
     derivative: {
       buckets_path: `${id}_sum_of_interfaces`,
-      gap_policy: 'skip',
+      gap_policy: 'insert_zeros',
       unit: '1s',
     },
   },

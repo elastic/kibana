@@ -6,6 +6,7 @@
  */
 
 import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
+import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
 
 export const rxV2: SchemaBasedAggregations = {
   ecs: {
@@ -47,38 +48,18 @@ export const rxV2: SchemaBasedAggregations = {
         },
       },
       aggs: {
-        first_rx_byte: {
-          min: {
-            field: 'system.network.io',
-          },
-        },
-        last_rx_byte: {
-          max: {
-            field: 'system.network.io',
-          },
-        },
-        min_timestamp: {
-          min: {
+        per_interval: {
+          auto_date_histogram: {
             field: '@timestamp',
+            buckets: 30,
           },
-        },
-        max_timestamp: {
-          max: {
-            field: '@timestamp',
-          },
+          aggs: networkTrafficWithInterfaces('rx_otel', 'system.network.io', 'device'),
         },
       },
     },
     rxV2: {
-      bucket_script: {
-        buckets_path: {
-          firstRxByte: 'rx_receive>first_rx_byte',
-          lastRxByte: 'rx_receive>last_rx_byte',
-          minTime: 'rx_receive>min_timestamp',
-          maxTime: 'rx_receive>max_timestamp',
-        },
-        script:
-          '(params.lastRxByte - params.firstRxByte) / ((params.maxTime - params.minTime) / 1000)',
+      avg_bucket: {
+        buckets_path: 'rx_receive>per_interval>rx_otel',
         gap_policy: 'skip',
       },
     },
