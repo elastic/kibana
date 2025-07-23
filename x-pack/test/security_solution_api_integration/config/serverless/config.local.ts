@@ -37,7 +37,7 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
       serverArgs: [
         ...svlSharedConfig.get('kbnTestServer.serverArgs'),
         '--serverless=security',
-        '--elasticsearch.hosts=https://localhost:9200',
+        '--elasticsearch.hosts=http://localhost:9200',
         '--server.port=5601',
         '--server.publicBaseUrl=http://localhost:5601',
       ],
