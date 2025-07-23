@@ -7,32 +7,28 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getActivePrivilegedUsersEsqlCount } from './esql_query';
+import { getPrivilegedUsersEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const ActivePrivilegedUsersTile: React.FC<{
+export const PrivilegedUsersTile: React.FC<{
   spaceId: string;
-  sourcerDataView: DataViewSpec;
-}> = ({ spaceId, sourcerDataView }) => {
+}> = ({ spaceId }) => {
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.title', {
-        defaultMessage: 'Active Privileged Users',
+        defaultMessage: 'Privileged Users',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.label', {
-        defaultMessage: 'Active Privileged Users',
+        defaultMessage: 'Privileged Users',
       })}
-      getEsqlQuery={(namespace: string) =>
-        getActivePrivilegedUsersEsqlCount(namespace, sourcerDataView)
-      }
+      getEsqlQuery={(namespace: string) => getPrivilegedUsersEsqlCount(namespace)}
       id="privileged-user-monitoring-active-users"
       spaceId={spaceId}
       inspectTitle={
         <FormattedMessage
-          id="xpack.securitySolution.privmon.activePrivilegedUsers.inspectTitle"
-          defaultMessage="Active privileged users"
+          id="xpack.securitySolution.privmon.privilegedUsers.inspectTitle"
+          defaultMessage="Privileged users"
         />
       }
     />

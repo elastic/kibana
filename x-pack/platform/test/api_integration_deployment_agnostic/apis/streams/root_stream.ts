@@ -48,9 +48,6 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         'scope.version': {
           type: 'keyword',
         },
-        observed_timestamp: {
-          type: 'date',
-        },
         trace_id: {
           type: 'keyword',
         },
@@ -70,6 +67,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
           type: 'long',
         },
         'resource.attributes.host.name': {
+          type: 'keyword',
+        },
+        'resource.attributes.service.name': {
           type: 'keyword',
         },
         'stream.name': {

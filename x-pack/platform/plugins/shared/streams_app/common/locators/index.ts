@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './active_privileged_users_tile';
+export * from './streams_locator';
