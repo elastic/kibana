@@ -56,7 +56,6 @@ const setup = async ({
   sessionsClient.find = jest.fn().mockResolvedValue(mockSessionsFindResponse);
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-    locators: mockShareStart.url.locators,
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
   });
@@ -71,6 +70,7 @@ const setup = async ({
           timezone="UTC"
           config={mockConfig}
           kibanaVersion="8.0.0"
+          locators={mockShareStart.url.locators}
           searchUsageCollector={mockSearchUsageCollector}
           {...props}
         />
