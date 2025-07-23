@@ -142,6 +142,7 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  appId?: string;
 }
 
 /**

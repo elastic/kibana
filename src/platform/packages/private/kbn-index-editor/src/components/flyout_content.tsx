@@ -16,7 +16,7 @@ import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { CustomPanel } from './custom_panel';
@@ -97,7 +97,11 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             `}
           >
             <FileDropzone noResults={noResults}>
-              <EuiFlexGroup direction="column" gutterSize="s" css={{ flex: 1 }}>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="s"
+                css={{ overflow: 'hidden', height: '100%' }}
+              >
                 <EuiFlexItem grow={false}>
                   <CustomPanel />
                 </EuiFlexItem>
