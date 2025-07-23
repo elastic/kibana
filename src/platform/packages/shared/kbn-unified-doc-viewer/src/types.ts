@@ -10,6 +10,6 @@
 export type {
   DocView,
   DocViewFilterFn,
-  DocViewRenderFn,
   DocViewRenderProps,
+  DocViewerComponent,
 } from './services/types';
