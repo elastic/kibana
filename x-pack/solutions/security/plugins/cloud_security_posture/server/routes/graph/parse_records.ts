@@ -110,13 +110,14 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
 
     const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
       ? castArray(actorsDocData)
-          .filter((actorData) => actorData)
+          .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
           .map((actorData) => JSON.parse(actorData))
       : [];
-
     const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
       ? castArray(targetsDocData)
-          .filter((targetData) => targetData)
+          .filter(
+            (targetData): targetData is string => targetData !== null && targetData !== undefined
+          )
           .map((targetData) => JSON.parse(targetData))
       : [];
 
@@ -138,8 +139,9 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
+          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeShape(
+          ...determineEntityNodeVisualProps(
             id,
             castArray(ips ?? []),
             castArray(hosts ?? []),
@@ -179,7 +181,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
   }
 };
 
-const determineEntityNodeShape = (
+const determineEntityNodeVisualProps = (
   actorId: string,
   ips: string[],
   hosts: string[],
@@ -211,24 +213,22 @@ const determineEntityNodeShape = (
       })
     : {};
 
-  let nodeProps = { shape: 'hexagon' };
+  let nodeProps: Partial<EntityNodeDataModel> = { shape: 'hexagon', ...mappedProps };
 
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
-    nodeProps = { shape: 'ellipse' };
+    nodeProps = { ...nodeProps, shape: 'ellipse', icon: 'user' };
   }
 
   // If actor is a host return hexagon
   if (hosts.includes(actorId)) {
-    nodeProps = { shape: 'hexagon' };
+    nodeProps = { ...nodeProps, shape: 'hexagon', icon: 'storage' };
   }
 
   // If actor is an IP return diamond
   if (ips.includes(actorId)) {
-    nodeProps = { shape: 'diamond' };
+    nodeProps = { ...nodeProps, shape: 'diamond', icon: 'globe' };
   }
-
-  nodeProps = { ...nodeProps, ...mappedProps };
 
   // Ensure shape property is present
   return nodeProps as { shape: EntityNodeDataModel['shape']; icon?: string };

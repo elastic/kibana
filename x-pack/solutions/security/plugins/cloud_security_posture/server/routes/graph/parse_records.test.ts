@@ -245,12 +245,14 @@ describe('parseRecords', () => {
         actorIds: ['user1', 'host1', 'ip1'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        actorsDocData: [null],
+        targetsDocData: [null],
         hosts: ['host1'],
         ips: ['ip1'],
         isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
-        targetIds: [],
+        targetIds: ['ip1'],
         users: ['user1'],
       },
     ];
@@ -264,5 +266,44 @@ describe('parseRecords', () => {
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
     expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+  });
+
+  it('assigns correct shapes and icons for entity nodes - with entity data', () => {
+    const records: GraphEdge[] = [
+      {
+        action: 'foo',
+        actorIds: ['user1', 'host1', 'ip1'],
+        actorsDocData: [
+          '{"id":"user1","type":"entity","index":"test","entity":{"name":"john","type":"user"}}',
+          '{"id":"ip1","type":"entity","index":"test","entity":{"name":"192.168.1.1","type":"ip"}}',
+          '{"id":"target1","type":"entity","index":"test","entity":{"name":"Target Service","type":"service"}}',
+        ],
+        badge: 1,
+        docs: ['{"foo":"bar"}'],
+        hosts: ['host1'],
+        ips: ['ip1'],
+        isOrigin: true,
+        isOriginAlert: false,
+        targetIds: ['target1', 'target2'],
+        users: ['user1'],
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+
+    const userNode = result.nodes.find((n) => n.id === 'user1');
+    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+
+    const hostNode = result.nodes.find((n) => n.id === 'host1');
+    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+
+    const ipNode = result.nodes.find((n) => n.id === 'ip1');
+    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+
+    const targetNode = result.nodes.find((n) => n.id === 'target1');
+    expect(targetNode).toBeDefined();
+    expect(targetNode).toMatchObject({
+      label: 'Target Service',
+      icon: 'cloudStormy',
+    });
   });
 });
