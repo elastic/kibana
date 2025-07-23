@@ -20,6 +20,7 @@ import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import moment from 'moment';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
+import { Global, css } from '@emotion/react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';
@@ -28,6 +29,12 @@ import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
+
+const docViewerFlyoutOverrides = css`
+  .DiscoverFlyout {
+    z-index: 8001 !important;
+  }
+`;
 
 export const Logs = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -119,47 +126,50 @@ export const Logs = () => {
   ]);
 
   return (
-    <EuiFlexGroup direction="column" ref={ref}>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              data-test-subj="infraAssetDetailsLogsTabFieldSearch"
-              fullWidth
-              placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
-                defaultMessage: 'Search for log entries...',
-              })}
-              value={textQuery}
-              isClearable
-              onChange={onQueryChange}
+    <>
+      {/* z-index override so DocViewer flyout is being visible */}
+      <Global styles={docViewerFlyoutOverrides} />
+      <EuiFlexGroup direction="column" ref={ref}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                data-test-subj="infraAssetDetailsLogsTabFieldSearch"
+                fullWidth
+                placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
+                  defaultMessage: 'Search for log entries...',
+                })}
+                value={textQuery}
+                isClearable
+                onChange={onQueryChange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OpenInLogsExplorerButton
+                href={logsUrl}
+                testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
+                size="xs"
+                flush="both"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {logSources.value ? (
+            <LazySavedSearchComponent
+              dependencies={{ embeddable, searchSource, dataViews }}
+              index={logSources.value}
+              timeRange={dateRange}
+              query={filter}
+              height="68vh"
+              displayOptions={{
+                solutionNavIdOverride: 'oblt',
+                enableFilters: false,
+              }}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <OpenInLogsExplorerButton
-              href={logsUrl}
-              testSubject={'infraAssetDetailsLogsTabOpenInLogsButton'}
-              size="xs"
-              flush="both"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {logSources.value ? (
-          <LazySavedSearchComponent
-            dependencies={{ embeddable, searchSource, dataViews }}
-            index={logSources.value}
-            timeRange={dateRange}
-            query={filter}
-            height="68vh"
-            displayOptions={{
-              solutionNavIdOverride: 'oblt',
-              enableDocumentViewer: false,
-              enableFilters: false,
-            }}
-          />
-        ) : null}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
