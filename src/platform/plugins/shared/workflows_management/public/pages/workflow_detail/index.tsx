@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkflowYaml } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
 import React, { useEffect, useMemo, useState } from 'react';
