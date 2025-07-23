@@ -26,10 +26,16 @@ import { getDocLinks } from '@kbn/doc-links';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { capabilities, setBreadcrumbs, navigateToApp, buildFlavor, kibanaBranch } =
-    useAppContext();
+  const {
+    capabilities,
+    setBreadcrumbs,
+    navigateToApp,
+    buildFlavor,
+    kibanaBranch,
+    securityAIAssistantEnabled,
+  } = useAppContext();
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
-  const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
+
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
 
@@ -148,25 +154,6 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
-                {!securityAIAssistantEnabled ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiCallOut
-                      iconType="warning"
-                      data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
-                      title={i18n.translate(
-                        'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
-                        {
-                          defaultMessage:
-                            'This feature is disabled. You can enable it from from Spaces > Features.',
-                        }
-                      )}
-                      size="s"
-                      className="eui-displayInlineBlock"
-                    />
-                    <EuiSpacer size="s" />
-                  </>
-                ) : null}
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription"
@@ -188,20 +175,21 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {securityAIAssistantEnabled && (
+                {
                   <EuiButton
                     data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
                     iconType="gear"
                     onClick={() =>
                       navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
                     }
+                    disabled={!securityAIAssistantEnabled}
                   >
                     {i18n.translate(
                       'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
                       { defaultMessage: 'Manage Settings' }
                     )}
                   </EuiButton>
-                )}
+                }
               </div>
             }
             display="plain"
