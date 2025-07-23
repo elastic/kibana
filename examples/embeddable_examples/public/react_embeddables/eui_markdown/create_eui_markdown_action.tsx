@@ -28,13 +28,17 @@ export const createEuiMarkdownAction = (): ActionDefinition<EmbeddableApiContext
   },
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    embeddable.addNewPanel<MarkdownEditorSerializedState>(
+    const newMarkdownEmbeddable = await embeddable.addNewPanel<MarkdownEditorSerializedState>(
       {
         panelType: EUI_MARKDOWN_ID,
-        serializedState: { rawState: { content: '# hello world!' } },
+        serializedState: { rawState: { 
+          content: '# hello world!',
+        } },
       },
       true
     );
+
+    return newMarkdownEmbeddable?.onEdit({ isNewPanel: true})
   },
   getDisplayName: () =>
     i18n.translate('embeddableExamples.euiMarkdownEditor.displayNameAriaLabel', {

@@ -24,7 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   StateComparators,
   WithAllKeys,
@@ -34,11 +34,12 @@ import {
   titleComparators,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
@@ -55,12 +56,10 @@ const editorStyles = css`
   }
 `;
 
-const dashboardMarkdownEditorAriaLabel = () => i18n.translate(
-  'embeddableExamples.euiMarkdownEditor.embeddableAriaLabel',
-  {
+const dashboardMarkdownEditorAriaLabel = () =>
+  i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
     defaultMessage: 'Dashboard markdown editor',
-  }
-)
+  });
 
 const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
 
@@ -70,6 +69,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: EUI_MARKDOWN_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    console.log('buildEmbeddable', initialState, parentApi, uuid);
     /**
      * Initialize state managers.
      */
@@ -79,7 +79,10 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       defaultMarkdownState
     );
     const isEditing$ = new BehaviorSubject<boolean>(false);
+    const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
+
+    const overridesHoverActions$ = new BehaviorSubject<boolean>(false);
 
     /**
      * if this embeddable had a difference between its runtime and serialized state, we could define and run a
@@ -128,12 +131,18 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ...unsavedChangesApi,
       ...titleManager.api,
       serializeState,
-      onEdit: async () => {
+      onEdit: async ({ isNewPanel } = {}) => {
+        overridesHoverActions$.next(true);
+        if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
+        if (isNewPanel !== isNewPanel$.getValue()) {
+          isNewPanel$.next(isNewPanel);
+        }
         isEditing$.next(true);
         parentApi.focusedPanelId$.next(api.uuid);
       },
       isEditingEnabled: () => true,
       getTypeDisplayName: () => 'Markdown',
+      overridesHoverActions$,
       OverridenHoverActionsComponent: () => {
         if (!isEditing$.getValue()) {
           return;
@@ -189,8 +198,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
         const isEditing = useStateFromPublishingSubject(isEditing$);
+
         const isPreview = useStateFromPublishingSubject(isPreview$);
-        
+
         const excludingPlugins = Array<'lineBreaks' | 'linkValidator' | 'tooltip'>();
 
         const { euiTheme } = useEuiTheme();
@@ -200,51 +210,99 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
         processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
-
         const onCancel = () => {
           isEditing$.next(false);
           isPreview$.next(false);
           parentApi.focusedPanelId$.next();
+          console.log('WHAAAT', isNewPanel$.getValue());
+          if (isNewPanel$.getValue() === true) {
+            // remove the embeddable
+            parentApi.removePanel(api.uuid);
+          }
+          overridesHoverActions$.next(false);
         };
 
         const onSave = () => {
           markdownStateManager.api.setContent(value);
           isEditing$.next(false);
           isPreview$.next(false);
+          if (isNewPanel$.getValue() === true) {
+            isNewPanel$.next(false);
+          }
           parentApi.focusedPanelId$.next();
+          overridesHoverActions$.next(false);
         };
 
         const markdownStyles = {
+          container: css({
+            width: '100%',
+          }),
           formatContainer: css({
             padding: euiTheme.size.base,
             overflow: 'scroll',
             width: '100%',
             img: {
               maxInlineSize: '100%',
-            }
+            },
+          }),
+          editorInvisible: css({
+            opacity: 0,
+            pointerEvents: 'none',
+            userSelect: 'none',
           })
-        }
+        };
+
+        const editorRef = useRef(null);
+        const textAreaScrollRef = useRef(0);
+        useEffect(() => {
+          if (editorRef.current) {
+            const textarea = editorRef.current.textarea;
+            if (!textarea) {
+              return;
+            }
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            textAreaScrollRef.current = textarea.scrollTop;
+            textarea.addEventListener('scroll', () => {
+              textAreaScrollRef.current = textarea.scrollTop;
+              console.log('it happens')
+            });
+            textarea.scrollTop = textarea.scrollHeight; 
+          }
+        }, []);
+
+        useEffect(() => {
+          if (isPreview) {
+            return;
+          }
+          if (editorRef.current) {
+            const textarea = editorRef.current.textarea;
+            if (!textarea) {
+              return;
+            }
+            // textarea.focus();
+            // textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            textarea.scrollTop = textAreaScrollRef.current; 
+          }
+        }, [isPreview]);
 
         const styles = useMemoCss(markdownStyles);
 
         if (viewMode === 'view' || !isEditing) {
           return (
-            <div
-            css={styles.formatContainer}
-          >
-            <EuiMarkdownFormat
-              processingPluginList={processingPlugins}
-            >
-              {content ?? ''}
-            </EuiMarkdownFormat>
+            <div css={styles.formatContainer}>
+              <EuiMarkdownFormat processingPluginList={processingPlugins}>
+                {content ?? ''}
+              </EuiMarkdownFormat>
             </div>
           );
         }
 
         return !isPreview ? (
-          <div css={css({ width: '100%' })}>
+          <div css={[styles.container, isPreview && styles.formatContainer]}>
             <EuiMarkdownEditor
-              css={editorStyles}
+              ref={editorRef}
+              css={[editorStyles, isPreview && styles.editorInvisible]}
               toolbarProps={{
                 right: <div>TODO</div>,
               }}
@@ -256,6 +314,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               showFooter="false"
             />
             <EditingFooter onCancel={onCancel} onSave={onSave} />
+            {<>
+               <EuiMarkdownFormat
+               processingPluginList={processingPlugins}
+               css={css`
+                 padding: ${euiTheme.size.base};
+                 img {
+                   max-inline-size: 100%;
+                 }
+               `}
+             >
+               {value ?? content ?? ''}
+             </EuiMarkdownFormat>
+             <EditingFooter onCancel={onCancel} onSave={onSave} isPreview />
+             </>
+            }
           </div>
         ) : (
           <div
@@ -275,11 +348,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             >
               {value ?? content ?? ''}
             </EuiMarkdownFormat>
-            <EditingFooter
-              onCancel={onCancel}
-              onSave={onSave}
-              isPreview
-            />
+            <EditingFooter onCancel={onCancel} onSave={onSave} isPreview />
           </div>
         );
       },
@@ -288,29 +357,36 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 };
 
 const footerStyles = {
-  footer: ({euiTheme}: UseEuiTheme) => css`
-  padding: 8px;
-  border-radius-bottom: 8px;
-  width: 100%;
-  border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
+  footer: ({ euiTheme }: UseEuiTheme) => css`
+    padding: 8px;
+    border-radius-bottom: 8px;
+    width: 100%;
+    border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
 
- 
-  position: absolute;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.9);
-`,
-previewFooter: ({euiTheme}: UseEuiTheme) => css`
-   opacity: 0;
-   ${euiCanAnimate} {
-    transition: opacity ${euiTheme.animation.slow} ease-in;
-  }
-  .dshDashboardGrid__item:hover & {
-    opacity: 1;
-  }
-`,
-}
+    position: absolute;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+  `,
+  previewFooter: ({ euiTheme }: UseEuiTheme) => css`
+    opacity: 0;
+    ${euiCanAnimate} {
+      transition: opacity ${euiTheme.animation.slow} ease-in;
+    }
+    .dshDashboardGrid__item:hover & {
+      opacity: 1;
+    }
+  `,
+};
 
-const EditingFooter = ({ onCancel, onSave, isPreview }: { onCancel: () => void; onSave: () => void, isPreview?: boolean }) => {
+const EditingFooter = ({
+  onCancel,
+  onSave,
+  isPreview,
+}: {
+  onCancel: () => void;
+  onSave: () => void;
+  isPreview?: boolean;
+}) => {
   const styles = useMemoCss(footerStyles);
   return (
     <EuiFlexGroup
