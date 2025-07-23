@@ -17,6 +17,7 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
   private lastHealth: HealthStatus = 'green';
   private lastJvmStats: Record<string, unknown> | undefined;
   private lastCpuStats: Record<string, unknown> | undefined;
+  private nodeTimestamps: Record<string, number> = {};
 
   constructor(
     private readonly config: {
@@ -42,11 +43,25 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
         metric: ['jvm', 'os'],
       });
 
+      if (!nodesResp.nodes || Object.keys(nodesResp.nodes).length === 0) {
+        return failure('No Elasticsearch nodes found');
+      }
+
       this.lastJvmStats = {};
       this.lastCpuStats = {};
 
       for (const nodeId of Object.keys(nodesResp.nodes)) {
         const node = nodesResp.nodes[nodeId];
+        const currentTimestamp = node.timestamp;
+        const lastReportedTimestamp = this.nodeTimestamps[nodeId];
+
+        if (!currentTimestamp || lastReportedTimestamp === currentTimestamp) {
+          return failure(
+            `Node ${nodeId} is stale: no timestamp updates detected. Current timestamp=${currentTimestamp}, Last reported timestamp=${lastReportedTimestamp}`
+          );
+        }
+
+        this.nodeTimestamps[nodeId] = currentTimestamp;
 
         const jvm = node.jvm;
         const os = node.os;
