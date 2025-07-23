@@ -29,11 +29,14 @@ import type {
 import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  ThreatMapEntry,
+  ThreatMapping,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
-export type ThreatMappingEntries = ThreatMapping['0']['entries'];
+export type ThreatMappingEntries = ThreatMapEntry[];
 
 export interface CreateThreatSignalsOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
