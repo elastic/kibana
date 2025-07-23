@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
-import { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '../../../services/custom_role_scoped_supertest';
+import { RoleScopedSupertestProvider } from '../../../services/role_scoped_supertest';
 import {
   RepositorySupertestClient,
   getAdminApiClient,
