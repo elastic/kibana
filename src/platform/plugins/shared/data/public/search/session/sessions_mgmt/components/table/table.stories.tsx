@@ -12,24 +12,26 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import moment from 'moment';
-import { SearchSessionStatus } from '../../../../../../common';
+import { SearchSessionStatus, SearchSessionStatusResponse } from '../../../../../../common';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SessionsClient } from '../../../sessions_client';
-import { getUiSessionMocks } from '../../__mocks__';
-import { UISession } from '../../types';
-import { ACTION } from '../actions';
+import { getSearchSessionSavedObjectMocks } from '../../__mocks__';
+import { SearchSessionSavedObject } from '../../types';
+import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
 
 export default {
   title: 'components/SearchSessionsMgmtTable',
 };
 
 const Component = ({
-  data = getUiSessionMocks({ length: 5 }),
+  data = getSearchSessionSavedObjectMocks({ length: 5 }),
+  statuses = {},
   props = {},
 }: {
-  data?: UISession[];
+  data?: SearchSessionSavedObject[];
+  statuses?: Record<string, SearchSessionStatusResponse>;
   props?: Partial<typeof SearchSessionsMgmtTable>;
 }) => {
   const mockCoreSetup = coreMock.createSetup();
@@ -51,12 +53,11 @@ const Component = ({
   } as any;
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-    locators: mockShareStart.url.locators,
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
   });
   api.fetchTableData = async () => {
-    return data;
+    return [data, statuses];
   };
 
   const mockSearchUsageCollector = createSearchUsageCollectorMock();
@@ -69,6 +70,7 @@ const Component = ({
         timezone="UTC"
         config={mockConfig}
         kibanaVersion="8.0.0"
+        locators={mockShareStart.url.locators}
         searchUsageCollector={mockSearchUsageCollector}
         {...props}
       />
@@ -81,20 +83,6 @@ export const Default = {
   render: () => <Component />,
 };
 
-export const WithActions = {
-  name: 'With actions',
-  render: () => (
-    <Component
-      data={getUiSessionMocks({
-        length: 5,
-        overrides: () => ({
-          actions: [ACTION.INSPECT, ACTION.DELETE, ACTION.EXTEND, ACTION.RENAME],
-        }),
-      })}
-    />
-  ),
-};
-
 export const NoData = {
   name: 'No data',
   render: () => <Component data={[]} />,
@@ -102,35 +90,45 @@ export const NoData = {
 
 export const MultiplePages = {
   name: 'Multiple pages',
-  render: () => <Component data={getUiSessionMocks({ length: 500 })} />,
+  render: () => <Component data={getSearchSessionSavedObjectMocks({ length: 500 })} />,
 };
 
 export const DifferentApps = {
   name: 'Different apps',
-  render: () => (
-    <Component
-      data={getUiSessionMocks({
-        length: 50,
-        overrides: ({ idx }) => {
-          const apps = ['discover', 'dashboard', 'visualize', 'canvas', 'ml', 'graph'];
+  render: () => {
+    const apps = ['discover', 'dashboard', 'visualize', 'canvas', 'ml', 'graph'];
 
-          return {
-            appId: apps[idx % apps.length],
-          };
-        },
-      })}
-    />
-  ),
+    return (
+      <Component
+        data={getSearchSessionSavedObjectMocks({
+          length: 50,
+          overrides: ({ idx }) => {
+            return {
+              attributes: getPersistedSearchSessionSavedObjectAttributesMock({
+                appId: apps[idx % apps.length],
+              }),
+            };
+          },
+        })}
+      />
+    );
+  },
 };
 
 export const DifferentSearchCounts = {
   name: 'Different search counts',
   render: () => (
     <Component
-      data={getUiSessionMocks({
+      data={getSearchSessionSavedObjectMocks({
         length: 50,
         overrides: ({ idx }) => {
+          const mappings = Array.from({ length: idx }, (_, i) => [`index-${i}`, `doc-${i}`]);
+          const idMapping = Object.fromEntries(mappings);
+
           return {
+            attributes: getPersistedSearchSessionSavedObjectAttributesMock({
+              idMapping,
+            }),
             numSearches: idx,
           };
         },
@@ -141,29 +139,41 @@ export const DifferentSearchCounts = {
 
 export const DifferentStatuses = {
   name: 'Different statuses',
-  render: () => (
-    <Component
-      data={getUiSessionMocks({
-        length: 50,
-        overrides: ({ idx }) => {
-          const statuses = [
-            SearchSessionStatus.CANCELLED,
-            SearchSessionStatus.COMPLETE,
-            SearchSessionStatus.ERROR,
-            SearchSessionStatus.EXPIRED,
-            SearchSessionStatus.IN_PROGRESS,
-          ];
+  render: () => {
+    const length = 50;
+    const statuses = [
+      SearchSessionStatus.CANCELLED,
+      SearchSessionStatus.COMPLETE,
+      SearchSessionStatus.ERROR,
+      SearchSessionStatus.EXPIRED,
+      SearchSessionStatus.IN_PROGRESS,
+    ];
+    const statusMap = Object.fromEntries(
+      Array.from({ length }, (_, idx) => [idx, { status: statuses[idx % statuses.length] }])
+    );
 
-          return {
-            status: statuses[idx % statuses.length],
-          };
-        },
-      })}
-    />
-  ),
+    return (
+      <Component
+        statuses={statusMap}
+        data={getSearchSessionSavedObjectMocks({
+          length,
+          overrides: ({ idx }) => {
+            return {
+              id: idx.toString(),
+            };
+          },
+        })}
+      />
+    );
+  },
 };
 
 export const FilteredColumns = {
   name: 'Filtered columns',
   render: () => <Component props={{ columns: ['name', 'status'] }} />,
+};
+
+export const FilteredActions = {
+  name: 'Filtered actions',
+  render: () => <Component props={{ actions: ['rename', 'delete'] }} />,
 };

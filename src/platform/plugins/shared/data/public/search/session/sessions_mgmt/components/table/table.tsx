@@ -17,32 +17,38 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { AvailableColumns, getColumns } from '../../lib/get_columns';
-import { UISession } from '../../types';
-import { OnActionComplete } from '../actions';
-import { getAppFilter } from './app_filter';
-import { getStatusFilter } from './status_filter';
+import { AvailableColumns, getColumns } from './utils/get_columns';
+import { LocatorsStart, UISession } from '../../types';
+import { Action, OnActionComplete } from './actions';
+import { getAppFilter } from './utils/get_app_filter';
+import { getStatusFilter } from './utils/get_status_filter';
 import { SearchUsageCollector } from '../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
+import { mapToUISession } from './utils/map_to_ui_session';
 
 interface Props {
   core: CoreStart;
+  locators: LocatorsStart;
   api: SearchSessionsMgmtAPI;
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
   columns?: AvailableColumns[];
+  // Only useful if the actions column is included
+  actions?: Action[];
 }
 
 export function SearchSessionsMgmtTable({
   core,
+  locators,
   api,
   timezone,
   config,
   kibanaVersion,
   searchUsageCollector,
   columns,
+  actions,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -88,7 +94,10 @@ export function SearchSessionsMgmtTable({
     if (document.visibilityState !== 'hidden') {
       let results: UISession[] = [];
       try {
-        results = await api.fetchTableData();
+        const [savedObjects, sessionStatuses] = await api.fetchTableData();
+        results = savedObjects.map((savedObject) =>
+          mapToUISession({ savedObject, locators, sessionStatuses, actions })
+        );
       } catch (e) {} // eslint-disable-line no-empty
 
       if (showLatestResultsHandler.current === renderResults) {
@@ -101,7 +110,7 @@ export function SearchSessionsMgmtTable({
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api, refreshInterval]);
+  }, [api, refreshInterval, locators, actions]);
 
   // initial data load
   useEffect(() => {
