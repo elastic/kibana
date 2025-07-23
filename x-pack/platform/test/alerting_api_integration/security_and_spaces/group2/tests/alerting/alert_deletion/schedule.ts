@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
@@ -1415,6 +1415,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
           });
         });
+
         await cleanupEventLog();
       });
     });
