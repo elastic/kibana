@@ -26,14 +26,12 @@ export function getTableColumns({
   currentProcessorSourceField,
   detectedFields = [],
   previewDocsFilter,
-  allColumns,
 }: {
   currentProcessorSourceField?: string;
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
-  allColumns: string[];
 }) {
-  if (!currentProcessorSourceField || !allColumns.includes(currentProcessorSourceField)) {
+  if (!currentProcessorSourceField) {
     return [];
   }
 

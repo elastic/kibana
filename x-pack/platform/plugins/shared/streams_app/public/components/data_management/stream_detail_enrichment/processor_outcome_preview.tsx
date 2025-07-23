@@ -189,7 +189,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const dataSourceRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
+  const shouldShowRowSourceAvatars = useStreamEnrichmentSelector(
+    (state) => state.context.dataSourcesRefs.length >= 2
+  );
   const currentProcessorSourceField = useStreamEnrichmentSelector((state) => {
     const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
       isProcessorUnderEdit(processorRef.getSnapshot())
@@ -267,7 +269,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       currentProcessorSourceField: validCurrentProcessorSourceField,
       detectedFields,
       previewDocsFilter,
-      allColumns,
     });
 
     if (cols.length === 0) {
@@ -423,7 +424,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       <MemoProcessingPreviewTable
         documents={previewDocuments}
         originalSamples={originalSamples}
-        showRowSourceAvatars={dataSourceRefs.length >= 2}
+        showRowSourceAvatars={shouldShowRowSourceAvatars}
         onRowSelected={onRowSelected}
         selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
         displayColumns={previewColumns}

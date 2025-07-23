@@ -84,7 +84,13 @@ export function ProcessingPreviewTable({
     [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
   );
 
-  return <PreviewTable {...otherProps} leadingControlColumns={leadingControlColumns} />;
+  return (
+    <PreviewTable
+      {...otherProps}
+      leadingControlColumns={leadingControlColumns}
+      selectedRowIndex={selectedRowIndex}
+    />
+  );
 }
 
 export const MemoProcessingPreviewTable = React.memo(ProcessingPreviewTable);
