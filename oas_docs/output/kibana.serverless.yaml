@@ -64049,6 +64049,23 @@ components:
     Security_Detections_API_ThreatIndicatorPath:
       description: Defines the path to the threat indicator in the indicator documents (optional)
       type: string
+    Security_Detections_API_ThreatMapEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     Security_Detections_API_ThreatMapping:
       description: |
         Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
@@ -64063,22 +64080,7 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-                negate:
-                  type: boolean
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/Security_Detections_API_ThreatMapEntry'
             type: array
         required:
           - entries
