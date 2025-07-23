@@ -7,9 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type { ThreatMap } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
+
 import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
@@ -158,7 +159,7 @@ export const createAndNewEntryItem = (): EmptyEntry => {
   });
 };
 
-export const createOrNewEntryItem = (): ThreatMap => {
+export const createOrNewEntryItem = (): ThreatMapping['0'] => {
   return addIdToItem({
     entries: [
       addIdToItem({

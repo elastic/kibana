@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   filterThreatMapping,
   buildThreatMappingFilter,
@@ -25,7 +21,7 @@ import {
   getThreatMappingFilterShouldMock,
   getThreatListSearchResponseMock,
 } from './build_threat_mapping_filter.mock';
-import type { BooleanFilter, ThreatListItem } from './types';
+import type { BooleanFilter, ThreatListItem, ThreatMappingEntries } from './types';
 
 describe('build_threat_mapping_filter', () => {
   describe('buildThreatMappingFilter', () => {

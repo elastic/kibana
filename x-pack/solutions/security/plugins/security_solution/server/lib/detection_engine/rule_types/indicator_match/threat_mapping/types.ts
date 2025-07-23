@@ -5,11 +5,6 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  ThreatIndex,
-  ThreatLanguageOrUndefined,
-  ThreatIndicatorPath,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type {
   OpenPointInTimeResponse,
@@ -32,6 +27,9 @@ import type { ScheduleNotificationResponseActionsService } from '../../../rule_r
 import type {
   ThreatMapEntry,
   ThreatMapping,
+  ThreatIndex,
+  ThreatMatchRuleOptionalFields,
+  ThreatIndicatorPath,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
@@ -147,7 +145,7 @@ export interface GetThreatListOptions {
 export interface ThreatListCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
@@ -219,7 +217,7 @@ export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   filters: unknown[];
   tuple: RuleRangeTuple;
