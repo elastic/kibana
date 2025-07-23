@@ -16,6 +16,8 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
+  containsSingleDoesNotMatchEntry,
+  containsInvalidDoesNotMatchEntries,
 } from './helpers';
 
 jest.mock('uuid', () => ({
@@ -333,6 +335,176 @@ describe('Helpers', () => {
         },
       };
       expect(output).toEqual(expected);
+    });
+  });
+
+  describe('containsSingleDoesNotMatchEntry', () => {
+    test('returns false when items is empty', () => {
+      expect(containsSingleDoesNotMatchEntry([])).toBe(false);
+    });
+
+    test('returns true when items contains single entry with negate=true', () => {
+      const items = [
+        {
+          entries: [
+            { field: 'field.one', type: 'mapping' as const, value: 'field.one', negate: true },
+          ],
+        },
+      ];
+      expect(containsSingleDoesNotMatchEntry(items)).toBe(true);
+    });
+
+    test('returns false when items contains single entry with negate=false', () => {
+      const items = [
+        {
+          entries: [
+            { field: 'field.one', type: 'mapping' as const, value: 'field.one', negate: false },
+          ],
+        },
+      ];
+      expect(containsSingleDoesNotMatchEntry(items)).toBe(false);
+    });
+
+    test('returns false when items contains one entry with negate=false', () => {
+      const items = [
+        {
+          entries: [
+            { field: 'field.one', type: 'mapping' as const, value: 'field.one', negate: true },
+            { field: 'field.two', type: 'mapping' as const, value: 'field.two', negate: false },
+          ],
+        },
+      ];
+      expect(containsSingleDoesNotMatchEntry(items)).toBe(false);
+    });
+
+    test('returns true when one of multiple entries contains negate=true', () => {
+      const items = [
+        {
+          entries: [
+            { field: 'field.one', type: 'mapping' as const, value: 'field.one', negate: false },
+          ],
+        },
+        {
+          entries: [
+            { field: 'field.two', type: 'mapping' as const, value: 'field.two', negate: true },
+          ],
+        },
+      ];
+      expect(containsSingleDoesNotMatchEntry(items)).toBe(true);
+    });
+  });
+
+  describe('containsInvalidDoesNotMatchEntries', () => {
+    it('returns false for empty items', () => {
+      expect(containsInvalidDoesNotMatchEntries([])).toBe(false);
+    });
+
+    it('returns false when no entries have negate=true', () => {
+      const items: ThreatMapEntries[] = [
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: false,
+            },
+          ],
+        },
+      ];
+      expect(containsInvalidDoesNotMatchEntries(items)).toBe(false);
+    });
+
+    it('returns false when one entry has negate=true', () => {
+      const items: ThreatMapEntries[] = [
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: true,
+            },
+          ],
+        },
+      ];
+      expect(containsInvalidDoesNotMatchEntries(items)).toBe(false);
+    });
+
+    it('returns true when both entries have same fields and opposite negate', () => {
+      const items: ThreatMapEntries[] = [
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: true,
+            },
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: false,
+            },
+          ],
+        },
+      ];
+      expect(containsInvalidDoesNotMatchEntries(items)).toBe(true);
+    });
+
+    it('returns false when both entries have different fields and opposite negate', () => {
+      const items: ThreatMapEntries[] = [
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: true,
+            },
+            {
+              field: 'host.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.host.name',
+              negate: false,
+            },
+          ],
+        },
+      ];
+      expect(containsInvalidDoesNotMatchEntries(items)).toBe(false);
+    });
+
+    it('returns true if any of multiple entries matches invalid condition', () => {
+      const items: ThreatMapEntries[] = [
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: true,
+            },
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: false,
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'user.name',
+              type: 'mapping' as const,
+              value: 'threat.indicator.user.name',
+              negate: false,
+            },
+          ],
+        },
+      ];
+      expect(containsInvalidDoesNotMatchEntries(items)).toBe(true);
     });
   });
 });

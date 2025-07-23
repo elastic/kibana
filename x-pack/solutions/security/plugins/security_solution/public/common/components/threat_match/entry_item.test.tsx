@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -136,6 +136,91 @@ describe('EntryItem', () => {
     expect(mockOnChange).toHaveBeenCalledWith(
       { id: '123', field: 'ip', type: 'mapping', value: '', negate: false },
       0
+    );
+  });
+
+  test('it invokes "onChange" with negate=false when MATCH option selected', () => {
+    const mockOnChange = jest.fn();
+    const wrapper = mount(
+      <EntryItem
+        entry={{
+          id: '123',
+          field: getField('ip'),
+          type: 'mapping',
+          value: getField('ip'),
+          entryIndex: 1,
+          negate: true,
+        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        showLabel={false}
+        onChange={mockOnChange}
+      />
+    );
+
+    (
+      wrapper.find(EuiSuperSelect).at(0).props() as unknown as {
+        onChange: (option: string) => void;
+      }
+    ).onChange('MATCH');
+
+    expect(mockOnChange).toHaveBeenCalledWith(
+      { id: '123', field: 'ip', type: 'mapping', value: 'ip', negate: false },
+      1
+    );
+  });
+
+  test('it invokes "onChange" with negate=true when DOES_NOT_MATCH option selected', () => {
+    const mockOnChange = jest.fn();
+    const wrapper = mount(
+      <EntryItem
+        entry={{
+          id: '123',
+          field: getField('ip'),
+          type: 'mapping',
+          value: getField('ip'),
+          entryIndex: 1,
+        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        showLabel={false}
+        onChange={mockOnChange}
+      />
+    );
+
+    (
+      wrapper.find(EuiSuperSelect).at(0).props() as unknown as {
+        onChange: (option: string) => void;
+      }
+    ).onChange('DOES_NOT_MATCH');
+
+    expect(mockOnChange).toHaveBeenCalledWith(
+      { id: '123', field: 'ip', type: 'mapping', value: 'ip', negate: true },
+      1
     );
   });
 });

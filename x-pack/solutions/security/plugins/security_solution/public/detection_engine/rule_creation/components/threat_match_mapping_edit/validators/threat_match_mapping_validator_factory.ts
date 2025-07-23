@@ -10,8 +10,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import {
   containsInvalidItems,
   singleEntryThreat,
-  containsInvalidNotMatchClauses,
-  containsSingledNotMatchClause,
+  containsInvalidDoesNotMatchEntries,
+  containsSingleDoesNotMatchEntry,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
 import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
@@ -115,7 +115,7 @@ export function threatMatchMappingValidatorFactory({
       };
     }
 
-    if (containsSingledNotMatchClause(value)) {
+    if (containsSingleDoesNotMatchEntry(value)) {
       return {
         code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_SINGLE_NOT_MATCH_CLAUSE,
         path,
@@ -129,7 +129,7 @@ export function threatMatchMappingValidatorFactory({
       };
     }
 
-    if (containsInvalidNotMatchClauses(value)) {
+    if (containsInvalidDoesNotMatchEntries(value)) {
       return {
         code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_INVALID_NOT_MATCH_CLAUSE,
         path,

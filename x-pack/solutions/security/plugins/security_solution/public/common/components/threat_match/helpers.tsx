@@ -135,17 +135,17 @@ export const getEntryOnThreatFieldChange = (
 
 export const getEntryOnMatchChange = (
   item: FormattedEntry,
-  negate: boolean
-): { updatedEntry: Entry; index: number } => {
-  const { entryIndex } = item;
+  newNegate: boolean
+): { updatedEntry: Entry & { id: string }; index: number } => {
+  const { entryIndex, field, value, id } = item;
   return {
     updatedEntry: {
-      id: item.id,
-      field: item.field != null ? item.field.name : '',
+      id,
+      field: field?.name ?? '',
       type: 'mapping',
-      value: item.value != null ? item.value.name : '',
-      negate: negate ?? false,
-    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
+      value: value?.name ?? '',
+      negate: newNegate ?? false,
+    },
     index: entryIndex,
   };
 };
@@ -198,10 +198,19 @@ export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
 
 /**
  * Not match field clause can not use same mapping fields as match clause in same AND condition.
- * This function checks if there are any entries that have a negate clause(NOT_MATCH)
+ * This function checks if there are any entries that have a negate=true(DOES_NOT_MATCH)
  * and MATCH clause with the same field and value in the item(ThreatMapEntries)
+ *
+ * For example:
+ *@example
+ *```
+ * user.name MATCHES threat.indicator.user.name
+ * AND
+ * user.name DOES_NOT_MATCH threat.indicator.user.name
+ *```
+ * is not allowed.
  */
-export const containsInvalidNotMatchClauses = (items: ThreatMapEntries[]): boolean => {
+export const containsInvalidDoesNotMatchEntries = (items: ThreatMapEntries[]): boolean => {
   return items.some((item) => {
     const hasNegate = item.entries.some((subEntry) => subEntry.negate === true);
     if (!hasNegate) {
@@ -222,9 +231,9 @@ export const containsInvalidNotMatchClauses = (items: ThreatMapEntries[]): boole
 };
 
 /**
- * Checks if there are any entries that have a single entry with negate set to true(NOT_MATCH)
+ * Checks if there are any entries that have a single entry with negate set to true(DOES_NOT_MATCH)
  */
-export const containsSingledNotMatchClause = (items: ThreatMapEntries[]): boolean => {
+export const containsSingleDoesNotMatchEntry = (items: ThreatMapEntries[]): boolean => {
   return items.some((item) => {
     return item.entries.length === 1 && item.entries[0].negate === true;
   });
