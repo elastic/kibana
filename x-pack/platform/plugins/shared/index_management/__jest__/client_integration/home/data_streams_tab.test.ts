@@ -958,6 +958,28 @@ describe('Data Streams tab', () => {
         expect(exists('editDataRetentionButton')).toBe(false);
       });
 
+      test('displays/hides bulk edit data retention depending if data stream fully managed by ILM is selected', async () => {
+        const {
+          find,
+          actions: { selectDataStream, clickManageDataStreamsButton },
+        } = testBed;
+
+        // Select data stream fully managed by ILM
+        selectDataStream('dataStream1', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        // Select data stream managed by DSL
+        selectDataStream('dataStream2', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        // Unselect data stream fully managed by ILM
+        selectDataStream('dataStream1', false);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+      });
+
       test('when partially managed by dsl but has backing indices managed by ILM should show a warning', async () => {
         const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
