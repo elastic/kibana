@@ -14,5 +14,6 @@ export class InvalidStateError extends AggregateStatusError {
       overallMessage += `: ${errors.map((error) => error.message).join(', ')}`;
     }
     super(errors, overallMessage, 400);
+    this.name = 'InvalidStateError';
   }
 }
