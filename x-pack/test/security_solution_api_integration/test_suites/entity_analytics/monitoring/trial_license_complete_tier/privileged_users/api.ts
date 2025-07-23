@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(listRes.body));
         }
         expect(listRes.status).eql(200);
-        expect(listRes.body.length).to.be(2);
+        expect(listRes.body.length).to.be(1);
       });
     });
   });

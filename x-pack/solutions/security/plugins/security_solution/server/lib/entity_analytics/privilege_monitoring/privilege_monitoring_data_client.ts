@@ -64,10 +64,10 @@ import {
 import { batchPartitions } from '../shared/streams/batching';
 import { queryExistingUsers } from './users/query_existing_users';
 import { bulkUpsertBatch } from './users/bulk/upsert_batch';
-import type { SoftDeletionResults } from './users/soft_delete_omitted_users';
+
 import { softDeleteOmittedUsers } from './users/soft_delete_omitted_users';
 import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
-import type { Accumulator } from './users/bulk/utils';
+
 import { accumulateUpsertResults } from './users/bulk/utils';
 import type { PrivMonBulkUser, PrivMonUserSource } from './types';
 import {
@@ -78,6 +78,7 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
+import type { BulkProcessingResults } from './users/bulk/types';
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -404,35 +405,45 @@ export class PrivilegeMonitoringDataClient {
       skipEmptyLines: true,
     });
 
-    const res = Readable.from(stream.pipe(csvStream))
+    const batches = Readable.from(stream.pipe(csvStream))
       .pipe(privilegedUserParserTransform())
-      .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
-      .map(queryExistingUsers(this.esClient, this.getIndex()))
-      .map(bulkUpsertBatch(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .reduce(accumulateUpsertResults, {
-        users: [],
-        errors: [],
-        failed: 0,
-        successful: 0,
-      } satisfies Accumulator)
+      .pipe(batchPartitions(100));
 
-      .then(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .then((results: SoftDeletionResults) => {
-        return {
-          errors: results.updated.errors.concat(results.deleted.errors),
-          stats: {
-            failed: results.updated.failed + results.deleted.failed,
-            successful: results.updated.successful + results.deleted.successful,
-            total:
-              results.updated.failed +
-              results.updated.successful +
-              results.deleted.failed +
-              results.deleted.successful,
-          },
-        };
-      });
+    let results: BulkProcessingResults = {
+      users: [],
+      errors: [],
+      failed: 0,
+      successful: 0,
+    };
+    for await (const batch of batches) {
+      const usrs = await queryExistingUsers(this.esClient, this.getIndex())(batch);
+      const upserted = await bulkUpsertBatch(this.esClient, this.getIndex(), {
+        flushBytes,
+        retries,
+      })(usrs);
+      results = accumulateUpsertResults(
+        { users: [], errors: [], failed: 0, successful: 0 },
+        upserted
+      );
+    }
 
-    return res;
+    const softDeletedResults = await softDeleteOmittedUsers(this.esClient, this.getIndex(), {
+      flushBytes,
+      retries,
+    })(results);
+
+    return {
+      errors: softDeletedResults.updated.errors.concat(softDeletedResults.deleted.errors),
+      stats: {
+        failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
+        successful: softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
+        total:
+          softDeletedResults.updated.failed +
+          softDeletedResults.updated.successful +
+          softDeletedResults.deleted.failed +
+          softDeletedResults.deleted.successful,
+      },
+    };
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
@@ -527,7 +538,7 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
-      await this.esClient.bulk({ body: ops });
+      await this.esClient.bulk({ body: ops, refresh: true });
     }
   }
 
@@ -604,7 +615,7 @@ export class PrivilegeMonitoringDataClient {
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
         this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-        await this.esClient.bulk({ body: ops });
+        await this.esClient.bulk({ body: ops, refresh: true });
       } catch (error) {
         this.log('error', `Error executing bulk operations: ${error}`);
       }
