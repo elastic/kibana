@@ -381,9 +381,7 @@ describe('es_query executor', () => {
               count: 291,
               hits: [],
               groupingObject: {
-                host: {
-                  name: 'host-1',
-                },
+                ['host.name']: 'host-1',
               },
             },
             {
@@ -392,9 +390,7 @@ describe('es_query executor', () => {
               count: 477,
               hits: [],
               groupingObject: {
-                host: {
-                  name: 'host-2',
-                },
+                ['host.name']: 'host-2',
               },
             },
             {
@@ -403,9 +399,7 @@ describe('es_query executor', () => {
               count: 999,
               hits: [],
               groupingObject: {
-                host: {
-                  name: 'host-3',
-                },
+                ['host.name']: 'host-3',
               },
             },
           ],

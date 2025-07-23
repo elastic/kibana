@@ -8,7 +8,7 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroupsFromGrouping } from '@kbn/alerting-rule-utils';
 import {
   isGroupAggregation,
   isPerRowAggregation,
@@ -173,7 +173,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
-    const ecsGroups = getEcsGroups(result.groups);
+    const ecsGroups = getEcsGroupsFromGrouping(result.groupingObject);
 
     alertsClient.report({
       id,
