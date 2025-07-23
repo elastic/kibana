@@ -124,7 +124,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       <StyledEuiContextMenuItem
         {...otherMenuItemProps}
         onClick={handleItemClick}
-        href={isNavigationDisabled ? href : undefined}
+        href={isNavigationDisabled ? undefined : href}
       >
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {content}
