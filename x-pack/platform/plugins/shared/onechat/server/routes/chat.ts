@@ -56,10 +56,12 @@ export function registerChatRoutes({
     payload,
     request,
     chatService,
+    abortSignal,
   }: {
     chatService: ChatService;
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
+    abortSignal: AbortSignal;
   }) => {
     const {
       agent_id: agentId,
@@ -74,6 +76,7 @@ export function registerChatRoutes({
       mode,
       connectorId,
       conversationId,
+      abortSignal,
       nextInput: { message: input },
       request,
     });
@@ -105,7 +108,17 @@ export function registerChatRoutes({
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
-        const chatEvents$ = callConverse({ chatService, payload, request });
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
         const {
@@ -161,7 +174,12 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
-        const chatEvents$ = callConverse({ chatService, payload, request });
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
 
         return response.ok({
           headers: {
