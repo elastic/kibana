@@ -19,7 +19,6 @@ export interface PipelineStructureTreeProps {
    * when the user clicks on the last "+X more pipelines" tree node.
    */
   isExtension: boolean;
-  selectedPipeline: string;
   setSelectedPipeline: (name: string) => void;
   clickMorePipelines: (name: string) => void;
   goBack: () => void;
@@ -31,10 +30,9 @@ export interface PipelineStructureTreeProps {
  * corresponding pipelines from the children node.
  * See more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor
  */
-export const PipelineStructureTree = ({
+export const PipelineStructureTree = React.memo(({
   pipelineTree,
   isExtension,
-  selectedPipeline,
   setSelectedPipeline,
   clickMorePipelines,
   goBack,
@@ -44,7 +42,6 @@ export const PipelineStructureTree = ({
 
   const treeNode = createTreeNodesFromPipelines(
     pipelineTree,
-    selectedPipeline,
     setSelectedPipeline,
     clickMorePipelines
   );
@@ -52,7 +49,7 @@ export const PipelineStructureTree = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
       {isExtension && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
             <FormattedMessage
               id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
@@ -66,4 +63,4 @@ export const PipelineStructureTree = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});

@@ -7,6 +7,7 @@
 
 export interface PipelineTreeNode {
   pipelineName: string;
+  isExisting: boolean;
   isManaged: boolean;
   isDeprecated: boolean;
   children: PipelineTreeNode[];

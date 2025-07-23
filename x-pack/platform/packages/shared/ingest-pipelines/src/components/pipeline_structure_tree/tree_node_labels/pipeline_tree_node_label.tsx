@@ -11,6 +11,7 @@ import React from 'react';
 
 interface PipelineTreeNodeLabelProps {
   pipelineName: string;
+  isExisting: boolean;
   isManaged: boolean;
   isDeprecated: boolean;
   setSelected: () => void;
@@ -18,6 +19,7 @@ interface PipelineTreeNodeLabelProps {
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
+  isExisting,
   isManaged,
   isDeprecated,
   setSelected,
@@ -30,7 +32,7 @@ export const PipelineTreeNodeLabel = ({
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
     >
-      <EuiFlexItem grow={8}>
+      <EuiFlexItem grow={7 + (isExisting + !isDeprecated + !isManaged)}>
         <EuiLink
           color="text"
           onClick={setSelected}
@@ -39,8 +41,24 @@ export const PipelineTreeNodeLabel = ({
           {pipelineName}
         </EuiLink>
       </EuiFlexItem>
+      {!isExisting && (
+        <EuiFlexItem
+          grow={1}
+          data-test-subj={`pipelineTreeNode-${pipelineName}-nonexistingIcon`}
+        >
+          <EuiIconTip
+            content={i18n.translate(
+              'ingestPipelines.pipelineStructureTree.treeNodeNonexistingTooltip',
+              {
+                defaultMessage: 'Pipeline does not exist',
+              }
+            )}
+            type="error"
+          />
+        </EuiFlexItem>
+      )}
       {isManaged && (
-        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
+        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip',
@@ -53,7 +71,7 @@ export const PipelineTreeNodeLabel = ({
         </EuiFlexItem>
       )}
       {isDeprecated && (
-        <EuiFlexItem grow={true} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
+        <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-deprecatedIcon`}>
           <EuiIconTip
             content={i18n.translate(
               'ingestPipelines.pipelineStructureTree.treeNodeDeprecatedTooltip',

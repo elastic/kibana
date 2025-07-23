@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiTitle,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -30,6 +28,7 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiSpacer,
+  EuiSplitPanel,
   useEuiTheme,
 } from '@elastic/eui';
 import { PipelineStructureTree, PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
@@ -118,146 +117,135 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       aria-labelledby="pipelineDetailsFlyoutTitle"
       data-test-subj="pipelineDetails"
       size="l"
-      maxWidth={pipelineTree ? 1000 : 550}
+      maxWidth={pipelineTree ? 1100 : 550}
     >
-      <EuiFlyoutHeader>
-        <EuiFlexGroup direction="row">
-          {pipelineTree && (
-            <EuiFlexItem grow={5}>
-              <EuiTitle id="pipelineTreeTitle" data-test-subj="pipelineTreeTitle">
-                <h2>
-                  {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTreeTitle', {
-                    defaultMessage: 'Ingest pipeline structure',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={pipelineTree ? 5 : 10}>
-            <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
-              <h2>{pipeline.name}</h2>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexGroup alignItems="center" gutterSize="m">
-              {/* Pipeline version */}
-              {pipeline.version && (
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="s">
-                    {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
-                      defaultMessage: 'Version',
-                    })}{' '}
-                    {String(pipeline.version)}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-
-              {/* Managed badge*/}
-              {pipeline.isManaged && (
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    label={i18n.translate(
-                      'xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel',
-                      { defaultMessage: 'Managed' }
-                    )}
-                    size="s"
-                    color="hollow"
-                  />
-                </EuiFlexItem>
-              )}
-
-              {/* Deprecated badge*/}
-              {pipeline.deprecated && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                    <EuiBetaBadge
-                      label={deprecatedPipelineBadge.badge}
-                      size="s"
-                      color="subdued"
-                      data-test-subj="isDeprecatedBadge"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
-        <EuiFlexGroup>
-          {pipelineTree && (
-            <EuiFlexItem grow={5}>
-              <PipelineStructureTree
-                pipelineTree={pipelineTree}
-                selectedPipeline={pipeline.name}
-                setSelectedPipeline={setSelectedPipeline}
-                isExtension={hasExtensionTree}
-                clickMorePipelines={(name: string) => addToTreeStack(name)}
-                goBack={popTreeStack}
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={pipelineTree ? 5 : 10}>
-            <EuiDescriptionList rowGutterSize="m" css={{ maxWidth: '500px' }}>
-              {/* Pipeline description */}
-              {pipeline.description && (
-                <>
-                  <EuiDescriptionListTitle />
-                  <EuiDescriptionListDescription>
-                    {pipeline.description}
-                  </EuiDescriptionListDescription>
-                </>
-              )}
-
-              {/* Processors JSON */}
-              <EuiDescriptionListTitle>
-                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-                  defaultMessage: 'Processors',
+      <EuiSplitPanel.Outer direction="row" grow={true}>
+        {pipelineTree && (
+          <EuiSplitPanel.Inner>
+            <EuiTitle id="pipelineTreeTitle" data-test-subj="pipelineTreeTitle">
+              <h2>
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTreeTitle', {
+                  defaultMessage: 'Ingest pipeline structure',
                 })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <PipelineDetailsJsonBlock json={pipeline.processors} />
-              </EuiDescriptionListDescription>
+              </h2>
+            </EuiTitle>
+            <PipelineStructureTree
+              pipelineTree={pipelineTree}
+              selectedPipeline={pipeline.name}
+              setSelectedPipeline={setSelectedPipeline}
+              isExtension={hasExtensionTree}
+              clickMorePipelines={(name: string) => addToTreeStack(name)}
+              goBack={popTreeStack}
+            />
+          </EuiSplitPanel.Inner>
+        )}
 
-              {/* On Failure Processor JSON */}
-              {pipeline.on_failure?.length && (
-                <>
-                  <EuiDescriptionListTitle>
-                    {i18n.translate(
-                      'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
-                      {
-                        defaultMessage: 'Failure processors',
-                      }
-                    )}
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <PipelineDetailsJsonBlock json={pipeline.on_failure} />
-                  </EuiDescriptionListDescription>
-                </>
-              )}
+        <EuiSplitPanel.Inner>
+          <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
+            <h2>{pipeline.name}</h2>
+          </EuiTitle>
 
-              {/* Metadata (optional) */}
-              {pipeline._meta && (
-                <>
-                  <EuiDescriptionListTitle data-test-subj="metaTitle">
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
-                      defaultMessage="Metadata"
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    <EuiCodeBlock language="json">
-                      {stringifyJson(pipeline._meta, false)}
-                    </EuiCodeBlock>
-                  </EuiDescriptionListDescription>
-                </>
-              )}
-            </EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
+          <EuiSpacer size="s" />
+
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            {/* Pipeline version */}
+            {pipeline.version && (
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.versionTitle', {
+                    defaultMessage: 'Version',
+                  })}{' '}
+                  {String(pipeline.version)}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+
+            {/* Managed badge*/}
+            {pipeline.isManaged && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.ingestPipelines.list.pipelineDetails.managedBadgeLabel',
+                    { defaultMessage: 'Managed' }
+                  )}
+                  size="s"
+                  color="hollow"
+                />
+              </EuiFlexItem>
+            )}
+
+            {/* Deprecated badge*/}
+            {pipeline.deprecated && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                  <EuiBetaBadge
+                    label={deprecatedPipelineBadge.badge}
+                    size="s"
+                    color="subdued"
+                    data-test-subj="isDeprecatedBadge"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+
+          <EuiDescriptionList rowGutterSize="m" css={{ maxWidth: '500px' }}>
+            {/* Pipeline description */}
+            {pipeline.description && (
+              <>
+                <EuiDescriptionListTitle />
+                <EuiDescriptionListDescription>
+                  {pipeline.description}
+                </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Processors JSON */}
+            <EuiDescriptionListTitle>
+              {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
+                defaultMessage: 'Processors',
+              })}
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              <PipelineDetailsJsonBlock json={pipeline.processors} />
+            </EuiDescriptionListDescription>
+
+            {/* On Failure Processor JSON */}
+            {pipeline.on_failure?.length && (
+              <>
+                <EuiDescriptionListTitle>
+                  {i18n.translate(
+                    'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
+                    {
+                      defaultMessage: 'Failure processors',
+                    }
+                  )}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+                </EuiDescriptionListDescription>
+              </>
+            )}
+
+            {/* Metadata (optional) */}
+            {pipeline._meta && (
+              <>
+                <EuiDescriptionListTitle data-test-subj="metaTitle">
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
+                    defaultMessage="Metadata"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <EuiCodeBlock language="json">
+                    {stringifyJson(pipeline._meta, false)}
+                  </EuiCodeBlock>
+                </EuiDescriptionListDescription>
+              </>
+            )}
+          </EuiDescriptionList>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
