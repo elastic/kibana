@@ -71,6 +71,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
       mode,
       connectorId,
       conversationId,
+      abortSignal,
       nextInput: { message: input },
       request,
     });
