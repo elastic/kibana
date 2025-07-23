@@ -79,13 +79,17 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    visibleIn: someVisible
-      ? ([
-          'sideNav',
-          'home',
-          'kibanaOverview',
-          ...(isCompleteOverviewEnabled ? ['globalSearch'] : []),
-        ] as AppDeepLinkLocations[])
-      : [],
+    const visibleIn: AppDeepLinkLocations[] = someVisible
+      ? ['sideNav', 'home', 'kibanaOverview']
+      : [];
+
+    if (isCompleteOverviewEnabled) {
+      visibleIn.push('globalSearch');
+    }
+
+    return {
+      deepLinks: updatedDeepLinks,
+      visibleIn,
+    };
   }));
 }
