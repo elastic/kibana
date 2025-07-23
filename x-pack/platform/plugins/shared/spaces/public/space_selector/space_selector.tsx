@@ -8,7 +8,10 @@
 import './space_selector.scss';
 
 import {
+  EuiButtonGroup,
   EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
@@ -32,7 +35,7 @@ import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { SpaceCards } from './components';
+import { SpaceCards, SpaceTable } from './components';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
@@ -49,6 +52,7 @@ interface State {
   spaces: Space[];
   error?: Error;
   customLogo?: string;
+  viewMode: 'grid' | 'table';
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -62,6 +66,7 @@ export class SpaceSelector extends Component<Props, State> {
       loading: false,
       searchTerm: '',
       spaces: [],
+      viewMode: 'grid',
     };
   }
 
@@ -96,6 +101,7 @@ export class SpaceSelector extends Component<Props, State> {
         this.setState({
           loading: false,
           spaces,
+          viewMode: spaces.length > 20 ? 'table' : 'grid',
         });
       })
       .catch((err) => {
@@ -173,12 +179,16 @@ export class SpaceSelector extends Component<Props, State> {
           </EuiText>
           <EuiSpacer size="xl" />
 
-          {this.getSearchField()}
+          {this.getSearchAndToggle()}
 
           {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-          {!this.state.loading && (
+          {!this.state.loading && this.state.viewMode === 'grid' && (
             <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+          )}
+
+          {!this.state.loading && this.state.viewMode === 'table' && (
+            <SpaceTable spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
           )}
 
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
@@ -261,6 +271,98 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase(),
     });
+  };
+
+  public onViewModeChange = (viewMode: 'grid' | 'table') => {
+    this.setState({ viewMode });
+  };
+
+  public getViewToggle = () => {
+    const { spaces, viewMode } = this.state;
+
+    // Only show view toggle if there are spaces to display
+    if (!spaces || spaces.length === 0) {
+      return null;
+    }
+
+    const toggleOptions = [
+      {
+        id: 'grid',
+        label: i18n.translate('xpack.spaces.spaceSelector.gridViewLabel', {
+          defaultMessage: 'Grid view',
+        }),
+        iconType: 'apps',
+      },
+      {
+        id: 'table',
+        label: i18n.translate('xpack.spaces.spaceSelector.tableViewLabel', {
+          defaultMessage: 'Table view',
+        }),
+        iconType: 'list',
+      },
+    ];
+
+    return (
+      <EuiButtonGroup
+        css={css`
+          .euiButtonGroup__buttons .euiButtonGroupButton {
+            min-width: 40px;
+            width: 40px;
+          }
+        `}
+        legend={i18n.translate('xpack.spaces.spaceSelector.viewToggleLegend', {
+          defaultMessage: 'View options',
+        })}
+        options={toggleOptions}
+        idSelected={viewMode}
+        onChange={(id) => this.onViewModeChange(id as 'grid' | 'table')}
+        buttonSize="m"
+        isIconOnly
+      />
+    );
+  };
+
+  public getSearchAndToggle = () => {
+    const { spaces } = this.state;
+
+    // Show search field if we have enough spaces
+    const showSearch = spaces && spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD;
+    // Show toggle if we have any spaces
+    const showToggle = spaces && spaces.length > 0;
+
+    if (!showSearch && !showToggle) {
+      return null;
+    }
+
+    const inputLabel = i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
+      defaultMessage: 'Find a space',
+    });
+
+    return (
+      <>
+        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
+          {showSearch && (
+            <EuiFlexItem grow={false}>
+              <div
+                css={css`
+                  width: ${euiThemeVars.euiFormMaxWidth};
+                  max-width: 100%;
+                `}
+              >
+                <EuiFieldSearch
+                  placeholder={inputLabel}
+                  aria-label={inputLabel}
+                  incremental={true}
+                  onSearch={this.onSearch}
+                />
+              </div>
+            </EuiFlexItem>
+          )}
+          {showToggle && <EuiFlexItem grow={false}>{this.getViewToggle()}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+      </>
+    );
   };
 }
 
