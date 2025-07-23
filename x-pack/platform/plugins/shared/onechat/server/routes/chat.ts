@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable, firstValueFrom, toArray } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import {
   AgentMode,
@@ -28,7 +28,12 @@ import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
-export function registerChatRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerChatRoutes({
+  router,
+  getInternalServices,
+  coreSetup,
+  logger,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
@@ -147,6 +152,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         },
       },
       wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
@@ -162,6 +168,8 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
+              flushThrottleMs: 150,
+              flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
               logger,
             }
           ),
