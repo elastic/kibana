@@ -55,5 +55,6 @@
     "@kbn/field-types",
     "@kbn/monaco",
     "@kbn/safer-lodash-set",
+    "@kbn/core-http-server-mocks",
   ]
 }
