@@ -2244,6 +2244,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/test/functional/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/test/functional/es_archives/cases/signals/hosts_users @elastic/kibana-cases
+/x-pack/test_serverless/functional/test_suites/search/rules/ @elastic/response-ops
 
 # Enterprise Search
 # search
