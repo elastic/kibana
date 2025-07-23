@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { services as platformfunctionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 
@@ -16,6 +15,7 @@ export const services = {
   appsMenu: platformfunctionalServices.appsMenu,
   browser: platformfunctionalServices.browser,
   canvasElement: platformfunctionalServices.canvasElement,
+  cases: platformfunctionalServices.cases,
   comboBox: platformfunctionalServices.comboBox,
   dashboardAddPanel: platformfunctionalServices.dashboardAddPanel,
   dashboardBadgeActions: platformfunctionalServices.dashboardBadgeActions,
@@ -33,7 +33,6 @@ export const services = {
   inspector: platformfunctionalServices.inspector,
   listingTable: platformfunctionalServices.listingTable,
   menuToggle: platformfunctionalServices.menuToggle,
-  ml: platformApiIntegrationServices.ml,
   monacoEditor: platformfunctionalServices.monacoEditor,
   esql: platformfunctionalServices.esql,
   pieChart: platformfunctionalServices.pieChart,
@@ -57,5 +56,6 @@ export const services = {
   transform: platformfunctionalServices.transform,
   toasts: platformfunctionalServices.toasts,
   userMenu: platformfunctionalServices.userMenu,
+  vegaDebugInspector: platformfunctionalServices.vegaDebugInspector,
   ...deploymentAgnosticSharedServices,
 };

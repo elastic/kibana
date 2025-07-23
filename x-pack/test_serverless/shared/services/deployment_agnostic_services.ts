@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
-import { services as apiIntegrationDeploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SecuritySolutionApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_api.gen';
 import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
+import { SecuritySolutionApiProvider } from './security_solution_api.gen';
+import { AlertingApiProvider } from './alerting_api';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
 const {
@@ -37,12 +36,13 @@ export const services = {
   ingestPipelines: platformApiIntegrationServices.ingestPipelines,
   indexManagement: platformApiIntegrationServices.indexManagement,
   kibanaServer,
-  ml: apiIntegrationServices.ml,
   randomness,
   retry,
   security,
   usageAPI: platformApiIntegrationServices.usageAPI,
   console,
   securitySolutionApi: SecuritySolutionApiProvider,
-  alertingApi: apiIntegrationDeploymentAgnosticServices.alertingApi,
+  alertingApi: AlertingApiProvider,
+  ml: platformApiIntegrationServices.ml,
+  ingestManager: platformApiIntegrationServices.ingestManager,
 };

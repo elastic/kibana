@@ -23,7 +23,6 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    "@kbn/test-suites-xpack",
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
