@@ -429,7 +429,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
         });
       });
 
-      describe.skip('Execution', () => {
+      describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body } = await supertest
             .post(`/api/actions/connector/${simulatedActionId}/_execute`)

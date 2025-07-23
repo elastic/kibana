@@ -23,7 +23,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const configService = getService('config');
   const retry = getService('retry');
 
-  describe.skip('pagerduty action', () => {
+  describe('pagerduty action', () => {
     let simulatedActionId = '';
     let pagerdutySimulatorURL: string = '<could not determine kibana url>';
     let proxyServer: httpProxy | undefined;

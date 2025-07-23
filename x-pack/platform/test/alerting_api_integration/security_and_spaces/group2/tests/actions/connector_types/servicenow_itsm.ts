@@ -75,7 +75,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
     },
   };
 
-  describe.skip('ServiceNow ITSM', () => {
+  describe('ServiceNow ITSM', () => {
     let simulatedActionId = '';
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;

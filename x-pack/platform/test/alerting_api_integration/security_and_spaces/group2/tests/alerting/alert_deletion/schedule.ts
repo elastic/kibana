@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
@@ -49,7 +49,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
-  const log = getService('log');
 
   async function indexTestDocs() {
     const testAlertDocs = getTestAlertDocs();
@@ -73,14 +72,12 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   };
 
   const cleanupEventLog = async () => {
-    log.info(`Cleaning up event log`);
     await retry.try(async () => {
       const results = await es.deleteByQuery({
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
         conflicts: 'proceed',
       });
-      log.info(`Deleted ${results.deleted} event log entries`);
       expect((results?.deleted ?? 0) > 0).to.eql(true);
     });
   };
@@ -106,10 +103,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     expectedAlertsIds: string[],
     deletedAlertIds: string[]
   ) => {
-    log.info(
-      `testExpectedAlertsAreDeleted expectedAlertsIds: ${JSON.stringify(expectedAlertsIds)}`
-    );
-    log.info(`testExpectedAlertsAreDeleted deletedAlertIds: ${JSON.stringify(deletedAlertIds)}`);
     // wait for the task to complete
     await retry.try(async () => {
       const results = await es.search<IValidatedEvent>({
@@ -117,7 +110,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         sort: { '@timestamp': 'desc' },
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
       });
-      log.info(`testExpectedAlertsAreDeleted results: ${JSON.stringify(results.hits.hits)}`);
       expect(results.hits.hits.length > 0).to.be(true);
       expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
       expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
@@ -282,7 +274,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -349,7 +340,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -416,7 +406,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -481,7 +470,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -546,7 +534,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -613,7 +600,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -678,7 +664,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -743,7 +728,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -810,7 +794,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -875,7 +858,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -940,7 +922,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1007,7 +988,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1074,7 +1054,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1141,7 +1120,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1208,7 +1186,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1342,7 +1319,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-
               await cleanupEventLog();
               break;
             default:
@@ -1439,7 +1415,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
           });
         });
-
         await cleanupEventLog();
       });
     });
