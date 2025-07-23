@@ -1196,6 +1196,28 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ScopedModel.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [
+              "\nThe connector bound to this scoped model."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/model_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.ScopedModel.chatModel",
             "type": "Object",
             "tags": [],

@@ -13666,16 +13666,16 @@
                 "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
-              },
-              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/lib/data_apis.ts"
               },
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/columns/breakdown.ts"
               },
               {
                 "plugin": "ml",
