@@ -13,26 +13,20 @@ export async function getAndroidCrashDeobfuscated({
   esClient,
   serviceName,
   buildId,
-  stacktrace,
+  className,
 }: {
   esClient: EsClient;
   serviceName: string;
   buildId: string;
-  stacktrace: string[];
-}): Promise<Array<SearchResponse<any, any>>> {
-  const queryPromises: Array<Promise<SearchResponse<any, any>>> = [];
-  for (const line of stacktrace) {
-    queryPromises.push(
-      esClient.search({
-        index: `android-sourcmap-${serviceName}-${buildId}`,
-        query: {
-          bool: {
-            filter: [{ terms: { stackframe: line } }],
-          },
-        },
-        size: 1,
-      })
-    );
-  }
-  return Promise.all(queryPromises);
+  className: string;
+}): Promise<SearchResponse<any, any>> {
+  return esClient.search({
+    index: `remote_cluster:androidmap-${serviceName}-${buildId}`,
+    query: {
+      ids: {
+        values: [className],
+      },
+    },
+    size: 1,
+  });
 }

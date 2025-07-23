@@ -31,7 +31,6 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
-import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -341,6 +340,8 @@ export function ErrorSampleDetailTabContent({
 }: {
   error: {
     service: {
+      name: string;
+      version?: string;
       language?: {
         name?: string;
       };
@@ -353,24 +354,84 @@ export function ErrorSampleDetailTabContent({
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
+  const [deobfucstatedStacktrace, setDeobfucstatedStacktrace] = useState<string>('');
+
   const isPlaintextException =
     !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   const onClickDeobfuscate = () => {
     if (error.error.stack_trace && error.error.stack_trace.length > 0) {
-      const stacktrace = [error.error.stack_trace!];
-      callApmApi('POST /internal/apm/mobile-services/{serviceName}/deobfuscate/{buildId}', {
-        signal: null,
-        params: {
-          path: {
-            serviceName: service.name,
-            buildId: '',
-          },
-          body: {
-            stacktrace,
-          },
-        },
-      }).then((response) => {
-        // set deobfucstated stacktrace state;
+      const parsedStack = error.error
+        .stack_trace!.split('\n')
+        .map((line) => line.trim())
+        .map((line) => {
+          if (line.startsWith('at ')) {
+            const identifier = line.substring(3).split('(')[0];
+            const post = line.split('(').slice(-1)[0];
+            const filename = post.split(':')[0];
+            const lineNumber = post.split(':')[1].split(')')[0];
+            return {
+              obfuscated: {
+                classname: identifier.split('.').slice(0, -1).join('.'),
+                method: identifier.split('.').slice(-1)[0],
+                lineNumber,
+                filename,
+              },
+              end: '(' + line.split('(').slice(-1),
+              output: line,
+            };
+          } else {
+            return {
+              output: line,
+            };
+          }
+        });
+
+      const promises = [];
+      parsedStack.forEach((stackframe) => {
+        if (stackframe.obfuscated) {
+          promises.push(
+            callApmApi('POST /internal/apm/mobile-services/{serviceName}/deobfuscate/{buildId}', {
+              signal: null,
+              params: {
+                path: {
+                  serviceName: error.service.name,
+                  buildId: error.service.version ?? '',
+                },
+                query: {
+                  className: stackframe.obfuscated.classname,
+                },
+              },
+            }).then((response) => {
+              const classMapping = response.hits.hits[0]?._source;
+              if (!classMapping) {
+                return;
+              }
+              const deobfuscatedClassName = classMapping.originalName;
+              const results = classMapping.callSites.filter((callsight) => {
+                return callsight.obfuscatedName === stackframe.obfuscated.method;
+              });
+              const linesbylinenumber = results[0].lines.filter((line) => {
+                return (
+                  line.obfuscatedLineNumbers[0] <= stackframe.obfuscated.lineNumber &&
+                  line.obfuscatedLineNumbers[1] >= stackframe.obfuscated.lineNumber
+                );
+              });
+              stackframe.output = `at ${deobfuscatedClassName}.${linesbylinenumber[0].value}(${stackframe.obfuscated.filename}:${linesbylinenumber[0].originalLineNumbers[0]})`;
+              stackframe.deobfuscated = true;
+              // set deobfucstated stacktrace state;
+            })
+          );
+        }
+      });
+      Promise.all(promises).then(() => {
+        // set deobfuscated stacktrace state;
+        setDeobfucstatedStacktrace(
+          parsedStack
+            .map((stackframe) => {
+              return stackframe.output;
+            })
+            .join('\n')
+        );
       });
     }
   };
@@ -411,7 +472,11 @@ export function ErrorSampleDetailTabContent({
               <PlaintextStacktrace
                 message={exceptions[0].message}
                 type={exceptions[0]?.type}
-                stacktrace={error?.error.stack_trace}
+                stacktrace={
+                  deobfucstatedStacktrace.length
+                    ? deobfucstatedStacktrace
+                    : error?.error.stack_trace
+                }
                 codeLanguage={codeLanguage}
               />
             ) : (

@@ -80,23 +80,23 @@ const androidCrashDeobfuscationRoute = createApmServerRoute({
       serviceName: t.string,
       buildId: t.string,
     }),
-    body: t.type({
-      stacktrace: t.array(t.string),
+    query: t.type({
+      className: t.string,
     }),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ deobfuscatedStacktrace: string }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+  handler: async (resources): Promise<{ any: any }> => {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const { serviceName, buildId } = params.path;
-    const { stacktrace } = params.body;
-    const deobfuscatedStacktrace = await getAndroidCrashDeobfuscated({
+    const { className } = params.query;
+    return await getAndroidCrashDeobfuscated({
       serviceName,
       buildId,
-      stacktrace,
-      apmEventClient,
+      className,
+      esClient,
     });
-    return { deobfuscatedStacktrace };
   },
 });
 
