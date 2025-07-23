@@ -69,3 +69,4 @@ export const escapeLinkLike = (text: string): string => {
     // Add zero-width space after each dot
     return match.replace(/\./g, '.\u200B');
   });
+};
