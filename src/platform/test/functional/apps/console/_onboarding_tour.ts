@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
 
       // Tour should not show after refreshing the browser
+      // Making sure tour stays hidden when skipped even after refresh
       await waitUntilFinishedLoading();
       await expectAllStepsHidden();
     });
