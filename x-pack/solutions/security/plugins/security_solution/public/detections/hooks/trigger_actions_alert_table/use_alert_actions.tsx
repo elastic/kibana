@@ -207,33 +207,33 @@ export const useBulkAlertActionItems = ({
           title: 'Choose one option to mark closed as',
           items: [
             {
-              key: 'a',
+              key: 'none',
               disableOnQuery: false,
-              label: 'None',
+              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_NONE,
               onClick: getOnAction(FILTER_CLOSED as AlertWorkflowStatus),
             },
             {
-              key: 'a',
+              key: AlertClosingReasonValues.FALSE_POSITIVE,
               disableOnQuery: false,
-              label: 'False positive',
+              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
                 AlertClosingReasonValues.FALSE_POSITIVE
               ),
             },
             {
-              key: 'a',
+              key: AlertClosingReasonValues.DUPLICATE,
               disableOnQuery: false,
-              label: 'Duplicate',
+              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
                 AlertClosingReasonValues.DUPLICATE
               ),
             },
             {
-              key: 'a',
+              key: AlertClosingReasonValues.INVESTIGATION_REQUIRED,
               disableOnQuery: false,
-              label: 'Investigation required',
+              label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
                 AlertClosingReasonValues.INVESTIGATION_REQUIRED
@@ -247,5 +247,3 @@ export const useBulkAlertActionItems = ({
 
   return useMemo(() => ({ items, panels }), [items, panels]);
 };
-
-/////

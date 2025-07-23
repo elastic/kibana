@@ -74,6 +74,6 @@ export const useAlertsActions = ({
   const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
 
   return useMemo(() => {
-    return { actionItems: hasIndexWrite ? actionItems : [], panels: hasIndexWrite ? panels : [] };
+    return hasIndexWrite ? { actionItems, panels } : { actionItems: [], panels: [] };
   }, [actionItems, hasIndexWrite, panels]);
 };
