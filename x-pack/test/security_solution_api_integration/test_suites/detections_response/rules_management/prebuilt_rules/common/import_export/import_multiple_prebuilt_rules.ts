@@ -11,7 +11,6 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   getCustomQueryRuleParams,
-  installMockPrebuiltRulesPackage,
   installPrebuiltRules,
   importRulesWithSuccess,
 } from '../../../../utils';
@@ -42,10 +41,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   // These scenarios are "smoke tests" for all the user stories from the test plan's Product requirements section.
   describe('@ess @serverless @skipInServerlessMKI Import multiple prebuilt rules', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -53,11 +48,6 @@ export default ({ getService }: FtrProviderContext): void => {
         PREBUILT_RULE_ASSET_A,
         PREBUILT_RULE_ASSET_B,
       ]);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
