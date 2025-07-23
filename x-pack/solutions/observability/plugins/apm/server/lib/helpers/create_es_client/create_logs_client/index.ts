@@ -22,15 +22,19 @@ export const createLogsClient = async (
   resources: APMRouteHandlerResources
 ): Promise<LogsClient> => {
   const { context } = resources;
-  const { savedObjects } = await context.core;
+  const core = await context.core;
+  const { savedObjects } = core;
 
   const logsDataAccess = await resources.plugins.logsDataAccess.start();
-  const logSourcesService = logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
-    savedObjects.client
-  );
-  const logsIndexPattern = await (await logSourcesService).getFlattenedLogSources();
+  const logSourcesService =
+    await logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+      savedObjects.client
+    );
 
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const [logsIndexPattern, esClient] = await Promise.all([
+    logSourcesService.getFlattenedLogSources(),
+    core.elasticsearch.client.asCurrentUser,
+  ]);
 
   async function search<T = unknown>(
     props: LogsClientSearchRequest
