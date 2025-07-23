@@ -44,19 +44,20 @@ runRecipe(
     });
 
     const streams = getStreamNames(flags);
+    console.log('Streams to process:', streams);
 
     await prepartitionStreams({
       esClient,
       kibanaClient,
       signal,
-      filter: streams.map((stream) => stream.split('.')[1]),
+      filter: streams.map((stream) => stream.split('.')[1]).filter((stream) => stream),
     });
 
     const now = moment();
 
     const end = now.valueOf();
 
-    const start = now.clone().subtract(1, 'hours').valueOf();
+    const start = now.clone().subtract(15, 'minutes').valueOf();
 
     await withLoghubSynthtrace(
       {
@@ -87,6 +88,11 @@ runRecipe(
               });
 
               span?.setAttribute('input.value', JSON.stringify(initialState.stream));
+
+              if (initialState.dataset.samples.length === 0) {
+                log.info(`No samples found for stream ${name}. Skipping parser generation.`);
+                return;
+              }
 
               log.info(`Generating parsers for ${name}`);
               const nextState = await generateParsers({ context, state: initialState });

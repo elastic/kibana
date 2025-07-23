@@ -29,7 +29,7 @@ const worker = new Piscina({
  */
 export async function extractTemplate(
   messages: string[],
-  timeout: number = 5000
+  timeout: number = 30_000
 ): Promise<ExtractTemplateResult> {
   const controller = new AbortController();
 
