@@ -31,6 +31,7 @@ import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/
 import { parse } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
 import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
+import { ESQLLicenseType } from '@kbn/esql-types';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -678,6 +679,33 @@ describe('STATS Autocomplete', () => {
           expect(suggestions).toContainEqual(expectedCompletionItem);
         });
       });
+    });
+  });
+
+  describe('license-based filtering', () => {
+    test('CATEGORIZE visibility with platinum vs basic license', () => {
+      const withPlatinum = getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        { grouping: true },
+        undefined,
+        undefined,
+        'by',
+        (license?: ESQLLicenseType | undefined): boolean => license === 'platinum'
+      );
+
+      const withBasic = getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        { grouping: true },
+        undefined,
+        undefined,
+        'by',
+        (license?: ESQLLicenseType | undefined): boolean => license === 'basic'
+      );
+
+      expect(withPlatinum.some((text) => text.includes('CATEGORIZE'))).toBe(true);
+      expect(withBasic.some((text) => text.includes('CATEGORIZE'))).toBe(false);
     });
   });
 });
