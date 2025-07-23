@@ -19,7 +19,6 @@ import type {
   EuiSelectableOnChangeEvent,
   EuiSelectableSearchableSearchProps,
 } from '@elastic/eui/src/components/selectable/selectable';
-
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -69,7 +68,8 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
 
     // Rough estimation: 8px per character
     const estimatedTextWidth = longestSpaceName.length * 8;
-    const totalEstimatedWidth = estimatedTextWidth + avatarWidth + solutionBadgeWidth + paddingAndMargins;
+    const totalEstimatedWidth =
+      estimatedTextWidth + avatarWidth + solutionBadgeWidth + paddingAndMargins;
 
     // Clamp between min and max
     return Math.min(Math.max(minWidth, totalEstimatedWidth), maxWidth);
