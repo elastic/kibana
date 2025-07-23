@@ -26,6 +26,6 @@ export interface GraphEdge {
   isOrigin: boolean;
   isOriginAlert: boolean;
   isAlert: boolean;
-  actorsDocData?: string[] | string;
-  targetsDocData?: string[] | string;
+  actorsDocData?: Array<string | null> | string;
+  targetsDocData?: Array<string | null> | string;
 }
