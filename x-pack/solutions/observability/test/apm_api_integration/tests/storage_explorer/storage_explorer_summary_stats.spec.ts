@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Storage Explorer summary stats when data is not loaded',
+    'Storage explorer summary stats when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
@@ -62,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177518
-  registry.when('Storage Explorer summary stats', { config: 'basic', archives: [] }, () => {
+  registry.when('Storage explorer summary stats', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {
         const serviceGo = apm

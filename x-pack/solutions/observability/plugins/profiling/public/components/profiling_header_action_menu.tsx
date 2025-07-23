@@ -40,7 +40,7 @@ export function ProfilingHeaderActionMenu() {
           }}
         >
           {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
-            defaultMessage: 'Storage Explorer',
+            defaultMessage: 'Storage explorer',
           })}
         </EuiHeaderLink>
       </EuiToolTip>
