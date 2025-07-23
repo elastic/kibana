@@ -5,6 +5,6 @@
     "@elastic/appex-sharedux"
   ],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "devOnly": true
 }
