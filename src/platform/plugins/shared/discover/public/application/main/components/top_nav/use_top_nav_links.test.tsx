@@ -33,6 +33,10 @@ describe('useTopNavLinks', () => {
   const state = getDiscoverStateMock({ isTimeBased: true });
   state.actions.setDataView(dataViewMock);
 
+  // identifier to denote if share integration is available,
+  // we default to false especially that there a specific test scenario for when this is true
+  const hasShareIntegration = false;
+
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
       <DiscoverTestProvider
@@ -60,6 +64,7 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration,
         }),
       {
         wrapper: Wrapper,
@@ -127,6 +132,7 @@ describe('useTopNavLinks', () => {
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
+          hasShareIntegration,
         }),
       {
         wrapper: Wrapper,
@@ -203,6 +209,7 @@ describe('useTopNavLinks', () => {
             adHocDataViews: [],
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
+            hasShareIntegration,
           }),
         {
           wrapper: Wrapper,
@@ -268,23 +275,6 @@ describe('useTopNavLinks', () => {
     });
 
     it('will include export menu item if there are export integrations available', () => {
-      const availableIntegrationsSpy = jest.spyOn(services.share!, 'availableIntegrations');
-
-      availableIntegrationsSpy.mockImplementation((_objectType, groupId) => {
-        if (groupId === 'export') {
-          return [
-            {
-              id: 'export',
-              shareType: 'integration',
-              groupId: 'export',
-              config: () => ({}),
-            },
-          ];
-        }
-
-        return [];
-      });
-
       const topNavLinks = renderHook(
         () =>
           useTopNavLinks({
@@ -296,6 +286,7 @@ describe('useTopNavLinks', () => {
             adHocDataViews: [],
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
+            hasShareIntegration: true,
           }),
         {
           wrapper: Wrapper,
