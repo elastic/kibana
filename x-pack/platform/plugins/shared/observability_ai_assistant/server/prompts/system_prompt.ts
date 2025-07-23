@@ -8,6 +8,7 @@
 import dedent from 'dedent';
 import {
   ALERTS_FUNCTION_NAME,
+  CHANGES_FUNCTION_NAME,
   CONTEXT_FUNCTION_NAME,
   ELASTICSEARCH_FUNCTION_NAME,
   GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
@@ -199,7 +200,8 @@ export function getSystemPrompt({
     if (isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME)) {
       usage.push(
         `**Get Dataset Information:** Use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields available on them. 
-         * Providing an empty string as index name will retrieve all indices. Otherwise list of all fields for the given index will be given. 
+         * Providing an empty string as index name will retrieve all indices. Otherwise list of all fields for the given index will be given.
+         * If the user doesn't specify a particular index, always retrieve all indices.
          * If no fields are returned this means no indices were matched by provided index pattern. 
          * Wildcards can be part of index name.`
       );
@@ -214,19 +216,29 @@ export function getSystemPrompt({
       );
     }
 
+    if (isFunctionAvailable(CHANGES_FUNCTION_NAME)) {
+      usage.push(
+        `**Spikes and Dips for Logs and Metrics:** Only use the ${CHANGES_FUNCTION_NAME} tool if the user asks for spikes or dips in Logs and Metrics. Do not use this tool if the user asks for the count of logs.`
+      );
+    }
+
     if (
       isFunctionAvailable(QUERY_FUNCTION_NAME) &&
       (isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME) ||
         isFunctionAvailable(GET_APM_DATASET_INFO_FUNCTION_NAME))
     ) {
       usage.push(
-        `**Prerequisites for the \`${QUERY_FUNCTION_NAME}\` tool:** Before calling the \`${QUERY_FUNCTION_NAME}\` tool, you **SHOULD** first call ${datasetTools.join(
+        `**Prerequisites for the \`${QUERY_FUNCTION_NAME}\` tool:** Before calling the \`${QUERY_FUNCTION_NAME}\` tool, you **SHOULD ALWAYS** first call ${datasetTools.join(
           ' or '
         )} to discover indices, data streams and fields. These instructions better describe the process:
         * When to fetch dataset info:
          * Do it once per dataset. Re-use previously fetched dataset information unless the user asks about new data.
+         * If you identify indices to query in the response of ${datasetTools.join(
+           ' or '
+         )} tools which matches the user's question, **ALWAYS** use those index/indices to generate the query.
          * Skip it only when the user already supplied a complete query that includes a valid \`FROM <index>\` clause in the query.
-        * Example query and syntax conversion requests:
+         * Skip it if the user asks you to **assume** their data is in a particular index in their question.
+        * For example queries and syntax conversion requests:
           * If the user doesn't ask for specific data, but rather asks for the query, you can consider it an example query in this context. 
           * If dataset lookup yields nothing, you **MUST** still call \`${QUERY_FUNCTION_NAME}\`
           * Make a sensible index and field assumptions from the user's request. Notify the user of the assumptions you used.
