@@ -35,8 +35,7 @@ export const ToggleAlertFlyoutButton = () => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { application } = useKibana<ClientPluginsStart>().services;
-  const hasAlertingWrite =
-    application?.capabilities.observabilityManageRules?.['alerting:save'] ?? false;
+  const hasAlertingWrite = application?.capabilities.uptime?.save;
 
   const { EditAlertFlyout, loading, NewRuleFlyout } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
