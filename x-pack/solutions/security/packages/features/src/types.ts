@@ -36,7 +36,10 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
     subFeatureIds?: T[];
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
 
-    /** An option for product features to modify the base kibana feature.
+    /**
+     * Optional function for custom modification of the base feature config.
+     * This can be used to apply specific changes to the base feature config before merging it with
+     * the rest of the product feature configurations.
      *
      * @param baseFeatureConfig
      * @returns modified baseFeatureConfig

@@ -50,12 +50,13 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         enabledSubFeaturesIndexed[subFeatureId] = true;
       });
 
-      if (baseFeatureConfigModifier) {
-        mergedKibanaFeatureConfig = baseFeatureConfigModifier(mergedKibanaFeatureConfig);
-      }
-
       if (subFeaturesPrivileges) {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
+      }
+
+      // apply custom modifications before merging
+      if (baseFeatureConfigModifier) {
+        mergedKibanaFeatureConfig = baseFeatureConfigModifier(mergedKibanaFeatureConfig);
       }
       mergeWith(mergedKibanaFeatureConfig, productFeatureConfigToMerge, featureConfigMerger);
     });
