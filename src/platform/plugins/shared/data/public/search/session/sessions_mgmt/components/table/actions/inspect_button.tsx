@@ -14,10 +14,10 @@ import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
-import { UISession } from '../../types';
-import { IClickActionDescriptor } from '..';
+import { UISession } from '../../../types';
+import { IClickActionDescriptor } from './types';
 import './inspect_button.scss';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

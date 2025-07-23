@@ -12,10 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { IClickActionDescriptor } from '..';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
-import { UISession } from '../../types';
+import { UISession } from '../../../types';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;
