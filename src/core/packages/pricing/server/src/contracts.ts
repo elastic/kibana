@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IPricingTiersClient, PricingProductFeature } from '@kbn/core-pricing-common';
+import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
 /**
  * APIs to manage pricing product features during the setup phase.
@@ -49,26 +49,4 @@ export interface PricingServiceSetup {
    * ```
    */
   registerProductFeatures(features: PricingProductFeature[]): void;
-}
-
-/**
- * APIs to access pricing tier information during the start phase.
- *
- * @public
- */
-export interface PricingServiceStart {
-  /**
-   * Check if a specific feature is available based on the current pricing tier configuration.
-   * Delegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.
-   *
-   * @example
-   * ```ts
-   * // my-plugin/server/plugin.ts
-   * public start(core: CoreStart) {
-   *   const isPremiumFeatureAvailable = core.pricing.isFeatureAvailable('my_premium_feature');
-   *   // Use the availability information to enable/disable functionality
-   * }
-   * ```
-   */
-  isFeatureAvailable: IPricingTiersClient['isFeatureAvailable'];
 }

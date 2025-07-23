@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTruncateText } from '@kbn/react-hooks';
-import { DataTableRecord } from '@kbn/discover-utils';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
@@ -28,7 +27,6 @@ interface HoverPopoverActionProps {
   field: string;
   value: unknown;
   formattedValue?: string;
-  rawDoc?: DataTableRecord;
   rawFieldValue?: unknown;
   title?: unknown;
   anchorPosition?: PopoverAnchorPosition;
@@ -127,7 +125,7 @@ export const HoverActionPopover = ({
         )}
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {uiFieldActions.map((action) => (
-            <EuiToolTip content={action.label} key={action.id}>
+            <EuiToolTip content={action.label} key={action.id} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj="unifiedDocViewLogsOverviewHoverActionPopoverButton"
                 size="xs"

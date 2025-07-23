@@ -26,7 +26,7 @@ interface Props extends MetricsChartsFields {
 const FRAGMENT_BASE = 'key-metrics';
 
 export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric, onShowAll, overview = false }, ref) => {
+  ({ entityId, dataView, dateRange, metric, onShowAll, overview = false }, ref) => {
     const { charts } = useHostCharts({
       metric,
       dataViewId: dataView?.id,
@@ -101,7 +101,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
             <Chart
               id={chart.id}
               key={chart.id}
-              assetId={assetId}
+              entityId={entityId}
               dateRange={dateRange}
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}

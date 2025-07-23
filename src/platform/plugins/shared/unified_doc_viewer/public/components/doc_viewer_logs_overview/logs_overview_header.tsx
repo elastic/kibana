@@ -18,12 +18,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
+  DataTableRecord,
   LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
-  DataTableRecord,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';
@@ -34,22 +35,24 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
 
 export function LogsOverviewHeader({
   doc,
-  rawDoc,
+  formattedDoc,
+  renderFlyoutStreamProcessingLink,
 }: {
-  doc: LogDocumentOverview;
-  rawDoc?: DataTableRecord;
+  formattedDoc: LogDocumentOverview;
+  doc: DataTableRecord;
+  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
 }) {
-  const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
-  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
+  const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
+  const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
   });
-  const rawFieldValue = rawDoc && field ? rawDoc.flattened[field] : undefined;
+  const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
-  const hasBadges = hasTimestamp || hasLogLevel;
   const hasMessageField = field && value;
+  const hasBadges = hasTimestamp || hasLogLevel || hasMessageField;
   const hasFlyoutHeader = hasMessageField || hasBadges;
 
   const accordionId = useGeneratedHtmlId({
@@ -62,18 +65,20 @@ export function LogsOverviewHeader({
     </EuiTitle>
   );
 
-  const logLevelAndTimestamp = hasBadges && (
-    <EuiFlexGroup responsive={false} gutterSize="m">
-      {doc[fieldConstants.LOG_LEVEL_FIELD] && (
+  const badges = hasBadges && (
+    <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+      {hasMessageField &&
+        renderFlyoutStreamProcessingLink &&
+        renderFlyoutStreamProcessingLink({ doc })}
+      {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
-          value={doc[fieldConstants.LOG_LEVEL_FIELD]}
+          value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
           field={fieldConstants.LOG_LEVEL_FIELD}
-          rawDoc={rawDoc}
         >
-          <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
+          <LogLevel level={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]} />
         </HoverActionPopover>
       )}
-      {hasTimestamp && <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />}
+      {hasTimestamp && <Timestamp timestamp={formattedDoc[fieldConstants.TIMESTAMP_FIELD]} />}
     </EuiFlexGroup>
   );
 
@@ -92,13 +97,12 @@ export function LogsOverviewHeader({
         <EuiText color="subdued" size="xs">
           {field}
         </EuiText>
-        <EuiFlexItem grow={false}>{logLevelAndTimestamp}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
       </EuiFlexGroup>
       <HoverActionPopover
         value={value}
         formattedValue={formattedValue}
         field={field}
-        rawDoc={rawDoc}
         rawFieldValue={rawFieldValue}
         anchorPosition="downCenter"
         display="block"
@@ -122,7 +126,7 @@ export function LogsOverviewHeader({
       initialIsOpen={true}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
-      {hasMessageField ? contentField : logLevelAndTimestamp}
+      {hasMessageField ? contentField : badges}
     </EuiAccordion>
   ) : null;
 }

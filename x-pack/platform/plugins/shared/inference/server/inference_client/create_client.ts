@@ -13,12 +13,14 @@ import { AnonymizationRule } from '@kbn/inference-common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
+import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 interface CreateClientOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }
 
@@ -31,12 +33,13 @@ export function createClient(options: BoundCreateClientOptions): BoundInferenceC
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger, anonymizationRulesPromise, esClient } = options;
+  const { actions, request, logger, anonymizationRulesPromise, esClient, regexWorker } = options;
   const client = createInferenceClient({
     request,
     actions,
     logger: logger.get('client'),
     anonymizationRulesPromise,
+    regexWorker,
     esClient,
   });
   if ('bindTo' in options) {

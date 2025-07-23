@@ -173,9 +173,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                 defaultMessage: 'Agent ID is required',
               }),
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled || !isCreateMode}
                 placeholder={
                   isCreateMode
@@ -204,9 +205,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                 defaultMessage: 'Agent name is required',
               }),
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled}
                 isInvalid={!!formState.errors.name}
               />
@@ -221,9 +223,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           <Controller
             name="description"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled}
                 isInvalid={!!formState.errors.description}
               />
@@ -238,9 +241,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           <Controller
             name="configuration.instructions"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiTextArea
-                {...field}
+                {...rest}
+                inputRef={ref}
                 rows={4}
                 disabled={isFormDisabled}
                 isInvalid={!!formState.errors.configuration?.instructions}

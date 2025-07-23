@@ -8,8 +8,10 @@
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   IngestStreamLifecycle,
+  MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
+  getSegments,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
 import {
@@ -277,6 +279,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return {
         isValid: false,
         errors: [new Error('Cannot create wired stream due to unsupported root stream')],
+      };
+    }
+
+    const nestingLevel = getSegments(this._definition.name).length;
+
+    if (nestingLevel > MAX_NESTING_LEVEL) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Cannot create wired stream "${this._definition.name}" due to nesting level exceeding ${MAX_NESTING_LEVEL}`
+          ),
+        ],
       };
     }
 

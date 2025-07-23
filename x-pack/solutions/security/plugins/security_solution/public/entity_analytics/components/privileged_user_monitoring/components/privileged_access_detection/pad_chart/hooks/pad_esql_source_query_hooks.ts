@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
 import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
 import type { AnomalyBand } from '../pad_anomaly_bands';
 import { getPrivilegedMonitorUsersJoin } from '../../../../queries/helpers';
@@ -29,7 +30,7 @@ export const usePadTopAnomalousUsersEsqlSource = ({
 }) => {
   const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
 
-  return `FROM .ml-anomalies-shared
+  return `FROM ${ML_ANOMALIES_INDEX}
     | WHERE job_id IN (${formattedJobIds})
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
     ${getHiddenBandsFilters(anomalyBands)}
@@ -59,7 +60,7 @@ export const usePadAnomalyDataEsqlSource = ({
   const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
   const formattedUserNames = userNames.map((each) => `"${each}"`).join(', ');
 
-  return `FROM .ml-anomalies-shared
+  return `FROM ${ML_ANOMALIES_INDEX}
     | WHERE job_id IN (${formattedJobIds})
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL AND user.name IN (${formattedUserNames})
     ${getHiddenBandsFilters(anomalyBands)}
