@@ -57,6 +57,9 @@ export const PresentationPanelEditActions = ({
         css={[
           hoverActionStyles,
           css({
+            justifyContent: 'right',
+          }),
+          css({
             '.embPanel__hoverActionsAnchor &': {
               '&.embPanel__hoverActions': { visibility: 'visible !important' as 'visible' },
             },
