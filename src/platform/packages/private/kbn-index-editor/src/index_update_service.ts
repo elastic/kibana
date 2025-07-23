@@ -35,7 +35,6 @@ import {
   skipWhile,
   startWith,
   switchMap,
-  takeUntil,
   takeWhile,
   tap,
   timer,
@@ -176,16 +175,12 @@ export class IndexUpdateService {
   );
 
   // Observable to track the number of milliseconds left to allow undo of the last change
-  public readonly undoTimer$: Observable<number> = this._actions$.pipe(
+  public readonly undoTimer$: Observable<number> = this.bufferState$.pipe(
     skipWhile(() => !this.isIndexCreated()),
-    filter((action) => action.type === 'add' || action.type === 'undo'),
-    switchMap((action) =>
-      action.type === 'add'
+    switchMap((updates) =>
+      updates.length > 0
         ? timer(0, UNDO_EMIT_MS).pipe(
-            map((elapsed) => {
-              return Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0);
-            }),
-            takeUntil(this._actions$.pipe(filter((a) => a.type === 'undo'))),
+            map((elapsed) => Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0)),
             takeWhile((remaining) => remaining > 0, true)
           )
         : of(0)
