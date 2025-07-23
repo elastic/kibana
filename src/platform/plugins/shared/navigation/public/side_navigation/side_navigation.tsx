@@ -12,12 +12,12 @@ import {
   Navigation,
   NavigationKibanaProvider,
   type NavigationProps,
-  type NavigationKibanaDependencies,
+  type NavigationChromeDependencies,
 } from '@kbn/shared-ux-chrome-navigation';
 
 export interface Props {
   navProps: NavigationProps;
-  deps: NavigationKibanaDependencies;
+  deps: NavigationChromeDependencies;
 }
 
 export const SideNavigation: FC<Props> = ({ navProps, deps }) => {
