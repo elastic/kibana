@@ -2282,10 +2282,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.5":
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.5.tgz#663cf39f902c6fbb82a096a393cdfd80a4d16127"
-  integrity sha512-+2HwYfKHrrYAoK6g49p6Tr5D1BsU3q0489U47jpU+xlQvQU8tEYuHrwFaRPI94mK5PG2lKcNrjvfPXx71MfgWg==
+"@elastic/monaco-esql@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.6.tgz#c89a1eb142b9a8bd713bc697d651373a9c4144df"
+  integrity sha512-roRLyZelCI0Vb9Z2/Ugu/w+aUghoLIqrnF/oVQqYH1VHXSBpzKDtItGEp5SXcXWdz7gcta3mlygfNxvr5DTEvw==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -6782,6 +6782,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/page-attachment-schema@link:x-pack/platform/packages/shared/kbn-page-attachment-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""
@@ -8379,6 +8383,22 @@
   uid ""
 
 "@kbn/workchat-framework-plugin@link:x-pack/solutions/chat/plugins/workchat-framework":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-plugin-example@link:examples/workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""
 
