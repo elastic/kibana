@@ -6,6 +6,7 @@
  */
 
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   getReviewSingleRuleButtonByRuleId,
@@ -63,7 +64,7 @@ describe(
     });
 
     describe('upgrade a single rule', () => {
-      const PREBUILT_RULE_ID = 'test-prebuilt-rule-a';
+      const PREBUILT_RULE_ID = 'test-prebuilt-rule';
       const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
         rule_id: PREBUILT_RULE_ID,
         version: 1,
@@ -105,7 +106,7 @@ describe(
         });
       });
 
-      it('displays "Review" button prebuilt rules with upgrade conflicts', () => {
+      it('displays "Review" button for prebuilt rules with upgrade conflicts', () => {
         setUpRuleUpgrades({
           currentRuleAssets: [PREBUILT_RULE_ASSET],
           rulePatches: [{ rule_id: PREBUILT_RULE_ID, name: 'Customized Prebuilt Rule A' }],
@@ -541,6 +542,32 @@ describe(
           PREBUILT_RULE_ASSET_C['security-rule'].name,
         ]);
         cy.get('Customized Prebuilt Rule A').should('not.exist');
+      });
+    });
+
+    describe('RBAC restrictions: readonly user', () => {
+      const PREBUILT_RULE_ID = 'test-prebuilt-rule';
+      const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+        rule_id: PREBUILT_RULE_ID,
+        version: 1,
+        name: 'Prebuilt rule A',
+      });
+      const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+        rule_id: PREBUILT_RULE_ID,
+        version: 2,
+        name: 'New Prebuilt rule A',
+      });
+
+      it('unable to upgrade prebuilt rules', () => {
+        setUpRuleUpgrades({
+          currentRuleAssets: [PREBUILT_RULE_ASSET],
+          rulePatches: [],
+          newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+        });
+        login(ROLES.reader);
+        visitRulesUpgradeTable();
+
+        cy.get(RULES_UPDATES_TAB).should('not.exist');
       });
     });
   }

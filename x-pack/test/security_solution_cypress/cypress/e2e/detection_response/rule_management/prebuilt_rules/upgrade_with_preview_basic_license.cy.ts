@@ -33,12 +33,6 @@ import {
 } from '../../../../tasks/api_calls/common';
 import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 
-const PREVIEW_TABS = {
-  OVERVIEW: 'Overview',
-  JSON_VIEW: 'JSON view',
-  UPDATES: 'Elastic update overview', // Currently open by default on upgrade
-};
-
 describe(
   'Detection rules, Prebuilt Rules Upgrade With Preview (Basic License)',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
