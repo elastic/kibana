@@ -46,7 +46,7 @@ export const UnifiedSearchBar = () => {
       const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
       onPreferredSchemaChange(next);
     }
-  }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas]);
+  }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas, featureFlags.hostOtelEnabled]);
 
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
