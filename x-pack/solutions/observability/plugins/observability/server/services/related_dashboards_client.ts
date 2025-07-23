@@ -76,7 +76,7 @@ export class RelatedDashboardsClient {
     return this.alert;
   }
 
-  private async newFetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
+  private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
     const alert = this.checkAlert();
     // make sure it is an o11y alert
     if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
@@ -137,84 +137,63 @@ export class RelatedDashboardsClient {
 
     console.log('Rankable dashboards:', JSON.stringify(rankableDashboards, null, 2));
 
-    /*
-    const allSuggestedDashboards = new Set<SuggestedDashboard>();
-    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const alertRelevantFields = alert.getAllRelevantFields();
+    const dashboardScorer = new DashboardScorer(rsa);
+    const scoredDashboards = dashboardScorer.getScores(rankableDashboards);
+    console.log('Scored dashboards:', JSON.stringify(scoredDashboards, null, 2));
 
-    if (alertRuleIndex) {
-      const { dashboards } = this.getDashboardsByIndex(alertRuleIndex);
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
-    }
-    if (alertRelevantFields.length > 0) {
-      const { dashboards } = this.getDashboardsByField(alertRelevantFields);
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
-    }
-    // Deduplicate dashboards and calculate scores
-    allSuggestedDashboards.forEach((dashboard) => {
-      const dedupedPanels = this.dedupePanels([
-        ...(relevantDashboardsById.get(dashboard.id)?.relevantPanels || []),
-        ...dashboard.relevantPanels,
-      ]);
-      const relevantPanelCount = dedupedPanels.length;
-      relevantDashboardsById.set(dashboard.id, {
-        ...dashboard,
-        matchedBy: {
-          ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
-          ...dashboard.matchedBy,
-        },
-        relevantPanelCount,
-        relevantPanels: dedupedPanels,
-        score: this.getScore(dashboard),
+    // Take the top 5 scored dashboards and map them to SuggestedDashboard format
+    const suggestedDashboards: SuggestedDashboard[] = scoredDashboards
+      .slice(0, 5)
+      .map(({ dashboard, score, scoreBreakdown }) => {
+        // Get relevant panels from the score breakdown
+        const relevantPanels = scoreBreakdown.panelScores
+          // Filter out panels with low contribution scores
+          .filter((panelScore) => panelScore.contributionToOverall > 0)
+          // Map to the RelevantPanel format
+          .map((panelScore) => ({
+            panel: {
+              panelIndex: uuidv4(), // Generate a unique ID for the panel
+              type: 'lens', // Assuming lens type, which is common for visualizations
+              title: panelScore.panel.title,
+              // Include panel configuration with title
+              panelConfig: {
+                title: panelScore.panel.title,
+                attributes: {
+                  title: panelScore.panel.title,
+                },
+              },
+            },
+            matchedBy: {
+              // Include matched fields from the panel's field contributions
+              fields: panelScore.fieldContributions
+                .filter((fc) => !fc.isIndexPattern)
+                .map((fc) => fc.field),
+              // Include matched index patterns
+              index: panelScore.fieldContributions
+                .filter((fc) => fc.isIndexPattern)
+                .map((fc) => fc.field.replace('[index] ', '')),
+            },
+          }));
+
+        return {
+          id: dashboard.id,
+          title: dashboard.title,
+          description: dashboard.description,
+          score: score,
+          matchedBy: {
+            // Extract matched fields from field contributions
+            fields: scoreBreakdown.fieldContributions
+              .filter((fc) => !fc.isIndexPattern)
+              .map((fc) => fc.field),
+            // Extract matched index patterns
+            index: dashboard.indexPatterns,
+            panels: [],
+          },
+          relevantPanelCount: relevantPanels.length,
+          relevantPanels: relevantPanels,
+        };
       });
-    });
-    const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
-      return b.score - a.score;
-    });
-     return sortedDashboards;
-  */
-  }
-
-  private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
-    const alert = this.checkAlert();
-    if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
-
-    this.newFetchSuggestedDashboards();
-
-    const allSuggestedDashboards = new Set<SuggestedDashboard>();
-    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = this.getRuleQueryIndex();
-    const allRelevantFields = alert.getAllRelevantFields();
-
-    if (index) {
-      const { dashboards } = this.getDashboardsByIndex(index);
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
-    }
-    if (allRelevantFields.length > 0) {
-      const { dashboards } = this.getDashboardsByField(allRelevantFields);
-      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
-    }
-    allSuggestedDashboards.forEach((dashboard) => {
-      const dedupedPanels = this.dedupePanels([
-        ...(relevantDashboardsById.get(dashboard.id)?.relevantPanels || []),
-        ...dashboard.relevantPanels,
-      ]);
-      const relevantPanelCount = dedupedPanels.length;
-      relevantDashboardsById.set(dashboard.id, {
-        ...dashboard,
-        matchedBy: {
-          ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
-          ...dashboard.matchedBy,
-        },
-        relevantPanelCount,
-        relevantPanels: dedupedPanels,
-        score: this.getScore(dashboard),
-      });
-    });
-    const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
-      return b.score - a.score;
-    });
-    return sortedDashboards;
+    return suggestedDashboards;
   }
 
   private async fetchDashboards({
