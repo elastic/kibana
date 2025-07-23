@@ -123,18 +123,32 @@ export class IndexUpdateService {
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
     scan((acc: DocUpdate[], action: Action) => {
-      if (action.type === 'add') {
-        return [...acc, action.payload];
-      } else if (action.type === 'undo') {
-        return acc.slice(0, -1); // remove last
-      } else if (action.type === 'saved') {
-        // Clear the buffer after save
-        // TODO check for update response
-        return [];
-      } else if (action.type === 'discard-unsaved-changes') {
-        return [];
-      } else {
-        return acc;
+      switch (action.type) {
+        case 'add':
+          return [...acc, action.payload];
+        case 'undo':
+          return acc.slice(0, -1); // remove last
+        case 'saved':
+          // Clear the buffer after save
+          // TODO check for update response
+          return [];
+        case 'discard-unsaved-changes':
+          return [];
+        case 'edit-column':
+          // if a column name has changed, we need to update the values added with the previous name.
+          return acc.map((docUpdate) => {
+            if (docUpdate.value[action.payload.previousName]) {
+              const newValue = {
+                ...docUpdate.value,
+                [action.payload.name]: docUpdate.value[action.payload.previousName],
+              };
+              delete newValue[action.payload.previousName];
+              return { ...docUpdate, value: newValue };
+            }
+            return docUpdate;
+          });
+        default:
+          return acc;
       }
     }, []),
     shareReplay(1) // keep latest buffer for retries
