@@ -91,9 +91,7 @@ export function TraceWaterfallContextProvider({
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy } = useTraceWaterfall({
     traceItems,
   });
-  const [warningMessage, setWarningMessage] = useState(() =>
-    !rootItem ? FALLBACK_WARNING : undefined
-  );
+  const [warningMessage, setWarningMessage] = useState(!rootItem ? FALLBACK_WARNING : undefined);
 
   const dismissWarning = () => setWarningMessage(undefined);
 
