@@ -9,11 +9,11 @@
 
 import { BaseStep } from '@kbn/workflows'; // Adjust path as needed
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { StepBase } from './step_base';
+import { StepImplementation } from './step_base';
 // Import schema and inferred types
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
-import { IfStepImpl } from './if_step_implementation';
+import { IfStartStepImpl, IfEndStepImpl } from './if_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -26,8 +26,7 @@ export class StepFactory {
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor // this is temporary, we will remove it when we have a proper connector executor
-    // @ts-expect-error - TODO: fix this
-  ): StepBase<TStep> {
+  ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
     if (!stepType) {
@@ -38,9 +37,9 @@ export class StepFactory {
       case 'foreach':
       // return new ForEachStepImpl(step as ForEachStep, contextManager);
       case 'if':
-        return new IfStepImpl(step as any, contextManager, 'nunjucks', 'start') as any; // Adjust type as needed
+        return new IfStartStepImpl(step as any, contextManager);
       case 'if-end':
-        return new IfStepImpl(step as any, contextManager, 'nunjucks', 'end') as any; // Adjust type as needed
+        return new IfEndStepImpl(step as any, contextManager) as any;
       case 'atomic':
       // return new AtomicStepImpl(step as AtomicStep, contextManager);
       case 'parallel':
@@ -48,7 +47,7 @@ export class StepFactory {
       case 'merge':
       // return new MergeStepImpl(step as MergeStep, contextManager);
       default:
-        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor) as any;
+        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor);
     }
   }
 }

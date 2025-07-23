@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IfStep } from '@kbn/workflows';
-
-export interface IfElseNode extends Omit<IfStep, 'steps' | 'else'> {
-  id: string;
-  trueNodeIds: string[];
-  falseNodeIds: string[];
-}
-export interface IfElseEndNode {
-  type: 'if-end';
-  id: string;
-  startNodeId: string;
-}
+export { IfStartStepImpl } from './if_start_step_impl';
+export { IfEndStepImpl } from './if_end_step_impl';

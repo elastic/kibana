@@ -29,7 +29,11 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
-export abstract class StepBase<TStep extends BaseStep> {
+export interface StepImplementation {
+  run(): Promise<RunStepResult>;
+}
+
+export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
@@ -59,6 +63,7 @@ export abstract class StepBase<TStep extends BaseStep> {
 
     // Log step start
     this.contextManager.logStepStart(stepName);
+    await this.contextManager.startStep((this.step as any).id);
 
     // const stepEvent = {
     //   event: { action: 'step-execution' },
@@ -101,6 +106,7 @@ export abstract class StepBase<TStep extends BaseStep> {
     } finally {
       // Clear step context
       this.contextManager.clearCurrentStep();
+      await this.contextManager.finishStep((this.step as any).id);
     }
   }
 

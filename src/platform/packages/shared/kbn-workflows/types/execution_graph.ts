@@ -19,7 +19,7 @@ export interface ExecutionGraphNode {
   /** Next nodes in the graph (children for the current node) */
   next: string[];
   /** Additional metadata about the node, such as configuration */
-  data: any;
+  data: any; // rename to metadata
 }
 
 export interface ExecutionGraph {

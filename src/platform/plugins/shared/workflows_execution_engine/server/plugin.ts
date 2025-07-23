@@ -29,6 +29,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
+import { RunStepResult } from './step/step_base';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -118,32 +119,33 @@ export class WorkflowsExecutionEnginePlugin
           const nodeId = contextManager.getCurrentStepId() as string;
           const currentStep = workflow.executionGraph?.nodes[nodeId].data;
 
-          if (!contextManager.isStepSkipped(nodeId)) {
-            const step = new StepFactory().create(
-              currentStep as any,
-              contextManager,
-              connectorExecutor
+          if (contextManager.isStepSkipped(nodeId)) {
+            contextManager.goToNextStep(); // Skip current step and move to the next one
+            continue; // Skip if step is marked as skipped
+          }
+
+          const step = new StepFactory().create(
+            currentStep as any,
+            contextManager,
+            connectorExecutor
+          );
+
+          await step.run();
+
+          const stepResult: RunStepResult = contextManager.getStepResults()[nodeId] || {};
+
+          let stepStatus: ExecutionStatus;
+
+          if (stepResult.error) {
+            stepStatus = ExecutionStatus.FAILED;
+          } else {
+            stepStatus = ExecutionStatus.COMPLETED;
+          }
+
+          if (stepStatus === ExecutionStatus.FAILED) {
+            throw new Error(
+              `Step "${nodeId}" failed with error: ${stepResult.error || 'Unknown error'}`
             );
-
-            await contextManager.startStep(nodeId);
-
-            const stepResult = await step.run();
-
-            let stepStatus: ExecutionStatus;
-
-            if (stepResult.error) {
-              stepStatus = ExecutionStatus.FAILED;
-            } else {
-              stepStatus = ExecutionStatus.COMPLETED;
-            }
-
-            await contextManager.finishStep(nodeId);
-
-            if (stepStatus === ExecutionStatus.FAILED) {
-              throw new Error(
-                `Step "${nodeId}" failed with error: ${stepResult.error || 'Unknown error'}`
-              );
-            }
           }
 
           const nodeIdFromContextManager = contextManager.getCurrentStepId();
@@ -163,6 +165,7 @@ export class WorkflowsExecutionEnginePlugin
         // contextManager.logError('Workflow execution failed', error as Error, {
         //   event: { action: 'workflow-failed', outcome: 'failure' },
         // });
+        console.error(error);
         contextManager.logWorkflowComplete(false);
       } finally {
         await this.esClient.update({
