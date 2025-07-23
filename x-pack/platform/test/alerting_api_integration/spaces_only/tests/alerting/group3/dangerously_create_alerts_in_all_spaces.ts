@@ -13,7 +13,6 @@ import { getEventLog, ObjectRemover, getTestRuleData } from '../../../../common/
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { Spaces } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function dangerouslyCreateAlertsInAllSpacesTests({
   getService,
 }: FtrProviderContext) {

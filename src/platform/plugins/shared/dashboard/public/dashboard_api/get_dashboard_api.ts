@@ -68,11 +68,7 @@ export function getDashboardApi({
     if (id === CONTROL_GROUP_EMBEDDABLE_ID) {
       return getReferencesForControls(references$.value ?? []);
     }
-
-    const panelReferences = getReferencesForPanelId(id, references$.value ?? []);
-    // references from old installations may not be prefixed with panel id
-    // fall back to passing all references in these cases to preserve backwards compatability
-    return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
+    return getReferencesForPanelId(id, references$.value ?? []);
   };
 
   const layoutManager = initializeLayoutManager(
@@ -175,6 +171,10 @@ export function getDashboardApi({
         ...getState(),
       });
 
+      if (!saveResult || saveResult.error) {
+        return;
+      }
+
       if (saveResult) {
         unsavedChangesManager.internalApi.onSave(
           saveResult.savedState,
@@ -209,6 +209,7 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
+      if (saveResult?.error) return;
       unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
       references$.next(saveResult.references);
 

@@ -787,11 +787,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
       }
     ),
-    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
-      'core.euiFlyout.screenReaderFixedHeaders',
+    'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
+      'core.euiFlyout.screenReaderFocusTrapShards',
       {
-        defaultMessage:
-          'You can still continue tabbing through the page headers in addition to the dialog.',
+        defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
@@ -1474,7 +1473,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }
     ),
     'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
-      defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+      defaultMessage: 'Select a color',
     }),
     'euiSearchBox.ariaLabel': i18n.translate('core.euiSearchBox.ariaLabel', {
       defaultMessage:
@@ -1836,5 +1835,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{language} code block:',
         values: { language },
       }),
+    'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
+      defaultMessage: 'HSV color mode saturation and value 2-axis slider.',
+    }),
+    'euiHue.ariaValueText': i18n.translate('core.euiHue.ariaValueText', {
+      defaultMessage: 'Hue',
+    }),
+    'euiHue.ariaRoleDescription': i18n.translate('core.euiHue.ariaRoleDescription', {
+      defaultMessage: 'Hue slider',
+    }),
+    'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
+      defaultMessage: 'Selected color',
+    }),
   };
 };

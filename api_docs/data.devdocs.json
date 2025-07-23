@@ -7107,7 +7107,9 @@
             "label": "createFiltersFromValueClickAction",
             "description": [],
             "signature": [
-              "({ data, negate, }: ValueClickDataContext) => Promise<",
+              "(context: ",
+              "ValueClickDataContext",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7120,23 +7122,24 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.DataPublicPluginStartActions.createFiltersFromValueClickAction.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "context",
                 "description": [],
                 "signature": [
                   "ValueClickDataContext"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_value_click.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7161,7 +7164,6 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
@@ -7173,11 +7175,13 @@
                 "signature": [
                   "RangeSelectDataContext"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_range_select.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7187,7 +7191,7 @@
             "label": "createFiltersFromMultiValueClickAction",
             "description": [],
             "signature": [
-              "({ data, negate, }: { data: { cells: { column: number; row: number; }[]; table: Pick<",
+              "(context: { data: { cells: { column: number; row: number; }[]; table: Pick<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -7216,14 +7220,13 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.DataPublicPluginStartActions.createFiltersFromMultiValueClickAction.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "context",
                 "description": [],
                 "signature": [
                   "{ data: { cells: { column: number; row: number; }[]; table: Pick<",
@@ -7244,11 +7247,13 @@
                   },
                   " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_multi_value_click.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -9837,15 +9842,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -9884,9 +9881,9 @@
         "label": "RefreshInterval",
         "description": [],
         "signature": [
-          "{ pause: boolean; value: number; }"
+          "{ readonly value: number; readonly pause: boolean; }"
         ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10278,6 +10275,9 @@
             "tags": [],
             "label": "ILLEGAL_CHARACTERS_KEY",
             "description": [],
+            "signature": [
+              "\"ILLEGAL_CHARACTERS\""
+            ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10289,6 +10289,9 @@
             "tags": [],
             "label": "CONTAINS_SPACES_KEY",
             "description": [],
+            "signature": [
+              "\"CONTAINS_SPACES\""
+            ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10546,7 +10549,14 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "(indexPattern: string) => { ILLEGAL_CHARACTERS?: string[] | undefined; CONTAINS_SPACES?: boolean | undefined; }"
+              "(indexPattern: string) => ",
+              {
+                "pluginId": "@kbn/data-view-validation",
+                "scope": "common",
+                "docId": "kibKbnDataViewValidationPluginApi",
+                "section": "def-common.ValidationErrors",
+                "text": "ValidationErrors"
+              }
             ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
@@ -10560,7 +10570,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "src/platform/plugins/shared/data_views/common/lib/validate_data_view.ts",
+                "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -25538,6 +25548,21 @@
           "unknown"
         ],
         "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RefreshInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshInterval",
+        "description": [],
+        "signature": [
+          "{ readonly value: number; readonly pause: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

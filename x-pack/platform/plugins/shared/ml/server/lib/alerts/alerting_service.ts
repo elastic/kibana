@@ -55,7 +55,7 @@ import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
-import { escapeLinkLike } from './utils';
+import { escapeLinkLike, assertUserError } from './utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -792,7 +792,7 @@ export function alertingServiceProvider(
    */
   const getQueryParams = async (
     params: MlAnomalyDetectionAlertParams
-  ): Promise<AnomalyESQueryParams | void> => {
+  ): Promise<AnomalyESQueryParams | never> => {
     const jobAndGroupIds = [
       ...(params.jobSelection.jobIds ?? []),
       ...(params.jobSelection.groupIds ?? []),
@@ -806,12 +806,16 @@ export function alertingServiceProvider(
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
-      return;
+      throw Boom.notFound('Unable to find jobs for provided job ids');
     }
 
     const jobIds = jobsResponse.map((v) => v.job_id);
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
+
+    if (datafeeds && datafeeds.length === 0) {
+      throw Boom.notFound('Unable to find datafeed for provided job ids');
+    }
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
       jobsResponse.map((v) => v.analysis_config.bucket_span!)
@@ -819,7 +823,7 @@ export function alertingServiceProvider(
 
     if (maxBucketInSeconds === undefined) {
       // Technically it's not possible, just in case.
-      throw new Error('Unable to resolve a valid bucket length');
+      throw Boom.badRequest('Unable to resolve a valid bucket length');
     }
 
     const lookBackTimeInterval: string =
@@ -1009,11 +1013,7 @@ export function alertingServiceProvider(
         }
       | undefined
     > => {
-      const queryParams = await getQueryParams(params);
-
-      if (!queryParams) {
-        return;
-      }
+      const queryParams = await getQueryParams(params).catch(assertUserError);
 
       const result = await fetchResult(queryParams);
 

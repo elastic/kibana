@@ -88,7 +88,10 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const columns = buildPrivilegedUsersTableColumns(openUserFlyout, euiTheme);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const privilegedUsersTableQuery = getPrivilegedUsersQuery(spaceId);
+  const privilegedUsersTableQuery = getPrivilegedUsersQuery(
+    spaceId,
+    currentPage * DEFAULT_PAGE_SIZE + 1 // we add 1 so that we know if there are more results to show
+  );
 
   const { filterQuery: filterQueryWithoutTimerange } = useGlobalFilterQuery();
 
@@ -98,6 +101,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     isError: privilegedUsersError,
   } = useQuery({
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
+    enabled: toggleStatus,
     queryFn: async () => {
       return getESQLResults({
         esqlQuery: privilegedUsersTableQuery,
@@ -143,6 +147,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   } = useAssetCriticalityFetchList({
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
+    skip: !toggleStatus,
   });
 
   const assetCriticalityRecords =
@@ -246,7 +251,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
                 </span>
               </EuiText>
               <EuiSpacer size="s" />
-              <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+              <EuiHorizontalRule margin="none" css={{ height: 2 }} />
               <EuiBasicTable
                 id={PRIVILEGED_USERS_TABLE_QUERY_ID}
                 loading={loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality}
