@@ -47,7 +47,7 @@ export async function selectEuiComboBoxOption({
 }: SelectEuiComboBoxOptionParameters): Promise<void> {
   await showEuiComboBoxOptions(comboBoxToggleButton);
 
-  return act(async () => {
+  await act(async () => {
     const options = Array.from(
       document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
     );
@@ -67,6 +67,17 @@ export async function selectEuiComboBoxOption({
     } else {
       fireEvent.click(options[optionIndex]);
     }
+  });
+
+  if (document.querySelector('[role="listbox"]')) {
+    await act(() => {
+      fireEvent.click(comboBoxToggleButton);
+    });
+  }
+
+  // wait for the combobox options popover to disappear
+  return waitFor(() => {
+    expect(document.querySelector('[role="listbox"]')).not.toBeInTheDocument();
   });
 }
 
