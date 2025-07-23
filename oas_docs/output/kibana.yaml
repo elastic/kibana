@@ -13318,7 +13318,7 @@ paths:
     delete:
       operationId: DeleteMonitoringEngine
       parameters:
-        - description: Whether to delete all the privilege users data
+        - description: Whether to delete all the privileged user data
           in: query
           name: data
           required: false
