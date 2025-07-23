@@ -57,7 +57,10 @@ export const getCsvReportParams: ReportParamsGetter<
  */
 export const getShareMenuItems =
   ({ apiClient, startServices$ }: ExportModalShareOpts) =>
-  ({ objectType, sharingData }: ShareContext): ReturnType<ExportShare['config']> => {
+  ({
+    objectType,
+    sharingData,
+  }: ShareContext): ReturnType<ExportShare['config']> extends Promise<infer R> ? R : never => {
     const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
       getCsvReportParams({ sharingData, forShareUrl });
 

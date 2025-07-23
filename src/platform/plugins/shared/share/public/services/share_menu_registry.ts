@@ -184,7 +184,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     });
   }
 
-  async resolveShareItemsForShareContext({
+  private async resolveShareItemsForShareContext({
     objectType,
     isServerless,
     ...shareContext
@@ -203,8 +203,15 @@ export class ShareRegistry implements ShareRegistryPublicApi {
               objectType,
               ...shareContext,
             });
-          } else {
+          } else if (shareAction.shareType === 'integration') {
             config = await shareAction.config.call(null, {
+              urlService: this.urlService!,
+              anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+              objectType,
+              ...shareContext,
+            });
+          } else {
+            config = shareAction.config.call(null, {
               urlService: this.urlService!,
               anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
               objectType,

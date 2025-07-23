@@ -81,7 +81,7 @@ type ShareImplementationFactory<
 
 // New type definition to extract the config return type
 type ShareImplementation<T> = Omit<T, 'config'> & {
-  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+  config: T extends ShareImplementationFactory<ShareTypes, infer R> ? R : never;
 };
 
 /**
@@ -257,7 +257,7 @@ export type ShareIntegrationMapKey = `integration-${string}`;
 
 export interface RegisterShareIntegrationArgs<I extends ShareIntegration>
   extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
-  getShareIntegrationConfig: (...args: Parameters<I['config']>) => ReturnType<I['config']>;
+  getShareIntegrationConfig: I['config'];
 }
 
 export interface ShareRegistryInternalApi {
