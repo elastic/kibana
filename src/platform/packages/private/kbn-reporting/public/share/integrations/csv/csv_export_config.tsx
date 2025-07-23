@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ShareContext, ExportShare } from '@kbn/share-plugin/public';
-import { ReportParamsGetter, ReportParamsGetterOptions } from '@kbn/reporting-plugin/common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../../types';
 import { CsvSearchModeParams, getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
 import { ExportModalShareOpts } from '../../share_context_menu';
 
@@ -55,7 +55,10 @@ export const getCsvReportParams: ReportParamsGetter<
  */
 export const getShareMenuItems =
   ({ apiClient, startServices$ }: ExportModalShareOpts) =>
-  ({ objectType, sharingData }: ShareContext): ReturnType<ExportShare['config']> => {
+  ({
+    objectType,
+    sharingData,
+  }: ShareContext): ReturnType<ExportShare['config']> extends Promise<infer R> ? R : never => {
     const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
       getCsvReportParams({ sharingData, forShareUrl });
 
