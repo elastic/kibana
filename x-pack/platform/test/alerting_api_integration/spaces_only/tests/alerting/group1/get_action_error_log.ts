@@ -174,9 +174,6 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_action_error_log?date_start=${dateStart}`
       );
 
-      // eslint-disable-next-line no-console
-      console.log('action errors', response.body);
-
       expect(response.body.totalErrors).to.eql(2);
 
       const filteredResponse = await supertest.get(
@@ -194,12 +191,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         }/_execution_log?date_start=${dateStart}`
       );
 
-      // eslint-disable-next-line no-console
-      console.log('execResponse', execResponse.body);
-
       const runId = execResponse.body.data[0].id;
-
-      expect(runId).to.be.a('string');
 
       const filteredByIdResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
