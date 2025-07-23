@@ -27,7 +27,7 @@ export function useIngestSampleData() {
     () => {
       if (!sampleDataIngest) {
         throw new Error(
-          i18n.translate('xpack.searchIndices.shared.createIndex.ingestSampleData.notInstalled', {
+          i18n.translate('xpack.searchHomepage.sampleData.notInstalled', {
             defaultMessage: 'Sample Data Ingest plugin is not installed',
           })
         );
@@ -38,24 +38,18 @@ export function useIngestSampleData() {
     {
       onSuccess: () => {
         toasts?.addSuccess(
-          i18n.translate(
-            'xpack.searchIndices.shared.createIndex.ingestSampleData.successNotification',
-            {
-              defaultMessage: 'The Sample Data was successfully installed',
-            }
-          )
+          i18n.translate('xpack.searchHomepage.sampleData.successNotification', {
+            defaultMessage: 'The Sample Data was successfully installed',
+          })
         );
 
         queryClient.invalidateQueries([QueryKeys.FetchSampleDataStatus]);
       },
       onError: (error) => {
         toasts?.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate(
-            'xpack.searchIndices.shared.createIndex.ingestSampleData.errorNotification',
-            {
-              defaultMessage: 'Something went wrong while installing the Sample Data',
-            }
-          ),
+          title: i18n.translate('xpack.searchHomepage.sampleData.errorNotification', {
+            defaultMessage: 'Something went wrong while installing the Sample Data',
+          }),
         });
       },
     }

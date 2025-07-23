@@ -67,10 +67,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
         iconSide="right"
         onClick={onViewButtonClick}
       >
-        <FormattedMessage
-          id="xpack.searchIndices.shared.createIndex.ingestSampleData.view"
-          defaultMessage="View Data"
-        />
+        <FormattedMessage id="xpack.searchHomepage.sampleData.view" defaultMessage="View Data" />
       </EuiButtonEmpty>
     );
 
@@ -88,13 +85,13 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
             items={[
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
-                  id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToDiscover"
+                  id="xpack.searchHomepage.sampleData.linkToDiscover"
                   defaultMessage="Discover"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem key="playground" onClick={navigateToPlayground} icon="comment">
                 <FormattedMessage
-                  id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToPlayground"
+                  id="xpack.searchHomepage.sampleData.linkToPlayground"
                   defaultMessage="Playground"
                 />
               </EuiContextMenuItem>,
@@ -108,7 +105,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
                 icon="index"
               >
                 <FormattedMessage
-                  id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToIndex"
+                  id="xpack.searchHomepage.sampleData.linkToIndex"
                   defaultMessage="View index"
                 />
               </EuiContextMenuItem>,
@@ -130,7 +127,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       onClick={onIngestSampleData}
     >
       <FormattedMessage
-        id="xpack.searchIndices.shared.createIndex.ingestSampleData.btn"
+        id="xpack.searchHomepage.sampleData.btn"
         defaultMessage="Install a sample dataset"
       />
     </EuiButtonEmpty>
