@@ -22,13 +22,13 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "20.19.2-darwin_amd64": ("node-v20.19.2-darwin-x64.tar.gz", "node-v20.19.2-darwin-x64", "29f91e05992a7d81498ab1d04938a184313cb4aaccab95bb4636e30e6424eae3"),
-    "20.19.2-darwin_arm64": ("node-v20.19.2-darwin-arm64.tar.gz", "node-v20.19.2-darwin-arm64", "5f96c725cd2be1151f08b25c05bf5a21866a2dc7db3803d351a6ea19fcc53665"),
-    "20.19.2-linux_arm64": ("node-v20.19.2-linux-arm64.tar.xz", "node-v20.19.2-linux-arm64", "7886dc7e151d2dda49b0837bb93dca233a9d3b7f5005ebbcbff9bd1a5ba4981c"),
-    "20.19.2-linux_amd64": ("node-v20.19.2-linux-x64.tar.xz", "node-v20.19.2-linux-x64", "3a3b6ccb3d687b60cc8a142e179d7a9cc6a04c7374ba0f782363a26176d6ea74"),
-    "20.19.2-windows_amd64": ("node-v20.19.2-win-x64.zip", "node-v20.19.2-win-x64", "8735c9940b97548f6d9d4dda7cf5fd4471c062f15f44c2b890c9b0b430460feb"),
+    "20.19.4-darwin_amd64": ("node-v20.19.4-darwin-x64.tar.gz", "node-v20.19.4-darwin-x64", "cc47ed094c1876b211a9091d09a78537c1cbbb0f8cf5a49c9fd79933ee8fd7fd"),
+    "20.19.4-darwin_arm64": ("node-v20.19.4-darwin-arm64.tar.gz", "node-v20.19.4-darwin-arm64", "8b89801f527a85e3f7de539512c9dde08673ac99db6458cc7cc627e05d707054"),
+    "20.19.4-linux_arm64": ("node-v20.19.4-linux-arm64.tar.xz", "node-v20.19.4-linux-arm64", "5dfd5c678caa8daeed651c646708e46e1a16f2d61782c47a7d3005fbcd53086a"),
+    "20.19.4-linux_amd64": ("node-v20.19.4-linux-x64.tar.xz", "node-v20.19.4-linux-x64", "4501ffc7e85d1f0e0d62598d99a8843694d4a79bbeb2e4e886e67e5af099a1ac"),
+    "20.19.4-windows_amd64": ("node-v20.19.4-win-x64.zip", "node-v20.19.4-win-x64", "1bf83e5958157d13673507349238236aec4f6efc95cf426cbe126a999a3e4c0b"),
   },
-  node_version = "20.19.2",
+  node_version = "20.19.4",
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
   ],
