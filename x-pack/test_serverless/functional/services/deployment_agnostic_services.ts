@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { services as platformfunctionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 
 export const services = {
   __webdriver__: platformfunctionalServices.__webdriver__,
+  aceEditor: platformfunctionalServices.aceEditor,
   actions: platformfunctionalServices.actions,
+  appsMenu: platformfunctionalServices.appsMenu,
   browser: platformfunctionalServices.browser,
+  canvasElement: platformfunctionalServices.canvasElement,
   comboBox: platformfunctionalServices.comboBox,
   dashboardAddPanel: platformfunctionalServices.dashboardAddPanel,
   dashboardBadgeActions: platformfunctionalServices.dashboardBadgeActions,
@@ -28,10 +32,13 @@ export const services = {
   globalNav: platformfunctionalServices.globalNav,
   inspector: platformfunctionalServices.inspector,
   listingTable: platformfunctionalServices.listingTable,
-  ml: platformfunctionalServices.ml,
+  menuToggle: platformfunctionalServices.menuToggle,
+  ml: platformApiIntegrationServices.ml,
   monacoEditor: platformfunctionalServices.monacoEditor,
   esql: platformfunctionalServices.esql,
   pieChart: platformfunctionalServices.pieChart,
+  pipelineEditor: platformfunctionalServices.pipelineEditor,
+  pipelineList: platformfunctionalServices.pipelineList,
   png: platformfunctionalServices.png,
   queryBar: platformfunctionalServices.queryBar,
   random: platformfunctionalServices.random,
@@ -40,6 +47,9 @@ export const services = {
   retryOnStale: platformfunctionalServices.retryOnStale,
   rules: platformfunctionalServices.rules,
   sampleData: platformfunctionalServices.sampleData,
+  savedObjectsFinder: platformfunctionalServices.savedObjectsFinder,
+  savedQueryManagementComponent: platformfunctionalServices.savedQueryManagementComponent,
+  selectable: platformfunctionalServices.selectable,
   screenshots: platformfunctionalServices.screenshots,
   snapshots: platformfunctionalServices.snapshots,
   supertest: platformfunctionalServices.supertest,

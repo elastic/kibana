@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
+import { pageObjects as xpackPlatformFunctionalPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 
 import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack-security/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
@@ -35,7 +35,7 @@ import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 
 export const pageObjects = {
-  ...xpackFunctionalPageObjects,
+  ...xpackPlatformFunctionalPageObjects,
   ...cloudSecurityPosturePageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
