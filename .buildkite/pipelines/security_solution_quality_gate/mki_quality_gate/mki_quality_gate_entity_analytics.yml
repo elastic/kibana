@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:all
     label: 'Cypress MKI - Entity Analytics'
     key: test_entity_analytics
     env:
