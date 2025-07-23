@@ -282,6 +282,28 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
       });
+
+      it('should only upload unique users from the CSV', async () => {
+        log.info(`Uploading multiple users via CSV with duplicates`);
+        const csv = Array(150).fill('non_unique_user').join('\n');
+        const res = await privMonUtils.bulkUploadUsersCsv(csv);
+        if (res.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+
+        const listRes = await api.listPrivMonUsers({
+          query: { kql: `user.name: non_unique_user` },
+        });
+        if (listRes.status !== 200) {
+          log.error(`Listing privmon users failed`);
+          log.error(JSON.stringify(listRes.body));
+        }
+        expect(listRes.status).eql(200);
+        expect(listRes.body.length).to.be(1);
+      });
     });
   });
 };
