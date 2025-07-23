@@ -296,7 +296,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                   body={
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.initEngine.description"
-                      defaultMessage="We're currently analyzing your connected data sources to set up a comprehensive Privileged user monitoring. This may take a few moments."
+                      defaultMessage="We're currently analyzing your connected data sources to set up comprehensive privileged user monitoring. This may take a few moments."
                     />
                   }
                 />

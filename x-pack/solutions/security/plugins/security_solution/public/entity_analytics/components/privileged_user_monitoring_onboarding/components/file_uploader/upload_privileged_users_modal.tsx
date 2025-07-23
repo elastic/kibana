@@ -36,7 +36,7 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.uploadPrivilegedUsersModal.description"
-              defaultMessage="Add your privileged users by importing a CSV file exported from your user management tool. This ensures data accuracy and reduces manual input errors."
+              defaultMessage="Add privileged users by importing a supported file exported from your user management tool. This ensures data accuracy and reduces manual input errors."
             />
           </p>
         </EuiText>
