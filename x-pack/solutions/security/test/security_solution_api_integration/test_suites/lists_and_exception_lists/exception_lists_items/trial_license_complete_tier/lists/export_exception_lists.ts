@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { partition } from 'lodash';
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
@@ -16,7 +17,9 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { binaryToString, deleteAllExceptions } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  createExceptionList,
   createExceptionListItem,
+  deleteExceptionList,
   deleteExceptionListItem,
 } from '../../../../detections_response/utils';
 
@@ -138,6 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with an expired exception', () => {
+      // TODO make this create rule exception lists
       before(async () => {
         await createExceptionListItem(supertest, log, {
           ...getCreateExceptionListItemMinimalSchemaMock({
@@ -183,7 +187,48 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('does not include rule exception lists');
+    describe('with defend exception lists', () => {
+      before(async () => {
+        await createExceptionList(supertest, log, {
+          ...getCreateExceptionListMinimalSchemaMock({
+            list_id: 'endpoint-list',
+            type: 'endpoint',
+          }),
+        });
+        await createExceptionListItem(supertest, log, {
+          ...getCreateExceptionListItemMinimalSchemaMock({
+            item_id: 'endpoint-item',
+            list_id: 'endpoint-list',
+            type: 'simple',
+          }),
+        });
+      });
+
+      after(async () => {
+        await deleteExceptionListItem(supertest, log, 'endpoint-item');
+        await deleteExceptionList(supertest, log, 'endpoint-list');
+      });
+
+      it('does not include defend exception lists', async () => {
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
+          .set('kbn-xsrf', 'true')
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRows: Array<{ type: string }> = parseRows(body);
+        const [exportedItems, exportedLists] = partition(
+          exportedRows,
+          (row) => row?.type === ITEM_TYPE
+        );
+
+        console.log('exportedItems', JSON.stringify(exportedItems, null, 2));
+        console.log('exportedLists', JSON.stringify(exportedLists, null, 2));
+
+        expect(exportedLists).toHaveLength(3); // 3 lists
+        expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
+      });
+    });
 
     describe('when exception list count exceeds the default export size limit', () => {
       it('returns an error');
@@ -196,6 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
+// TODO make this create rule exception lists
 const bulkCreateExceptionLists = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
