@@ -135,10 +135,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
+  // const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/220971
   // Failing: See https://github.com/elastic/kibana/issues/220971
-  describe.skip('@ess @serverless @skipInServerlessMKI import_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI import_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -965,11 +966,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('should be imported into the non-default space', () => {
+          // THIS
           it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
             const spaceId = '714-space';
             // connectorId is from the 7.x connector here
             // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
+
+            // console.log(JSON.stringify(await es.search({ index: '.kibana_alerting_cases' })));
 
             const { body } = await supertest
               .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)

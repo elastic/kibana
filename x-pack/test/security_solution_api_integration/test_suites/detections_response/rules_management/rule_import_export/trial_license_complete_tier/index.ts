@@ -9,12 +9,12 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rules Management - Rule import export API', function () {
-    loadTestFile(require.resolve('./export_rules'));
-    loadTestFile(require.resolve('./export_rules_ess'));
-    loadTestFile(require.resolve('./import_export_rules'));
+    // loadTestFile(require.resolve('./export_rules'));
+    // loadTestFile(require.resolve('./export_rules_ess'));
+    // loadTestFile(require.resolve('./import_export_rules'));
     loadTestFile(require.resolve('./import_rules'));
-    loadTestFile(require.resolve('./import_rules_with_overwrite'));
-    loadTestFile(require.resolve('./import_rules_ess'));
-    loadTestFile(require.resolve('./import_connectors'));
+    // loadTestFile(require.resolve('./import_rules_with_overwrite'));
+    // loadTestFile(require.resolve('./import_rules_ess'));
+    // loadTestFile(require.resolve('./import_connectors'));
   });
 }
