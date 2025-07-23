@@ -27,6 +27,21 @@ const readConfig = {
 
 const client = new Client({ node: process.env.ELASTICSEARCH_URL });
 
+// Setup indices
+await client.indices.create({
+    index: ElasticSearchSaver.defaultCheckpointIndex,
+    mappings: {
+        properties: ElasticSearchSaver.checkpointIndexMapping,
+    },
+});
+
+await client.indices.create({
+    index: ElasticSearchSaver.defaultCheckpointWritesIndex,
+    mappings: {
+        properties: ElasticSearchSaver.checkpointWritesIndexMapping,
+    },
+});
+
 const checkpointer = new ElasticSearchSaver({ client });
 
 const checkpoint = {
