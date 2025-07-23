@@ -23,6 +23,7 @@ export interface HostsLocatorParams extends SerializableRecord {
   filters?: Filter[];
   panelFilters?: Filter[];
   limit?: number;
+  preferredSchema?: 'ecs' | 'semconv' | null;
   tableProperties?: {
     detailsItemId?: string;
     pagination: {
@@ -49,6 +50,7 @@ export class HostsLocatorDefinition implements LocatorDefinition<HostsLocatorPar
       filters: params.filters ?? [],
       panelFilters: params.panelFilters ?? [],
       limit: params.limit ?? DEFAULT_HOST_LIMIT,
+      preferredSchema: params.preferredSchema ?? null,
     };
     const searchString = rison.encodeUnknown(paramsWithDefaults);
     const tableProperties = rison.encodeUnknown(params.tableProperties);

@@ -20,6 +20,9 @@ import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { METRIC_SCHEMA_SEMCONV } from '@kbn/infra-plugin/common/constants';
+import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -33,9 +36,9 @@ export const UnifiedSearchBar = () => {
 
   const { SearchBar } = unifiedSearch.ui;
 
-  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
 
-  const schemas = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
+  const schemas: SchemaTypes[] = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
 
   // Set preferredSchema in URL if not set and hostOtelEnabled
   useEffect(() => {
@@ -43,7 +46,7 @@ export const UnifiedSearchBar = () => {
     const current = searchCriteria.preferredSchema;
     // Only set if not set
     if (current === null) {
-      const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
+      const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
       onPreferredSchemaChange(next);
     }
   }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas, featureFlags.hostOtelEnabled]);
@@ -59,6 +62,8 @@ export const UnifiedSearchBar = () => {
     [onSubmit, onPageRefreshStart]
   );
 
+  const isLoading = status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -68,6 +73,7 @@ export const UnifiedSearchBar = () => {
               onChange={onPreferredSchemaChange}
               schemas={schemas}
               value={searchCriteria.preferredSchema}
+              isLoading={isLoading}
             />
           </EuiFlexItem>
         )}

@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
+import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '@kbn/infra-plugin/common/constants';
+import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -95,28 +97,32 @@ const InvalidDisplay = ({ value }: { value: string }) => {
   );
 };
 
-const getInputDisplay = (schema: string) => {
-  if (schema === 'ecs') {
+const getInputDisplay = (schema: SchemaTypes) => {
+  if (schema === METRIC_SCHEMA_ECS) {
     return i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
       defaultMessage: 'Elastic System Integration',
     });
   }
-  if (schema === 'semconv') {
+  if (schema === METRIC_SCHEMA_SEMCONV) {
     return i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
       defaultMessage: 'OpenTelemetry',
     });
   }
-  return schema;
+  return i18n.translate('xpack.infra.schemaSelector.unknownDisplay', {
+    defaultMessage: 'Unknown schema',
+  });
 };
 
 export const SchemaSelector = ({
   onChange,
   schemas,
   value,
+  isLoading,
 }: {
   onChange: (selected: HostsState['preferredSchema']) => void;
-  schemas: string[];
-  value: string | null;
+  schemas: SchemaTypes[];
+  value: SchemaTypes | null;
+  isLoading: boolean;
 }) => {
   const options = useMemo(
     () =>
@@ -130,20 +136,17 @@ export const SchemaSelector = ({
   const isInvalid = !!value && !options.some((opt) => opt.value === value);
 
   // If only one schema is available and it's not the preferred, show both in the dropdown
-  let displayOptions;
-  if (options.length === 1 && isInvalid && value) {
-    displayOptions = [
-      {
-        inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
-        value,
-        disabled: true,
-        dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
-      },
-      ...options,
-    ];
-  } else {
-    displayOptions = options;
-  }
+  const displayOptions = options.length === 1 && isInvalid && value
+    ? [
+        {
+          inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
+          value,
+          disabled: true,
+          dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
+        },
+        ...options,
+      ]
+    : options;
 
   const onSelect = (selectedValue: string) => {
     if (selectedValue) {
@@ -167,9 +170,9 @@ export const SchemaSelector = ({
                   data-test-subj="infraSchemaSelect"
                   id={'infraSchemaSelectorSelect'}
                   options={displayOptions}
-                  valueOfSelected={value === null ? '' : value}
+                  valueOfSelected={value || ''}
                   onChange={onSelect}
-                  isLoading={!schemas.length}
+                  isLoading={isLoading}
                   fullWidth
                   prepend={<PrependLabel count={schemas.length} />}
                 />
