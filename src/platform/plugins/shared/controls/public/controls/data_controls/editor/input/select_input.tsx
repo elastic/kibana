@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { appendStatsByToQuery } from '@kbn/esql-utils';
 import { AggregateQuery } from '@kbn/es-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { v4 } from 'uuid';
 import {
   DEFAULT_CONTROL_INPUT,
   ControlOutputOption,
@@ -61,14 +62,30 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   const [previewError, setPreviewError] = useState<Error | undefined>();
   const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(isEdit);
 
-  const [staticOptions, setStaticOptions] = useState<EuiSelectOption[]>([]);
-
   const isESQLVariableEmpty = useMemo(
     () => !editorState.esqlVariableString || editorState.esqlVariableString === '?',
     [editorState.esqlVariableString]
   );
 
   const { fieldRegistry } = useDataViewAndFieldContext();
+
+  // List input needs to track list options with unique IDs for rendering and ordering correctly; track them in a UI
+  // state separately from the editorState to prevent the list input from rerendering and losing focus as the user types
+  const [staticOptions, setStaticOptions] = useState<EuiSelectOption[]>(
+    inputMode !== ControlInputOption.STATIC || !editorState.staticValues
+      ? []
+      : editorState.staticValues.map((value) => ({ value: v4(), text: value }))
+  );
+  const onStaticOptionsChange = useCallback(
+    (nextOptions: EuiSelectOption[]) => {
+      setStaticOptions(nextOptions);
+      setEditorState({
+        ...editorState,
+        staticValues: nextOptions.map(({ text }) => text),
+      });
+    },
+    [editorState, setEditorState]
+  );
 
   const submitESQLQuery = useCallback(
     async (query: string) => {
@@ -97,7 +114,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         if (!editorState.esqlVariableString) {
           nextEditorState.esqlVariableString = fieldToESQLVariable(result.column);
         }
-        if (!editorState.fieldName && fieldRegistry) {
+        if (fieldRegistry) {
           if (Object.hasOwn(fieldRegistry, result.column)) {
             nextEditorState.fieldName = result.column;
           } else if (!result.column.endsWith('.keyword')) {
@@ -259,7 +276,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         <ListOptionsInput
           label={DataControlEditorStrings.manageControl.dataSource.getListOptionsTitle()}
           value={staticOptions}
-          onChange={setStaticOptions}
+          onChange={onStaticOptionsChange}
         />
       )}
     </>

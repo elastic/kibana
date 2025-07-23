@@ -50,6 +50,7 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   input: 'referenceEquality',
   esqlVariableString: 'referenceEquality',
   esqlQuery: 'referenceEquality',
+  staticValues: 'deepEquality',
 };
 
 export const initializeDataControlManager = <EditorState extends object = {}>(
@@ -84,6 +85,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       input: ControlInputOption.DSL,
       esqlVariableString: undefined,
       esqlQuery: undefined,
+      staticValues: undefined,
     },
     defaultDataControlComparators
   );

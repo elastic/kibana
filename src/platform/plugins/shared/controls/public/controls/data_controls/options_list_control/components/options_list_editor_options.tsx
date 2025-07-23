@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-import { ControlOutputOption } from '../../../../../common';
+import { ControlInputOption, ControlOutputOption } from '../../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSearchTechnique,
@@ -75,12 +75,15 @@ export const OptionsListEditorOptions = ({
   updateState,
   controlGroupApi,
   output,
+  input,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
   const allowExpensiveQueries = useStateFromPublishingSubject(
     controlGroupApi.allowExpensiveQueries$
   );
 
   const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
+  const isStaticInputMode = useMemo(() => input === ControlInputOption.STATIC, [input]);
+
   const [singleSelect, setSingleSelect] = useState<boolean>(
     isESQLOutputMode || (initialState.singleSelect ?? false)
   );
@@ -91,10 +94,10 @@ export const OptionsListEditorOptions = ({
     initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
   );
 
-  const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(field.type),
-    [field.type]
-  );
+  const compatibleSearchTechniques = useMemo(() => {
+    if (isStaticInputMode) return ['wildcard' as OptionsListSearchTechnique];
+    return getCompatibleSearchTechniques(field.type);
+  }, [field.type, isStaticInputMode]);
 
   const searchOptions = useMemo(() => {
     return allSearchOptions.filter((searchOption) => {

@@ -53,7 +53,7 @@ export const INITIAL_OPTIONS: EuiSelectOption[] = [
   },
 ];
 
-const ListOptionsInputComponent = ({
+export const ListOptionsInput = ({
   value,
   helpText,
   label,
@@ -220,7 +220,3 @@ const ListOptionsInputComponent = ({
     </EuiFormRow>
   );
 };
-
-ListOptionsInputComponent.displayName = 'ListOptionsInput';
-
-export const ListOptionsInput = React.memo(ListOptionsInputComponent);

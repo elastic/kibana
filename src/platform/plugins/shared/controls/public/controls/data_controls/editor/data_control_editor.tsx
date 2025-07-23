@@ -360,6 +360,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
           output={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
+          input={editorState.input ?? DEFAULT_CONTROL_INPUT}
         />
       </div>
     );
@@ -372,13 +373,18 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       if (hasFieldName && hasSelectedDataView) return EditorComponentStatus.COMPLETE;
     } else if (isESQLInputMode) {
       return esqlQueryValidation;
+    } else if (isStaticInputMode) {
+      if (editorState.staticValues?.every(Boolean) && editorState.staticValues.length)
+        return EditorComponentStatus.COMPLETE;
     }
     return EditorComponentStatus.INCOMPLETE;
   }, [
     esqlQueryValidation,
     editorState.fieldName,
+    editorState.staticValues,
     isDSLInputMode,
     isESQLInputMode,
+    isStaticInputMode,
     selectedDataView,
   ]);
 

@@ -11,7 +11,7 @@ import {
   StateComparators,
   initializeStateManager,
 } from '@kbn/presentation-publishing/state_manager';
-import { ControlOutputOption } from '../../../../common';
+import { ControlInputOption, ControlOutputOption } from '../../../../common';
 import { OptionsListControlState } from '../../../../common/options_list';
 import { DEFAULT_SEARCH_TECHNIQUE } from './constants';
 
@@ -34,10 +34,13 @@ const defaultEditorState = {
 
 export const initializeEditorStateManager = ({
   output,
+  input,
   ...initialState
-}: EditorState & Pick<OptionsListControlState, 'output'>) => {
+}: EditorState & Pick<OptionsListControlState, 'output' | 'input'>) => {
   const state = {
     ...initialState,
+    searchTechnique:
+      input === ControlInputOption.STATIC ? 'wildcard' : initialState.searchTechnique,
     singleSelect: output === ControlOutputOption.ESQL || initialState.singleSelect,
   };
   return initializeStateManager<EditorState>(state, defaultEditorState, editorComparators);

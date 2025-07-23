@@ -46,7 +46,13 @@ export function fetchAndValidate$({
 }: {
   api: Pick<
     OptionsListControlApi,
-    'input$' | 'dataViews$' | 'field$' | 'esqlQuery$' | 'setBlockingError' | 'parentApi'
+    | 'input$'
+    | 'dataViews$'
+    | 'field$'
+    | 'esqlQuery$'
+    | 'staticValues$'
+    | 'setBlockingError'
+    | 'parentApi'
   > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -67,6 +73,7 @@ export function fetchAndValidate$({
     api.dataViews$,
     api.field$,
     api.esqlQuery$,
+    api.staticValues$,
     controlFetch$(requestCache.clearCache),
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
@@ -94,6 +101,7 @@ export function fetchAndValidate$({
           dataViews,
           field,
           esqlQuery,
+          staticValues,
           controlFetchContext,
           allowExpensiveQueries,
           ignoreParentSettings,
@@ -106,7 +114,22 @@ export function fetchAndValidate$({
         selectedOptions,
       ]) => {
         let request: OptionsListRequest | GetESQLSingleColumnValuesParams;
-        if (input === ControlInputOption.ESQL) {
+        if (input === ControlInputOption.STATIC) {
+          const suggestions =
+            staticValues
+              // Static searchTechnique is always 'wildcard'
+              ?.filter((value) => !searchString || value.includes(searchString))
+              .sort((a, b) => {
+                if (!sort || a === b) return 0;
+                if (sort.direction === 'asc') return a > b ? 1 : -1;
+                return b > a ? 1 : -1;
+              })
+              .map((value) => ({ value })) ?? [];
+          return {
+            suggestions,
+            totalCardinality: suggestions.length,
+          };
+        } else if (input === ControlInputOption.ESQL) {
           if (!esqlQuery) return { suggestions: [] };
           request = { query: esqlQuery, timeRange: controlFetchContext.timeRange };
         } else {

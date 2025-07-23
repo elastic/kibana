@@ -38,6 +38,10 @@ export interface PublishesESQLQuery {
   esqlQuery$: PublishingSubject<string | undefined>;
 }
 
+export interface PublishesStaticValues {
+  staticValues$: PublishingSubject<string[] | undefined>;
+}
+
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
   HasEditCapabilities &
@@ -46,7 +50,8 @@ export type DataControlApi = DefaultControlApi &
   PublishesAsyncFilters &
   PublishesESQLVariable &
   PublishesESQLQuery &
-  PublishesControlInputOutput;
+  PublishesControlInputOutput &
+  PublishesStaticValues;
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -57,6 +62,7 @@ export interface CustomOptionsComponentProps<
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
   output: ControlOutputOption;
+  input: ControlInputOption;
 }
 
 export interface DataControlFactory<

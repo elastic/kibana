@@ -47,4 +47,5 @@ export interface DefaultDataControlState extends DefaultControlState {
   input: ControlInputOption;
   esqlVariableString?: string;
   esqlQuery?: string;
+  staticValues?: string[];
 }
