@@ -56,7 +56,6 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -100,6 +99,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { getPageAttachmentType } from './attachments/page/attachment';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -154,7 +154,6 @@ export interface ObservabilityPublicPluginsStart {
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -270,6 +269,13 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+    if (
+      pluginsSetup.cases &&
+      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
+      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle

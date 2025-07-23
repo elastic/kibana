@@ -23,13 +23,14 @@ import {
   PostEvaluateBody,
   PostEvaluateResponse,
   DefendInsightType,
-  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
@@ -176,11 +177,13 @@ export const postEvaluateRoute = (
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
-            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
 
           const { featureFlags } = await context.core;
-          const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
-            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+          const inferenceChatModelDisabled = await featureFlags.getBooleanValue(
+            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
             false
           );
 
@@ -321,7 +324,7 @@ export const postEvaluateRoute = (
               const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType);
               const createLlmInstance = async () =>
-                inferenceChatModelEnabled
+                !inferenceChatModelDisabled
                   ? inference.getChatModel({
                       request,
                       connectorId: connector.id,
@@ -467,7 +470,7 @@ export const postEvaluateRoute = (
               const agentRunnable = await agentRunnableFactory({
                 llm: chatModel,
                 llmType,
-                inferenceChatModelEnabled,
+                inferenceChatModelDisabled,
                 isOpenAI,
                 tools,
                 isStream: false,
