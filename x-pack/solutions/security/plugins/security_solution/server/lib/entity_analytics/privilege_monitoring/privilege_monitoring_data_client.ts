@@ -752,7 +752,6 @@ export class PrivilegeMonitoringDataClient {
 
   public async disable() {
     this.log('info', 'Disabling Privileged Monitoring Engine');
-    const errors: string[] = [];
     // Check the current status of the engine
     const currentEngineStatus = await this.getEngineStatus();
     if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
