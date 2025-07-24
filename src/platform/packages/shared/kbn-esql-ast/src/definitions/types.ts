@@ -187,6 +187,13 @@ export interface FunctionParameter {
   mapParams?: string;
 }
 
+export interface ElasticsearchCommandDefinition {
+  type: string;
+  name: string;
+  license?: ESQLSignatureLicenseType;
+  observability_tier?: string;
+}
+
 /**
  * This is the return type of a function definition.
  *
