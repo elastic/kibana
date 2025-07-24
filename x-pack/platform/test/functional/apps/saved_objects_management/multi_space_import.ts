@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkIfDashboardRendered = async (spaceId: string) => {
-    retry.tryWithRetries(
+    await retry.tryWithRetries(
       'Retry asserting that dashboard renders correctly',
       async () => {
         await PageObjects.common.navigateToUrl('dashboard', undefined, {
