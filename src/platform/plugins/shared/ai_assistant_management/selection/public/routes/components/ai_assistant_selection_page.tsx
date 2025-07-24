@@ -154,6 +154,24 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
+                {!securityAIAssistantEnabled ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiCallOut
+                      iconType="warning"
+                      data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
+                      title={i18n.translate(
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
+                        {
+                          defaultMessage: 'This feature is disabled.',
+                        }
+                      )}
+                      size="s"
+                      className="eui-displayInlineBlock"
+                    />
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription"

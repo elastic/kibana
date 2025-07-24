@@ -108,6 +108,9 @@ describe('AiAssistantSelectionPage', () => {
       it('displays the disabled callout', () => {
         const securityAIAssistantEnabled = false;
         renderComponent(generateMockCapabilities(false), securityAIAssistantEnabled);
+        expect(
+          screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
+        ).toBeInTheDocument();
         expect(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton')).toBeDisabled();
       });
     });
