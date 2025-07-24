@@ -14,6 +14,7 @@
 /** @typedef {import('./modern/types').SharedBrowserPackageManifest} SharedBrowserPackageManifest */
 /** @typedef {import('./modern/types').BasePackageManifest} BasePackageManifest */
 /** @typedef {import('./modern/types').KibanaPackageType} KibanaPackageType */
+/** @typedef {import('./modern/types').PackageExports} PackageExports */
 /** @typedef {import('./modern/types').ParsedPackageJson} ParsedPackageJson */
 /** @typedef {import('./modern/types').KbnImportReq} KbnImportReq */
 /** @typedef {import('./modern/types').PluginCategoryInfo} PluginCategoryInfo */
