@@ -239,7 +239,10 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   render() {
     const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
-    const modalTitleId = htmlIdGenerator()('addPolicyModalTitle');
+    const idGenerator = htmlIdGenerator();
+    const modalTitleId = idGenerator('modal');
+    const confirmModalId = idGenerator('confirmModal');
+    
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -286,9 +289,9 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     }
     return (
       <EuiConfirmModal
-        aria-labelledby={modalTitleId}
+        aria-labelledby={confirmModalId}
         title={title}
-        titleProps={{ id: modalTitleId }}
+        titleProps={{ id: confirmModalId }}
         onCancel={closeModal}
         onConfirm={this.addPolicy}
         cancelButtonText={
