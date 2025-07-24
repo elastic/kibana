@@ -69,7 +69,6 @@ export default function (providerContext: FtrProviderContext) {
   );
   const benchmarkScoreIndex = new EsIndexDataProvider(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
-  // Failing: See https://github.com/elastic/kibana/issues/214191
   describe('GET /internal/cloud_security_posture/stats', () => {
     describe('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
@@ -272,7 +271,7 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         await findingsIndex.addBulk([findingsMockData[1]]);
 
-        const { status, ...rest } = await supertestWithoutAuth
+        const { status } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/stats/cspm`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
