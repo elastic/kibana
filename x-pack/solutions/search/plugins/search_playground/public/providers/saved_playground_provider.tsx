@@ -24,7 +24,12 @@ import {
   SavedPlaygroundLoadErrors,
 } from '../types';
 import { savedPlaygroundFormResolver } from '../utils/playground_form_resolver';
-import { fetchSavedPlaygroundError, parseSavedPlayground } from '../utils/saved_playgrounds';
+import {
+  fetchSavedPlaygroundError,
+  parseSavedPlayground,
+  validateSavedPlaygroundIndices,
+  validateSavedPlaygroundModel,
+} from '../utils/saved_playgrounds';
 import { SavedPlaygroundInvalidStateModal } from '../components/saved_playground/invalid_state_modal';
 import { IndicesQuery } from '../hooks/use_query_indices';
 
@@ -38,9 +43,31 @@ interface FetchSavedPlaygroundOptions {
   setLoadErrors: (errors: SavedPlaygroundLoadErrors | null) => void;
 }
 
+const fetchDataForValidation = async (
+  selectedIndices: string[],
+  { client, http }: FetchSavedPlaygroundOptions
+) => {
+  let models: LLMModel[] = [];
+  let indices: string[] = [];
+  const indicesQuery = selectedIndices.join(',');
+  [models, indices] = await Promise.all([
+    client
+      .fetchQuery([SearchPlaygroundQueryKeys.LLMsQuery], LLMsQuery(http, client))
+      .catch(() => []),
+    client
+      .fetchQuery(
+        [SearchPlaygroundQueryKeys.QueryIndices, indicesQuery],
+        IndicesQuery(http, indicesQuery, true)
+      )
+      .catch(() => []),
+  ]);
+  return { models, indices };
+};
+
 const fetchSavedPlayground =
-  (playgroundId: string, { http, client, setLoadErrors }: FetchSavedPlaygroundOptions) =>
+  (playgroundId: string, options: FetchSavedPlaygroundOptions) =>
   async (): Promise<SavedPlaygroundForm> => {
+    const { http, client, setLoadErrors } = options;
     let playgroundResp: PlaygroundResponse;
     try {
       playgroundResp = await http.get<PlaygroundResponse>(
@@ -52,48 +79,16 @@ const fetchSavedPlayground =
     } catch (e) {
       return fetchSavedPlaygroundError(e);
     }
-    let models: LLMModel[] = [];
-    let indices: string[] = [];
-    const indicesQuery = playgroundResp.data.indices.join(',');
-    [models, indices] = await Promise.all([
-      client
-        .fetchQuery([SearchPlaygroundQueryKeys.LLMsQuery], LLMsQuery(http, client))
-        .catch(() => []),
-      client
-        .fetchQuery(
-          [SearchPlaygroundQueryKeys.QueryIndices, indicesQuery],
-          IndicesQuery(http, indicesQuery, true)
-        )
-        .catch(() => []),
-    ]);
-    // validate indices
-    const validIndices: string[] = [];
-    const missingIndices: string[] = [];
-    let missingModel: string | undefined;
-    for (const index of playgroundResp.data.indices) {
-      if (indices.includes(index)) {
-        validIndices.push(index);
-      } else {
-        missingIndices.push(index);
-      }
-    }
+    const { models, indices } = await fetchDataForValidation(playgroundResp.data.indices, options);
+    const { validIndices, missingIndices } = validateSavedPlaygroundIndices(
+      playgroundResp.data.indices,
+      indices
+    );
+    const missingModel = validateSavedPlaygroundModel(
+      playgroundResp.data.summarizationModel,
+      models
+    );
     playgroundResp.data.indices = validIndices;
-    const summarizationModel = playgroundResp.data.summarizationModel;
-    if (summarizationModel && summarizationModel.modelId) {
-      const model = models.find(
-        (llm) =>
-          llm.connectorId === summarizationModel.connectorId &&
-          llm.value === summarizationModel.modelId
-      );
-      if (model === undefined) {
-        missingModel = summarizationModel.modelId;
-      }
-    } else if (summarizationModel) {
-      const model = models.find((llm) => llm.connectorId === summarizationModel.connectorId);
-      if (model === undefined) {
-        missingModel = summarizationModel.connectorId;
-      }
-    }
     if (missingModel || missingIndices.length > 0) {
       setLoadErrors({
         missingIndices,
