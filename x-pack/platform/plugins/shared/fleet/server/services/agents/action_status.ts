@@ -326,20 +326,6 @@ async function getPolicyChangeActions(
     return [];
   }
 
-  const dateFilter = options.date
-    ? `AND @timestamp >= "${options.date}" AND @timestamp <= "${moment(options.date)
-        .add(1, 'days')
-        .toISOString()}"`
-    : '';
-
-  const esqlQuery = `FROM ${AGENT_POLICY_INDEX} 
-    | WHERE revision_idx > 1 AND coordinator_idx == 0 ${dateFilter} ${await namespaceFilterEsql(
-    namespace
-  )}
-  | SORT @timestamp DESC 
-  | KEEP revision_idx, @timestamp, policy_id
-  | LIMIT ${getPerPage(options)}`;
-
   interface AgentPolicyRevision {
     policyId: string;
     revision: number;
@@ -351,6 +337,20 @@ async function getPolicyChangeActions(
   let agentPolicies: { [key: string]: AgentPolicyRevision } = {};
 
   try {
+    const dateFilter = options.date
+      ? `AND @timestamp >= "${options.date}" AND @timestamp <= "${moment(options.date)
+          .add(1, 'days')
+          .toISOString()}"`
+      : '';
+
+    const esqlQuery = `FROM ${AGENT_POLICY_INDEX} 
+    | WHERE revision_idx > 1 AND coordinator_idx == 0 ${dateFilter} ${await namespaceFilterEsql(
+      namespace
+    )}
+  | SORT @timestamp DESC 
+  | KEEP revision_idx, @timestamp, policy_id
+  | LIMIT ${getPerPage(options)}`;
+
     const agentPoliciesRes = await esClient.esql.query({
       query: esqlQuery,
     });
@@ -371,8 +371,9 @@ async function getPolicyChangeActions(
   } catch (err) {
     if (err.statusCode === 400 && err.message.includes('Unknown index')) {
       appContextService.getLogger().debug(err);
+    } else {
+      throw err;
     }
-    throw err;
   }
 
   let agentsPerPolicyRevisionRes;
