@@ -127,7 +127,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     chartsManager.api.updateUserInput(result);
                     closeFlyout();
                   }}
-                  closeFlyout={closeFlyout}
+                  onCancel={closeFlyout}
                   input={{ ...titleManager.getLatestState(), ...chartsManager.getLatestState() }}
                 />
               );

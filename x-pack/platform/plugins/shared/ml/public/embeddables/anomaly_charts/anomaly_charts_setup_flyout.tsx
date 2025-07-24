@@ -24,13 +24,13 @@ export function EmbeddableAnomalyChartsUserInput({
   coreStart,
   pluginStart,
   onConfirm,
-  closeFlyout,
+  onCancel,
   input,
 }: {
   coreStart: CoreStart;
   pluginStart: MlStartDependencies;
   onConfirm: (state: AnomalyChartsEmbeddableOverridableState) => void;
-  closeFlyout: () => void;
+  onCancel: () => void;
   input?: AnomalyChartsEmbeddableOverridableState;
 }) {
   const { http } = coreStart;
@@ -42,15 +42,9 @@ export function EmbeddableAnomalyChartsUserInput({
       <AnomalyChartsInitializer
         initialInput={input}
         onCreate={({ jobIds, title, maxSeriesToPlot }) => {
-          onConfirm({ jobIds, title, maxSeriesToPlot } as Pick<
-            AnomalyChartsEmbeddableState,
-            'jobIds' | 'title' | 'maxSeriesToPlot'
-          >);
-          closeFlyout();
+          onConfirm({ jobIds, title, maxSeriesToPlot } as AnomalyChartsEmbeddableOverridableState);
         }}
-        onCancel={() => {
-          closeFlyout();
-        }}
+        onCancel={onCancel}
         adJobsApiService={adJobsApiService}
       />
     </KibanaContextProvider>

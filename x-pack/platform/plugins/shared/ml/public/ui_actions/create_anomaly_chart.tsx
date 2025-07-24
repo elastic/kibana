@@ -84,8 +84,9 @@ export function createAddAnomalyChartsPanelAction(
                     rawState: initialState,
                   },
                 });
+                closeFlyout();
               }}
-              closeFlyout={closeFlyout}
+              onCancel={closeFlyout}
             />
           );
         },
