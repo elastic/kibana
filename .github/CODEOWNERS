@@ -1525,7 +1525,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
-/x-pack/test/common/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
+/x-pack/platform/test/api_integration/services/ingest_manager.ts @elastic/fleet
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
@@ -2383,7 +2383,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 # Security Solution
 /x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/test/functional/es_archives/packetbeat @elastic/security-solution
-/x-pack/test/common/services/ingest_manager.ts @elastic/security-solution # Assigned per blame
 /x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
