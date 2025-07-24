@@ -57,6 +57,8 @@ export interface HomePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
 }
 
+const TUTORIAL_DIRECTORY_PATH = `${HOME_APP_BASE_PATH}#/tutorial_directory`;
+
 export class HomePublicPlugin
   implements
     Plugin<
@@ -151,7 +153,7 @@ export class HomePublicPlugin
       }),
       icon: 'indexOpen',
       showOnHomePage: true,
-      path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
+      path: TUTORIAL_DIRECTORY_PATH,
       category: 'data',
       order: 500,
     });
@@ -192,7 +194,7 @@ export class HomePublicPlugin
             title: i18n.translate('home.tutorialDirectory.fileUploadDeepLinkTitle', {
               defaultMessage: 'File Upload',
             }),
-            path: '#/tutorial_directory/fileDataViz',
+            path: `${TUTORIAL_DIRECTORY_PATH}/fileDataViz`,
             keywords: ['CSV', 'JSON'],
             icon: 'logoElastic',
           },
