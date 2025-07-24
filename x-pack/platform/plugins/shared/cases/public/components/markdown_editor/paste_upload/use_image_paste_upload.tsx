@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { type Subscription } from 'rxjs';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useReducer } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useReducer } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import type { DoneNotification } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import type { MarkdownEditorRef } from '../types';
 import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from '../translations';
@@ -17,9 +16,10 @@ import { SUPPORTED_PASTE_MIME_TYPES } from '../constants';
 import { constructFileKindIdByOwner } from '../../../../common/files';
 import { type PasteUploadState, UploadPhase, ActionType } from './types';
 import { reducer } from './reducer';
-import { getTextarea, isOwner, markdownImage } from './utils';
+import { canUpload, getTextarea, isOwner, markdownImage } from './utils';
 import { useUploadStart } from './use_upload_start';
 import { useUploadComplete } from './use_upload_complete';
+import { useFileUploadApi } from './use_file_upload_api';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -60,37 +60,7 @@ export function useImagePasteUpload({
   const [uiState, dispatch] = useReducer(reducer, DEFAULT_STATE);
   const textarea = getTextarea(editorRef);
 
-  /**
-   * Subscribe to file upload API, and use responses to drive UI state.
-   */
-  useEffect(() => {
-    const subs: Subscription[] = [
-      uploadState.files$.subscribe((files: FileState[]) => {
-        if (files.length && files[0].status !== 'uploaded' && uiState.phase === UploadPhase.IDLE) {
-          dispatch({
-            type: ActionType.START_UPLOAD,
-            filename: files[0].file.name,
-            placeholder: `<!-- uploading "${files[0].file.name}" -->`,
-          });
-        }
-      }),
-      uploadState.done$.subscribe((files) => {
-        if (files?.length && uiState.phase === UploadPhase.UPLOADING) {
-          dispatch({
-            type: ActionType.UPLOAD_FINISHED,
-            file: files[0],
-            placeholder: uiState.placeholder,
-          });
-        } else {
-          dispatch({ type: ActionType.RESET });
-        }
-      }),
-      uploadState.error$.subscribe(
-        (err) => err && dispatch({ type: ActionType.UPLOAD_ERROR, errors: [err] })
-      ),
-    ];
-    return () => subs.forEach((s) => s.unsubscribe());
-  }, [uploadState, uiState]);
+  useFileUploadApi(uploadState, uiState, dispatch);
 
   const replacePlaceholder = useCallback(
     (file: DoneNotification, placeholder: string) => {
@@ -163,12 +133,14 @@ export function useImagePasteUpload({
       e.preventDefault();
 
       try {
-        uploadState.setFiles([fileToUpload]);
+        if (!uploadState.isUploading()) {
+          uploadState.setFiles([fileToUpload]);
+        }
       } catch (err) {
         dispatch({ type: ActionType.UPLOAD_ERROR, errors: [err] });
       }
 
-      if (uploadState.hasFiles() && uploadState.uploading$.value === false && caseId) {
+      if (canUpload(uploadState, caseId)) {
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };

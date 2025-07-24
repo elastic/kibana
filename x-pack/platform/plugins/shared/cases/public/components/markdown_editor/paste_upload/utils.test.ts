@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { markdownImage, getTextarea, isOwner } from './utils';
+import { markdownImage, getTextarea, isOwner, canUpload } from './utils';
 import type { MarkdownEditorRef } from '../types';
+import type { UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 
 describe('utils', () => {
   describe('markdownImage', () => {
@@ -47,6 +48,37 @@ describe('utils', () => {
 
     it('returns false for an invalid owner', () => {
       expect(isOwner('notAnOwner')).toBe(false);
+    });
+  });
+  describe('canUpload', () => {
+    const CASE_ID = 'case-123';
+
+    // Minimal mock implementation – just the pieces needed for canUpload
+    const mockUploadState = (hasFiles: boolean, uploading: boolean): UploadState =>
+      ({
+        hasFiles: () => hasFiles,
+        isUploading: () => uploading,
+        // The remaining members of UploadState are not needed for this test suite.
+      } as unknown as UploadState);
+
+    it('returns truthy when there are files, not uploading, and caseId provided', () => {
+      const state = mockUploadState(true, false);
+      expect(canUpload(state, CASE_ID)).toBe(CASE_ID);
+    });
+
+    it('returns false when no files are present', () => {
+      const state = mockUploadState(false, false);
+      expect(canUpload(state, CASE_ID)).toBe(false);
+    });
+
+    it('returns false when an upload is already in progress', () => {
+      const state = mockUploadState(true, true);
+      expect(canUpload(state, CASE_ID)).toBe(false);
+    });
+
+    it('returns false when caseId is empty', () => {
+      const state = mockUploadState(true, false);
+      expect(canUpload(state, '')).toBe('');
     });
   });
 });

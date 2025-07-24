@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { type Owner } from '../../../../common/constants/types';
 import { OWNERS } from '../../../../common/constants';
 import type { MarkdownEditorRef } from '../types';
@@ -27,3 +28,7 @@ export function getTextarea(editorRef: React.ForwardedRef<MarkdownEditorRef | nu
 
 const validOwners = new Set<Owner>(OWNERS);
 export const isOwner = (o: string): o is Owner => validOwners.has(o as Owner);
+
+export function canUpload(uploadState: UploadState, caseId: string) {
+  return uploadState.hasFiles() && !uploadState.isUploading() && caseId;
+}
