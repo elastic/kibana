@@ -12,7 +12,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { appendStatsByToQuery } from '@kbn/esql-utils';
 import { AggregateQuery } from '@kbn/es-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { v4 } from 'uuid';
 import {
   DEFAULT_CONTROL_INPUT,
   ControlOutputOption,
@@ -75,21 +74,13 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
 
   const { fieldRegistry } = useDataViewAndFieldContext();
 
-  // List input needs to track list options with unique IDs for rendering and ordering correctly; track them in a UI
-  // state separately from the editorState to prevent the list input from rerendering and losing focus as the user types
-  const [staticOptions, setStaticOptions] = useState<EuiSelectOption[]>(
-    inputMode !== ControlInputOption.STATIC || !editorState.staticValues
-      ? []
-      : editorState.staticValues.map((value) => ({ value: v4(), text: value }))
-  );
-  const onStaticOptionsChange = useCallback(
-    (nextOptions: EuiSelectOption[]) => {
-      setStaticOptions(nextOptions);
+  const onStaticValuesChange = useCallback(
+    (staticValues: EuiSelectOption[]) => {
       setEditorState({
         ...editorState,
-        staticValues: nextOptions.map(({ text }) => text),
+        staticValues,
       });
-      if (!selectedControlType && nextOptions.some(({ text }) => !!text)) {
+      if (!selectedControlType && staticValues.some(({ text }) => !!text)) {
         setSelectedControlType(OPTIONS_LIST_CONTROL);
       }
     },
@@ -284,8 +275,8 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
       {inputMode === ControlInputOption.STATIC && (
         <ListOptionsInput
           label={DataControlEditorStrings.manageControl.dataSource.getListOptionsTitle()}
-          value={staticOptions}
-          onChange={onStaticOptionsChange}
+          value={editorState.staticValues ?? []}
+          onChange={onStaticValuesChange}
         />
       )}
     </>

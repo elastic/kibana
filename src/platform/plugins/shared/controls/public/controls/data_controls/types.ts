@@ -39,7 +39,7 @@ export interface PublishesESQLQuery {
 }
 
 export interface PublishesStaticValues {
-  staticValues$: PublishingSubject<string[] | undefined>;
+  staticValues$: PublishingSubject<Array<{ value: string; text: string }> | undefined>;
 }
 
 export type DataControlApi = DefaultControlApi &

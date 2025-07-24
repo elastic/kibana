@@ -26,12 +26,10 @@ type GetESQLSingleColumnValuesMultiColumnFailure = Required<GetESQLSingleColumnV
 export interface GetESQLSingleColumnValuesParams {
   query: string;
   timeRange?: TimeRange;
-  filter?: unknown;
 }
 export const getESQLSingleColumnValues = async ({
   query,
   timeRange,
-  filter,
 }: GetESQLSingleColumnValuesParams): Promise<
   GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
 > => {
@@ -40,7 +38,7 @@ export const getESQLSingleColumnValues = async ({
       esqlQuery: query,
       search: dataService.search.search,
       signal: undefined,
-      filter,
+      filter: undefined,
       dropNullColumns: true,
       timeRange,
     });

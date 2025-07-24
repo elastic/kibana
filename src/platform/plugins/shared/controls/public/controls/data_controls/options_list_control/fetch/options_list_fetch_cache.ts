@@ -12,11 +12,12 @@ import hash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 
-import type {
-  OptionsListFailureResponse,
-  OptionsListRequest,
-  OptionsListResponse,
-  OptionsListSuccessResponse,
+import {
+  isOptionsListDSLRequest,
+  type OptionsListFailureResponse,
+  type OptionsListRequest,
+  type OptionsListResponse,
+  type OptionsListSuccessResponse,
 } from '../../../../../common/options_list/types';
 import {
   GetESQLSingleColumnValuesParams,
@@ -33,17 +34,8 @@ const optionsListResponseWasFailure = (
   return (response as OptionsListFailureResponse).error !== undefined;
 };
 
-const isDSLRequest = (request: unknown): request is OptionsListRequest => {
-  const req = request as OptionsListRequest;
-  return Object.hasOwn(req, 'dataView') && Object.hasOwn(req, 'field');
-};
-
 export class OptionsListFetchCache {
   private cache: LRUCache<string, OptionsListSuccessResponse>;
-
-  static isSuccessResponse = (
-    response: OptionsListResponse
-  ): response is OptionsListSuccessResponse => Object.hasOwn(response, 'suggestions');
 
   constructor() {
     this.cache = new LRUCache<string, OptionsListSuccessResponse>({
@@ -61,7 +53,7 @@ export class OptionsListFetchCache {
           to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
         })
       : [];
-    if (isDSLRequest(request)) {
+    if (isOptionsListDSLRequest(request)) {
       const {
         size,
         sort,
@@ -99,7 +91,7 @@ export class OptionsListFetchCache {
   };
 
   public async runFetchRequest(
-    request: OptionsListRequest | GetESQLSingleColumnValuesParams,
+    request: OptionsListRequest,
     abortSignal: AbortSignal
   ): Promise<OptionsListResponse> {
     const requestHash = this.getRequestHash(request);
@@ -107,7 +99,7 @@ export class OptionsListFetchCache {
     if (this.cache.has(requestHash)) {
       return Promise.resolve(this.cache.get(requestHash)!);
     } else {
-      if (isDSLRequest(request)) {
+      if (isOptionsListDSLRequest(request)) {
         const result = await getDSLFieldValues({ request, abortSignal });
 
         if (!optionsListResponseWasFailure(result)) {
@@ -116,11 +108,27 @@ export class OptionsListFetchCache {
         }
         return result;
       } else {
-        const result = await getESQLSingleColumnValues(request);
+        const result = await getESQLSingleColumnValues({
+          query: request.query.esql,
+          timeRange: request.timeRange,
+        });
         if (getESQLSingleColumnValues.isSuccess(result)) {
+          // Run client-side search on ES|QL results
+          // TODO: Add a named parameter to handle this natively in the ES|QL query
+          const suggestions = result.values
+            .filter(
+              (value) =>
+                // ES|QL searchTechnique is always 'wildcard'
+                !request.searchString ||
+                String(value).toLowerCase().includes(request.searchString.toLowerCase())
+            )
+            .map((value) => ({ value }));
           const response: OptionsListSuccessResponse = {
-            suggestions: result.values.map((value) => ({ value })),
-            totalCardinality: result.values.length,
+            suggestions,
+            totalCardinality: suggestions.length,
+            invalidSelections: request.selectedOptions?.filter(
+              (selection) => !suggestions.some(({ value }) => value === selection)
+            ),
           };
           this.cache.set(requestHash, response);
           return response;

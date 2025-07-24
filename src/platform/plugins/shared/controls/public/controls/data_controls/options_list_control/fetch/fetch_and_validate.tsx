@@ -31,7 +31,6 @@ import {
 import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { ControlFetchContext } from '../../../../control_group/control_fetch';
-import { GetESQLSingleColumnValuesParams } from '../../common/get_esql_single_column_values';
 import { OptionsListComponentApi, OptionsListControlApi } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 
@@ -113,23 +112,29 @@ export function fetchAndValidate$({
         runPastTimeout,
         selectedOptions,
       ]) => {
-        let request: OptionsListRequest | GetESQLSingleColumnValuesParams;
+        let request: OptionsListRequest;
         const isESQLInputMode = input === ControlInputOption.ESQL;
         if (input === ControlInputOption.STATIC) {
           const suggestions =
             staticValues
               // Static searchTechnique is always 'wildcard'
               ?.filter(
-                (value) => !searchString || value.toLowerCase().includes(searchString.toLowerCase())
+                ({ text }) =>
+                  !searchString || text.toLowerCase().includes(searchString.toLowerCase())
               )
-              .map((value) => ({ value })) ?? [];
+              .map(({ text }) => ({ value: text })) ?? [];
           return {
             suggestions,
             totalCardinality: suggestions.length,
           };
         } else if (isESQLInputMode) {
           if (!esqlQuery) return { suggestions: [] };
-          request = { query: esqlQuery, timeRange: controlFetchContext.timeRange };
+          request = {
+            query: { esql: esqlQuery },
+            timeRange: controlFetchContext.timeRange,
+            searchString,
+            selectedOptions,
+          };
         } else {
           const dataView = dataViews?.[0];
           if (
@@ -161,19 +166,6 @@ export function fetchAndValidate$({
         abortController = newAbortController;
         try {
           const result = await requestCache.runFetchRequest(request, newAbortController.signal);
-          if (isESQLInputMode && searchString && OptionsListFetchCache.isSuccessResponse(result)) {
-            // Run client-side search on ES|QL results
-            // TODO: Add a named parameter to handle this natively in the ES|QL query
-            const suggestions = result.suggestions.filter(({ value }) =>
-              // ES|QL searchTechnique is always 'wildcard'
-              String(value).toLowerCase().includes(searchString.toLowerCase())
-            );
-            return {
-              ...result,
-              suggestions,
-              totalCardinality: suggestions.length,
-            };
-          }
           return result;
         } catch (error) {
           return { error };

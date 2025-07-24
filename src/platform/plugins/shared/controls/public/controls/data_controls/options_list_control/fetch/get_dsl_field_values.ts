@@ -9,14 +9,17 @@
 
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { OptionsListRequest, OptionsListResponse } from '../../../../../common/options_list/types';
+import {
+  OptionsListDSLRequest,
+  OptionsListResponse,
+} from '../../../../../common/options_list/types';
 import { coreServices, dataService } from '../../../../services/kibana_services';
 
 export const getDSLFieldValues = async ({
   request,
   abortSignal,
 }: {
-  request: OptionsListRequest;
+  request: OptionsListDSLRequest;
   abortSignal: AbortSignal;
 }) => {
   const index = request.dataView.getIndexPattern();
