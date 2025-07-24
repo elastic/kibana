@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -28,7 +28,6 @@ export interface SavedPlaygroundInvalidStateModalProps {
 enum InvalidPlaygroundType {
   MissingIndices,
   MissingModel,
-  MissingIndicesAndModel,
 }
 
 export const SavedPlaygroundInvalidStateModal = ({
@@ -36,12 +35,16 @@ export const SavedPlaygroundInvalidStateModal = ({
   onClose,
 }: SavedPlaygroundInvalidStateModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
-  const errorsType: InvalidPlaygroundType =
-    errors.missingIndices.length > 0 && errors.missingModel !== undefined
-      ? InvalidPlaygroundType.MissingIndicesAndModel
-      : errors.missingModel !== undefined
-      ? InvalidPlaygroundType.MissingModel
-      : InvalidPlaygroundType.MissingIndices;
+  const errorsTypes = useMemo(() => {
+    const eTypes = new Set<InvalidPlaygroundType>();
+    if (errors.missingIndices.length > 0) {
+      eTypes.add(InvalidPlaygroundType.MissingIndices);
+    }
+    if (errors.missingModel !== undefined) {
+      eTypes.add(InvalidPlaygroundType.MissingModel);
+    }
+    return eTypes;
+  }, [errors]);
   return (
     <EuiModal
       aria-labelledby={modalTitleId}
@@ -50,12 +53,13 @@ export const SavedPlaygroundInvalidStateModal = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {errorsType === InvalidPlaygroundType.MissingIndicesAndModel ? (
+          {errorsTypes.has(InvalidPlaygroundType.MissingIndices) &&
+          errorsTypes.has(InvalidPlaygroundType.MissingModel) ? (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.invalidPlayground.title"
               defaultMessage="Invalid playground values"
             />
-          ) : errorsType === InvalidPlaygroundType.MissingModel ? (
+          ) : errorsTypes.has(InvalidPlaygroundType.MissingModel) ? (
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.invalidModelConnector.title"
               defaultMessage="AI Connector not found"
@@ -70,8 +74,7 @@ export const SavedPlaygroundInvalidStateModal = ({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText>
-          {(errorsType === InvalidPlaygroundType.MissingIndicesAndModel ||
-            errorsType === InvalidPlaygroundType.MissingIndices) && (
+          {errorsTypes.has(InvalidPlaygroundType.MissingIndices) && (
             <>
               <p>
                 <FormattedMessage
@@ -86,8 +89,7 @@ export const SavedPlaygroundInvalidStateModal = ({
               </ul>
             </>
           )}
-          {(errorsType === InvalidPlaygroundType.MissingIndicesAndModel ||
-            errorsType === InvalidPlaygroundType.MissingModel) && (
+          {errorsTypes.has(InvalidPlaygroundType.MissingModel) && (
             <p>
               <FormattedMessage
                 id="xpack.searchPlayground.savedPlayground.invalidModelConnector.description"
