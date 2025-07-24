@@ -22,6 +22,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  euiLineHeightFromBaseline,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -171,7 +172,7 @@ const componentStyles = {
           verticalAlign: 'middle',
           // !important is required to overwrite the max-height on the element from the field formatter
           // historically we used lineHeightFromBaseline(2) here, but the smallest euiLineHeightFromBaseline was too large
-          maxHeight: '1rem !important',
+          maxHeight: `${euiLineHeightFromBaseline('xs', euiTheme)} !important`,
           // An arbitrary amount of width we don't want to go over, to not have very wide images.
           // For most width-height-ratios that will never be hit, because we'd usually limit
           // it by the way smaller height. But images with very large width and very small height
