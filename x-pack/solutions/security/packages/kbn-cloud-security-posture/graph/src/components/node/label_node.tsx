@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiTextTruncate } from '@elastic/eui';
+import { EuiTextTruncate, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -21,22 +21,65 @@ import {
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
+import { analyzeDocuments, getLabelBackgroundColor, getLabelTextColor } from './label_node_helpers/analyze_documents';
+import { LabelNodeBadges } from './label_node_helpers/label_node_badges';
+import { LabelNodeTooltipContent } from './label_node_helpers/label_node_tooltip';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, label, interactive, nodeClick, expandButtonClick } =
-    props.data as LabelNodeViewModel;
+  const { dragging } = props;
+  const { 
+    id, 
+    color, 
+    label, 
+    interactive, 
+    nodeClick, 
+    expandButtonClick,
+    documentsData
+  } = props.data as LabelNodeViewModel;
+  
+  const { euiTheme } = useEuiTheme();
   const text = label ? label : id;
+  
+  const analysis = useMemo(() => analyzeDocuments(documentsData), [documentsData]);
+  const backgroundColor = useMemo(() => getLabelBackgroundColor(analysis, euiTheme), [analysis, euiTheme]);
+  const textColor = useMemo(() => getLabelTextColor(analysis, euiTheme), [analysis, euiTheme]);
 
-  return (
-    <LabelNodeContainer>
+  const shouldShowTooltip = analysis.totalDocuments > 0;
+
+  const labelContent = (
+    <LabelNodeContainer isDragging={dragging}>
       {interactive && <LabelShapeOnHover color={color} />}
-      <LabelShape color={color} textAlign="center">
-        <EuiTextTruncate
-          truncation="end"
-          truncationOffset={20}
-          text={text}
-          width={NODE_LABEL_WIDTH - LABEL_PADDING_X * 2}
-        />
+      <LabelShape 
+        color={color} 
+        textAlign="center"
+        backgroundColor={backgroundColor}
+        textColor={textColor}
+      >
+        <div css={css`
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+        `}>
+          <div css={css`
+            flex: 1;
+            min-width: 0;
+          `}>
+            <EuiTextTruncate
+              truncation="end"
+              truncationOffset={20}
+              text={text}
+              width={NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - 60} // Leave space for badges
+            />
+          </div>
+          <div css={css`
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+          `}>
+            <LabelNodeBadges analysis={analysis} />
+          </div>
+        </div>
       </LabelShape>
       {interactive && (
         <>
@@ -74,6 +117,20 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
       />
     </LabelNodeContainer>
   );
+
+  if (shouldShowTooltip) {
+    return (
+      <EuiToolTip
+        content={<LabelNodeTooltipContent analysis={analysis} />}
+        position="top"
+        data-test-subj="label-node-tooltip"
+      >
+        {labelContent}
+      </EuiToolTip>
+    );
+  }
+
+  return labelContent;
 });
 
 LabelNode.displayName = 'LabelNode';

@@ -12,3 +12,9 @@ export { PentagonNode } from './pentagon_node';
 export { RectangleNode } from './rectangle_node';
 export { LabelNode } from './label_node';
 export { EdgeGroupNode } from './edge_group_node';
+
+// Export new components for reuse
+export { Ips } from './ips';
+export type { IpsProps } from './ips';
+export { CountryFlags } from './country_flags';
+export type { CountryFlagsProps } from './country_flags';

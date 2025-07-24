@@ -52,21 +52,35 @@ export const LABEL_PADDING_X = 15;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
-export const LabelNodeContainer = styled.div`
+interface LabelNodeContainerProps {
+  isDragging?: boolean;
+}
+
+export const LabelNodeContainer = styled.div<LabelNodeContainerProps>`
   position: relative;
   top: ${(NODE_LABEL_HEIGHT - ACTUAL_LABEL_HEIGHT) / 2}px;
   text-wrap: nowrap;
   width: ${NODE_LABEL_WIDTH}px;
   max-width: ${NODE_LABEL_WIDTH}px;
   height: ${ACTUAL_LABEL_HEIGHT}px;
+  
+  ${(props) => props.isDragging && `
+    filter: drop-shadow(0px 15px 15px rgba(0, 0, 0, 0.04))
+      drop-shadow(0px 5.7px 12px rgba(0, 0, 0, 0.05)) 
+      drop-shadow(0px 2.6px 8px rgba(0, 0, 0, 0.06))
+      drop-shadow(0px 0.9px 4px rgba(0, 0, 0, 0.08));
+  `}
 `;
 
 interface LabelShapeProps extends EuiTextProps {
   color: LabelNodeViewModel['color'];
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 export const LabelShape = styled(EuiText)<LabelShapeProps>`
-  background: ${(props) => useNodeFillColor(props.color)};
+  background: ${(props) => props.backgroundColor || useNodeFillColor(props.color)};
+  color: ${(props) => props.textColor};
   max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
   max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
   border: ${(props) => {
@@ -86,6 +100,9 @@ export const LabelShape = styled(EuiText)<LabelShapeProps>`
   }};
 
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   padding: 6px ${LABEL_PADDING_X}px;
   border-radius: 16px;
