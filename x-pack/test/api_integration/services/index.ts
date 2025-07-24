@@ -16,7 +16,6 @@ import { UsageAPIProvider } from './usage_api';
 
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
-import { FleetAndAgents } from './fleet_and_agents';
 
 export const services = {
   ...commonServices,
@@ -28,5 +27,4 @@ export const services = {
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
-  fleetAndAgents: FleetAndAgents,
 };
