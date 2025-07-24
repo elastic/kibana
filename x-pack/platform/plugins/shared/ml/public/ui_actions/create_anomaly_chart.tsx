@@ -66,7 +66,7 @@ export function createAddAnomalyChartsPanelAction(
         core: coreStart,
         parentApi: context.embeddable,
         flyoutProps: {
-          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
