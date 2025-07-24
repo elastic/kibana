@@ -44,7 +44,7 @@ export class OptionsListFetchCache {
     });
   }
 
-  private getRequestHash = (request: OptionsListRequest | GetESQLSingleColumnValuesParams) => {
+  private getRequestHash = (request: OptionsListRequest) => {
     const { timeRange } = request;
     // round timeRange to the minute to avoid cache misses
     const roundedTimeRange = timeRange
@@ -82,10 +82,11 @@ export class OptionsListFetchCache {
         size,
       });
     } else {
-      const { query } = request;
+      const { query, searchString } = request;
       return hash({
         query,
         timeRange: roundedTimeRange,
+        searchString,
       });
     }
   };
@@ -127,7 +128,7 @@ export class OptionsListFetchCache {
             suggestions,
             totalCardinality: suggestions.length,
             invalidSelections: request.selectedOptions?.filter(
-              (selection) => !suggestions.some(({ value }) => value === selection)
+              (selection) => !result.values.some((value) => value === selection)
             ),
           };
           this.cache.set(requestHash, response);
