@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
-  // const es = getService('es');
+  const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/220971
   // Failing: See https://github.com/elastic/kibana/issues/220971

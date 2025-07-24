@@ -77,7 +77,7 @@ module.exports = {
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/react_testing_library.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
     process.env.CI
-      ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
+      ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js' // <-- THIS?
       : [],
   ].flat(),
 
