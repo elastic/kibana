@@ -10,7 +10,7 @@
     "public/**/*.json",
     "server/**/*",
     ".storybook/**/*",
-    "ui_tests/**/*"
+    "test/scout/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [

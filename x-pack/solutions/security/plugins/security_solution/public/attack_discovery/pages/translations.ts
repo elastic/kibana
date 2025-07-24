@@ -31,7 +31,7 @@ export const ERROR_GENERATING_ATTACK_DISCOVERIES = i18n.translate(
 export const SHOW_ANONYMIZED_LABEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.showAnonymizedLabel',
   {
-    defaultMessage: 'Show anonymized',
+    defaultMessage: 'Show anonymized values',
   }
 );
 

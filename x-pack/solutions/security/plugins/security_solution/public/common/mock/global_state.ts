@@ -498,6 +498,16 @@ export const mockGlobalState: State = {
           true
         ),
       },
+      [SourcererScopeName.explore]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
     },
   },
   globalUrlParam: {},

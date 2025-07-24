@@ -61,76 +61,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-    label: 'Serverless Entity Analytics - Security Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 3
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
-    label: 'Serverless Explore - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 2
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-    label: 'Serverless Investigations - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 10
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
-    label: 'Serverless Rule Management - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 5
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
-    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
@@ -159,34 +89,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
-    label: 'Serverless Detection Engine - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 5
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
-    label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 4
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -210,20 +112,6 @@ steps:
       - build
     timeout_in_minutes: 60
     parallelism: 3
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
-    label: 'Serverless AI Assistant - Security Solution Cypress Tests'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
@@ -299,20 +187,6 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
-    label: 'Osquery Cypress Tests on Serverless'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 8
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
@@ -322,20 +196,6 @@ steps:
       - build
     timeout_in_minutes: 60
     parallelism: 20
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      enableNestedVirtualization: true
-      machineType: n2-standard-4
-    depends_on:
-      - build
-    timeout_in_minutes: 60
-    parallelism: 14
     retry:
       automatic:
         - exit_status: '-1'

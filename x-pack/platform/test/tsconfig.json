@@ -127,5 +127,23 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/aiops-plugin",
+    "@kbn/ml-category-validator",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
+    "@kbn/ml-string-hash",
+    "@kbn/data-visualizer-plugin",
+    "@kbn/cloud-integration-saml-provider-plugin",
+    "@kbn/ci-stats-reporter",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-deprecations-common",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/sse-utils-server",
+    "@kbn/inference-common",
+    "@kbn/rule-registry-plugin",
+    "@kbn/controls-plugin"
   ]
 }
