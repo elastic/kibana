@@ -28,13 +28,9 @@
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
-    "@kbn/telemetry-collection-manager-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/apm-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/infra-plugin",
     "@kbn/ml-plugin",
-    "@kbn/observability-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
@@ -65,7 +61,6 @@
     "@kbn/osquery-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
   ]
 }
