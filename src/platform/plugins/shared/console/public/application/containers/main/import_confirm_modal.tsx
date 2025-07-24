@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useEditorActionContext } from '../../contexts';
 import { useServicesContext } from '../../contexts';
 
@@ -23,6 +23,8 @@ export const ImportConfirmModal = ({ onClose, fileContent }: ImportConfirmModalP
   const {
     services: { notifications },
   } = useServicesContext();
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const onConfirmImport = useCallback(() => {
     // Import the file content
@@ -43,9 +45,11 @@ export const ImportConfirmModal = ({ onClose, fileContent }: ImportConfirmModalP
   return (
     <EuiConfirmModal
       data-test-subj="importConfirmModal"
+      aria-labelledby={modalTitleId}
       title={i18n.translate('console.importConfirmModal.title', {
         defaultMessage: 'Import and replace requests?',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={onConfirmImport}
       cancelButtonText={i18n.translate('console.importConfirmModal.cancelButton', {

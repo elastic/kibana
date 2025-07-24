@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164381
-  describe.skip('forecasts', function () {
+  describe('forecasts', function () {
     this.tags(['ml']);
 
     describe('with single metric job', function () {
@@ -96,10 +95,12 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the forecasts toggle checkbox');
         await ml.forecast.assertForecastCheckboxExists();
 
-        await ml.testExecution.logTestStep(
-          'should display the forecast in the single metric chart'
-        );
-        await ml.forecast.assertForecastChartElementsExists();
+        // Disabling forecast chart check until https://github.com/elastic/kibana/issues/229143 is resolved.
+        // The chart slider sometimes does not move over to the forecast section of the chart.
+        // await ml.testExecution.logTestStep(
+        //   'should display the forecast in the single metric chart'
+        // );
+        // await ml.forecast.assertForecastChartElementsExists();
 
         await ml.testExecution.logTestStep('should hide the forecast in the single metric chart');
         await ml.forecast.clickForecastCheckbox();

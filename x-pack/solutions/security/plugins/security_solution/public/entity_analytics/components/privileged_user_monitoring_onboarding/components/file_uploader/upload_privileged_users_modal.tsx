@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiText } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedUsersFileUploader } from './privileged_users_file_uploader';
 
@@ -20,11 +27,12 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
   onImport,
 }) => {
   // TODO handle missing permissions
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.uploadPrivilegedUsersModal.title"
             defaultMessage="Import file"
@@ -36,7 +44,7 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.uploadPrivilegedUsersModal.description"
-              defaultMessage="Add your privileged users by importing a CSV file exported from your user management tool. This ensures data accuracy and reduces manual input errors."
+              defaultMessage="Add privileged users by importing a supported file exported from your user management tool. This ensures data accuracy and reduces manual input errors."
             />
           </p>
         </EuiText>
