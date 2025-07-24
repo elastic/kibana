@@ -14,44 +14,86 @@ import { monaco } from '@kbn/monaco';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { type ESQLSource } from '@kbn/esql-ast';
-import { Parser } from '@kbn/esql-ast/src/parser/parser';
+import { mutate, type ESQLSource, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 import { memoize } from 'lodash';
 import { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
 
 /**
- * Returns a query with appended index name to the join command.
+ * Replace the index referenced by the JOIN that the user created.
  *
- * @param query Input query
- * @param cursorPosition
- * @param indexName
+ * @param query             - full ES|QL query
+ * @param initialIndexOrPos - either the index name we want to replace OR a Monaco
+ *                            cursor Position pointing at that name
+ * @param createdIndexName – new lookup-index name
  *
  * @returns {string} Query with appended index name to the join command
  */
 export function appendIndexToJoinCommand(
   query: string,
-  cursorPosition: monaco.Position,
-  indexName: string
+  initialIndexOrPos: string | monaco.Position,
+  createdIndexName: string
 ): string {
-  const cursorColumn = cursorPosition?.column ?? 1;
-  const cursorLine = cursorPosition?.lineNumber ?? 1;
+  if (!createdIndexName) return query;
 
-  const lines = query.split('\n');
-  const line = lines[cursorLine - 1];
+  // Resolve the “target” index name
+  let targetName: string | undefined;
 
-  let beforeCursor = line.slice(0, cursorColumn - 1);
-  const afterCursor = line.slice(cursorColumn - 1);
+  if (typeof initialIndexOrPos === 'string') {
+    targetName = initialIndexOrPos.trim();
+  } else {
+    // word under cursor
+    const { lineNumber, column } = initialIndexOrPos;
+    const line = query.split('\n')[lineNumber - 1] ?? '';
+    const re = /[A-Za-z0-9_.]+/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(line))) {
+      if (m.index <= column - 1 && re.lastIndex >= column - 1) {
+        targetName = m[0];
+        break;
+      }
+    }
+  }
 
-  // Check if the join command already had an index argument.
-  // Delete the last word before the cursor
-  beforeCursor = beforeCursor.replace(/\S+$/, '');
+  if (!targetName || targetName === createdIndexName) return query;
 
-  const updatedLine = beforeCursor + indexName + afterCursor;
-  lines[cursorLine - 1] = updatedLine;
+  // Parse and walk the AST
+  const { root } = Parser.parse(query);
 
-  return lines.join('\n');
+  for (const joinCmd of mutate.commands.join.list(root)) {
+    const firstArg = joinCmd.args[0] as any; // source | as
+    let src: ESQLSource | undefined;
+
+    if (firstArg?.type === 'source') {
+      src = firstArg;
+    } else if (firstArg?.type === 'as') {
+      src = firstArg.args[0] as ESQLSource; // AS (<source>, <alias>)
+    }
+
+    if (src && src.name === targetName) {
+      // Build & insert replacement source
+      const replacement: ESQLSource = {
+        type: 'source',
+        sourceType: 'index',
+        incomplete: false,
+        location: {
+          min: src.location?.min ?? 0,
+          max: (src.location?.min ?? 0) + createdIndexName.length,
+        },
+        text: createdIndexName,
+        name: createdIndexName,
+      };
+
+      const idx = joinCmd.args.indexOf(firstArg);
+      mutate.generic.commands.args.remove(root as any, firstArg);
+      mutate.generic.commands.args.insert(joinCmd, replacement, idx);
+      break; // only first match
+    }
+  }
+
+  return BasicPrettyPrinter.multiline(root);
 }
 
 function isESQLSourceItem(arg: unknown): arg is ESQLSource {
@@ -124,16 +166,26 @@ export const useLookupIndexCommand = (
   );
 
   const onFlyoutClose = useCallback(
-    (resultIndexName: string, indexCreated: boolean) => {
+    (initialIndexName: string | undefined, resultIndexName: string, indexCreated: boolean) => {
+      console.log(initialIndexName, '___initialIndexName___');
+      console.log(resultIndexName, '___resultIndexName___');
+      console.log(indexCreated, '___indexCreated___');
+
       if (!indexCreated) return;
 
       const cursorPosition = editorRef.current?.getPosition();
 
-      if (!cursorPosition) {
+      console.log(cursorPosition, '___cursorPosition___');
+
+      if (!initialIndexName && !cursorPosition) {
         throw new Error('Could not find cursor position in the editor');
       }
 
-      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, resultIndexName);
+      const resultQuery = appendIndexToJoinCommand(
+        query.esql,
+        initialIndexName || cursorPosition!,
+        resultIndexName
+      );
       onIndexCreated(resultQuery);
     },
     [onIndexCreated, query.esql, editorRef]
@@ -149,7 +201,7 @@ export const useLookupIndexCommand = (
         indexName,
         doesIndexExist,
         onClose: ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          onFlyoutClose(resultIndexName, indexCreatedDuringFlyout);
+          onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },
       } as EditLookupIndexContentContext);
     },

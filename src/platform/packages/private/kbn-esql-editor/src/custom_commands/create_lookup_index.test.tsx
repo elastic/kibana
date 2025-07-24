@@ -11,6 +11,20 @@ import { appendIndexToJoinCommand } from './create_lookup_index';
 import { monaco } from '@kbn/monaco';
 
 describe('appendIndexToJoinCommand', () => {
+  it('replaces existing index argument', () => {
+    const result = appendIndexToJoinCommand(
+      `FROM kibana_sample_data_ecommerce
+  | EVAL customer_id = TO_LONG(customer_id)
+  | LOOKUP JOIN customer_data ON customer_id | LOOKUP JOIN test1123`,
+      'test1123',
+      'new_index'
+    );
+    expect(result).toBe(`FROM kibana_sample_data_ecommerce
+  | EVAL customer_id = TO_LONG(customer_id)
+  | LOOKUP JOIN customer_data ON customer_id
+  | LOOKUP JOIN new_index`);
+  });
+
   it('should append index name to the join command', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN  | LIMIT 10',
