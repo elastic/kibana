@@ -19,7 +19,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const spaceName = 'default';
   const es = getService('es');
-  // const spaceName = 'default';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);

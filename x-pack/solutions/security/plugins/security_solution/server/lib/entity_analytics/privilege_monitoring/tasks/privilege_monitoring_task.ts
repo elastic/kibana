@@ -195,7 +195,6 @@ export const startPrivilegeMonitoringTask = async ({
   interval = INTERVAL,
 }: StartParams & { interval?: SyncIntervalConfig }) => {
   const taskId = getTaskId(namespace);
-  logger.info(`Starting privilege monitoring task with id ${taskId} and interval ${interval}`);
   try {
     await taskManager.ensureScheduled({
       id: taskId,
