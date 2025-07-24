@@ -15,6 +15,7 @@ import {
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
+import { browseDataSourcesSuggestion } from '../../complete_items';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
@@ -45,6 +46,7 @@ export async function autocomplete(
   // FROM /
   if (indexes.length === 0) {
     suggestions.push(
+      browseDataSourcesSuggestion,
       ...getSourceSuggestions(
         context?.sources ?? [],
         indexes.map(({ name }) => name)
@@ -53,6 +55,7 @@ export async function autocomplete(
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
+    suggestions.push(browseDataSourcesSuggestion);
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
@@ -83,6 +86,7 @@ export async function autocomplete(
       indexes.map(({ name }) => name),
       recommendedQuerySuggestions
     );
+    suggestions.push(browseDataSourcesSuggestion);
     suggestions.push(...additionalSuggestions);
   }
 

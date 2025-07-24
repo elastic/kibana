@@ -136,7 +136,6 @@ export function ResourcesArea({
           padding-top: 8px;
           flex-grow: 1; // Allows it to take up remaining vertical space
           overflow-y: auto; // Make this specific area scrollable
-          tabIndex={-1}; // Make it focusable for scroll
           outline: none; // Remove default focus outline
         `}
       >
