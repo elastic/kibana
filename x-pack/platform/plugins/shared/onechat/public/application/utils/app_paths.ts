@@ -22,4 +22,7 @@ export const appPaths = {
       return `/conversations/${conversationId}`;
     },
   },
+  tools: {
+    list: '/tools',
+  },
 };
