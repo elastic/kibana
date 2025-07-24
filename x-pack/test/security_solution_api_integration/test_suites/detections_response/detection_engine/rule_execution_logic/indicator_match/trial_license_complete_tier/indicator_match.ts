@@ -1716,6 +1716,89 @@ export default ({ getService }: FtrProviderContext) => {
             ]);
           });
 
+          it('should create alert when 2 fields not matching in single AND group', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+                client: { ip: '127.0.0.11' },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'France' },
+                client: { ip: '127.0.0.2' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' }, // country_name matches threat, so no alert should be generated
+                client: { ip: '127.0.0.2' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+                client: { ip: '127.0.0.11' },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+                client: { ip: '127.0.0.1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: {
+                ...basicThreatMatchRuleWithDoesNotMatch(id),
+                threat_mapping: [
+                  {
+                    entries: [
+                      {
+                        field: 'user.name',
+                        value: 'user.name',
+                        type: 'mapping',
+                      },
+                      {
+                        field: 'geo.country_name',
+                        value: 'geo.country_name',
+                        type: 'mapping',
+                        negate: true,
+                      },
+                      {
+                        field: 'client.ip',
+                        value: 'client.ip',
+                        type: 'mapping',
+                        negate: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(1);
+          });
+
           it('should create alerts for not matching fields in OR condition', async () => {
             const id = uuidv4();
 
