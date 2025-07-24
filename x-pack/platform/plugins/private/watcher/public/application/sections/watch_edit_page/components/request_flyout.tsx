@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 interface Props {
@@ -36,11 +37,13 @@ export class RequestFlyout extends PureComponent<Props> {
     const endpoint = `PUT _watcher/watch/${id || '<watchId>'}`;
     const request = `${endpoint}\n${this.getEsJson(payload)}`;
 
+    const flyoutTitleId = htmlIdGenerator()('requestFlyoutTitle');
+
     return (
-      <EuiFlyout maxWidth={480} onClose={close}>
+      <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               {id ? (
                 <FormattedMessage
                   id="xpack.watcher.requestFlyout.namedTitle"
