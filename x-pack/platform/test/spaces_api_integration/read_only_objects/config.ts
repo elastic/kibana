@@ -9,17 +9,10 @@ import { resolve } from 'path';
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 
-import { services as apiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../common/services';
-
-export const services = {
-  ...commonServices,
-  esSupertest: apiIntegrationServices.esSupertest,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
-  security: apiIntegrationServices.security,
-};
-
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-src/api_integration/config')
+  );
   const xPackAPITestsConfig = await readConfigFile(
     require.resolve('../../api_integration/config.ts')
   );
@@ -31,7 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [resolve(__dirname, './apis/spaces/read_only_objects.ts')],
-    services,
+    services: {
+      ...kibanaAPITestsConfig.get('services'),
+      ...xPackAPITestsConfig.get('services'),
+    },
     servers: xPackAPITestsConfig.get('servers'),
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),
@@ -50,7 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${readOnlyObjectsPlugin}`,
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
-          saml: { saml1: { order: 1, realm: 'saml1' } },
         })}`,
       ],
     },
