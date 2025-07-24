@@ -88,7 +88,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Serverless - Agentless CIS_AWS edit flow', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/229307
+    describe.skip('Serverless - Agentless CIS_AWS edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newDirectAccessKeyId = `newDirectAccessKey`;
 
