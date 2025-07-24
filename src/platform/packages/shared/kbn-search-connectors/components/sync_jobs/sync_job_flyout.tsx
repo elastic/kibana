@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,8 @@ interface SyncJobFlyoutProps {
 }
 
 export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const filtering = syncJob?.connector.filtering
     ? Array.isArray(syncJob?.connector.filtering)
       ? syncJob?.connector.filtering?.[0]
@@ -42,10 +45,10 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
     : null;
   const visible = !!syncJob;
   return visible ? (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate('searchConnectors.syncJobs.flyout.title', {
               defaultMessage: 'Event log',
             })}
