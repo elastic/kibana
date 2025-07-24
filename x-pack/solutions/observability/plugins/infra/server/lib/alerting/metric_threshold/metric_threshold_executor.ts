@@ -27,11 +27,11 @@ import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  getEcsGroups,
-  getFormattedGroupBy,
-  getGroupByObject,
+  getEcsGroupsFromGrouping,
   unflattenGrouping,
+  getFlattenGrouping,
   type Group,
+  getFormattedGroups,
 } from '@kbn/alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -42,7 +42,6 @@ import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
-  // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
 import type { AdditionalContext } from '../common/utils';
@@ -104,7 +103,7 @@ type MetricThresholdAlertReporter = (params: {
   additionalContext?: AdditionalContext | null;
   evaluationValues?: Array<number | null>;
   groups?: Group[];
-  grouping?: Record<string, any>;
+  grouping?: { flatten?: Record<string, unknown>; unflatten?: Record<string, unknown> };
   thresholds?: Array<number | null>;
 }) => void;
 
@@ -173,8 +172,8 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
           ...flattenAdditionalContext(additionalContext),
-          ...getEcsGroups(groups),
-          [ALERT_GROUPING]: grouping,
+          ...getEcsGroupsFromGrouping(grouping?.flatten),
+          [ALERT_GROUPING]: grouping?.unflatten,
         },
         context: {
           ...contextWithoutAlertDetailsUrl,
@@ -270,14 +269,19 @@ export const createMetricThresholdExecutor =
     );
 
     const resultGroupSet = new Set<string>();
+    const flattenGroupings: Record<string, ReturnType<typeof getFlattenGrouping>> = {};
     for (const resultSet of alertResults) {
       for (const group of Object.keys(resultSet)) {
         resultGroupSet.add(group);
+        if (!flattenGroupings[group]) {
+          flattenGroupings[group] = getFlattenGrouping({
+            groupBy: params.groupBy,
+            bucketKey: resultSet[group].bucketKey,
+          });
+        }
       }
     }
 
-    const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
-    const groupByMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
     const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
@@ -375,20 +379,15 @@ export const createMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);
-        const groups: Group[] = groupByMapping[group];
-        const flattenGrouping = groups
-          ? groups.reduce((acc, { field, value }) => {
-              return { ...acc, [field]: value };
-            }, {} as Record<string, string>)
-          : undefined;
+        const groups: Group[] | undefined = getFormattedGroups(flattenGroupings[group]);
 
-        const grouping = unflattenGrouping(flattenGrouping);
+        const grouping = unflattenGrouping(flattenGroupings[group]);
 
         const alertContext = {
           alertState: stateToAlertMessage[nextState],
           group,
           grouping,
-          groupByKeys: groupByKeysObjectMapping[group],
+          groupByKeys: grouping,
           metric: mapToConditionsLookup(criteria, (c) => {
             if (c.aggType === 'count') {
               return 'count';
@@ -444,17 +443,13 @@ export const createMetricThresholdExecutor =
           evaluationValues,
           groups,
           thresholds,
-          grouping,
+          grouping: { flatten: flattenGroupings[group], unflatten: grouping },
         });
         scheduledActionsCount++;
       }
     }
 
     const recoveredAlerts = alertsClient?.getRecoveredAlerts() ?? [];
-    const groupByKeysObjectForRecovered = getGroupByObject(
-      params.groupBy,
-      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-    );
 
     for (const recoveredAlert of recoveredAlerts) {
       const recoveredAlertId = recoveredAlert.alert.getId();
@@ -470,7 +465,7 @@ export const createMetricThresholdExecutor =
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
-        groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
+        groupByKeys: alertHits?.[ALERT_GROUPING],
         metric: mapToConditionsLookup(criteria, (c) => {
           if (criteria.aggType === 'count') {
             return 'count';

@@ -37,6 +37,7 @@ import {
   getFormattedGroups,
   unflattenGrouping,
   type Group,
+  getFlattenGrouping,
 } from '@kbn/alerting-rule-utils';
 import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
@@ -525,18 +526,6 @@ interface ReducedGroupByResult {
 
 type ReducedGroupByResults = ReducedGroupByResult[];
 
-const getFlattenGrouping = ({
-  groupBy,
-  keyValues,
-}: {
-  groupBy: LogThresholdRuleTypeParams['groupBy'];
-  keyValues: string[];
-}) => {
-  return groupBy?.reduce((acc, value, index) => {
-    return { ...acc, [value]: keyValues[index] };
-  }, {} as Record<string, string>);
-};
-
 const getReducedGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   groupBy: LogThresholdRuleTypeParams['groupBy']
@@ -554,7 +543,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
-        flattenGrouping: getFlattenGrouping({ groupBy, keyValues: Object.values(groupBucket.key) }),
+        flattenGrouping: getFlattenGrouping({ groupBy, bucketKey: groupBucket.key }),
       });
     }
   } else {
@@ -565,7 +554,7 @@ const getReducedGroupByResults = (
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
         context: formatFields(additionalContextHits?.[0]?.fields),
-        flattenGrouping: getFlattenGrouping({ groupBy, keyValues: Object.values(groupBucket.key) }),
+        flattenGrouping: getFlattenGrouping({ groupBy, bucketKey: groupBucket.key }),
       });
     }
   }
