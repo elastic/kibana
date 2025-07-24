@@ -40,6 +40,11 @@ import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
 
+// Number of spaces above which the selector defaults to table view for better scalability
+const VIEW_MODE_THRESHOLD = 20;
+
+type ViewMode = 'grid' | 'table';
+
 interface Props {
   spacesManager: SpacesManager;
   serverBasePath: string;
@@ -52,7 +57,7 @@ interface State {
   spaces: Space[];
   error?: Error;
   customLogo?: string;
-  viewMode: 'grid' | 'table';
+  viewMode: ViewMode;
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -101,7 +106,7 @@ export class SpaceSelector extends Component<Props, State> {
         this.setState({
           loading: false,
           spaces,
-          viewMode: spaces.length > 20 ? 'table' : 'grid',
+          viewMode: spaces.length > VIEW_MODE_THRESHOLD ? 'table' : 'grid',
         });
       })
       .catch((err) => {
@@ -183,13 +188,12 @@ export class SpaceSelector extends Component<Props, State> {
 
           {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-          {!this.state.loading && this.state.viewMode === 'grid' && (
-            <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-          )}
-
-          {!this.state.loading && this.state.viewMode === 'table' && (
-            <SpaceTable spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-          )}
+          {!this.state.loading &&
+            (this.state.viewMode === 'grid' ? (
+              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ) : (
+              <SpaceTable spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            ))}
 
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
             <Fragment>
@@ -273,17 +277,12 @@ export class SpaceSelector extends Component<Props, State> {
     });
   };
 
-  public onViewModeChange = (viewMode: 'grid' | 'table') => {
+  public onViewModeChange = (viewMode: ViewMode) => {
     this.setState({ viewMode });
   };
 
   public getViewToggle = () => {
-    const { spaces, viewMode } = this.state;
-
-    // Only show view toggle if there are spaces to display
-    if (!spaces || spaces.length === 0) {
-      return null;
-    }
+    const { viewMode } = this.state;
 
     const toggleOptions = [
       {
@@ -315,7 +314,7 @@ export class SpaceSelector extends Component<Props, State> {
         })}
         options={toggleOptions}
         idSelected={viewMode}
-        onChange={(id) => this.onViewModeChange(id as 'grid' | 'table')}
+        onChange={(id) => this.onViewModeChange(id as ViewMode)}
         buttonSize="m"
         isIconOnly
       />
@@ -325,12 +324,10 @@ export class SpaceSelector extends Component<Props, State> {
   public getSearchAndToggle = () => {
     const { spaces } = this.state;
 
-    // Show search field if we have enough spaces
-    const showSearch = spaces && spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD;
-    // Show toggle if we have any spaces
-    const showToggle = spaces && spaces.length > 0;
+    // Show search field and toggle if we have enough spaces to warrant them
+    const showSearchAndToggle = spaces && spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD;
 
-    if (!showSearch && !showToggle) {
+    if (!showSearchAndToggle) {
       return null;
     }
 
@@ -341,7 +338,7 @@ export class SpaceSelector extends Component<Props, State> {
     return (
       <>
         <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
-          {showSearch && (
+          {showSearchAndToggle && (
             <EuiFlexItem grow={false}>
               <div
                 css={css`
@@ -358,7 +355,7 @@ export class SpaceSelector extends Component<Props, State> {
               </div>
             </EuiFlexItem>
           )}
-          {showToggle && <EuiFlexItem grow={false}>{this.getViewToggle()}</EuiFlexItem>}
+          {showSearchAndToggle && <EuiFlexItem grow={false}>{this.getViewToggle()}</EuiFlexItem>}
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
       </>

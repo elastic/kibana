@@ -94,14 +94,10 @@ export class SpaceTable extends Component<Props, State> {
       return null;
     }
 
-    const needsTruncation = description.length > 100;
-    const displayDescription = needsTruncation ? description.substr(0, 100) + '…' : description;
-
+    // Use simple text display like the working card view
     return (
-      <EuiTextColor color="subdued">
-        <EuiText size="s" title={description}>
-          {displayDescription}
-        </EuiText>
+      <EuiTextColor color="subdued" className="eui-textBreakWord">
+        <EuiText size="s">{description}</EuiText>
       </EuiTextColor>
     );
   };
@@ -119,13 +115,13 @@ export class SpaceTable extends Component<Props, State> {
     const { pageIndex, pageSize, sortField, sortDirection } = this.state;
 
     // Sort spaces
-    const sortedSpaces = [...spaces].sort((a, b) => {
+    const sortedSpaces = spaces.slice().sort((a, b) => {
       if (!sortField) return 0;
 
-      const aValue = a[sortField] || '';
-      const bValue = b[sortField] || '';
+      const aValue = String(a[sortField] || '');
+      const bValue = String(b[sortField] || '');
 
-      const comparison = aValue.toString().localeCompare(bValue.toString());
+      const comparison = aValue.localeCompare(bValue);
       return sortDirection === 'desc' ? -comparison : comparison;
     });
 
