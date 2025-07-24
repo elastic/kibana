@@ -67,7 +67,7 @@ const fetchDataForValidation = async (
 const fetchSavedPlayground =
   (playgroundId: string, options: FetchSavedPlaygroundOptions) =>
   async (): Promise<SavedPlaygroundForm> => {
-    const { http, client, setLoadErrors } = options;
+    const { http, setLoadErrors } = options;
     let playgroundResp: PlaygroundResponse;
     try {
       playgroundResp = await http.get<PlaygroundResponse>(
