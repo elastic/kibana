@@ -77,8 +77,7 @@ export function updateGlobalNavigation({
     })
     .filter((link): link is AppDeepLink => link !== null);
 
-  updater$.next(() => ({
-    deepLinks: updatedDeepLinks,
+  updater$.next(() => {
     const visibleIn: AppDeepLinkLocations[] = someVisible
       ? ['sideNav', 'home', 'kibanaOverview']
       : [];
@@ -91,5 +90,5 @@ export function updateGlobalNavigation({
       deepLinks: updatedDeepLinks,
       visibleIn,
     };
-  }));
+  });
 }
