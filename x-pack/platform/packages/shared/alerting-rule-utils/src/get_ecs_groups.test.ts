@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEcsGroups, getEcsGroupsFromGrouping } from './get_ecs_groups';
+import { getEcsGroups, getEcsGroupsFromFlattenGrouping } from './get_ecs_groups';
 
 describe('getEcsGroups', () => {
   it('should return all groups if they are string ecs fields', () => {
@@ -64,31 +64,31 @@ describe('getEcsGroups', () => {
   });
 });
 
-describe('getEcsGroupsFromGrouping', () => {
+describe('getEcsGroupsFromFlattenGrouping', () => {
   it('should return all groups if they are string ecs fields', () => {
-    const grouping = { ['host.name']: 'host-1', ['container.id']: 'container-1' };
+    const flattenGrouping = { ['host.name']: 'host-1', ['container.id']: 'container-1' };
 
-    expect(getEcsGroupsFromGrouping(grouping)).toEqual({
+    expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({
       'host.name': 'host-1',
       'container.id': 'container-1',
     });
   });
 
   it('should not return group with field types other than keyword', () => {
-    const grouping = { ['client.as.number']: 'some-value' };
+    const flattenGrouping = { ['client.as.number']: 'some-value' };
 
-    expect(getEcsGroupsFromGrouping(grouping)).toEqual({});
+    expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({});
   });
 
   it('should not return non-ECS group with field', () => {
-    const grouping = { ['non.ecs.field']: 'some-value' };
+    const flattenGrouping = { ['non.ecs.field']: 'some-value' };
 
-    expect(getEcsGroupsFromGrouping(grouping)).toEqual({});
+    expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({});
   });
 
   it('should handle array types assigned non-array values', () => {
-    const grouping = { tags: 'abc' };
+    const flattenGrouping = { tags: 'abc' };
 
-    expect(getEcsGroupsFromGrouping(grouping)).toEqual({ tags: ['abc'] });
+    expect(getEcsGroupsFromFlattenGrouping(flattenGrouping)).toEqual({ tags: ['abc'] });
   });
 });

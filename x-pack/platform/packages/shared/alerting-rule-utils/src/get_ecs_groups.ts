@@ -38,15 +38,15 @@ export const getEcsGroups = (groups: Group[] = []): Record<string, string | stri
   return ecsGroup;
 };
 
-export const getEcsGroupsFromGrouping = (
-  grouping: Record<string, unknown> = {}
+export const getEcsGroupsFromFlattenGrouping = (
+  flattenGrouping: Record<string, unknown> = {}
 ): Record<string, string | string[]> => {
   const ecsGroup: Record<string, string | string[]> = {};
 
-  Object.keys(grouping).forEach((group) => {
-    const ecsValue = getEcsValue(group, grouping[group]);
+  Object.keys(flattenGrouping).forEach((flattenGroup) => {
+    const ecsValue = getEcsValue(flattenGroup, flattenGrouping[flattenGroup]);
     if (ecsValue) {
-      ecsGroup[group] = ecsValue;
+      ecsGroup[flattenGroup] = ecsValue;
     }
   });
 
