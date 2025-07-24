@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { type VisParams } from '@kbn/visualizations-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { FormatOverrides } from './helpers';
+import type { VisParams } from '@kbn/visualizations-plugin/common/types';
 
-export interface TrendConfig {
-  icon: boolean;
-  value: boolean;
-  palette: [string, string, string];
-  baselineValue: number | undefined;
-  borderColor?: string;
-  compareToPrimary: boolean;
-}
+import { FormatOverrides } from './helpers';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
+import type { TrendConfig } from './secondary_metric_info';
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
   defaultMessage: 'N/A',
@@ -48,7 +42,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -57,7 +51,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -65,7 +59,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -152,11 +146,11 @@ function SecondaryMetricValue({
       trendConfig.compareToPrimary
     );
     // If no value is shown and no icon should be shown (i.e. N/A) then do not render the badge at all
-    if (trendConfig.icon && !trendConfig.value && !icon) {
+    if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
       return (
         <span
           data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
-          aria-label={getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)}
+          aria-label={getTrendDescription(trendConfig.showValue, icon != null, valueToShow, iconLabel)}
         />
       );
     }
@@ -165,15 +159,15 @@ function SecondaryMetricValue({
         aria-label={
           // Make the information accessible also for screen readers
           // so show it only when icon only mode to avoid to be reduntant
-          getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)
+          getTrendDescription(trendConfig.showValue, icon != null, valueToShow, iconLabel)
         }
         color={trendColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {trendConfig.value ? valueToShow : null}
-        {trendConfig.value && trendConfig.icon && icon ? ' ' : ''}
-        {trendConfig.icon && icon ? icon : null}
+        {trendConfig.showValue ? valueToShow : null}
+        {trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''}
+        {trendConfig.showIcon && icon ? icon : null}
       </EuiBadge>
     );
   }
@@ -196,7 +190,7 @@ export interface SecondaryMetricProps {
   row: DatatableRow;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   trendConfig?: TrendConfig;
-  color?: string;
+  staticColor?: string;
   getMetricFormatter: (
     accessor: string,
     columns: DatatableColumn[],
@@ -243,8 +237,9 @@ export function SecondaryMetric({
   config,
   getMetricFormatter,
   trendConfig,
-  color,
+  staticColor,
 }: SecondaryMetricProps) {
+
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(
       columns,
@@ -262,8 +257,8 @@ export function SecondaryMetric({
         <SecondaryMetricValue
           rawValue={value}
           formattedValue={metricFormatter?.(value)}
-          trendConfig={color ? undefined : trendConfig}
-          color={color}
+          trendConfig={staticColor ? undefined : trendConfig}
+          color={staticColor}
           formatter={metricFormatter}
         />
       </span>
