@@ -17,4 +17,5 @@ export const PagePath = {
   [Page.assistant]: '/create/assistant',
 };
 
-export const AUTOMATIC_IMPORT_DOCUMENTATION_URL = "https://www.elastic.co/docs/solutions/security/get-started/automatic-import"
+export const AUTOMATIC_IMPORT_DOCUMENTATION_URL =
+  'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
