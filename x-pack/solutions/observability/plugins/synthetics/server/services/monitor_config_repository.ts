@@ -268,14 +268,15 @@ export class MonitorConfigRepository {
     // Calculate how many extra pages to fetch
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;
-    const extraPages = 5; // fetch 5 extra pages from each source
+    // fetch all possible monitors, sort locally since we can't sort across multiple types yet
+    const maximumPageSize = 10_000;
 
     // Fetch extra pages from both sources
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
         ...options,
-        perPage: Math.min(perPage * (extraPages + 1), 5000),
+        perPage: maximumPageSize,
         page: 1,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
