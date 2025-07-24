@@ -28,8 +28,13 @@ import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDet
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../features/workflow_visual_editor/ui').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
