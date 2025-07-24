@@ -19,9 +19,6 @@ disabled:
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
 
-  # Local, to generate es archiver. Necessary to inform config finding script
-  - x-pack/test/security_solution_api_integration/config/serverless/config.local.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts

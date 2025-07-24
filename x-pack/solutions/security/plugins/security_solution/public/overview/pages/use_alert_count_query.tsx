@@ -60,7 +60,6 @@ export const useAlertCountQuery = ({
         },
       },
     };
-    console.log('currentQuery:', JSON.stringify(query));
     return query;
   }, [additionalFilters, from, to]);
 
