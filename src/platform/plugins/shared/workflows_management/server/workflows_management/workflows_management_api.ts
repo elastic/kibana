@@ -105,6 +105,13 @@ export class WorkflowsManagementApi {
       throw new Error('Scheduler service not set');
     }
     const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+
+    if (parsedYaml.error) {
+      // TODO: handle error properly
+      // It should throw BadRequestError in the API
+      throw parsedYaml.error;
+    }
+
     // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 

@@ -77,6 +77,11 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
         await new Promise((resolve) => setTimeout(resolve, sleepTime));
         return { output: step.with?.message, error: undefined };
+      } else if (step.type === 'delay') {
+        const delayTime = step.with?.delay ?? 1000;
+        // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delayTime));
+        return { output: `Delayed for ${delayTime}ms`, error: undefined };
       }
 
       const output = await this.connectorExecutor.execute(
