@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { shallow, mount } from 'enzyme';
 import React from 'react';
-import { keys } from 'lodash';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
-import { ConditionEntryInput, ConditionEntryInputProps } from '.';
-import type { EuiSuperSelectProps } from '@elastic/eui';
-import { AppContextTestRender, createAppRootMockRenderer } from '@kbn/security-solution-plugin/public/common/mock/endpoint';
+import type { ConditionEntryInputProps } from '.';
+import { ConditionEntryInput } from '.';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -55,22 +54,25 @@ describe('Condition entry input', () => {
 
   afterEach(() => {
     cleanup();
-  })
+  });
 
   const render = () => {
-    return (renderResult = mockedContext.render(
-      <ConditionEntryInput {...props} />));
+    return (renderResult = mockedContext.render(<ConditionEntryInput {...props} />));
   };
 
-  it.each(
-    [
-      { name: 'Hash md5, sha1, or sha256', expectedCall: ConditionEntryField.HASH },
-      { name: 'Path The full path of the application', expectedCall: ConditionEntryField.PATH },
-      { name: 'Signature The signer of the application', expectedCall: ConditionEntryField.SIGNER },
-      { name: 'Signature The signer of the application', expectedCall: ConditionEntryField.SIGNER_MAC },
-    ])('selecting `$name` should call onChange with `$expectedCall`', async ({ name, expectedCall }) => {
+  it.each([
+    { name: 'Hash md5, sha1, or sha256', expectedCall: ConditionEntryField.HASH },
+    { name: 'Path The full path of the application', expectedCall: ConditionEntryField.PATH },
+    { name: 'Signature The signer of the application', expectedCall: ConditionEntryField.SIGNER },
+    {
+      name: 'Signature The signer of the application',
+      expectedCall: ConditionEntryField.SIGNER_MAC,
+    },
+  ])(
+    'selecting `$name` should call onChange with `$expectedCall`',
+    async ({ name, expectedCall }) => {
       if (expectedCall === ConditionEntryField.SIGNER_MAC) {
-        props = { ...props, os: OperatingSystem.MAC }
+        props = { ...props, os: OperatingSystem.MAC };
       }
       render();
       expect(onChangeMock).toHaveBeenCalledTimes(0);
@@ -79,8 +81,9 @@ describe('Condition entry input', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByRole('option', { name }));
       expect(onChangeMock).toHaveBeenCalledTimes(1);
-      expect(onChangeMock).toHaveBeenCalledWith({ ...baseEntry, field: expectedCall }, baseEntry)
-    });
+      expect(onChangeMock).toHaveBeenCalledWith({ ...baseEntry, field: expectedCall }, baseEntry);
+    }
+  );
 
   it('should call on remove for field input', async () => {
     render();
@@ -110,11 +113,11 @@ describe('Condition entry input', () => {
   });
 
   it('should not call on visited for field change if value is empty', async () => {
-    props = { ...props, entry: { ...baseEntry, value: '' } }
+    props = { ...props, entry: { ...baseEntry, value: '' } };
     render();
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
     const field = renderResult.getByTestId(`${formPrefix}-field`);
-    await fireEvent.change(field)
+    await fireEvent.change(field);
     await fireEvent.blur(field);
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
   });
@@ -134,18 +137,20 @@ describe('Condition entry input', () => {
     );
   });
 
-  it.each(
-    [
-      { os: OperatingSystem.WINDOWS, expectedLength: 3 },
-      { os: OperatingSystem.LINUX, expectedLength: 2 },
-      { os: OperatingSystem.MAC, expectedLength: 3 },
-    ])(`should be able to select $expectedLength options when OS is $os`, async ({ os, expectedLength }) => {
-      props = { ...props, os }
+  it.each([
+    { os: OperatingSystem.WINDOWS, expectedLength: 3 },
+    { os: OperatingSystem.LINUX, expectedLength: 2 },
+    { os: OperatingSystem.MAC, expectedLength: 3 },
+  ])(
+    `should be able to select $expectedLength options when OS is $os`,
+    async ({ os, expectedLength }) => {
+      props = { ...props, os };
       render();
       await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
       const options = screen.getAllByRole('option');
       expect(options).toHaveLength(expectedLength);
-    });
+    }
+  );
 
   it('should have operator value selected when field is HASH', () => {
     render();
@@ -154,7 +159,7 @@ describe('Condition entry input', () => {
   });
 
   it('should show operator dropdown with two values when field is PATH', async () => {
-    props = { ...props, entry: { ...baseEntry, field: ConditionEntryField.PATH } }
+    props = { ...props, entry: { ...baseEntry, field: ConditionEntryField.PATH } };
     render();
     await userEvent.click(screen.getByTestId(`${formPrefix}-operator`));
     const options = screen.getAllByRole('option');
