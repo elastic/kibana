@@ -583,6 +583,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     resourcesLabelKeyDownHandler,
     addResourcesDecorator,
     ResourcesPopover,
+    resourcesOpenStatusRef,
   } = useResourcesCommand(
     editor1,
     editorModel,
@@ -911,7 +912,9 @@ export const ESQLEditor = memo(function ESQLEditor({
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
                     editor.onMouseDown((e) => {
                       setTimeout(() => {
-                        editor.focus();
+                        if (!resourcesOpenStatusRef.current) {
+                          editor.focus();
+                        }
                       }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setDatePickerPopoverPosition({});

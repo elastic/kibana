@@ -250,5 +250,6 @@ export const useResourcesCommand = (
     resourcesLabelClickHandler,
     resourcesLabelKeyDownHandler,
     ResourcesPopover: MemoizedResourcesPopover,
+    resourcesOpenStatusRef,
   };
 };
