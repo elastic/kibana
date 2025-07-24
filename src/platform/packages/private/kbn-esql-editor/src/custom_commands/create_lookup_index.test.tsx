@@ -31,7 +31,9 @@ describe('appendIndexToJoinCommand', () => {
       { lineNumber: 1, column: 44 } as monaco.Position,
       'new_index'
     );
-    expect(result).toBe('FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10');
+    expect(result).toBe(`FROM kibana_sample_data_logs
+  | LOOKUP JOIN new_index
+  | LIMIT 10`);
   });
 
   it('should append index name to the join command in multi-line query', () => {
@@ -53,9 +55,10 @@ describe('appendIndexToJoinCommand', () => {
       { lineNumber: 1, column: 82 } as monaco.Position,
       'another_index'
     );
-    expect(result).toBe(
-      'FROM kibana_sample_data_logs | LOOKUP JOIN new_index ON some_field | LOOKUP JOIN another_index | LIMIT 10'
-    );
+    expect(result).toBe(`FROM kibana_sample_data_logs
+  | LOOKUP JOIN new_index ON some_field
+  | LOOKUP JOIN another_index
+  | LIMIT 10`);
   });
 
   it('should not append index name if an index argument with the same name is already present', () => {
@@ -73,6 +76,8 @@ describe('appendIndexToJoinCommand', () => {
       { lineNumber: 1, column: 53 } as monaco.Position,
       'new_index_2'
     );
-    expect(result).toBe('FROM kibana_sample_data_logs | LOOKUP JOIN new_index_2 | LIMIT 10');
+    expect(result).toBe(`FROM kibana_sample_data_logs
+  | LOOKUP JOIN new_index_2
+  | LIMIT 10`);
   });
 });

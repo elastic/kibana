@@ -36,34 +36,43 @@ export function appendIndexToJoinCommand(
   initialIndexOrPos: string | monaco.Position,
   createdIndexName: string
 ): string {
-  if (!createdIndexName) return query;
+  if (!createdIndexName) return query; // nothing to do
 
   // Resolve the “target” index name
   let targetName: string | undefined;
 
   if (typeof initialIndexOrPos === 'string') {
     targetName = initialIndexOrPos.trim();
-  } else {
-    // word under cursor
-    const { lineNumber, column } = initialIndexOrPos;
-    const line = query.split('\n')[lineNumber - 1] ?? '';
-    const re = /[A-Za-z0-9_.]+/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(line))) {
-      if (m.index <= column - 1 && re.lastIndex >= column - 1) {
-        targetName = m[0];
-        break;
-      }
-    }
   }
 
-  if (!targetName || targetName === createdIndexName) return query;
+  // If we came through name-path and it equals new name – nothing to do
+  if (typeof initialIndexOrPos === 'string' && targetName === createdIndexName) {
+    return query;
+  }
 
   // Parse and walk the AST
   const { root } = Parser.parse(query);
 
+  // Compute cursor offset once (if needed)
+  const cursorOffset: number | undefined =
+    typeof initialIndexOrPos === 'object'
+      ? (() => {
+          const { lineNumber, column } = initialIndexOrPos;
+          const lines = query.split('\n');
+          let off = 0;
+          for (let i = 0; i < lineNumber - 1; i++) {
+            off += lines[i].length + 1;
+          }
+          return off + column - 1;
+        })()
+      : undefined;
+
+  // Pick the JOIN command to modify
+  let selectedJoin: any | undefined;
+  let smallestDistance = Number.MAX_SAFE_INTEGER;
+
   for (const joinCmd of mutate.commands.join.list(root)) {
-    const firstArg = joinCmd.args[0] as any; // source | as
+    const firstArg = joinCmd.args[0] as any | undefined; // may be undefined
     let src: ESQLSource | undefined;
 
     if (firstArg?.type === 'source') {
@@ -72,25 +81,51 @@ export function appendIndexToJoinCommand(
       src = firstArg.args[0] as ESQLSource; // AS (<source>, <alias>)
     }
 
-    if (src && src.name === targetName) {
-      // Build & insert replacement source
-      const replacement: ESQLSource = {
-        type: 'source',
-        sourceType: 'index',
-        incomplete: false,
-        location: {
-          min: src.location?.min ?? 0,
-          max: (src.location?.min ?? 0) + createdIndexName.length,
-        },
-        text: createdIndexName,
-        name: createdIndexName,
-      };
+    const matchesByName = targetName !== undefined && src?.name === targetName;
 
-      const idx = joinCmd.args.indexOf(firstArg);
-      mutate.generic.commands.args.remove(root as any, firstArg);
-      mutate.generic.commands.args.insert(joinCmd, replacement, idx);
-      break; // only first match
+    if (matchesByName) {
+      selectedJoin = { joinCmd, src, firstArg };
+      break;
     }
+
+    if (cursorOffset !== undefined && joinCmd.location) {
+      const { min, max } = joinCmd.location;
+      let distance = 0;
+      if (cursorOffset < min) distance = min - cursorOffset;
+      else if (cursorOffset > max) distance = cursorOffset - max;
+
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        selectedJoin = { joinCmd, src, firstArg };
+      }
+    }
+  }
+
+  if (!selectedJoin) return query; // no join found
+
+  const { joinCmd, src, firstArg } = selectedJoin;
+
+  // If existing source already equals new name, nothing to do
+  if (src && src.name === createdIndexName) return query;
+
+  const newSource: ESQLSource = {
+    type: 'source',
+    sourceType: 'index',
+    incomplete: false,
+    location: src?.location ?? {
+      min: joinCmd.location?.min ?? 0,
+      max: (joinCmd.location?.min ?? 0) + createdIndexName.length,
+    },
+    text: createdIndexName,
+    name: createdIndexName,
+  };
+
+  if (src) {
+    const idx = joinCmd.args.indexOf(firstArg);
+    mutate.generic.commands.args.remove(root as any, firstArg);
+    mutate.generic.commands.args.insert(joinCmd, newSource, idx);
+  } else {
+    mutate.generic.commands.args.insert(joinCmd, newSource, 0);
   }
 
   return BasicPrettyPrinter.multiline(root);
@@ -131,10 +166,12 @@ export const useLookupIndexCommand = (
       border-width: ${euiTheme.border.thin};
       color: ${euiTheme.colors.text};
     }
+
     .${lookupIndexAddBadgeClassName} {
       border-color: ${euiTheme.colors.backgroundBaseDanger};
       background-color: ${euiTheme.colors.backgroundBaseDanger};
     }
+
     .${lookupIndexEditBadgeClassName} {
       border-color: ${euiTheme.colors.backgroundBasePrimary};
       background-color: ${euiTheme.colors.backgroundBasePrimary};
