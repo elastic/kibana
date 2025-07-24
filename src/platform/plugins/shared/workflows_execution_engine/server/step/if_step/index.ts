@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { IfStartStepImpl } from './if_start_step_impl';
-export { IfEndStepImpl } from './if_end_step_impl';
+export { IfStartNodeImpl } from './if_start_step_impl';
+export { IfEndNodeImpl } from './if_end_step_impl';

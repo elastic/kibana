@@ -10,7 +10,7 @@
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { RunStepResult, StepImplementation } from '../step_base';
 
-export class IfEndStepImpl implements StepImplementation {
+export class IfEndNodeImpl implements StepImplementation {
   // It must be IfEndNode (or IfExitNode)
   constructor(private step: any, private contextManager: WorkflowContextManager) {}
 

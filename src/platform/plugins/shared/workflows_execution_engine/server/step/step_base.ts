@@ -58,9 +58,6 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
   public async run(): Promise<RunStepResult> {
     const stepName = this.getName();
 
-    // Set step context for logging
-    // this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
-
     // Log step start
     this.contextManager.logStepStart(stepName);
     await this.contextManager.startStep((this.step as any).id);

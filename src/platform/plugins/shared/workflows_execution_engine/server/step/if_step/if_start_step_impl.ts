@@ -11,7 +11,7 @@ import { IfStep } from '@kbn/workflows';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { RunStepResult, StepImplementation } from '../step_base';
 
-export class IfStartStepImpl implements StepImplementation {
+export class IfStartNodeImpl implements StepImplementation {
   constructor(private step: IfStep, private contextManager: WorkflowContextManager) {}
 
   public async run(): Promise<RunStepResult> {

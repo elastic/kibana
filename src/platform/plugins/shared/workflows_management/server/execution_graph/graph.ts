@@ -19,78 +19,91 @@ import { omit } from 'lodash';
 import { IfElseEndNode, IfElseNode } from './nodes/branching_nodes';
 
 function getNodeId(node: BaseStep): string {
+  // TODO: This is a workaround for the fact that some steps do not have an `id` field.
+  // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
   return (node as any).id || node.name;
 }
 
-export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): graphlib.Graph {
-  function visitStep(
-    graph: graphlib.Graph,
-    previousStep: any,
-    currentStep: any,
-    nextStep: any
-  ): any {
-    const currentStepId = getNodeId(currentStep);
-    const previousStepId = getNodeId(previousStep);
+function visitAbstractStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: any,
+  nextStep: any
+): any {
+  const currentStepId = getNodeId(currentStep);
+  const previousStepId = getNodeId(previousStep);
 
-    if (currentStep.type === 'if') {
-      const ifElseStep = currentStep as IfStep;
-      const trueSteps: BaseStep[] = ifElseStep.steps || [];
-      const falseSteps: BaseStep[] = ifElseStep.else || [];
-      const ifElseNode: IfElseNode = {
-        ...omit(ifElseStep, ['steps', 'else']),
-        id: currentStepId,
-        trueNodeIds: [],
-        falseNodeIds: [],
-      };
-      const ifElseStartId = currentStepId;
-      const ifElseEnd: IfElseEndNode = {
-        type: 'if-end',
-        id: ifElseStartId + '_end',
-        startNodeId: ifElseStartId,
-      };
-
-      let ifTruePreviousStep = ifElseStep;
-      let ifTrueNextStep = trueSteps[0];
-      trueSteps.forEach((ifTrueCurrentStep: any, index: number) => {
-        ifElseNode.trueNodeIds.push(ifTrueCurrentStep.id);
-        visitStep(graph, ifTruePreviousStep, ifTrueCurrentStep, ifTrueNextStep);
-        ifTruePreviousStep = ifTrueCurrentStep;
-        ifTrueNextStep = trueSteps[index + 1];
-      });
-
-      let ifFalsePreviousStep = ifElseStep;
-      let ifFalseNextStep = falseSteps[0];
-      falseSteps.forEach((ifFalseCurrentStep: any, index: number) => {
-        ifElseNode.falseNodeIds.push(ifFalseCurrentStep.id);
-        visitStep(graph, ifFalsePreviousStep, ifFalseCurrentStep, ifFalseNextStep);
-        ifFalsePreviousStep = ifFalseCurrentStep;
-        ifFalseNextStep = falseSteps[index + 1];
-      });
-
-      const lastIfTrueStep = trueSteps[trueSteps.length - 1];
-      const lastIfFalseStep = falseSteps[falseSteps.length - 1];
-
-      graph.setNode(ifElseEnd.id, ifElseEnd);
-      graph.setEdge(getNodeId(lastIfTrueStep), ifElseEnd.id);
-      graph.setEdge(getNodeId(lastIfFalseStep), ifElseEnd.id);
-      graph.setNode(ifElseStartId, ifElseNode);
-
-      if (previousStep) {
-        graph.setEdge(previousStepId, ifElseStartId);
-      }
-
-      return ifElseEnd;
-    }
-
-    graph.setNode(currentStep.id, currentStep);
-
-    if (previousStep) {
-      graph.setEdge(previousStepId, currentStepId);
-    }
-
-    return currentStep;
+  if (currentStep.type === 'if') {
+    return visitIfStep(graph, previousStep, currentStep, nextStep);
   }
 
+  graph.setNode(currentStep.id, currentStep);
+
+  if (previousStep) {
+    graph.setEdge(previousStepId, currentStepId);
+  }
+
+  return currentStep;
+}
+
+export function visitIfStep(
+  graph: graphlib.Graph,
+  previousStep: any,
+  currentStep: any,
+  nextStep: any
+): any {
+  const currentStepId = getNodeId(currentStep);
+  const previousStepId = getNodeId(previousStep);
+  const ifElseStep = currentStep as IfStep;
+  const trueSteps: BaseStep[] = ifElseStep.steps || [];
+  const falseSteps: BaseStep[] = ifElseStep.else || [];
+  const ifElseNode: IfElseNode = {
+    ...omit(ifElseStep, ['steps', 'else']),
+    id: currentStepId,
+    trueNodeIds: [],
+    falseNodeIds: [],
+  };
+  const ifElseStartId = currentStepId;
+  const ifElseEnd: IfElseEndNode = {
+    type: 'if-end',
+    id: ifElseStartId + '_end',
+    startNodeId: ifElseStartId,
+  };
+
+  let ifTruePreviousStep = ifElseStep;
+  let ifTrueNextStep = trueSteps[0];
+  trueSteps.forEach((ifTrueCurrentStep: any, index: number) => {
+    ifElseNode.trueNodeIds.push(ifTrueCurrentStep.id);
+    visitAbstractStep(graph, ifTruePreviousStep, ifTrueCurrentStep, ifTrueNextStep);
+    ifTruePreviousStep = ifTrueCurrentStep;
+    ifTrueNextStep = trueSteps[index + 1];
+  });
+
+  let ifFalsePreviousStep = ifElseStep;
+  let ifFalseNextStep = falseSteps[0];
+  falseSteps.forEach((ifFalseCurrentStep: any, index: number) => {
+    ifElseNode.falseNodeIds.push(ifFalseCurrentStep.id);
+    visitAbstractStep(graph, ifFalsePreviousStep, ifFalseCurrentStep, ifFalseNextStep);
+    ifFalsePreviousStep = ifFalseCurrentStep;
+    ifFalseNextStep = falseSteps[index + 1];
+  });
+
+  const lastIfTrueStep = trueSteps[trueSteps.length - 1];
+  const lastIfFalseStep = falseSteps[falseSteps.length - 1];
+
+  graph.setNode(ifElseEnd.id, ifElseEnd);
+  graph.setEdge(getNodeId(lastIfTrueStep), ifElseEnd.id);
+  graph.setEdge(getNodeId(lastIfFalseStep), ifElseEnd.id);
+  graph.setNode(ifElseStartId, ifElseNode);
+
+  if (previousStep) {
+    graph.setEdge(previousStepId, ifElseStartId);
+  }
+
+  return ifElseEnd;
+}
+
+export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   let previousStep: BaseStep | null = null;
 
@@ -99,7 +112,7 @@ export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): 
       index < workflow.definition.workflow.steps.length - 1
         ? workflow.definition.workflow.steps[index + 1]
         : null;
-    previousStep = visitStep(graph, previousStep, currentStep, nextStep);
+    previousStep = visitAbstractStep(graph, previousStep, currentStep, nextStep);
   });
 
   return graph;
