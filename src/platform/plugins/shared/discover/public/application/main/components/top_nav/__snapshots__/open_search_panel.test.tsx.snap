@@ -2,6 +2,7 @@
 
 exports[`OpenSearchPanel render 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   data-test-subj="loadSearchForm"
   onClose={[MockFunction]}
   ownFocus={true}
@@ -12,7 +13,9 @@ exports[`OpenSearchPanel render 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        id="generated-id"
+      >
         <MemoizedFormattedMessage
           defaultMessage="Open Discover session"
           id="discover.topNav.openSearchPanel.openSearchTitle"
