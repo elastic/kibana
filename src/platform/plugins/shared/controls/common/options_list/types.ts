@@ -27,6 +27,7 @@ export interface OptionsListDisplaySettings {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+  awaitInitialAvailableOptions?: boolean;
 }
 
 export interface OptionsListControlState
@@ -50,7 +51,7 @@ export interface OptionsListControlState
 export type OptionsListSuggestions = Array<{
   value: OptionsListSelection;
   docCount?: number;
-  key?: string;
+  key?: string; // For static values, this allows the value text to be changed and updated in the UI automatically
 }>;
 
 /**

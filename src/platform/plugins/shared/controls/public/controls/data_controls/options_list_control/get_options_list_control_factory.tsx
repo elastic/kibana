@@ -185,9 +185,23 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         const successResponse = result as OptionsListSuccessResponse;
         temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
         temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality ?? 0);
-        temporaryStateManager.api.setInvalidSelections(
-          new Set(successResponse.invalidSelections ?? [])
-        );
+
+        if (dataControlManager.api.input$.getValue() === ControlInputOption.STATIC) {
+          // For static values, invalid selections means an option was deleted from the control. Deselect them instead
+          // of displating them
+          temporaryStateManager.api.setInvalidSelections(new Set([]));
+          const { invalidSelections } = successResponse;
+          if (invalidSelections?.length) {
+            const currentSelections = selectionsManager.api.selectedOptions$.getValue() ?? [];
+            selectionsManager.api.setSelectedOptions(
+              currentSelections.filter((selection) => !invalidSelections.includes(selection))
+            );
+          }
+        } else {
+          temporaryStateManager.api.setInvalidSelections(
+            new Set(successResponse.invalidSelections ?? [])
+          );
+        }
 
         // reset the request size back to the minimum (if it's not already)
         if (temporaryStateManager.api.requestSize$.getValue() !== MIN_OPTIONS_LIST_REQUEST_SIZE) {
@@ -352,6 +366,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             hideExclude: 'skip',
             hideExists: 'skip',
             hideSort: 'skip',
+            awaitInitialAvailableOptions: 'skip',
           };
         },
         defaultState: {
@@ -560,6 +575,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
                   hideExclude: isESQLOutputMode || hideExclude,
                   hideExists: isESQLOutputMode || hideExists,
                   hideSort: isESQLOutputMode || isESQLInputMode || isStaticInputMode || hideSort,
+                  awaitInitialAvailableOptions: isStaticInputMode,
                 },
               }}
             >
