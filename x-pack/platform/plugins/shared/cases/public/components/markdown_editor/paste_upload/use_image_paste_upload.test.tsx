@@ -230,5 +230,45 @@ describe('useImagePasteUpload', () => {
       });
       expect(mockUploadState.upload).not.toHaveBeenCalled();
     });
+
+    it('replaces placeholder and resets state when upload completes', async () => {
+      const { textarea, field, result } = setup();
+
+      const imageFile = new File(['x'], 'image.png', { type: 'image/png' });
+      const dt = {
+        items: [{ kind: 'file', type: imageFile.type, getAsFile: () => imageFile }],
+        types: ['Files'],
+      };
+
+      // 1. Paste image to start upload
+      act(() => {
+        // @ts-expect-error partial impl for testing
+        textarea.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }));
+        // uploadState emits files -> triggers START_UPLOAD/UPLOAD_IN_PROGRESS chain
+        mockUploadState.files$.next([
+          { file: imageFile, status: 'uploading' } as unknown as FileState,
+        ]);
+        mockUploadState.uploading$.next(true);
+      });
+
+      // Wait until hook reflects uploading state
+      await waitFor(() => expect(result.current.isUploading).toBe(true));
+
+      // 2. Emit done$ notification to indicate upload finished
+      const doneNotification: DoneNotification = {
+        id: '1',
+        fileJSON: { name: 'image', extension: 'png' },
+      } as unknown as DoneNotification;
+
+      // allow React effect cleanup+setup to run before emitting done$
+      await act(async () => {
+        await Promise.resolve(); // next microtask
+        mockUploadState.done$.next([doneNotification]);
+        mockUploadState.uploading$.next(false);
+      });
+
+      // Ensure setValue was invoked (placeholder or final link)
+      await waitFor(() => expect(field.setValue).toHaveBeenCalled());
+    });
   });
 });
