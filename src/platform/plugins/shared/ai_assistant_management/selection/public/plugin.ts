@@ -12,11 +12,13 @@ import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import type { SpacesApi, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { switchMap, filter } from 'rxjs/operators';
 import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { once } from 'lodash';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
@@ -46,6 +48,8 @@ export class AIAssistantManagementPlugin
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
+  private space$ = new Subject<SpacesApi | undefined>();
+  private spacesSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
@@ -60,51 +64,12 @@ export class AIAssistantManagementPlugin
       return {};
     }
 
-    // Check if current space solution is classic - only enable for classic spaces
-    core.getStartServices().then(async ([coreStart, { spaces }]) => {
-      if (spaces) {
-        const currentSpace = await firstValueFrom(spaces.getActiveSpace$());
-        const isClassicSpace =
-          currentSpace?.solution === 'classic' || currentSpace?.solution === undefined;
-
-        if (!isClassicSpace) {
-          // Don't register for non-classic spaces (oblt, security, es)
-          return;
-        }
-      }
-
-      this.registerPlugin(core, { home, management });
-    });
-
-    return {};
-  }
-
-  private registerPlugin(
-    core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>,
-    { home, management }: Pick<SetupDependencies, 'home' | 'management'>
-  ) {
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'ai_assistant',
-        title: i18n.translate('aiAssistantManagementSelection.app.title', {
-          defaultMessage: 'AI Assistants',
-        }),
-        description: i18n.translate('aiAssistantManagementSelection.app.description', {
-          defaultMessage: 'Manage your AI Assistants.',
-        }),
-        icon: 'sparkles',
-        path: '/app/management/ai/aiAssistantManagementSelection',
-        showOnHomePage: false,
-        category: 'admin',
-      });
-    }
-
-    management.sections.section.ai.registerApp({
+    const managementApp = management.sections.section.ai.registerApp({
       id: 'aiAssistantManagementSelection',
       title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',
       }),
-      order: 1,
+      order: 2,
       keywords: ['ai'],
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
@@ -118,10 +83,42 @@ export class AIAssistantManagementPlugin
       },
     });
 
+    // Disable in non-classic spaces; individual AI apps appear in the nav.
+    this.spacesSubscription = this.space$
+      .pipe(
+        filter((spaces): spaces is SpacesApi => spaces !== undefined),
+        switchMap((spaces) => spaces.getActiveSpace$())
+      )
+      .subscribe((space) => {
+        const isClassicSpace = space?.solution === 'classic' || space?.solution === undefined;
+        if (!isClassicSpace) {
+          managementApp.disable();
+        }
+
+        if (home && isClassicSpace) {
+          once(() =>
+            home.featureCatalogue.register({
+              id: 'ai_assistant',
+              title: i18n.translate('aiAssistantManagementSelection.app.title', {
+                defaultMessage: 'AI Assistants',
+              }),
+              description: i18n.translate('aiAssistantManagementSelection.app.description', {
+                defaultMessage: 'Manage your AI Assistants.',
+              }),
+              icon: 'sparkles',
+              path: '/app/management/ai/aiAssistantManagementSelection',
+              showOnHomePage: false,
+              category: 'admin',
+            })
+          );
+        }
+      });
+
     return {};
   }
 
-  public start(coreStart: CoreStart) {
+  public start(coreStart: CoreStart, { spaces }: StartDependencies) {
+    this.space$.next(spaces);
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
@@ -131,5 +128,11 @@ export class AIAssistantManagementPlugin
     return {
       aiAssistantType$: aiAssistantType$.asObservable(),
     };
+  }
+
+  public stop() {
+    if (this.spacesSubscription) {
+      this.spacesSubscription.unsubscribe();
+    }
   }
 }
