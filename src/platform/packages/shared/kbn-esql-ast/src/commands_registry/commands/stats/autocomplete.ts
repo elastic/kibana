@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+import { isAssignment } from '../../../ast/is';
 import { ICommandCallbacks, Location } from '../../types';
-import type { ESQLCommand, ESQLCommandOption, ESQLColumn, ESQLFunction } from '../../../types';
+import type {
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLAstItem,
+} from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/utils/functions';
 import {
@@ -20,7 +27,6 @@ import {
   getDateHistogramCompletionItem,
 } from '../../complete_items';
 import {
-  pushItUpInTheList,
   columnExists,
   handleFragment,
   getControlSuggestionIfSupported,
@@ -179,23 +185,57 @@ export async function autocomplete(
     case 'grouping_expression_after_assignment': {
       const histogramBarTarget = context?.histogramBarTarget ?? 0;
 
-      const columnSuggestions = pushItUpInTheList(
-        await callbacks?.getByType('any', [], { openSuggestions: true }),
-        true
-      );
+      // TODO - incorporate columns to ignore
+      const ignored = alreadyUsedColumns(command);
 
-      return suggestColumns(
-        columnSuggestions,
-        [
-          ...getFunctionSuggestions(
-            { location: Location.STATS_BY },
-            callbacks?.hasMinimumLicenseRequired
-          ),
-          getDateHistogramCompletionItem(histogramBarTarget),
-        ],
+      // Find expression root
+
+      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
+      const assignment = byNode.args[byNode.args.length - 1];
+      const rightHandAssignment = isAssignment(assignment)
+        ? assignment.args[assignment.args.length - 1]
+        : undefined;
+      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
+
+      // @TODO the marker shouldn't be leaking through here
+      if (isMarkerNode(expressionRoot)) {
+        expressionRoot = undefined;
+      }
+
+      // guaranteed by the getPosition function, but we check it here for type safety
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions: ISuggestionItem[] = [];
+
+      if (!expressionRoot) {
+        suggestions.push(getDateHistogramCompletionItem(histogramBarTarget));
+      }
+
+      const expressionSuggestions = await suggestForExpression({
         innerText,
-        context
-      );
+        getColumnsByType: callbacks?.getByType,
+        expressionRoot,
+        location: Location.STATS_BY,
+        context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+      });
+
+      suggestions.push(...expressionSuggestions);
+
+      if (
+        isExpressionComplete(
+          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
+          innerText
+        )
+      ) {
+        suggestions.push(
+          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
+        );
+      }
+
+      return suggestions;
     }
 
     case 'grouping_expression_without_assignment': {
@@ -204,10 +244,12 @@ export async function autocomplete(
       // TODO - incorporate columns to ignore
       const ignored = alreadyUsedColumns(command);
 
-      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
+      let expressionRoot: ESQLAstItem | undefined;
+      if (!/,\s*$/.test(innerText)) {
+        const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
 
-      const expressionRoot = byNode.args[byNode.args.length - 1];
-
+        expressionRoot = byNode.args[byNode.args.length - 1];
+      }
       // guaranteed by the getPosition function, but we check it here for type safety
       if (Array.isArray(expressionRoot)) {
         return [];

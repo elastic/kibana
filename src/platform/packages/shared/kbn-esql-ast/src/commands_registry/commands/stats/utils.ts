@@ -79,7 +79,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !isAssignmentComplete(lastOptionArg)) {
+    if (isAssignment(lastOptionArg)) {
       return 'grouping_expression_after_assignment';
     }
 

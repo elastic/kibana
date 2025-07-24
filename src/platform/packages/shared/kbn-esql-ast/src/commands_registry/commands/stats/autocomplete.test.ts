@@ -105,6 +105,12 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
+  /**
+   * @TODO check
+   * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword not /
+   * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword, /
+   */
+
   const suggest = async (query: string) => {
     const correctedQuery = correctQuerySyntax(query);
     const { ast } = parse(correctedQuery, { withFormatting: true });
