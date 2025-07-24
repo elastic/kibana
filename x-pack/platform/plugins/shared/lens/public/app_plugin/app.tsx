@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -76,6 +76,7 @@ export function App({
   initialContext,
   coreStart,
 }: LensAppProps) {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const lensAppServices = useKibana<LensAppServices>().services;
 
   const {
@@ -509,10 +510,12 @@ export function App({
       )}
       {shouldShowGoBackToVizEditorModal && (
         <EuiConfirmModal
-          maxWidth={600}
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
           })}
+          titleProps={{ id: confirmModalTitleId }}
+          maxWidth={600}
           onCancel={closeGoBackToVizEditorModal}
           onConfirm={navigateToVizEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {

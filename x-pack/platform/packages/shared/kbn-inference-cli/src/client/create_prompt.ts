@@ -9,6 +9,7 @@ import {
   BoundPromptAPI,
   ChatCompleteResponse,
   ChatCompletionEvent,
+  Prompt,
   PromptOptions,
   ToolOptionsOfPrompt,
   UnboundPromptOptions,
@@ -23,7 +24,9 @@ import { InferenceCliClientOptions } from './types';
 export function createPrompt(options: InferenceCliClientOptions): BoundPromptAPI;
 
 export function createPrompt({ connector, kibanaClient, signal }: InferenceCliClientOptions) {
-  return <TPromptOptions extends PromptOptions>(options: UnboundPromptOptions<TPromptOptions>) => {
+  return <TPrompt extends Prompt, TPromptOptions extends PromptOptions<TPrompt>>(
+    options: UnboundPromptOptions<TPrompt>
+  ) => {
     const {
       abortSignal,
       maxRetries,
