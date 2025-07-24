@@ -38,7 +38,7 @@ export const Flyout = ({
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <FormattedMessage id="session_mgmt.flyout" defaultMessage="Background searches" />
+          <FormattedMessage id="data.session_mgmt.flyout" defaultMessage="Background searches" />
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
