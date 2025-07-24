@@ -17,7 +17,8 @@ export function registerSearchLinks(
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
   isServerless: boolean,
-  isEsqlEnabled?: boolean
+  isEsqlEnabled: boolean,
+  canUploadFile: boolean
 ) {
   appUpdater.next(() => ({
     keywords: [
@@ -25,6 +26,12 @@ export function registerSearchLinks(
         defaultMessage: 'ML',
       }),
     ],
-    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, isServerless, isEsqlEnabled),
+    deepLinks: getDeepLinks(
+      isFullLicense,
+      mlCapabilities,
+      isServerless,
+      isEsqlEnabled,
+      canUploadFile
+    ),
   }));
 }

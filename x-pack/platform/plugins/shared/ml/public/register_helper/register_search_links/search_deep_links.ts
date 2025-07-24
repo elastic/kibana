@@ -16,7 +16,8 @@ function createDeepLinks(
   mlCapabilities: MlCapabilities,
   isFullLicense: boolean,
   isServerless: boolean,
-  esqlEnabled?: boolean
+  esqlEnabled: boolean,
+  canUploadFile: boolean
 ) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
@@ -182,7 +183,9 @@ function createDeepLinks(
       };
     },
 
-    getFileUploadDeepLink: (): AppDeepLink<LinkId> => {
+    getFileUploadDeepLink: (): AppDeepLink<LinkId> | null => {
+      if (!canUploadFile) return null;
+
       return {
         id: 'fileUpload',
         title: i18n.translate('xpack.ml.deepLink.fileUpload', {
@@ -230,9 +233,16 @@ export function getDeepLinks(
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
   isServerless: boolean,
-  esqlEnabled?: boolean
+  esqlEnabled: boolean,
+  canUploadFile: boolean
 ): Array<AppDeepLink<LinkId>> {
-  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless, esqlEnabled);
+  const links = createDeepLinks(
+    mlCapabilities,
+    isFullLicense,
+    isServerless,
+    esqlEnabled,
+    canUploadFile
+  );
   return Object.values(links)
     .map((link) => link())
     .filter((link): link is AppDeepLink<LinkId> => link !== null);
