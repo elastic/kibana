@@ -16,8 +16,7 @@ steps:
   - group: "API MKI - AI Assistant"
     key: api_test_ai_assistant
     steps:
-
-      - label: Running nlp_cleanup_task:complete:qa:serverless
+      - label: 'API MKI - nlp_cleanup_task:complete:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless
         key: nlp_cleanup_task:complete:qa:serverless
         agents:
@@ -31,7 +30,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running nlp_cleanup_task:essentials:qa:serverless
+      - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
         key: nlp_cleanup_task:essentials:qa:serverless
         agents:
