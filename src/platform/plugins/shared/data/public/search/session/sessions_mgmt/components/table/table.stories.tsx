@@ -20,10 +20,15 @@ import { SessionsClient } from '../../../sessions_client';
 import { getSearchSessionSavedObjectMocks } from '../../__mocks__';
 import { SearchSessionSavedObject } from '../../types';
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
+import { columns } from '.';
 
 export default {
   title: 'components/SearchSessionsMgmtTable',
 };
+
+type GetColumnsParams = Parameters<
+  NonNullable<React.ComponentProps<typeof SearchSessionsMgmtTable>['getColumns']>
+>[0];
 
 const Component = ({
   data = getSearchSessionSavedObjectMocks({ length: 5 }),
@@ -168,12 +173,42 @@ export const DifferentStatuses = {
   },
 };
 
-export const FilteredColumns = {
-  name: 'Filtered columns',
-  render: () => <Component props={{ columns: ['name', 'status'] }} />,
+export const ColumnsFunction = {
+  name: 'Columns function',
+  render: () => (
+    <Component
+      props={{
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.statusColumn('BROWSER'),
+        ],
+      }}
+    />
+  ),
 };
 
 export const FilteredActions = {
   name: 'Filtered actions',
-  render: () => <Component props={{ actions: ['rename', 'delete'] }} />,
+  render: () => (
+    <Component
+      props={{
+        getColumns: ({
+          core,
+          api,
+          onActionComplete,
+          searchUsageCollector,
+          kibanaVersion,
+        }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.statusColumn('BROWSER'),
+          columns.actionsColumn({
+            core,
+            api,
+            onActionComplete,
+            allowedActions: ['inspect', 'delete'],
+          }),
+        ],
+      }}
+    />
+  ),
 };

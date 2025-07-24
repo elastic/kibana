@@ -54,15 +54,15 @@ const setup = ({
 
   const handleAction = jest.fn();
 
-  return getColumns(
-    mockCoreStart,
+  return getColumns({
+    core: mockCoreStart,
     api,
-    mockConfig,
-    tz,
-    handleAction,
+    config: mockConfig,
+    timezone: tz,
+    onActionComplete: handleAction,
     kibanaVersion,
-    mockSearchUsageCollector
-  );
+    searchUsageCollector: mockSearchUsageCollector,
+  });
 };
 
 describe('getColumns', () => {

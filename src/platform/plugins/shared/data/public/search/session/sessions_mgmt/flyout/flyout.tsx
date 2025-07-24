@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
@@ -16,6 +22,7 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { SearchSessionsMgmtTable } from '../components/table';
 import { SearchUsageCollector } from '../../../collectors';
 import { LocatorsStart } from '../types';
+import { getColumns } from './get_columns';
 
 export const Flyout = ({
   onClose,
@@ -34,10 +41,12 @@ export const Flyout = ({
   kibanaVersion: string;
   locators: LocatorsStart;
 }) => {
+  const flyoutId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout aria-labelledby={flyoutId} onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle id={flyoutId} size="s">
           <FormattedMessage id="data.session_mgmt.flyout" defaultMessage="Background searches" />
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -50,8 +59,7 @@ export const Flyout = ({
           kibanaVersion={kibanaVersion}
           searchUsageCollector={usageCollector}
           locators={locators}
-          columns={['name', 'status', 'actions']}
-          actions={['extend', 'rename', 'delete']}
+          getColumns={getColumns}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
@@ -17,9 +17,9 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { AvailableColumns, getColumns } from './utils/get_columns';
+import { getColumns as getDefaultColumns } from './columns/get_columns';
 import { LocatorsStart, UISession } from '../../types';
-import { Action, OnActionComplete } from './actions';
+import { OnActionComplete } from './actions';
 import { getAppFilter } from './utils/get_app_filter';
 import { getStatusFilter } from './utils/get_status_filter';
 import { SearchUsageCollector } from '../../../../collectors';
@@ -34,9 +34,15 @@ interface Props {
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
-  columns?: AvailableColumns[];
-  // Only useful if the actions column is included
-  actions?: Action[];
+  getColumns?: (params: {
+    core: CoreStart;
+    api: SearchSessionsMgmtAPI;
+    config: SearchSessionsConfigSchema;
+    timezone: string;
+    kibanaVersion: string;
+    searchUsageCollector: SearchUsageCollector;
+    onActionComplete: OnActionComplete;
+  }) => Array<EuiBasicTableColumn<UISession>>;
 }
 
 export function SearchSessionsMgmtTable({
@@ -47,8 +53,7 @@ export function SearchSessionsMgmtTable({
   config,
   kibanaVersion,
   searchUsageCollector,
-  columns,
-  actions,
+  getColumns = getDefaultColumns,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -96,7 +101,7 @@ export function SearchSessionsMgmtTable({
       try {
         const [savedObjects, sessionStatuses] = await api.fetchTableData();
         results = savedObjects.map((savedObject) =>
-          mapToUISession({ savedObject, locators, sessionStatuses, actions })
+          mapToUISession({ savedObject, locators, sessionStatuses })
         );
       } catch (e) {} // eslint-disable-line no-empty
 
@@ -110,7 +115,7 @@ export function SearchSessionsMgmtTable({
       if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = window.setTimeout(doRefresh, refreshInterval);
     }
-  }, [api, refreshInterval, locators, actions]);
+  }, [api, refreshInterval, locators]);
 
   // initial data load
   useEffect(() => {
@@ -124,20 +129,6 @@ export function SearchSessionsMgmtTable({
   const onActionComplete: OnActionComplete = () => {
     doRefresh();
   };
-
-  const tableColumns = getColumns(
-    core,
-    api,
-    config,
-    timezone,
-    onActionComplete,
-    kibanaVersion,
-    searchUsageCollector
-  ).filter((column) => {
-    if (!columns) return true;
-    if (!('field' in column)) return true;
-    return columns.includes(column.field);
-  });
 
   // table config: search / filters
   const search: EuiSearchBarProps = {
@@ -171,7 +162,15 @@ export function SearchSessionsMgmtTable({
         'data-test-subj': `searchSessionsRow`,
         'data-test-search-session-id': `id-${searchSession.id}`,
       })}
-      columns={tableColumns}
+      columns={getColumns({
+        core,
+        api,
+        config,
+        timezone,
+        onActionComplete,
+        kibanaVersion,
+        searchUsageCollector,
+      })}
       items={tableData}
       pagination={{
         pageSize,

@@ -134,11 +134,16 @@ describe('<SearchSessionsMgmtTable />', () => {
     });
   });
 
-  describe('when the columns are filtered', () => {
+  describe('when a columns function is provided', () => {
     it('should render table header cells', async () => {
       await setup({
         mockSessionsFindResponse: getInitialResponse(),
-        props: { columns: ['appId', 'name'] },
+        props: {
+          getColumns: () => [
+            { field: 'appId', name: 'App', render: () => null },
+            { field: 'name', name: 'Name', render: () => null },
+          ],
+        },
       });
 
       // Check header cells (column titles)
