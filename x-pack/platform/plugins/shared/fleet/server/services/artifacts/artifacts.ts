@@ -227,7 +227,7 @@ export const bulkDeleteArtifacts = async (
     if (res.errors) {
       errors = res.items.reduce<Error[]>((acc, item) => {
         if (item.delete?.error) {
-          acc.push(new Error(item.delete.error.reason));
+          acc.push(new Error(item.delete.error.reason ?? undefined)); // reason can be null and it's not a valid parameter for Error
         }
         return acc;
       }, []);

@@ -73,8 +73,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        246351
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="157258653"
                       value="246351"
@@ -142,8 +150,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          73847
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="73847"
@@ -195,8 +211,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          107307
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="107307"
@@ -248,8 +272,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          60015
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="60015"
@@ -301,8 +333,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          2003
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="2003"
@@ -354,8 +394,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          1200
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="1200"
@@ -407,8 +455,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          1979
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="246351"
                         value="1979"
@@ -491,8 +547,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        156714735
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="157258653"
                       value="156714735"
@@ -560,8 +624,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39123
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39123"
@@ -613,8 +685,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39456
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39456"
@@ -666,8 +746,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39789
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39789"
@@ -719,8 +807,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39101112
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39101112"
@@ -772,8 +868,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39131415
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39131415"
@@ -825,8 +929,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39161718
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39161718"
@@ -878,8 +990,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          39202122
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="156714735"
                         value="39202122"
@@ -962,8 +1082,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        568
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="157258653"
                       value="568"
@@ -1031,8 +1159,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          568
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="568"
                         value="568"
@@ -1115,8 +1251,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        296999
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="157258653"
                       value="296999"
@@ -1184,8 +1328,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          195929
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="296999"
                         value="195929"
@@ -1237,8 +1389,16 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          101070
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="296999"
                         value="101070"

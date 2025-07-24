@@ -24,7 +24,7 @@ export function sortAndTruncateAnalyzedFields(
         let label = `${field.name}:${field.types.join(',')}`;
 
         if (field.empty) {
-          return `${name} (empty)`;
+          return `${label} (empty)`;
         }
 
         label += ` - ${field.cardinality} distinct values`;

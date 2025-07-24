@@ -15,7 +15,7 @@ import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const MONITOR_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const MONITOR_ALERTS_TABLE_ID = 'xpack.synthetics.monitor.alertTable';
 
 export function MonitorDetailsAlerts() {
   const { monitorId: configId } = useParams<{ monitorId: string }>();

@@ -913,6 +913,9 @@
   "privilege-monitoring-status": [
     "status"
   ],
+  "privmon-api-key": [
+    "apiKey"
+  ],
   "product-doc-install-status": [
     "index_name",
     "inference_id",
@@ -1281,6 +1284,16 @@
     "name",
     "type",
     "updated_at"
+  ],
+  "workflow": [
+    "createdBy",
+    "definition",
+    "description",
+    "lastUpdatedBy",
+    "name",
+    "status",
+    "tags",
+    "yaml"
   ],
   "workplace_search_telemetry": []
 }

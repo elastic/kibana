@@ -5,9 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCopy,
   EuiFieldText,
@@ -22,17 +19,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
-import { useKibana } from '../hooks/use_kibana';
-import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
+import { ApiKeyForm } from './api_key_form';
 
 export const ConnectToElasticsearch = () => {
-  const { share } = useKibana().services;
-  const { data } = useGetApiKeys();
   const elasticsearchUrl = useElasticsearchUrl();
-  const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
-  const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
-  const createApiKeyLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys/create' });
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -121,39 +112,7 @@ export const ConnectToElasticsearch = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="s" alignItems="baseline">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          href={createApiKeyLink}
-                          iconType="key"
-                          data-test-subj="createApiKeyButton"
-                        >
-                          {i18n.translate(
-                            'xpack.searchHomepage.connectToElasticsearch.createApiKey',
-                            {
-                              defaultMessage: 'Create API key',
-                            }
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="gear"
-                          href={manageKeysLink}
-                          data-test-subj="manageApiKeysButton"
-                        >
-                          Manage API keys
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          data-test-subj="activeApiKeysBadge"
-                          color={(data?.apiKeys?.length ?? 0) > 0 ? 'success' : 'warning'}
-                        >
-                          {data?.apiKeys?.length ?? 0} active
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <ApiKeyForm data-test-subj="apiKeyForm" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

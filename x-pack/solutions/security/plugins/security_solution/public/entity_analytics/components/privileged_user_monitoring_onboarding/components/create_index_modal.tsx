@@ -20,10 +20,11 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiCallOut,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
 enum IndexMode {
@@ -78,10 +79,13 @@ export const CreateIndexModal = ({
     setError(null);
     const trimmedName = indexName.trim();
 
-    await createPrivMonImportIndex({
-      name: trimmedName,
-      mode: indexMode,
-    }).catch((err: SecurityAppError) => {
+    try {
+      await createPrivMonImportIndex({
+        name: trimmedName,
+        mode: indexMode,
+      });
+      onCreate(trimmedName);
+    } catch (err) {
       setError(
         i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.error',
@@ -91,8 +95,7 @@ export const CreateIndexModal = ({
           }
         )
       );
-    });
-    onCreate(trimmedName);
+    }
   }, [indexName, createPrivMonImportIndex, indexMode, onCreate]);
 
   return (
@@ -112,6 +115,18 @@ export const CreateIndexModal = ({
             <EuiSpacer size="m" />
           </>
         )}
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.description"
+              defaultMessage="Create an index to store your privileged users. After creating it, make sure to index documents with the {nameField} field using your preferred method."
+              values={{
+                nameField: <EuiCode>{'user.name'}</EuiCode>,
+              }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiFormRow
           label={INDEX_NAME_LABEL}
           fullWidth

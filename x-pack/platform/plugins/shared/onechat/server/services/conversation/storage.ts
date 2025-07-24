@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { ConversationRound, PlainIdAgentIdentifier } from '@kbn/onechat-common';
+import type { ConversationRound } from '@kbn/onechat-common';
 
 export const conversationIndexName = '.kibana_onechat_conversations';
 
@@ -18,7 +18,6 @@ const storageSettings = {
       user_id: types.keyword({}),
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
-      agent_provider_id: types.keyword({}),
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -30,8 +29,7 @@ const storageSettings = {
 export interface ConversationProperties {
   user_id: string;
   user_name: string;
-  agent_id: PlainIdAgentIdentifier;
-  agent_provider_id: string;
+  agent_id: string;
   title: string;
   created_at: string;
   updated_at: string;
