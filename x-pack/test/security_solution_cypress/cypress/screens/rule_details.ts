@@ -205,3 +205,8 @@ export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
 export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
 export const RULE_FILL_ALL_GAPS_BUTTON = '[data-test-subj="fill-rule-gaps-button"]';
 export const MODIFIED_PREBUILT_RULE_BADGE = '[data-test-subj="modified-prebuilt-rule-badge"]';
+export const MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION =
+  '[data-test-subj="modified-prebuilt-rule-badge-no-base-version"]';
+export const MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE = (fieldName: string) =>
+  `[data-test-subj="modified-prebuilt-rule-per-field-${fieldName}-badge"]`;
+export const RULE_CUSTOMIZATIONS_DIFF_FLYOUT = '[data-test-subj="ruleCustomizationsDiffFlyout"]';
