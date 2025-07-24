@@ -69,8 +69,8 @@ export async function suggest(
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
 
-  const license = await resourceRetriever?.getLicense?.();
-  const hasMinimumLicenseRequired = license?.hasAtLeast;
+  const licenseInstance = await resourceRetriever?.getLicense?.();
+  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -79,8 +79,10 @@ export async function suggest(
     const commands = esqlCommandRegistry
       .getAllCommands()
       .filter((command) => {
-        const licenseInstance = command.metadata?.license;
-        return !licenseInstance || hasMinimumLicenseRequired?.(licenseInstance);
+        const license = command.metadata?.license;
+        return (
+          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType)
+        );
       })
       .map((command) => command.name);
 

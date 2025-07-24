@@ -33,6 +33,5 @@ export const changePointCommand: ICommand = {
       '… | CHANGE_POINT value ON timestamp',
       '… | CHANGE_POINT value ON timestamp AS type, pvalue',
     ],
-    license: 'platinum',
   },
 };
