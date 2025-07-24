@@ -137,7 +137,13 @@ const assertStatsAndMetrics = (body, legacy = false) => {
       statsResponseSchema.validate(body);
     }
   } catch (e) {
-    expect().fail(`Expected /api/stats response to match schema: ${e.message}`);
+    expect().fail(
+      `Expected /api/stats response to match schema: ${e.message}, response: ${JSON.stringify(
+        body,
+        null,
+        2
+      )}`
+    );
   }
 };
 
@@ -164,6 +170,8 @@ export default function ({ getService }) {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(({ body }) => {
+            // eslint-ignore-next-line no-console
+            console.log('*** body is ', body);
             expect(body.cluster_uuid).to.be(undefined);
             assertStatsAndMetrics(body);
           });

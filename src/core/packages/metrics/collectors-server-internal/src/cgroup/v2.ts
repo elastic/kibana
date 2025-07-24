@@ -30,6 +30,19 @@ export async function gatherV2CgroupMetrics(group: string): Promise<OsCgroupMetr
       readSwapCurrent(group),
     ]);
 
+  const filesInCgroup = await fs.readdir(joinPath(PROC_CGROUP2_DIR, group));
+
+  // eslint-disable-next-line no-console
+  console.log('*** CGroup V2 Metrics ***', {
+    group,
+    cpuMax,
+    usageNanos,
+    memoryCurrent,
+    swapCurrent,
+    stat,
+    filesInCgroup,
+  });
+
   return {
     cpu: {
       ...cpuMax,
