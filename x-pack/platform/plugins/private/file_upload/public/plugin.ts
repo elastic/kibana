@@ -47,10 +47,6 @@ export class FileUploadPlugin
   public setup() {}
 
   public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
-    if (core.application.capabilities.fileUpload.show) {
-      // Show the file upload component
-    }
-
     setStartServices(core, plugins);
     return {
       FileUploadComponent,
