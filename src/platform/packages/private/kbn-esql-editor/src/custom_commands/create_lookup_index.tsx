@@ -204,15 +204,9 @@ export const useLookupIndexCommand = (
 
   const onFlyoutClose = useCallback(
     (initialIndexName: string | undefined, resultIndexName: string, indexCreated: boolean) => {
-      console.log(initialIndexName, '___initialIndexName___');
-      console.log(resultIndexName, '___resultIndexName___');
-      console.log(indexCreated, '___indexCreated___');
-
       if (!indexCreated) return;
 
       const cursorPosition = editorRef.current?.getPosition();
-
-      console.log(cursorPosition, '___cursorPosition___');
 
       if (!initialIndexName && !cursorPosition) {
         throw new Error('Could not find cursor position in the editor');
@@ -326,33 +320,8 @@ export const useLookupIndexCommand = (
     [query.esql, addLookupIndicesDecorator]
   );
 
-  /**
-   * the onClick handler is set only once, hence the reference has to be stable.
-   */
-  const lookupIndexLabelClickHandler = useCallback(
-    async (e: monaco.editor.IEditorMouseEvent) => {
-      const mousePosition = e.target.position;
-      if (!mousePosition) return;
-
-      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
-      const clickedIndexName = inQueryLookupIndices.current.find((v) =>
-        currentWord?.word.includes(v)
-      );
-
-      const doesIndexExist = (await getLookupIndicesMemoized()).indices.some(
-        (index) => index.name === clickedIndexName
-      );
-
-      if (clickedIndexName) {
-        await openFlyout(clickedIndexName, doesIndexExist);
-      }
-    },
-    [editorModel, getLookupIndicesMemoized, openFlyout]
-  );
-
   return {
     addLookupIndicesDecorator,
     lookupIndexBadgeStyle,
-    lookupIndexLabelClickHandler,
   };
 };

@@ -590,14 +590,13 @@ export const ESQLEditor = memo(function ESQLEditor({
     [esqlCallbacks, onQueryUpdate]
   );
 
-  const { lookupIndexBadgeStyle, lookupIndexLabelClickHandler, addLookupIndicesDecorator } =
-    useCreateLookupIndexCommand(
-      editor1,
-      editorModel,
-      esqlCallbacks?.getJoinIndices,
-      query,
-      onIndexCreated
-    );
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+    editor1,
+    editorModel,
+    esqlCallbacks?.getJoinIndices,
+    query,
+    onIndexCreated
+  );
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
@@ -927,7 +926,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
-                      await lookupIndexLabelClickHandler(e);
                     });
 
                     editor.onDidFocusEditorText(() => {
