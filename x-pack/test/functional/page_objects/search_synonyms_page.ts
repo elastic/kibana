@@ -26,11 +26,14 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         // check if exists, refresh and check again for 10 seconds
         await retry.tryForTime(10000, async () => {
           await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 });
-          browser.refresh();
+          await browser.refresh();
         });
       },
       async clickCreateSynonymsSetButton() {
-        await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
+        await retry.tryForTime(10000, async () => {
+          await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
+          await browser.refresh();
+        });
       },
       async setSynonymsSetName(name: string) {
         await testSubjects.setValue(this.TEST_IDS.CREATE_SYNONYMS_SET_MODAL_INPUT, name);
