@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CascadeRow } from './cascade_row';
-export type { CascadeRowProps } from './cascade_row';
-export { CascadeRowCell } from './cascade_row_cell';
-export type { CascadeRowCellProps } from './cascade_row_cell';
+export { CascadeRowPrimitive } from './cascade_row';
+export type { CascadeRowPrimitiveProps } from './cascade_row';
+export { CascadeRowCellPrimitive } from './cascade_row_cell';
+export type { CascadeRowCellPrimitiveProps } from './cascade_row_cell';
 export {
   getCascadeRowLeafDataCacheKey,
   getCascadeRowNodePath,
