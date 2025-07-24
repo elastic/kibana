@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { convertToWorkflowGraph } from './graph';
+import { z } from '@kbn/zod';
+
+export const ExecutionGraphNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  configuration: z.any(),
+});
+
+export type ExecutionGraphNode = z.infer<typeof ExecutionGraphNodeSchema>;

@@ -13,7 +13,7 @@ import { StepImplementation } from './step_base';
 // Import schema and inferred types
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
-import { IfStartNodeImpl, IfEndNodeImpl } from './if_step';
+import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -36,10 +36,10 @@ export class StepFactory {
     switch (stepType) {
       case 'foreach':
       // return new ForEachStepImpl(step as ForEachStep, contextManager);
-      case 'if':
-        return new IfStartNodeImpl(step as any, contextManager);
-      case 'if-end':
-        return new IfEndNodeImpl(step as any, contextManager) as any;
+      case 'enter-if':
+        return new EnterIfNodeImpl(step as any, contextManager);
+      case 'exit-if':
+        return new ExitIfNodeImpl(step as any, contextManager);
       case 'atomic':
       // return new AtomicStepImpl(step as AtomicStep, contextManager);
       case 'parallel':

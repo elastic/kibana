@@ -14,7 +14,7 @@ import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-en
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
-import { convertToWorkflowGraph } from '../execution_graph';
+import { convertToWorkflowGraph, convertToSerializableGraph } from '../../common';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -59,7 +59,7 @@ export class SchedulerService {
     workflow: WorkflowExecutionEngineModel,
     inputs: Record<string, any>
   ): Promise<string> {
-    workflow.executionGraph = convertToWorkflowGraph(workflow); // TODO: It's not good approach, it's temporary
+    workflow.executionGraph = convertToSerializableGraph(convertToWorkflowGraph(workflow)); // TODO: It's not good approach, it's temporary
     const connectorCredentials = await extractConnectorIds(
       workflow.executionGraph,
       this.actionsClient

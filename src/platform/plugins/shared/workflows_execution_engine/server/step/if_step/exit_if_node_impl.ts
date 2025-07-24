@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IfStep } from '@kbn/workflows';
+import { ExitIfNode } from '@kbn/workflows';
+import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import { StepImplementation } from '../step_base';
 
-export interface IfElseNode extends Omit<IfStep, 'steps' | 'else'> {
-  id: string;
-  trueNodeIds: string[];
-  falseNodeIds: string[];
-}
-export interface IfElseEndNode {
-  type: 'if-end';
-  id: string;
-  startNodeId: string;
+export class ExitIfNodeImpl implements StepImplementation {
+  constructor(private step: ExitIfNode, private contextManager: WorkflowContextManager) {}
+
+  public run(): Promise<void> {
+    return this.contextManager.finishStep(this.step.startNodeId);
+  }
 }

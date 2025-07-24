@@ -30,7 +30,7 @@ export interface BaseStep {
 export type StepDefinition = BaseStep;
 
 export interface StepImplementation {
-  run(): Promise<RunStepResult>;
+  run(): Promise<void>;
 }
 
 export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
@@ -55,7 +55,8 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
     return this.step.name;
   }
 
-  public async run(): Promise<RunStepResult> {
+  public async run(): Promise<void> {
+    const stepId = (this.step as any).id || this.getName();
     const stepName = this.getName();
 
     // Log step start
@@ -80,9 +81,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       // });
 
       this.contextManager.logStepComplete(stepName, stepName, true);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      this.contextManager.appendStepResult(stepId, result);
     } catch (error) {
       // Log failure
       // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
@@ -98,8 +97,6 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
       const result = await this.handleFailure(error);
       this.contextManager.appendStepResult(stepName, result);
-
-      return result;
     } finally {
       // Clear step context
       this.contextManager.clearCurrentStep();

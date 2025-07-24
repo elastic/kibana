@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EnterIfNodeImpl } from './enter_if_node_impl';
-export { ExitIfNodeImpl } from './exit_if_node_impl';
+export type { EnterIfNode, ExitIfNode } from './nodes/branching_nodes';
+export type { ExecutionGraph, ExecutionGraphNode } from './execution_graph';
