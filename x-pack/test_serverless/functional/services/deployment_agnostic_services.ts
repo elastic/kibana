@@ -65,7 +65,6 @@ export const services = {
   testSubjects: functionalPlatformServices.testSubjects,
   transform: functionalPlatformServices.transform,
   toasts: functionalPlatformServices.toasts,
-  uptime: functionalPlatformServices.uptime,
   usageCollection: functionalPlatformServices.usageCollection,
   userMenu: functionalPlatformServices.userMenu,
   vegaDebugInspector: functionalPlatformServices.vegaDebugInspector,
