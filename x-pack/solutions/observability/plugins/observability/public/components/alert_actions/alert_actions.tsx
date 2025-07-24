@@ -104,7 +104,6 @@ export function AlertActions({
       services: {
         cases,
       },
-      caseContext,
     });
 
   const closeActionsPopover = useCallback(() => {
