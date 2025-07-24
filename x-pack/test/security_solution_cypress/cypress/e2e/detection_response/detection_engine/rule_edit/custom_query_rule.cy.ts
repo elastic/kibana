@@ -57,7 +57,7 @@ import {
   goToActionsStepTab,
   goToScheduleStepTab,
 } from '../../../../tasks/create_new_rule';
-import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
+import { saveEditedRule, visitRuleEditPage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { getDetails } from '../../../../tasks/rule_details';
 
@@ -75,7 +75,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   context('Basics', () => {
     beforeEach(() => {
       createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
-        visitEditRulePage(createdRule.body.id);
+        visitRuleEditPage(createdRule.body.id);
       });
     });
 
@@ -188,7 +188,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
           ],
         })
       ).then((createdRule) => {
-        visitEditRulePage(createdRule.body.id);
+        visitRuleEditPage(createdRule.body.id);
       });
     });
 
