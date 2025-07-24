@@ -315,6 +315,22 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerParams.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [
+              "optional signal to abort the execution of the agent"
+            ],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -752,6 +768,22 @@
                 "text": "RunAgentOnEventFn"
               },
               " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.RunAgentParams.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [
+              "\nOptional signal to abort the execution of the agent."
+            ],
+            "signature": [
+              "AbortSignal | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/runner.ts",
             "deprecated": false,
@@ -1374,7 +1406,7 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ onEvent?: ",
+                  "{ abortSignal?: AbortSignal | undefined; onEvent?: ",
                   {
                     "pluginId": "@kbn/onechat-server",
                     "scope": "common",
@@ -2168,7 +2200,7 @@
         "tags": [],
         "label": "RunAgentFn",
         "description": [
-          "\nPublic onechat API to execute a tools."
+          "\nPublic onechat API to execute an agent."
         ],
         "signature": [
           "(params: ",
@@ -2384,7 +2416,7 @@
         "tags": [],
         "label": "ScopedRunAgentFn",
         "description": [
-          "\nPublic onechat API to execute a tools."
+          "\nPublic onechat API to execute an agent."
         ],
         "signature": [
           "(params: ",
@@ -2418,7 +2450,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ onEvent?: ",
+              "{ abortSignal?: AbortSignal | undefined; onEvent?: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -2447,7 +2479,7 @@
           "\nParams for {@link ScopedRunner.runTool}"
         ],
         "signature": [
-          "{ onEvent?: ",
+          "{ abortSignal?: AbortSignal | undefined; onEvent?: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
