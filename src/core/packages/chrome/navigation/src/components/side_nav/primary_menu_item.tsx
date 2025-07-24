@@ -54,6 +54,12 @@ export const SideNavPrimaryMenuItem = forwardRef<
           max-width: 100%;
           padding: 0 4px;
 
+          ${!horizontal &&
+          `
+            font-size: 11px;
+            font-weight: ${euiTheme.font.weight.medium};  
+          `}
+
           ${isSingleWord
             ? css`
                 /* Single word: stay on one line, truncate with ellipsis */
