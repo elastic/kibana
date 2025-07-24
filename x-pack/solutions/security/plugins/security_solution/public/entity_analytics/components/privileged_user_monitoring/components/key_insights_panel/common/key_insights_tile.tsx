@@ -45,14 +45,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
-  const lensAttributes = createKeyInsightsPanelLensAttributes({
-    title,
-    label,
-    esqlQuery: getEsqlQuery(effectiveSpaceId),
-    dataViewId: 'default-dataview',
-    filterQuery,
-  });
-
   const visualizationResponse = useVisualizationResponse({
     visualizationId: id,
   });
@@ -116,8 +108,8 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   }
 
   const lensAttributes = createKeyInsightsPanelLensAttributes({
-    title: titleString,
-    label: labelString,
+    title,
+    label,
     esqlQuery: esqlQuery.right,
     dataViewId: 'default-dataview',
     filterQuery,
