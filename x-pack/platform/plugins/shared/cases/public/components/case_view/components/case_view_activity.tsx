@@ -269,7 +269,6 @@ export const CaseViewActivity = ({
           <h2>{i18n.CASE_SETTINGS}</h2>
         </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
-          <CaseSummary caseData={caseData} markdown={true} />
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers
