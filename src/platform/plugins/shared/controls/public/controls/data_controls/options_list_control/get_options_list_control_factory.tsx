@@ -243,6 +243,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
+        dataControlManager.api.input$,
         dataControlManager.api.output$,
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
@@ -250,10 +251,12 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         selectionsManager.api.existsSelected$,
         selectionsManager.api.exclude$,
         dataControlManager.api.esqlVariableString$,
+        temporaryStateManager.api.availableOptions$,
       ])
         .pipe(debounceTime(0))
         .subscribe(
           ([
+            input,
             output,
             dataViews,
             fieldName,
@@ -261,9 +264,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             existsSelected,
             exclude,
             esqlVariableString,
+            availableOptions,
           ]) => {
+            const selections =
+              input === ControlInputOption.STATIC
+                ? selectedOptions?.map(
+                    (selection) =>
+                      availableOptions?.find(({ key }) => key === selection)?.value ?? selection
+                  )
+                : selectedOptions;
             if (output === ControlOutputOption.ESQL) {
-              if (!esqlVariableString || !selectedOptions) {
+              if (!esqlVariableString || !selections) {
                 dataControlManager.internalApi.setESQLVariable(undefined);
                 return;
               }
@@ -274,9 +285,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               dataControlManager.internalApi.setESQLVariable({
                 key: variableName,
                 type: variableType,
-                value: isNaN(Number(selectedOptions[0]))
-                  ? selectedOptions[0]
-                  : Number(selectedOptions[0]),
+                value: isNaN(Number(selections[0])) ? selections[0] : Number(selections[0]),
               });
             } else {
               const dataView = dataViews?.[0];
@@ -286,11 +295,11 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               if (dataView && field) {
                 if (existsSelected) {
                   newFilter = buildExistsFilter(field, dataView);
-                } else if (selectedOptions && selectedOptions.length > 0) {
+                } else if (selections && selections.length > 0) {
                   newFilter =
-                    selectedOptions.length === 1
-                      ? buildPhraseFilter(field, selectedOptions[0], dataView)
-                      : buildPhrasesFilter(field, selectedOptions, dataView);
+                    selections.length === 1
+                      ? buildPhraseFilter(field, selections[0], dataView)
+                      : buildPhrasesFilter(field, selections, dataView);
                 }
               }
               if (newFilter) {

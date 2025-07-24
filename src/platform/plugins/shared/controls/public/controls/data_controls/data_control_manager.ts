@@ -199,6 +199,23 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       }
     });
 
+  const staticValuesSubscription = combineLatest([
+    dataControlManager.api.input$,
+    dataControlManager.api.staticValues$,
+  ])
+    .pipe(
+      tap(() => {
+        filtersReady$.next(false);
+      })
+    )
+    .subscribe(([nextInput, nextStaticValues]) => {
+      if (nextInput === ControlInputOption.STATIC) {
+        fieldFormatter.next(
+          (key: any) => nextStaticValues?.find(({ value }) => key === value)?.text ?? String(key)
+        );
+      }
+    });
+
   const onEdit = async () => {
     const initialState: DefaultDataControlState & EditorState = {
       ...dataControlManager.getLatestState(),
@@ -268,6 +285,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       fieldNameSubscription.unsubscribe();
       filtersReadySubscription.unsubscribe();
       esqlVariableStringSubscription.unsubscribe();
+      staticValuesSubscription.unsubscribe();
     },
     internalApi: {
       extractReferences: (referenceNameSuffix: string) => {

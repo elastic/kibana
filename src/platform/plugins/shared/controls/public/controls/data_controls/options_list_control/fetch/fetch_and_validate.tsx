@@ -122,10 +122,13 @@ export function fetchAndValidate$({
                 ({ text }) =>
                   !searchString || text.toLowerCase().includes(searchString.toLowerCase())
               )
-              .map(({ text }) => ({ value: text })) ?? [];
+              .map(({ text, value }) => ({ value: text, key: value })) ?? [];
           return {
             suggestions,
             totalCardinality: suggestions.length,
+            invalidSelections: selectedOptions?.filter(
+              (selection) => !suggestions.some(({ key }) => key === selection)
+            ),
           };
         } else if (isESQLInputMode) {
           if (!esqlQuery) return { suggestions: [] };

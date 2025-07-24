@@ -47,7 +47,11 @@ export interface OptionsListControlState
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
+export type OptionsListSuggestions = Array<{
+  value: OptionsListSelection;
+  docCount?: number;
+  key?: string;
+}>;
 
 /**
  * The Options list response is returned from the serverside Options List route.

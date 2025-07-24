@@ -102,13 +102,14 @@ export const OptionsListPopoverSuggestions = ({
         suggestion = { value: suggestion };
       }
 
+      const suggestionKey = suggestion.key ?? suggestion.value;
       return {
-        key: String(suggestion.value),
+        key: suggestionKey,
         label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
-        checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
-        'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
+        checked: (selectedOptions ?? []).includes(suggestionKey) ? 'on' : undefined,
+        'data-test-subj': `optionsList-control-selection-${suggestionKey}`,
         className:
-          showOnlySelected && invalidSelections.has(suggestion.value)
+          showOnlySelected && invalidSelections.has(suggestionKey)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
