@@ -11,7 +11,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerObservabilityTracesTransactionOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { DocumentProfileProvider } from '../../../../..';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
@@ -39,12 +38,10 @@ export const createGetDocViewer =
           order: 0,
           component: (props) => {
             return (
-              <KibanaSectionErrorBoundary sectionName={tabTitle}>
-                <UnifiedDocViewerObservabilityTracesTransactionOverview
-                  {...props}
-                  indexes={indexes}
-                />
-              </KibanaSectionErrorBoundary>
+              <UnifiedDocViewerObservabilityTracesTransactionOverview
+                {...props}
+                indexes={indexes}
+              />
             );
           },
         });

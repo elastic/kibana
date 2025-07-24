@@ -10,7 +10,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerObservabilityAttributesOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { hasAnyFieldWithPrefixes } from '../../utils/has_any_field_with_prefixes';
 import type { ObservabilityRootProfileProvider } from '../types';
 
@@ -33,11 +32,7 @@ export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocVi
             title: tabTitle,
             order: 9,
             component: (props) => {
-              return (
-                <KibanaSectionErrorBoundary sectionName={tabTitle}>
-                  <UnifiedDocViewerObservabilityAttributesOverview {...props} />
-                </KibanaSectionErrorBoundary>
-              );
+              return <UnifiedDocViewerObservabilityAttributesOverview {...props} />;
             },
           });
         }
