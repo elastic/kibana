@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { difference, groupBy } from 'lodash';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -75,7 +75,7 @@ type Action =
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> }
-  | { type: 'refetch-data-view' };
+  | { type: 'refetch-field-types' };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -193,7 +193,7 @@ export class IndexUpdateService {
     this._indexName$,
     this._indexCrated$,
     this._actions$.pipe(
-      filter((action) => action.type === 'refetch-data-view'),
+      filter((action) => action.type === 'refetch-field-types'),
       startWith(null)
     ),
   ]).pipe(
@@ -430,7 +430,7 @@ export class IndexUpdateService {
 
               // if there were saved columns, refresh the data view
               if (unsavedColumns.length < acc.length) {
-                this._actions$.next({ type: 'refetch-data-view' });
+                this._actions$.next({ type: 'refetch-field-types' });
               }
               return unsavedColumns;
             }
