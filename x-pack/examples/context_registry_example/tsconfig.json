@@ -15,6 +15,12 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/context-registry-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/developer-examples-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-query",
   ]
 }
-  
