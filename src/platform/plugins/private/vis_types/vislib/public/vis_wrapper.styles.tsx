@@ -10,6 +10,7 @@
 import React from 'react';
 import { Global } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { vislibVisTypeStyles } from './vislib/vislib_vis_type.styles';
 import { vislibLayoutStyles } from './vislib/lib/layout/layout.styles';
 import { vislibMeterStyles } from './vislib/visualizations/gauges/meter.styles';
 
@@ -17,8 +18,9 @@ import { vislibMeterStyles } from './vislib/visualizations/gauges/meter.styles';
 export const GlobalVislibWrapperStyles = () => {
   const euiThemeContext = useEuiTheme();
 
+  const vislibStyles = vislibVisTypeStyles;
   const layoutStyles = vislibLayoutStyles(euiThemeContext);
   const meterStyles = vislibMeterStyles(euiThemeContext);
 
-  return <Global styles={[layoutStyles, meterStyles]} />;
+  return <Global styles={[vislibStyles, layoutStyles, meterStyles]} />;
 };
