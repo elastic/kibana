@@ -129,6 +129,8 @@ export class ElasticAssistantPlugin
 
     registerRoutes(router, this.logger, this.config);
 
+    // TEST
+
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
     // This can take a while, but the plugin setup phase cannot run for a long time.
