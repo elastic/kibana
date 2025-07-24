@@ -866,7 +866,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // two actions
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: {
@@ -1039,7 +1039,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // two actions
         let i = 1;
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {

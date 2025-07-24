@@ -16,6 +16,7 @@ export const services = {
   ...commonServices,
   esSupertest: apiIntegrationServices.esSupertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
+  security: apiIntegrationServices.security,
 };
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
