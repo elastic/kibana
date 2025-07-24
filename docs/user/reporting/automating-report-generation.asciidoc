@@ -70,6 +70,8 @@ In earlier {kib} versions, you could use the `&sync` parameter to append to repo
 [[schedule-report-generation]]
 === Schedule and share reports
 
+preview::[]
+
 Save time by setting up a recurring task that automatically generates reports and shares them on a schedule that you choose. 
 
 [float]
