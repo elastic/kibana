@@ -112,7 +112,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             core: coreStartServices,
             parentApi,
             flyoutProps: {
-              'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+              'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
