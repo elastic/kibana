@@ -9,7 +9,7 @@
 
 import { schema } from '../..';
 
-const { literal } = schema;
+const { literal, maybe } = schema;
 
 describe('literal', () => {
   test('handles string', () => {
@@ -26,6 +26,10 @@ describe('literal', () => {
 
   test('handles null', () => {
     expect(literal(null).validate(null)).toBe(null);
+  });
+
+  test('handles maybe value', () => {
+    expect(maybe(literal(1)).validate(undefined)).toBe(undefined);
   });
 
   test('returns error when not correct', () => {
