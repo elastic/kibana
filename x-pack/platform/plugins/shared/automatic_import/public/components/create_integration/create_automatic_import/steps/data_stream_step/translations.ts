@@ -166,7 +166,7 @@ export const LOGS_SAMPLE_WARNING = {
     'xpack.automaticImport.step.dataStream.logsSample.warningInfoLink',
     {
       defaultMessage:
-        'Refer to the documentation for supported log formats.',
+        'refer to the documentation for supported log formats.',
     })
 }
 
