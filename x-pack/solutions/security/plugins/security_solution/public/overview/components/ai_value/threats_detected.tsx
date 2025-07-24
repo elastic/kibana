@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ThreatsDetectedTrend } from './threats_detected_trend';
-import { ComparePercentage } from './compare_percentage';
+import { ComparePercentageBadge } from './compare_percentage_badge';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
 
@@ -35,7 +35,7 @@ export const ThreatsDetected: React.FC<Props> = ({
     >
       <ThreatsDetectedTrend from={from} to={to} />
 
-      <ComparePercentage
+      <ComparePercentageBadge
         currentCount={attackDiscoveryCount}
         description={i18n.THREATS_DETECTED_DESC}
         positionForLens

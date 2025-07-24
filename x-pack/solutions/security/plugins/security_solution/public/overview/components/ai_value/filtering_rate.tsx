@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AlertFilteringTrend } from './alert_filtering_trend';
 import { formatPercent } from './metrics';
-import { ComparePercentage } from './compare_percentage';
+import { ComparePercentageBadge } from './compare_percentage_badge';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
-import { AlertFilteringTrend } from './alert_filtering_trend';
 
 interface Props {
   filteredAlertsPerc: number;
@@ -44,7 +44,7 @@ export const FilteringRate: React.FC<Props> = ({
         from={from}
         to={to}
       />
-      <ComparePercentage
+      <ComparePercentageBadge
         description={i18n.FILTERING_RATE_DESC}
         positionForLens
         currentCount={filteredAlertsPerc}

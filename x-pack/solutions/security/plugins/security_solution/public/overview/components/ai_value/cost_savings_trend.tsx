@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { ChartHeight } from '../../../explore/components/stat_items/utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 
@@ -51,7 +50,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({ attackAlertIds, from, to }
       getLensAttributes={getCostSavingsTrendAreaLensAttributes}
       timerange={{ from, to }}
       id={`${ID}-area-embeddable`}
-      height={ChartHeight}
+      height={300}
       width={'95%'}
       inspectTitle={i18n.COST_SAVINGS_TREND}
       scopeId={SourcererScopeName.detections}

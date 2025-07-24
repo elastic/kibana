@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
+import { METRICS_OVER_TIME } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
@@ -26,6 +27,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
+import { getTimeRangeAsDays } from '../components/ai_value/utils';
 
 /**
  * The dashboard includes key performance metrics such as:
@@ -74,6 +76,7 @@ const AIValueComponent = () => {
         <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
           <HeaderPage
             title={i18n.AI_VALUE_DASHBOARD}
+            subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
             rightSideItems={[
               <SuperDatePicker
                 id={InputsModelId.valueReport}

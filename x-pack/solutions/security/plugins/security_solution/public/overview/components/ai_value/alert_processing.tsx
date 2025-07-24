@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ComparePercentage } from './compare_percentage';
+import { ComparePercentageBadge } from './compare_percentage_badge';
 import { formatPercent } from './metrics';
 import * as i18n from './translations';
 import { AlertProcessingDonut } from './alert_processing_donut';
@@ -40,14 +40,14 @@ export const AlertProcessing: React.FC<Props> = ({
         <p>{i18n.ALERT_PROCESSING_DESC}</p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             <p>{i18n.COMPARED}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ComparePercentage
+          <ComparePercentageBadge
             currentCount={filteredAlertsPerc}
             previousCount={filteredAlertsPercCompare}
             stat={formatPercent(filteredAlertsPercCompare)}
@@ -56,11 +56,11 @@ export const AlertProcessing: React.FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <p>{i18n.FALSE_POSITIVES}</p>
+            <p>{i18n.NON_SUSPICIOUS}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ComparePercentage
+          <ComparePercentageBadge
             currentCount={attackAlertsCountPerc}
             previousCount={attackAlertsCountPercCompare}
             stat={formatPercent(attackAlertsCountPercCompare)}

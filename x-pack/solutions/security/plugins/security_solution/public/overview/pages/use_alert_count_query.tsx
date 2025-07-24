@@ -50,8 +50,8 @@ export const useAlertCountQuery = ({
     }
   }, [query, filters, uiSettings]);
 
-  const currentQuery = useMemo(
-    () => ({
+  const currentQuery = useMemo(() => {
+    const query = {
       size: 0,
       track_total_hits: true,
       query: {
@@ -59,9 +59,10 @@ export const useAlertCountQuery = ({
           filter: [...additionalFilters, { range: { '@timestamp': { gte: from, lte: to } } }],
         },
       },
-    }),
-    [additionalFilters, from, to]
-  );
+    };
+    console.log('currentQuery:', JSON.stringify(query));
+    return query;
+  }, [additionalFilters, from, to]);
 
   const {
     data,

@@ -23,7 +23,7 @@ import { useStyles } from './beacon.styles';
 import bg from './bg.svg';
 import { UsdIcon } from './usd_icon';
 import { formatDollars, getCostSavings } from './metrics';
-import { ComparePercentage } from './compare_percentage';
+import { ComparePercentageBadge } from './compare_percentage_badge';
 import * as i18n from './translations';
 interface Props {
   attackAlertIds: string[];
@@ -125,11 +125,11 @@ export const CostSavings: React.FC<Props> = ({
                 </h2>
               </EuiTitle>
 
-              <ComparePercentage
+              <ComparePercentageBadge
                 currentCount={filteredAlerts}
                 previousCount={filteredAlertsCompare}
                 stat={costSavingsCompare}
-                statType={i18n.COST_SAVINGS}
+                statType={i18n.COST_SAVINGS_TITLE.toLowerCase()}
                 timeRange={getTimeRangeAsDays({ from, to })}
               />
 

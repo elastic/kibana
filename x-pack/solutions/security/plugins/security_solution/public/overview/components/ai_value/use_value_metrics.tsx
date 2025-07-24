@@ -47,10 +47,67 @@ export const useValueMetrics = ({ from, to, minutesPerAlert }: Props): UseValueM
     useFindAttackDiscoveries({
       end: compareTimeRange.to,
       http,
+      includeUniqueAlertIds: true,
       isAssistantEnabled: assistantAvailability.isAssistantEnabled,
       start: compareTimeRange.from,
       status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
     });
+
+  const filters = useMemo(
+    () => [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            // only query alerts that are not part of an attack discovery
+            must_not: (data?.unique_alert_ids ?? []).map((uuid: string) => ({
+              match_phrase: { 'kibana.alert.uuid': uuid },
+            })),
+          },
+        },
+      },
+    ],
+    [data?.unique_alert_ids]
+  );
+
+  const filtersCompare = useMemo(
+    () => [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            // only query alerts that are not part of an attack discovery
+            must_not: (compareAdData?.unique_alert_ids ?? []).map((uuid: string) => ({
+              match_phrase: { 'kibana.alert.uuid': uuid },
+            })),
+          },
+        },
+      },
+    ],
+    [compareAdData?.unique_alert_ids]
+  );
+
+  const { alertCount: filteredAlertsCount } = useAlertCountQuery({
+    to,
+    from,
+    signalIndexName,
+    filters,
+  });
+
+  const { alertCount: filteredAlertsCountCompare } = useAlertCountQuery({
+    to: compareTimeRange.to,
+    from: compareTimeRange.from,
+    signalIndexName,
+    filters: filtersCompare,
+  });
 
   const { alertCount, isLoading: isLoadingAlerts } = useAlertCountQuery({
     to,
@@ -75,30 +132,26 @@ export const useValueMetrics = ({ from, to, minutesPerAlert }: Props): UseValueM
       isLoadingAttackDiscoveriesCompare,
     ]
   );
+
   const valueMetrics = useMemo(
     () =>
       getValueMetrics({
         attackDiscoveryCount: data?.total ?? 0,
         totalAlerts: alertCount,
-        attackAlertsCount: data?.unique_alert_ids_count ?? 0,
+        attackAlertsCount: alertCount - filteredAlertsCount ?? 0,
         minutesPerAlert,
       }),
-    [alertCount, data?.total, data?.unique_alert_ids_count, minutesPerAlert]
+    [alertCount, filteredAlertsCount, data?.total, minutesPerAlert]
   );
   const valueMetricsCompare = useMemo(
     () =>
       getValueMetrics({
         attackDiscoveryCount: compareAdData?.total ?? 0,
         totalAlerts: alertCountCompare,
-        attackAlertsCount: compareAdData?.unique_alert_ids_count ?? 0,
+        attackAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
         minutesPerAlert,
       }),
-    [
-      alertCountCompare,
-      compareAdData?.total,
-      compareAdData?.unique_alert_ids_count,
-      minutesPerAlert,
-    ]
+    [alertCountCompare, compareAdData?.total, filteredAlertsCountCompare, minutesPerAlert]
   );
 
   return {

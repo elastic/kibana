@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { formatThousandsDecimal } from './metrics';
-import { ComparePercentage } from './compare_percentage';
+import { ComparePercentageBadge } from './compare_percentage_badge';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
 import { TimeSavedTrend } from './time_saved_trend';
@@ -44,7 +44,7 @@ export const TimeSaved: React.FC<Props> = ({
         from={from}
         to={to}
       />
-      <ComparePercentage
+      <ComparePercentageBadge
         description={i18n.TIME_SAVED_DESC}
         positionForLens
         currentCount={hoursSaved}

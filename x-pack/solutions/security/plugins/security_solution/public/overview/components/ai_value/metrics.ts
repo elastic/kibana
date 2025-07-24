@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { formatNumber } from '@elastic/eui';
+import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 // Define AlertData type if not already imported
 export interface AlertData {
@@ -84,20 +85,35 @@ export const getResponseTimeTrend = (beforeAI: number[], afterAI: number[]) => {
 };
 
 export const formatDollars = (value: number) =>
-  formatNumber(value, {
+  formatNumber(roundTo(value, 2), {
     format: '$0,0', // e.g., $1,234,567
     nil: '-',
     round: true,
   });
 
 export const formatThousandsDecimal = (value: number) =>
-  formatNumber(value, {
+  formatNumber(roundTo(value, 1), {
     format: '0,0.0',
   });
 
 export const formatThousands = (value: number) =>
-  formatNumber(value, {
+  formatNumber(roundTo(value, 0), {
     format: '0,0',
   });
 
-export const formatPercent = (value: number) => `${formatNumber(value, { format: '0.00' })}%`;
+export const formatPercent = (value: number) =>
+  `${formatNumber(roundTo(value, 2), { format: '0.00' })}%`;
+
+function roundTo(value: number, decimals: number) {
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
+export const getFormattedPercChange = (currentCount: number, previousCount: number): string => {
+  const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
+
+  const isNegative = percentageChange.charAt(0) === '-';
+  const cleanedPercentage = isNegative ? percentageChange.slice(1) : percentageChange;
+
+  return cleanedPercentage;
+};
