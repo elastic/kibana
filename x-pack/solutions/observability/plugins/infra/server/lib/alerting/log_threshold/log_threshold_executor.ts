@@ -196,7 +196,7 @@ export const createLogThresholdExecutor =
             [ALERT_GROUP]: groups,
             [ALERT_GROUPING]: grouping,
             ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroupsFromFlattenGrouping(grouping),
+            ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
           };
 
           alertsClient.setAlertData({
