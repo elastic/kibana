@@ -202,7 +202,10 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataViewSpec} />
+          <SiemSearchBar
+            id={InputsModelId.global}
+            sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
+          />
         </FiltersGlobal>
       )}
 

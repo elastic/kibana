@@ -399,7 +399,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={oldSourcererDataViewSpec} // TODO: newDataViewPicker -   Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
+              }
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper

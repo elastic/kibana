@@ -235,7 +235,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataView}
             />
           </FiltersGlobal>
 

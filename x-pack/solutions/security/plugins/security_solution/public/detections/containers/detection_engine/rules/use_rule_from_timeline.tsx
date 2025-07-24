@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import { useSelectDataView } from '../../../../data_view_manager/hooks/use_select_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -67,6 +68,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const selectDataView = useSelectDataView();
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -107,9 +109,17 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
             selectedPatterns: timeline.indexNames,
           })
         );
+
+        if (newDataViewPickerEnabled) {
+          selectDataView({
+            scope: SourcererScopeName.timeline,
+            id: timeline.dataViewId,
+            fallbackPatterns: timeline.indexNames,
+          });
+        }
       }
     },
-    [dataViewId, dispatch]
+    [dataViewId, dispatch, newDataViewPickerEnabled, selectDataView]
   );
 
   const getTimelineById = useCallback(
@@ -194,13 +204,23 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
           selectedPatterns: originalDataView.selectedPatterns,
         })
       );
+
+      if (newDataViewPickerEnabled) {
+        selectDataView({
+          scope: SourcererScopeName.timeline,
+          id: originalDataView.dataViewId,
+          fallbackPatterns: originalDataView.selectedPatterns,
+        });
+      }
     }
   }, [
     addError,
     dataViewId,
     dispatch,
+    newDataViewPickerEnabled,
     originalDataView.dataViewId,
     originalDataView.selectedPatterns,
+    selectDataView,
     selectedDataViewBrowserFields,
     selectedPatterns,
     selectedTimeline,
