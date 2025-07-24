@@ -6,6 +6,7 @@
  */
 
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -179,25 +180,31 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             defaultMessage: 'swim lane',
           }),
         onEdit: async () => {
-          try {
-            const { resolveAnomalySwimlaneUserInput } = await import(
-              './anomaly_swimlane_setup_flyout'
-            );
-
-            const result = await resolveAnomalySwimlaneUserInput(
-              { ...coreStartServices, ...pluginsStartServices },
-              parentApi,
-              uuid,
-              {
-                ...titleManager.getLatestState(),
-                ...swimlaneManager.getLatestState(),
-              }
-            );
-
-            swimlaneManager.api.updateUserInput(result);
-          } catch (e) {
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStartServices,
+            parentApi,
+            flyoutProps: {
+              'data-test-subj': 'ooooooooo',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { ResolveAnomalySwimlaneUserInput } = await import(
+                './anomaly_swimlane_setup_flyout'
+              );
+              return (
+                <ResolveAnomalySwimlaneUserInput
+                  coreStart={coreStartServices}
+                  pluginStart={pluginsStartServices}
+                  onConfirm={(result) => {
+                    swimlaneManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  closeFlyout={closeFlyout}
+                  input={{ ...titleManager.getLatestState(), ...swimlaneManager.getLatestState() }}
+                />
+              );
+            },
+          });
         },
         ...titleManager.api,
         ...timeRangeManager.api,

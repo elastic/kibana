@@ -6,46 +6,44 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import type { MlDependencies } from '../../application/app';
 import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
 import { HttpService } from '../../application/services/http_service';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
+import type { MlStartDependencies } from '../../plugin';
+import { getMlGlobalServices } from '../../application/util/get_services';
 
-export function resolveAnomalySwimlaneUserInput(
-  coreStart: CoreStart,
-  parentApi: unknown,
-  onConfirm: (state: AnomalySwimlaneEmbeddableUserInput) => void,
-  input?: Partial<AnomalySwimLaneEmbeddableState>
-) {
+export function ResolveAnomalySwimlaneUserInput({
+  coreStart,
+  pluginStart,
+  onConfirm,
+  closeFlyout,
+  input,
+}: {
+  coreStart: CoreStart;
+  pluginStart: MlDependencies | MlStartDependencies;
+  onConfirm: (state: AnomalySwimlaneEmbeddableUserInput) => void;
+  closeFlyout: () => void;
+  input?: Partial<AnomalySwimLaneEmbeddableState>;
+}) {
   const { http } = coreStart;
-
   const adJobsApiService = jobsApiProvider(new HttpService(http));
-
-  openLazyFlyout({
-    core: coreStart,
-    parentApi,
-    flyoutProps: {
-      'data-test-subj': 'ooooooo',
-    },
-    loadContent: async ({ closeFlyout }) => {
-      return (
-        <KibanaContextProvider services={{ ...coreStart }}>
-          <AnomalySwimlaneInitializer
-            adJobsApiService={adJobsApiService}
-            initialInput={input}
-            onCreate={(explicitInput) => {
-              onConfirm(explicitInput);
-              closeFlyout();
-            }}
-            onCancel={() => {
-              closeFlyout();
-            }}
-          />
-        </KibanaContextProvider>
-      );
-    },
-  });
+  const mlServices = getMlGlobalServices(coreStart, pluginStart.data.dataViews);
+  return (
+    <KibanaContextProvider services={{ ...coreStart, ...pluginStart, mlServices }}>
+      <AnomalySwimlaneInitializer
+        adJobsApiService={adJobsApiService}
+        initialInput={input}
+        onCreate={(explicitInput) => {
+          onConfirm(explicitInput);
+        }}
+        onCancel={() => {
+          closeFlyout();
+        }}
+      />
+    </KibanaContextProvider>
+  );
 }

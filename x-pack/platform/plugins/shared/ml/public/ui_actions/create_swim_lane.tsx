@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -60,27 +62,59 @@ export function createAddSwimlanePanelAction(
 
       const [coreStart, pluginStart] = await getStartServices();
 
-      try {
-        const { resolveAnomalySwimlaneUserInput } = await import(
-          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        );
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          const { ResolveAnomalySwimlaneUserInput } = await import(
+            '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+          );
+          return (
+            <ResolveAnomalySwimlaneUserInput
+              coreStart={coreStart}
+              pluginStart={pluginStart}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel({
+                  panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    rawState: initialState,
+                  },
+                });
+                closeFlyout();
+              }}
+              closeFlyout={() => {
+                closeFlyout();
+              }}
+            />
+          );
+        },
+      });
 
-        resolveAnomalySwimlaneUserInput(
-          {
-            ...coreStart,
-            ...pluginStart,
-          },
-          context.embeddable,
-          (initialState) => {
-            presentationContainerParent.addNewPanel({
-              panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-              serializedState: { rawState: initialState },
-            });
-          }
-        );
-      } catch (e) {
-        return Promise.reject();
-      }
+      // try {
+      //   const { ResolveAnomalySwimlaneUserInput } = await import(
+      //     '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+      //   );
+
+      //   ResolveAnomalySwimlaneUserInput(
+      //     {
+      //       ...coreStart,
+      //       ...pluginStart,
+      //     },
+      //     context.embeddable,
+      //     (initialState) => {
+      //       presentationContainerParent.addNewPanel({
+      //         panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      //         serializedState: { rawState: initialState },
+      //       });
+      //     }
+      //   );
+      // } catch (e) {
+      //   return Promise.reject();
+      // }
     },
   };
 }
