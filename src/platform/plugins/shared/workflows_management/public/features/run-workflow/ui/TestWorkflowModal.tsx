@@ -21,7 +21,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
+import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
 
 export function TestWorkflowModal({
   workflowYaml,
@@ -40,10 +40,10 @@ export function TestWorkflowModal({
       try {
         if (services.security) {
           const user = await services.security.authc.getCurrentUser();
-          console.log(user);
           setCurrentUser(user);
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to get current user:', error);
       }
     };
@@ -78,14 +78,14 @@ export function TestWorkflowModal({
         }),
       })
       .then((res: any) => {
-        console.log('Workflow run response:', res);
         setWorkflowExecutionId(res.workflowExecutionId);
       });
   };
 
   useEffect(() => {
     handleSubmit();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // I need to run this only once when the modal opens
 
   const [workflowEvent, setWorkflowEvent] = useState<string>(getDefaultWorkflowInputs());
 

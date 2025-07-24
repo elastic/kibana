@@ -24,18 +24,19 @@ import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
-import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
 
 interface WorkflowExecutionProps {
   workflowExecutionId: string;
+  workflowYaml: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
 }
 
 export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   workflowExecutionId,
+  workflowYaml,
   fields = ['stepId', 'workflowId', 'status', 'executionTimeMs'],
 }) => {
   const {
@@ -44,8 +45,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
-
-  const { data: workflow } = useWorkflowDetail(workflowExecution?.workflowId ?? null);
 
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
@@ -103,11 +102,11 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   }, [workflowExecution, refetch]);
 
   const workflowYamlObject = useMemo(() => {
-    if (!workflow) {
+    if (!workflowYaml) {
       return null;
     }
-    return parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE)?.data;
-  }, [workflow]);
+    return parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE)?.data;
+  }, [workflowYaml]);
 
   const executionProps = useMemo(() => {
     return [
@@ -154,16 +153,22 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList type="column" listItems={executionProps} compressed />
-      <EuiSpacer size="s" />
-      <div css={{ height: '500px' }}>
-        {workflowYamlObject && (
-          <WorkflowVisualEditor
-            workflow={workflowYamlObject as any}
-            stepExecutions={workflowExecution?.stepExecutions}
-          />
-        )}
-      </div>
-      <EuiSpacer size="m" />
+      {workflowYamlObject && (
+        <>
+          {workflowYamlObject && (
+            <>
+              <EuiSpacer size="s" />
+              <div css={{ height: '500px' }}>
+                <WorkflowVisualEditor
+                  workflow={workflowYamlObject}
+                  stepExecutions={workflowExecution?.stepExecutions}
+                />
+              </div>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      )}
       <EuiTitle size="xs">
         <h3>Step Executions</h3>
       </EuiTitle>

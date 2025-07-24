@@ -16,9 +16,12 @@ import {
   EsWorkflow,
   WorkflowExecutionEngineModel,
   UpdatedWorkflowResponseDto,
+  transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-management-plugin/common/lib/yaml-utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '@kbn/workflows-management-plugin/common';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -95,6 +98,25 @@ export class WorkflowsManagementApi {
       throw new Error('Scheduler service not set');
     }
     return await this.schedulerService.runWorkflow(workflow, inputs);
+  }
+
+  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
+    if (!this.schedulerService) {
+      throw new Error('Scheduler service not set');
+    }
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    // @ts-expect-error - TODO: fix this
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+
+    return await this.schedulerService.runWorkflow(
+      {
+        id: 'test-workflow',
+        name: workflowToCreate.name,
+        status: workflowToCreate.status,
+        definition: workflowToCreate.definition,
+      },
+      inputs
+    );
   }
 
   public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {

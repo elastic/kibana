@@ -165,7 +165,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (workflow === undefined) {
       return <EuiText>Failed to load workflow</EuiText>;
     }
-    return <WorkflowExecutionList workflowId={workflow?.id} />;
+    return <WorkflowExecutionList workflow={workflow} />;
   };
 
   if (isLoadingWorkflow) {
@@ -182,9 +182,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         pageTitle={workflow?.name ?? 'Workflow Detail'}
         restrictWidth={false}
         rightSideItems={[
-          <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
-            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-          </EuiButton>,
           <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
           </EuiButton>,
