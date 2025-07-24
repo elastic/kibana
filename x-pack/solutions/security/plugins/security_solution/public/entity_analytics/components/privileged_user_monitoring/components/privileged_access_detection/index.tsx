@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PRIVILEGED_USER_ACTIVITY_QUERY_ID } from '../privileged_user_activity/constants';
@@ -17,11 +18,7 @@ import { PrivilegedAccessDetectionChart } from './pad_chart';
 import { usePrivilegedAccessDetectionRoutes } from './pad_routes';
 import { PrivilegedAccessDetectionInstallPrompt } from './pad_install_prompt';
 import { PrivilegedAccessDetectionViewAllAnomaliesButton } from './pad_view_all_anomalies_button';
-
-const TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title',
-  { defaultMessage: 'Top privileged access detection anomalies' }
-);
+import { PrivilegedAccessInfoPopover } from './info_popover';
 
 const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
 
@@ -128,7 +125,16 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
             toggleQuery={setToggleStatus}
             id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
             showInspectButton={false}
-            title={TITLE}
+            title={
+              <>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
+                  defaultMessage="Top privileged access anomalies"
+                />
+
+                <PrivilegedAccessInfoPopover />
+              </>
+            }
             titleSize="s"
             outerDirection="column"
             hideSubtitle
