@@ -11,15 +11,22 @@ import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
 
 export async function ensureLatestRulesPackageInstalled(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
-  securityContext: SecuritySolutionApiRequestHandlerContext
+  securityContext: SecuritySolutionApiRequestHandlerContext,
+  logDebug: (message: string) => void = (message: string) => {}
 ) {
+  logDebug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets');
   let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
+  logDebug(
+    `ENSURE LATEST PACKAGE INSTALLED - fetched latest assets. Assets count: ${latestPrebuiltRules.length}`
+  );
   if (latestPrebuiltRules.length === 0) {
     // Seems no packages with prepackaged rules were installed, try to install the default rules package
-    await installPrebuiltRulesPackage(securityContext);
+    await installPrebuiltRulesPackage(securityContext, logDebug);
 
+    logDebug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets again');
     // Try to get the prepackaged rules again
     latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   }
+  logDebug(`ENSURE LATEST PACKAGE INSTALLED complete. Assets count: ${latestPrebuiltRules.length}`);
   return latestPrebuiltRules;
 }

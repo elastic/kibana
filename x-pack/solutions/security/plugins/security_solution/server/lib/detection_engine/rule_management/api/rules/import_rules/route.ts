@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { chunk, partition } from 'lodash/fp';
 import { extname } from 'path';
@@ -42,7 +42,11 @@ import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logi
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -74,6 +78,12 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
       },
       async (context, request, response): Promise<IKibanaResponse<ImportRulesResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        function logDebug(message: string) {
+          logger.debug(message);
+        }
+
+        logDebug('IMPORT HANDLER - Import rules route handler started.');
 
         try {
           const ctx = await context.resolve([
@@ -113,6 +123,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           );
 
           // import exceptions, includes validation
+          logDebug('IMPORT HANDLER - Importing rule exceptions...');
           const {
             errors: exceptionsErrors,
             successCount: exceptionsSuccessCount,
@@ -130,6 +141,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           );
 
           // import actions-connectors
+          logDebug('IMPORT HANDLER - Importing rule action connectors...');
           const {
             successCount: actionConnectorSuccessCount,
             success: actionConnectorSuccess,
@@ -141,16 +153,19 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             overwrite: request.query.overwrite_action_connectors,
           });
 
+          logDebug('IMPORT HANDLER - Migrating legacy action IDs...');
           const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
             rulesToImportOrErrors,
             actionSOClient,
             actionsClient
           );
 
+          logDebug(`IMPORT HANDLER - Creating ruleSourceImporter`);
           const ruleSourceImporter = createRuleSourceImporter({
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
+            logDebug,
           });
 
           const [parsedRules, parsedRuleErrors] = partition(
@@ -161,6 +176,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           // After importing the actions and migrating action IDs on rules to import,
           // validate that all actions referenced by rules exist
           // Filter out rules that reference non-existent actions
+          logDebug(`IMPORT HANDLER - Validating rule actions...`);
           const { validatedActionRules, missingActionErrors } = await validateRuleActions({
             actionsClient,
             rules: parsedRules,
@@ -168,6 +184,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
 
+          logDebug(
+            `IMPORT HANDLER - Importing ${validatedActionRules.length} rules in ${ruleChunks.length} chunks...`
+          );
           const importRuleResponse = await importRules({
             ruleChunks,
             overwriteRules: request.query.overwrite,
@@ -175,6 +194,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             ruleSourceImporter,
             detectionRulesClient,
           });
+          logDebug('IMPORT HANDLER - importRules complete');
 
           const parseErrors = parsedRuleErrors.map((error) =>
             createBulkErrorObject({
@@ -212,9 +232,12 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             action_connectors_warnings: actionConnectorWarnings,
           };
 
+          logDebug(`IMPORT HANDLER - Import rules route handler finished`);
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
           const error = transformError(err);
+          logDebug(`IMPORT HANDLER - Error in import rules route handler: ${error.message}`);
+          logDebug(JSON.stringify(error));
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

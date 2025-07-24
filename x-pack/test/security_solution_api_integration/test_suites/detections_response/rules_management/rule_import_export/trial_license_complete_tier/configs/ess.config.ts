@@ -19,5 +19,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName:
         'Rules Management - Rule Import And Export Integration Tests - ESS Env - Trial License',
     },
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'plugins.securitySolution',
+            level: 'debug',
+          },
+        ])}`,
+      ],
+    },
   };
 }

@@ -16,17 +16,30 @@ import { findLatestPackageVersion } from './find_latest_package_version';
  * @param context Request handler context
  */
 export async function installPrebuiltRulesPackage(
-  context: SecuritySolutionApiRequestHandlerContext
+  context: SecuritySolutionApiRequestHandlerContext,
+  logDebug: (message: string) => void = (message: string) => {}
 ) {
   const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
+
+  logDebug(`INSTALL PREBUILT RULES PACKAGE - package version in config: ${pkgVersion}`);
 
   if (!pkgVersion) {
     // Find latest package if the version isn't specified in the config
     pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME);
   }
 
-  return context
+  logDebug(`INSTALL PREBUILT RULES PACKAGE - installing package version: ${pkgVersion}`);
+
+  const packageInstallationResult = await context
     .getInternalFleetServices()
     .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+
+  logDebug(
+    `INSTALL PREBUILT RULES PACKAGE - installation result: ${JSON.stringify(
+      packageInstallationResult
+    )}`
+  );
+
+  return packageInstallationResult;
 }

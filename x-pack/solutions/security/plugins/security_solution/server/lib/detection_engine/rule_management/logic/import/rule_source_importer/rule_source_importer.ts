@@ -101,19 +101,25 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private currentRulesById: Record<string, RuleResponse> = {};
   private rulesToImport: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
+  private logDebug: (message: string) => void = () => {}; // noop
 
   constructor({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logDebug,
   }: {
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+    logDebug?: (message: string) => void;
   }) {
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
+    if (logDebug) {
+      this.logDebug = logDebug;
+    }
   }
 
   /**
@@ -122,17 +128,26 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
+    this.logDebug('RULE SOURCE IMPORTER - setup starts');
+
     if (!this.latestPackagesInstalled) {
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context);
+      this.logDebug('RULE SOURCE IMPORTER - latest package not installed');
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logDebug);
       this.latestPackagesInstalled = true;
+    } else {
+      this.logDebug('RULE SOURCE IMPORTER - latest package already installed');
     }
 
     this.rulesToImport = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
+    this.logDebug('RULE SOURCE IMPORTER - fetchMatchingAssetsByRuleId()');
     this.matchingAssetsByRuleId = await this.fetchMatchingAssetsByRuleId();
+    this.logDebug('RULE SOURCE IMPORTER - fetchAvailableRuleAssetIds()');
     this.availableRuleAssetIds = new Set(await this.fetchAvailableRuleAssetIds());
+    this.logDebug('RULE SOURCE IMPORTER - fetchInstalledRulesByIds()');
     this.currentRulesById = await this.fetchInstalledRulesByIds(
       this.rulesToImport.map((rule) => rule.rule_id)
     );
+    this.logDebug('RULE SOURCE IMPORTER - setup complete');
   }
 
   public isPrebuiltRule(rule: RuleToImport): boolean {
@@ -207,14 +222,17 @@ export const createRuleSourceImporter = ({
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
+  logDebug = (message: string) => {},
 }: {
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+  logDebug?: (message: string) => void;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logDebug,
   });
 };
