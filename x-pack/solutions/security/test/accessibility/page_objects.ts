@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { pageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
+export { pageObjects } from '../functional/page_objects';

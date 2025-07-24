@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { services as kibanaA11yServices } from '@kbn/test-suites-src/accessibility/services';
-import { services as functionalServices } from '../functional/services';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 
 export const services = {
-  ...kibanaA11yServices,
-  ...functionalServices,
+  ...platformServices,
 };

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { services as kibanaA11yServices } from '@kbn/test-suites-src/accessibility/services';
-import { services as functionalServices } from '../functional/services';
+import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
+import { DetectionsPageObject } from './detections';
 
-export const services = {
-  ...kibanaA11yServices,
-  ...functionalServices,
+export const pageObjects = {
+  ...platformPageObjects,
+  detections: DetectionsPageObject,
 };
