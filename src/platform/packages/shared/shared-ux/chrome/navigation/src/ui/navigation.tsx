@@ -118,6 +118,19 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
 
 export const Navigation = React.memo(NavigationComp) as typeof NavigationComp;
 
+/**
+ * A React hook for accessing the internal state and rendering logic of the `Navigation` component.
+ *
+ * This hook consumes a private context set up by the `Navigation` component itself.
+ * It is intended for use only by the immediate child components of `Navigation` (e.g., `NavGroup`, `NavLinks`)
+ * to coordinate their rendering with the parent.
+ *
+ * NOTE: This is distinct from the `useNavigation` hook in `src/services.tsx`, which provides
+ * access to the top-level navigation services.
+ *
+ * @returns The internal state of the `Navigation` component.
+ * @throws If the hook is used outside of a `Navigation` component.
+ */
 export function useNavigation() {
   const context = useContext(NavigationContext);
   if (!context) {
