@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '../../common/constants';
-import { SchemaTypes } from '../../common/http_api/shared/schema_type';
+import type { SchemaTypes } from '../../common/http_api/shared/schema_type';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -36,9 +36,13 @@ const PrependLabel = ({ count }: { count: number }) => (
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiBadge color="primary" data-test-subj="infraSchemaSelectorCount" aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
-        defaultMessage: 'Schemas available',
-      })}>
+      <EuiBadge
+        color="primary"
+        data-test-subj="infraSchemaSelectorCount"
+        aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
+          defaultMessage: 'Schemas available',
+        })}
+      >
         {count}
       </EuiBadge>
     </EuiFlexItem>
@@ -57,9 +61,7 @@ const InvalidDropdownDisplay = ({ value }: { value: string }) => {
   return (
     <>
       <EuiText size="s">{value}</EuiText>
-      <EuiText size="xs">
-        {SCHEMA_NOT_AVAILABLE}
-      </EuiText>
+      <EuiText size="xs">{SCHEMA_NOT_AVAILABLE}</EuiText>
     </>
   );
 };
@@ -71,10 +73,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
         <EuiText size="s">{value}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={SCHEMA_NOT_AVAILABLE}
-        >
+        <EuiToolTip position="top" content={SCHEMA_NOT_AVAILABLE}>
           <EuiToken
             iconType="alert"
             tabIndex={0}
@@ -98,23 +97,22 @@ const InvalidDisplay = ({ value }: { value: string }) => {
 };
 const schemaTranslationMap = {
   [METRIC_SCHEMA_ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
-      defaultMessage: 'Elastic System Integration',
-    }),
+    defaultMessage: 'Elastic System Integration',
+  }),
   [METRIC_SCHEMA_SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
-      defaultMessage: 'OpenTelemetry',
-    }),
-  };
+    defaultMessage: 'OpenTelemetry',
+  }),
+};
 
-
-  const getInputDisplay = (schema: SchemaTypes) => {
-    const translation = schemaTranslationMap[schema];
-    if (translation) {
-      return translation;
-    }
-    return i18n.translate('xpack.infra.schemaSelector.unknownDisplay', {
-      defaultMessage: 'Unknown schema',
-    });
-  };
+const getInputDisplay = (schema: SchemaTypes) => {
+  const translation = schemaTranslationMap[schema];
+  if (translation) {
+    return translation;
+  }
+  return i18n.translate('xpack.infra.schemaSelector.unknownDisplay', {
+    defaultMessage: 'Unknown schema',
+  });
+};
 
 export const SchemaSelector = ({
   onChange,
@@ -139,17 +137,18 @@ export const SchemaSelector = ({
   const isInvalid = !!value && !options.some((opt) => opt.value === value);
 
   // If only one schema is available and it's not the preferred, show both in the dropdown
-  const displayOptions = options.length === 1 && isInvalid
-    ? [
-        {
-          inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
-          value,
-          disabled: true,
-          dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
-        },
-        ...options,
-      ]
-    : options;
+  const displayOptions =
+    options.length === 1 && isInvalid
+      ? [
+          {
+            inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
+            value,
+            disabled: true,
+            dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
+          },
+          ...options,
+        ]
+      : options;
 
   const onSelect = (selectedValue: string) => {
     if (selectedValue) {

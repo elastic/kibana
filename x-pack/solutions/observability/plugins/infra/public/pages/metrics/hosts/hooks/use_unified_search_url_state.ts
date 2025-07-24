@@ -147,7 +147,11 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
-  preferredSchema: rt.union([rt.literal(METRIC_SCHEMA_ECS), rt.literal(METRIC_SCHEMA_SEMCONV), rt.null]),
+  preferredSchema: rt.union([
+    rt.literal(METRIC_SCHEMA_ECS),
+    rt.literal(METRIC_SCHEMA_SEMCONV),
+    rt.null,
+  ]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

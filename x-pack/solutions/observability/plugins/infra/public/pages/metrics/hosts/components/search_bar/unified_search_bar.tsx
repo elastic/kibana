@@ -22,8 +22,7 @@ import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../../hooks/use_fetcher';
 import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
-import { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
-
+import type { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -39,7 +38,10 @@ export const UnifiedSearchBar = () => {
 
   const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
 
-  const schemas: SchemaTypes[] = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
+  const schemas: SchemaTypes[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata]
+  );
 
   // Set preferredSchema in URL if not set and hostOtelEnabled
   useEffect(() => {
@@ -50,7 +52,13 @@ export const UnifiedSearchBar = () => {
       const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
       onPreferredSchemaChange(next);
     }
-  }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas, featureFlags.hostOtelEnabled]);
+  }, [
+    timeRangeMetadata,
+    searchCriteria.preferredSchema,
+    onPreferredSchemaChange,
+    schemas,
+    featureFlags.hostOtelEnabled,
+  ]);
 
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
