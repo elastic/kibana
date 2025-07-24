@@ -604,7 +604,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 </EuiButton>
               )}
               <EuiButton
-                aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+                aria-label={`save-${editorState.title ?? defaultPanelTitle}`}
                 data-test-subj="control-editor-save"
                 fill
                 color="primary"
@@ -616,7 +616,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                   )
                 }
                 onClick={() => {
-                  onSave(editorState, selectedControlType!);
+                  onSave(
+                    { ...editorState, title: editorState.title ?? defaultPanelTitle },
+                    selectedControlType!
+                  );
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
