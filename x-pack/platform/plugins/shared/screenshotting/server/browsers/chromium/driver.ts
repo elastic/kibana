@@ -12,7 +12,7 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
-import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
+import { CDPSession, ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
@@ -136,7 +136,8 @@ export class HeadlessChromiumDriver {
     }
 
     await this.page.setRequestInterception(true);
-    this.registerListeners(url, headers, logger);
+    const client = this.page._client();
+    this.registerListeners(url, headers, logger, client);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     await this.waitForSelector(
@@ -356,13 +357,15 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
+  private registerListeners(
+    url: string,
+    customHeaders: Headers,
+    logger: Logger,
+    client: CDPSession
+  ) {
     if (this.listenersAttached) {
       return;
     }
-
-    // FIXME: retrieve the client in open() and  pass in the client?
-    const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -384,10 +387,10 @@ export class HeadlessChromiumDriver {
           errorReason: 'Aborted',
           requestId,
         });
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
+        await this.page.browser().close();
         return;
       }
 
@@ -424,7 +427,7 @@ export class HeadlessChromiumDriver {
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    this.page.on('response', (interceptedResponse: HTTPResponse) => {
+    this.page.on('response', async (interceptedResponse: HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
       const status = interceptedResponse.status();
@@ -436,10 +439,10 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
+        await this.page.browser().close();
         return;
       }
     });
