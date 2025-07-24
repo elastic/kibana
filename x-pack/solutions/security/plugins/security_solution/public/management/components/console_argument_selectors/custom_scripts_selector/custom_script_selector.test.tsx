@@ -11,7 +11,6 @@ import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
-import { useConsoleStateDispatch } from '../../console/hooks/state_selectors/use_console_state_dispatch';
 import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { CustomScript } from '../../../../../server/endpoint/services';
@@ -33,9 +32,6 @@ jest.useFakeTimers();
 describe('CustomScriptSelector', () => {
   const mockUseGetCustomScripts = useGetCustomScripts as jest.MockedFunction<
     typeof useGetCustomScripts
-  >;
-  const mockUseConsoleStateDispatch = useConsoleStateDispatch as jest.MockedFunction<
-    typeof useConsoleStateDispatch
   >;
   const mockUseCustomScriptsErrorToast = useCustomScriptsErrorToast as jest.MockedFunction<
     typeof useCustomScriptsErrorToast

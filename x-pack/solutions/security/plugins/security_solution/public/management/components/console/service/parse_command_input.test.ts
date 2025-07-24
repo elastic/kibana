@@ -18,7 +18,6 @@ describe('when using parsed command input utils', () => {
         input: '',
         name: 'foo',
         args: {},
-        commandDefinitions: [] as CommandDefinition[],
         hasArgs: Object.keys(overrides.args || {}).length > 0,
         ...overrides,
       } as unknown as ParsedCommandInterface;
@@ -165,63 +164,6 @@ describe('when using parsed command input utils', () => {
       const parsedCommand = parseCommandInput(input);
 
       expect(parsedCommand.args).toEqual({ path: [expected ?? path] });
-    });
-
-    describe('selectorStringDefaultValue handling', () => {
-      const mockCommandDefinitions: CommandDefinition[] = [
-        {
-          name: 'testcmd',
-          about: 'Test command',
-          RenderComponent: () => null,
-          args: {
-            normal: {
-              required: false,
-              allowMultiples: false,
-              about: 'Normal arg',
-            },
-            selector: {
-              required: false,
-              allowMultiples: false,
-              about: 'Selector arg',
-              selectorStringDefaultValue: true,
-              SelectorComponent: () => null,
-            },
-          },
-        },
-      ];
-      it('should use empty string for selector arguments with selectorStringDefaultValue', () => {
-        const input = 'testcmd --selector';
-        const parsedCommand = parseCommandInput(input, mockCommandDefinitions);
-
-        expect(parsedCommand.args).toEqual({ selector: [''] });
-      });
-
-      it('should use empty string for normal arguments without values', () => {
-        const input = 'testcmd --normal';
-        const parsedCommand = parseCommandInput(input, mockCommandDefinitions);
-
-        expect(parsedCommand.args).toEqual({ normal: [true] });
-      });
-
-      it('should handle mixed argument types correctly', () => {
-        const input = 'testcmd --normal --selector';
-        const parsedCommand = parseCommandInput(input, mockCommandDefinitions);
-
-        expect(parsedCommand.args).toEqual({
-          normal: [true],
-          selector: [''],
-        });
-      });
-
-      it('should work without command definitions (backward compatibility)', () => {
-        const input = 'testcmd --normal --selector';
-        const parsedCommand = parseCommandInput(input);
-
-        expect(parsedCommand.args).toEqual({
-          normal: [true],
-          selector: [true],
-        });
-      });
     });
   });
 

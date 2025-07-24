@@ -8,10 +8,7 @@
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 import type { CommandDefinition, CommandArgDefinition } from '../types';
 
-const parseInputString = (
-  rawInput: string,
-  commandDefinitions: CommandDefinition[] = []
-): ParsedCommandInput => {
+const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
   const response: ParsedCommandInput = {
     name: getCommandNameFromTextInput(input),
@@ -27,9 +24,6 @@ const parseInputString = (
     inputFirstSpacePosition === -1
       ? []
       : input.substring(inputFirstSpacePosition).trim().split(/--/);
-
-  // Find command definition for selector argument handling
-  const commandDef = commandDefinitions.find((def) => def.name === response.name);
 
   for (const rawArg of rawArguments) {
     const argNameAndValueTrimmedString = rawArg.trim();
@@ -72,11 +66,8 @@ const parseInputString = (
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has no value (bare flag)
-          // Check if this argument has selectorStringDefaultValue set to true
-          const argDef = commandDef?.args?.[argName] as CommandArgDefinition | undefined;
-          const useStringValue = argDef?.selectorStringDefaultValue === true;
-          response.args[argName].push(useStringValue ? '' : true);
+          // Argument has not value (bare), set it to empty string
+          response.args[argName].push(true);
         }
       }
     }
@@ -90,11 +81,8 @@ class ParsedCommand implements ParsedCommandInterface {
   public readonly args: Record<string, string[]>;
   public readonly hasArgs: boolean;
 
-  constructor(
-    public readonly input: string,
-    public readonly commandDefinitions: CommandDefinition[] = []
-  ) {
-    const parseInput = parseInputString(input, commandDefinitions);
+  constructor(public readonly input: string) {
+    const parseInput = parseInputString(input);
     this.name = parseInput.name;
     this.args = parseInput.args;
     this.hasArgs = Object.keys(this.args).length > 0;
@@ -105,11 +93,8 @@ class ParsedCommand implements ParsedCommandInterface {
   }
 }
 
-export const parseCommandInput = (
-  input: string,
-  commandDefinitions: CommandDefinition[] = []
-): ParsedCommandInterface => {
-  return new ParsedCommand(input, commandDefinitions);
+export const parseCommandInput = (input: string): ParsedCommandInterface => {
+  return new ParsedCommand(input);
 };
 
 export const getCommandNameFromTextInput = (input: string): string => {

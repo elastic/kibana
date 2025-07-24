@@ -26,6 +26,9 @@ import { InputAreaPopover } from './components/input_area_popover';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
+import type { CommandDefinition, CommandArgDefinition } from '../../types';
+import { getCommandNameFromTextInput } from '../../service/parsed_command_input';
 
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
@@ -76,6 +79,94 @@ const CommandInputContainer = styled.div`
   }
 `;
 
+/**
+ * Detects and pre-processes pasted commands that contain argument values
+ * for arguments that should be handled by selector components.
+ *
+ * For example: "runscript --ScriptName=\"test.ps1\"" becomes:
+ * - cleanedCommand: "runscript --ScriptName"
+ * - extractedArgState: { ScriptName: [{ value: "test.ps1", valueText: "test.ps1" }] }
+ */
+const detectAndPreProcessPastedCommand = (
+  rawInput: string,
+  commandDefinitions: CommandDefinition[] = []
+): {
+  cleanedCommand: string;
+  extractedArgState: Record<string, Array<{ value: string; valueText: string }>>;
+  hasSelectorArguments: boolean;
+} => {
+  const result = {
+    cleanedCommand: rawInput,
+    extractedArgState: {} as Record<string, Array<{ value: string; valueText: string }>>,
+    hasSelectorArguments: false,
+  };
+
+  // Early return if no input
+  if (!rawInput.trim()) {
+    return result;
+  }
+
+  const commandName = getCommandNameFromTextInput(rawInput);
+  const commandDef = commandDefinitions.find((def) => def.name === commandName);
+
+  // Early return if command not found or has no selector arguments
+  if (!commandDef?.args) {
+    return result;
+  }
+
+  // Find arguments that have SelectorComponents (like ScriptName)
+  const selectorArguments = Object.entries(commandDef.args).filter(
+    ([_, argDef]: [string, CommandArgDefinition]) => argDef.SelectorComponent
+  );
+
+  if (selectorArguments.length === 0) {
+    return result;
+  }
+
+  let cleanedCommand = rawInput;
+  let hasProcessedSelectorArgs = false;
+
+  // Process each selector argument to extract embedded values
+  for (const [argName, argDef] of selectorArguments) {
+    const argPattern = new RegExp(`--${argName}\\s*[=]\\s*(["'][^"]*["']|\\S+)`, 'g');
+    let match;
+
+    while ((match = argPattern.exec(rawInput)) !== null) {
+      hasProcessedSelectorArgs = true; // Mark that we processed a selector argument
+
+      if (argDef.selectorStringDefaultValue === true) {
+        let value = match[1];
+
+        // Remove quotes if present
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
+
+        // Store the extracted value in argState format
+        if (!result.extractedArgState[argName]) {
+          result.extractedArgState[argName] = [];
+        }
+
+        result.extractedArgState[argName].push({
+          value,
+          valueText: value,
+        });
+      }
+
+      // Replace the full argument with value with just the argument name (for both types)
+      cleanedCommand = cleanedCommand.replace(match[0], `--${argName}`);
+    }
+  }
+
+  result.cleanedCommand = cleanedCommand;
+  result.hasSelectorArguments = hasProcessedSelectorArgs;
+
+  return result;
+};
+
 export interface CommandInputProps extends CommonProps {
   prompt?: string;
   isWaiting?: boolean;
@@ -86,6 +177,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
+  const commands = useWithCommandList();
   const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
     useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
@@ -161,6 +253,18 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         return;
       }
 
+      // Handle any input value by pre-processing selector arguments (paste, history, etc.)
+      let processedValue = value;
+      let extractedArgState: Record<string, Array<{ value: string; valueText: string }>> = {};
+
+      if (value) {
+        const preProcessResult = detectAndPreProcessPastedCommand(value, commands);
+        if (preProcessResult.hasSelectorArguments) {
+          processedValue = preProcessResult.cleanedCommand;
+          extractedArgState = preProcessResult.extractedArgState;
+        }
+      }
+
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
@@ -177,7 +281,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevEnteredCommand
           );
 
-          inputText.addValue(value ?? '', selection);
+          inputText.addValue(processedValue ?? '', selection);
 
           switch (keyCode) {
             // BACKSPACE
@@ -224,12 +328,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           return {
             leftOfCursorText: inputText.getLeftOfCursorText(),
             rightOfCursorText: inputText.getRightOfCursorText(),
-            argState: inputText.getArgState(),
+            argState: {
+              ...inputText.getArgState(),
+              ...extractedArgState,
+            },
           };
         },
       });
     },
-    [dispatch]
+    [commands, dispatch]
   );
 
   // Execute the command if one was ENTER'd.

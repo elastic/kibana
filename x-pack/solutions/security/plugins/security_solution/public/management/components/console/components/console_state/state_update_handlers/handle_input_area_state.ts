@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
-import {
-  parseCommandInput,
-  detectAndPreProcessPastedCommand,
-} from '../../../service/parsed_command_input';
+import { parseCommandInput } from '../../../service/parsed_command_input';
 import type {
   ArgSelectorState,
   ConsoleDataAction,
@@ -119,38 +116,15 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         state.input.leftOfCursorText !== newTextEntered ||
         state.input.rightOfCursorText !== newRightOfCursor
       ) {
-        const fullCommand = newTextEntered + newRightOfCursor;
-
-        // Pre-process pasted commands to handle selector arguments like --ScriptName
-        const preProcessResult = detectAndPreProcessPastedCommand(fullCommand, state.commands);
-
-        // Use cleaned command for parsing if selector arguments were found
-        const commandToParse = preProcessResult.hasSelectorArguments
-          ? preProcessResult.cleanedCommand
-          : fullCommand;
-
-        const parsedInput = parseCommandInput(commandToParse, state.commands);
+        const parsedInput = parseCommandInput(newTextEntered + newRightOfCursor);
 
         let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
           state.input.enteredCommand;
 
-        // Merge extracted argState from pre-processing with adjusted argState
-        let finalArgState = adjustedArgState;
-
-        if (
-          preProcessResult.hasSelectorArguments &&
-          Object.keys(preProcessResult.extractedArgState).length > 0
-        ) {
-          finalArgState = {
-            ...adjustedArgState,
-            ...preProcessResult.extractedArgState,
-          };
-        }
-
-        if (enteredCommand && finalArgState && enteredCommand?.argState !== finalArgState) {
+        if (enteredCommand && adjustedArgState && enteredCommand?.argState !== adjustedArgState) {
           enteredCommand = {
             ...enteredCommand,
-            argState: finalArgState,
+            argState: adjustedArgState,
           };
         }
 
@@ -166,7 +140,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
           if (commandDefinition) {
             let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
-            const argState: EnteredCommand['argState'] = finalArgState ?? {};
+            const argState: EnteredCommand['argState'] = adjustedArgState ?? {};
 
             for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
               if (argDef.SelectorComponent) {
@@ -178,7 +152,12 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
                 // Clear selector argument values for clean commands (e.g., from history)
                 // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorStringDefaultValue set to true
-                if (parsedInput.hasArg(argName) && parsedInput.args[argName]?.includes(true)) {
+                // BUT: Don't clear if we already have values from preprocessing (paste, history, etc.)
+                if (
+                  parsedInput.hasArg(argName) &&
+                  parsedInput.args[argName]?.includes(true) &&
+                  !argState[argName]?.length
+                ) {
                   argState[argName] = [];
                 }
               }
@@ -195,11 +174,9 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         // Update parsed input with any values that were selected via argument selectors
         setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
-        // Use cleaned command text for display if pre-processing occurred
-        const displayLeftText = preProcessResult.hasSelectorArguments
-          ? preProcessResult.cleanedCommand
-          : newTextEntered;
-        const displayRightText = preProcessResult.hasSelectorArguments ? '' : newRightOfCursor;
+        // Use original text values for display
+        const displayLeftText = newTextEntered;
+        const displayRightText = newRightOfCursor;
 
         return {
           ...state,
