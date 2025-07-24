@@ -243,73 +243,71 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item
-        css={styles.flyoutPanel}
-        data-test-subj="indexPatternEditorFlyout"
-        border="right"
-      >
-        <EuiTitle data-test-subj="flyoutTitle">
-          <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
-        </EuiTitle>
-        {showManagementLink && editData && editData.id && (
-          <EuiLink
-            href={application.getUrlForApp('management', {
-              path: `/kibana/dataViews/dataView/${editData.id}`,
-            })}
+      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
+        <FlyoutPanels.Content>
+          <EuiTitle data-test-subj="flyoutTitle">
+            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+          </EuiTitle>
+          {showManagementLink && editData && editData.id && (
+            <EuiLink
+              href={application.getUrlForApp('management', {
+                path: `/kibana/dataViews/dataView/${editData.id}`,
+              })}
+            >
+              {i18n.translate('indexPatternEditor.goToManagementPage', {
+                defaultMessage: 'Manage settings and view field details',
+              })}
+            </EuiLink>
+          )}
+          <Form
+            form={form}
+            css={styles.patternEditorForm}
+            error={form.getErrors()}
+            isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+            data-validation-error={form.getErrors().length ? '1' : '0'}
+            data-test-subj="indexPatternEditorForm"
           >
-            {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'Manage settings and view field details',
-            })}
-          </EuiLink>
-        )}
-        <Form
-          form={form}
-          css={styles.patternEditorForm}
-          error={form.getErrors()}
-          isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
-          data-validation-error={form.getErrors().length ? '1' : '0'}
-          data-test-subj="indexPatternEditorForm"
-        >
-          <UseField path="isAdHoc" />
-          {indexPatternTypeSelect}
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <NameField namesNotAllowed={existingDataViewNames || []} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TitleField
-                isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-                rollupIndicesCapabilities={rollupIndicesCapabilities}
-                indexPatternValidationProvider={
-                  dataViewEditorService.indexPatternValidationProvider
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TimestampField
-                options$={dataViewEditorService.timestampFieldOptions$}
-                isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <AdvancedParamsContent
-            disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-            disableId={!!editData}
-            onAllowHiddenChange={() => {
-              form.getFields().title.validate();
-            }}
-            defaultVisible={editData?.getAllowHidden()}
-          />
-        </Form>
+            <UseField path="isAdHoc" />
+            {indexPatternTypeSelect}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <NameField namesNotAllowed={existingDataViewNames || []} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TitleField
+                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                  rollupIndicesCapabilities={rollupIndicesCapabilities}
+                  indexPatternValidationProvider={
+                    dataViewEditorService.indexPatternValidationProvider
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TimestampField
+                  options$={dataViewEditorService.timestampFieldOptions$}
+                  isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <AdvancedParamsContent
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
+              disableId={!!editData}
+              onAllowHiddenChange={() => {
+                form.getFields().title.validate();
+              }}
+              defaultVisible={editData?.getAllowHidden()}
+            />
+          </Form>
+        </FlyoutPanels.Content>
         <Footer
           onCancel={onCancel}
           onSubmit={async (adhoc?: boolean) => {
@@ -356,10 +354,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
 const styles = {
   patternEditorForm: css({
     flexGrow: 1,
-  }),
-  flyoutPanel: css({
-    display: 'flex',
-    flexDirection: 'column',
   }),
 };
 

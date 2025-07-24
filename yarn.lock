@@ -2068,10 +2068,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@70.1.0":
-  version "70.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.0.tgz#178c7304c1b82c05ca687367b83886aa861b1036"
-  integrity sha512-Re+MABG944Xm6fQGgf85Mlb0IWf0e8xhVALFqTWK+xKgqyjiecb0rj34fUGbKpqzzV6YRok6MK1nudsXK3KJTw==
+"@elastic/charts@70.1.1":
+  version "70.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.1.tgz#3ce1cd77b7d6b5c89cfe33f8dbdbf23e294d98e2"
+  integrity sha512-g6joH7VZlCL9syAJJDZ5Tf/x03XV3Zsc8HD0f77SioWa9MbMLPqRQZyuLG+Y2+1wCsoV6njuvk9AR96VgwbFdw==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2237,10 +2237,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.4":
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.4.tgz#a400bf7fb5058e7df5f37ce556a62dcc6c214f41"
-  integrity sha512-B504Q0SM3GysR7aGBj5O1U5/Y5j5fw0B+tbhmL8j8Gw5vogNG+/7TzwggPL39PjeRfpLqjiqu3DtWNNqjAlxcw==
+"@elastic/monaco-esql@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.6.tgz#c89a1eb142b9a8bd713bc697d651373a9c4144df"
+  integrity sha512-roRLyZelCI0Vb9Z2/Ugu/w+aUghoLIqrnF/oVQqYH1VHXSBpzKDtItGEp5SXcXWdz7gcta3mlygfNxvr5DTEvw==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
