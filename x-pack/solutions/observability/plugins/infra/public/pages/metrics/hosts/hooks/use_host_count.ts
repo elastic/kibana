@@ -20,7 +20,7 @@ export const useHostCount = () => {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  const schema = searchCriteria.preferredSchema || METRIC_SCHEMA_ECS;
+  const schema = searchCriteria?.preferredSchema || METRIC_SCHEMA_ECS;
 
   const payload = useMemo(
     () =>
