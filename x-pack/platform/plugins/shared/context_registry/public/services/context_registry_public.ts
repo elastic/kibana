@@ -5,28 +5,25 @@
  * 2.0.
  */
 import React from 'react';
-
-export interface ContextDefinitionPublicProps<TPayload = {}, TMetadata = {}> {
-  data: {
-    attachments: Array<{
-      attachment: Array<Record<string, unknown>>;
-      payload: TPayload;
-    }>;
-    metadata?: TMetadata;
-  };
+import { ContextResponse } from '../../common/types';
+interface BaseContextDefinitionPublic {
+  key: string;
 }
 
-export interface ContextDefinitionPublic<TPayload = {}, TMetadata = {}> {
-  key: string;
-  displayName: string;
-  description: string;
-  children: React.LazyExoticComponent<React.FC<ContextDefinitionPublicProps<TPayload, TMetadata>>>;
+export type ContextDefinitionPublic<TPayload = {}> = BaseContextDefinitionPublic & {
+  children: React.LazyExoticComponent<React.FC<ContextChildrenProps<TPayload>>>;
+};
+
+export interface ContextChildrenProps<TPayload = {}> {
+  context: ContextResponse<TPayload>;
 }
 
 export class ContextRegistryPublic {
-  private registry: Map<string, ContextDefinitionPublic> = new Map();
+  private registry: Map<string, BaseContextDefinitionPublic> = new Map();
 
-  public register(contextDefinition: ContextDefinitionPublic): void {
+  public registerHandler<TPayload = {}>(
+    contextDefinition: ContextDefinitionPublic<TPayload>
+  ): void {
     if (this.registry.has(contextDefinition.key)) {
       throw new Error(
         `Context with key '${contextDefinition.key}' is already registered with public context registry.`
@@ -35,11 +32,14 @@ export class ContextRegistryPublic {
     this.registry.set(contextDefinition.key, contextDefinition);
   }
 
-  get(key: string): ContextDefinitionPublic | undefined {
-    return this.registry.get(key);
+  getContextByKey<TPayload = {}>(key: string): ContextDefinitionPublic<TPayload> {
+    if (!this.registry.has(key)) {
+      throw new Error(`Context with key '${key}' is not registered.`);
+    }
+    return this.registry.get(key) as ContextDefinitionPublic<TPayload>;
   }
 
   getAll(): ContextDefinitionPublic[] {
-    return Array.from(this.registry.values());
+    return Array.from(this.registry.values()) as ContextDefinitionPublic[];
   }
 }

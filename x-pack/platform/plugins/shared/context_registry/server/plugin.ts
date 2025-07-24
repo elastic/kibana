@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server';
+import { Logger } from '@kbn/logging';
 import { ContextRegistryServer } from './services/context_registry_server';
 import { ContextRegistryConfig } from '../common/config';
 
@@ -21,9 +22,11 @@ export interface ContextRegistryServerStart {
 export class ContextRegistryPlugin implements PluginType {
   private config: ContextRegistryConfig;
   private registry: ContextRegistryServer;
+  private readonly logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext<ContextRegistryConfig>) {
-    this.registry = new ContextRegistryServer();
+    this.logger = this.initContext.logger.get();
+    this.registry = new ContextRegistryServer(this.logger);
     this.config = this.initContext.config.get<ContextRegistryConfig>();
   }
 

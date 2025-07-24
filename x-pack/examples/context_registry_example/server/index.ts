@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { CasesSuggestionRegistryExamplePlugin } from './plugin';
+import { PluginInitializer } from '@kbn/core/server';
 
-export const plugin = () => new CasesSuggestionRegistryExamplePlugin();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { ContextRegistryExamplePlugin } = await import('./plugin');
+  return new ContextRegistryExamplePlugin();
+};

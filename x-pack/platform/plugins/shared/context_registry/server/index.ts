@@ -13,6 +13,9 @@ export type { ContextRegistryServerSetup, ContextRegistryServerStart } from './p
 export type {
   ContextDefinitionServer,
   ContextRegistryServer,
+  ContextHandler,
+  ContextRequest,
+  contextRequestSchema,
 } from './services/context_registry_server';
 
 export type { ContextResponse } from '../common/types';

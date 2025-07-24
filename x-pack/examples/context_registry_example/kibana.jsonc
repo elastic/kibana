@@ -1,19 +1,20 @@
 {
     "type": "plugin",
-    "id": "@kbn/case-suggestion-registry-example-plugin",
+    "id": "@kbn/context-registry-example-plugin",
     "owner": "@elastic/obs-ux-management-team",
     "group": "platform",
     "visibility": "private",
     "plugin": {
-      "id": "caseSuggestionRegistryExample",
+      "id": "contextRegistryExample",
       "server": true,
       "browser": true,
       "configPath": [
-        "case_suggestion_registry_example"
+        "conext_registry_example"
       ],
       "requiredPlugins": [
         "developerExamples",
-        "caseSuggestionRegistry",
+        "contextRegistry",
+        "share"
       ],
       "requiredBundles": [
         "kibanaReact"

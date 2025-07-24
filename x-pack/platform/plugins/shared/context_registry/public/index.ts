@@ -15,7 +15,7 @@ export type { ContextResponse } from '../common/types';
 
 export type {
   ContextDefinitionPublic,
-  ContextDefinitionPublicProps,
+  ContextChildrenProps,
 } from './services/context_registry_public';
 
 export type { ContextRegistryPublicSetup, ContextRegistryPublicStart } from './plugin';
