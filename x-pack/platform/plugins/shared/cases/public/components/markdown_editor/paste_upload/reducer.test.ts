@@ -11,6 +11,7 @@ import {
   type UploadInProgressState,
   UploadPhase,
   ActionType,
+  type Action,
 } from './types';
 
 describe('reducer', () => {
@@ -78,5 +79,13 @@ describe('reducer', () => {
 
     expect(next.phase).toBe(UploadPhase.ERROR);
     expect('errors' in next && next.errors).toEqual(errors);
+  });
+
+  it('returns previous state for unknown action type', () => {
+    const prevState = { phase: UploadPhase.IDLE } as const;
+    // Use a cast to bypass TypeScript type checking for this intentional invalid action
+    const nextState = reducer(prevState, { type: 'UNKNOWN_ACTION' } as unknown as Action);
+    // Should return the exact same object reference
+    expect(nextState).toBe(prevState);
   });
 });
