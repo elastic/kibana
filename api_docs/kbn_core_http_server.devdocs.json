@@ -3846,6 +3846,10 @@
               },
               {
                 "plugin": "ingestPipelines",
+                "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
+              },
+              {
+                "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/privileges.ts"
               },
               {
@@ -3861,8 +3865,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -3971,6 +3975,34 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/audit_log/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/features_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -4467,6 +4499,22 @@
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/get_allowed_types.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -6569,12 +6617,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -6682,6 +6726,42 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
               },
               {
@@ -6766,7 +6846,19 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7103,6 +7195,18 @@
               {
                 "plugin": "savedObjectsManagement",
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/scroll_count.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -8477,6 +8581,10 @@
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/update.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/router.ts"
               },
@@ -9195,6 +9303,14 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/delete.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -12036,11 +12152,79 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/functional_execution_context/plugins/alerts/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/oidc_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_api_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/server/init_routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -13988,22 +14172,6 @@
                 "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -14046,6 +14214,22 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
               },
               {
                 "plugin": "data",
@@ -14465,7 +14649,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -14473,11 +14661,15 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
                 "plugin": "onechat",
@@ -14874,6 +15066,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileged_access_detection/pad_get_installation_status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15279,14 +15475,6 @@
                 "path": "src/core/packages/apps/server-internal/src/core_app.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -15297,6 +15485,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
               },
               {
                 "plugin": "data",
@@ -15400,11 +15596,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "osquery",
@@ -15594,18 +15790,6 @@
                 "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -15644,6 +15828,18 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
               },
               {
                 "plugin": "data",
@@ -16183,6 +16379,10 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
@@ -16192,10 +16392,6 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -16572,6 +16768,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileged_access_detection/pad_install.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/disable.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16952,14 +17152,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
               },
@@ -16970,6 +17162,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
               },
               {
                 "plugin": "data",
@@ -17057,11 +17257,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",
@@ -17150,6 +17350,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",

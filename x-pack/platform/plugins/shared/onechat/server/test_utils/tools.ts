@@ -6,35 +6,21 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import type {
-  ToolProvider,
-  ToolHandlerFn,
   ExecutableTool,
   ExecutableToolHandlerFn,
+  ToolProvider,
+  ToolHandlerFn,
 } from '@kbn/onechat-server';
-import type {
-  ToolsServiceStart,
-  InternalToolRegistry,
-  ScopedPublicToolRegistry,
-  ScopedPublicToolRegistryFactoryFn,
-  RegisteredToolWithMeta,
-} from '../services/tools/types';
-import { ChangeReturnType } from './common';
-import { EsqlToolRegistry } from '../services/tools/esql/esql_registry';
+import type { ToolsServiceStart } from '../services/tools/types';
+import type { ToolRegistry } from '../services/tools/tool_registry';
+import type { InternalToolDefinition } from '../services/tools/tool_provider';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
-export type EsqlToolProviderMock = jest.Mocked<EsqlToolRegistry>;
-export type ScopedPublicToolRegistryMock = jest.Mocked<ScopedPublicToolRegistry>;
-export type ScopedPublicToolRegistryFactoryFnMock = jest.MockedFn<
-  ChangeReturnType<ScopedPublicToolRegistryFactoryFn, ScopedPublicToolRegistryMock>
->;
-export type InternalToolRegistryMock = jest.Mocked<InternalToolRegistry>;
+export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
 
-export type ToolsServiceStartMock = ToolsServiceStart & {
-  registry: InternalToolRegistryMock;
-  esql: EsqlToolProviderMock;
-};
+export type ToolsServiceStartMock = jest.Mocked<ToolsServiceStart>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -44,44 +30,25 @@ export const createToolProviderMock = (): ToolProviderMock => {
   };
 };
 
-export const esqlToolProviderMock = (): EsqlToolProviderMock => {
-  return {
-    id: esqlToolProviderId,
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-    getScopedClient: jest.fn(),
-  };
-};
-
-export const createInternalToolRegistryMock = (): InternalToolRegistryMock => {
+export const createToolRegistryMock = (): ToolRegistryMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
-    asPublicRegistry: jest.fn().mockImplementation(() => createToolProviderMock()),
-    asScopedPublicRegistry: jest
-      .fn()
-      .mockImplementation(() => createScopedPublicToolRegistryMock()),
-  };
-};
-
-export const createScopedPublicToolRegistryMock = (): ScopedPublicToolRegistryMock => {
-  return {
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    execute: jest.fn(),
   };
 };
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
-    registry: createInternalToolRegistryMock(),
-    esql: esqlToolProviderMock(),
+    getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
   };
 };
 
-export type MockedTool = Omit<RegisteredToolWithMeta, 'handler'> & {
+export type MockedTool = Omit<InternalToolDefinition, 'handler'> & {
   handler: jest.MockedFunction<ToolHandlerFn>;
 };
 
@@ -89,17 +56,16 @@ export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
   execute: jest.MockedFunction<ExecutableToolHandlerFn>;
 };
 
-export const createMockedTool = (parts: Partial<RegisteredToolWithMeta> = {}): MockedTool => {
+export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool => {
   return {
     id: 'test-tool',
+    type: ToolType.builtin,
     description: 'test description',
+    configuration: {},
     schema: z.object({}),
-    meta: {
-      providerId: builtinToolProviderId,
-      tags: ['tag-1', 'tag-2'],
-    },
-    ...parts,
+    tags: ['tag-1', 'tag-2'],
     handler: jest.fn(parts.handler),
+    ...parts,
   };
 };
 
@@ -108,12 +74,11 @@ export const createMockedExecutableTool = (
 ): MockedExecutableTool => {
   return {
     id: 'test-tool',
+    type: ToolType.builtin,
     description: 'test description',
     schema: z.object({}),
-    meta: {
-      providerId: builtinToolProviderId,
-      tags: ['tag-1', 'tag-2'],
-    },
+    configuration: {},
+    tags: ['tag-1', 'tag-2'],
     ...parts,
     execute: jest.fn(parts.execute),
   };

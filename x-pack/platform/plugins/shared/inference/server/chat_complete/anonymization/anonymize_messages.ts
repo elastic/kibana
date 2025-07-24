@@ -11,16 +11,19 @@ import { merge } from 'lodash';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
+import { RegexWorkerService } from './regex_worker_service';
 
 export async function anonymizeMessages({
   system,
   messages,
   anonymizationRules,
+  regexWorker,
   esClient,
 }: {
   system?: string | undefined;
   messages: Message[];
   anonymizationRules: AnonymizationRule[];
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
@@ -41,6 +44,7 @@ export async function anonymizeMessages({
   const { records, anonymizations } = await anonymizeRecords({
     input: toAnonymize,
     anonymizationRules: rules,
+    regexWorker,
     esClient,
   });
 

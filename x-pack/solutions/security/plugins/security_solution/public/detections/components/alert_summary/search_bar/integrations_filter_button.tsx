@@ -32,7 +32,7 @@ const INTEGRATIONS_BUTTON = i18n.translate(
   }
 );
 
-export const FILTER_KEY = 'signal.rule.id';
+export const FILTER_KEY = 'signal.rule.rule_id';
 
 export interface IntegrationFilterButtonProps {
   /**

@@ -8,7 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/presentation-publishing",
-    "@kbn/core-mount-utils-browser",
     "@kbn/utility-types",
   ]
 }

@@ -6,7 +6,6 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from '../tools';
 
 /**
  * Code to identify onechat errors
@@ -17,6 +16,7 @@ export enum OnechatErrorCode {
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  requestAborted = 'requestAborted',
 }
 
 const OnechatError = ServerSentEventError;
@@ -96,7 +96,7 @@ export const createToolNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  toolId: SerializedToolIdentifier;
+  toolId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {
@@ -163,6 +163,25 @@ export const createConversationNotFoundError = ({
     customMessage ?? `Conversation ${conversationId} not found`,
     { ...meta, conversationId, statusCode: 404 }
   );
+};
+
+/**
+ * Represents an internal error
+ */
+export type OnechatRequestAbortedError = OnechatError<OnechatErrorCode.requestAborted>;
+
+/**
+ * Checks if the given error is a {@link OnechatRequestAbortedError}
+ */
+export const isRequestAbortedError = (err: unknown): err is OnechatRequestAbortedError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.requestAborted;
+};
+
+export const createRequestAbortedError = (
+  message: string,
+  meta?: Record<string, any>
+): OnechatRequestAbortedError => {
+  return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
 };
 
 /**

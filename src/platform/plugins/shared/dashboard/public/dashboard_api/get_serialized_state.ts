@@ -35,13 +35,11 @@ export const getSerializedState = ({
   generateNewIds,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: {
   controlGroupReferences?: Reference[];
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
 }): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
@@ -77,7 +75,7 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filter: filters, query };
+  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -119,14 +117,13 @@ export const getSerializedState = ({
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
-    : searchSourceReferences ?? [];
+    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+    : [];
 
   const allReferences = [
     ...references,
     ...(prefixedPanelReferences ?? []),
     ...(controlGroupReferences ?? []),
-    ...(searchSourceReferences ?? []),
   ];
   return { attributes, references: allReferences };
 };
