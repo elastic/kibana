@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiPortal } from '@elastic/eui';
+import { EuiConfirmModal, EuiPortal, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useState } from 'react';
@@ -71,6 +71,8 @@ export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.Re
     onConfirm: () => {},
   });
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: any) => {
     setIsVisible(true);
     setModal({
@@ -93,7 +95,9 @@ export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.Re
       {isVisible && (
         <EuiPortal>
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={modal.title}
+            titleProps={{ id: confirmModalTitleId }}
             buttonColor={modal.options?.buttonColor}
             onCancel={modal.onCancel}
             onConfirm={modal.onConfirm}

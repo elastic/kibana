@@ -136,7 +136,6 @@ export const FlyoutWrapper = ({
           }
           .euiFlyoutBody__overflowContent {
             padding: 0;
-            block-size: 100%;
           }
         `}
       >
