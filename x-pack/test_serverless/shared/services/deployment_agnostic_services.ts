@@ -10,6 +10,7 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { SecuritySolutionApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_api.gen';
 import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { AlertingApiProvider } from './alerting_api';
+import { UsageAPIProvider } from './usage_api';
 
 // pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
 const {
@@ -41,7 +42,7 @@ export const services = {
   randomness,
   retry,
   security,
-  usageAPI: platformApiIntegrationServices.usageAPI,
+  usageAPI: UsageAPIProvider,
   console,
   securitySolutionApi: SecuritySolutionApiProvider,
   alertingApi: AlertingApiProvider,
