@@ -66,7 +66,7 @@ describe('LabelNodeBadges', () => {
     };
 
     render(<LabelNodeBadges analysis={analysis} />);
-    expect(screen.getByText('+2')).toBeInTheDocument();
+    expect(screen.getByText('+3')).toBeInTheDocument();
   });
 
   test('renders warning icon with counter for group of alerts', () => {
@@ -89,7 +89,7 @@ describe('LabelNodeBadges', () => {
 
     render(<LabelNodeBadges analysis={analysis} />);
     expect(screen.getByTestId('euiIcon')).toBeInTheDocument();
-    expect(screen.getByText('+2')).toBeInTheDocument();
+    expect(screen.getByText('+3')).toBeInTheDocument();
   });
 
   test('renders both badges for group of events and alerts', () => {
@@ -114,6 +114,6 @@ describe('LabelNodeBadges', () => {
 
     render(<LabelNodeBadges analysis={analysis} />);
     expect(screen.getByTestId('euiIcon')).toBeInTheDocument();
-    expect(screen.getAllByText('+1')).toHaveLength(2);
+    expect(screen.getAllByText('+2')).toHaveLength(2); // Both events and alerts count
   });
 });

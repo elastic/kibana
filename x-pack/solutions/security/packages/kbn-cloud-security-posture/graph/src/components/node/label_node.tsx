@@ -40,7 +40,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { euiTheme } = useEuiTheme();
   const text = label ? label : id;
   
-  const analysis = useMemo(() => analyzeDocuments(documentsData), [documentsData]);
+  const analysis = useMemo(() => analyzeDocuments(documentsData as NodeDocumentDataModel[] | undefined), [documentsData]);
   const backgroundColor = useMemo(() => getLabelBackgroundColor(analysis, euiTheme), [analysis, euiTheme]);
   const textColor = useMemo(() => getLabelTextColor(analysis, euiTheme), [analysis, euiTheme]);
 

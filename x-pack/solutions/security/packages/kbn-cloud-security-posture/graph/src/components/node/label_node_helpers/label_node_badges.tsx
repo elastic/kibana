@@ -65,7 +65,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
               color: ${euiTheme.colors.textPrimary};
             `}
           >
-            +{analysis.totalEvents - 1}
+            +{analysis.totalEvents}
           </EuiText>
         </BadgeContainer>
       )}
@@ -88,7 +88,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
               color: ${euiTheme.colors.textPrimary};
             `}
           >
-            +{analysis.totalAlerts - 1}
+            +{analysis.totalAlerts}
           </EuiText>
         </BadgeContainer>
       )}
@@ -105,7 +105,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
                 color: ${euiTheme.colors.textPrimary};
               `}
             >
-              +{analysis.totalEvents - 1}
+              +{analysis.totalEvents}
             </EuiText>
           </BadgeContainer>
           
@@ -126,7 +126,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
                 color: ${euiTheme.colors.textPrimary};
               `}
             >
-              +{analysis.totalAlerts - 1}
+              +{analysis.totalAlerts}
             </EuiText>
           </BadgeContainer>
         </>
