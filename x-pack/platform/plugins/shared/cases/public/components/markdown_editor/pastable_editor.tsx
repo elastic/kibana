@@ -10,7 +10,7 @@ import { EuiProgress } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { type Owner } from '../../../common/constants/types';
-import { useImagePasteUpload } from './use_image_paste_upload';
+import { useImagePasteUpload } from './paste_upload';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MarkdownEditor } from './editor';
 import { type EditorBaseProps, type MarkdownEditorRef } from './types';
