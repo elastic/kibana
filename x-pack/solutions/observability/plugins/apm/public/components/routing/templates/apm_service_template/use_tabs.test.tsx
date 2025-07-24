@@ -145,7 +145,7 @@ describe('APM service template', () => {
       'Service map',
       'Logs',
       'Alerts',
-      'Universal profiling',
+      'Universal Profiling',
       'Dashboards',
     ];
     const apisMockData: Partial<Record<APIEndpoint, object>> = {

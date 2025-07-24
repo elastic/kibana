@@ -93,7 +93,7 @@ export const profilingTab = {
   dataTestSubj: 'apmProfilingTabButton',
   key: 'Profiling',
   label: i18n.translate('xpack.apm.transactionDetails.tabs.ProfilingLabel', {
-    defaultMessage: 'Universal profiling',
+    defaultMessage: 'Universal Profiling',
   }),
   component: ProfilingTab,
 };

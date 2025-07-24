@@ -1,17 +1,17 @@
-# Universal profiling (Beta)
+# Universal Profiling (Beta)
 
 ## Overview
-Universal profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
+Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 ### Universal profiling setup
-Universal profiling is enabled by default on [Elastic Cloud](https://www.elastic.co/cloud/), and you can find it under **Observability**. To see data in Universal profiling, you need to initialize it.
+Universal Profiling is enabled by default on [Elastic Cloud](https://www.elastic.co/cloud/), and you can find it under **Observability**. To see data in Universal Profiling, you need to initialize it.
 
-##### **Initialize Universal profiling**
-Initialize Universal profiling by navigating to one of the views and clicking the **Set up** button. Clicking this will trigger some checks and install some packages so data can be processed.
+##### **Initialize Universal Profiling**
+Initialize Universal Profiling by navigating to one of the views and clicking the **Set up** button. Clicking this will trigger some checks and install some packages so data can be processed.
 
 The following are some of the actions and checks that occur during initialization:
 - Check that the APM integration is installed and configured.
-- Create Universal profiling indices.
+- Create Universal Profiling indices.
 - Install the Collector integration.
 - Install the Symbolizer integration.
 
@@ -49,7 +49,7 @@ node scripts/jest --config x-pack/solutions/observability/plugins/profiling/jest
 ## E2E Tests (Cypress)
 The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/e2e`](./e2e).
 
-Universal profiling uses [FTR](../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
+Universal Profiling uses [FTR](../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
 
 ### Start with Cypress Dashboard
 

@@ -81,14 +81,14 @@ export async function setupProfiling(bettertest: BetterTest, logger: ToolingLog)
   });
 
   if (response.body.has_setup) {
-    log(`Skipping Universal profiling set up, already set up`);
+    log(`Skipping Universal Profiling set up, already set up`);
   } else {
-    log(`Setting up Universal profiling`);
+    log(`Setting up Universal Profiling`);
     await bettertest<ProfilingStatus>({
       method: 'post',
       pathname: profilingRoutePaths.HasSetupESResources,
     });
-    log(`Universal profiling set up`);
+    log(`Universal Profiling set up`);
   }
 }
 

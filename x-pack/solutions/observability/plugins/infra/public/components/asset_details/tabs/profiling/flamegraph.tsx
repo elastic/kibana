@@ -34,7 +34,7 @@ export function Flamegraph({ kuery }: Props) {
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.flamegraphLocator;
   const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppFlamegraphLink', {
-    defaultMessage: 'Go to Universal profiling Flamegraph',
+    defaultMessage: 'Go to Universal Profiling Flamegraph',
   });
 
   const params = useMemo(() => ({ kuery, from, to }), [from, kuery, to]);

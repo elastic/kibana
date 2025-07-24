@@ -24,7 +24,7 @@ export function DeleteDataView() {
           style={{ flexGrow: 0, maxWidth: '500px' }}
           icon={<EuiIcon color="danger" size="xxl" type="warning" />}
           title="You have existing profiling data"
-          description="To proceed with the Universal profiling setup, please delete existing profiling data following the steps described in the link below."
+          description="To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below."
           footer={
             <div>
               <EuiLink

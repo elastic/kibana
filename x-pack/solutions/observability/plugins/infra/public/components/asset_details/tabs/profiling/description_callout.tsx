@@ -32,7 +32,7 @@ export function DescriptionCallout() {
         <EuiText>
           {i18n.translate('xpack.infra.profiling.descriptionCallout.body', {
             defaultMessage:
-              'Universal profiling helps you optimize resource usage and find performance bottlenecks by showing which lines of code are consuming resources on your host, down to the application code, kernel, and third-party libraries.',
+              'Universal Profiling helps you optimize resource usage and find performance bottlenecks by showing which lines of code are consuming resources on your host, down to the application code, kernel, and third-party libraries.',
           })}
         </EuiText>
         <EuiSpacer />

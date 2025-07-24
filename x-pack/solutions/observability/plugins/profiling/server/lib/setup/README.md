@@ -1,4 +1,4 @@
-## Universal profiling mappings
+## Universal Profiling mappings
 
 ### Server routes
 

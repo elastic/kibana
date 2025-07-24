@@ -254,7 +254,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.home.profilingTabLabel', {
-        defaultMessage: 'Universal profiling',
+        defaultMessage: 'Universal Profiling',
       }),
 
       hidden:

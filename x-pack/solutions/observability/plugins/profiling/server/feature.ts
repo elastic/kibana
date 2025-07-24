@@ -14,7 +14,7 @@ export const PROFILING_SERVER_FEATURE_ID = 'profiling';
 export const PROFILING_FEATURE = {
   id: PROFILING_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.profiling.featureRegistry.profilingFeatureName', {
-    defaultMessage: 'Universal profiling',
+    defaultMessage: 'Universal Profiling',
   }),
   order: 1200,
   category: DEFAULT_APP_CATEGORIES.observability,

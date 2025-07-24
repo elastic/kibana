@@ -11,8 +11,8 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 
 /**
  * These properties are used to create both the Collector and the Symbolizer integrations
- * when Universal profiling is initialized.
- * As of now Universal profiling is only available on Elastic Cloud, so
+ * when Universal Profiling is initialized.
+ * As of now Universal Profiling is only available on Elastic Cloud, so
  * Elastic Cloud will fill these properties up and pass it to Kibana.
  * Note that the list of config options does not encompass all the avaiable entries
  * offered by the integrations pacakges, but are limited to the ones that

@@ -173,7 +173,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
         }),
         nameTooltip: {
           content: i18n.translate('xpack.profiling.storageExplorer.hostsTable.totalData.hint', {
-            defaultMessage: 'The combined value of Universal profiling metrics and samples.',
+            defaultMessage: 'The combined value of Universal Profiling metrics and samples.',
           }),
         },
         sortable: true,

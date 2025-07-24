@@ -60,7 +60,7 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);
-  // Setup of Profiling resources, automates the configuration of Universal profiling
+  // Setup of Profiling resources, automates the configuration of Universal Profiling
   // and will show instructions on how to add data
   registerSetupRoute(params);
   registerStorageExplorerRoute(params);

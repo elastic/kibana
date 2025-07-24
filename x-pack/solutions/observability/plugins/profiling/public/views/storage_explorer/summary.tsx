@@ -48,7 +48,7 @@ export function Summary({ data, isLoading }: Props) {
         : undefined,
       hint: i18n.translate('xpack.profiling.storageExplorer.summary.totalData.hint', {
         defaultMessage:
-          'Total storage size of all Universal profiling indices including replicas, ignoring the filter settings.',
+          'Total storage size of all Universal Profiling indices including replicas, ignoring the filter settings.',
       }),
     },
     {
@@ -78,7 +78,7 @@ export function Summary({ data, isLoading }: Props) {
       value: data?.diskSpaceUsedPct ? asPercentage(data?.diskSpaceUsedPct) : undefined,
       hint: i18n.translate('xpack.profiling.storageExplorer.summary.discSpaceUsed.hint', {
         defaultMessage:
-          'The percentage of the storage capacity that is currently used by all of the Universal profiling indices compared to the maximum storage capacity currently configured for Elasticsearch.',
+          'The percentage of the storage capacity that is currently used by all of the Universal Profiling indices compared to the maximum storage capacity currently configured for Elasticsearch.',
       }),
     },
     {
@@ -89,7 +89,7 @@ export function Summary({ data, isLoading }: Props) {
       value: data?.totalNumberOfHosts,
       hint: i18n.translate('xpack.profiling.storageExplorer.summary.numberOfHosts.hint', {
         defaultMessage:
-          'Total number of Universal profiling host agents reporting into the deployment.',
+          'Total number of Universal Profiling host agents reporting into the deployment.',
       }),
     },
   ];
@@ -131,7 +131,7 @@ export function Summary({ data, isLoading }: Props) {
                 })}
               >
                 {i18n.translate('xpack.profiling.storageExplorer.summary.universalProfilingLink', {
-                  defaultMessage: 'Go to Universal profiling',
+                  defaultMessage: 'Go to Universal Profiling',
                 })}
               </EuiLink>
             </EuiFlexItem>

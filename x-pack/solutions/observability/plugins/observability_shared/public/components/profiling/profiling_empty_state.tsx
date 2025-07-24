@@ -33,7 +33,7 @@ export function ProfilingEmptyState() {
           <p>
             {i18n.translate('xpack.observabilityShared.profilingEmptyState.body', {
               defaultMessage:
-                'Elastic Universal profiling is a whole-system, always-on, continuous profiling solution that eliminates the need for code instrumentation, recompilation, on-host debug symbols, or service restarts. Leveraging eBPF, Universal profiling operates within the Linux kernel space, capturing only the needed data with minimal overhead in an unobtrusive manner.',
+                'Elastic Universal Profiling is a whole-system, always-on, continuous profiling solution that eliminates the need for code instrumentation, recompilation, on-host debug symbols, or service restarts. Leveraging eBPF, Universal Profiling operates within the Linux kernel space, capturing only the needed data with minimal overhead in an unobtrusive manner.',
             })}
           </p>
         </>

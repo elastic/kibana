@@ -38,7 +38,7 @@ export function ProfilingTopNFunctionsLink({
           })}
         >
           {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
-            defaultMessage: 'Go to Universal profiling Functions',
+            defaultMessage: 'Go to Universal Profiling Functions',
           })}
         </EuiLink>
       </EuiFlexItem>
