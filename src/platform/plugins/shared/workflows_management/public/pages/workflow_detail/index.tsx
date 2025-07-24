@@ -8,7 +8,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -29,7 +28,6 @@ import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDet
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 
@@ -141,23 +139,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             hasChanges={hasChanges}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            gutterSize="s"
-            css={css(`
-             padding-bottom: 10px;
-          `)}
-          >
-            <EuiButton iconType="play" size="s" onClick={() => setTestWorkflowModalOpen(true)}>
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
-            </EuiButton>
-            <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-            </EuiButton>
-          </EuiFlexGroup>
-          {workflowYamlObject?.data && <WorkflowVisualEditor workflow={workflowYamlObject.data} />}
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -182,6 +163,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         pageTitle={workflow?.name ?? 'Workflow Detail'}
         restrictWidth={false}
         rightSideItems={[
+          <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
+            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
+          </EuiButton>,
+          <EuiButton iconType="beaker" size="s" onClick={() => setTestWorkflowModalOpen(true)}>
+            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
+          </EuiButton>,
           <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
           </EuiButton>,

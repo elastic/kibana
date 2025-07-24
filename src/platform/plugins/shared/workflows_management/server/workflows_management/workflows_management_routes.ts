@@ -260,7 +260,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           },
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
