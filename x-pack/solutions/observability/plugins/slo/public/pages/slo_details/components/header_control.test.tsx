@@ -35,7 +35,6 @@ const useSloActionsMock = useSloActions as jest.Mock;
 const mockTriggerAction = jest.fn();
 const mockNavigateToUrl = jest.fn();
 const mockNavigateToRules = jest.fn();
-const mockSetIsEditRuleFlyoutOpen = jest.fn();
 
 const mockCapabilities = {
   apm: { show: true },
@@ -64,6 +63,29 @@ const mockServices = {
   },
 };
 
+// Helper function to create query params mock with overrides
+const createQueryParamsMock = (
+  overrides: Partial<{
+    isDeletingSlo: boolean;
+    isResettingSlo: boolean;
+    isEnablingSlo: boolean;
+    isDisablingSlo: boolean;
+    isAddingToCase: boolean;
+  }> = {}
+) => ({
+  isDeletingSlo: false,
+  isResettingSlo: false,
+  isEnablingSlo: false,
+  isDisablingSlo: false,
+  isAddingToCase: false,
+  removeDeleteQueryParam: jest.fn(),
+  removeResetQueryParam: jest.fn(),
+  removeEnableQueryParam: jest.fn(),
+  removeDisableQueryParam: jest.fn(),
+  removeAddToCaseQueryParam: jest.fn(),
+  ...overrides,
+});
+
 describe('HeaderControl', () => {
   const mockSlo = buildSlo({ enabled: true });
 
@@ -87,18 +109,7 @@ describe('HeaderControl', () => {
       data: { hasAllWriteRequested: true },
     });
 
-    useGetQueryParamsMock.mockReturnValue({
-      isDeletingSlo: false,
-      isResettingSlo: false,
-      isEnablingSlo: false,
-      isDisablingSlo: false,
-      isAddingToCase: false,
-      removeDeleteQueryParam: jest.fn(),
-      removeResetQueryParam: jest.fn(),
-      removeEnableQueryParam: jest.fn(),
-      removeDisableQueryParam: jest.fn(),
-      removeAddToCaseQueryParam: jest.fn(),
-    });
+    useGetQueryParamsMock.mockReturnValue(createQueryParamsMock());
 
     useSloActionsMock.mockReturnValue({
       handleNavigateToRules: mockNavigateToRules,
@@ -301,18 +312,7 @@ describe('HeaderControl', () => {
 
   describe('Query Parameter Effects', () => {
     it('triggers delete action on mount when isDeletingSlo is true', () => {
-      useGetQueryParamsMock.mockReturnValue({
-        isDeletingSlo: true,
-        isResettingSlo: false,
-        isEnablingSlo: false,
-        isDisablingSlo: false,
-        isAddingToCase: false,
-        removeDeleteQueryParam: jest.fn(),
-        removeResetQueryParam: jest.fn(),
-        removeEnableQueryParam: jest.fn(),
-        removeDisableQueryParam: jest.fn(),
-        removeAddToCaseQueryParam: jest.fn(),
-      });
+      useGetQueryParamsMock.mockReturnValue(createQueryParamsMock({ isDeletingSlo: true }));
 
       render(<HeaderControl slo={mockSlo} />);
 
@@ -324,18 +324,7 @@ describe('HeaderControl', () => {
     });
 
     it('triggers reset action on mount when isResettingSlo is true', () => {
-      useGetQueryParamsMock.mockReturnValue({
-        isDeletingSlo: false,
-        isResettingSlo: true,
-        isEnablingSlo: false,
-        isDisablingSlo: false,
-        isAddingToCase: false,
-        removeDeleteQueryParam: jest.fn(),
-        removeResetQueryParam: jest.fn(),
-        removeEnableQueryParam: jest.fn(),
-        removeDisableQueryParam: jest.fn(),
-        removeAddToCaseQueryParam: jest.fn(),
-      });
+      useGetQueryParamsMock.mockReturnValue(createQueryParamsMock({ isResettingSlo: true }));
 
       render(<HeaderControl slo={mockSlo} />);
 
@@ -346,18 +335,7 @@ describe('HeaderControl', () => {
     });
 
     it('triggers enable action on mount when isEnablingSlo is true', () => {
-      useGetQueryParamsMock.mockReturnValue({
-        isDeletingSlo: false,
-        isResettingSlo: false,
-        isEnablingSlo: true,
-        isDisablingSlo: false,
-        isAddingToCase: false,
-        removeDeleteQueryParam: jest.fn(),
-        removeResetQueryParam: jest.fn(),
-        removeEnableQueryParam: jest.fn(),
-        removeDisableQueryParam: jest.fn(),
-        removeAddToCaseQueryParam: jest.fn(),
-      });
+      useGetQueryParamsMock.mockReturnValue(createQueryParamsMock({ isEnablingSlo: true }));
 
       render(<HeaderControl slo={mockSlo} />);
 
@@ -368,18 +346,7 @@ describe('HeaderControl', () => {
     });
 
     it('triggers disable action on mount when isDisablingSlo is true', () => {
-      useGetQueryParamsMock.mockReturnValue({
-        isDeletingSlo: false,
-        isResettingSlo: false,
-        isEnablingSlo: false,
-        isDisablingSlo: true,
-        isAddingToCase: false,
-        removeDeleteQueryParam: jest.fn(),
-        removeResetQueryParam: jest.fn(),
-        removeEnableQueryParam: jest.fn(),
-        removeDisableQueryParam: jest.fn(),
-        removeAddToCaseQueryParam: jest.fn(),
-      });
+      useGetQueryParamsMock.mockReturnValue(createQueryParamsMock({ isDisablingSlo: true }));
 
       render(<HeaderControl slo={mockSlo} />);
 
@@ -390,18 +357,7 @@ describe('HeaderControl', () => {
     });
 
     it('triggers add_to_case action on mount when isAddingToCase is true', () => {
-      useGetQueryParamsMock.mockReturnValue({
-        isDeletingSlo: false,
-        isResettingSlo: false,
-        isEnablingSlo: false,
-        isDisablingSlo: false,
-        isAddingToCase: true,
-        removeDeleteQueryParam: jest.fn(),
-        removeResetQueryParam: jest.fn(),
-        removeEnableQueryParam: jest.fn(),
-        removeDisableQueryParam: jest.fn(),
-        removeAddToCaseQueryParam: jest.fn(),
-      });
+      useGetQueryParamsMock.mockReturnValue(createQueryParamsMock({ isAddingToCase: true }));
 
       render(<HeaderControl slo={mockSlo} />);
 
