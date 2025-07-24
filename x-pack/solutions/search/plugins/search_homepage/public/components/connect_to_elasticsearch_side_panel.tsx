@@ -15,7 +15,7 @@ import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
 import { generateRandomIndexName } from '../utils/indices';
 
 export const ConnectToElasticsearchSidePanel = () => {
-  const { application } = useKibana().services;
+  const { application, sampleDataIngest } = useKibana().services;
 
   const { ingestSampleData, isLoading } = useIngestSampleData();
 
@@ -56,7 +56,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
         />
 
-        {userPrivileges?.privileges?.canManageIndex === true && (
+        {sampleDataIngest && userPrivileges?.privileges?.canManageIndex === true && (
           <EuiCard
             display="plain"
             hasBorder
