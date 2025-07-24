@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { isEqual, uniq } from 'lodash';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, getAncestorsAndSelf } from '@kbn/streams-schema';
 import { baseFields } from '../streams/component_templates/logs_layer';
@@ -39,8 +39,8 @@ export function prepareStreamsForExport({
               ...root.request.stream.ingest.wired,
               routing: prepareIncludedDestinations(root.request.stream.ingest.wired.routing),
               fields: {
-                ...root.request.stream.ingest.wired.fields,
                 ...inheritedFields,
+                ...root.request.stream.ingest.wired.fields,
               },
             },
           },
@@ -95,13 +95,7 @@ export function prepareStreamsForImport({
         }, {} as FieldDefinition);
       assertNoConflictingFields(rootFields, importedFields);
 
-      const mergedRouting = [
-        ...rootRouting,
-        ...importedRouting.filter(
-          ({ destination }) =>
-            !rootRouting.some((existingRule) => existingRule.destination === destination)
-        ),
-      ];
+      const mergedRouting = [...rootRouting, ...importedRouting];
       const mergedFields = { ...rootFields, ...importedFields };
 
       return {
@@ -185,8 +179,8 @@ function assertNoConflictingRouting(
 }
 
 function assertNoConflictingFields(rootFields: FieldDefinition, importedFields: FieldDefinition) {
-  for (const [field, { type }] of Object.entries(importedFields)) {
-    if (rootFields[field] && rootFields[field].type !== type) {
+  for (const [field, fieldConfig] of Object.entries(importedFields)) {
+    if (rootFields[field] && !isEqual(rootFields[field], fieldConfig)) {
       throw new ContentPackConflictError(`Cannot change mapping of [${field}]`);
     }
   }

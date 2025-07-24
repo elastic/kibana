@@ -154,18 +154,18 @@ const importContentRoute = createServerRoute({
     }
 
     const contentPack = await parseArchive(params.body.content);
-    const parentEntry = contentPack.entries.find(
+    const rootEntry = contentPack.entries.find(
       (entry): entry is ContentPackStream =>
         entry.type === 'stream' && entry.name === ROOT_STREAM_ID
     );
-    if (!parentEntry) {
+    if (!rootEntry) {
       throw new StatusError(`[${ROOT_STREAM_ID}] definition not found`, 400);
     }
 
     const importedStreamEntries = isIncludeAll(params.body.include)
       ? contentPack.entries.filter((entry): entry is ContentPackStream => entry.type === 'stream')
       : [
-          parentEntry,
+          rootEntry,
           ...resolveAncestors(params.body.include.objects.streams).map((name) => {
             const descendant = contentPack.entries.find(
               (entry): entry is ContentPackStream => entry.type === 'stream' && entry.name === name

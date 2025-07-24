@@ -329,45 +329,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('fails when importing conflicting mappings', async () => {
+        const generateWithMappings = (fields: FieldDefinition) =>
+          generateArchive(
+            {
+              name: 'conflict_pack',
+              description: 'Content pack with conflicting mappings',
+              version: '1.0.0',
+            },
+            [
+              {
+                type: 'stream',
+                name: ROOT_STREAM_ID,
+                request: {
+                  stream: {
+                    description: '',
+                    ingest: {
+                      processing: [],
+                      wired: {
+                        fields,
+                        routing: [],
+                      },
+                      lifecycle: { inherit: {} },
+                    },
+                  },
+                  dashboards: [],
+                  queries: [],
+                },
+              },
+            ]
+          );
+
         const targetStreamName = 'logs.branch_a';
 
-        const archive = await generateArchive(
-          {
-            name: 'conflict_pack',
-            description: 'Content pack with conflicting mappings',
-            version: '1.0.0',
-          },
-          [
-            {
-              type: 'stream',
-              name: ROOT_STREAM_ID,
-              request: {
-                stream: {
-                  description: '',
-                  ingest: {
-                    processing: [],
-                    wired: {
-                      fields: {
-                        'resource.attributes.foo.bar': { type: 'long' },
-                      },
-                      routing: [],
-                    },
-                    lifecycle: { inherit: {} },
-                  },
-                },
-                dashboards: [],
-                queries: [],
-              },
-            },
-          ]
-        );
-
-        const response = await importContent(
+        // fails when the field type changes
+        let response = await importContent(
           apiClient,
           targetStreamName,
           {
             include: { all: {} },
-            content: Readable.from(archive),
+            content: Readable.from(
+              await generateWithMappings({
+                'resource.attributes.foo.bar': { type: 'long' },
+              })
+            ),
             filename: 'conflict_pack-1.0.0.zip',
           },
           409
@@ -375,6 +379,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect((response as unknown as { message: string }).message).to.eql(
           'Cannot change mapping of [resource.attributes.foo.bar]'
+        );
+
+        // fails when field configuration changes
+        response = await importContent(
+          apiClient,
+          targetStreamName,
+          {
+            include: { all: {} },
+            content: Readable.from(
+              await generateWithMappings({
+                'resource.attributes.foo.bar': { type: 'keyword', boost: 2.0 },
+              })
+            ),
+            filename: 'conflict_pack-1.0.0.zip',
+          },
+          409
+        );
+
+        expect((response as unknown as { message: string }).message).to.eql(
+          'Cannot change mapping of [resource.attributes.foo.bar]'
+        );
+
+        // succeeds when the field configuration is unchanged
+        await importContent(
+          apiClient,
+          targetStreamName,
+          {
+            include: { all: {} },
+            content: Readable.from(
+              await generateWithMappings({
+                'resource.attributes.foo.bar': { type: 'keyword' },
+              })
+            ),
+            filename: 'conflict_pack-1.0.0.zip',
+          },
+          200
         );
       });
 
