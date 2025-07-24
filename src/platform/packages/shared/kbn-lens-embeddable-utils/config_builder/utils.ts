@@ -8,6 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -31,9 +32,10 @@ import {
   LensDataset,
   LensDatatableDataset,
 } from './types';
-import { LensApiState } from './schema';
+import { LensApiState, lensApiStateSchema } from './schema';
 import { fromBreakdownColumn } from './columns';
 import { getMetricColumnReverse } from './columns/metric';
+import { UnionType } from '@kbn/config-schema/src/types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -364,6 +366,8 @@ export const generateLayer = (id: string, options: LensApiState) => {
     [id]: {
       sampling: options.samplings,
       ignoreGlobalFilters: options.ignore_global_filters,
+      columns: {},
+      columnOrder: [],
     } as PersistedIndexPatternLayer,
   };
 }
@@ -375,3 +379,216 @@ export type DeepMutable<T> = {
       : DeepMutable<T[P]>
     : T[P];
 };
+
+
+/**
+ * Appends all default values from schema to the given metric state
+ * 
+ * @param state The metric state to append default values to.
+ * @returns 
+ */
+export const appendDefaults = (state: LensApiState): LensApiState => {
+  function applyDefaults(schemaNode: any, value: any): any {
+    // If the schema node is a maybeType (optional)
+    if (schemaNode.maybeType) {
+      return applyDefaults(schemaNode.maybeType, value);
+    }
+    // If the schema node has getPropSchemas, it's an object
+    if (typeof schemaNode.getPropSchemas === 'function') {
+      const props = schemaNode.getPropSchemas();
+
+      if (value === undefined && schemaNode.options?.defaultValue !== undefined) {
+        return schemaNode.options.defaultValue;
+      }
+
+      const result: Record<string, any> = { ...value };
+      for (const key of Object.keys(props)) {
+        const propSchema = props[key];
+        const hasValue = value && Object.prototype.hasOwnProperty.call(value, key);
+        if (hasValue) {
+          // Recurse for nested objects/arrays
+          result[key] = applyDefaults(propSchema, value[key]);
+        } else if (
+          (propSchema.typeOptions && 'defaultValue' in propSchema.typeOptions && propSchema.typeOptions.defaultValue !== undefined) ||
+          ('defaultValue' in propSchema && propSchema.defaultValue !== undefined)
+        ) {
+          // If schema defines a default, use it (prefer typeOptions.defaultValue)
+          const def = propSchema.typeOptions && 'defaultValue' in propSchema.typeOptions
+            ? propSchema.typeOptions.defaultValue
+            : propSchema.defaultValue;
+          result[key] = typeof def === 'function' ? def() : def;
+        } else {
+          // Try recursing with undefined to fill nested defaults
+          const nestedDefault = applyDefaults(propSchema, undefined);
+          if (nestedDefault !== undefined) {
+            result[key] = nestedDefault;
+          }
+        }
+      }
+      return Object.keys(result).length > 0 ? result : undefined;
+    }
+    // If the schema node is an arrayType
+    if (schemaNode.arrayType) {
+      if (Array.isArray(value)) {
+        return value.map((item: any) => applyDefaults(schemaNode.arrayType, item));
+      } else {
+        // If a default is defined for the array itself, use it
+        const def = schemaNode.typeOptions && 'defaultValue' in schemaNode.typeOptions
+          ? schemaNode.typeOptions.defaultValue
+          : undefined;
+        if (def !== undefined) {
+          return typeof def === 'function' ? def() : def;
+        }
+        return [];
+      }
+    }
+    // If the schema node is an array
+    if (typeof schemaNode.getItemSchema === 'function') {
+      if (Array.isArray(value)) {
+        return value.map((item: any) => applyDefaults(schemaNode.getItemSchema(), item));
+      } else {
+        return [];
+      }
+    }
+    // If the schema node is a oneOf/union (UnionType)
+    if (Array.isArray(schemaNode.unionTypes)) {
+      const schemas = schemaNode.unionTypes;
+      if (value !== undefined) {
+        for (const s of schemas) {
+          try {
+            // Validate value against schema; if no error, use it
+            s.validate(value);
+            return applyDefaults(s, value);
+          } catch (e) {
+            // Try next
+            console.log(e);
+          }
+        }
+      }
+      // Otherwise, try to return the default of the first schema with a default
+      for (const s of schemas) {
+        const def = s.typeOptions && 'defaultValue' in s.typeOptions
+          ? s.typeOptions.defaultValue
+          : s.defaultValue;
+        if (def !== undefined) {
+          return typeof def === 'function' ? def() : def;
+        }
+      }
+      return undefined;
+    }
+    // For primitives (string, number, boolean, literal, etc.)
+    if (value !== undefined) {
+      return value;
+    }
+    // Check for defaultValue in typeOptions first
+    if (schemaNode.typeOptions && 'defaultValue' in schemaNode.typeOptions && schemaNode.typeOptions.defaultValue !== undefined) {
+      const def = schemaNode.typeOptions.defaultValue;
+      return typeof def === 'function' ? def() : def;
+    }
+    if ('defaultValue' in schemaNode && schemaNode.defaultValue !== undefined) {
+      return typeof schemaNode.defaultValue === 'function' ? schemaNode.defaultValue() : schemaNode.defaultValue;
+    }
+    if (schemaNode.getSchema()._flags.default !== undefined) {
+      return schemaNode.getSchema()._flags.default;
+    }
+    return undefined;
+  }
+
+  return applyDefaults(lensApiStateSchema, state) as LensApiState;
+};
+
+
+/**
+ * Strips all default values from the given metric state
+ *  * @param state The metric state to strip default values from.
+ * @returns 
+ */
+export const stripDefaults = (state: LensApiState): LensApiState => {
+  function strip(schemaNode: any, value: any): any {
+    if (schemaNode.maybeType) {
+      return strip(schemaNode.maybeType, value);
+    }
+    // If the schema node has getPropSchemas, it's an object
+    if (typeof schemaNode.getPropSchemas === 'function') {
+      if (isEqual(value, schemaNode.options?.defaultValue)) {
+        return undefined;
+      }
+      const props = schemaNode.getPropSchemas();
+      const result: Record<string, any> = {};
+      let hasAny = false;
+      for (const key of Object.keys(props)) {
+        const propSchema = props[key];
+        if (value && Object.prototype.hasOwnProperty.call(value, key)) {
+          const stripped = strip(propSchema, value[key]);
+          // Remove key if stripped is undefined or equal to default
+          if (stripped !== undefined) {
+            result[key] = stripped;
+            hasAny = true;
+          }
+        }
+      }
+      return hasAny ? result : undefined;
+    }
+    // If the schema node is an array
+    if (typeof schemaNode.getItemSchema === 'function') {
+      if (Array.isArray(value)) {
+        const strippedArr = value
+          .map((item: any) => strip(schemaNode.getItemSchema(), item))
+          .filter((item: any) => item !== undefined);
+        return strippedArr.length > 0 ? strippedArr : undefined;
+      }
+      return undefined;
+    }
+    // If the schema node is an arrayType
+    if (schemaNode.arrayType) {
+      if (Array.isArray(value)) {
+        const stripped = value.map((item: any) => strip(schemaNode.arrayType, item));
+        return stripped.every((v) => v === undefined) ? undefined : stripped;
+      }
+      return undefined;
+    }
+    // If the schema node is an array
+    if (typeof schemaNode.getItemSchema === 'function') {
+      if (Array.isArray(value)) {
+        const stripped = value.map((item: any) => strip(schemaNode.getItemSchema(), item));
+        return stripped.every((v) => v === undefined) ? undefined : stripped;
+      }
+      return undefined;
+    }
+    // If the schema node is a oneOf/union (UnionType)
+    if (Array.isArray(schemaNode.unionTypes)) {
+      const schemas = schemaNode.unionTypes;
+      if (value !== undefined) {
+        for (const s of schemas) {
+          try {
+            s.validate(value);
+            return strip(s, value);
+          } catch (e) {
+            // Try next
+            console.log(e);
+          }
+        }
+      }
+      return undefined;
+    }
+    // For primitives (string, number, boolean, literal, etc.)
+    if (value !== undefined) {
+      // Prefer typeOptions.defaultValue, then defaultValue, then Joi _flags.default
+      let def;
+      if (schemaNode.typeOptions && 'defaultValue' in schemaNode.typeOptions && schemaNode.typeOptions.defaultValue !== undefined) {
+        def = typeof schemaNode.typeOptions.defaultValue === 'function' ? schemaNode.typeOptions.defaultValue() : schemaNode.typeOptions.defaultValue;
+      } else if ('defaultValue' in schemaNode && schemaNode.defaultValue !== undefined) {
+        def = typeof schemaNode.defaultValue === 'function' ? schemaNode.defaultValue() : schemaNode.defaultValue;
+      } else if (typeof schemaNode.getSchema === 'function' && schemaNode.getSchema()._flags.default !== undefined) {
+        def = schemaNode.getSchema()._flags.default;
+      }
+      if (def !== undefined && value === def) {
+        return undefined;
+      }
+      return value;
+    }
+    return undefined;
+  }
+
+  return strip(lensApiStateSchema, state) as LensApiState;
+}

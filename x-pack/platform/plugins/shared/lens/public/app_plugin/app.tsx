@@ -17,7 +17,7 @@ import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
 import { LensDocument } from '../persistence/saved_object_store';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder, appendDefaults, stripDefaults } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   setState,
   applyChanges,
@@ -334,6 +334,14 @@ export function App({
 
       const testChart2 = await cb.reverseBuild(testChart);
       console.log(testChart2);
+
+      testChart2.config.dataset.index = 'test';
+
+      const withDefaults = appendDefaults(testChart2.config);
+      const withoutDefaults = stripDefaults(withDefaults);
+
+      console.log(withDefaults);
+      console.log(withoutDefaults);
 
       console.log('all done');
       try {

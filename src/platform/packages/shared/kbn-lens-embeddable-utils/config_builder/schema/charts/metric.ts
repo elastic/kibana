@@ -14,7 +14,7 @@ export const complementaryVizSchema = schema.oneOf([
      * - 'horizontal': Bar is oriented horizontally
      */
     direction: schema.maybe(
-      schema.oneOf([schema.literal("vertical"), schema.literal("horizontal")]),
+      schema.oneOf([schema.literal("vertical"), schema.literal("horizontal")]), 
     ),
     /**
      * Goal value
@@ -30,7 +30,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Sub label
    */
-  sub_label: schema.maybe(schema.string({ meta: { description: 'Sub label' } })),
+  sub_label: schema.maybe(schema.string({ defaultValue: '', meta: { description: 'Sub label' } })),
   /**
    * Alignments of the labels and values for the primary metric.
    * For example, align the labels to the left and the values to the right.
@@ -46,7 +46,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
       schema.literal("left"),
       schema.literal("center"),
       schema.literal("right")
-    ], { meta: { description: 'Alignments for labels' } })),
+    ], { meta: { description: 'Alignments for labels' }, defaultValue: 'left' })),
     /**
      * Alignments for value. Possible values:
      * - 'left': Align value to the left
@@ -57,12 +57,12 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
       schema.literal("left"),
       schema.literal("center"),
       schema.literal("right")
-    ], { meta: { description: 'Alignments for value' } })),
-  })),
+    ], { meta: { description: 'Alignments for value' }, defaultValue: 'left' })),
+  }, { defaultValue: { labels: 'left', value: 'left' } })),
   /**
-   * Whether to fit the value
+   * Whether to fit the value`
    */
-  fit: schema.maybe(schema.boolean({ meta: { description: 'Whether to fit the value' } })),
+  fit: schema.maybe(schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })),
   /**
    * Icon configuration
    */
@@ -79,7 +79,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
     align: schema.maybe(schema.oneOf([
       schema.literal("right"),
       schema.literal("left")
-    ], { meta: { description: 'Icon alignment' } })),
+    ], { meta: { description: 'Icon alignment' }, defaultValue: 'right' })),
   })),
   /**
    * Color configuration
@@ -95,7 +95,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Prefix
    */
-  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
+  prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' }, defaultValue: '' })),
   /**
    * Compare to
    */

@@ -1,6 +1,9 @@
-import type { MetricState, NarrowByType } from "./schema";
+import type { LensApiState, NarrowByType } from "./schema";
+import { LensConfigBuilder } from "./config_builder";
+import { stripDefaults, appendDefaults } from "./utils";
 
-const test: MetricState = {
+// sample metric configuration
+const test: NarrowByType<LensApiState, 'metric'> = {
   type: 'metric',
   dataset: {
     type: 'index',
@@ -25,3 +28,23 @@ const test: MetricState = {
   ignore_global_filters: true,
   samplings: 1,
 }
+
+const tryMe = async () => {
+  const configBuilder = new LensConfigBuilder({} as any, {} as any);
+
+  // convert to lens internal state
+  const lensInternalState = await configBuilder.build(test);
+
+  // convert back to api state
+  const lensApiState = await configBuilder.reverseBuild(lensInternalState);
+
+  // append all default values
+  const lensApiStateWithDefaults = appendDefaults(lensApiState.config);
+
+  // strip all default values
+  const lensApiStateWithoutDefaults = stripDefaults(lensApiStateWithDefaults);
+
+  console.log(lensApiStateWithoutDefaults);
+}
+
+tryMe();

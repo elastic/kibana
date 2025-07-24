@@ -9,3 +9,4 @@
 
 export * from './config_builder';
 export * from './types';
+export { appendDefaults, stripDefaults } from './utils';

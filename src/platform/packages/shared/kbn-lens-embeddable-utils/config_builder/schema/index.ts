@@ -1,11 +1,12 @@
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
 
-const lensApiStateSchema = schema.oneOf([
+export const lensApiStateSchema = schema.oneOf([
     metricStateSchema,
 ]);
 
 export type LensApiState = typeof lensApiStateSchema.type;
+
 
 export type { MetricState } from './charts/metric';
 
