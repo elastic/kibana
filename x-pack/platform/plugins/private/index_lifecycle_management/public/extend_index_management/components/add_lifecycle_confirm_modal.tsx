@@ -242,7 +242,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     const idGenerator = htmlIdGenerator();
     const modalTitleId = idGenerator('modal');
     const confirmModalId = idGenerator('confirmModal');
-    
+
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
