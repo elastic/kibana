@@ -19,6 +19,7 @@ import {
   EuiSkeletonText,
   EuiCallOut,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useLoadNodeDetails } from '../../../../../../../services/api';
@@ -29,6 +30,8 @@ interface Props {
 }
 
 export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, selectedNodeAttrs }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {
@@ -87,10 +90,10 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
   }
   return (
     <EuiPortal>
-      <EuiFlyout ownFocus onClose={close}>
+      <EuiFlyout ownFocus onClose={close} aria-labelledby={modalTitleId}>
         <EuiFlyoutBody>
           <EuiTitle>
-            <h2>
+            <h2 id={modalTitleId}>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.nodeAttrDetails.title"
                 defaultMessage="Nodes that contain the attribute {selectedNodeAttrs}"
