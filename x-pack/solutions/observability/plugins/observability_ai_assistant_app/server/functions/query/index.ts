@@ -134,6 +134,9 @@ export function registerQueryFunction({
   * Under NO circumstances should you use any tool that is not explicitly defined in the AvailableTools section for THIS turn. 
   * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below. 
   * Calling unavailable tools will result in a **critical error and task failure**.
+ 3. **Critical ES|QL syntax rules:**
+      * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
+      * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`
 </CriticalInstructions>
  <AvailableTools>
  * These are the only known and available tools for use: 
