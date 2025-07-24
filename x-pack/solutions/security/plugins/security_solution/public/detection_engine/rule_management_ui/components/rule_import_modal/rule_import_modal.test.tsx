@@ -12,9 +12,18 @@ import { RuleImportModal } from './rule_import_modal';
 import { ReactQueryClientProvider } from '../../../../common/containers/query_client/query_client_provider';
 import { importRules } from '../../../rule_management/logic';
 import { mockImportResponse } from './test_utils';
+import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
+import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 
 jest.mock('../../../../common/lib/kibana');
-
+jest.mock('../../../rule_management/api/hooks/use_find_rules_query');
+jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+jest.mock('../../../rule_management/api/hooks/use_fetch_rule_management_filters_query');
+jest.mock(
+  '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query'
+);
 jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: { http: { basePath: { prepend: jest.fn() } } },
@@ -26,6 +35,22 @@ jest.mock('../../../rule_management/logic', () => ({
 }));
 
 const hideImportModal = jest.fn();
+
+const mockInvalidateFindRulesQuery = jest.fn();
+const mockInvalidateFetchCoverageOverviewQuery = jest.fn();
+const mockInvalidateFetchRuleManagementFilters = jest.fn();
+const mockInvalidateFetchPrebuiltRuleBaseVerison = jest.fn();
+(useInvalidateFindRulesQuery as jest.Mock).mockImplementation(() => mockInvalidateFindRulesQuery);
+(useInvalidateFetchCoverageOverviewQuery as jest.Mock).mockImplementation(
+  () => mockInvalidateFetchCoverageOverviewQuery
+);
+(useInvalidateFetchRuleManagementFiltersQuery as jest.Mock).mockImplementation(
+  () => mockInvalidateFetchRuleManagementFilters
+);
+(useInvalidateFetchPrebuiltRuleBaseVersionQuery as jest.Mock).mockImplementation(
+  () => mockInvalidateFetchPrebuiltRuleBaseVerison
+);
+
 const file = new File(['file'], 'rules.json', { type: 'application/x-ndjson' });
 
 const mockedImportRules = importRules as jest.Mock;
@@ -33,6 +58,31 @@ const mockedImportRules = importRules as jest.Mock;
 describe('RuleImportModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  test('should invalidate all rule related queries after importing new file', async () => {
+    mockedImportRules.mockReturnValue(mockImportResponse());
+
+    const { getByTestId } = render(
+      <ReactQueryClientProvider>
+        <RuleImportModal isImportModalVisible={true} hideImportModal={hideImportModal} />
+      </ReactQueryClientProvider>
+    );
+
+    await waitFor(() => {
+      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
+        target: { files: [file] },
+      });
+    });
+
+    await waitFor(() => {
+      fireEvent.click(getByTestId('import-data-modal-button') as HTMLButtonElement);
+    });
+
+    expect(mockInvalidateFindRulesQuery).toHaveBeenCalled();
+    expect(mockInvalidateFetchCoverageOverviewQuery).toHaveBeenCalled();
+    expect(mockInvalidateFetchRuleManagementFilters).toHaveBeenCalled();
+    expect(mockInvalidateFetchPrebuiltRuleBaseVerison).toHaveBeenCalled();
   });
 
   test('should uncheck the selected checkboxes after importing new file', async () => {
