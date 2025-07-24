@@ -21,7 +21,11 @@ import type {
 } from '../../../../components/artifact_list_page';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { INPUT_ERRORS, USING_ADVANCED_MODE, USING_ADVANCED_MODE_DESCRIPTION } from '../translations';
+import {
+  INPUT_ERRORS,
+  USING_ADVANCED_MODE,
+  USING_ADVANCED_MODE_DESCRIPTION,
+} from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
@@ -159,19 +163,19 @@ describe('Trusted apps form', () => {
 
   const getAdvancedModeToggle = (): HTMLButtonElement => {
     return renderResult.getByTestId(`advancedModeButton`) as HTMLButtonElement;
-  }
+  };
 
   const getBasicModeToggle = (): HTMLButtonElement => {
     return renderResult.getByTestId(`basicModeButton`) as HTMLButtonElement;
-  }
+  };
 
   const getAdvancedModeUsageWarningHeader = (dataTestSub: string = formPrefix): HTMLElement => {
-    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningHeader`)
-  }
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningHeader`);
+  };
 
   const getAdvancedModeUsageWarningBody = (dataTestSub: string = formPrefix): HTMLElement => {
-    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`)
-  }
+    return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`);
+  };
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
@@ -426,7 +430,7 @@ describe('Trusted apps form', () => {
         await userEvent.click(getAdvancedModeToggle());
 
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-          tags: ["policy:all", "form_mode:advanced"],
+          tags: ['policy:all', 'form_mode:advanced'],
           entries: [],
         };
         const expected = createOnChangeArgs({
@@ -435,13 +439,15 @@ describe('Trusted apps form', () => {
           item: createItem(propsItem),
         });
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
-      })
+      });
 
       it('when updating an existing trusted app, the previous form mode is enabled by default', async () => {
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
           name: 'edit advanced mode ta',
-          entries: [{ field: 'file.path.text', operator: 'included', type: 'match', value: 'asdf' }],
-          tags: ["policy:all", "form_mode:advanced"],
+          entries: [
+            { field: 'file.path.text', operator: 'included', type: 'match', value: 'asdf' },
+          ],
+          tags: ['policy:all', 'form_mode:advanced'],
         };
 
         formProps = {
@@ -458,9 +464,13 @@ describe('Trusted apps form', () => {
 
         rerenderWithLatestProps();
 
-        expect(getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-        expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(false);
-      })
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(true);
+        expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(
+          false
+        );
+      });
 
       it.skip('retains previous user input when switching between advanced and simplified mode', async () => {
         act(() => {
@@ -471,18 +481,26 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledTimes(1);
         await userEvent.click(getAdvancedModeToggle());
 
-
         rerenderWithLatestProps();
         expect(formProps.onChange).toHaveBeenCalledTimes(2);
-        console.log('my props 2', formProps.item.entries)
+        console.log('my props 2', formProps.item.entries);
         await userEvent.click(getBasicModeToggle());
         rerenderWithLatestProps();
-        console.log('my props 3', formProps.item.entries)
-        expect(getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(false);
+        console.log('my props 3', formProps.item.entries);
+        expect(
+          getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')
+        ).toEqual(false);
 
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-          tags: ["policy:all"],
-          entries: [{ field: ConditionEntryField.HASH, operator: 'included', type: 'match', value: 'basic value' }],
+          tags: ['policy:all'],
+          entries: [
+            {
+              field: ConditionEntryField.HASH,
+              operator: 'included',
+              type: 'match',
+              value: 'basic value',
+            },
+          ],
         };
         const expected = createOnChangeArgs({
           isValid: false,
@@ -491,19 +509,21 @@ describe('Trusted apps form', () => {
         });
         // expect(formProps.onChange).toHaveBeenCalledTimes(3);
         // expect(formProps.onChange).toHaveBeenCalledWith(expected);
-      })
+      });
 
       it('should display warning text when user selects toggle for advanced mode', async () => {
         await userEvent.click(getAdvancedModeToggle());
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-          tags: ["policy:all", "form_mode:advanced"],
+          tags: ['policy:all', 'form_mode:advanced'],
         };
         // formProps.item = { ...formProps.item, ...propsItem };
         latestUpdatedItem = { ...formProps.item, ...propsItem };
         rerenderWithLatestProps();
-        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE)
-        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(USING_ADVANCED_MODE_DESCRIPTION)
-      })
+        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE);
+        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(
+          USING_ADVANCED_MODE_DESCRIPTION
+        );
+      });
     });
   });
 
