@@ -8,5 +8,3 @@
 export const INTEGRATED_SOLUTIONS = ['apm', 'infrastructure', 'logs'];
 
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
-
-export const ALERTING_SAVE = 'rac';
