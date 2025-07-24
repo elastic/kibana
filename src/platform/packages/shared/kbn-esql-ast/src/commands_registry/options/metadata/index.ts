@@ -11,8 +11,8 @@ import type { ESQLCommandOption, ESQLCommand } from '../../../types';
 import type { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
-import { handleFragment } from '../../../definitions/utils/autocomplete';
-import { commaCompleteItem, pipeCompleteItem } from '../../utils/complete_items';
+import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
+import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { isColumn, isOptionNode } from '../../../ast/is';
 
 export const METADATA_FIELDS = [

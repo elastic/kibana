@@ -13,9 +13,9 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { FieldSpec, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
+import { browserFieldsManager } from '../../../data_view_manager/utils/security_browser_fields_manager';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
-import { getDataViewStateFromIndexFields } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
@@ -115,10 +115,7 @@ export const useFetchIndex = (
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(
-            iNames.join(','),
-            dataView.fields
-          );
+          const { browserFields } = browserFieldsManager.getBrowserFields(dv);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 

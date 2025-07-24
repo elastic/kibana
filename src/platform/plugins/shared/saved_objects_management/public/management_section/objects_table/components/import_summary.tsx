@@ -21,17 +21,15 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  SavedObjectsImportSuccess,
-  SavedObjectsImportWarning,
-  IBasePath,
-} from '@kbn/core/public';
+import { SavedObjectsImportSuccess, SavedObjectsImportWarning, IBasePath } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { css } from '@emotion/react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
-import './import_summary.scss';
 
 const DEFAULT_ICON = 'apps';
 
@@ -83,6 +81,8 @@ const mapImportSuccess = (obj: SavedObjectsImportSuccess): ImportItem => {
 };
 
 const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => {
+  const styles = useMemoCss(componentStyles);
+
   if (!importItems.length) {
     return null;
   }
@@ -100,7 +100,7 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {createdCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4 className="savedObjectsManagementImportSummary__createdCount">
+            <h4 css={styles.createdCount} data-test-subj="importSavedObjectsCreatedCount">
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.createdCountHeader"
                 defaultMessage="{createdCount} new"
@@ -113,7 +113,7 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {overwrittenCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4 className="savedObjectsManagementImportSummary__overwrittenCount">
+            <h4 data-test-subj="importSavedObjectsOverwrittenCount">
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.overwrittenCountHeader"
                 defaultMessage="{overwrittenCount} overwritten"
@@ -126,10 +126,7 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {errorCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4
-              data-test-subj="importSavedObjectsErrorsCount"
-              className="savedObjectsManagementImportSummary__errorCount"
-            >
+            <h4 data-test-subj="importSavedObjectsErrorsCount" css={styles.errorCount}>
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.errorCountHeader"
                 defaultMessage="{errorCount} error"
@@ -260,6 +257,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       ),
     [successfulImports, failedImports]
   );
+  const styles = useMemoCss(componentStyles);
 
   return (
     <Fragment>
@@ -290,14 +288,15 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             key={index}
             alignItems="center"
             gutterSize="s"
-            className="savedObjectsManagementImportSummary__row"
+            css={styles.row}
+            data-test-subj="importSavedObjectsRow"
           >
             <EuiFlexItem grow={false}>
               <EuiToolTip position="top" content={typeLabel}>
                 <EuiIcon aria-label={typeLabel} type={icon} size="s" />
               </EuiToolTip>
             </EuiFlexItem>
-            <EuiFlexItem className="savedObjectsManagementImportSummary__title">
+            <EuiFlexItem css={styles.title} data-test-subj="importSavedObjectsTitle">
               <EuiText size="s">
                 <p className="eui-textTruncate" title={title}>
                   {title}
@@ -314,4 +313,11 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       })}
     </Fragment>
   );
+};
+
+const componentStyles = {
+  row: ({ euiTheme }: UseEuiTheme) => css({ marginBottom: euiTheme.size.xs }),
+  title: css({ minWidth: 0 }),
+  createdCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSuccess }),
+  errorCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
 };

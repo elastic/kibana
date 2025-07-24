@@ -10,7 +10,6 @@ import {
   OnechatError,
   OnechatErrorCode,
   isConversationCreatedEvent,
-  isConversationUpdatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isOnechatError,
@@ -26,19 +25,18 @@ import { useOnechatServices } from './use_onechat_service';
 export type ChatStatus = 'ready' | 'loading' | 'error';
 
 interface UseChatProps {
-  conversationId: string | undefined;
-  agentId: string;
   connectorId?: string;
   onError?: (error: OnechatError<OnechatErrorCode>) => void;
 }
 
-export const useChat = ({ conversationId, agentId, connectorId, onError }: UseChatProps) => {
+export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
   const { chatService } = useOnechatServices();
   const {
     services: { notifications },
   } = useKibana();
   const [status, setStatus] = useState<ChatStatus>('ready');
-  const { actions } = useConversation({ conversationId });
+  const { actions, conversationId, conversation } = useConversation();
+  const { agent_id: agentId } = conversation ?? {};
 
   const sendMessage = useCallback(
     (nextMessage: string) => {
@@ -50,7 +48,7 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
       setStatus('loading');
 
       const events$ = chatService.chat({
-        nextMessage,
+        input: nextMessage,
         conversationId,
         agentId,
         connectorId,
@@ -60,29 +58,28 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
         next: (event) => {
           // chunk received, we append it to the chunk buffer
           if (isMessageChunkEvent(event)) {
-            actions.addAssistantMessageChunk({ messageChunk: event.data.textChunk });
+            actions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
           }
 
           // full message received - we purge the chunk buffer
           // and insert the received message into the temporary list
           else if (isMessageCompleteEvent(event)) {
-            actions.setAssistantMessage({ assistantMessage: event.data.messageContent });
+            actions.setAssistantMessage({ assistantMessage: event.data.message_content });
           } else if (isToolCallEvent(event)) {
-            const { toolCallId, toolId, args } = event.data;
             actions.addToolCall({
               step: createToolCallStep({
-                args,
+                params: event.data.params,
                 result: '',
-                toolCallId,
-                toolId,
+                tool_call_id: event.data.tool_call_id,
+                tool_id: event.data.tool_id,
               }),
             });
           } else if (isToolResultEvent(event)) {
-            const { toolCallId, result } = event.data;
+            const { tool_call_id: toolCallId, result } = event.data;
             actions.setToolCallResult({ result, toolCallId });
-          } else if (isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)) {
-            const { conversationId: id, title } = event.data;
-            actions.onConversationUpdate({ conversationId: id, title });
+          } else if (isConversationCreatedEvent(event)) {
+            const { conversation_id: id, title } = event.data;
+            actions.onConversationCreated({ conversationId: id, title });
           }
         },
         complete: () => {

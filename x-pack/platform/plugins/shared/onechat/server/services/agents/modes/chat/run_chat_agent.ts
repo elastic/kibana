@@ -40,6 +40,7 @@ export const runChatAgent: RunChatAgentFn = async (
     customInstructions,
     runId = uuidv4(),
     agentId,
+    abortSignal,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
@@ -72,13 +73,14 @@ export const runChatAgent: RunChatAgentFn = async (
     { initialMessages },
     {
       version: 'v2',
+      signal: abortSignal,
       runName: chatAgentGraphName,
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
         runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );

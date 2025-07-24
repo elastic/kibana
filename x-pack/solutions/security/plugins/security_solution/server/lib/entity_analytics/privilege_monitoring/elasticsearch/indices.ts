@@ -35,6 +35,15 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   'labels.sources': {
     type: 'keyword',
   },
+  'entity_analytics_monitoring.labels.field': {
+    type: 'keyword',
+  },
+  'entity_analytics_monitoring.labels.source': {
+    type: 'keyword',
+  },
+  'entity_analytics_monitoring.labels.value': {
+    type: 'keyword',
+  },
 };
 
 export const generateUserIndexMappings = (): MappingTypeMapping => ({

@@ -45,9 +45,10 @@ interface EmptyPageProps {
   title: string;
 }
 
+const maxItemWidthStyle = { maxWidth: 283 };
+
 const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title, ...rest }) => {
   const titles = Object.keys(actions);
-  const maxItemWidth = 283;
   const renderActions = useMemo(
     () =>
       Object.values(actions)
@@ -60,7 +61,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
             descriptionTitle != null || description != null ? (
               <EuiFlexItem
                 grow={false}
-                style={{ maxWidth: maxItemWidth }}
+                css={maxItemWidthStyle}
                 key={`empty-page-${titles[idx]}-action`}
               >
                 <EuiCard
@@ -84,7 +85,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
             ) : (
               <EuiFlexItem
                 grow={false}
-                style={{ maxWidth: maxItemWidth }}
+                css={maxItemWidthStyle}
                 key={`empty-page-${titles[idx]}-action`}
               >
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}

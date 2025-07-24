@@ -680,6 +680,10 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
               },
@@ -704,56 +708,24 @@
                 "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/client.ts"
               },
               {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+                "plugin": "globalSearchBar",
+                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+                "plugin": "globalSearchBar",
+                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "datasetQuality",
-                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+                "plugin": "intercepts",
+                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "intercepts",
-                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
-              },
-              {
-                "plugin": "intercepts",
-                "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "productIntercept",
@@ -768,8 +740,20 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "osquery",
@@ -782,6 +766,26 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "streamsApp",
+                "path": "x-pack/platform/plugins/shared/streams_app/public/telemetry/client.ts"
               },
               {
                 "plugin": "@kbn/cloud",
@@ -869,11 +873,11 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -978,6 +982,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observability",
@@ -2152,6 +2160,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/public/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",

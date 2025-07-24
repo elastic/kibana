@@ -44,6 +44,11 @@ export interface HighlightedFieldsTableRow {
      * If true, cell actions will be shown on hover
      */
     showCellActions: boolean;
+    /**
+     * The indexName to be passed to the flyout preview panel
+     * when clicking on "Source event" id
+     */
+    ancestorsIndexName?: string;
   };
 }
 
@@ -76,6 +81,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
       showCellActions: boolean;
+      ancestorsIndexName?: string;
     }) => (
       <>
         {description.showCellActions ? (
@@ -86,6 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               originalField={description.originalField}
               scopeId={description.scopeId}
               showPreview={true}
+              ancestorsIndexName={description.ancestorsIndexName}
             />
           </CellActions>
         ) : (
@@ -124,6 +131,11 @@ export interface HighlightedFieldsProps {
    * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
    */
   showEditButton?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -137,6 +149,7 @@ export const HighlightedFields = memo(
     scopeId = '',
     showCellActions,
     showEditButton = false,
+    ancestorsIndexName,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
 
@@ -144,9 +157,16 @@ export const HighlightedFields = memo(
       dataFormattedForFieldBrowser,
       investigationFields,
     });
+
     const items = useMemo(
-      () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions),
-      [highlightedFields, scopeId, showCellActions]
+      () =>
+        convertHighlightedFieldsToTableRow(
+          highlightedFields,
+          scopeId,
+          showCellActions,
+          ancestorsIndexName
+        ),
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
     );
 
     return (

@@ -109,6 +109,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   return (
     <EuiFlexItem
+      component="li"
       ref={setNodeRef}
       style={{
         transition,

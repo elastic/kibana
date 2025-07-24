@@ -22,7 +22,6 @@ const defaultSuccessfulResponse = {
   task_ids_failed_to_be_enabled: [],
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');

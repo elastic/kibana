@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const usageAPI = getService('usageAPI');

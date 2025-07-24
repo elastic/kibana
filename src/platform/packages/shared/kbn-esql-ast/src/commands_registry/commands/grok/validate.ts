@@ -10,18 +10,20 @@ import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
   context?: ICommandContext
 ): ESQLMessage[] => {
+  const messages: ESQLMessage[] = [];
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
   const columnRef = context?.fields.get(astCol.name);
 
   if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
-    return [
+    messages.push(
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',
         values: {
@@ -31,9 +33,11 @@ export const validate = (
           column: astCol.name,
         },
         locations: astCol.location,
-      }),
-    ];
+      })
+    );
   }
 
-  return [];
+  messages.push(...validateCommandArguments(command, ast, context));
+
+  return messages;
 };

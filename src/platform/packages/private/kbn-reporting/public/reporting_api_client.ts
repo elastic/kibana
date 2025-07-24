@@ -58,7 +58,7 @@ interface IReportingAPI {
   // CRUD
   downloadReport(jobId: string): void;
   deleteReport(jobId: string): Promise<void>;
-  list(page: number, jobIds: string[]): Promise<Job[]>; // gets the first 10 report of the page
+  list(page: number, perPage: number, jobIds: string[]): Promise<Job[]>;
   total(): Promise<number>;
   getError(jobId: string): Promise<string>;
   getInfo(jobId: string): Promise<Job>;
@@ -125,11 +125,10 @@ export class ReportingAPIClient implements IReportingAPI {
     return await this.http.delete<void>(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${jobId}`);
   }
 
-  public async list(page = 0, jobIds: string[] = []) {
-    const query: HttpFetchQuery = { page };
+  public async list(page = 0, perPage = 50, jobIds: string[] = []) {
+    const query: HttpFetchQuery = { page, size: perPage };
     if (jobIds.length > 0) {
-      // Only getting the first 10, to prevent URL overflows
-      query.ids = jobIds.slice(0, 10).join(',');
+      query.ids = jobIds.slice(0, perPage).join(',');
     }
 
     const jobQueueEntries: ReportApiJSON[] = await this.http.get(INTERNAL_ROUTES.JOBS.LIST, {
@@ -167,9 +166,12 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(report);
   }
 
-  public async getScheduledReportInfo(id: string) {
+  public async getScheduledReportInfo(id: string, page: number = 0, perPage: number = 50) {
     const { data: reportList = [] }: { data: ScheduledReportApiJSON[] } = await this.http.get(
-      `${INTERNAL_ROUTES.SCHEDULED.LIST}`
+      `${INTERNAL_ROUTES.SCHEDULED.LIST}`,
+      {
+        query: { page, size: perPage },
+      }
     );
 
     const report = reportList.find((item) => item.id === id);
