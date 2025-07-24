@@ -1,0 +1,66 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3",
+    "index": "logs-ti_abusech.malware",
+    "source": {
+      "@timestamp": "2021-06-27T14:51:05.766Z",
+      "agent": {
+        "ephemeral_id": "34c78500-8df5-4a07-ba87-1cc738b98431",
+        "hostname": "test",
+        "id": "08a3d064-8f23-41f3-84b2-f917f6ff9588",
+        "name": "test",
+        "type": "filebeat",
+        "version": "7.12.0"
+      },
+      "fileset": {
+        "name": "abusemalware"
+      },
+      "threat": {
+        "indicator": {
+          "first_seen": "2021-03-11T08:02:14.000Z",
+          "ip": "192.168.1.1",
+          "provider": "another_provider",
+          "type": "ip"
+        },
+        "abusemalware": {
+          "virustotal": {
+            "result": "38 / 61",
+            "link": "https://www.virustotal.com/gui/file/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/detection/f-a04ac6d",
+            "percent": "62.30"
+          }
+        },
+        "feed": {
+          "name": "feed_name"
+        }
+      },
+      "tags": ["threatintel-abusemalware", "forwarded"],
+      "input": {
+        "type": "httpjson"
+      },
+      "ecs": {
+        "version": "1.6.0"
+      },
+      "related": {
+        "hash": [
+          "9b6c3518a91d23ed77504b5416bfb5b3",
+          "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3",
+          "1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL"
+        ]
+      },
+      "service": {
+        "type": "threatintel"
+      },
+      "event": {
+        "reference": "https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/",
+        "ingested": "2021-03-11T14:51:09.809069Z",
+        "created": "2021-03-11T14:51:07.663Z",
+        "kind": "enrichment",
+        "module": "threatintel",
+        "category": "threat",
+        "type": "indicator",
+        "dataset": "ti_abusech.malware"
+      }
+    }
+  }
+}

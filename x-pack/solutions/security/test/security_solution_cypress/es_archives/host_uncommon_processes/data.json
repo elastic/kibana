@@ -1,0 +1,1298 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test1",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpW3DweSth_g",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test2",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5awBOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test3",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwZOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test4",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE7nwBOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test5",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBbpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test6",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOoWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test8",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpliDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test9",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwjOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test10",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpziDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test11",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE8nwBOpWiDweSth_F",
+    "index": "auditbeat-uncommon-2022",
+    "source": {
+      "@timestamp" : "2022-03-04T19:41:33.045Z",
+      "host" : {
+        "hostname" : "test.local",
+        "architecture" : "x86_64",
+        "os" : {
+          "platform" : "darwin",
+          "version" : "10.16",
+          "family" : "darwin",
+          "name" : "Mac OS X",
+          "kernel" : "21.3.0",
+          "build" : "21D62",
+          "type" : "macos"
+        },
+        "id" : "44426D67-79AB-547C-7777-440AB8F5DDD2",
+        "ip" : [
+          "fe80::bade:48ff:fe00:1122",
+          "fe81::4ab:9565:1199:be3",
+          "192.168.5.175",
+          "fe80::40d7:d0ff:fe66:f55",
+          "fe81::40d8:d0ff:fe66:f55",
+          "fe82::c2c:6bdf:3307:dce0",
+          "fe83::5069:fcd5:e31c:7059",
+          "fe80::ce81:b2c:bd2c:69e",
+          "fe80::febc:bbc1:c517:827b",
+          "fe80::6d09:bee6:55a5:539d",
+          "fe80::c920:752e:1e0e:edc9",
+          "fe80::a4a:ca38:761f:83e2"
+        ],
+        "mac" : [
+          "ad:df:48:00:11:22",
+          "a6:86:e7:ae:5a:b6",
+          "a9:83:e7:ae:5a:b6",
+          "43:d8:d0:66:0f:55",
+          "42:d8:d0:66:0f:57",
+          "82:70:c7:c2:3c:01",
+          "82:70:c6:c2:4c:00",
+          "82:76:a6:c2:3c:05",
+          "82:70:c6:b2:3c:04",
+          "82:71:a6:c2:3c:01"
+        ],
+        "name" : "test.local"
+      },
+      "agent" : {
+        "type" : "auditbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "f6df090f-656a-4a79-a6a1-0c8671c9752d",
+        "id" : "0ebd469b-c164-4734-00e6-96d018098dc7",
+        "name" : "test.local"
+      },
+      "event" : {
+        "module" : "system",
+        "dataset" : "process",
+        "kind" : "event",
+        "category" : [
+          "process"
+        ],
+        "type" : [
+          "start"
+        ],
+        "action" : "process_started"
+      },
+      "destination": {
+        "port": 80
+      },
+      "process" : {
+        "start" : "2022-03-04T19:41:32.902Z",
+        "pid" : 30884,
+        "working_directory" : "/Users/test/security_solution",
+        "hash" : {
+          "sha1" : "ae2d46c38fa207efbea5fcecd6294eebbf5af00f"
+        },
+        "parent" : {
+          "pid" : 777
+        },
+        "executable" : "/bin/zsh",
+        "name" : "test12",
+        "args" : [
+          "-zsh"
+        ],
+        "entity_id" : "q6pltOhTWlQx3BCD"
+      },
+      "message" : "Process zsh (PID: 27884) by user test STARTED",
+      "user" : {
+        "id" : "505",
+        "group" : {
+          "name" : "staff",
+          "id" : "20"
+        },
+        "effective" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "saved" : {
+          "id" : "505",
+          "group" : {
+            "id" : "20"
+          }
+        },
+        "name" : "test"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
