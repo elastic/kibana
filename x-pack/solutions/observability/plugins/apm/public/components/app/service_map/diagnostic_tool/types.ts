@@ -12,7 +12,10 @@ import type {
 
 export type NodeField = typeof SERVICE_NAME | typeof SPAN_DESTINATION_SERVICE_RESOURCE;
 
-export type NodeSelection = Partial<Record<NodeField, string>>;
+export interface NodeSelection {
+  field: NodeField;
+  value: string;
+}
 
 export interface DiagnosticFormState {
   sourceNode: NodeSelection | null;

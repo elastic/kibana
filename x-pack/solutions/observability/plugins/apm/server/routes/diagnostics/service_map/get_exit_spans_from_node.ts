@@ -5,23 +5,10 @@
  * 2.0.
  */
 
-import {
-  termQuery,
-  rangeQuery,
-  existsQuery,
-  termsQuery,
-  kqlQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, existsQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_ID,
-  PARENT_ID,
-} from '@kbn/apm-types';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_ID, PARENT_ID } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { SPAN_DESTINATION_SERVICE_RESOURCE_FIELD } from '@kbn/discover-utils';
-import { kueryRt } from '../../default_api_types';
 
 /**
  * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
@@ -29,16 +16,18 @@ import { kueryRt } from '../../default_api_types';
  * @param end End time (epoch ms)
  * @param serviceName Service name to filter on
  */
-export async function getExitSpansFromNode({
+export async function getExitSpansFromSourceNode({
   apmEventClient,
   start,
   end,
   sourceNode,
+  destinationNode,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  sourceNode: string;
+  sourceNode: { field: string; value: string };
+  destinationNode: { field: string; value: string };
 }) {
   const response = await apmEventClient.search('diagnostics_get_exit_spans_from_node', {
     apm: {
@@ -48,14 +37,15 @@ export async function getExitSpansFromNode({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), kqlQuery(sourceNode)],
+        filter: [...rangeQuery(start, end), ...termQuery(sourceNode.field, sourceNode.value)],
       },
     },
     aggs: {
-      destination_resources: {
-        terms: {
-          field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          size: 1000,
+      matching_destination_resources: {
+        filter: {
+          term: {
+            [SPAN_DESTINATION_SERVICE_RESOURCE]: destinationNode.value,
+          },
         },
         aggs: {
           sample_doc: {
@@ -65,15 +55,28 @@ export async function getExitSpansFromNode({
           },
         },
       },
-      otel_destination_resources: {
+      destination_resources: {
         terms: {
-          field: 'destination.address',
-          size: 1000,
+          field: SPAN_DESTINATION_SERVICE_RESOURCE,
+          size: 50,
         },
         aggs: {
           sample_doc: {
             top_hits: {
-              size: 1,
+              size: 5,
+            },
+          },
+        },
+      },
+      otel_destination_resources: {
+        terms: {
+          field: 'destination.address',
+          size: 50,
+        },
+        aggs: {
+          sample_doc: {
+            top_hits: {
+              size: 5,
             },
           },
         },
@@ -100,6 +103,8 @@ export async function getExitSpansFromNode({
     exitSpans,
     totalConnections: exitSpans.length,
     rawResponse: response,
+    hasMatchingDestinationResources:
+      response?.aggregations?.matching_destination_resources?.sample_doc?.hits?.total?.value > 0,
   };
 }
 
@@ -107,7 +112,7 @@ export async function getExitSpansFromNode({
  * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
  * @param start Start time (epoch ms)
  * @param end End time (epoch ms)
- * @param sourceNode Service name to filter on
+ * @param sourceNodeKql Service name to filter on
  */
 export async function getSourceSpanIds({
   apmEventClient,
@@ -118,7 +123,7 @@ export async function getSourceSpanIds({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  sourceNode: string;
+  sourceNode: { field: string; value: string };
 }) {
   const response = await apmEventClient.search('diagnostics_get_source_span_ids', {
     apm: {
@@ -128,14 +133,18 @@ export async function getSourceSpanIds({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...existsQuery(SPAN_ID)],
+        filter: [
+          ...rangeQuery(start, end),
+          ...existsQuery(SPAN_ID),
+          ...termsQuery(sourceNode.field, sourceNode.value),
+        ],
       },
     },
     aggs: {
       span_ids: {
         terms: {
           field: SPAN_ID,
-          size: 1000,
+          size: 100,
         },
       },
     },
@@ -157,8 +166,8 @@ export async function getDestinationParentIds({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  ids: string[];
-  destinationNode: string;
+  ids: string[] | undefined;
+  destinationNode: { field: string; value: string };
 }) {
   const response = await apmEventClient.search('diagnostics_get_destination_parent_ids', {
     apm: {
@@ -171,9 +180,9 @@ export async function getDestinationParentIds({
       bool: {
         filter: [
           ...rangeQuery(start, end),
-          ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE_FIELD, destinationNode),
+          ...termQuery(destinationNode.field, destinationNode.value),
           ...existsQuery(PARENT_ID),
-          ...termsQuery(PARENT_ID, ...ids),
+          ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
         ],
       },
     },

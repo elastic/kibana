@@ -80,7 +80,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       form.traceId
     ) {
       console.log('form in front', form);
-      const response = await callApmApi('POST /internal/apm/diagnostics/service-map/', {
+      const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
         params: {
           body: {
             start,
@@ -106,7 +106,8 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       onClose={onClose}
       size="m"
       type="push"
-      // maxWidth={500}
+      style={{ zIndex: 11000 }}
+      maxWidth={1000}
       data-test-subj="diagnosticFlyout"
     >
       <EuiFlyoutHeader hasBorder>
@@ -137,7 +138,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         {isLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : data ? (
-          data?.response?.exitSpans?.length > 0 ? (
+          data?.response?.exitSpans?.exitSpans?.length > 0 ? (
             <>
               <EuiTitle size="xs">
                 <h3>
@@ -150,7 +151,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <HighlightedExitSpansTable items={data?.response?.exitSpans} />
+              <HighlightedExitSpansTable items={data?.response?.exitSpans?.exitSpans} />
             </>
           ) : (
             <>

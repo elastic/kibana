@@ -22,7 +22,7 @@ import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 import {
   getDestinationParentIds,
-  getExitSpansFromNode,
+  getExitSpansFromSourceNode,
   getSourceSpanIds,
 } from './service_map/get_exit_spans_from_node';
 import { rangeRt } from '../default_api_types';
@@ -87,41 +87,36 @@ export type DiagnosticsBundle = Promise<{
 
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
-  endpoint: 'POST /internal/apm/diagnostics/service-map/',
+  endpoint: 'POST /internal/apm/diagnostics/service-map',
   params: t.type({
     body: t.intersection([
       rangeRt,
       t.type({
-        sourceNode: t.record(t.string, t.string),
-        destinationNode: t.record(t.string, t.string),
+        sourceNode: t.type({ field: t.string, value: t.string }),
+        destinationNode: t.type({ field: t.string, value: t.string }),
         traceId: t.string,
       }),
     ]),
   }),
-  handler: async (resources) => {
+  handler: async (
+    resources
+  ): Promise<{ exitSpans: any[]; sourceSpanIds: string[]; destinationParentIds: string[] }> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
 
-    // Convert sourceNode object to KQL query string
-    const sourceNodeKql = Object.entries(sourceNode)
-      .map(([field, value]) => `${field}:"${value}"`)
-      .join(' AND ');
-    
-    // Extract the destination resource from destinationNode object for getDestinationParentIds
-    const destinationResource = destinationNode['span.destination.service.resource'] || Object.values(destinationNode)[0];
-
     const [exitSpans, sourceSpanIds] = await Promise.all([
-      getExitSpansFromNode({
+      getExitSpansFromSourceNode({
         apmEventClient,
         start,
         end,
-        sourceNode: sourceNodeKql,
+        sourceNode,
+        destinationNode,
       }),
       getSourceSpanIds({
         apmEventClient,
         start,
         end,
-        sourceNode: sourceNodeKql,
+        sourceNode,
       }),
     ]);
 
@@ -130,12 +125,10 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       start,
       end,
       ids: sourceSpanIds.spanIds,
-      destinationNode: destinationResource,
+      destinationNode,
     });
 
-    return {
-      response: exitSpans,
-    };
+    return { exitSpans, destinationParentIds, sourceSpanIds };
   },
 });
 

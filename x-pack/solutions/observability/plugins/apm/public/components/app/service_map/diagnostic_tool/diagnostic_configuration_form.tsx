@@ -27,7 +27,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../../common/es_fields/apm';
-import type { DiagnosticFormState } from './types';
+import type { DiagnosticFormState, NodeField } from './types';
 
 interface DiagnosticConfigurationFormProps {
   selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
@@ -59,17 +59,23 @@ export function DiagnosticConfigurationForm({
   };
 
   React.useEffect(() => {
+    const [sourceNodeField, destinationNodeField] = selectedFields;
+    const [sourceNodeValue, destinationNodeValue] = selectedValues;
     const sourceNode =
-      selectedFields[0] && selectedValues[0] ? { [selectedFields[0]]: selectedValues[0] } : null;
+      sourceNodeField && sourceNodeValue
+        ? { field: sourceNodeField as NodeField, value: sourceNodeValue }
+        : null;
 
     const destinationNode =
-      selectedFields[1] && selectedValues[1] ? { [selectedFields[1]]: selectedValues[1] } : null;
+      destinationNodeField && destinationNodeValue
+        ? { field: destinationNodeField as NodeField, value: destinationNodeValue }
+        : null;
 
     onSelectionUpdate({
       sourceNode,
       destinationNode,
       traceId,
-      isValid: !isEmpty(selectedValues[0]) && !isEmpty(selectedValues[1]) && !isEmpty(traceId),
+      isValid: !isEmpty(sourceNodeValue) && !isEmpty(destinationNodeValue) && !isEmpty(traceId),
     });
   }, [selectedFields, selectedValues, traceId, onSelectionUpdate]);
 
