@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { difference, groupBy } from 'lodash';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -35,6 +35,7 @@ import {
   skipWhile,
   startWith,
   switchMap,
+  take,
   takeWhile,
   tap,
   timer,
@@ -73,7 +74,8 @@ type Action =
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-changes' }
-  | { type: 'new-row-added'; payload: Record<string, any> };
+  | { type: 'new-row-added'; payload: Record<string, any> }
+  | { type: 'refetch-data-view' };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -190,6 +192,10 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
+    this._actions$.pipe(
+      filter((action) => action.type === 'refetch-data-view'),
+      startWith(null)
+    ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -218,6 +224,7 @@ export class IndexUpdateService {
             searchable: true,
           });
         });
+
       return (
         dataView.fields
           .concat(unsavedFields)
@@ -293,9 +300,6 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
-            // Clear the buffer after successful update
-            this._actions$.next({ type: 'saved', payload: { response, updates } });
-
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
             const mappedResponse = response.items.reduce((acc, item, index) => {
@@ -325,6 +329,9 @@ export class IndexUpdateService {
               })
             );
 
+            // Clear the buffer after successful update
+            this._actions$.next({ type: 'saved', payload: { response, updates } });
+
             this._isSaving$.next(false);
 
             // TODO handle index docs
@@ -340,7 +347,8 @@ export class IndexUpdateService {
     // Fetch ES docs
     this._subscription.add(
       combineLatest([
-        this.dataView$,
+        // Only when the dataview is set for the first time
+        this.dataView$.pipe(take(1)),
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         this._refreshSubject$,
@@ -415,23 +423,15 @@ export class IndexUpdateService {
               return acc.filter((column) => column.name !== action.payload.name);
             }
             if (action.type === 'saved') {
-              action.payload.updates.forEach((update) => {});
               // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
               const unsavedColumns = acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
               );
 
-              // Add saved columns to the data view
-              const savedColumns = difference(acc, unsavedColumns);
-              savedColumns.forEach((column) => {
-                dataView.fields.add({
-                  name: column.name,
-                  type: KBN_FIELD_TYPES.UNKNOWN,
-                  aggregatable: true,
-                  searchable: true,
-                });
-              });
-
+              // if there were saved columns, refresh the data view
+              if (unsavedColumns.length < acc.length) {
+                this._actions$.next({ type: 'refetch-data-view' });
+              }
               return unsavedColumns;
             }
             if (action.type === 'new-row-added') {
