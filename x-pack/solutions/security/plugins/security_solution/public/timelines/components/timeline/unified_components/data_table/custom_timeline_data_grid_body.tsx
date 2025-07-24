@@ -65,12 +65,6 @@ const VirtualizedCustomDataGridContainer = styled.div<{
 // THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
 const DEFAULT_UDT_ROW_HEIGHT = 34;
 
-const SCROLLBAR_STYLE = css`
-  scrollbar-width: thin;
-  scroll-padding: 0 0 0 0;
-  overflow: auto;
-`;
-
 /**
  *
  * In order to render the additional row with every event ( which displays the row-renderer, notes and notes editor)
@@ -218,7 +212,11 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                         itemSize={getRowHeight}
                         overscanCount={5}
                         ref={listRef}
-                        css={SCROLLBAR_STYLE}
+                        css={css`
+                          scrollbar-width: thin;
+                          scroll-padding: 0 0 0 0;
+                          overflow: auto;
+                        `}
                         innerElementType={innerRowContainer}
                       >
                         {({ index, style }) => {
