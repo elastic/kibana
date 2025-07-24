@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -33,6 +33,8 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
 
   const newExpiration = moment(expires).add(extendByDuration);
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const title = i18n.translate('data.mgmt.searchSessions.extendModal.title', {
     defaultMessage: 'Extend search session expiration',
   });
@@ -53,7 +55,9 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
 
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={title}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
