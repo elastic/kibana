@@ -98,7 +98,7 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     await waitFor(() =>
-      expect(screen.getByText('Top privileged access detection anomalies')).toBeInTheDocument()
+      expect(screen.getByText('Top privileged access anomalies')).toBeInTheDocument()
     );
   });
 
