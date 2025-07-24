@@ -15,6 +15,7 @@ import {
   EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
+import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type cytoscape from 'cytoscape';
 import type { CSSProperties, MouseEvent } from 'react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -29,6 +30,7 @@ import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 import { withDiagnoseButton } from './with_diagnose_button';
 import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 function getContentsComponent(
   selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition
@@ -76,9 +78,11 @@ export type { ContentsProps, PopoverProps };
 export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
+  const { core } = useApmPluginContext();
   const [selectedElement, setSelectedElement] = useState<
     cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
   >(undefined);
+  const isDiagnosticModeEnabled = core.settings.client.get(enableDiagnosticMode);
   const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
   const deselect = useCallback(() => {
     if (cy) {
@@ -166,12 +170,8 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
 
   const popoverContentComponent = getContentsComponent(selectedElementData);
 
-  // Example: show the diagnose button if selectedElementData has a certain property, or just hardcode true for now
-  const showDiagnoseButton = true; // TODO: replace with real condition if needed
-
-  const isTroubleshootingEnabled = true;
   // Only wrap if there is a component
-  const ContentsComponent = isTroubleshootingEnabled
+  const ContentsComponent = isDiagnosticModeEnabled
     ? popoverContentComponent
       ? withDiagnoseButton(popoverContentComponent)
       : null
@@ -219,7 +219,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
               kuery={kuery}
               start={start}
               end={end}
-              showDiagnoseButton={showDiagnoseButton}
+              showDiagnoseButton={isDiagnosticModeEnabled}
               onDiagnoseClick={handleDiagnoseClick}
             />
           )}
