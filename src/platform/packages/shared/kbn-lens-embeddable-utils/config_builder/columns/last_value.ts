@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CountIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { LensApiCountMetricOperation } from '../schema/metric_ops';
+import type { LastValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { LensApiLastValueOperation } from '../schema/metric_ops';
 import { ValueFormatConfig } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 
-const convertFormat = (format: LensApiCountMetricOperation['format']) => {
+const convertFormat = (format: LensApiLastValueOperation['format']) => {
   return {
     id: 'number'
   };
@@ -23,38 +23,38 @@ const convertFormatReverse = (format: ValueFormatConfig) => {
   };
 }
 
-export type CountColumnParams = CountIndexPatternColumn['params'];
-export const getCountColumn = (options: LensApiCountMetricOperation): CountIndexPatternColumn => {
-  const { empty_as_null, format, field, label } = options ?? {};
+export type LastValueColumnParams = LastValueIndexPatternColumn['params'];
+export const getLastValueColumn = (options: LensApiLastValueOperation): LastValueIndexPatternColumn => {
+  const { format, field, label } = options ?? {};
 
   return {
     dataType: 'number',
     isBucketed: false,
     label: label || '',
     customLabel: !!label,
-    operationType: 'count',
+    operationType: 'last_value',
     sourceField: field || '',
     // filter: options.filter,
     // timeScale: options.time_scale,
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     params: { 
-        emptyAsNull: empty_as_null || false,
-        ...(format ? { format: convertFormat(format) } : {}),
+      sortField: field,
+      showArrayValues: false,
+      ...(format ? { format: convertFormat(format) } : {}),
      },
   };
 };
 
-export const getCountColumnReverse = (options: CountIndexPatternColumn): LensApiCountMetricOperation => {
+export const getLastValueColumnReverse = (options: LastValueIndexPatternColumn): LensApiLastValueOperation => {
   return {
-    operation: 'count',
-    ...(options.sourceField ? { field: options.sourceField } : {}),
-    ...(options.params?.emptyAsNull ? { empty_as_null: options.params?.emptyAsNull } : {}),
+    operation: 'last_value',
+    field: options.sourceField,
     ...(options.params?.format ? { format: convertFormatReverse(options.params.format) } : {}),
     ...(options.customLabel ? { label: options.label } : {} ),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
-    // filter: options.filter,
+    //...(options.filter ? { filter: options.filter } : {}),
   };
 };

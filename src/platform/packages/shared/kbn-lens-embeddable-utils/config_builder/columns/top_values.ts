@@ -8,25 +8,19 @@
  */
 
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { TopValuesColumnParams } from '../../attribute_builder/utils';
 import { LensApiTermsOperation } from '../schema/bucket_ops';
 
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
-export const getTopValuesColumn = ({
-  field,
-  options,
-}: {
-  field: string;
-  options?: Partial<TopValuesColumnParams>;
-}): TermsIndexPatternColumn => {
-  const { size = DEFAULT_BREAKDOWN_SIZE, ...params } = options ?? {};
+export const getTopValuesColumn = (options: LensApiTermsOperation): TermsIndexPatternColumn => {
+  const { fields, size = DEFAULT_BREAKDOWN_SIZE, ...params } = options;
+  const [sourceField, ...secondaryFields] = fields ?? [];
   return {
-    label: `Top ${size} values of ${field}`,
+    label: `Top ${size} values of ${sourceField}`,
     dataType: 'string',
     operationType: 'terms',
     scale: 'ordinal',
-    sourceField: field,
+    sourceField,
     isBucketed: true,
     params: {
       size,
@@ -44,6 +38,7 @@ export const getTopValuesColumn = ({
       exclude: [],
       includeIsRegex: false,
       excludeIsRegex: false,
+      secondaryFields,
       ...params,
     },
   };
@@ -56,7 +51,7 @@ export const fromTopValuesColumn = (
   const { params } = column;
   return {
     operation: 'terms',
-    fields: [column.sourceField],
+    fields: [column.sourceField, ...(column.params.secondaryFields ?? [])],
     size: params.size ?? DEFAULT_BREAKDOWN_SIZE,
   };
 };

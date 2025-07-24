@@ -15,72 +15,23 @@ import { fromIntervalsColumn, getIntervalsColumn } from './intervals';
 import { fromFiltersColumn, getFiltersColumn } from './filters';
 import { LensApiBucketOperations, LensApiDateHistogramOperation, LensApiFilterOperation, LensApiHistogramOperation, LensApiRangeOperation, LensApiTermsOperation } from '../schema/bucket_ops';
 
-const DEFAULT_BREAKDOWN_SIZE = 5;
-
 export const getBreakdownColumn = ({
   options,
-  dataView,
 }: {
   options: LensApiBucketOperations;
   dataView: DataView;
 }): GenericIndexPatternColumn => {
   const breakdownType = options.operation;
-  const field: string =
-    typeof options === 'string' ? options : 'field' in options ? options.field : '';
-  const config = typeof options !== 'string' ? options : {};
 
   switch (breakdownType) {
     case 'date_histogram':
-      return getHistogramColumn({
-        options: {
-          sourceField: field,
-          params:
-            typeof options !== 'string'
-              ? {
-                  interval: (options as LensApiDateHistogramOperation).suggested_interval || 'auto',
-                }
-              : {
-                  interval: 'auto',
-                },
-        },
-      });
+      return getHistogramColumn(options as LensApiDateHistogramOperation);
     case 'terms':
-      const topValuesOptions = config as LensApiTermsOperation;
-      return getTopValuesColumn({
-        field,
-        options: {
-          size: topValuesOptions.size || DEFAULT_BREAKDOWN_SIZE,
-        },
-      });
+      return getTopValuesColumn(options as LensApiTermsOperation);
     case 'range':
-      const intervalOptions = config as LensApiRangeOperation;
-      return getIntervalsColumn({
-        field,
-        options: {
-          type: 'range',
-          ranges: [
-            {
-              from: 0,
-              to: 1000,
-              label: '',
-            },
-          ],
-          maxBars: 'auto',
-        },
-      });
+      return getIntervalsColumn(options as LensApiRangeOperation);
     case 'filters':
-      const filterOptions = config as LensApiFilterOperation;
-      return getFiltersColumn({
-        options: {
-          filters: filterOptions.filters.map((f) => ({
-            label: f.label || '',
-            input: {
-              language: 'kuery',
-              query: f.query,
-            },
-          })),
-        },
-      });
+      return getFiltersColumn(options as LensApiFilterOperation);
 
     default:
       throw new Error(`Unsupported breakdown type: ${breakdownType}`);

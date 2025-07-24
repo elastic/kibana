@@ -19,6 +19,7 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type {
+  TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
@@ -61,12 +62,30 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer, dat
   if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
     return fromBreakdownColumn(column as FieldBasedIndexPatternColumn);
   }
-  return getMetricColumnReverse(column);;
+  return getMetricColumnReverse(column, layer.columns);;
 };
 
-export const buildDatasetState = (layer: FormBasedLayer, dataViews: DataViewsCommon) => {
-  return {
-    index: layer.indexPatternId || '',
+/**
+ * Builds dataset state from the layer configuration
+ * 
+ * @param layer 
+ * @param dataViews 
+ * @returns 
+ */
+export const buildDatasetState = (layer: FormBasedLayer | TextBasedLayer, dataViews: DataViewsCommon) => {
+
+  if ('index' in layer) {
+    return {
+      type: 'esql',
+      index: layer.index,
+      query: layer.query,
+    }
+  } else {
+    return {
+      type: 'index',
+      index: (layer as FormBasedLayer).indexPatternId,
+      time_field: '@timestamp',
+    }
   }
 };
 
@@ -139,6 +158,13 @@ export async function getDataView(
   return dataView;
 }
 
+/**
+ * Gets DataView from the dataset configuration
+ * 
+ * @param dataset 
+ * @param dataViewsAPI 
+ * @returns 
+ */
 export async function getDatasetIndex(dataset?: LensApiState['dataset'], dataViewsAPI?: DataViewsCommon) {
   if (!dataset) return undefined;
 
@@ -301,17 +327,51 @@ export const buildDatasourceStates = async (
 export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
-  config: GenericIndexPatternColumn,
+  config: GenericIndexPatternColumn | GenericIndexPatternColumn[],
   first = false,
   postfix = ''
 ) => {
+  const column = Array.isArray(config) ? config[0] : config;
+  const referenceColumn = Array.isArray(config) ? config[1] : undefined;
+
   layer.columns = {
     ...layer.columns,
-    [columnName]: config,
+    [columnName]: column,
+    ...(referenceColumn ? { [`${columnName}_reference`]: referenceColumn } : {}),
   };
   if (first) {
     layer.columnOrder.unshift(columnName);
+    if (referenceColumn) {
+      layer.columnOrder.unshift(`${columnName}_reference`);
+    }
   } else {
     layer.columnOrder.push(columnName);
+    if (referenceColumn) {
+      layer.columnOrder.push(`${columnName}_reference`);
+    }
   }
+};
+
+/**
+ * Generates the base layer
+ * 
+ * @param id 
+ * @param options 
+ * @returns 
+ */
+export const generateLayer = (id: string, options: LensApiState) => {
+  return {
+    [id]: {
+      sampling: options.samplings,
+      ignoreGlobalFilters: options.ignore_global_filters,
+    } as PersistedIndexPatternLayer,
+  };
+}
+
+export type DeepMutable<T> = {
+  -readonly [P in keyof T]: T[P] extends object
+    ? T[P] extends (...args: any[]) => any
+      ? T[P] // don't mutate functions
+      : DeepMutable<T[P]>
+    : T[P];
 };

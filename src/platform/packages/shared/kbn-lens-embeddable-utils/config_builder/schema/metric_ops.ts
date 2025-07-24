@@ -23,7 +23,8 @@ const genericOperationOptionsSchema = schema.object({
       meta: {
         description: 'Static value'
       }
-    })
+    }),
+    ...genericOperationOptionsSchema.getPropSchemas(),
   });
   
   export const formulaOperationDefinitionSchema = schema.object({
@@ -179,6 +180,7 @@ const genericOperationOptionsSchema = schema.object({
   ]);
 
   export type LensApiMetricOperations = typeof metricOperationDefinitionSchema.type;
+  export type LensApiFieldMetricOperations = typeof fieldMetricOperationsSchema.type;
 
   export type LensApiCountMetricOperation = typeof countMetricOperationSchema.type;
   export type LensApiUniqueValuesMetricOperation = typeof uniqueValuesMetricOperationSchema.type;

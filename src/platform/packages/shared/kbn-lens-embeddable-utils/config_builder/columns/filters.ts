@@ -10,12 +10,8 @@
 import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiFilterOperation } from '../schema/bucket_ops';
 
-export const getFiltersColumn = ({
-  options,
-}: {
-  options?: FiltersIndexPatternColumn['params'];
-}): FiltersIndexPatternColumn => {
-  const { filters = [], ...params } = options ?? {};
+export const getFiltersColumn = (options: LensApiFilterOperation): FiltersIndexPatternColumn => {
+  const { filters = [], ...params } = options;
   return {
     label: `Filters`,
     dataType: 'number',

@@ -11,6 +11,7 @@ import type {
   FormBasedLayer,
   FormBasedPersistedState,
   FormulaPublicApi,
+  GenericIndexPatternColumn,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -35,6 +36,7 @@ import { DataViewsCommon } from '../config_builder';
 import { getMetricColumn } from '../columns/metric';
 import { LensApiMetricOperations } from '../schema/metric_ops';
 import { LensApiBucketOperations } from '../schema/bucket_ops';
+import { generateLayer, DeepMutable } from '../utils';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -105,38 +107,26 @@ function reverseBuildVisualizationState(
 
   const dataset = buildDatasetState(layer, dataViews);
 
-  // if dataset type === esql:
-  //   operation is just the column name, check lkensattributes
-  // if dataset type === table:
-  //   same as esql, check whats on lens attributes ?
-  // if dataset type === adhoc:
-  //   create adhoc index pattern ? or we dont need it here ?
-  // if dataset type === index:
-  //   load index, get timefield ? or we dont need it here ?
+  let props: Partial<DeepMutable<MetricState>>;
 
+  if (dataset.type === 'esql' || dataset.type === 'table') {
+    // handle for esql case (just column name)
+    props = {};
+  } else if (dataset.type === 'adhoc' || dataset.type === 'index') {
+    const metric = operationFromColumn(visualization.metricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations;
+    const secondary_metric = visualization.secondaryMetricAccessor ? operationFromColumn(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
+    const max_value = visualization.maxAccessor ? operationFromColumn(visualization.maxAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
+    const breakdown_by = visualization.breakdownByAccessor ? operationFromColumn(visualization.breakdownByAccessor, layer, dataViews, formulaAPI) as LensApiBucketOperations : undefined;
 
-  // in case of index or adhoc, we need to build operations from columns
-  // metric operation can also be formula !!
-
-  const metric = operationFromColumn(visualization.metricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations;
-  const secondary_metric = visualization.secondaryMetricAccessor ? operationFromColumn(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
-  const max_value = visualization.maxAccessor ? operationFromColumn(visualization.maxAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
-  const breakdown_by = visualization.breakdownByAccessor ? operationFromColumn(visualization.breakdownByAccessor, layer, dataViews, formulaAPI) as LensApiBucketOperations : undefined;
-
-  type DeepMutable<T> = {
-    -readonly [P in keyof T]: T[P] extends object
-      ? T[P] extends (...args: any[]) => any
-        ? T[P] // don't mutate functions
-        : DeepMutable<T[P]>
-      : T[P];
-  };
-
-  const props: Partial<DeepMutable<MetricState>> = {
-    metric,
-    ...(secondary_metric ? { secondary_metric } : {}),
-    ...(max_value ? { max_value } : {}),
-    ...(breakdown_by ? { breakdown_by } : {}),
-  };
+    props = {
+      metric,
+      ...(secondary_metric ? { secondary_metric } : {}),
+      ...(max_value ? { max_value } : {}),
+      ...(breakdown_by ? { breakdown_by } : {}),
+    };
+  } else {
+    throw new Error('Unsupported dataset type');
+  }
 
   if (props.secondary_metric) {
     // just static color is supported for now
@@ -175,51 +165,23 @@ function buildFormBasedLayer(
   dataView: DataView,
   formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'] {
-  const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
-    columns: {
-      [HISTOGRAM_COLUMN_NAME]: getHistogramColumn({
-        options: {
-          sourceField: dataView.timeFieldName,
-          params: {
-            interval: 'auto',
-            includeEmptyRows: true,
-          },
-        },
-      }),
-    },
-    sampling: 1,
-  };
 
-  const layers: {
-    layer_0: PersistedIndexPatternLayer;
-    layer_0_trendline?: PersistedIndexPatternLayer;
-  } = {
-    [DEFAULT_LAYER_ID]: {
-      columnOrder: [ACCESSOR],
-      columns: {
-        [ACCESSOR]: getMetricColumn(layer.metric as LensApiMetricOperations),
-      },
-      sampling: layer.samplings,
-      ignoreGlobalFilters: layer.ignore_global_filters,
-    },
+  const columns = getMetricColumn(layer.metric as LensApiMetricOperations);
+  
+  const layers: Record<string, PersistedIndexPatternLayer> = {
+    ...generateLayer(DEFAULT_LAYER_ID, layer),
     ...(layer.metric?.background_chart?.type === 'trend'
-      ? {
-          [TRENDLINE_LAYER_ID]: {
-            linkToLayers: [DEFAULT_LAYER_ID],
-            columnOrder: [`${ACCESSOR}_trendline`],
-            columns: {
-              [`${ACCESSOR}_trendline`]: getMetricColumn(layer.metric as LensApiMetricOperations),
-            },
-            sampling: layer.samplings,
-            ignoreGlobalFilters: layer.ignore_global_filters,
-          },
-        }
+      ? generateLayer(TRENDLINE_LAYER_ID, layer)
       : {}),
   };
 
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
+
+  addLayerColumn(defaultLayer, ACCESSOR, columns);
+  if (trendLineLayer) {
+    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, columns);
+  }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
@@ -236,25 +198,25 @@ function buildFormBasedLayer(
 
   if (layer.secondary_metric) {
     const columnName = getAccessorName('secondary');
-    const column = getMetricColumn(
+    const columns = getMetricColumn(
       layer.secondary_metric as LensApiMetricOperations
     );
 
-    addLayerColumn(defaultLayer, columnName, column);
+    addLayerColumn(defaultLayer, columnName, columns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, column, false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendline`, columns, false, 'X0');
     }
   }
 
   if (layer.metric?.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const column = getMetricColumn(
+    const columns = getMetricColumn(
       { operation: 'max', field: 'max' },
     );
 
-    addLayerColumn(defaultLayer, columnName, column);
+    addLayerColumn(defaultLayer, columnName, columns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, column , false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendline`, columns, false, 'X0');
     }
   }
 

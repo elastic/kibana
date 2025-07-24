@@ -13,8 +13,15 @@ import { getCountColumn, getCountColumnReverse } from './count';
 import { LensApiFormulaOperation, LensApiMetricOperations } from '../schema/metric_ops';
 import { getMaxMinAvgSumColumn, getMaxMinAvgSumColumnReverse } from './max_min_avg_sum';
 import { getFormulaColumn, fromFormulaColumn } from './formula';
+import { getLastValueColumn, getLastValueColumnReverse } from './last_value';
+import { getStaticValueColumn, getStaticValueColumnReverse } from './static_value';
+import { getCounterRateColumn, getCounterRateColumnReverse } from './counter_rate';
+import { getCumulativeSumColumn, getCumulativeSumColumnReverse } from './cumulative_sum';
+import { getPercentileColumn, getPercentileColumnReverse } from './percentile';
+import { getPercentileRanksColumn, getPercentileRanksColumnReverse } from './percentile_ranks';
+import { getUniqueValuesColumn, getUniqueValuesColumnReverse } from './unique_values';
 
-export const getMetricColumn = (options: LensApiMetricOperations | LensApiFormulaOperation): GenericIndexPatternColumn => {
+export const getMetricColumn = (options: LensApiMetricOperations | LensApiFormulaOperation): GenericIndexPatternColumn[] | GenericIndexPatternColumn => {
   const metricType = options.operation;
 
   switch (metricType) {
@@ -22,6 +29,20 @@ export const getMetricColumn = (options: LensApiMetricOperations | LensApiFormul
       return getCountColumn(options);
     case 'min': case 'max': case 'median': case 'sum':
       return getMaxMinAvgSumColumn(metricType, options);
+    case 'last_value':
+      return getLastValueColumn(options);
+    case 'static_value':
+      return getStaticValueColumn(options);
+    case 'counter_rate':
+      return getCounterRateColumn(options);
+    case 'cumulative_sum':
+      return getCumulativeSumColumn(options);
+    case 'percentile':
+      return getPercentileColumn(options);
+    case 'percentile_ranks':
+      return getPercentileRanksColumn(options);
+    case 'unique_values':
+      return getUniqueValuesColumn(options);
     case 'formula':
       return getFormulaColumn(options);
     default:
@@ -29,12 +50,26 @@ export const getMetricColumn = (options: LensApiMetricOperations | LensApiFormul
   }
 };
 
-export const getMetricColumnReverse = (options: GenericIndexPatternColumn): LensApiMetricOperations | LensApiFormulaOperation => {
+export const getMetricColumnReverse = (options: GenericIndexPatternColumn, columns: Record<string, GenericIndexPatternColumn>): LensApiMetricOperations | LensApiFormulaOperation => {
   switch (options.operationType) {
     case 'count':
       return getCountColumnReverse(options as any);
     case 'min': case 'max': case 'median': case 'sum':
       return getMaxMinAvgSumColumnReverse(options as any);
+    case 'last_value':
+      return getLastValueColumnReverse(options as any);
+    case 'static_value':
+      return getStaticValueColumnReverse(options as any);
+    case 'counter_rate':
+      return getCounterRateColumnReverse(options as any, columns);
+    case 'cumulative_sum':
+      return getCumulativeSumColumnReverse(options as any, columns);
+    case 'percentile':
+      return getPercentileColumnReverse(options as any);
+    case 'percentile_ranks':
+      return getPercentileRanksColumnReverse(options as any);
+    case 'unique_values':
+      return getUniqueValuesColumnReverse(options as any);
     case 'formula':
       return fromFormulaColumn(options as any);
     default:

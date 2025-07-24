@@ -11,16 +11,8 @@ import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiDateHistogramOperation } from '../schema/bucket_ops';
 
 export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
-export const getHistogramColumn = ({
-  options,
-}: {
-  options?: Partial<
-    Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
-      params: DateHistogramColumnParams;
-    }
-  >;
-}): DateHistogramIndexPatternColumn => {
-  const { interval = 'auto', ...rest } = options?.params ?? {};
+export const getHistogramColumn = (options: LensApiDateHistogramOperation): DateHistogramIndexPatternColumn => {
+  const { suggested_interval = 'auto', field, ...rest } = options;
 
   return {
     dataType: 'date',
@@ -28,18 +20,18 @@ export const getHistogramColumn = ({
     label: '@timestamp',
     operationType: 'date_histogram',
     scale: 'interval',
-    sourceField: options?.sourceField ?? '@timestamp',
-    params: { interval, ...rest },
+    sourceField: field,
+    params: { interval: suggested_interval, ...rest },
   };
 };
 
 export const fromHistogramColumn = (
   column: DateHistogramIndexPatternColumn
 ): LensApiDateHistogramOperation => {
-  const { params } = column;
+  const { params, sourceField } = column;
   return {
     operation: 'date_histogram',
-    field: column.sourceField,
-    suggested_interval: params?.interval ?? 'auto',
+    field: sourceField,
+    suggested_interval: params?.interval,
   };
 };

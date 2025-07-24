@@ -10,14 +10,8 @@
 import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiRangeOperation } from '../schema/bucket_ops';
 
-export const getIntervalsColumn = ({
-  field,
-  options,
-}: {
-  field: string;
-  options: RangeIndexPatternColumn['params'];
-}): RangeIndexPatternColumn => {
-  const { ranges = [], ...params } = options ?? {};
+export const getIntervalsColumn = (options: LensApiRangeOperation): RangeIndexPatternColumn => {
+  const { field, ranges = [], ...params } = options;
   return {
     label: `Intervals of ${field}`,
     dataType: 'number',
