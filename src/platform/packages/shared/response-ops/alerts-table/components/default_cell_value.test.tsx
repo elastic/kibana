@@ -89,7 +89,7 @@ describe('DefaultCellValue', () => {
             }}
           />
         );
-        expect(screen.queryByText('Machine learning')).toBeInTheDocument();
+        expect(screen.queryByText('Machine Learning')).toBeInTheDocument();
       }
     );
   });

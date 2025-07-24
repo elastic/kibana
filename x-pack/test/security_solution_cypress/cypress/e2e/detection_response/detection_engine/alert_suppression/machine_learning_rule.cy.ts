@@ -40,7 +40,7 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(
-  'Machine learning Detection Rules - Alert suppression',
+  'Machine Learning Detection Rules - Alert suppression',
   {
     tags: ['@ess', '@serverless'],
   },
@@ -75,7 +75,7 @@ describe(
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
           cy.get(TOOLTIP).should(
             'contain.text',
-            'To enable alert suppression, start relevant Machine learning jobs.'
+            'To enable alert suppression, start relevant Machine Learning jobs.'
           );
         });
       });
@@ -104,7 +104,7 @@ describe(
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
             cy.get(ALERT_SUPPRESSION_WARNING).should(
               'contain.text',
-              'This list of fields might be incomplete as some Machine learning jobs are not running. Start all relevant jobs for a complete list.'
+              'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'
             );
           });
         });

@@ -5,7 +5,7 @@ post:
     You must have `all` privileges for the appropriate Kibana features,
     depending on the `consumer` and `rule_type_id` of the rule. For example, the
     **Management > Stack Rules** feature, **Analytics > Discover** and
-    **Machine learning** features, **Observability**, and **Security** features.
+    **Machine Learning** features, **Observability**, and **Security** features.
     If the rule has actions, you must also have `read` privileges for the
     **Management > Actions and Connectors** feature.
   tags:

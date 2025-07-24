@@ -1,7 +1,7 @@
 {
   "name": "@kbn/ml-cancellable-search",
   "description": "React hook for cancellable data searching",
-  "author": "Machine learning UI",
+  "author": "Machine Learning UI",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0",

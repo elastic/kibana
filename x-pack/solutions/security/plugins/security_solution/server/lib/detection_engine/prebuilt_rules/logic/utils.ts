@@ -24,7 +24,7 @@ export const rulesToMap = (rules: RuleAlertType[]) =>
  * Excludes rules that are not allowed under the current license.
  *
  * @param rules The array of rule objects to filter
- * @param mlAuthz Machine learning authorization object
+ * @param mlAuthz Machine Learning authorization object
  * @returns A new array containing only the rules that are allowed under the current license
  */
 export async function excludeLicenseRestrictedRules<T extends { type: Type }>(
@@ -56,7 +56,7 @@ function getUpgradeTargets(
  *
  * @param currentRules The list of rules currently installed.
  * @param targetRulesMap A map of the latest available rule versions, with rule_id as the key.
- * @param mlAuthz Machine learning authorization object
+ * @param mlAuthz Machine Learning authorization object
  * @returns An array of target rule version specifiers.
  */
 export function getPossibleUpgrades(

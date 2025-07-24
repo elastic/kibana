@@ -318,7 +318,7 @@ export const assertMachineLearningPropertiesShown = (
   cy.get(ANOMALY_THRESHOLD_TITLE).should('have.text', 'Anomaly score threshold');
   cy.get(ANOMALY_THRESHOLD_VALUE).should('have.text', anomalyThreshold);
 
-  cy.get(MACHINE_LEARNING_JOB_TITLE).should('have.text', 'Machine learning job');
+  cy.get(MACHINE_LEARNING_JOB_TITLE).should('have.text', 'Machine Learning job');
   machineLearningJobIds.forEach((jobId, jobIndex) => {
     cy.get(MACHINE_LEARNING_JOB_VALUE).eq(jobIndex).should('contain', mlJobNameById[jobId]);
   });

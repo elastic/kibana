@@ -46,7 +46,7 @@ export class MlManagementLocatorInternal {
 
     switch (params.page) {
       //  This case covers ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE || ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE as they are empty strings.
-      //  This is because they are each the root page for their respective sections/apps in Stack Management > Machine learning
+      //  This is because they are each the root page for their respective sections/apps in Stack Management > Machine Learning
       case '':
         if (appId === 'anomaly_detection') {
           path = formatAnomalyDetectionJobManagementUrl(

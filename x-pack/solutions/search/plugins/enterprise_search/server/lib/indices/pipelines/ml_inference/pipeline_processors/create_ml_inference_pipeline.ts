@@ -19,7 +19,7 @@ import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/
 import { updateMlInferenceMappings } from '../update_ml_inference_mappings';
 
 /**
- * Creates a Machine learning Inference pipeline with the given settings, if it doesn't exist yet,
+ * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet,
  * then references it in the "parent" ML Inference pipeline that is associated with the index.
  * Finally, updates the index's mappings to accommodate the specified outputs of the inference model (if able)
  * @param indexName name of the index this pipeline corresponds to.
@@ -62,7 +62,7 @@ export const preparePipelineAndIndexForMlInference = async (
 };
 
 /**
- * Creates a Machine learning Inference pipeline with the given settings, if it doesn't exist yet.
+ * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet.
  * @param pipelineName pipeline name set by the user.
  * @param pipelineDefinition full definition of the pipeline
  * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.

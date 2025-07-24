@@ -30,7 +30,7 @@ export const TextExpansionErrors = ({ error }: { error: { title: string; message
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCreateError.mlNotificationsLink',
             {
-              defaultMessage: 'Machine learning notifications',
+              defaultMessage: 'Machine Learning notifications',
             }
           )}
         </EuiLink>

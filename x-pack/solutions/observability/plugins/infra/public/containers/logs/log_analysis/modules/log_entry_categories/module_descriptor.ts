@@ -36,7 +36,7 @@ const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryCategoriesM
 const moduleDescription = i18n.translate(
   'xpack.infra.logs.analysis.logEntryCategoriesModuleDescription',
   {
-    defaultMessage: 'Use Machine learning to automatically categorize log messages.',
+    defaultMessage: 'Use Machine Learning to automatically categorize log messages.',
   }
 );
 

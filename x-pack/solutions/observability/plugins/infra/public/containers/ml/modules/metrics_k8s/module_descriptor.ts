@@ -29,7 +29,7 @@ const moduleName = i18n.translate('xpack.infra.ml.metricsModuleName', {
   defaultMessage: 'Metrics anomanly detection',
 });
 const moduleDescription = i18n.translate('xpack.infra.ml.metricsHostModuleDescription', {
-  defaultMessage: 'Use Machine learning to automatically detect anomalous log entry rates.',
+  defaultMessage: 'Use Machine Learning to automatically detect anomalous log entry rates.',
 });
 
 const getJobIds = (spaceId: string, sourceId: string) =>

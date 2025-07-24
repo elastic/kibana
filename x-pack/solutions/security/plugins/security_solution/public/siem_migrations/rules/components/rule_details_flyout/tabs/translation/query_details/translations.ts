@@ -61,7 +61,7 @@ export const MACHINE_LEARNING_RULE_QUERY_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.machineLearningRule.queryPlaceholder',
   {
     defaultMessage:
-      'This query was mapped to a Machine learning rule. See more details in the Overview tab above.',
+      'This query was mapped to a Machine Learning rule. See more details in the Overview tab above.',
   }
 );
 

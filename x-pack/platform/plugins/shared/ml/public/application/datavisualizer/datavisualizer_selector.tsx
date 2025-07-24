@@ -33,7 +33,7 @@ function startTrialDescription() {
     <span>
       <FormattedMessage
         id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
-        defaultMessage="To experience the full Machine learning features that a {subscriptionsLink} offers, start a 30-day trial."
+        defaultMessage="To experience the full Machine Learning features that a {subscriptionsLink} offers, start a 30-day trial."
         values={{
           subscriptionsLink: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
@@ -90,7 +90,7 @@ export const DatavisualizerSelector: FC = () => {
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
-                defaultMessage="The Machine learning Data Visualizer tool helps you understand your data
+                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data
                   by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
               />
             </EuiText>

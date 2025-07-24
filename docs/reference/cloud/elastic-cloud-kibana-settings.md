@@ -344,7 +344,7 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `xpack.ml.enabled`
 :   Set to true (default) to enable machine learning.
 
-    If set to `false` in `kibana.yml`, the machine learning icon is hidden in this Kibana instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however, you can still use the machine learning APIs. To disable machine learning entirely, check the [Elasticsearch Machine learning Settings](elasticsearch://reference/elasticsearch/configuration-reference/machine-learning-settings.md).
+    If set to `false` in `kibana.yml`, the machine learning icon is hidden in this Kibana instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however, you can still use the machine learning APIs. To disable machine learning entirely, check the [Elasticsearch Machine Learning Settings](elasticsearch://reference/elasticsearch/configuration-reference/machine-learning-settings.md).
 
 
 #### Content security policy configuration [ec_content_security_policy_configuration]

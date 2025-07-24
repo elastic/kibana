@@ -107,7 +107,7 @@ export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType 
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }),
   href: '/',
 });

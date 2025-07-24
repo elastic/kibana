@@ -45,7 +45,7 @@ export const HelpText = memo(function HelpText({
             <EuiLink href={mlUrl} target="_blank">
               <FormattedMessage
                 id="xpack.securitySolution.components.mlJobSelect.machineLearningLink"
-                defaultMessage="Machine learning"
+                defaultMessage="Machine Learning"
               />
             </EuiLink>
           ),

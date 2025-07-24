@@ -49,7 +49,7 @@ const appToIcon = (app: string) => {
 const appToTooltip = (appId: string | undefined) => {
   if (appId === 'ml') {
     return i18n.translate('data.mgmt.searchSessions.table.mlAppName', {
-      defaultMessage: 'Machine learning',
+      defaultMessage: 'Machine Learning',
     });
   }
 };

@@ -175,7 +175,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                 'xpack.enterpriseSearch.inferencePipelineCard.deleteConfirm.description',
                 {
                   defaultMessage:
-                    'You are removing the pipeline "{pipelineName}" from the Machine learning Inference Pipeline and deleting it.',
+                    'You are removing the pipeline "{pipelineName}" from the Machine Learning Inference Pipeline and deleting it.',
                   values: {
                     pipelineName,
                   },

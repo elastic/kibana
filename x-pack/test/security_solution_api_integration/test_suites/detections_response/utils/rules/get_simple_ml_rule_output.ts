@@ -13,7 +13,7 @@ const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningRule => {
   return {
     ...getMockSharedResponseSchema(ruleId),
     name: 'Simple ML Rule',
-    description: 'Simple Machine learning Rule',
+    description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,
     machine_learning_job_id: ['some_job_id'],
     type: 'machine_learning',

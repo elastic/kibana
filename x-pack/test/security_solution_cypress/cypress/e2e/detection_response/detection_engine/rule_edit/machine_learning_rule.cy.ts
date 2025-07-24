@@ -40,7 +40,7 @@ import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_detail
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 describe(
-  'Machine learning Detection Rules - Editing',
+  'Machine Learning Detection Rules - Editing',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },

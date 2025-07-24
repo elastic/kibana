@@ -164,7 +164,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.defaultAnomalyScoreDescription',
         {
           defaultMessage:
-            '<p>Value above which Machine learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
+            '<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
           values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),

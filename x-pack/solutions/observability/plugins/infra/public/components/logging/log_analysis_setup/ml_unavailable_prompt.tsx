@@ -17,7 +17,7 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
       <h2>
         <FormattedMessage
           id="xpack.infra.logs.analysis.mlUnavailableTitle"
-          defaultMessage="This feature requires Machine learning"
+          defaultMessage="This feature requires Machine Learning"
         />
       </h2>
     }
@@ -35,7 +35,7 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
               >
                 <FormattedMessage
                   id="xpack.infra.logs.analysisPage.unavailable.mlAppLink"
-                  defaultMessage="Machine learning app"
+                  defaultMessage="Machine Learning app"
                 />
               </EuiLink>
             ),
@@ -52,7 +52,7 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
         fill
       >
         {i18n.translate('xpack.infra.logs.analysis.mlAppButton', {
-          defaultMessage: 'Open Machine learning',
+          defaultMessage: 'Open Machine Learning',
         })}
       </EuiButton>
     }

@@ -82,7 +82,7 @@ export const LOGS_DISPLAY_NAME = i18n.translate(
 );
 
 export const ML_DISPLAY_NAME = i18n.translate('responseOpsAlertsTable.sections.alertsTable.ml', {
-  defaultMessage: 'Machine learning',
+  defaultMessage: 'Machine Learning',
 });
 
 export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(

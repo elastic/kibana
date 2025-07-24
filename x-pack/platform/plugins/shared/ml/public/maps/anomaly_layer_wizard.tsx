@@ -16,7 +16,7 @@ export const anomalyLayerWizard: Partial<LayerWizard> = {
   }),
   disabledReason: i18n.translate('xpack.ml.maps.anomalyLayerUnavailableMessage', {
     defaultMessage:
-      'Anomalies layers are a subscription feature. Ensure you have the right subscription and access to Machine learning.',
+      'Anomalies layers are a subscription feature. Ensure you have the right subscription and access to Machine Learning.',
   }),
   icon: 'outlierDetectionJob',
   getIsDisabled: () => {

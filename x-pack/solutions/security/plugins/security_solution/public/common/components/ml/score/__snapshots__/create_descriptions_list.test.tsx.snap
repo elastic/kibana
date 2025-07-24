@@ -57,7 +57,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
         >
           <ExplorerLink
             endDate="3000-01-01T00:00:00.000Z"
-            linkName="View in Machine learning"
+            linkName="View in Machine Learning"
             score={
               Object {
                 "detectorIndex": 0,

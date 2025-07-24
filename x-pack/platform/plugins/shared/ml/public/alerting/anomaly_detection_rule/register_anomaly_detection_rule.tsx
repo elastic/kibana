@@ -116,7 +116,7 @@ export function registerAnomalyDetectionRule(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.anomalyDetection.defaultActionMessage',
       {
-        defaultMessage: `['{{rule.name}}'] Elastic Stack Machine learning Alert:
+        defaultMessage: `['{{rule.name}}'] Elastic Stack Machine Learning Alert:
 - Job IDs: '{{context.jobIds}}'
 - Time: '{{context.timestampIso8601}}'
 - Anomaly score: '{{context.score}}'

@@ -28,7 +28,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Data ingestion and Fleet**:
 * Adds a tooltip to the **Last activity** column in Agent list UI [#224850]({{kib-pull}}224850).
 
-**Machine learning**:
+**Machine Learning**:
 * Improves error messages in the AI Connector creation UI and ensures they're surfaced in {{kib}} [#221859]({{kib-pull}}221859).
 
 
@@ -96,7 +96,7 @@ For the Elastic Observability 9.0.3 release information, refer to [Elastic Obser
 **Elastic Security solution**:
 For the Elastic Security 9.0.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-**Machine learning**:
+**Machine Learning**:
 * Ensures the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
 * Ensures the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
 * Allows you to add additional fields even if your ingest pipeline is empty when uploading a file [#222775]({{kib-pull}}222775).
@@ -157,7 +157,7 @@ For the Elastic Security 9.0.1 release information, refer to [Elastic Security S
 * Fixes broken icons in integrations coming from the Home plugin [#219206](https://github.com/elastic/kibana/pull/219206).
 * Fixes placeholder disappearing when a value is set in the Monaco code editor [#217828](https://github.com/elastic/kibana/pull/217828).
 
-**Machine learning**:
+**Machine Learning**:
 * Fixes an issue that could cause a page loading error to show when changing between Inference endpoints services [#219020](https://github.com/elastic/kibana/pull/219020).
 * Fixes missing field names in the step details of the anomaly detection job wizards [#218570](https://github.com/elastic/kibana/pull/218570).
 
@@ -196,7 +196,7 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
 **Kibana security**:
 * Updates `js-yaml` to `4.1.0` [#190678]({{kib-pull}}190678).
 
-**Machine learning**:
+**Machine Learning**:
 * Removes use of `ignore_throttled` [#199107]({{kib-pull}}199107).
 
 **Platform**:

@@ -179,7 +179,7 @@ export const OverviewPage: FC = () => {
                   <h1>
                     <FormattedMessage
                       id="xpack.ml.overview.welcomeBanner.header.title"
-                      defaultMessage="Welcome to the Machine learning Hub"
+                      defaultMessage="Welcome to the Machine Learning Hub"
                     />
                   </h1>
                 </EuiTitle>
@@ -196,7 +196,7 @@ export const OverviewPage: FC = () => {
           rightSideItems={[
             <EuiImage
               alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
-                defaultMessage: 'Welcome to the Machine learning Hub',
+                defaultMessage: 'Welcome to the Machine Learning Hub',
               })}
               src={isDarkTheme ? bannerImageDark : bannerImageLight}
               size="l"
@@ -478,7 +478,7 @@ export const OverviewPage: FC = () => {
               defaultMessage: 'Browse documentation',
             })}
             description={i18n.translate('xpack.ml.overview.browseDocumentationDescription', {
-              defaultMessage: 'In-depth guides on Elastic Machine learning.',
+              defaultMessage: 'In-depth guides on Elastic Machine Learning.',
             })}
             docLink={helpLink}
             callToAction={

@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Detection Engine - Machine learning Rule Execution Logic Integration Tests - ESS Env - Trial License',
+        'Detection Engine - Machine Learning Rule Execution Logic Integration Tests - ESS Env - Trial License',
     },
   };
 }

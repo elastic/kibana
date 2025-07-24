@@ -188,7 +188,7 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.mlUnavailableTitle', {
     values: { totalRules },
     defaultMessage:
-      '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine learning to enable.',
+      '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
 
 export const bulkAlertSuppression = {

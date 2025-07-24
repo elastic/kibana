@@ -47,9 +47,9 @@ Once installation is complete, you can navigate to **Stack Management > Ingest P
 
 ![Once installation is complete, you can navigate to Stack Management > Ingest Pipelines and see that the `<version-number>-problem_child_ingest_pipeline` has been installed and can now be used to enrich incoming ingest data.](/assets/images/detecting-living-off-the-land-attacks-with-new-elastic-integration/blog-elastic-detecting-lotl-attacks-3.png)
 
-Similarly, the installed ProblemChild model can now be seen in **Machine learning > Model Management > Trained Models**
+Similarly, the installed ProblemChild model can now be seen in **Machine Learning > Model Management > Trained Models**
 
-![Similarly, the installed ProblemChild model can now be seen in Machine learning > Model Management > Trained Models](/assets/images/detecting-living-off-the-land-attacks-with-new-elastic-integration/blog-elastic-detecting-lotl-attacks-4.jpg)
+![Similarly, the installed ProblemChild model can now be seen in Machine Learning > Model Management > Trained Models](/assets/images/detecting-living-off-the-land-attacks-with-new-elastic-integration/blog-elastic-detecting-lotl-attacks-4.jpg)
 
 ### Step 2: Enriching your data
 
@@ -108,7 +108,7 @@ If you want an immediate way to test that the ingest pipeline is working as expe
 
 The package includes several preconfigured anomaly detection jobs. These jobs enable you to find the rarest events among those detected as malicious by the supervised model in order to decide which events require immediate attention from your analysts.
 
-To run these jobs on your enriched data, go to **Machine learning > Anomaly Detection**. When you create a job using the job wizard, you should see an option to Use preconfigured jobs with a card for LotL Attacks. After selecting the card, you will see several preconfigured anomaly detection jobs that can be run. Note these jobs are only useful for indices that have been enriched by the ingest pipeline.
+To run these jobs on your enriched data, go to **Machine Learning > Anomaly Detection**. When you create a job using the job wizard, you should see an option to Use preconfigured jobs with a card for LotL Attacks. After selecting the card, you will see several preconfigured anomaly detection jobs that can be run. Note these jobs are only useful for indices that have been enriched by the ingest pipeline.
 
 ### Step 4: Enabling the rules
 

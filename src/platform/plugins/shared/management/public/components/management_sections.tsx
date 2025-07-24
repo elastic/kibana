@@ -35,11 +35,11 @@ const insightsAndAlertingTip = i18n.translate('management.sections.insightsAndAl
 });
 
 const machineLearningTitle = i18n.translate('management.sections.machineLearningTitle', {
-  defaultMessage: 'Machine learning',
+  defaultMessage: 'Machine Learning',
 });
 
 const machineLearningTip = i18n.translate('management.sections.machineLearningTip', {
-  defaultMessage: 'Manage your Machine learning jobs and trained models',
+  defaultMessage: 'Manage your Machine Learning jobs and trained models',
 });
 
 const sectionTitle = i18n.translate('management.sections.section.title', {

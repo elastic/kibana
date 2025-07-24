@@ -5,7 +5,7 @@ get:
     You must have `read` privileges for the appropriate Kibana features,
     depending on the `consumer` and `rule_type_id` of the rules you're seeking.
     For example, the **Management > Stack Rules** feature,
-    **Analytics > Discover** and **Machine learning** features, **Observability**
+    **Analytics > Discover** and **Machine Learning** features, **Observability**
     features, or **Security** features. To get rules associated with the
     **Stack Monitoring** feature, use the `monitoring_user` built-in role.
   tags:
@@ -40,7 +40,7 @@ delete:
   operationId: deleteRule
   description: >
     To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting.
-    For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine learning** features, **Observability**, or **Security** features.
+    For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features.
     WARNING: After you delete a rule, you cannot recover it.
     If the API key that is used by the rule was created automatically, it is deleted.
   tags:
@@ -71,7 +71,7 @@ post:
     This API creates a rule with a specific rule identifier.
     If you omit the identifer, it is automatically generated.
     To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.
-    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine learning** features, **Observability** features, or **Security** features.
+    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.
     If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
     This API supports both key- and token-based authentication.
     To use key-based authentication, create an API key in Kibana and use it in the header of the API call.
@@ -139,7 +139,7 @@ put:
   operationId: updateRule
   description: >
     To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating.
-    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine learning** features, **Observability** features, or **Security** features.
+    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.
     If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
     This API supports both key- and token-based authentication.
     To use key-based authentication, create an API key in Kibana and use it in the header of the API call.

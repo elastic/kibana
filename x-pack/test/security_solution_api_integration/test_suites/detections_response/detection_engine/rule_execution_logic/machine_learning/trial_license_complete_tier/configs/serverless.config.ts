@@ -10,7 +10,7 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Machine learning Rule Execution Logic Integration Tests - Serverless Env - Complete Tier',
+      'Detection Engine - Machine Learning Rule Execution Logic Integration Tests - Serverless Env - Complete Tier',
   },
   kbnTestServerArgs: [
     `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([

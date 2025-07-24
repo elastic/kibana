@@ -54,7 +54,7 @@ export const QUERY_TYPE_DESCRIPTION = i18n.translate(
 export const ML_TYPE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeTitle',
   {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }
 );
 

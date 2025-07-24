@@ -33,7 +33,7 @@ export const UpgradeContentsComponent = () => (
     <EuiText size="s">
       <FormattedMessage
         id="xpack.securitySolution.components.mlPopup.upgradeDescription"
-        defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine learning jobs and view anomalies."
+        defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
         values={{
           cloudLink: (
             <EuiLink href={`https://www.elastic.co/cloud/`} target="_blank">

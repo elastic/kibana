@@ -28,7 +28,7 @@ describe('startMlModelDownload', () => {
 
   it('should error when there is no trained model provider', async () => {
     await expect(() => startMlModelDownload(knownModelName, undefined)).rejects.toThrowError(
-      'Machine learning is not enabled'
+      'Machine Learning is not enabled'
     );
   });
 

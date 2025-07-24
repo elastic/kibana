@@ -50,11 +50,11 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
       cy.get(SIEM_MIGRATIONS_FEATURE).should('not.exist');
     });
 
-    it('should show `Cases`, `Machine learning`, `Elastic AI Assistant` and `Attack discovery` features', () => {
+    it('should show `Cases`, `Machine Learning`, `Elastic AI Assistant` and `Attack discovery` features', () => {
       selectAllSpaces();
       // should have Cases sub-privilege
       cy.get(CASES_FEATURE).should('exist');
-      // should have Machine learning sub-privilege
+      // should have Machine Learning sub-privilege
       cy.get(MACHINE_LEARNING_FEATURE).should('exist');
       // should have Elastic AI Assistant sub-privilege
       cy.get(ELASTIC_AI_ASSISTANT_FEATURE).should('exist');

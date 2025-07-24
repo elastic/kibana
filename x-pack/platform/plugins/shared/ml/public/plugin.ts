@@ -179,7 +179,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
-        defaultMessage: 'Machine learning',
+        defaultMessage: 'Machine Learning',
       }),
       order: 5000,
       euiIconType: PLUGIN_ICON_SOLUTION,

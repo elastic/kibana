@@ -3070,7 +3070,7 @@ export const ruleTypesIndex = new Map([
       doesSetRecoveryContext: false,
       hasAlertsMappings: true,
       id: 'siem.mlRule',
-      name: 'Machine learning Rule',
+      name: 'Machine Learning Rule',
       category: 'securitySolution',
       producer: 'siem',
       isExportable: false,

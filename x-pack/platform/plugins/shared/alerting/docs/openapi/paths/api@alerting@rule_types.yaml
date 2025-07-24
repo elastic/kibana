@@ -5,7 +5,7 @@ get:
     If you have `read` privileges for one or more Kibana features, the API
     response contains information about the appropriate rule types. For example,
     there are rule types associated with the **Management > Stack Rules** feature,
-    **Analytics > Discover** and **Machine learning** features, **Observability**
+    **Analytics > Discover** and **Machine Learning** features, **Observability**
     features, and **Security** features. To get rule types associated with the
     **Stack Monitoring** feature, use the `monitoring_user` built-in role.
   tags:

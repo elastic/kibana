@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   // NOTE: Add to second quality gate after feature is GA
-  describe('@ess @serverless Machine learning Detection Rule - Alert Suppression', () => {
+  describe('@ess @serverless Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,

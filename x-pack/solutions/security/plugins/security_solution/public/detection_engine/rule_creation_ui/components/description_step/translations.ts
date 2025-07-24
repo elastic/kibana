@@ -66,7 +66,7 @@ export const SAVED_QUERY_LABEL = i18n.translate(
 export const ML_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription',
   {
-    defaultMessage: 'Machine learning',
+    defaultMessage: 'Machine Learning',
   }
 );
 

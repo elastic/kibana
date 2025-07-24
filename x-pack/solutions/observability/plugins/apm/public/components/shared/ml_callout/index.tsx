@@ -132,7 +132,7 @@ export function MLCallout({
         }),
         text: i18n.translate('xpack.apm.mlCallout.legacyJobsCalloutText', {
           defaultMessage:
-            'We have discovered legacy Machine learning jobs from our previous integration which are no longer being used in the APM app',
+            'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
         }),
         icon: 'info',
         color: 'primary',

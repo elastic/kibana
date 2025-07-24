@@ -45,6 +45,6 @@ export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
 export const ANOMALY_DETECTION_DOCS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.AnomalyDetectionDocsTitle',
   {
-    defaultMessage: 'Anomaly Detection with Machine learning',
+    defaultMessage: 'Anomaly Detection with Machine Learning',
   }
 );

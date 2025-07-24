@@ -129,7 +129,7 @@ export const MANAGE_ANOMALY_DETECTION = i18n.translate(
 export const ML_MANAGEMENT_PAGE = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
   {
-    defaultMessage: 'Machine learning jobs management page',
+    defaultMessage: 'Machine Learning jobs management page',
   }
 );
 

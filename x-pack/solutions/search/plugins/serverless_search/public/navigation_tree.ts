@@ -225,7 +225,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     ],
                   },
                   {
-                    title: 'Machine learning',
+                    title: 'Machine Learning',
                     children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
                   },
                   {

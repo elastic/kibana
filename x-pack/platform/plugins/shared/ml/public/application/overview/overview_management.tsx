@@ -65,7 +65,7 @@ export const OverviewPage: FC = () => {
       <MlPageHeader>
         <PageTitle
           title={i18n.translate('xpack.ml.management.machineLearningOverview.overviewLabel', {
-            defaultMessage: 'Machine learning Overview',
+            defaultMessage: 'Machine Learning Overview',
           })}
         />
       </MlPageHeader>

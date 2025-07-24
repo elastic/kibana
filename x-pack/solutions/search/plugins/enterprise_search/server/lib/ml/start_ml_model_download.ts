@@ -18,7 +18,7 @@ export const startMlModelDownload = async (
   trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<MlModelDeploymentStatus> => {
   if (!trainedModelsProvider) {
-    throw new Error('Machine learning is not enabled');
+    throw new Error('Machine Learning is not enabled');
   }
 
   try {

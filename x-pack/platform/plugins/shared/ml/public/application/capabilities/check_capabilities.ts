@@ -243,7 +243,7 @@ export function createPermissionFailureMessage(privilegeType: keyof MlCapabiliti
     });
   } else if (privilegeType === 'canCreateJob') {
     message = i18n.translate('xpack.ml.privilege.noPermission.createMLJobsTooltip', {
-      defaultMessage: 'You do not have permission to create Machine learning jobs.',
+      defaultMessage: 'You do not have permission to create Machine Learning jobs.',
     });
   } else if (privilegeType === 'canStartStopDatafeed') {
     message = i18n.translate('xpack.ml.privilege.noPermission.startOrStopDatafeedsTooltip', {

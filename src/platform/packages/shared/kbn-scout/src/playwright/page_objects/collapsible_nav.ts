@@ -29,7 +29,7 @@ export class CollapsibleNav {
     }
   }
 
-  async clickItem(itemName: 'Discover' | 'Dashboards' | 'Maps' | 'Machine learning') {
+  async clickItem(itemName: 'Discover' | 'Dashboards' | 'Maps' | 'Machine Learning') {
     await this.expandNav();
     return this.config.serverless
       ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)

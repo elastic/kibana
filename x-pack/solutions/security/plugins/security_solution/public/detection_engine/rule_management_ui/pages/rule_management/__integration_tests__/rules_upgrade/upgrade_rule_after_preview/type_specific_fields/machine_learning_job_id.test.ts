@@ -137,7 +137,7 @@ describe('Upgrade diffable rule "machine_learning_job_id" (machine_learning rule
 
   const ruleType = 'machine_learning';
   const fieldName = 'machine_learning_job_id';
-  const humanizedFieldName = 'Machine learning job';
+  const humanizedFieldName = 'Machine Learning job';
   const initial = ['jobA'];
   const customized = ['jobB'];
   const upgrade = ['jobC'];

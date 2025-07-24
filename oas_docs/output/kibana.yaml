@@ -809,7 +809,7 @@ paths:
   /api/alerting/_health:
     get:
       description: |
-        You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine learning**, **Observability**, or **Security** features.
+        You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.
       operationId: getAlertingHealth
       responses:
         '200':
@@ -892,7 +892,7 @@ paths:
   /api/alerting/rule_types:
     get:
       description: |
-        If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.
+        If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.
       operationId: getRuleTypes
       responses:
         '200':
@@ -43577,7 +43577,7 @@ paths:
   /api/ml/saved_objects/sync:
     get:
       description: |
-        Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space. You must have `all` privileges for the **Machine learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
+        Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
       parameters:
         - $ref: '#/components/parameters/Machine_learning_APIs_simulateParam'

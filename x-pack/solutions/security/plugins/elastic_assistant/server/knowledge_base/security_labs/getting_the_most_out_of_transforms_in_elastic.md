@@ -16,7 +16,7 @@ tags:
 
 ## Preamble
 
-In 8.3, our Elastic Stack Machine learning team introduced a way to import [third party Natural Language Processing (NLP) models](https://www.elastic.co/guide/en/machine-learning/master/ml-nlp-model-ref.html) into Elastic. As security researchers, we HAD to try it out on a security dataset. So we decided to build a model to identify malicious command lines by fine-tuning a pre-existing model available on the [Hugging Face model hub](https://huggingface.co/models).
+In 8.3, our Elastic Stack Machine Learning team introduced a way to import [third party Natural Language Processing (NLP) models](https://www.elastic.co/guide/en/machine-learning/master/ml-nlp-model-ref.html) into Elastic. As security researchers, we HAD to try it out on a security dataset. So we decided to build a model to identify malicious command lines by fine-tuning a pre-existing model available on the [Hugging Face model hub](https://huggingface.co/models).
 
 Upon finding that the fine-tuned model was performing (surprisingly!) well, we wanted to see if it could replace or be combined with our previous [tree-based model](https://www.elastic.co/blog/problemchild-detecting-living-off-the-land-attacks) for detecting Living off the Land (LotL) attacks. But first, we had to make sure that the throughput and latency of this new model were reasonable enough for real-time inference. This resulted in a series of experiments, the results of which we will detail in this blog.
 
@@ -54,7 +54,7 @@ ML models do not understand raw text. Before using text data as inputs to a mode
 ## Importing custom models into Elastic
 
 Once you have a trained model that you are happy with, it's time to import it into Elastic. This is done using [Eland](https://www.elastic.co/guide/en/elasticsearch/client/eland/current/machine-learning.html), a Python client and toolkit for machine learning in Elasticsearch. A code snippet of how we imported our model into Elastic using Eland can be found [here](https://gist.github.com/ajosh0504/4560af91adb48212402300677cb65d4a#file-import-py).  
-You can verify that the model has been imported successfully by navigating to **Model Management \\> Trained Models** via the Machine learning UI in Kibana:
+You can verify that the model has been imported successfully by navigating to **Model Management \\> Trained Models** via the Machine Learning UI in Kibana:
 
 ![Imported model in the Trained Models UI](/assets/images/getting-the-most-out-of-transforms-in-elastic/Imported_model_in_the_Trained_Models_UI.png)
 
@@ -66,7 +66,7 @@ Our first inference run with our fine-tuned **RoBERTa** model took ~4 hours on t
 
 ### Using multiple nodes and threads
 
-The latency numbers above were observed when the models were running on a single thread on a single node. If you have multiple Machine learning (ML) nodes associated with your Elastic deployment, you can run inference on multiple nodes, and also on multiple threads on each node. This can significantly improve the throughput and latency of your models.
+The latency numbers above were observed when the models were running on a single thread on a single node. If you have multiple Machine Learning (ML) nodes associated with your Elastic deployment, you can run inference on multiple nodes, and also on multiple threads on each node. This can significantly improve the throughput and latency of your models.
 
 You can change these parameters while starting the trained model deployment via the [API](https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trained-model-deployment.html):
 
@@ -111,7 +111,7 @@ We found that this **resulted in a 2.6x speedup** on the original inference time
 
 Based on our experiments, dynamic quantization and model distillation resulted in significant inference speedups. Combining these improvements with distributed and parallel computing, we were further able to **reduce the total inference time on our test set from four hours to 35 minutes**. However, even our fastest transformer model was still several magnitudes slower than the tree-based model, despite using significantly more CPU resources.
 
-The Machine learning team here at Elastic is introducing an inference caching mechanism in version 8.4 of the Elastic Stack, to save time spent on performing inference on repeat samples. These are a common occurrence in real-world environments, especially when it comes to Security. With this optimization in place, we are optimistic that we will be able to use transformer models alongside tree-based models in the future.
+The Machine Learning team here at Elastic is introducing an inference caching mechanism in version 8.4 of the Elastic Stack, to save time spent on performing inference on repeat samples. These are a common occurrence in real-world environments, especially when it comes to Security. With this optimization in place, we are optimistic that we will be able to use transformer models alongside tree-based models in the future.
 
 A comparison of the sensitivity (true positive rate) and specificity (true negative rate) of our tree-based and transformer models shows that an ensemble of the two could potentially result in a more performant model:
 

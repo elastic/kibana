@@ -39,14 +39,14 @@ export const ML_ERRORS = {
     'xpack.apm.anomaly_detection.error.missing_read_privileges',
     {
       defaultMessage:
-        'You must have "read" privileges to Machine learning and APM in order to view Anomaly Detection jobs',
+        'You must have "read" privileges to Machine Learning and APM in order to view Anomaly Detection jobs',
     }
   ),
   MISSING_WRITE_PRIVILEGES: i18n.translate(
     'xpack.apm.anomaly_detection.error.missing_write_privileges',
     {
       defaultMessage:
-        'You must have "write" privileges to Machine learning and APM in order to create Anomaly Detection jobs',
+        'You must have "write" privileges to Machine Learning and APM in order to create Anomaly Detection jobs',
     }
   ),
   ML_NOT_AVAILABLE: i18n.translate('xpack.apm.anomaly_detection.error.not_available', {

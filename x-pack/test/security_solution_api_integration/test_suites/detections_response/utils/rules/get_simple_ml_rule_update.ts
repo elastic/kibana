@@ -14,7 +14,7 @@ import type { RuleUpdateProps } from '@kbn/security-solution-plugin/common/api/d
  */
 export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleUpdateProps => ({
   name: 'Simple ML Rule',
-  description: 'Simple Machine learning Rule',
+  description: 'Simple Machine Learning Rule',
   enabled,
   anomaly_threshold: 44,
   risk_score: 1,

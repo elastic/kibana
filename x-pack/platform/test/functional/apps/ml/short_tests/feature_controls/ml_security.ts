@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows ml navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Machine learning');
+        expect(navLinks).to.contain('Machine Learning');
       });
     });
 
@@ -101,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows ML navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Machine learning');
+        expect(navLinks).to.contain('Machine Learning');
       });
     });
 
@@ -136,7 +136,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows ML navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Machine learning');
+        expect(navLinks).to.contain('Machine Learning');
       });
     });
 
@@ -171,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does NOT show ML navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.not.contain('Machine learning');
+        expect(navLinks).to.not.contain('Machine Learning');
       });
     });
   });

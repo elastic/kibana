@@ -13,7 +13,7 @@ import type { AttachMlInferencePipelineResponse } from '../../common/types/pipel
 import { getInferencePipelineNameFromIndexName } from './ml_inference_pipeline_utils';
 
 /**
- * Adds the supplied a Machine learning Inference pipeline reference to the "parent" ML Inference
+ * Adds the supplied a Machine Learning Inference pipeline reference to the "parent" ML Inference
  * pipeline that is associated with the index.
  * @param indexName name of the index this pipeline corresponds to.
  * @param pipelineName name of the ML Inference pipeline to add.
