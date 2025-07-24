@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/env.sh
 
 .buildkite/scripts/bootstrap.sh
 
@@ -34,13 +33,3 @@ if [[ "${eslint_exit}" != "0" ]]; then
 fi
 
 echo "eslint ✅"
-
-echo '--- Security: check 3rd-party dependencies'
-
-if is_pr && ! is_auto_commit_disabled; then
-  ts-node .buildkite/scripts/steps/security/dependencies_diff.ts
-fi
-
-check_for_changed_files "security: 3rd-party dependencies" true
-
-echo "security: check 3rd-party dependencies ✅"
