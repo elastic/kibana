@@ -6,13 +6,13 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createAttackDiscoverySchedules,
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
-} from '../utils/helpers';
-import { getAttackDiscoverySchedulesApis } from '../utils/apis';
+} from '../../utils/helpers';
+import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
