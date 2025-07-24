@@ -115,7 +115,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       try {
-        do {
+        while (!contextManager.isFinished()) {
           const nodeId = contextManager.getCurrentStepId() as string;
           const currentStep = workflow.executionGraph?.nodes[nodeId].data;
 
@@ -153,7 +153,7 @@ export class WorkflowsExecutionEnginePlugin
             // Move to next step in the graph
             contextManager.goToNextStep();
           }
-        } while (!contextManager.isFinished());
+        }
 
         workflowExecutionStatus = ExecutionStatus.COMPLETED;
         // Log workflow success
