@@ -99,8 +99,8 @@ const baseResponseSchema = schema.object({
     ),
     cgroup_memory: schema.maybe(
       schema.object({
-        current_in_bytes: schema.number(),
-        swap_current_in_bytes: schema.number(),
+        current_bytes: schema.number(),
+        swap_current_bytes: schema.number(),
       })
     ),
   }),
