@@ -16,7 +16,7 @@ import type {
   RuleMigrationResourceType,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { StoredRuleMigrationResource } from '../types';
-import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type CreateRuleMigrationResourceInput = Pick<

@@ -14,7 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
-import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import {
   DashboardMigrationTaskStatusEnum,
   type DashboardMigrationDashboard,

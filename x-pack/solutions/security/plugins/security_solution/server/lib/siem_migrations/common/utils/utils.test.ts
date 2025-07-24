@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNotFoundError } from './utils';
+import { isNotFoundError } from './is_not_found_error';
 
 describe('isNotFoundError', () => {
   it('should return true if message has key found with value false', () => {

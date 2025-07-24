@@ -34,10 +34,10 @@ components:
         description:
           type: string
           description:  The description of the dashboard
-        "eai:data":
+        eai:data:
           type: string
           description: The EAI data of the dashboard, typically in XML format
-        "eai:acl.app":
+        eai:acl.app:
           type: string
           description: The application associated with the EAI ACL
         eai:acl.sharing:

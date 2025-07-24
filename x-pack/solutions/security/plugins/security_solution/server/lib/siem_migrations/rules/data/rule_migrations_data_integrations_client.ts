@@ -7,7 +7,7 @@
 
 import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
-import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;

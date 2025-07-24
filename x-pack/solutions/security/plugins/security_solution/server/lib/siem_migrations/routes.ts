@@ -20,7 +20,6 @@ export const registerSiemMigrationsRoutes = (
   }
 
   if (config.experimentalFeatures.automaticDashboardsMigration) {
-    logger.warn(`\n\n\n \t\t WARNING: Automatic Dashboard Migrations are enabled. \n\n\n`);
     import('./dashboards/api').then(({ registerSiemDashboardMigrationsRoutes }) => {
       registerSiemDashboardMigrationsRoutes(router, logger);
     });

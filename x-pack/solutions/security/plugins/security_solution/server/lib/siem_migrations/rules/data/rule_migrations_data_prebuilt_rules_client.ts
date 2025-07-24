@@ -9,7 +9,7 @@ import type { RuleVersions } from '../../../detection_engine/prebuilt_rules/logi
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
-import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import type { RuleMigrationPrebuiltRule } from '../types';
 
 export type { RuleVersions };
