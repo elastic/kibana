@@ -8,84 +8,148 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  useEuiTheme,
-  type EuiThemeShape,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { flexRender, type Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
-import { type GroupNode } from '../../data_cascade_provider';
+import { type CascadeRowCellPrimitiveProps } from './cascade_row_cell';
+import {
+  type LeafNode,
+  type GroupNode,
+  useDataCascadeDispatch,
+  useDataCascadeState,
+} from '../../data_cascade_provider';
+import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from './utils';
 
-export interface CascadeRowProps<G> {
+interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
+  row: Row<G>;
+  /**
+   * @description The path of the row that was expanded in the group by hierarchy.
+   */
+  nodePath: string[];
+  /**
+   * @description KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
+}
+
+/**
+ * @internal
+ * @description Internal cascade row primitive component props.
+ */
+export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode> {
   isActiveSticky: boolean;
   innerRef: React.LegacyRef<HTMLDivElement>;
-  populateGroupNodeDataFn: (args: { row: Row<G> }) => Promise<void>;
-  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
-  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
+  /**
+   * @description Callback function that is called when a cascade node is expanded.
+   */
+  onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
+  /**
+   * @description The row instance for the cascade row.
+   */
   rowInstance: Row<G>;
   /**
-   * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large).
+   * @description The row header title slot for the cascade row.
    */
-  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
+  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
+  /**
+   * @description The row header meta slots for the cascade row.
+   */
+  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
+  /**
+   * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
+   */
+  size: CascadeRowCellPrimitiveProps<G, L>['size'];
+  /**
+   * @description The virtual row for the cascade row.
+   */
   virtualRow: VirtualItem;
+  /**
+   * @description The virtual row style for the cascade row.
+   */
   virtualRowStyle: React.CSSProperties;
 }
 
-export function CascadeRow<G extends GroupNode>({
+/**
+ * @internal
+ * @description Internal component that is used to render a row in the data cascade.
+ */
+export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   isActiveSticky,
   innerRef,
-  populateGroupNodeDataFn,
+  onCascadeGroupNodeExpanded,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
   rowInstance,
   size,
   virtualRow,
   virtualRowStyle,
-}: CascadeRowProps<G>) {
+}: CascadeRowPrimitiveProps<G, L>) {
   const { euiTheme } = useEuiTheme();
-  const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = React.useState<boolean>(false);
+  const dispatch = useDataCascadeDispatch<G, L>();
+  const { currentGroupByColumns } = useDataCascadeState<G, L>();
+  const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = useState<boolean>(false);
 
   // rows that can be expanded are denoted to be group nodes
   const isGroupNode = rowInstance.getCanExpand();
+  const isRowExpanded = rowInstance.getIsExpanded();
+  const hasAllParentsExpanded = rowInstance.getIsAllParentsExpanded();
 
-  const fetchCascadeRowGroupNodeData = React.useCallback(() => {
+  const fetchGroupNodeData = useCallback(() => {
+    const dataFetchFn = async () => {
+      const groupNodeData = await onCascadeGroupNodeExpanded({
+        row: rowInstance,
+        nodePath: getCascadeRowNodePath(currentGroupByColumns, rowInstance),
+        nodePathMap: getCascadeRowNodePathValueRecord(currentGroupByColumns, rowInstance),
+      });
+
+      if (!groupNodeData) {
+        return;
+      }
+      dispatch({
+        type: 'UPDATE_ROW_GROUP_NODE_DATA',
+        payload: {
+          id: rowInstance.id,
+          data: groupNodeData,
+        },
+      });
+    };
+    return dataFetchFn().catch((error) => {
+      // eslint-disable-next-line no-console -- added for debugging purposes
+      console.error('Error fetching data for row with ID: %s', rowInstance.id, error);
+    });
+  }, [dispatch, onCascadeGroupNodeExpanded, rowInstance, currentGroupByColumns]);
+
+  const fetchCascadeRowGroupNodeData = useCallback(() => {
     setRowGroupDataFetch(true);
-    populateGroupNodeDataFn({ row: rowInstance }).finally(() => {
+    fetchGroupNodeData().finally(() => {
       setRowGroupDataFetch(false);
     });
-  }, [populateGroupNodeDataFn, rowInstance]);
+  }, [fetchGroupNodeData]);
 
-  const onCascadeRowClick = React.useCallback(
-    (_isGroupNode: boolean) => {
-      rowInstance.toggleExpanded();
-      if (_isGroupNode) {
-        // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
-        fetchCascadeRowGroupNodeData();
-      }
-    },
-    [fetchCascadeRowGroupNodeData, rowInstance]
-  );
+  const onCascadeRowClick = useCallback(() => {
+    rowInstance.toggleExpanded();
+    if (isGroupNode) {
+      // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
+      fetchCascadeRowGroupNodeData();
+    }
+  }, [fetchCascadeRowGroupNodeData, isGroupNode, rowInstance]);
 
   /**
    * @description required ARIA props to ensure proper accessibility tree gets generated
    * @see https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
    */
-  const rowARIAProps = React.useMemo(() => {
+  const rowARIAProps = useMemo(() => {
     return {
       id: rowInstance.id,
       role: 'row',
-      'aria-expanded': rowInstance.getIsExpanded(),
+      'aria-expanded': isRowExpanded,
       'aria-level': rowInstance.depth + 1,
       ...(rowInstance.subRows.length > 0 && {
         'aria-owns': rowInstance.subRows.map((row) => row.id).join(' '),
       }),
     };
-  }, [rowInstance]);
+  }, [rowInstance, isRowExpanded]);
 
   return (
     <div
@@ -138,7 +202,7 @@ export function CascadeRow<G extends GroupNode>({
         gutterSize={size}
         css={{
           position: 'relative',
-          ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
+          ...(rowInstance.parentId && hasAllParentsExpanded
             ? {
                 padding: euiTheme.size[size],
                 ...(rowInstance.depth % 2 === 1
@@ -247,8 +311,8 @@ export function CascadeRow<G extends GroupNode>({
           >
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType={rowInstance.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
-                onClick={onCascadeRowClick.bind(null, isGroupNode)}
+                iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+                onClick={onCascadeRowClick}
                 aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
                   defaultMessage: 'expand row',
                 })}
@@ -279,7 +343,7 @@ export function CascadeRow<G extends GroupNode>({
           </EuiFlexGroup>
         </EuiFlexItem>
         <React.Fragment>
-          {!isGroupNode && rowInstance.getIsExpanded() && rowInstance.getIsAllParentsExpanded() && (
+          {!isGroupNode && isRowExpanded && hasAllParentsExpanded && (
             <EuiFlexItem
               role="gridcell"
               css={{
