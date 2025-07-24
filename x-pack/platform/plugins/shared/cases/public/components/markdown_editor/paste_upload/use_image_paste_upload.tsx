@@ -27,7 +27,12 @@ interface UseImagePasteUploadArgs {
   caseId: string;
   owner: string;
   fileKindId: string;
-  setErrors: React.Dispatch<React.SetStateAction<Array<string | Error>>>;
+}
+
+interface UseImagePasteUploadReturn {
+  isUploading: boolean;
+  uploadState: UploadState;
+  errors?: Array<string | Error>;
 }
 
 const DEFAULT_STATE: PasteUploadState = { phase: UploadPhase.IDLE };
@@ -38,11 +43,7 @@ export function useImagePasteUpload({
   caseId,
   owner,
   fileKindId,
-  setErrors,
-}: UseImagePasteUploadArgs): {
-  isUploading: boolean;
-  uploadState: UploadState;
-} {
+}: UseImagePasteUploadArgs): UseImagePasteUploadReturn {
   const { client } = useFilesContext();
   const kind = client.getFileKind(fileKindId);
 
@@ -84,14 +85,12 @@ export function useImagePasteUpload({
           dispatch({ type: ActionType.RESET });
         }
       }),
-      uploadState.error$.subscribe((err) => err && setErrors((c) => [...c, err])),
+      uploadState.error$.subscribe(
+        (err) => err && dispatch({ type: ActionType.UPLOAD_ERROR, errors: [err] })
+      ),
     ];
     return () => subs.forEach((s) => s.unsubscribe());
-  }, [uploadState, setErrors, uiState]);
-
-  const pasteHandlerRef = useRef<(e: ClipboardEvent) => void>();
-
-  useUploadStart(uiState, dispatch, textarea, field);
+  }, [uploadState, uiState]);
 
   const replacePlaceholder = useCallback(
     (file: DoneNotification, placeholder: string) => {
@@ -112,17 +111,11 @@ export function useImagePasteUpload({
     [textarea, owner, client, field]
   );
 
-  useUploadComplete(uiState, replacePlaceholder, dispatch);
+  const pasteHandlerRef = useRef<(e: ClipboardEvent) => void>();
 
-  // sets error messages to display on the editor
-  const handlePasteError = useCallback(
-    (e: ClipboardEvent, msg: string) => {
-      dispatch({ type: ActionType.RESET });
-      setErrors([msg]);
-      e.preventDefault();
-    },
-    [setErrors]
-  );
+  useUploadStart(uiState, dispatch, textarea, field);
+
+  useUploadComplete(uiState, replacePlaceholder, dispatch);
 
   /**
    * This hook handles paste events and input errors.
@@ -138,20 +131,21 @@ export function useImagePasteUpload({
         .filter((item) => !!item);
       if (items.length === 0) {
         // Not a file paste – clear any previous errors and allow default behaviour.
-        setErrors([]);
+        dispatch({ type: ActionType.RESET });
         return;
       }
       // NOTE: In Firefox, there will always be only 1 or 0 items,
       // see: https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
       if (items.length > 1) {
-        handlePasteError(e, NO_SIMULTANEOUS_UPLOADS_MESSAGE);
+        dispatch({ type: ActionType.UPLOAD_ERROR, errors: [NO_SIMULTANEOUS_UPLOADS_MESSAGE] });
+        e.preventDefault();
         return;
       }
 
       const fileToUpload = items[0];
       if (!fileToUpload) {
         // this is a non-file paste, so bubble and clear errors
-        setErrors([]);
+        dispatch({ type: ActionType.RESET });
         return;
       }
 
@@ -160,7 +154,8 @@ export function useImagePasteUpload({
           fileToUpload.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
         )
       ) {
-        handlePasteError(e, UNSUPPORTED_MIME_TYPE_MESSAGE);
+        dispatch({ type: ActionType.UPLOAD_ERROR, errors: [UNSUPPORTED_MIME_TYPE_MESSAGE] });
+        e.preventDefault();
         return;
       }
 
@@ -170,15 +165,14 @@ export function useImagePasteUpload({
       try {
         uploadState.setFiles([fileToUpload]);
       } catch (err) {
-        setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
+        dispatch({ type: ActionType.UPLOAD_ERROR, errors: [err] });
       }
 
       if (uploadState.hasFiles() && uploadState.uploading$.value === false && caseId) {
-        setErrors([]);
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };
-  }, [caseId, owner, uploadState, setErrors, handlePasteError]);
+  }, [caseId, owner, uploadState]);
 
   // Attach the listener once for the lifetime of the textarea element.
   useLayoutEffect(() => {
@@ -192,5 +186,9 @@ export function useImagePasteUpload({
     };
   }, [textarea]);
 
-  return { isUploading: uiState.phase === UploadPhase.UPLOADING, uploadState };
+  return {
+    isUploading: uiState.phase === UploadPhase.UPLOADING,
+    uploadState,
+    errors: uiState.phase === UploadPhase.ERROR ? uiState.errors : undefined,
+  };
 }

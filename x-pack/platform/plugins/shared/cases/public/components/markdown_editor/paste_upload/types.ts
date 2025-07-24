@@ -12,13 +12,15 @@ export enum UploadPhase {
   START_UPLOAD = 'start_upload',
   UPLOADING = 'uploading',
   FINISHED = 'finished',
+  ERROR = 'error',
 }
 
 export type PasteUploadState =
   | UploadIdleState
   | UploadStartState
   | UploadInProgressState
-  | UploadFinishedState;
+  | UploadFinishedState
+  | UploadErrorState;
 
 export interface UploadIdleState {
   phase: UploadPhase.IDLE;
@@ -42,15 +44,22 @@ export interface UploadFinishedState {
   placeholder: string;
 }
 
+export interface UploadErrorState {
+  phase: UploadPhase.ERROR;
+  errors: Array<string | Error>;
+}
+
 export enum ActionType {
   RESET = 'RESET',
   START_UPLOAD = 'START_UPLOAD',
   UPLOAD_IN_PROGRESS = 'UPLOAD_IN_PROGRESS',
   UPLOAD_FINISHED = 'UPLOAD_FINISHED',
+  UPLOAD_ERROR = 'UPLOAD_ERROR',
 }
 
 export type Action =
   | { type: ActionType.START_UPLOAD; filename: string; placeholder: string }
   | { type: ActionType.UPLOAD_IN_PROGRESS; filename: string; placeholder: string }
   | { type: ActionType.UPLOAD_FINISHED; file: DoneNotification; placeholder: string }
-  | { type: ActionType.RESET };
+  | { type: ActionType.RESET }
+  | { type: ActionType.UPLOAD_ERROR; errors: Array<string | Error> };

@@ -61,4 +61,22 @@ describe('reducer', () => {
     const reset = reducer(doneState, { type: ActionType.RESET });
     expect(reset.phase).toBe(UploadPhase.IDLE);
   });
+
+  it('transitions to ERROR when UPLOAD_ERROR is dispatched', () => {
+    const startState: UploadInProgressState = {
+      phase: UploadPhase.UPLOADING,
+      filename,
+      placeholder,
+    } as UploadInProgressState;
+
+    const errors = [new Error('boom')];
+
+    const next = reducer(startState, {
+      type: ActionType.UPLOAD_ERROR,
+      errors,
+    });
+
+    expect(next.phase).toBe(UploadPhase.ERROR);
+    expect('errors' in next && next.errors).toEqual(errors);
+  });
 });

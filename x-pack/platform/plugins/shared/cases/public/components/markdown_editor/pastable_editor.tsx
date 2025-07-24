@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef } from 'react';
 import { EuiProgress } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { constructFileKindIdByOwner } from '../../../common/files';
@@ -34,15 +34,13 @@ const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMa
     const { owner: ownerList } = useCasesContext();
     const owner = ownerList[0];
     const fileKindId = constructFileKindIdByOwner(owner as Owner);
-    const [editorErrors, setEditorErrors] = useState<Array<string | Error>>([]);
 
-    const { isUploading } = useImagePasteUpload({
+    const { isUploading, errors } = useImagePasteUpload({
       editorRef: ref,
       field,
       caseId,
       owner,
       fileKindId,
-      setErrors: setEditorErrors,
     });
 
     return (
@@ -56,7 +54,7 @@ const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMa
           value={field.value}
           disabledUiPlugins={disabledUiPlugins}
           data-test-subj={`${dataTestSubj}-markdown-editor`}
-          errors={editorErrors}
+          errors={errors}
         />
       </>
     );

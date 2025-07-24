@@ -96,7 +96,6 @@ describe('useImagePasteUpload', () => {
           textarea.value = newVal;
         }),
       } as unknown as FieldHook<string>;
-      const setErrors = jest.fn();
 
       const filesClient = {
         getFileKind: jest.fn(() => ({})),
@@ -115,12 +114,11 @@ describe('useImagePasteUpload', () => {
             caseId: CASE_ID,
             owner: OWNER,
             fileKindId: FILE_KIND_ID,
-            setErrors,
           }),
         { wrapper }
       );
 
-      return { textarea, field, setErrors, result };
+      return { textarea, field, result };
     };
 
     it('returns initial uploading state false', () => {
@@ -161,7 +159,7 @@ describe('useImagePasteUpload', () => {
     });
 
     it('sets error when unsupported mime is pasted', () => {
-      const { textarea, setErrors } = setup();
+      const { textarea, result } = setup();
 
       const textFile = new File(['x'], 'file.txt', { type: 'text/plain' });
       const dt = {
@@ -180,11 +178,12 @@ describe('useImagePasteUpload', () => {
         textarea.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }));
       });
 
-      expect(setErrors).toHaveBeenCalledWith([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+      // error should be propagated through reducer state
+      expect(result.current.errors).toEqual([UNSUPPORTED_MIME_TYPE_MESSAGE]);
     });
 
     it('sets error when multiple files are pasted simultaneously', () => {
-      const { textarea, setErrors } = setup();
+      const { textarea, result } = setup();
       const file1 = new File(['x'], 'image1.png', { type: 'image/png' });
       const file2 = new File(['y'], 'image2.png', { type: 'image/png' });
       const dt = {
@@ -198,13 +197,12 @@ describe('useImagePasteUpload', () => {
         // @ts-expect-error partial impl
         textarea.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }));
       });
-      expect(setErrors).toHaveBeenCalledWith([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
+
+      expect(result.current.errors).toEqual([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
     });
 
     it('clears errors when a non-file paste occurs', () => {
-      const { textarea, setErrors } = setup();
-      // First trigger an error so spy records something
-      setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+      const { textarea, result } = setup();
       const dt = {
         items: [{ kind: 'string', type: 'text/plain', getAsFile: () => null }],
         types: ['text/plain'],
@@ -213,7 +211,8 @@ describe('useImagePasteUpload', () => {
         // @ts-expect-error partial implementation for testing
         textarea.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true }));
       });
-      expect(setErrors).toHaveBeenLastCalledWith([]);
+
+      expect(result.current.errors).toBeUndefined();
     });
 
     it('does not start a new upload if one is already in progress', () => {

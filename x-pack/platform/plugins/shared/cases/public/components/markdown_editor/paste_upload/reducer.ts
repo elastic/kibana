@@ -25,6 +25,8 @@ export const reducer = (state: PasteUploadState, action: Action): PasteUploadSta
       };
     case ActionType.UPLOAD_FINISHED:
       return { phase: UploadPhase.FINISHED, file: action.file, placeholder: action.placeholder };
+    case ActionType.UPLOAD_ERROR:
+      return { phase: UploadPhase.ERROR, errors: action.errors };
     default:
       return state;
   }
