@@ -2168,18 +2168,10 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.StringArrayLiteralContext) {
       return this.fromStringArrayLiteral(ctx);
     } else if (ctx instanceof cst.InputParameterContext && ctx.children) {
-      // TODO: Make a method out of this.
-      const values: ast.ESQLLiteral[] = [];
-
-      for (const child of ctx.children) {
-        const param = this.toParam(child);
-        if (param) values.push(param);
-      }
-
-      return values;
+      return this.fromInputParameter(ctx);
+    } else {
+      return this.fromParserRuleToUnknown(ctx);
     }
-
-    return this.fromParserRuleToUnknown(ctx);
   }
 
   // ------------------------------------------- constant expression: "literal"
@@ -2277,6 +2269,21 @@ export class CstToAstConverter {
       },
       this.createParserFields(ctx)
     );
+  }
+
+  private fromInputParameter(ctx: cst.InputParameterContext): ast.ESQLLiteral[] {
+    const values: ast.ESQLLiteral[] = [];
+    const children = ctx.children;
+
+    if (children) {
+      for (const child of children) {
+        const param = this.toParam(child);
+
+        if (param) values.push(param);
+      }
+    }
+
+    return values;
   }
 
   private toParam(ctx: antlr.ParseTree): ast.ESQLParam | undefined {
