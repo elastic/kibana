@@ -133,6 +133,7 @@ import {
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
   THREAT_MATCH_QUERY_REQUIRED,
+  THREAT_MATCH_OPERATOR_SELECT,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
@@ -699,11 +700,13 @@ export const fillIndicatorMatchRow = ({
   indexField,
   indicatorIndexField,
   validColumns,
+  doesNotMatch,
 }: {
   rowNumber?: number; // default is 1
   indexField: string;
   indicatorIndexField: string;
   validColumns?: 'indexField' | 'indicatorField' | 'both' | 'none'; // default is both are valid entries
+  doesNotMatch?: boolean;
 }) => {
   const computedRowNumber = rowNumber == null ? 1 : rowNumber;
   const computedValueRows = validColumns == null ? 'both' : validColumns;
@@ -720,6 +723,10 @@ export const fillIndicatorMatchRow = ({
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
     cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
+  }
+
+  if (doesNotMatch) {
+    selectDoesNotMatchOperator(computedRowNumber - 1);
   }
 };
 
@@ -991,6 +998,11 @@ export const interceptEsqlQueryFieldsRequest = (
       req.alias = alias;
     }
   });
+};
+
+export const selectDoesNotMatchOperator = (rowNumber: number = 0) => {
+  cy.get(THREAT_MATCH_OPERATOR_SELECT).eq(rowNumber).click();
+  cy.get('[role=option]#DOES_NOT_MATCH').click();
 };
 
 export const checkLoadQueryDynamically = () => {

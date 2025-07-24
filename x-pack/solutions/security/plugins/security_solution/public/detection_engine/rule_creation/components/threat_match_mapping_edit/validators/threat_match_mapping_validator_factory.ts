@@ -137,7 +137,7 @@ export function threatMatchMappingValidatorFactory({
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.invalidNotMatchClauseError',
           {
             defaultMessage:
-              'DOES NOT MATCH entry can not use same mapping fields as MATCHES entry in same AND condition.',
+              'DOES NOT MATCH entry can not use the same mapping fields as MATCHES entry in the same AND condition.',
           }
         ),
       };

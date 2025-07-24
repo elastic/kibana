@@ -98,6 +98,8 @@ export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
 export const THREAT_COMBO_BOX_INPUT =
   '[data-test-subj="stepDefineRule"] [data-test-subj="fieldAutocompleteComboBox"]';
 
+export const THREAT_MATCH_OPERATOR_SELECT = '[data-test-subj="entryItemMatchInputFormRow"]';
+
 export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
 
 export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is required.';
