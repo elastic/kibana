@@ -75,11 +75,11 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
             </>
           );
         } else if (typeof description === 'string' && descriptionLinks && descriptionLinks[key]) {
-          const regex = /\{(.*?)\}\./;
-          const editedDescription = description.replace(regex, '');
+          const regex = /\{.*\}/;
+          const substrings = description.split(regex);
           helpText = (
             <>
-              {editedDescription} {descriptionLinks[key]}
+              {substrings[0]} {descriptionLinks[key]} {substrings.slice(1)}
             </>
           );
         }

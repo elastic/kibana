@@ -36,7 +36,8 @@ export const GEMINI_REGION_DOC_LINK = (
   <EuiLink
     data-test-subj="gemini-vertexai-api-doc"
     href="https://cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints"
-    target="_blank"
+    external
+    rel="noopener nofollow noreferrer"
   >
     {`${GEMINI} ${DOCUMENTATION}`}
   </EuiLink>
@@ -46,7 +47,8 @@ export const GEMINI_PROJECT_ID_DOC_LINK = (
   <EuiLink
     data-test-subj="gemini-api-doc"
     href="https://cloud.google.com/vertex-ai/docs/start/cloud-environment"
-    target="_blank"
+    external
+    rel="noopener nofollow noreferrer"
   >
     {`${GEMINI} ${DOCUMENTATION}`}
   </EuiLink>
