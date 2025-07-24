@@ -12,8 +12,6 @@ import {
   BaseStep,
   IfStep,
   WorkflowExecutionEngineModel,
-  ExecutionGraph,
-  ExecutionGraphNode,
   EnterIfNode,
   ExitIfNode,
 } from '@kbn/workflows';
@@ -103,33 +101,6 @@ export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): 
   return graph;
 }
 
-export function convertToSerializableGraph(graph: graphlib.Graph): ExecutionGraph {
-  const result: Record<string, ExecutionGraphNode> = {};
-  const nodes = graph.nodes();
-  const topologicalOrder = graphlib.alg.topsort(graph);
-  const topologicalOrderMap = new Map<string, number>(
-    topologicalOrder.map((nodeId, index) => [nodeId, index])
-  );
-  for (const nodeId of nodes) {
-    const prev = graph.predecessors(nodeId) || [];
-    const next = graph.successors(nodeId) || [];
-
-    const data = graph.node(nodeId);
-
-    const flatNode: ExecutionGraphNode = {
-      type: (data as any).type,
-      id: (data as any).id,
-      topologicalIndex: topologicalOrderMap.get(nodeId) as number,
-      prev,
-      next,
-      data: data || {},
-    };
-
-    result[nodeId] = flatNode;
-  }
-
-  return {
-    nodes: result,
-    topologicalOrder,
-  };
+export function convertToSerializableGraph(graph: graphlib.Graph): any {
+  return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
 }

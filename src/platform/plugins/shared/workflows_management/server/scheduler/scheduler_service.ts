@@ -59,11 +59,9 @@ export class SchedulerService {
     workflow: WorkflowExecutionEngineModel,
     inputs: Record<string, any>
   ): Promise<string> {
-    workflow.executionGraph = convertToSerializableGraph(convertToWorkflowGraph(workflow)); // TODO: It's not good approach, it's temporary
-    const connectorCredentials = await extractConnectorIds(
-      workflow.executionGraph,
-      this.actionsClient
-    );
+    const executionGraph = convertToWorkflowGraph(workflow);
+    workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
+    const connectorCredentials = await extractConnectorIds(executionGraph, this.actionsClient);
 
     const workflowRunId = generateUuid();
     await this.workflowsExecutionEngine.executeWorkflow(workflow, {

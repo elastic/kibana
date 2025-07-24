@@ -14,9 +14,10 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { ExecutionGraph, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
+import { graphlib } from '@dagrejs/dagre';
 
 import type {
   WorkflowsExecutionEnginePluginSetup,
@@ -104,35 +105,30 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
-        workflowExecutionGraph: workflow.executionGraph as ExecutionGraph,
+        workflowExecutionGraph: graphlib.json.read(workflow.executionGraph),
       });
 
       // Log workflow execution start
       contextManager.logWorkflowStart();
 
-      if (workflow.executionGraph?.topologicalOrder) {
-        contextManager.setCurrentStep(workflow.executionGraph.topologicalOrder[0]);
-      }
-
       try {
         while (!contextManager.isFinished()) {
-          const nodeId = contextManager.getCurrentStepId() as string;
-          const currentStep = workflow.executionGraph?.nodes[nodeId].data;
+          const currentNode = contextManager.getCurrentStep();
 
-          if (contextManager.isStepSkipped(nodeId)) {
+          if (contextManager.isStepSkipped(currentNode.id)) {
             contextManager.goToNextStep(); // Skip current step and move to the next one
             continue; // Skip if step is marked as skipped
           }
 
           const step = new StepFactory().create(
-            currentStep as any,
+            currentNode as any,
             contextManager,
             connectorExecutor
           );
 
           await step.run();
 
-          const stepResult: RunStepResult = contextManager.getStepResults()[nodeId] || {};
+          const stepResult: RunStepResult = contextManager.getStepResults()[currentNode.id] || {};
 
           let stepStatus: ExecutionStatus;
 
@@ -144,12 +140,12 @@ export class WorkflowsExecutionEnginePlugin
 
           if (stepStatus === ExecutionStatus.FAILED) {
             throw new Error(
-              `Step "${nodeId}" failed with error: ${stepResult.error || 'Unknown error'}`
+              `Step "${currentNode.id}" failed with error: ${stepResult.error || 'Unknown error'}`
             );
           }
 
-          const nodeIdFromContextManager = contextManager.getCurrentStepId();
-          if (nodeId === nodeIdFromContextManager) {
+          const nodeFromContext = contextManager.getCurrentStep();
+          if (nodeFromContext && nodeFromContext.id === currentNode.id) {
             // Move to next step in the graph
             contextManager.goToNextStep();
           }

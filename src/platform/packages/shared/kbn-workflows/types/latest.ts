@@ -42,4 +42,4 @@ export {
   CreateWorkflowCommandSchema,
 } from './v1';
 
-export type { ExecutionGraph, ExecutionGraphNode, EnterIfNode, ExitIfNode } from './execution';
+export type { EnterIfNode, ExitIfNode } from './execution';

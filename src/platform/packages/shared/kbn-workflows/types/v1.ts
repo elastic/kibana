@@ -9,7 +9,6 @@
 
 import { z } from '@kbn/zod';
 import { WorkflowYaml, WorkflowYamlSchema } from '../spec/schema';
-import { ExecutionGraph } from './execution_graph';
 
 export enum ExecutionStatus {
   // In progress
@@ -178,5 +177,6 @@ export interface WorkflowListDto {
 }
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
-  executionGraph?: ExecutionGraph;
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
 }

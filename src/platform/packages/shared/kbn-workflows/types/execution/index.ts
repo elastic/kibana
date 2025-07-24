@@ -8,4 +8,3 @@
  */
 
 export type { EnterIfNode, ExitIfNode } from './nodes/branching_nodes';
-export type { ExecutionGraph, ExecutionGraphNode } from './execution_graph';

@@ -8,13 +8,9 @@
  */
 
 import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
-  WorkflowSchema,
-  ExecutionGraph,
-  EsWorkflowStepExecution,
-  ExecutionStatus,
-} from '@kbn/workflows';
+import { WorkflowSchema, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { graphlib } from '@dagrejs/dagre';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { RunStepResult } from '../step/step_base';
 
@@ -30,7 +26,7 @@ export interface ContextManagerInit {
   logger?: Logger;
   workflowEventLoggerIndex?: string;
   esClient?: ElasticsearchClient;
-  workflowExecutionGraph: ExecutionGraph;
+  workflowExecutionGraph: graphlib.Graph;
 }
 
 export class WorkflowContextManager {
@@ -38,7 +34,8 @@ export class WorkflowContextManager {
   private esClient: IScopedClusterClient;
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private contextManagerInit: ContextManagerInit;
-  public executionGraph: ExecutionGraph;
+  private topologicalOrder: string[];
+  public executionGraph: graphlib.Graph;
 
   private currentStepIndex: number = 0;
   // private workflowLogger: IWorkflowEventLogger | null = null;
@@ -60,6 +57,7 @@ export class WorkflowContextManager {
 
     this.esClient = this.createEsClient(init.esApiKey);
     this.executionGraph = init.workflowExecutionGraph;
+    this.topologicalOrder = graphlib.alg.topsort(this.executionGraph);
     this.contextManagerInit = init;
     // Store original parameters for recreating logger
     // this.originalEsClient = init.esClient || null;
@@ -125,7 +123,7 @@ export class WorkflowContextManager {
    * Call this when entering a step to get step-specific logging
    */
   public setCurrentStep(stepId: string, stepName?: string, stepType?: string): void {
-    this.currentStepIndex = this.executionGraph.topologicalOrder.findIndex((id) => id === stepId);
+    this.currentStepIndex = this.topologicalOrder.findIndex((id) => id === stepId);
     // if (this.workflowLogger) {
     //   // Create a new step-specific logger
     //   this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
@@ -143,7 +141,7 @@ export class WorkflowContextManager {
   }
 
   public goToNextStep(): void {
-    if (this.currentStepIndex < this.executionGraph.topologicalOrder.length - 1) {
+    if (this.currentStepIndex < this.topologicalOrder.length - 1) {
       this.currentStepIndex++;
       return;
     }
@@ -155,8 +153,15 @@ export class WorkflowContextManager {
     this.currentStepIndex = -1;
   }
 
-  public getCurrentStepId(): string | null {
-    return this.executionGraph.topologicalOrder[this.currentStepIndex] || null;
+  // TODO: use proper type here. It should be step or node.
+  public getCurrentStep(): any | null {
+    const stepId = this.topologicalOrder[this.currentStepIndex];
+
+    if (!stepId) {
+      return null;
+    }
+
+    return this.executionGraph.node(stepId);
   }
 
   /**
@@ -236,7 +241,7 @@ export class WorkflowContextManager {
       workflowId, // Replace with actual workflow ID
       workflowRunId,
       stepId: nodeId,
-      topologicalIndex: this.executionGraph.nodes[stepId].topologicalIndex,
+      topologicalIndex: this.topologicalOrder.indexOf(nodeId),
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
     } as Partial<EsWorkflowStepExecution>;
@@ -288,7 +293,7 @@ export class WorkflowContextManager {
         id: workflowStepExecutionId,
         workflowRunId: this.contextManagerInit.workflowRunId,
         stepId,
-        topologicalIndex: this.executionGraph.nodes[stepId].topologicalIndex,
+        topologicalIndex: this.topologicalOrder.indexOf(stepId),
         status: ExecutionStatus.SKIPPED,
       } as Partial<EsWorkflowStepExecution>;
     });
