@@ -4536,6 +4536,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_EVENT_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_EVENT_NAME",
+        "description": [],
+        "signature": [
+          "\"event_name\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.OTEL_SPAN_LINKS",
         "type": "string",
         "tags": [],
