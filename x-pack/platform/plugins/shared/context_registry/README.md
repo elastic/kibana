@@ -1,6 +1,6 @@
 # Context Registry
 
-The Context Registry plugin provides a centralized mechanism for managing and accessing context definitions in both the client and server environments. Its primary purpose is to register handlers and tools for finding and displaying relevant Kibana assets based on context.
+The Context Registry plugin provides a centralized mechanism for dynamically discovering relevant Kibana assets based on user or application context. It achieves this by registering and accessing context definitions containing client and server side handlers for finding (server) and displaying (client) these assets.
 
 ## Features
 
@@ -26,13 +26,13 @@ The `ContextRegistryPublic` class allows you to register and retrieve context de
 
 #### Methods
 
-- `register(contextDefinition: ContextDefinitionPublic): void`
+- `registerHandler(contextDefinition: ContextDefinitionPublic): void`
 
   - Registers a new context definition. Throws an error if the key is already registered.
 
-- `get(key: string): ContextDefinitionPublic | undefined`
+- `getContextByKey(key: string): ContextDefinitionPublic | undefined`
 
-  - Retrieves a context definition by its key. Returns `undefined` if the key does not exist.
+  - Retrieves a context definition by its key. Throws an error if the key does not exist.
 
 - `getAll(): ContextDefinitionPublic[]`
   - Retrieves all registered context definitions.
@@ -53,8 +53,8 @@ const context = {
   ),
 };
 
-registry.register(context);
-console.log(registry.get('example-context'));
+registry.registerHandler(context);
+console.log(registry.getContextByKey('example-context'));
 ```
 
 ## Server-Side API
@@ -78,12 +78,17 @@ The `ContextRegistryServer` class allows you to register and retrieve context de
   - Retrieves a tool definition by its name. Returns `undefined` if the tool does not exist.
 
 - `getToolHandler(handlerName: string): ContextHandler | undefined`
+
   - Retrieves a handler by its name. Returns `undefined` if the handler does not exist.
+
+- `getContextByKey({ key, handlerName, context }: { key: string; handlerName?: string; context: ContextRequest }): Promise<ContextResponse[]>`
+
+  - Retrieves context data for a specific key. Optionally, a specific handler can be specified. Throws an error if the key or handler does not exist.
 
 #### Example
 
 ```typescript
-const registry = new ContextRegistryServer();
+const registry = new ContextRegistryServer(logger);
 
 const context = {
   key: 'example-context',
@@ -98,7 +103,12 @@ const context = {
 };
 
 registry.register(context);
-console.log(registry.get('example-context'));
+console.log(
+  await registry.getContextByKey({
+    key: 'example-context',
+    context: { timeRange: { from: 'now-1h', to: 'now' } },
+  })
+);
 ```
 
 ## Use Cases
