@@ -23,10 +23,10 @@ import {
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
+import { getCellValueRenderer } from './grid_custom_renderers/value_input_control';
+import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
 import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import { KibanaContextExtra } from '../types';
-import { getCellValueRenderer } from './value_input_control';
-import { AddColumnHeader } from './add_column_header';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -178,21 +178,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomCellRenderer);
   }, [CellValueRenderer, renderedColumns]);
 
+  // We render an editable header for columns that are not saved in the index.
   const customGridColumnsConfiguration = useMemo(() => {
     return renderedColumns.reduce((acc, columnName) => {
-      if (columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)) {
-        acc[columnName] = ({ column }) => ({
-          ...column,
-          display: <AddColumnHeader />,
-          actions: false,
-          displayHeaderCellProps: {
-            className: 'custom-column--placeholder',
-          },
-        });
+      if (!props.dataView.fields.getByName(columnName)) {
+        acc[columnName] = getColumnInputRenderer(columnName, indexUpdateService);
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
-  }, [renderedColumns]);
+  }, [renderedColumns, props.dataView, indexUpdateService]);
 
   return (
     <>
@@ -242,9 +236,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           .euiDataGridHeaderCell {
             align-items: center;
             display: flex;
-          }
-          .custom-column--placeholder {
-            padding: 0;
           }
         `}
       />
