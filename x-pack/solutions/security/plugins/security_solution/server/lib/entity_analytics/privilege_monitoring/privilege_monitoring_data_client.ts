@@ -90,7 +90,7 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
-  config: MonitoringSyncIntervalConfig;
+  config?: MonitoringSyncIntervalConfig;
 }
 
 export class PrivilegeMonitoringDataClient {
@@ -167,15 +167,11 @@ export class PrivilegeMonitoringDataClient {
       if (this.apiKeyGenerator) {
         await this.apiKeyGenerator.generate();
       }
-
-      this.log(
-        'info',
-        'Starting privilege monitoring task with interval ${JSON.stringify(this.configInterval)}'
-      );
       await startPrivilegeMonitoringTask({
         logger: this.opts.logger,
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
+        interval: this.opts.config?.privileges.developer.syncInterval,
       });
 
       const setupEndTime = moment().utc().toISOString();

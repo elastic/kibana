@@ -15,7 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.entityAnalytics.monitoring.privileges.developer.syncInterval=30s',
+      ],
     },
     testFiles: [require.resolve('..')],
     junit: {

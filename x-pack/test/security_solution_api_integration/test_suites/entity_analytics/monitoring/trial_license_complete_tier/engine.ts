@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { privilegeMonitoringRouteHelpersFactory } from '../../utils/privilege_monitoring';
 import { enablePrivmonSetting } from '../../utils';
+import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const privmon = privilegeMonitoringRouteHelpersFactory(supertest);
+  const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const spaceName = 'default';
   const es = getService('es');
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       log.info(`Syncing plain index`);
       const indexName = 'tatooine-privileged-users';
       const entitySource = {
-        type: 'index' as const,
+        type: 'index',
         name: 'StarWars',
         managed: true,
         indexPattern: indexName,
@@ -66,31 +66,12 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         log.info(`Cleaning up after test`);
         await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await privmon.deleteEngine(true);
+        await api.deleteMonitoringEngine({ query: { data: true } });
       });
-      // Want to make sure that monitoring saved objects are created and have something in them,
       before(async () => {
         await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await privmon.deleteEngine(true);
-        /*
-        const soId = await kibanaServer.savedObjects.find<{
-          // do you need this?
-          type: typeof privilegeMonitoringTypeName;
-          space: string;
-        }>({
-          type: privilegeMonitoringTypeName,
-          space: spaceName,
-        });
-        if (soId.saved_objects.length !== 0) {
-          await kibanaServer.savedObjects.delete({
-            type: privilegeMonitoringTypeName,
-            space: spaceName,
-            id: soId.saved_objects[0].id,
-          });
-        }*/
-        //  await privmon.deleteEngine();
-        // await privmon.deleteIndexSource(entitySource.name);
-        // Create index with mapping
+        await api.deleteMonitoringEngine({ query: { data: true } });
+        // create the tatooine index
         await es.indices.create({
           index: indexName,
           mappings: {
@@ -122,16 +103,25 @@ export default ({ getService }: FtrProviderContext) => {
           'R2-D2',
           'C-3PO',
           'Darth Vader',
-        ].flatMap((name) => [{ index: {} }, { user: { name } }]);
+        ].flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
         await es.bulk({ index: indexName, body: bulkBody, refresh: true });
       });
 
       it('should sync plain index', async () => {
-        // Register monitoring source
-        const response = await privmon.registerIndexSource(entitySource);
+        // register entity source
+        const response = await api.createEntitySource({ body: entitySource }, 'default');
+        expect(response.status).to.be(200);
+        const boop = await es.search({
+          index: 'tatooine-privileged-users',
+          size: 1000,
+          query: {
+            match_all: {},
+          },
+        });
+        const listedSources = await api.listEntitySources({ query: {} }, 'default');
         expect(response.status).to.be(200);
         // Call init to trigger the sync
-        await privmon.initEngine();
+        await privMonUtils.initPrivMonEngine();
         // default-monitoring-index should exist now
         const result = await kibanaServer.savedObjects.find({
           type: 'entity-analytics-monitoring-entity-source',
@@ -140,17 +130,21 @@ export default ({ getService }: FtrProviderContext) => {
 
         const names = result.saved_objects.map((so) => so.attributes.name);
         expect(names).to.contain('default-monitoring-index-default');
-        // How to make interval shorter to test the data syncs?
-        // Now list the users in monitoring
-        // const res = await privmon.listUsers(); // this should be undefined to start with. Can we change the interval to 1s?
-        // console.log('Users in monitoring:', res.body.users);
-        // const userNames = res.body.users.map((u: any) => u.name);
-        // expect(userNames).to.be.an('array');
-        // expect(userNames.length).to.be.greaterThan(0);
-        // expect(userNames).contain('Luke Skywalker');
-        // expect(userNames).contain('Leia Organa');
+        expect(names).to.contain('StarWars');
+        await sleep(40000); // Wait task to run
+        const res = await api.listPrivMonUsers({
+          query: {},
+        });
+        const userNames = res.body.map((monitoring: any) => monitoring.user.name);
+        expect(userNames.length).to.be.greaterThan(0);
+        expect(userNames).contain('Luke Skywalker');
+        expect(userNames).contain('Leia Organa');
       });
       // add a test to handle duplicate users
     });
   });
 };
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

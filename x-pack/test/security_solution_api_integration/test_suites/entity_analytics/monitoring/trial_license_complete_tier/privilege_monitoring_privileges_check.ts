@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { privilegeMonitoringRouteHelpersFactory } from '../../utils/privilege_monitoring';
+import { privilegeMonitoringRouteHelpersFactoryNoAuth } from '../../utils/privilege_monitoring';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
 const USER_PASSWORD = 'changeme';
@@ -64,7 +64,7 @@ const ROLES = [READ_ALL_INDICES_ROLE, READ_PRIV_MON_INDICES_ROLE, READ_NO_INDEX_
 
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const privMonRoutesNoAuth = privilegeMonitoringRouteHelpersFactory(supertestWithoutAuth);
+  const privMonRoutesNoAuth = privilegeMonitoringRouteHelpersFactoryNoAuth(supertestWithoutAuth);
   const userHelper = usersAndRolesFactory(getService('security'));
 
   async function createPrivilegeTestUsers() {
