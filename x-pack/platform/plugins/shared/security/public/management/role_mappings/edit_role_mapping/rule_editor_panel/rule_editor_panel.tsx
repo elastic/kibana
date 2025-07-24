@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
@@ -67,6 +68,8 @@ export class RuleEditorPanel extends Component<Props, State> {
   }
 
   public render() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     const validationResult =
       this.props.validateForm &&
       validateRoleMappingRules({ rules: this.state.rules ? this.state.rules.toRaw() : {} });
@@ -122,7 +125,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                   {validationWarning}
                   {this.conditionallyRenderEditModeToggle()}
                   {this.getEditor()}
-                  {this.getConfirmModeChangePrompt()}
+                  {this.getConfirmModeChangePrompt(confirmModalTitleId)}
                 </Fragment>
               </EuiErrorBoundary>
             </EuiFormRow>
@@ -244,12 +247,14 @@ export class RuleEditorPanel extends Component<Props, State> {
     }
   }
 
-  private getConfirmModeChangePrompt = () => {
+  private getConfirmModeChangePrompt = (confirmModalTitleId: string) => {
     if (!this.state.showConfirmModeChange) {
       return null;
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
