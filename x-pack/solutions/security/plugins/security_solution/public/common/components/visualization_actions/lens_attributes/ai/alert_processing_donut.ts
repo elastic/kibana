@@ -77,6 +77,7 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
                 },
               ],
             },
+            emptySizeRatio: 0.9,
             layerId: 'unifiedHistogram',
             layerType: 'data',
             legendSize: 'medium',
