@@ -54,7 +54,6 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
-    "@kbn/shared-ux-error-boundary",
     "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
