@@ -40,11 +40,11 @@ export class WorkflowTaskScheduler {
         const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger);
         scheduledTaskIds.push(taskId);
         this.logger.info(
-          `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.id}, task ID: ${taskId}`
+          `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
         );
       } catch (error) {
         this.logger.error(
-          `Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.id}: ${error}`
+          `Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.type}: ${error}`
         );
         throw error;
       }
@@ -70,7 +70,7 @@ export class WorkflowTaskScheduler {
       params: {
         workflowId,
         spaceId,
-        triggerId: trigger.id,
+        triggerType: trigger.type,
       },
       state: {
         lastRunAt: null,
