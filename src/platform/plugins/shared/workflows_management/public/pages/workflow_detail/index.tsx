@@ -21,8 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
@@ -54,11 +52,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
-
-  const workflowYamlObject = useMemo(
-    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
-    [workflowYaml]
-  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');

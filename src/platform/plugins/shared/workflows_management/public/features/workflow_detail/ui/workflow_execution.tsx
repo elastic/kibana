@@ -158,7 +158,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           <EuiSpacer size="s" />
           <div css={{ height: '500px' }}>
             <WorkflowVisualEditor
-              workflow={workflowYamlObject}
+              workflow={workflowYamlObject as any}
               stepExecutions={workflowExecution?.stepExecutions}
             />
           </div>
