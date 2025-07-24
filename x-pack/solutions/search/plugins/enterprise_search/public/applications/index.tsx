@@ -63,7 +63,6 @@ export const renderApp = (
   const {
     charts,
     cloud,
-    guidedOnboarding,
     indexManagement: indexManagementPlugin,
     lens,
     security,
@@ -99,7 +98,6 @@ export const renderApp = (
     fleet,
     getChromeStyle$: chrome.getChromeStyle$,
     getNavLinks: chrome.navLinks.getAll,
-    guidedOnboarding,
     history,
     indexMappingComponent,
     isSidebarEnabled,
