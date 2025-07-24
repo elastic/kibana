@@ -1568,7 +1568,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime/ @elastic/obs-ux-management-team
