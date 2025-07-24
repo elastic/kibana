@@ -65,32 +65,21 @@ describe('Search Sessions Management API', () => {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
       });
-      expect(await api.fetchTableData()).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "actions": Array [
-              "inspect",
-              "rename",
-              "extend",
-              "delete",
-            ],
-            "appId": "pizza",
-            "created": undefined,
-            "errors": undefined,
-            "expires": undefined,
-            "id": "hello-pizza-123",
-            "idMapping": Array [],
-            "initialState": Object {},
-            "name": "Veggie",
-            "numSearches": 0,
-            "reloadUrl": undefined,
-            "restoreState": Object {},
-            "restoreUrl": undefined,
-            "status": "complete",
-            "version": undefined,
+
+      const [results, statuses] = await api.fetchTableData();
+      expect(results).toEqual([
+        {
+          id: 'hello-pizza-123',
+          attributes: {
+            name: 'Veggie',
+            appId: 'pizza',
+            initialState: {},
+            restoreState: {},
+            idMapping: [],
           },
-        ]
-      `);
+        },
+      ]);
+      expect(statuses['hello-pizza-123']).toEqual({ status: 'complete' });
     });
 
     test('expired session is showed as expired', async () => {
@@ -121,7 +110,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const [res, statuses] = await api.fetchTableData();
-      expect(statuses[res[0].id]).toBe({ status: 'expired' });
+      expect(statuses[res[0].id]).toEqual({ status: 'expired' });
     });
 
     test('handle error from sessionsClient response', async () => {
