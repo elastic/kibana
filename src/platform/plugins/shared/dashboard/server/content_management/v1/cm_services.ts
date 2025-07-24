@@ -376,14 +376,14 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-export const dashboardCreateResultDataSchema = dashboardAttributesSchemaResponse;
-export const dashboardCreateResultMetaSchema = dashboardResponseMetaSchema;
+export const dashboardItemSchema = schema.object({
+  data: dashboardAttributesSchemaResponse,
+  meta: dashboardResponseMetaSchema,
+});
+export const dashboardCreateResultSchema = dashboardItemSchema;
 
-export const dashboardCreateResultSchema = schema.oneOf([
-  schema.object({
-    data: dashboardCreateResultDataSchema,
-    meta: dashboardCreateResultMetaSchema,
-  }),
+export const mayBeDashboardItemSchema = schema.oneOf([
+  dashboardItemSchema,
   schema.object(
     {
       error: apiError,
@@ -391,8 +391,6 @@ export const dashboardCreateResultSchema = schema.oneOf([
     { unknowns: 'allow' }
   ),
 ]);
-
-export const dashboardItemSchema = dashboardCreateResultSchema;
 
 const dashboardGetResultMetaSchemaSettings = {
   outcome: schema.oneOf([
@@ -405,14 +403,14 @@ const dashboardGetResultMetaSchemaSettings = {
     schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
   ),
 };
-export const dashboardGetResultMetaSchema = schema.object(dashboardGetResultMetaSchemaSettings, {
-  unknowns: 'forbid',
-});
+export const dashboardGetResultMetaSchema = dashboardResponseMetaSchema.extends(
+  dashboardGetResultMetaSchemaSettings
+);
 
 export const dashboardGetResultSchema = schema.object(
   {
-    data: dashboardCreateResultDataSchema,
-    meta: dashboardCreateResultMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+    data: dashboardAttributesSchemaResponse,
+    meta: dashboardResponseMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
   },
   { unknowns: 'forbid' }
 );

@@ -19,7 +19,6 @@ import {
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
-  referenceSchema,
   DashboardItem,
 } from '../content_management/v1';
 import {

@@ -29,10 +29,10 @@ export class DashboardContentManagementCache {
   }
 
   /** Add the fetched dashboard to the cache */
-  public addDashboard({ item: dashboard, meta }: DashboardGetOut) {
-    this.cache.set(dashboard.id, {
+  public addDashboard({ data: dashboard, meta }: DashboardGetOut) {
+    this.cache.set(meta.id, {
       meta,
-      item: dashboard,
+      data: dashboard,
     });
   }
 

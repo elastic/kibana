@@ -29,7 +29,7 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardItem, DashboardStorage } from './content_management';
+import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
@@ -39,7 +39,7 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
-import { dashboardCreateResultDataSchema } from './content_management/v1/cm_services';
+import { dashboardAttributesSchemaResponse } from './content_management/v1/cm_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -79,7 +79,7 @@ export class DashboardPlugin
 
     void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
       const { contentClient } = plugins.contentManagement.register<
-        ContentStorage<TypeOf<typeof dashboardCreateResultDataSchema>>
+        ContentStorage<TypeOf<typeof dashboardAttributesSchemaResponse>>
       >({
         id: CONTENT_ID,
         storage: new DashboardStorage({

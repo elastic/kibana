@@ -8,6 +8,7 @@
  */
 
 export type {
+  FindDashboardsByIdResponseAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,

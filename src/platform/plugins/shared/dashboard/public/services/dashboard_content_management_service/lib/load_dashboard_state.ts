@@ -65,14 +65,14 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent: DashboardGetOut['item'];
+  let rawDashboardContent: DashboardGetOut['data'];
   let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
 
   if (cachedDashboard) {
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
-    ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
+    ({ data: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
     /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
     const result = await contentManagementService.client
@@ -88,7 +88,7 @@ export const loadDashboardState = async ({
         throw new Error(message);
       });
 
-    ({ item: rawDashboardContent, meta: resolveMeta } = result);
+    ({ data: rawDashboardContent, meta: resolveMeta } = result);
     const { outcome: loadOutcome } = resolveMeta;
     if (loadOutcome !== 'aliasMatch') {
       /**
@@ -108,7 +108,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  const { references, attributes, managed } = rawDashboardContent;
+  const { references: references = [], ...attributes } = rawDashboardContent;
 
   /**
    * Create search source and pull filters and query from it.
@@ -146,7 +146,7 @@ export const loadDashboardState = async ({
       : undefined;
 
   return {
-    managed,
+    managed: resolveMeta.managed,
     references,
     resolveMeta,
     dashboardInput: {

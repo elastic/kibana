@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { transformDashboardOut, transformReferencesOut } from './transforms';
-import type { DashboardItem, PartialDashboardItem } from './types';
+import type { MaybeDashboardItem, PartialDashboardItem } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -48,7 +48,7 @@ export function savedObjectToItem(
     allowedReferences?: string[];
     getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
   } = {}
-): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
+): SavedObjectToItemReturn<MaybeDashboardItem | PartialDashboardItem> {
   const {
     id,
     type,

@@ -33,8 +33,8 @@ import type {
   DashboardSearchOptions,
 } from './latest';
 import {
-  dashboardCreateResultDataSchema,
-  dashboardCreateResultMetaSchema,
+  dashboardAttributesSchemaResponse,
+  dashboardResponseMetaSchema,
   dashboardGetResultSchema,
 } from './v1/cm_services';
 
@@ -178,15 +178,7 @@ export class DashboardStorage {
     return combinedTagNames;
   }
 
-  async get(
-    ctx: StorageContext,
-    id: string
-  ): Promise<
-    CreateResult<
-      TypeOf<typeof dashboardCreateResultDataSchema>,
-      TypeOf<typeof dashboardCreateResultMetaSchema>
-    >
-  > {
+  async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -316,12 +308,12 @@ export class DashboardStorage {
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<
-        TypeOf<typeof dashboardCreateResultDataSchema>,
-        TypeOf<typeof dashboardCreateResultMetaSchema>
+        TypeOf<typeof dashboardAttributesSchemaResponse>,
+        TypeOf<typeof dashboardResponseMetaSchema>
       >,
       CreateResult<
-        TypeOf<typeof dashboardCreateResultDataSchema>,
-        TypeOf<typeof dashboardCreateResultMetaSchema>
+        TypeOf<typeof dashboardAttributesSchemaResponse>,
+        TypeOf<typeof dashboardResponseMetaSchema>
       >
     >(
       item,
@@ -414,7 +406,6 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-    console.log('DashboardStorage.update------', JSON.stringify(value, null, 2));
     return value;
   }
 

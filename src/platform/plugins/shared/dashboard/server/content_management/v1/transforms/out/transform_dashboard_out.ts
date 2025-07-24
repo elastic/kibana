@@ -32,6 +32,7 @@ export function transformDashboardOut(
     timeRestore,
     timeTo,
     title,
+    version,
   } = attributes;
   // Inject any tag names from references into the attributes
   let tags: string[] | undefined;
@@ -58,5 +59,6 @@ export function transformDashboardOut(
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
     title,
+    version,
   };
 }

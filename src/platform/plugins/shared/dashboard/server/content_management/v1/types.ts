@@ -24,15 +24,14 @@ import {
   panelSchema,
   sectionSchema,
   dashboardCreateOptionsSchema,
-  dashboardCreateResultSchema,
   dashboardSearchOptionsSchema,
-  dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
   optionsSchema,
-  dashboardAttributesSchemaRequest,
   dashboardGetResultMetaSchema,
-  dashboardCreateResultDataSchema,
-  dashboardCreateResultMetaSchema,
+  dashboardAttributesSchemaResponse,
+  dashboardResponseMetaSchema,
+  mayBeDashboardItemSchema,
+  dashboardCreateRequestAttributesSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -48,40 +47,47 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
 export type DashboardSection = TypeOf<typeof sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
 export type DashboardAttributes = Omit<
-  TypeOf<typeof dashboardAttributesSchemaRequest>,
+  TypeOf<typeof dashboardCreateRequestAttributesSchema>,
+  'panels'
+> & {
+  panels: Array<DashboardPanel | DashboardSection>;
+};
+export type FindDashboardsByIdResponseAttributes = Omit<
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
   'panels'
 > & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
-export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'>;
+export type MaybeDashboardItem = TypeOf<typeof mayBeDashboardItemSchema>;
+export type PartialDashboardItem = Omit<MaybeDashboardItem, 'data'>;
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = GetResult<
-  TypeOf<typeof dashboardItemSchema>,
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
   TypeOf<typeof dashboardGetResultMetaSchema>
 >;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
 export type DashboardCreateOut = CreateResult<
-  TypeOf<typeof dashboardCreateResultDataSchema>,
-  TypeOf<typeof dashboardCreateResultMetaSchema>
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardResponseMetaSchema>
 >;
 export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
 export type DashboardUpdateOut = CreateResult<
-  TypeOf<typeof dashboardCreateResultDataSchema>,
-  TypeOf<typeof dashboardCreateResultMetaSchema>
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardResponseMetaSchema>
 >;
 export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>;
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<
-  TypeOf<typeof dashboardCreateResultDataSchema>,
-  TypeOf<typeof dashboardCreateResultMetaSchema>
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  TypeOf<typeof dashboardResponseMetaSchema>
 >;
