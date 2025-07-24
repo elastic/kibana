@@ -31,7 +31,9 @@ const SEVERITY_MAP = {
 
 export interface UseYamlValidationResult {
   validationErrors: YamlValidationError[] | null;
-  validateVariables: (model: monaco.editor.ITextModel | null) => void;
+  validateVariables: (
+    editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor
+  ) => void;
   handleMarkersChanged: (
     editor: monaco.editor.IStandaloneCodeEditor,
     modelUri: monaco.Uri,
@@ -47,67 +49,103 @@ export function useYamlValidation({
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
 
   // Function to validate mustache expressions and apply decorations
-  const validateVariables = useCallback((model: monaco.editor.ITextModel | null) => {
-    if (!model) {
-      return;
-    }
-
-    try {
-      const text = model.getValue();
-
-      // Parse the YAML to JSON to get the workflow definition
-      const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
-      if (!result.success) {
-        throw new Error('Failed to parse YAML');
-      }
-      const yamlDocument = parseDocument(text);
-      const workflowGraph = getWorkflowGraph(result.data);
-
-      // Collect markers to add to the model
-      const markers: monaco.editor.IMarkerData[] = [];
-
-      const matches = [...text.matchAll(MUSTACHE_REGEX)];
-      // TODO: check if the variable is inside quouted string or yaml | or > string section
-      for (const match of matches) {
-        const matchStart = match.index ?? 0;
-        const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
-
-        // Get the position (line, column) for the match
-        const startPos = model.getPositionAt(matchStart);
-        const endPos = model.getPositionAt(matchEnd);
-
-        let errorMessage: string | null = null;
-        const severity: YamlValidationErrorSeverity = 'warning';
-
-        const path = getCurrentPath(yamlDocument, matchStart);
-        const context = getContextForPath(result.data, workflowGraph, path);
-
-        // TODO: validate mustache variable for YAML step
-        if (!_.get(context, match[1])) {
-          errorMessage = `Variable ${match[1]} is not defined`;
-        }
-
-        // Add marker for validation issues
-        if (errorMessage) {
-          markers.push({
-            severity: SEVERITY_MAP[severity],
-            message: errorMessage,
-            startLineNumber: startPos.lineNumber,
-            startColumn: startPos.column,
-            endLineNumber: endPos.lineNumber,
-            endColumn: endPos.column,
-            source: 'mustache-validation',
-          });
-        }
+  const validateVariables = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor) => {
+      const model = editor.getModel();
+      if (!model) {
+        return;
       }
 
-      // Set markers on the model for the problems panel
-      monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    }
-  }, []);
+      if ('original' in model) {
+        // TODO: validate diff editor
+        return;
+      }
+
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
+
+      try {
+        const text = model.getValue();
+
+        // Parse the YAML to JSON to get the workflow definition
+        const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
+        if (!result.success) {
+          throw new Error('Failed to parse YAML');
+        }
+        const yamlDocument = parseDocument(text);
+        const workflowGraph = getWorkflowGraph(result.data);
+
+        // Collect markers to add to the model
+        const markers: monaco.editor.IMarkerData[] = [];
+
+        const matches = [...text.matchAll(MUSTACHE_REGEX)];
+        // TODO: check if the variable is inside quouted string or yaml | or > string section
+        for (const match of matches) {
+          const matchStart = match.index ?? 0;
+          const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
+
+          // Get the position (line, column) for the match
+          const startPos = model.getPositionAt(matchStart);
+          const endPos = model.getPositionAt(matchEnd);
+
+          let errorMessage: string | null = null;
+          const severity: YamlValidationErrorSeverity = 'warning';
+
+          const path = getCurrentPath(yamlDocument, matchStart);
+          const context = getContextForPath(result.data, workflowGraph, path);
+
+          // TODO: validate mustache variable for YAML step
+          if (!_.get(context, match[1])) {
+            errorMessage = `Variable ${match[1]} is not defined`;
+          }
+
+          // Add marker for validation issues
+          if (errorMessage) {
+            markers.push({
+              severity: SEVERITY_MAP[severity],
+              message: errorMessage,
+              startLineNumber: startPos.lineNumber,
+              startColumn: startPos.column,
+              endLineNumber: endPos.lineNumber,
+              endColumn: endPos.column,
+              source: 'mustache-validation',
+            });
+
+            decorations.push({
+              range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+              ),
+              options: {
+                inlineClassName: 'template-variable-error',
+              },
+            });
+          } else {
+            decorations.push({
+              range: new monaco.Range(
+                startPos.lineNumber,
+                startPos.column,
+                endPos.lineNumber,
+                endPos.column
+              ),
+              options: {
+                inlineClassName: 'template-variable-valid',
+              },
+            });
+          }
+        }
+
+        // Set markers on the model for the problems panel
+        monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
+        editor?.deltaDecorations([], decorations);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    },
+    []
+  );
 
   const handleMarkersChanged = useCallback(
     (
