@@ -23,6 +23,7 @@ import React from 'react';
 import styled from 'styled-components';
 import type { Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { constructThreatMappingDescription } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   AlertSuppressionMissingFieldsStrategy,
@@ -30,12 +31,6 @@ import type {
   ThreatMapping,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import {
-  AND,
-  MATCHES,
-  OR,
-  DOES_NOT_MATCH,
-} from '../../../../common/components/threat_match/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
@@ -521,33 +516,8 @@ export const buildThreatMappingDescription = (
   title: string,
   threatMapping: ThreatMapping
 ): ListItems[] => {
-  const description = threatMapping.reduce<string>(
-    (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
-      const matches = threatMap.entries.reduce<string>(
-        (accumItems, item, itemsIndex, { length: threatMapLength }) => {
-          const matchOperator = item.negate ? DOES_NOT_MATCH : MATCHES;
+  const description = constructThreatMappingDescription(threatMapping);
 
-          if (threatMapLength === 1) {
-            return `${item.field} ${matchOperator} ${item.value}`;
-          } else if (itemsIndex === 0) {
-            return `(${item.field} ${matchOperator} ${item.value})`;
-          } else {
-            return `${accumItems} ${AND} (${item.field} ${matchOperator} ${item.value})`;
-          }
-        },
-        ''
-      );
-
-      if (threatMappingLength === 1) {
-        return `${matches}`;
-      } else if (threatMapIndex === 0) {
-        return `(${matches})`;
-      } else {
-        return `${accumThreatMaps} ${OR} (${matches})`;
-      }
-    },
-    ''
-  );
   return [
     {
       title,

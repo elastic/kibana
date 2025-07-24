@@ -384,8 +384,8 @@ interface ThreatMappingProps {
   threatMapping: ThreatMappingType;
 }
 
-export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
-  const description = threatMapping.reduce<string>(
+export const constructThreatMappingDescription = (threatMapping: ThreatMappingType): string => {
+  return threatMapping.reduce<string>(
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
         (accumItems, item, itemsIndex, { length: threatMapLength }) => {
@@ -414,6 +414,10 @@ export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
     },
     ''
   );
+};
+
+export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
+  const description = constructThreatMappingDescription(threatMapping);
 
   return (
     <EuiText size="s" data-test-subj="threatMappingPropertyValue">
