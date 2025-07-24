@@ -10,6 +10,7 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
 export type HostsLocator = LocatorPublic<HostsLocatorParams>;
+export type SchemaTypes = 'ecs' | 'semconv';
 
 export interface HostsLocatorParams extends SerializableRecord {
   query?: {
@@ -23,7 +24,7 @@ export interface HostsLocatorParams extends SerializableRecord {
   filters?: Filter[];
   panelFilters?: Filter[];
   limit?: number;
-  preferredSchema?: 'ecs' | 'semconv' | null;
+  preferredSchema?: SchemaTypes | null;
   tableProperties?: {
     detailsItemId?: string;
     pagination: {

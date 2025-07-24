@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '../../common/constants';
-import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
+import { SchemaTypes } from '../../common/http_api/shared/schema_type';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -96,22 +96,25 @@ const InvalidDisplay = ({ value }: { value: string }) => {
     </EuiFlexGroup>
   );
 };
-
-const getInputDisplay = (schema: SchemaTypes) => {
-  if (schema === METRIC_SCHEMA_ECS) {
-    return i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
+const schemaTranslationMap = {
+  [METRIC_SCHEMA_ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
       defaultMessage: 'Elastic System Integration',
-    });
-  }
-  if (schema === METRIC_SCHEMA_SEMCONV) {
-    return i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
+    }),
+  [METRIC_SCHEMA_SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
       defaultMessage: 'OpenTelemetry',
+    }),
+  };
+
+
+  const getInputDisplay = (schema: SchemaTypes) => {
+    const translation = schemaTranslationMap[schema];
+    if (translation) {
+      return translation;
+    }
+    return i18n.translate('xpack.infra.schemaSelector.unknownDisplay', {
+      defaultMessage: 'Unknown schema',
     });
-  }
-  return i18n.translate('xpack.infra.schemaSelector.unknownDisplay', {
-    defaultMessage: 'Unknown schema',
-  });
-};
+  };
 
 export const SchemaSelector = ({
   onChange,
@@ -136,7 +139,7 @@ export const SchemaSelector = ({
   const isInvalid = !!value && !options.some((opt) => opt.value === value);
 
   // If only one schema is available and it's not the preferred, show both in the dropdown
-  const displayOptions = options.length === 1 && isInvalid && value
+  const displayOptions = options.length === 1 && isInvalid
     ? [
         {
           inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,

@@ -20,9 +20,10 @@ import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { isPending } from '../../../../../hooks/use_fetcher';
 import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
-import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
+
 
 export const UnifiedSearchBar = () => {
   const {
@@ -44,7 +45,7 @@ export const UnifiedSearchBar = () => {
   useEffect(() => {
     if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
     const current = searchCriteria.preferredSchema;
-    // Only set if not set
+
     if (current === null) {
       const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
       onPreferredSchemaChange(next);
@@ -62,7 +63,7 @@ export const UnifiedSearchBar = () => {
     [onSubmit, onPageRefreshStart]
   );
 
-  const isLoading = status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = isPending(status);
 
   return (
     <StickyContainer>

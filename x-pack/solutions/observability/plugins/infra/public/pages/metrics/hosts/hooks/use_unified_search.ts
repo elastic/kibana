@@ -46,7 +46,7 @@ const buildQuerySubmittedPayload = (
     limit,
   };
 
-  if (typeof preferredSchema === 'string') {
+  if (preferredSchema) {
     payload.preferred_schema = preferredSchema;
   }
 
