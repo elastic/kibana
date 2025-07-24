@@ -119,6 +119,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('security');
+
       indexedData = await endpointTestResources.loadEndpointData();
 
       const waitForAlertsToAppear = async () => {
