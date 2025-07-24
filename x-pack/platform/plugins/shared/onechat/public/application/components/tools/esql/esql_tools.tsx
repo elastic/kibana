@@ -20,7 +20,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolDefinition, formatOnechatErrorMessage } from '@kbn/onechat-common';
+import { ToolDefinition } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
 import { useEsqlTools } from '../../../hooks/tools/use_tools';
