@@ -16,7 +16,7 @@ interface Props {
   to: string;
 }
 
-export const CostSavingsDiv: React.FC<Props> = ({ attackAlertIds, from, to }) => {
+export const CostSavings: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   return (
     <EuiPanel paddingSize="l">
       <EuiTitle size="s">

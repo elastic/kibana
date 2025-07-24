@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
-import { CostSavingsDiv } from './cost_savings_div';
+import { CostSavings } from './cost_savings';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { useValueMetrics } from './use_value_metrics';
@@ -30,25 +30,24 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
   return isLoading ? null : (
     <>
       <ExecutiveSummary
-        valueMetrics={valueMetrics}
-        valueMetricsCompare={valueMetricsCompare}
-        minutesPerAlert={minutesPerAlert}
         analystHourlyRate={analystHourlyRate}
-        attackAlertIds={attackAlertIds}
         filteredAlerts={valueMetrics.filteredAlerts}
         filteredAlertsCompare={valueMetricsCompare.filteredAlerts}
         from={from}
+        minutesPerAlert={minutesPerAlert}
         to={to}
+        valueMetrics={valueMetrics}
+        valueMetricsCompare={valueMetricsCompare}
       />
       <EuiSpacer size="l" />
       <EuiFlexGrid columns={2} gutterSize="l">
-        <CostSavingsDiv attackAlertIds={attackAlertIds} from={from} to={to} />
+        <CostSavings attackAlertIds={attackAlertIds} from={from} to={to} />
         <AlertProcessing
           attackAlertIds={attackAlertIds}
-          filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
-          filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
           attackAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
           attackAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
+          filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
+          filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
           from={from}
           to={to}
         />

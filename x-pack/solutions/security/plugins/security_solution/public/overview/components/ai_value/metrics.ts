@@ -57,43 +57,11 @@ export const getCostSavings = ({
   return hoursSaved * analystHourlyRate;
 };
 
-export const getAlertStats = (alertData: AlertData) => {
-  const escalated = alertData.totalAlerts - alertData.filteredAlerts;
-  return {
-    escalated,
-    filteredPercentage: (alertData.filteredAlerts / alertData.totalAlerts) * 100,
-    escalatedPercentage: (escalated / alertData.totalAlerts) * 100,
-  };
-};
-
-export const getAttackDetectionComparison = (aiDetected: number, traditionalDetected: number) => {
-  const total = aiDetected + traditionalDetected;
-  return {
-    aiPercentage: (aiDetected / total) * 100,
-    traditionalPercentage: (traditionalDetected / total) * 100,
-  };
-};
-
-export const getResponseTimeTrend = (beforeAI: number[], afterAI: number[]) => {
-  const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
-  return {
-    averageBeforeAI: avg(beforeAI),
-    averageAfterAI: avg(afterAI),
-    improvement: avg(beforeAI) - avg(afterAI),
-    improvementPercent: ((avg(beforeAI) - avg(afterAI)) / avg(beforeAI)) * 100,
-  };
-};
-
 export const formatDollars = (value: number) =>
   formatNumber(roundTo(value, 2), {
     format: '$0,0', // e.g., $1,234,567
     nil: '-',
     round: true,
-  });
-
-export const formatThousandsDecimal = (value: number) =>
-  formatNumber(roundTo(value, 1), {
-    format: '0,0.0',
   });
 
 export const formatThousands = (value: number) =>
@@ -113,7 +81,5 @@ export const getFormattedPercChange = (currentCount: number, previousCount: numb
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
 
   const isNegative = percentageChange.charAt(0) === '-';
-  const cleanedPercentage = isNegative ? percentageChange.slice(1) : percentageChange;
-
-  return cleanedPercentage;
+  return isNegative ? percentageChange.slice(1) : percentageChange;
 };

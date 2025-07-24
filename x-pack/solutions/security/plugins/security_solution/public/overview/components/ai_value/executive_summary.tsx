@@ -6,15 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 import { ComparePercentage } from './compare_percentage';
@@ -31,31 +23,27 @@ import type { ValueMetrics } from './metrics';
 import logo from './logo.svg';
 import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
 interface Props {
-  attackAlertIds: string[];
-  minutesPerAlert: number;
   analystHourlyRate: number;
   filteredAlerts: number;
   filteredAlertsCompare: number;
   from: string;
+  minutesPerAlert: number;
   to: string;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
 }
 
 export const ExecutiveSummary: React.FC<Props> = ({
-  attackAlertIds,
+  analystHourlyRate,
   filteredAlerts,
   filteredAlertsCompare,
   from,
-  to,
   minutesPerAlert,
-  analystHourlyRate,
+  to,
   valueMetrics,
   valueMetricsCompare,
 }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
 
   const costSavings = useMemo(
     () =>
@@ -69,7 +57,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
       ),
     [filteredAlertsCompare, minutesPerAlert, analystHourlyRate]
   );
-  const { data: currentUserProfile } = useGetCurrentUserProfile();
 
   return (
     <div
