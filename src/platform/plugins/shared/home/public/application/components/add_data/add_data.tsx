@@ -57,6 +57,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     });
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const canUploadFile = application.capabilities.fileUpload.show;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -130,18 +131,20 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 </EuiButtonEmpty>
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="uploadFile"
-                  href={addBasePath('#/tutorial_directory/fileDataViz')}
-                  iconType="importAction"
-                >
-                  <FormattedMessage
-                    id="home.addData.uploadFileButtonLabel"
-                    defaultMessage="Upload a file"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+              {canUploadFile ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="uploadFile"
+                    href={addBasePath('#/tutorial_directory/fileDataViz')}
+                    iconType="importAction"
+                  >
+                    <FormattedMessage
+                      id="home.addData.uploadFileButtonLabel"
+                      defaultMessage="Upload a file"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
 

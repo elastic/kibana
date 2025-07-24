@@ -241,8 +241,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           const [coreStart, pluginStart] = await core.getStartServices();
           const { capabilities } = coreStart.application;
           const mlCapabilities = capabilities.ml as MlCapabilities;
-
-          const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+          const canUploadFile = Boolean(coreStart.application.capabilities.fileUpload.show);
+          const isEsqlEnabled = Boolean(core.uiSettings.get(ENABLE_ESQL));
 
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
@@ -276,7 +276,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               fullLicense,
               mlCapabilities,
               this.isServerless,
-              isEsqlEnabled
+              isEsqlEnabled,
+              canUploadFile
             );
 
             if (

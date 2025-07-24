@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -14,4 +15,5 @@ export interface StartDeps {
 
 export interface SetupDeps {
   usageCollection: UsageCollectionSetup;
+  features: FeaturesPluginSetup;
 }

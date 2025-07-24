@@ -59,9 +59,11 @@ export const DatavisualizerSelector: FC = () => {
       docLinks,
       dataVisualizer,
       uiSettings,
+      application: { capabilities },
     },
   } = useMlKibana();
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
+  const canUploadFile = useMemo(() => !!capabilities.fileUpload.show, [capabilities]);
   const helpLink = docLinks.links.ml.guide;
 
   const startTrialVisible =
@@ -97,7 +99,11 @@ export const DatavisualizerSelector: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
-        <DataVisualizerGrid buttonType="full" isEsqlEnabled={isEsqlEnabled} />
+        <DataVisualizerGrid
+          buttonType="full"
+          isEsqlEnabled={isEsqlEnabled}
+          canUploadFile={canUploadFile}
+        />
         {startTrialVisible === true && (
           <Fragment>
             <EuiSpacer size="xxl" />

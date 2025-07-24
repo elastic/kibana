@@ -8,9 +8,12 @@
  */
 
 import {
+  AppDeepLink,
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -22,6 +25,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plug
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import type { ConfigSchema } from '../server/config';
@@ -67,6 +71,7 @@ export class HomePublicPlugin
   private readonly tutorialService = new TutorialService();
   private readonly addDataService = new AddDataService();
   private readonly welcomeService = new WelcomeService();
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -78,6 +83,9 @@ export class HomePublicPlugin
       id: PLUGIN_ID,
       title: 'Home',
       visibleIn: [],
+      updater$: this.appStateUpdater,
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
@@ -175,6 +183,26 @@ export class HomePublicPlugin
 
   public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
+
+    if (capabilities.fileUpload.show) {
+      this.appStateUpdater.next(() => {
+        const deepLinks: AppDeepLink[] = [
+          {
+            id: 'fileUpload',
+            title: i18n.translate('home.tutorialDirectory.fileUploadDeepLinkTitle', {
+              defaultMessage: 'File Upload',
+            }),
+            path: '#/tutorial_directory/fileDataViz',
+            keywords: ['CSV', 'JSON'],
+            icon: 'logoElastic',
+          },
+        ];
+
+        return {
+          deepLinks,
+        };
+      });
+    }
 
     return { featureCatalogue: this.featuresCatalogueRegistry };
   }

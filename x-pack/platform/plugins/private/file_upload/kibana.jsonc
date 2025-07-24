@@ -14,7 +14,8 @@
     "server": true,
     "requiredPlugins": [
       "data",
-      "usageCollection"
+      "usageCollection",
+      "features"
     ],
     "optionalPlugins": [
       "security"

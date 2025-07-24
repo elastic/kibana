@@ -10,6 +10,7 @@ import type { Plugin } from '@kbn/core/public';
 
 import type { CoreSetup } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { getComponents } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
@@ -45,6 +46,7 @@ export class DataVisualizerPlugin
       enabled: true,
     },
   };
+  private homePluginSetup: HomePublicPluginSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const resultsLinks = initializerContext.config.get().resultLinks;
@@ -54,19 +56,20 @@ export class DataVisualizerPlugin
   }
 
   public async setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
+    this.homePluginSetup = plugins.home;
     if (plugins.embeddable) {
       registerEmbeddables(plugins.embeddable, core);
-    }
-
-    if (plugins.home) {
-      registerHomeAddData(plugins.home, this.resultsLinks);
-      registerHomeFeatureCatalogue(plugins.home);
     }
 
     plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
+    if (this.homePluginSetup && core.application.capabilities.fileUpload.show) {
+      registerHomeAddData(this.homePluginSetup, this.resultsLinks);
+      registerHomeFeatureCatalogue(this.homePluginSetup);
+    }
+
     setStartServices(core, plugins);
 
     if (plugins.uiActions) {

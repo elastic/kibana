@@ -6,15 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
+import {
+  DEFAULT_APP_CATEGORIES,
+  type CoreSetup,
+  type CoreStart,
+  type Logger,
+  type Plugin,
+  type PluginInitializerContext,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { UI_SETTING_MAX_FILE_SIZE, MAX_FILE_SIZE } from '@kbn/file-upload-common/src/constants';
+import {
+  UI_SETTING_MAX_FILE_SIZE,
+  MAX_FILE_SIZE,
+  PLUGIN_ID,
+} from '@kbn/file-upload-common/src/constants';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
 import { setupCapabilities } from './capabilities';
@@ -31,6 +37,37 @@ export class FileUploadPlugin implements Plugin {
     fileUploadRoutes(coreSetup, this._logger);
 
     setupCapabilities(coreSetup);
+
+    plugins.features.registerKibanaFeature({
+      id: PLUGIN_ID,
+      name: i18n.translate('xpack.fileUpload.featureName', {
+        defaultMessage: 'File Upload',
+      }),
+      category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['kibana', PLUGIN_ID],
+      catalogue: [PLUGIN_ID],
+      privileges: {
+        all: {
+          app: ['kibana', PLUGIN_ID],
+          api: [],
+          catalogue: [PLUGIN_ID],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['show'],
+        },
+        read: {
+          disabled: true,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
 
     coreSetup.uiSettings.register({
       [UI_SETTING_MAX_FILE_SIZE]: {
