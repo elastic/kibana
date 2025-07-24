@@ -15,6 +15,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,6 +40,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   forceModal = false,
 }) => {
   const { overlays, ...startServices } = useAppDependencies();
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
@@ -66,9 +68,9 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   const openModal = () => {
     const modal = overlays.openModal(
       toMountPoint(
-        <EuiModal onClose={() => modal.close()}>
+        <EuiModal aria-labelledby={modalTitleId} onClose={() => modal.close()}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               {i18n.translate('xpack.transform.toastText.modalTitle', {
                 defaultMessage: 'Error details',
               })}
