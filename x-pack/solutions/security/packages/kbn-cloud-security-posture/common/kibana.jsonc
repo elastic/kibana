@@ -4,6 +4,6 @@
   "owner": [
     "@elastic/kibana-cloud-security-posture"
   ],
-  "group": "platform",
-  "visibility": "shared"
+  "group": "security",
+  "visibility": "private"
 }
