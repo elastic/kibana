@@ -39,6 +39,7 @@ interface SelectOutputProps<State> {
   setDefaultPanelTitle: (title: string) => void;
   setHasTouchedOutput: (b: boolean) => void;
   variableStringError: string | null;
+  showESQLOnly: boolean;
 }
 
 export const SelectOutput = <State extends DefaultDataControlState = DefaultDataControlState>({
@@ -50,6 +51,7 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
   setDefaultPanelTitle,
   setHasTouchedOutput,
   variableStringError,
+  showESQLOnly,
 }: SelectOutputProps<State>) => {
   const [isFieldOutputPopoverOpen, setIsFieldOutputPopoverOpen] = useState<boolean>(false);
   const isStaticInputMode = useMemo(() => inputMode === ControlInputOption.STATIC, [inputMode]);
@@ -156,19 +158,21 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
 
   return (
     <>
-      <EuiFormRow data-test-subj="control-editor-output-settings">
-        <div>
-          <OutputSelectRadioGroup
-            idSelected={outputMode ?? DEFAULT_CONTROL_OUTPUT}
-            onChangeOutput={(output) => {
-              setEditorState({ ...editorState, output });
-              setHasTouchedOutput(true);
-            }}
-            isDSLInputMode={inputMode === ControlInputOption.DSL}
-            fieldName={editorState.fieldName}
-          />
-        </div>
-      </EuiFormRow>
+      {!showESQLOnly && (
+        <EuiFormRow data-test-subj="control-editor-output-settings">
+          <div>
+            <OutputSelectRadioGroup
+              idSelected={outputMode ?? DEFAULT_CONTROL_OUTPUT}
+              onChangeOutput={(output) => {
+                setEditorState({ ...editorState, output });
+                setHasTouchedOutput(true);
+              }}
+              isDSLInputMode={inputMode === ControlInputOption.DSL}
+              fieldName={editorState.fieldName}
+            />
+          </div>
+        </EuiFormRow>
+      )}
       {outputMode === ControlOutputOption.ESQL
         ? esqlVariableOutput
         : inputMode === ControlInputOption.ESQL

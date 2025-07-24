@@ -82,6 +82,7 @@ export interface ControlEditorProps<
   onCancel: (newState: Partial<State>) => void;
   onSave: (newState: Partial<State>, type: string) => void;
   ariaLabelledBy: string;
+  showESQLOnly?: boolean;
 }
 
 const CompatibleControlTypesComponent = ({
@@ -216,6 +217,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   onCancel,
   controlGroupApi,
   ariaLabelledBy,
+  showESQLOnly = true,
 }: ControlEditorProps<State>) => {
   const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
 
@@ -255,6 +257,16 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [hasTouchedOutput, setHasTouchedOutput] = useState(isEdit);
 
   useEffect(() => {
+    // Set the default input mode to ES|QL for showESQLOnly editors
+    if (isDSLInputMode && showESQLOnly) {
+      setEditorState({ ...editorState, input: ControlInputOption.ESQL });
+    }
+
+    // TODO remove this when range sliders can output ES|QL variables
+    if (showESQLOnly && !selectedControlType) {
+      setSelectedControlType(OPTIONS_LIST_CONTROL);
+    }
+
     // Set the default control label to either the selected field name or entered ES|QL variable name
     switch (editorState.output) {
       case ControlOutputOption.DSL:
@@ -275,7 +287,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     switch (editorState.input) {
       case ControlInputOption.DSL:
       case ControlInputOption.STATIC:
-        if (editorState.output !== ControlOutputOption.DSL) {
+        if (!showESQLOnly && editorState.output !== ControlOutputOption.DSL) {
           setEditorState({ ...editorState, output: ControlOutputOption.DSL });
           setDefaultPanelTitle(editorState.fieldName ?? '');
         }
@@ -287,7 +299,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         }
         break;
     }
-  }, [hasTouchedOutput, editorState, defaultPanelTitle]);
+  }, [
+    hasTouchedOutput,
+    editorState,
+    defaultPanelTitle,
+    isDSLInputMode,
+    showESQLOnly,
+    selectedControlType,
+  ]);
 
   const {
     loading: dataViewListLoading,
@@ -343,7 +362,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   }, [selectedControlType]);
 
   const CustomSettingsComponent = useMemo(() => {
-    if (!controlFactory || !editorState.fieldName || !fieldRegistry) return;
+    if (!controlFactory || !fieldRegistry) return;
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
@@ -353,7 +372,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         <EuiSpacer size="m" />
         <CustomSettings
           initialState={initialState}
-          field={fieldRegistry[editorState.fieldName].field}
+          field={editorState.fieldName ? fieldRegistry[editorState.fieldName].field : undefined}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
@@ -415,12 +434,19 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const controlConfigStatus = useMemo(() => {
     if (!selectedControlType) return EditorComponentStatus.INCOMPLETE;
     if (!controlOptionsValid) return EditorComponentStatus.ERROR;
+
+    // For ES|QL only mode, selectedControlType is always true, so to reduce visual noise,
+    // prevent the green checkbox from showing up until the rest of the form is complete
+    // TODO remove this when range sliders can output ES|QL variables
+    if (showESQLOnly && outputStatus !== EditorComponentStatus.COMPLETE)
+      return EditorComponentStatus.INCOMPLETE;
+
     return EditorComponentStatus.COMPLETE;
-  }, [selectedControlType, controlOptionsValid]);
+  }, [showESQLOnly, outputStatus, selectedControlType, controlOptionsValid]);
 
   const steps: EuiContainedStepProps[] = [
     {
-      title: 'Select input',
+      title: DataControlEditorStrings.manageControl.getConfigureInputTitle(),
       status: useStepStatus(inputStatus, isEdit),
       children: (
         <SelectInput
@@ -434,11 +460,12 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setControlOptionsValid={setControlOptionsValid}
           setESQLQueryValidation={setESQLQueryValidation}
           isEdit={isEdit}
+          showESQLOnly={showESQLOnly}
         />
       ),
     },
     {
-      title: 'Select output',
+      title: DataControlEditorStrings.manageControl.getConfigureOutputTitle(),
       status: useStepStatus(outputStatus, isEdit),
       children: (
         <SelectOutput
@@ -450,29 +477,33 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setDefaultPanelTitle={setDefaultPanelTitle}
           setHasTouchedOutput={setHasTouchedOutput}
           variableStringError={esqlVariableError}
+          showESQLOnly={showESQLOnly}
         />
       ),
     },
     {
-      title: 'Configure control',
+      title: DataControlEditorStrings.manageControl.getConfigureControlTitle(),
       status: useStepStatus(controlConfigStatus, isEdit),
       children: (
         <>
-          <EuiFormRow
-            label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
-          >
-            {/* wrapping in `div` so that focus gets passed properly to the form row */}
-            <div>
-              <CompatibleControlTypesComponent
-                fieldRegistry={fieldRegistry}
-                selectedFieldName={editorState.fieldName}
-                selectedControlType={selectedControlType}
-                setSelectedControlType={setSelectedControlType}
-                isESQLOutputMode={isESQLOutputMode}
-                isStaticInputMode={isStaticInputMode}
-              />
-            </div>
-          </EuiFormRow>
+          {/* TODO remove !showESQLOnly when range siders can output ES|QL variables */}
+          {!showESQLOnly && (
+            <EuiFormRow
+              label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
+            >
+              {/* wrapping in `div` so that focus gets passed properly to the form row */}
+              <div>
+                <CompatibleControlTypesComponent
+                  fieldRegistry={fieldRegistry}
+                  selectedFieldName={editorState.fieldName}
+                  selectedControlType={selectedControlType}
+                  setSelectedControlType={setSelectedControlType}
+                  isESQLOutputMode={isESQLOutputMode}
+                  isStaticInputMode={isStaticInputMode}
+                />
+              </div>
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
             labelAppend={

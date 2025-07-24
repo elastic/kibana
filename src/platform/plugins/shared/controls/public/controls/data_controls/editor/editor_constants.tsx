@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { ControlInputOption, ControlOutputOption } from '../../../../common';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {
@@ -54,21 +55,21 @@ export const CONTROL_LAYOUT_OPTIONS = [
 
 export const CONTROL_INPUT_OPTIONS = [
   {
-    id: 'dsl',
+    id: ControlInputOption.DSL,
     'data-test-subj': 'control-editor-input-dsl',
     label: i18n.translate('controls.controlGroup.management.input.dsl', {
       defaultMessage: 'Field',
     }),
   },
   {
-    id: 'esql',
+    id: ControlInputOption.ESQL,
     'data-test-subj': 'control-editor-input-esql',
     label: i18n.translate('controls.controlGroup.management.input.esql', {
       defaultMessage: 'Query',
     }),
   },
   {
-    id: 'static',
+    id: ControlInputOption.STATIC,
     'data-test-subj': 'control-editor-input-static',
     label: i18n.translate('controls.controlGroup.management.input.static', {
       defaultMessage: 'Static values',
@@ -78,7 +79,7 @@ export const CONTROL_INPUT_OPTIONS = [
 
 export const CONTROL_OUTPUT_OPTIONS = [
   {
-    id: 'dsl',
+    id: ControlOutputOption.DSL,
     'data-test-subj': 'control-editor-output-dsl',
     label: i18n.translate('controls.controlGroup.management.output.dsl.label', {
       defaultMessage: 'Field filter',
@@ -98,7 +99,7 @@ export const CONTROL_OUTPUT_OPTIONS = [
       ),
   },
   {
-    id: 'esql',
+    id: ControlOutputOption.ESQL,
     'data-test-subj': 'control-editor-output-esql',
     label: i18n.translate('controls.controlGroup.management.output.esql', {
       defaultMessage: 'ES|QL variable',
@@ -120,3 +121,9 @@ export enum EditorComponentStatus {
 }
 
 export const getESQLVariableInvalidRegex = () => /[^a-zA-Z0-9_]/g;
+export const INITIAL_EMPTY_STATE_ESQL_QUERY = `/** Example
+To get the agent field values use: 
+FROM logs-* 
+|  WHERE @timestamp <=?_tend and @timestamp >?_tstart
+| STATS BY agent
+*/`;

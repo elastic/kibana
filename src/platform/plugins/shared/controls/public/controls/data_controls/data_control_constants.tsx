@@ -23,6 +23,18 @@ export const DataControlEditorStrings = {
       i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
+    getConfigureInputTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.configureInputTitle', {
+        defaultMessage: 'Configure input',
+      }),
+    getConfigureOutputTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.configureOutputTitle', {
+        defaultMessage: 'Configure output',
+      }),
+    getConfigureControlTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.configurControlTitle', {
+        defaultMessage: 'Configure control',
+      }),
     dataSource: {
       getSelectDataViewMessage: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.selectDataViewMessage', {

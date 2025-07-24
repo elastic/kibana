@@ -27,6 +27,7 @@ import {
   CONTROL_INPUT_OPTIONS,
   getESQLVariableInvalidRegex,
   EditorComponentStatus,
+  INITIAL_EMPTY_STATE_ESQL_QUERY,
 } from '../editor_constants';
 import { ESQLLangEditor } from '../esql_lang_editor';
 import { InputValuesPreview } from './input_values_preview';
@@ -46,6 +47,7 @@ interface SelectInputProps<State> {
   setControlOptionsValid: (valid: boolean) => void;
   setESQLQueryValidation: (status: EditorComponentStatus) => void;
   isEdit: boolean;
+  showESQLOnly: boolean;
 }
 
 export const SelectInput = <State extends DefaultDataControlState = DefaultDataControlState>({
@@ -59,6 +61,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   setControlOptionsValid,
   setESQLQueryValidation,
   isEdit,
+  showESQLOnly,
 }: SelectInputProps<State>) => {
   const [previewOptions, setPreviewOptions] = useState<string[]>([]);
   const [previewColumns, setPreviewColumns] = useState<string[]>([]);
@@ -173,12 +176,20 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
     [editorState, setEditorState, submitESQLQuery]
   );
 
+  const inputOptions = useMemo(
+    () =>
+      showESQLOnly
+        ? CONTROL_INPUT_OPTIONS.filter(({ id }) => id !== ControlInputOption.DSL)
+        : CONTROL_INPUT_OPTIONS,
+    [showESQLOnly]
+  );
+
   return (
     <>
       <EuiFormRow data-test-subj="control-editor-input-select">
         <EuiButtonGroup
           isFullWidth
-          options={CONTROL_INPUT_OPTIONS}
+          options={inputOptions}
           idSelected={editorState.input ?? DEFAULT_CONTROL_INPUT}
           onChange={(input) => {
             setEditorState({ ...editorState, input });
@@ -243,7 +254,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         <>
           <ESQLLangEditor
             formLabel={DataControlEditorStrings.manageControl.dataSource.getEsqlQueryTitle()}
-            query={{ esql: editorState.esqlQuery ?? '' }}
+            query={{ esql: editorState.esqlQuery ?? INITIAL_EMPTY_STATE_ESQL_QUERY }}
             editorIsInline
             errors={previewError ? [previewError] : []}
             hideTimeFilterInfo={true}
@@ -259,6 +270,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
             isDisabled={false}
             isLoading={false}
             hasOutline
+            expandToFitQueryOnMount
           />
           <EuiSpacer size="s" />
           <InputValuesPreview

@@ -19,10 +19,7 @@ import {
   type OptionsListResponse,
   type OptionsListSuccessResponse,
 } from '../../../../../common/options_list/types';
-import {
-  GetESQLSingleColumnValuesParams,
-  getESQLSingleColumnValues,
-} from '../../common/get_esql_single_column_values';
+import { getESQLSingleColumnValues } from '../../common/get_esql_single_column_values';
 import { getDSLFieldValues } from './get_dsl_field_values';
 
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
@@ -112,6 +109,7 @@ export class OptionsListFetchCache {
         const result = await getESQLSingleColumnValues({
           query: request.query.esql,
           timeRange: request.timeRange,
+          abortSignal,
         });
         if (getESQLSingleColumnValues.isSuccess(result)) {
           // Run client-side search on ES|QL results

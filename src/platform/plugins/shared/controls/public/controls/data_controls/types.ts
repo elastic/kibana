@@ -57,7 +57,7 @@ export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
 > {
   initialState: Partial<State>;
-  field: DataViewField;
+  field?: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;

@@ -96,8 +96,9 @@ export const OptionsListEditorOptions = ({
 
   const compatibleSearchTechniques = useMemo(() => {
     if (!isDSLInputMode) return ['wildcard' as OptionsListSearchTechnique];
+    if (!field) return [];
     return getCompatibleSearchTechniques(field.type);
-  }, [field.type, isDSLInputMode]);
+  }, [field, isDSLInputMode]);
 
   const searchOptions = useMemo(() => {
     return allSearchOptions.filter((searchOption) => {
@@ -143,7 +144,6 @@ export const OptionsListEditorOptions = ({
             compressed
             options={selectionOptions}
             idSelected={singleSelect ? 'single' : 'multi'}
-            disabled={isESQLOutputMode}
             onChange={(id) => {
               const newSingleSelect = id === 'single';
               setSingleSelect(newSingleSelect);
@@ -169,24 +169,27 @@ export const OptionsListEditorOptions = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
-        <EuiSwitch
-          compressed
-          label={
-            <ControlSettingTooltipLabel
-              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-              tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-            />
-          }
-          checked={runPastTimeout}
-          onChange={() => {
-            const newRunPastTimeout = !runPastTimeout;
-            setRunPastTimeout(newRunPastTimeout);
-            updateState({ runPastTimeout: newRunPastTimeout });
-          }}
-          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
-        />
-      </EuiFormRow>
+      {/* TODO Remove !isESQLOutputMode when runPastTimeout is implemented for ES|QL queries */}
+      {!isESQLOutputMode && (
+        <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
+          <EuiSwitch
+            compressed
+            label={
+              <ControlSettingTooltipLabel
+                label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+                tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+              />
+            }
+            checked={runPastTimeout}
+            onChange={() => {
+              const newRunPastTimeout = !runPastTimeout;
+              setRunPastTimeout(newRunPastTimeout);
+              updateState({ runPastTimeout: newRunPastTimeout });
+            }}
+            data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 };
