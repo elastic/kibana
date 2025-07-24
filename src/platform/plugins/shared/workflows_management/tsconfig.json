@@ -30,7 +30,6 @@
     "@kbn/workflows-execution-engine",
     "@kbn/task-manager-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/workflows-management-plugin",
   ],
   "exclude": [
     "target/**/*"
