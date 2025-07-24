@@ -1560,6 +1560,7 @@ const categorizeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
+  license: 'PLATINUM',
   validate: undefined,
   examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
 };
