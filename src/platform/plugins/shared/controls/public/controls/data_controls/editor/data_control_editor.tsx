@@ -217,7 +217,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   onCancel,
   controlGroupApi,
   ariaLabelledBy,
-  showESQLOnly = true,
+  showESQLOnly = false,
 }: ControlEditorProps<State>) => {
   const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
 
