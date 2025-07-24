@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   OnechatError,
   OnechatErrorCode,
+  formatOnechatErrorMessage,
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -92,11 +93,11 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
           if (isOnechatError(err)) {
             onError?.(err);
 
-            notifications.toasts.addError(err, {
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.onechat.chat.chatError.title', {
                 defaultMessage: 'Error loading chat response',
               }),
-              toastMessage: `${err.code} - ${err.message}`,
+              text: formatOnechatErrorMessage(err),
             });
           }
         },
