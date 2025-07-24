@@ -39,6 +39,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   openAlertInFlyout,
   parentAlert,
   services,
+  sourceContext,
   ...rest
 }) => {
   const {
@@ -87,6 +88,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       services: {
         cases,
       },
+      sourceContext,
     });
 
   const closeActionsPopover = useCallback(() => {

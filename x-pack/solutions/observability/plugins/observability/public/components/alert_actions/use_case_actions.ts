@@ -16,6 +16,7 @@ export const useCaseActions = ({
   alerts,
   refresh,
   services,
+  sourceContext,
 }: {
   alerts: Alert[];
   refresh?: () => void;
@@ -25,6 +26,7 @@ export const useCaseActions = ({
      */
     cases?: CasesService;
   };
+  sourceContext?: string;
 }) => {
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -33,7 +35,10 @@ export const useCaseActions = ({
     refresh?.();
   }, [refresh]);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess,
+    sourceContext,
+  });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({

@@ -97,7 +97,7 @@ function InternalAlertsPage() {
       timefilter: { timefilter: timeFilterService },
     },
   } = data;
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
   const [filterControls, setFilterControls] = useState<Filter[]>();
   const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
@@ -376,6 +376,11 @@ function InternalAlertsPage() {
                       initialPageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      additionalContext={{
+                        observabilityRuleTypeRegistry,
+                        config,
+                        sourceContext: 'observability_alerts_page',
+                      }}
                       renderAdditionalToolbarControls={() => (
                         <GroupingToolbarControls
                           groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}

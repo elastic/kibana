@@ -13,6 +13,7 @@ export interface ObservabilityAlertsTableContext {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   config: ConfigSchema;
   parentAlert?: TopAlert;
+  sourceContext?: string;
 }
 
 export type ObservabilityAlertsTableProps = SetOptional<

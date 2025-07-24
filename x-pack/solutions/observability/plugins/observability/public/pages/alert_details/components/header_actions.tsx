@@ -62,7 +62,9 @@ export function HeaderActions({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    sourceContext: 'observability_alert_details_page_header_actions',
+  });
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 

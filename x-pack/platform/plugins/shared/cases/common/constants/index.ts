@@ -344,3 +344,4 @@ export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key
  * EBT events
  */
 export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';
+export const CASE_SELECTED_FROM_MODAL_EVENT_TYPE = 'case_selected_from_modal';

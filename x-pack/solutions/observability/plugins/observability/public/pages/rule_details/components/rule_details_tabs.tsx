@@ -21,6 +21,7 @@ import type { BoolQuery, Filter } from '@kbn/es-query';
 import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import {
   RULE_DETAILS_ALERTS_TAB,
@@ -74,6 +75,7 @@ export function RuleDetailsTabs({
     settings,
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
+  const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
   const hasInitialControlLoadingFinished = useMemo(
     () => controlApi && Array.isArray(filterControls),
@@ -123,6 +125,11 @@ export function RuleDetailsTabs({
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
                   columns={tableColumns}
+                  additionalContext={{
+                    observabilityRuleTypeRegistry,
+                    config,
+                    sourceContext: 'observability_rule_details_page',
+                  }}
                   services={{
                     data,
                     http,
