@@ -194,13 +194,8 @@ export function formatOnechatErrorMessage(error: any): string {
   }
 
   if (!error) {
-    // stringify undefined/null/0/whatever this falsy value is
+    // stringify undefined/null/whatever this falsy value is
     return inspect(error);
-  }
-
-  // handle es error response with `root_cause`s
-  if (error.resp && error.resp.error && error.resp.error.root_cause) {
-    return error.resp.error.root_cause.map((cause: { reason: string }) => cause.reason).join('\n');
   }
 
   // handle http response errors with error messages
