@@ -12,7 +12,6 @@ import {
   CLOSE_SELECTED_ALERTS_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   TAKE_ACTION_POPOVER_BTN,
-  TIMELINE_CONTEXT_MENU_BTN,
 } from '../../../../../screens/alerts';
 
 import { selectNumberOfAlerts } from '../../../../../tasks/alerts';
