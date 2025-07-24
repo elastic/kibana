@@ -6,20 +6,21 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
   getScheduleNotFoundError,
-} from '../utils/helpers';
-import { getAttackDiscoverySchedulesApis } from '../utils/apis';
-import { getSimpleAttackDiscoverySchedule } from '../mocks';
+} from '../../utils/helpers';
+import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
+import { getSimpleAttackDiscoverySchedule } from '../../mocks';
+import { checkIfScheduleEnabled } from '../../utils/check_schedule_enabled';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @serverlessQA Get', () => {
+  describe('@ess @serverless @serverlessQA Enable', () => {
     before(async () => {
       await enableAttackDiscoverySchedulesFeature(supertest);
     });
@@ -29,14 +30,18 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Happy path', () => {
-      it('should return a schedule by `id`', async () => {
+      it('should enable a schedule by `id`', async () => {
         const apis = getAttackDiscoverySchedulesApis({ supertest });
 
+        // Create disabled schedule
         const createdSchedule = await apis.create({ schedule: getSimpleAttackDiscoverySchedule() });
+        expect(createdSchedule.enabled).toEqual(false);
 
-        const schedule = await apis.get({ id: createdSchedule.id });
+        // Enable schedule
+        await apis.enable({ id: createdSchedule.id });
 
-        expect(schedule).toEqual(createdSchedule);
+        // Check that schedule is enabled
+        checkIfScheduleEnabled({ getService, id: createdSchedule.id });
       });
     });
 
@@ -44,9 +49,9 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return a `Not Found` error if schedule does not exist', async () => {
         const apis = getAttackDiscoverySchedulesApis({ supertest });
 
-        const result = await apis.get({ id: 'test-id', expectedHttpCode: 404 });
+        const result = await apis.enable({ id: 'enable-test-id', expectedHttpCode: 404 });
 
-        expect(result).toEqual(getScheduleNotFoundError('test-id'));
+        expect(result).toEqual(getScheduleNotFoundError('enable-test-id'));
       });
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { Role, User, UserInfo } from './types';
 import { allUsers } from './users';
 import { allRoles } from './roles';
@@ -33,6 +33,12 @@ export const createUsersAndRoles = async (
   usersToCreate: User[] = allUsers,
   rolesToCreate: Role[] = allRoles
 ) => {
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  if (isServerless) {
+    return;
+  }
+
   const security = getService('security');
 
   const createRole = async ({ name, privileges }: Role) => {
@@ -75,6 +81,12 @@ export const deleteUsersAndRoles = async (
   usersToDelete: User[] = allUsers,
   rolesToDelete: Role[] = allRoles
 ) => {
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  if (isServerless) {
+    return;
+  }
+
   const security = getService('security');
 
   for (const user of usersToDelete) {
