@@ -8,30 +8,30 @@ const numericFormatSchema = schema.object({
     /**
      * Number of decimals
      */
-    decimals: schema.number({ 
+    decimals: schema.maybe(schema.number({ 
       defaultValue: 2,
       meta: { 
         description: 'Number of decimals' 
       } 
-    }),
+    })),
     /**
      * Suffix
      */
-    suffix: schema.string({ 
+    suffix: schema.maybe(schema.string({ 
       defaultValue: '',
       meta: {
         description: 'Suffix'
       }
-    }),
+    })),
     /**
      * Whether to use compact notation
      */
-    compact: schema.boolean({ 
+    compact: schema.maybe(schema.boolean({ 
       defaultValue: false, 
       meta: { 
         description: 'Whether to use compact notation' 
       } 
-    }),
+    })),
   });
   
   const byteFormatSchema = schema.object({
@@ -106,3 +106,10 @@ const numericFormatSchema = schema.object({
     durationFormatSchema,
     customFormatSchema
   ]);
+
+  export const formatSchema = schema.object({
+    /**
+     * Format configuration
+     */
+    format: schema.maybe(formatTypeSchema),
+  });

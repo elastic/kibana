@@ -11,7 +11,10 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
+  FieldBasedIndexPatternColumn,
+  FormBasedLayer,
   FormBasedPersistedState,
+  FormulaPublicApi,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -23,17 +26,13 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataViewsCommon } from './config_builder';
 import {
-  FormulaValueConfig,
-  LensAnnotationLayer,
   LensAttributes,
-  LensBaseConfig,
-  LensBaseLayer,
-  LensBaseXYLayer,
   LensDataset,
   LensDatatableDataset,
-  LensESQLDataset,
 } from './types';
-import { LensApiState } from './zod_schema';
+import { LensApiState } from './schema';
+import { fromBreakdownColumn } from './columns';
+import { getMetricColumnReverse } from './columns/metric';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -53,26 +52,24 @@ export const getDefaultReferences = (
   ];
 };
 
-export function mapToFormula(layer: LensApiState): FormulaValueConfig {
-  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
 
-  const formulaFormat: FormulaValueConfig['format'] | undefined = format
-    ? {
-        id: format,
-        params: {
-          decimals: decimals ?? 2,
-          ...(!!compact ? { compact } : undefined),
-        },
-      }
-    : undefined;
+export const operationFromColumn = (columnId: string, layer: FormBasedLayer, dataViews: DataViewsCommon, formulaAPI?: FormulaPublicApi) => {
+  const column = layer.columns[columnId];
+  if (!column) {
+    return undefined;
+  }
+  if (['terms', 'filters', 'ranges', 'date_range'].includes(column.operationType)) {
+    return fromBreakdownColumn(column as FieldBasedIndexPatternColumn);
+  }
+  return getMetricColumnReverse(column);;
+};
 
+export const buildDatasetState = (layer: FormBasedLayer, dataViews: DataViewsCommon) => {
   return {
-    formula: value,
-    label,
-    timeScale: normalizeByUnit,
-    format: formulaFormat,
-  };
-}
+    index: layer.indexPatternId || '',
+  }
+};
+
 
 export function buildReferences(dataviews: Record<string, DataView>) {
   const references = [];
@@ -142,7 +139,7 @@ export async function getDataView(
   return dataView;
 }
 
-export function getDatasetIndex(dataset?: LensApiState['dataset']) {
+export async function getDatasetIndex(dataset?: LensApiState['dataset'], dataViewsAPI?: DataViewsCommon) {
   if (!dataset) return undefined;
 
   let index: string;
@@ -153,6 +150,17 @@ export function getDatasetIndex(dataset?: LensApiState['dataset']) {
     timeFieldName = dataset.time_field || '@timestamp';
   } else if (dataset.type === 'esql') {
     index = getIndexPatternFromESQLQuery(dataset.query); // parseIndexFromQuery(config.dataset.query);
+  } else if (dataset.type === 'dataView') {
+    if (dataViewsAPI) {
+      const dataView = await getDataView(dataset.name, dataViewsAPI);
+      if (!dataView) {
+        return undefined;
+      }
+      index = dataView.id!;
+      timeFieldName = dataView.timeFieldName!;
+    } else {
+      return undefined;
+    }
   } else {
     return undefined;
   }
@@ -165,7 +173,7 @@ function buildDatasourceStatesLayer(
   i: number,
   dataset: LensApiState['dataset'],
   dataView: DataView | undefined,
-  buildFormulaLayers: (
+  buildDataLayers: (
     config: unknown,
     i: number,
     dataView: DataView
@@ -215,8 +223,19 @@ function buildDatasourceStatesLayer(
   } else if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer)];
   }
-  return ['formBased', buildFormulaLayers(layer, i, dataView!)];
+  return ['formBased', buildDataLayers(layer, i, dataView!)];
 }
+
+/**
+ * Builds lens datasource states from LensApiState
+ * 
+ * @param config lens api state
+ * @param dataviews list to which dataviews are added
+ * @param buildFormulaLayers function used when dataset type is index or dataView
+ * @param getValueColumns function used when dataset type is table or esql
+ * @param dataViewsAPI dataViews service
+ * @returns lens datasource states
+ */
 export const buildDatasourceStates = async (
   config: LensApiState,
   dataviews: Record<string, DataView>,
@@ -244,41 +263,35 @@ export const buildDatasourceStates = async (
       throw Error('dataset must be defined');
     }
 
-    if (dataset.type !== 'index' && dataset.type !== 'esql') {
-      throw Error('dataset must be of type index or esql');
-    }
-
-    const index = getDatasetIndex(dataset);
+    const index = await getDatasetIndex(dataset, dataViewsAPI);
     const dataView = index
       ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
       : undefined;
 
-    if (dataset) {
-      const [type, layerConfig] = buildDatasourceStatesLayer(
-        layer,
-        i,
-        dataset,
-        dataView,
-        buildFormulaLayers,
-        getValueColumns
-      );
-      if (layerConfig) {
-        layers = {
-          ...layers,
-          [type]: {
-            layers: isSingleLayer(layerConfig)
-              ? { ...layers[type]?.layers, [layerId]: layerConfig }
-              : // metric chart can return 2 layers (one for the metric and one for the trendline)
-                { ...layerConfig },
-          },
-        };
-      }
+    const [type, layerConfig] = buildDatasourceStatesLayer(
+      layer,
+      i,
+      dataset,
+      dataView,
+      buildFormulaLayers,
+      getValueColumns
+    );
+    if (layerConfig) {
+      layers = {
+        ...layers,
+        [type]: {
+          layers: isSingleLayer(layerConfig)
+            ? { ...layers[type]?.layers, [layerId]: layerConfig }
+            : // metric chart can return 2 layers (one for the metric and one for the trendline)
+              { ...layerConfig },
+        },
+      };
+    }
 
-      if (dataView) {
-        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
-          dataviews[id] = dataView;
-        });
-      }
+    if (dataView) {
+      Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+        dataviews[id] = dataView;
+      });
     }
   }
 
@@ -289,7 +302,8 @@ export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
   config: GenericIndexPatternColumn,
-  first = false
+  first = false,
+  postfix = ''
 ) => {
   layer.columns = {
     ...layer.columns,
@@ -300,23 +314,4 @@ export const addLayerColumn = (
   } else {
     layer.columnOrder.push(columnName);
   }
-};
-
-export const addLayerFormulaColumns = (
-  layer: PersistedIndexPatternLayer,
-  columns: PersistedIndexPatternLayer,
-  postfix = ''
-) => {
-  const altObj = Object.fromEntries(
-    Object.entries(columns.columns).map(([key, value]) =>
-      // Modify key here
-      [`${key}${postfix}`, value]
-    )
-  );
-
-  layer.columns = {
-    ...layer.columns,
-    ...altObj,
-  };
-  layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
 };

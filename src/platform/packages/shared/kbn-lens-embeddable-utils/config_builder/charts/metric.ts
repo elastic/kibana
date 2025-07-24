@@ -8,29 +8,33 @@
  */
 
 import type {
+  FormBasedLayer,
   FormBasedPersistedState,
   FormulaPublicApi,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes } from '../types';
 import {
   addLayerColumn,
-  addLayerFormulaColumns,
+  buildDatasetState,
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
-  mapToFormula,
+  operationFromColumn,
 } from '../utils';
 import {
   getBreakdownColumn,
-  getFormulaColumn,
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
 
-import { MetricState } from '../zod_schema';
+import { MetricState } from '../schema';
+import { DataViewsCommon } from '../config_builder';
+import { getMetricColumn } from '../columns/metric';
+import { LensApiMetricOperations } from '../schema/metric_ops';
+import { LensApiBucketOperations } from '../schema/bucket_ops';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -46,17 +50,17 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: ACCESSOR,
-    color: layer.primary_value?.color?.type === 'static' ? layer.primary_value.color.code : undefined,
-    subtitle: layer.primary_value?.sub_label,
+    color: layer.metric?.color?.type === 'static' ? layer.metric.color.color : undefined,
+    subtitle: layer.metric?.sub_label,
     showBar: false,
 
-    ...(layer.secondary_value
+    ...(layer.secondary_metric
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
         }
       : {}),
 
-    ...(layer.primary_value?.background_chart?.type === 'bar'
+    ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
           showBar: true,
@@ -69,13 +73,13 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
         }
       : {}),
 
-    ...(layer.primary_value.background_chart?.type === 'trend'
+    ...(layer.metric.background_chart?.type === 'trend'
       ? {
           trendlineLayerId: `${DEFAULT_LAYER_ID}_trendline`,
           trendlineLayerType: 'metricTrendline',
           trendlineMetricAccessor: `${ACCESSOR}_trendline`,
           trendlineTimeAccessor: HISTOGRAM_COLUMN_NAME,
-          ...(layer.secondary_value
+          ...(layer.secondary_metric
             ? {
                 trendlineSecondaryMetricAccessor: `${ACCESSOR}_secondary_trendline`,
               }
@@ -91,7 +95,81 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   };
 }
 
-function buildFormulaLayer(
+function reverseBuildVisualizationState(
+  visualization: MetricVisualizationState, layer: FormBasedLayer, dataViews: DataViewsCommon, formulaAPI?: FormulaPublicApi
+): MetricState {
+
+  if (visualization.metricAccessor === undefined) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
+
+  const dataset = buildDatasetState(layer, dataViews);
+
+  // if dataset type === esql:
+  //   operation is just the column name, check lkensattributes
+  // if dataset type === table:
+  //   same as esql, check whats on lens attributes ?
+  // if dataset type === adhoc:
+  //   create adhoc index pattern ? or we dont need it here ?
+  // if dataset type === index:
+  //   load index, get timefield ? or we dont need it here ?
+
+
+  // in case of index or adhoc, we need to build operations from columns
+  // metric operation can also be formula !!
+
+  const metric = operationFromColumn(visualization.metricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations;
+  const secondary_metric = visualization.secondaryMetricAccessor ? operationFromColumn(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
+  const max_value = visualization.maxAccessor ? operationFromColumn(visualization.maxAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
+  const breakdown_by = visualization.breakdownByAccessor ? operationFromColumn(visualization.breakdownByAccessor, layer, dataViews, formulaAPI) as LensApiBucketOperations : undefined;
+
+  type DeepMutable<T> = {
+    -readonly [P in keyof T]: T[P] extends object
+      ? T[P] extends (...args: any[]) => any
+        ? T[P] // don't mutate functions
+        : DeepMutable<T[P]>
+      : T[P];
+  };
+
+  const props: Partial<DeepMutable<MetricState>> = {
+    metric,
+    ...(secondary_metric ? { secondary_metric } : {}),
+    ...(max_value ? { max_value } : {}),
+    ...(breakdown_by ? { breakdown_by } : {}),
+  };
+
+  if (props.secondary_metric) {
+    // just static color is supported for now
+    // visualization.secondaryTrend.type
+    if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
+      props.secondary_metric!.color = {
+        type: 'static',
+        color: visualization.secondaryTrend.color,
+      }
+    }
+
+    if (visualization.secondaryPrefix) {
+      props.secondary_metric!.prefix = visualization.secondaryPrefix;
+    }
+  }
+
+  
+
+  if (visualization.icon) {
+    props.metric!.icon = {
+      name: visualization.icon,
+    }
+  }
+
+  return {
+    type: 'metric',    
+    title: '',
+    dataset,
+    ...props,
+  } as MetricState;
+}
+
+function buildFormBasedLayer(
   layer: MetricState,
   i: number,
   dataView: DataView,
@@ -118,19 +196,23 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer.primary_value), dataView, formulaAPI),
+      columnOrder: [ACCESSOR],
+      columns: {
+        [ACCESSOR]: getMetricColumn(layer.metric as LensApiMetricOperations),
+      },
+      sampling: layer.samplings,
+      ignoreGlobalFilters: layer.ignore_global_filters,
     },
-    ...(layer.primary_value?.background_chart?.type === 'trend' && formulaAPI
+    ...(layer.metric?.background_chart?.type === 'trend'
       ? {
           [TRENDLINE_LAYER_ID]: {
             linkToLayers: [DEFAULT_LAYER_ID],
-            ...getFormulaColumn(
-              `${ACCESSOR}_trendline`,
-              mapToFormula(layer.primary_value),
-              dataView,
-              formulaAPI,
-              baseLayer
-            ),
+            columnOrder: [`${ACCESSOR}_trendline`],
+            columns: {
+              [`${ACCESSOR}_trendline`]: getMetricColumn(layer.metric as LensApiMetricOperations),
+            },
+            sampling: layer.samplings,
+            ignoreGlobalFilters: layer.ignore_global_filters,
           },
         }
       : {}),
@@ -152,33 +234,27 @@ function buildFormulaLayer(
     }
   }
 
-  if (layer.secondary_value) {
+  if (layer.secondary_metric) {
     const columnName = getAccessorName('secondary');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.secondary_value.formula },
-      dataView,
-      formulaAPI
+    const column = getMetricColumn(
+      layer.secondary_metric as LensApiMetricOperations
     );
 
-    addLayerFormulaColumns(defaultLayer, formulaColumn);
+    addLayerColumn(defaultLayer, columnName, column);
     if (trendLineLayer) {
-      addLayerFormulaColumns(trendLineLayer, formulaColumn, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendline`, column, false, 'X0');
     }
   }
 
-  if (layer.primary_value?.background_chart?.type === 'bar') {
+  if (layer.metric?.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.primary_value?.background_chart?.goal_value.formula },
-      dataView,
-      formulaAPI
+    const column = getMetricColumn(
+      { operation: 'max', field: 'max' },
     );
 
-    addLayerFormulaColumns(defaultLayer, formulaColumn);
+    addLayerColumn(defaultLayer, columnName, column);
     if (trendLineLayer) {
-      addLayerFormulaColumns(trendLineLayer, formulaColumn, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendline`, column , false, 'X0');
     }
   }
 
@@ -191,12 +267,12 @@ function getValueColumns(layer: MetricState) {
     ...(layer.breakdown_by
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.operation)]
       : []),
-    getValueColumn(ACCESSOR, layer.primary_value.operation, 'number'),
-    ...(layer.primary_value?.background_chart?.type === 'bar'
-      ? [getValueColumn(getAccessorName('max'), layer.primary_value.background_chart.goal_value.operation, 'number')]
+    getValueColumn(ACCESSOR, layer.metric.operation, 'number'),
+    ...(layer.metric?.background_chart?.type === 'bar'
+      ? [getValueColumn(getAccessorName('max'), layer.metric.background_chart.goal_value.operation, 'number')]
       : []),
-    ...(layer.secondary_value
-      ? [getValueColumn(getAccessorName('secondary'), layer.secondary_value.operation)]
+    ...(layer.secondary_metric
+      ? [getValueColumn(getAccessorName('secondary'), layer.secondary_metric.operation)]
       : []),
   ];
 }
@@ -206,15 +282,18 @@ export async function buildMetric(
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
-  const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as MetricState, i, dataView, formulaAPI);
+  
+  const _buildDataLayer = (cfg: unknown, i: number, dataView: DataView) =>
+    buildFormBasedLayer(cfg as MetricState, i, dataView, formulaAPI);
+
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
-    _buildFormulaLayer,
+    _buildDataLayer,
     getValueColumns,
     dataViewsAPI
   );
+
   return {
     title: config.title ?? '',
     description: config.description ?? '',
@@ -230,4 +309,20 @@ export async function buildMetric(
       adHocDataViews: getAdhocDataviews(dataviews),
     },
   };
+}
+
+export async function reverseBuildMetric(
+  attributes: LensAttributes,
+  dataView: DataViewsCommon,
+  formulaAPI?: FormulaPublicApi
+): Promise<MetricState> {
+  const { state } = attributes;
+  const visualization = state.visualization as MetricVisualizationState;
+  const layers = state.datasourceStates.formBased!.layers;
+
+  const layer = Object.values(layers)[0] as FormBasedLayer;
+
+  const visualizationState = reverseBuildVisualizationState(visualization, layer, dataView, formulaAPI);
+
+  return visualizationState;
 }

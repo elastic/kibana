@@ -21,3 +21,13 @@ export function getValueColumn(
     ...(type ? { meta: { type } } : {}),
   };
 }
+
+
+export function fromValueColumn(
+  column: TextBasedLayerColumn
+): { fieldName: string; type?: DatatableColumnType } {
+  return {
+    fieldName: column.fieldName,
+    type: column.meta?.type,
+  };
+}

@@ -132,7 +132,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
 
 export const metricStateSchema = schema.object({
   type: schema.literal("metric"),
-  ...datasetSchema.getPropSchemas(),
+  ...datasetSchema,
   /**
    * Primary value configuration, must define operation.
    */

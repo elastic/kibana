@@ -8,77 +8,52 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import {
-  LensBreakdownConfig,
-  LensBreakdownDateHistogramConfig,
-  LensBreakdownFiltersConfig,
-  LensBreakdownIntervalsConfig,
-  LensBreakdownTopValuesConfig,
-} from '../types';
-import { getHistogramColumn } from './date_histogram';
-import { getTopValuesColumn } from './top_values';
-import { getIntervalsColumn } from './intervals';
-import { getFiltersColumn } from './filters';
+import type { DateHistogramIndexPatternColumn, FieldBasedIndexPatternColumn, FiltersIndexPatternColumn, GenericIndexPatternColumn, RangeIndexPatternColumn, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { fromHistogramColumn, getHistogramColumn } from './date_histogram';
+import { fromTopValuesColumn, getTopValuesColumn } from './top_values';
+import { fromIntervalsColumn, getIntervalsColumn } from './intervals';
+import { fromFiltersColumn, getFiltersColumn } from './filters';
+import { LensApiBucketOperations, LensApiDateHistogramOperation, LensApiFilterOperation, LensApiHistogramOperation, LensApiRangeOperation, LensApiTermsOperation } from '../schema/bucket_ops';
 
 const DEFAULT_BREAKDOWN_SIZE = 5;
 
-function getBreakdownType(field: string, dataview: DataView) {
-  if (!dataview.fields.getByName(field)) {
-    throw new Error(
-      `field ${field} does not exist on dataview ${dataview.id ? dataview.id : dataview.title}`
-    );
-  }
-
-  switch (dataview.fields.getByName(field)!.type) {
-    case 'string':
-      return 'topValues';
-    case 'number':
-      return 'intervals';
-    case 'date':
-      return 'dateHistogram';
-    default:
-      return 'topValues';
-  }
-}
 export const getBreakdownColumn = ({
   options,
   dataView,
 }: {
-  options: LensBreakdownConfig;
+  options: LensApiBucketOperations;
   dataView: DataView;
 }): GenericIndexPatternColumn => {
-  const breakdownType =
-    typeof options === 'string' ? getBreakdownType(options, dataView) : options.type;
+  const breakdownType = options.operation;
   const field: string =
     typeof options === 'string' ? options : 'field' in options ? options.field : '';
   const config = typeof options !== 'string' ? options : {};
 
   switch (breakdownType) {
-    case 'dateHistogram':
+    case 'date_histogram':
       return getHistogramColumn({
         options: {
           sourceField: field,
           params:
             typeof options !== 'string'
               ? {
-                  interval: (options as LensBreakdownDateHistogramConfig).minimumInterval || 'auto',
+                  interval: (options as LensApiDateHistogramOperation).suggested_interval || 'auto',
                 }
               : {
                   interval: 'auto',
                 },
         },
       });
-    case 'topValues':
-      const topValuesOptions = config as LensBreakdownTopValuesConfig;
+    case 'terms':
+      const topValuesOptions = config as LensApiTermsOperation;
       return getTopValuesColumn({
         field,
         options: {
           size: topValuesOptions.size || DEFAULT_BREAKDOWN_SIZE,
         },
       });
-    case 'intervals':
-      const intervalOptions = config as LensBreakdownIntervalsConfig;
+    case 'range':
+      const intervalOptions = config as LensApiRangeOperation;
       return getIntervalsColumn({
         field,
         options: {
@@ -90,21 +65,39 @@ export const getBreakdownColumn = ({
               label: '',
             },
           ],
-          maxBars: intervalOptions.granularity || 'auto',
+          maxBars: 'auto',
         },
       });
     case 'filters':
-      const filterOptions = config as LensBreakdownFiltersConfig;
+      const filterOptions = config as LensApiFilterOperation;
       return getFiltersColumn({
         options: {
           filters: filterOptions.filters.map((f) => ({
             label: f.label || '',
             input: {
               language: 'kuery',
-              query: f.filter,
+              query: f.query,
             },
           })),
         },
       });
+
+    default:
+      throw new Error(`Unsupported breakdown type: ${breakdownType}`);
   }
+};
+
+export const fromBreakdownColumn = (
+  column: FieldBasedIndexPatternColumn
+): LensApiBucketOperations => {
+  if (column.operationType === 'date_histogram') {
+    return fromHistogramColumn(column as DateHistogramIndexPatternColumn);
+  } else if (column.operationType === 'terms') {
+    return fromTopValuesColumn(column as TermsIndexPatternColumn);
+  } else if (column.operationType === 'intervals') {
+    return fromIntervalsColumn(column as RangeIndexPatternColumn);
+  } else if (column.operationType === 'filters') {
+    return fromFiltersColumn(column as unknown as FiltersIndexPatternColumn);
+  }
+  throw new Error(`Unsupported breakdown column type: ${column.operationType}`);
 };

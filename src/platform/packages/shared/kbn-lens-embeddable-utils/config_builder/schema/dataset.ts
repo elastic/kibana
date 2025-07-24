@@ -100,7 +100,7 @@ export const datasetTypeSchema = schema.oneOf([
   }),
 ]);
 
-export const datasetSchema = schema.object({
+export const datasetSchema = {
   /**
    * The dataset configuration. Can be one of the following types:
    * - `dataView`: Use a Kibana data view as the data source. Requires a `name` property with the name of the data view.
@@ -109,4 +109,4 @@ export const datasetSchema = schema.object({
    * - `table`: Use a Kibana datatable object as the data source. Requires a `table` property with the Kibana datatable object, which should match the Kibana Datatable contract.
    */
   dataset: datasetTypeSchema,
-});
+};

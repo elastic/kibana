@@ -1,6 +1,8 @@
-import type { MetricState, NarrowByType } from "./schema";
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 
-const test: MetricState = {
+const cb = new LensConfigBuilder({} as any, {} as any);
+
+const testChart = await cb.build({
   type: 'metric',
   dataset: {
     type: 'index',
@@ -9,7 +11,6 @@ const test: MetricState = {
   },
   metric: {
     operation: 'count',
-
   },
   secondary_metric: {
     operation: 'last_value',
@@ -19,9 +20,16 @@ const test: MetricState = {
     operation: 'terms',
     fields: ['test'],
     size: 5,
-    increase_accuracy: true,
     collapse_by: 'avg',
   },
   ignore_global_filters: true,
   samplings: 1,
-}
+});
+
+console.log(testChart);
+
+
+const testChart2 = await cb.reverseBuild(testChart);
+console.log(testChart2);
+
+console.log('all done');

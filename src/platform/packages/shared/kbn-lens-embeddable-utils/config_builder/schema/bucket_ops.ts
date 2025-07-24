@@ -275,3 +275,11 @@ export const bucketDateHistogramOperationSchema = schema.object({
     bucketRangesOperationSchema,
     bucketFilterOperationSchema,
   ]);
+
+  export type LensApiBucketOperations = typeof bucketOperationDefinitionSchema.type;
+
+  export type LensApiDateHistogramOperation = typeof bucketDateHistogramOperationSchema.type;
+  export type LensApiTermsOperation = typeof bucketTermsOperationSchema.type;
+  export type LensApiHistogramOperation = typeof bucketHistogramOperationSchema.type;
+  export type LensApiRangeOperation = typeof bucketRangesOperationSchema.type;
+  export type LensApiFilterOperation = typeof bucketFilterOperationSchema.type;

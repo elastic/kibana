@@ -20,9 +20,10 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
+  reverseBuildMetric,
 } from './charts';
 
-import { LensApiState } from './zod_schema'
+import { LensApiState } from './schema'
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -43,6 +44,11 @@ export class LensConfigBuilder {
     table: buildTable,
     datatable: buildTable,
   };
+
+  private reverseCharts = {
+    'lnsMetric': reverseBuildMetric,
+  };
+
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
 
@@ -82,4 +88,21 @@ export class LensConfigBuilder {
 
     return chartState as LensAttributes;
   }
+
+  async reverseBuild(state: LensAttributes): Promise<{ config: LensApiState; options: LensConfigOptions }> {
+    const chartType = state.visualizationType;
+    const chartBuilder = this.reverseCharts[chartType as 'lnsMetric'];
+
+    const config = (await chartBuilder(state, this.dataViewsAPI, this.formulaAPI)) as LensApiState;
+    const options: LensConfigOptions = {
+      filters: state.state?.filters || [],
+      query: state.state?.query || { language: 'kuery', query: '' },
+      embeddable: false,
+    };
+    return {
+      config,
+      options,
+    };
+  }
+
 }

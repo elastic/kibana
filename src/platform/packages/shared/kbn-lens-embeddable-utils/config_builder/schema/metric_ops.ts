@@ -1,5 +1,6 @@
 import { schema } from '@kbn/config-schema';
 import { filterSchema } from './filter';
+import { formatSchema } from './format';
 
 const genericOperationOptionsSchema = schema.object({
     /**
@@ -10,6 +11,7 @@ const genericOperationOptionsSchema = schema.object({
         description: 'Label for the operation'
       }
     })),
+    ...formatSchema.getPropSchemas(),
   });
   
   export const staticOperationDefinitionSchema = schema.object({
@@ -163,7 +165,7 @@ const genericOperationOptionsSchema = schema.object({
   
   export const metricOperationDefinitionSchema = schema.oneOf([
     formulaOperationDefinitionSchema,
-  //  staticOperationDefinitionSchema,
+    staticOperationDefinitionSchema,
     fieldMetricOperationsSchema,
     differencesOperationSchema,
     movingAverageOperationSchema,
@@ -171,8 +173,23 @@ const genericOperationOptionsSchema = schema.object({
     counterRateOperationSchema,
     countMetricOperationSchema,
     uniqueValuesMetricOperationSchema,
-    metricOperationSchema,
     lastValueOperationSchema,
     percentileOperationSchema,
     percentileRanksOperationSchema
   ]);
+
+  export type LensApiMetricOperations = typeof metricOperationDefinitionSchema.type;
+
+  export type LensApiCountMetricOperation = typeof countMetricOperationSchema.type;
+  export type LensApiUniqueValuesMetricOperation = typeof uniqueValuesMetricOperationSchema.type;
+  export type LensApiMetricOperation = typeof metricOperationSchema.type;
+  export type LensApiLastValueOperation = typeof lastValueOperationSchema.type;
+  export type LensApiPercentileOperation = typeof percentileOperationSchema.type;
+  export type LensApiPercentileRanksOperation = typeof percentileRanksOperationSchema.type;
+  export type LensApiDifferencesOperation = typeof differencesOperationSchema.type;
+  export type LensApiMovingAverageOperation = typeof movingAverageOperationSchema.type;
+  export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.type;
+  export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
+  export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
+  export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
+  

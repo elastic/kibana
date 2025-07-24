@@ -7,28 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormulaIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { FormulaValueConfig } from '../types';
+import { LensApiFormulaOperation } from '../schema/metric_ops';
 
 export function getFormulaColumn(
-  id: string,
-  config: FormulaValueConfig,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi,
-  baseLayer?: PersistedIndexPatternLayer
-): PersistedIndexPatternLayer {
-  const { formula, ...rest } = config;
-  const formulaLayer = formulaAPI?.insertOrReplaceFormulaColumn(
-    id,
-    { formula, ...rest },
-    baseLayer || { columnOrder: [], columns: {} },
-    dataView
-  );
+  config: LensApiFormulaOperation,
+): FormulaIndexPatternColumn {
+  const { formula } = config;
+  
+  return {
+    label: `Formula`,
+    dataType: 'number',
+    operationType: 'formula',
+    scale: 'ordinal',
+    isBucketed: true,
+    params: {
+      formula,
+    },
+    references: [],
+  };
+}
 
-  if (!formulaLayer) {
-    throw new Error('Error generating the data layer for the chart');
-  }
+export function fromFormulaColumn(
+  column: FormulaIndexPatternColumn,
+): LensApiFormulaOperation {
+  const { label, params } = column;
 
-  return formulaLayer;
+  return {
+    label,
+    formula: params?.formula || '',
+    operation: 'formula',
+  };
 }
