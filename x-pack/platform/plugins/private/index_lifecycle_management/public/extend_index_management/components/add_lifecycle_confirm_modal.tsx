@@ -23,6 +23,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiModalHeaderTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { Index } from '@kbn/index-management-plugin/common';
@@ -238,6 +239,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   render() {
     const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
+    const modalTitleId = htmlIdGenerator()('confirmModalTitle');
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -284,7 +286,9 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={title}
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={this.addPolicy}
         cancelButtonText={

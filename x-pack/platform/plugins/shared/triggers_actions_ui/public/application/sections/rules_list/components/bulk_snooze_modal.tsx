@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -71,6 +72,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     bulkSnoozeRules,
     bulkUnsnoozeRules,
   } = props;
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const {
     notifications: { toasts },
@@ -135,7 +138,9 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   if (bulkEditAction === 'unsnooze' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={confirmationTitle}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onClose}
         onConfirm={onUnsnoozeRule}
         confirmButtonText={i18n.translate(
