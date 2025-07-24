@@ -230,15 +230,6 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
                */
               setEditorState({ ...editorState, fieldName: newFieldName });
             }
-            /**
-             * make sure that the new field is compatible with the selected control type and, if it's not,
-             * reset the selected control type to the **first** compatible control type
-             */
-            const newCompatibleControlTypes =
-              fieldRegistry?.[newFieldName]?.compatibleControlTypes ?? [];
-            if (!selectedControlType || !newCompatibleControlTypes.includes(selectedControlType!)) {
-              setSelectedControlType(newCompatibleControlTypes[0]);
-            }
 
             /**
              * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)

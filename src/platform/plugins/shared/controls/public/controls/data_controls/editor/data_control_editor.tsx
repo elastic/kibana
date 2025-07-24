@@ -262,11 +262,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       setEditorState({ ...editorState, input: ControlInputOption.ESQL });
     }
 
-    // TODO remove this when range sliders can output ES|QL variables
-    if (showESQLOnly && !selectedControlType) {
-      setSelectedControlType(OPTIONS_LIST_CONTROL);
-    }
-
     // Set the default control label to either the selected field name or entered ES|QL variable name
     switch (editorState.output) {
       case ControlOutputOption.DSL:
@@ -299,14 +294,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         }
         break;
     }
-  }, [
-    hasTouchedOutput,
-    editorState,
-    defaultPanelTitle,
-    isDSLInputMode,
-    showESQLOnly,
-    selectedControlType,
-  ]);
+  }, [hasTouchedOutput, editorState, defaultPanelTitle, isDSLInputMode, showESQLOnly]);
 
   const {
     loading: dataViewListLoading,
@@ -360,6 +348,24 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       cancelled = true;
     };
   }, [selectedControlType]);
+
+  useEffect(() => {
+    const newFieldName = editorState.fieldName;
+
+    // TODO remove this when range sliders can output ES|QL variables
+    if (isESQLOutputMode) {
+      setSelectedControlType(OPTIONS_LIST_CONTROL);
+    } else if (newFieldName) {
+      /**
+       * make sure that the new field is compatible with the selected control type and, if it's not,
+       * reset the selected control type to the **first** compatible control type
+       */
+      const newCompatibleControlTypes = fieldRegistry?.[newFieldName]?.compatibleControlTypes ?? [];
+      if (!selectedControlType || !newCompatibleControlTypes.includes(selectedControlType!)) {
+        setSelectedControlType(newCompatibleControlTypes[0]);
+      }
+    }
+  }, [editorState.fieldName, fieldRegistry, isESQLOutputMode, selectedControlType]);
 
   const CustomSettingsComponent = useMemo(() => {
     if (!controlFactory || !fieldRegistry) return;
