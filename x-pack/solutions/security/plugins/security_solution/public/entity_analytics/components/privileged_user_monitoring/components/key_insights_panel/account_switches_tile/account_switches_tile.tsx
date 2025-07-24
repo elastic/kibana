@@ -19,10 +19,10 @@ export const AccountSwitchesTile: React.FC<{ spaceId: string; sourcerDataView: D
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.accountSwitches.title', {
-        defaultMessage: 'Account Switches',
+        defaultMessage: 'Account switches',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.accountSwitches.label', {
-        defaultMessage: 'Account Switches',
+        defaultMessage: 'Account switches',
       })}
       getEsqlQuery={(namespace) => getAccountSwitchesEsqlCount(namespace, sourcerDataView)}
       id="privileged-user-monitoring-account-switches"

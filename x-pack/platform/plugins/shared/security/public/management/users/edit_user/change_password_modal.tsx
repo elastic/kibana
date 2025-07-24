@@ -151,10 +151,12 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
   const firstFieldRef = useInitialFocus<HTMLInputElement>([isLoading]);
   const modalFormId = useGeneratedHtmlId({ prefix: 'modalForm' });
 
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'changePasswordModalTitle' });
+
   return (
-    <EuiModal onClose={onCancel}>
+    <EuiModal onClose={onCancel} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="confirmModalTitleText">
           <FormattedMessage
             id="xpack.security.management.users.changePasswordForm.title"
             defaultMessage="Change password"
