@@ -4234,7 +4234,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-security-posture-common@link:x-pack/platform/packages/shared/kbn-cloud-security-posture/common":
+"@kbn/cloud-security-posture-common@link:x-pack/solutions/security/packages/kbn-cloud-security-posture/common":
   version "0.0.0"
   uid ""
 
@@ -8250,6 +8250,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/validate-oas@link:src/platform/packages/private/kbn-validate-oas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/vis-default-editor-plugin@link:src/platform/plugins/private/vis_default_editor":
   version "0.0.0"
   uid ""
@@ -10619,6 +10623,16 @@
   integrity sha512-UDAOQJtJDxZHQ5Nm1olycBIsz2wdGX8SdzyGVHmD8EOQYAeDZQyIlQYohDe9nazdIOQLZCIc3fU0G9gqVLkaGQ==
   dependencies:
     "@sentry/types" "7.120.3"
+
+"@seriousme/openapi-schema-validator@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@seriousme/openapi-schema-validator/-/openapi-schema-validator-2.4.1.tgz#09d44527e7cd5c78c72ab51ef29956eb309fcd30"
+  integrity sha512-OX15CKLV2JFGcoXxFVD/CMtWzys+r6G9gArKY8iaUqOkIEqp80ispclk5c8j5i1iEIIlyCRJ0R0N5MddHFg2xg==
+  dependencies:
+    ajv "^8.17.1"
+    ajv-draft-04 "^1.0.0"
+    ajv-formats "^3.0.1"
+    js-yaml "^4.1.0"
 
 "@sideway/address@^4.1.5":
   version "4.1.5"
@@ -13982,19 +13996,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.1":
-  version "12.8.1"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.1.tgz#bf16e34bd9592fa4200d002d408329ee97aa0714"
-  integrity sha512-t5Rame4Gc/540VcOZd28yFe9Xd8lyjKUX+VTiyb1x4ykNXZH5zyDmsu+lj9je2O/jGBVb0pj1Vjcxrxyn+Xk2g==
+"@xyflow/react@^12.8.2":
+  version "12.8.2"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.2.tgz#3e0818699c8d29407bd6f77d88570d38ef513b46"
+  integrity sha512-VifLpxOy74ck283NQOtBn1e8igmB7xo7ADDKxyBHkKd8IKpyr16TgaYOhzqVwNMdB4NT+m++zfkic530L+gEXw==
   dependencies:
-    "@xyflow/system" "0.0.65"
+    "@xyflow/system" "0.0.66"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.65":
-  version "0.0.65"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.65.tgz#1824cb81369e389c34d02297bd1d871f0932004b"
-  integrity sha512-AliQPQeurQMoNlOdySnRoDQl9yDSA/1Lqi47Eo0m98lHcfrTdD9jK75H0tiGj+0qRC10SKNUXyMkT0KL0opg4g==
+"@xyflow/system@0.0.66":
+  version "0.0.66"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.66.tgz#94eec3962e65b8686b314629911b51a7db057059"
+  integrity sha512-TTxESDwPsATnuDMUeYYtKe4wt9v8bRO29dgYBhR8HyhSCzipnAdIL/1CDfFd+WqS1srVreo24u6zZeVIDk4r3Q==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -14187,6 +14201,13 @@ ajv-formats@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-2.1.1.tgz#6e669400659eb74973bbf2e33327180a0996b520"
   integrity sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==
+  dependencies:
+    ajv "^8.0.0"
+
+ajv-formats@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-3.0.1.tgz#3d5dc762bca17679c3c2ea7e90ad6b7532309578"
+  integrity sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==
   dependencies:
     ajv "^8.0.0"
 
@@ -16806,10 +16827,10 @@ create-require@^1.1.0, create-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
-cronstrue@^1.51.0:
-  version "1.51.0"
-  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-1.51.0.tgz#7a63153d61d940344049037628da38a60784c8e2"
-  integrity sha512-fSRAz/MV0TRjeNZKAsovmH/MSsly7+8np4XsfsrjOOz7sjxLrE9SmedRYAs3nPAtLLC5UsMpvenjXYRz463bMA==
+cronstrue@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.0.0.tgz#6af0552db24bd37bbb9d72bc7dbd46d8bae7666e"
+  integrity sha512-acwNTPzndJUmfDmcUN2cpBH4EgVn30rg5BYDAP8n5ENPP8A3IH2Z0UbxaNjvCkKxccjtfsTVhF6d+eHhv/GK5g==
 
 cross-fetch@^3.1.5:
   version "3.2.0"
