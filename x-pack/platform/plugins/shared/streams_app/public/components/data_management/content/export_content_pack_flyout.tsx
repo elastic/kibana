@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -40,6 +41,8 @@ export function ExportContentPackFlyout({
   onClose: () => void;
   onExport: () => void;
 }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     core: { http, notifications },
     dependencies: {
@@ -98,10 +101,10 @@ export function ExportContentPackFlyout({
   const [isExporting, setIsExporting] = useState(false);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate('xpack.streams.streamDetailDashboard.exportContent', {
               defaultMessage: 'Export content pack',
             })}
