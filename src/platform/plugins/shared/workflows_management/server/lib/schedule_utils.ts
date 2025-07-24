@@ -9,7 +9,6 @@
 
 // Define the trigger type based on the schema
 export interface WorkflowTrigger {
-  id: string;
   type: 'triggers.elastic.detectionRule' | 'triggers.elastic.scheduled' | 'triggers.elastic.manual';
   with?: Record<string, any>;
   enabled?: boolean;
