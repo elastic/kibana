@@ -12,7 +12,7 @@ import {
 import { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
 import { StatusRuleExecutor } from '../../alert_rules/status_rule/status_rule_executor';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { ALERTING_SAVE, SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,8 +20,6 @@ export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = (
   validate: {
     body: syntheticsMonitorStatusRuleParamsSchema,
   },
-  requiredPrivileges: [ALERTING_SAVE],
-  writeAccess: false, // setting to false to cancel automatic requirement of uptime write privilege
   handler: async ({
     request,
     server,

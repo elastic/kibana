@@ -7,7 +7,7 @@
 
 import { TLSRuleParams, tlsRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { ALERTING_SAVE, SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { TLSRuleExecutor } from '../../alert_rules/tls_rule/tls_rule_executor';
 
 export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -16,8 +16,6 @@ export const syntheticsInspectTLSRuleRoute: SyntheticsRestApiRouteFactory = () =
   validate: {
     body: tlsRuleParamsSchema,
   },
-  requiredPrivileges: [ALERTING_SAVE],
-  writeAccess: false, // setting to false to cancel automatic requirement of uptime write privilege
   handler: async ({
     request,
     server,
