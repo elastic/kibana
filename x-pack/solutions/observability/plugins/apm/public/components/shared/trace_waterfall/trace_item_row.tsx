@@ -142,11 +142,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
         paddingSize="none"
         forceState={state}
         arrowDisplay="none"
-        onToggle={() => {
-          if (hasToggle) {
-            onToggle(item.id);
-          }
-        }}
         buttonContentClassName="accordion__buttonContent"
         css={css`
           .accordion__buttonContent {
