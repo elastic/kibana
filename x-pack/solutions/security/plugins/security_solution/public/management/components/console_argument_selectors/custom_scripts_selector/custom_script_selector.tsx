@@ -18,12 +18,15 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CustomScript } from '../../../../server/endpoint/services';
-import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
-import type { CommandArgumentValueSelectorProps } from '../console/types';
+import type { CustomScript } from '../../../../../server/endpoint/services';
+import { useConsoleStateDispatch } from '../../console/hooks/state_selectors/use_console_state_dispatch';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { CommandArgumentValueSelectorProps } from '../../console/types';
+import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
 
 // Css to have a tooltip in place with a one line truncated description
 const truncationStyle = css({
@@ -60,6 +63,10 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
   >(({ value, valueText, onChange, store: _store }) => {
     const dispatch = useConsoleStateDispatch();
+    const {
+      services: { notifications },
+    } = useKibana();
+
     const state = useMemo<CustomScriptSelectorState>(() => {
       return _store ?? { isPopoverOpen: true };
     }, [_store]);
@@ -77,7 +84,12 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state, value, valueText]
     );
 
-    const { data = [], isLoading: isLoadingScripts } = useGetCustomScripts(agentType);
+    const {
+      data = [],
+      isLoading: isLoadingScripts,
+      error: scriptsError,
+    } = useGetCustomScripts(agentType);
+
     const scriptsOptions: SelectableOption[] = useMemo(() => {
       return data.map((script: CustomScript) => {
         const isChecked = script.name === value;
@@ -160,7 +172,11 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
-    if (isAwaitingRenderDelay || isLoadingScripts) {
+    // notifications comes from useKibana() and is of type NotificationsStart
+    // which is compatible with our updated useCustomScriptsErrorToast function
+    useCustomScriptsErrorToast(scriptsError, notifications);
+
+    if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {
       return <EuiLoadingSpinner />;
     }
 
@@ -206,6 +222,14 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
               showIcons: true,
               textWrap: 'truncate',
             }}
+            errorMessage={
+              scriptsError ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.customScriptSelector.errorLoading"
+                  defaultMessage="Error loading scripts"
+                />
+              ) : undefined
+            }
           >
             {(list, search) => (
               <>
