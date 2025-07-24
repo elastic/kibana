@@ -230,7 +230,7 @@ export class WorkflowsService {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
     // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
@@ -249,9 +249,9 @@ export class WorkflowsService {
     );
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.triggers) {
-      for (const trigger of workflowToCreate.triggers) {
-        if (trigger.type === 'schedule' && trigger.enabled) {
+    if (this.taskScheduler && workflowToCreate.definition.workflow.triggers) {
+      for (const trigger of workflowToCreate.definition.workflow.triggers) {
+        if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
       }
@@ -266,7 +266,7 @@ export class WorkflowsService {
       createdBy: response.attributes.createdBy,
       lastUpdatedAt: new Date(response.updated_at!),
       lastUpdatedBy: response.attributes.lastUpdatedBy,
-      definition: response.attributes.definition as any,
+      definition: response.attributes.definition,
       yaml: response.attributes.yaml,
     };
   }

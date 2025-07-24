@@ -17,12 +17,13 @@ import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
+import { type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
-
-import './vega_editor.scss';
 
 function format(
   value: string,
@@ -48,7 +49,30 @@ function format(
   }
 }
 
+const vegaVisStyles = {
+  base: css({
+    '&.vgaEditor': {
+      width: '100%',
+      flexGrow: 1,
+
+      '.kibanaCodeEditor': {
+        width: '100%',
+      },
+    },
+  }),
+  editorActions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      zIndex: euiTheme.levels.flyout,
+      top: euiTheme.size.s,
+      // Adjust for sidebar collapse button
+      right: euiTheme.size.xxl,
+      lineHeight: 1,
+    }),
+};
+
 function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+  const styles = useMemoCss(vegaVisStyles);
   const [languageId, setLanguageId] = useState<string>();
 
   useMount(() => {
@@ -97,8 +121,8 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
   }
 
   return (
-    <div className="vgaEditor" data-test-subj="vega-editor">
-      <div className="vgaEditor__editorActions">
+    <div className="vgaEditor" data-test-subj="vega-editor" css={styles.base}>
+      <div className="vgaEditor__editorActions" css={styles.editorActions}>
         <VegaHelpMenu />
         <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
       </div>
