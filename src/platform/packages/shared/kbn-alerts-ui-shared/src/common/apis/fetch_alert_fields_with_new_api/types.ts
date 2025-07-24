@@ -9,7 +9,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 
-export interface FetchAlertsFieldsNewApiParams {
+export interface FetchAlertsFieldsWithNewApiParams {
   // Dependencies
   http: HttpSetup;
 

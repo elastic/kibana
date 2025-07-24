@@ -11,27 +11,24 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
-import type { FetchAlertsFieldsNewApiParams } from '../apis/fetch_alert_fields_new_api';
-import { fetchAlertsFieldsNewApi } from '../apis/fetch_alert_fields_new_api';
+import type { FetchAlertsFieldsWithNewApiParams } from '../apis/fetch_alert_fields_with_new_api';
+import { fetchAlertsFieldsWithNewApi } from '../apis/fetch_alert_fields_with_new_api';
 
-export type UseFetchAlertsFieldsNewApiQueryParams = FetchAlertsFieldsNewApiParams & {
+export type UseFetchAlertsFieldsWithNewApiQueryParams = FetchAlertsFieldsWithNewApiParams & {
   toasts: ToastsStart;
 };
 
-// Query key prefix MUST contain explicit strings, not fetchAlertsFields.name
+// Query key prefix MUST contain explicit strings, not fetchAlertsFieldsViaNewApi.name
 // Production builds cannot guarantee a unique function name
 const queryKeyPrefix = ['alerts', 'fetchAlertsFieldsViaNewApi'];
 
 /**
- * Fetch alerts indexes alert fields for the given feature ids
- *
- * When testing components that depend on this hook, prefer mocking the {@link fetchAlertsFields} function instead of the hook itself.
- * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
+ * Fetch fields for the given rule type ids
  */
-export const useFetchAlertsFieldsNewApi = (
-  { http, ...params }: UseFetchAlertsFieldsNewApiQueryParams,
+export const useFetchAlertsFieldsWithNewApi = (
+  { http, ...params }: UseFetchAlertsFieldsWithNewApiQueryParams,
   options?: Pick<
-    QueryOptionsOverrides<typeof fetchAlertsFieldsNewApi>,
+    QueryOptionsOverrides<typeof fetchAlertsFieldsWithNewApi>,
     'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
@@ -39,8 +36,8 @@ export const useFetchAlertsFieldsNewApi = (
 
   return useQuery({
     queryKey: queryKeyPrefix.concat(ruleTypeIds),
-    queryFn: () => fetchAlertsFieldsNewApi({ http, ruleTypeIds }),
-    placeholderData: { alertFields: {}, fields: [] },
+    queryFn: () => fetchAlertsFieldsWithNewApi({ http, ruleTypeIds }),
+    placeholderData: { fields: [] },
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     ...options,

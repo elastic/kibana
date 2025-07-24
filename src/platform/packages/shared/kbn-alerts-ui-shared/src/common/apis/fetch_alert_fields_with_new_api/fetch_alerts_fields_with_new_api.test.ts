@@ -8,24 +8,22 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { fetchAlertsFieldsNewApi } from './fetch_alerts_fields_new_api';
+import { fetchAlertsFieldsWithNewApi } from './fetch_alerts_fields_with_new_api';
 
-describe('fetchAlertsFieldsNewApi', () => {
+describe('fetchAlertsFieldsWithNewApi', () => {
   const http = httpServiceMock.createStartContract();
-  test('should call the alert_fields API with the correct parameters', async () => {
+  test('should call the alerts fields API with the correct parameters', async () => {
     const ruleTypeIds = ['.es-query'];
 
     http.get.mockResolvedValueOnce({
-      alertFields: { fakeCategory: {} },
       fields: [
         {
           name: 'fakeCategory',
         },
       ],
     });
-    const result = await fetchAlertsFieldsNewApi({ http, ruleTypeIds });
+    const result = await fetchAlertsFieldsWithNewApi({ http, ruleTypeIds });
     expect(result).toEqual({
-      alertFields: { fakeCategory: {} },
       fields: [
         {
           name: 'fakeCategory',
@@ -33,7 +31,7 @@ describe('fetchAlertsFieldsNewApi', () => {
       ],
     });
     expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/fields', {
-      query: { ruleTypeIds },
+      query: { rule_type_ids: ruleTypeIds },
     });
   });
 });

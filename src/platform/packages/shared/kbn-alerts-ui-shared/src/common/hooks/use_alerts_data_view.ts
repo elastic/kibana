@@ -112,7 +112,7 @@ export const useAlertsDataView = ({
   } = useFetchAlertsIndexNamesQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features
+      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features or using new api to fetch fields
       enabled:
         !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity) && !enableNewAPIForFields,
     }
@@ -173,7 +173,7 @@ export const useAlertsDataView = ({
 
   return useMemo(() => {
     let isLoading: boolean;
-    if (!ruleTypeIds.length || hasMixedFeatureIds) {
+    if (!ruleTypeIds.length || hasMixedFeatureIds || enableNewAPIForFields) {
       isLoading = false;
     } else {
       if (isOnlySecurity) {
@@ -200,5 +200,6 @@ export const useAlertsDataView = ({
     isLoadingFields,
     isLoadingIndexNames,
     isOnlySecurity,
+    enableNewAPIForFields,
   ]);
 };

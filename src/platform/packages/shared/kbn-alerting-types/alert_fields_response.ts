@@ -8,15 +8,7 @@
  */
 
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import type { AlertFields } from '@kbn/alerting-types';
-import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
-import type { FetchAlertsFieldsNewApiParams } from './types';
 
-export const fetchAlertsFieldsNewApi = ({ http, ruleTypeIds }: FetchAlertsFieldsNewApiParams) => {
-  return http.get<{ alertFields: AlertFields; fields: FieldDescriptor[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/fields`,
-    {
-      query: { ruleTypeIds },
-    }
-  );
-};
+export interface GetAlertFieldsResponse {
+  fields: FieldDescriptor[];
+}

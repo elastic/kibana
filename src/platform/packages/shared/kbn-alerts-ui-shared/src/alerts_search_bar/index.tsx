@@ -14,7 +14,7 @@ import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertsDataView, useFetchAlertsFieldsNewApi } from '../common/hooks';
+import { useAlertsDataView, useFetchAlertsFieldsWithNewApi } from '../common/hooks';
 
 export type { AlertsSearchBarProps } from './types';
 
@@ -52,7 +52,7 @@ export const AlertsSearchBar = ({
     enableNewAPIForFields,
   });
 
-  const { data: alertFields } = useFetchAlertsFieldsNewApi(
+  const { data: alertFields } = useFetchAlertsFieldsWithNewApi(
     { http, ruleTypeIds, toasts },
     {
       enabled: enableNewAPIForFields,
@@ -68,13 +68,15 @@ export const AlertsSearchBar = ({
       return [dataView];
     }
 
-    if (ruleTypeIds.length > 0 && alertFields?.fields.length) {
-      return [{ title: ruleTypeIds.join(','), fields: alertFields.fields }];
+    if (alertFields?.fields.length) {
+      return [
+        {
+          title: ruleTypeIds.length ? ruleTypeIds.join(',') : DEFAULT_INDEX_PATTERN_TITLE,
+          fields: alertFields.fields,
+        },
+      ];
     }
 
-    if (!ruleTypeIds.length && alertFields?.fields.length) {
-      return [{ title: DEFAULT_INDEX_PATTERN_TITLE, fields: alertFields.fields }];
-    }
     return null;
   }, [dataView, ruleTypeIds, alertFields]);
 

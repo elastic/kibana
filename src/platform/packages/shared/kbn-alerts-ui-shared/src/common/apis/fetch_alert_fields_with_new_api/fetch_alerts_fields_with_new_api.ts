@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './fetch_alerts_fields_new_api';
+import type { GetAlertFieldsResponse } from '@kbn/alerting-types';
+import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
+import type { FetchAlertsFieldsWithNewApiParams } from './types';
+
+export const fetchAlertsFieldsWithNewApi = ({
+  http,
+  ruleTypeIds,
+}: FetchAlertsFieldsWithNewApiParams) => {
+  return http.get<GetAlertFieldsResponse>(`${BASE_RAC_ALERTS_API_PATH}/fields`, {
+    query: { rule_type_ids: ruleTypeIds },
+  });
+};

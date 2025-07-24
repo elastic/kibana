@@ -11,7 +11,7 @@ import React, { FC } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
-import { useFetchAlertsFieldsNewApi } from './use_fetch_alerts_fields_new_api';
+import { useFetchAlertsFieldsWithNewApi } from './use_fetch_alerts_fields_with_new_api';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
@@ -28,14 +28,13 @@ const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 const mockHttpClient = httpServiceMock.createStartContract();
 const mockToasts = notificationServiceMock.createStartContract().toasts;
 
-const emptyData = { alertFields: {}, fields: [] };
+const emptyData = { fields: [] };
 
 describe('useFetchAlertsFieldsNewApi', () => {
   const mockHttpGet = jest.mocked(mockHttpClient.get);
 
   beforeEach(() => {
     mockHttpGet.mockResolvedValue({
-      alertFields: { fakeCategory: {} },
       fields: [
         {
           name: 'fakeCategory',
@@ -52,7 +51,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should return all fields when empty rule types', async () => {
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsNewApi({
+        useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: [],
@@ -65,14 +64,11 @@ describe('useFetchAlertsFieldsNewApi', () => {
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/fields', {
-        query: { ruleTypeIds: [] },
+        query: { rule_type_ids: [] },
       });
     });
 
     expect(result.current.data).toEqual({
-      alertFields: {
-        fakeCategory: {},
-      },
       fields: [
         {
           name: 'fakeCategory',
@@ -84,7 +80,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should fetch for single rule types', () => {
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsNewApi({
+        useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: ['logs'],
@@ -104,7 +100,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
         ruleTypeIds,
         enabled,
       }: React.PropsWithChildren<{ ruleTypeIds: string[]; enabled?: boolean }>) =>
-        useFetchAlertsFieldsNewApi(
+        useFetchAlertsFieldsWithNewApi(
           { http: mockHttpClient, toasts: mockToasts, ruleTypeIds },
           { enabled }
         ),
@@ -131,7 +127,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should call the api only once', async () => {
     const { result, rerender } = renderHook(
       () =>
-        useFetchAlertsFieldsNewApi({
+        useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: ['apm'],
@@ -144,7 +140,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(result.current.data).toEqual({
-        alertFields: { fakeCategory: {} },
         fields: [
           {
             name: 'fakeCategory',
@@ -158,7 +153,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(result.current.data).toEqual({
-        alertFields: { fakeCategory: {} },
         fields: [
           {
             name: 'fakeCategory',
@@ -171,7 +165,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should fetch for siem rule types', async () => {
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsNewApi({
+        useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'],
@@ -184,7 +178,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
       expect(result.current.data).toEqual({
-        alertFields: { fakeCategory: {} },
         fields: [
           {
             name: 'fakeCategory',
@@ -199,7 +192,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
 
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsNewApi({
+        useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: [],

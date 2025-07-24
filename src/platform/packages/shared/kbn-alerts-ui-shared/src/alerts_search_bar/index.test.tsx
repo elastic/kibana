@@ -12,7 +12,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { useAlertsDataView, useFetchAlertsFieldsNewApi } from '../common/hooks';
+import { useAlertsDataView, useFetchAlertsFieldsWithNewApi } from '../common/hooks';
 import { AlertsSearchBar } from '.';
 import { HttpStart } from '@kbn/core-http-browser';
 
@@ -22,7 +22,7 @@ jest.mock('../common/hooks');
 
 const mockUseAlertsDataView = jest.mocked(useAlertsDataView);
 
-const mockuseFetchAlertsFieldsNewApi = jest.mocked(useFetchAlertsFieldsNewApi);
+const mockUseFetchAlertsFieldsWithNewApi = jest.mocked(useFetchAlertsFieldsWithNewApi);
 
 const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
   <button
@@ -50,10 +50,9 @@ describe('AlertsSearchBar', () => {
     });
 
     // @ts-expect-error: mocking only necessary attributes
-    mockuseFetchAlertsFieldsNewApi.mockReturnValue({
+    mockUseFetchAlertsFieldsWithNewApi.mockReturnValue({
       isLoading: false,
       data: {
-        alertFields: {},
         fields: [],
       },
     });
@@ -309,10 +308,9 @@ describe('AlertsSearchBar', () => {
         dataView: undefined,
       });
 
-      mockuseFetchAlertsFieldsNewApi.mockReturnValue({
+      mockUseFetchAlertsFieldsWithNewApi.mockReturnValue({
         isLoading: false,
         data: {
-          alertFields: {},
           fields: [
             // @ts-expect-error: mocking only necessary attributes
             {
@@ -537,10 +535,9 @@ describe('AlertsSearchBar', () => {
 
     it('calls the unifiedSearchBar with correct index patters without data views', async () => {
       // @ts-expect-error: mocking only necessary attributes
-      jest.mocked(mockuseFetchAlertsFieldsNewApi).mockReturnValue({
+      jest.mocked(mockUseFetchAlertsFieldsWithNewApi).mockReturnValue({
         isLoading: false,
         data: {
-          alertFields: {},
           fields: [],
         },
       });
