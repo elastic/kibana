@@ -37,7 +37,7 @@ export const selectorRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('basic', ['canFindFileStructure']);
+  const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
