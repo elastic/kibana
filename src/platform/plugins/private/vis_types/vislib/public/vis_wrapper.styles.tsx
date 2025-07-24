@@ -11,12 +11,14 @@ import React from 'react';
 import { Global } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { vislibLayoutStyles } from './vislib/lib/layout/layout.styles';
+import { vislibMeterStyles } from './vislib/visualizations/gauges/meter.styles';
 
 // Styles for non-React DOM nodes
 export const GlobalVislibWrapperStyles = () => {
-  const euiTheme = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
-  const layoutStyles = vislibLayoutStyles(euiTheme);
+  const layoutStyles = vislibLayoutStyles(euiThemeContext);
+  const meterStyles = vislibMeterStyles(euiThemeContext);
 
-  return <Global styles={layoutStyles} />;
+  return <Global styles={[layoutStyles, meterStyles]} />;
 };
