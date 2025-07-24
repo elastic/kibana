@@ -318,7 +318,7 @@ export class CoreAppsService {
           version: '1',
           validate: {
             request: {
-              body: schema.recordOf(schema.string(), schema.any()),
+              body: schema.recordOf(schema.string(), any()),
             },
             response: {
               '200': { body: () => schema.object({ ok: schema.boolean() }) },

@@ -33,6 +33,7 @@ import {
   LensDatatableDataset,
   LensESQLDataset,
 } from './types';
+import { LensApiState } from './zod_schema';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -52,7 +53,7 @@ export const getDefaultReferences = (
   ];
 };
 
-export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
+export function mapToFormula(layer: LensApiState): FormulaValueConfig {
   const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
 
   const formulaFormat: FormulaValueConfig['format'] | undefined = format
@@ -141,17 +142,17 @@ export async function getDataView(
   return dataView;
 }
 
-export function getDatasetIndex(dataset?: LensDataset) {
+export function getDatasetIndex(dataset?: LensApiState['dataset']) {
   if (!dataset) return undefined;
 
   let index: string;
   let timeFieldName: string = '@timestamp';
 
-  if ('index' in dataset) {
+  if (dataset.type === 'index') {
     index = dataset.index;
-    timeFieldName = dataset.timeFieldName || '@timestamp';
-  } else if ('esql' in dataset) {
-    index = getIndexPatternFromESQLQuery(dataset.esql); // parseIndexFromQuery(config.dataset.query);
+    timeFieldName = dataset.time_field || '@timestamp';
+  } else if (dataset.type === 'esql') {
+    index = getIndexPatternFromESQLQuery(dataset.query); // parseIndexFromQuery(config.dataset.query);
   } else {
     return undefined;
   }
@@ -160,9 +161,9 @@ export function getDatasetIndex(dataset?: LensDataset) {
 }
 
 function buildDatasourceStatesLayer(
-  layer: LensBaseLayer | LensBaseXYLayer,
+  layer: LensApiState,
   i: number,
-  dataset: LensDataset,
+  dataset: LensApiState['dataset'],
   dataView: DataView | undefined,
   buildFormulaLayers: (
     config: unknown,
@@ -172,9 +173,9 @@ function buildDatasourceStatesLayer(
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
-    config: LensBaseLayer | LensBaseXYLayer
+    config: LensApiState
   ): TextBasedPersistedState['layers'][0] {
-    const table = dataset as LensDatatableDataset;
+    const table = dataset as unknown as LensDatatableDataset;
     const newLayer = {
       table,
       columns: getValueColumns(layer, i),
@@ -194,13 +195,13 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(
-    config: LensBaseLayer | LensBaseXYLayer
+    config: LensApiState
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(layer, i);
+    const columns = getValueColumns(layer, i) as TextBasedLayerColumn[];
 
     const newLayer = {
       index: dataView!.id!,
-      query: { esql: (dataset as LensESQLDataset).esql } as AggregateQuery,
+      query: { esql: (dataset as any).query } as AggregateQuery,
       timeField: dataView!.timeFieldName,
       columns,
       allColumns: columns,
@@ -209,15 +210,15 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  if ('esql' in dataset) {
+  if (dataset.type === 'esql') {
     return ['textBased', buildESQLLayer(layer)];
-  } else if ('type' in dataset) {
+  } else if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer)];
   }
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config: LensApiState,
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
@@ -230,14 +231,21 @@ export const buildDatasourceStates = async (
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   const mainDataset = config.dataset;
-  const configLayers = 'layers' in config ? config.layers : [config];
+  const configLayers = 'layers' in config ? config.layers as LensApiState[] : [config];
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
     const dataset = layer.dataset || mainDataset;
 
-    if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
+    // if (!dataset && 'type' in layer && layer.type !== 'annotation') {
+    //   throw Error('dataset must be defined');
+    // }
+    if (!dataset) {
       throw Error('dataset must be defined');
+    }
+
+    if (dataset.type !== 'index' && dataset.type !== 'esql') {
+      throw Error('dataset must be of type index or esql');
     }
 
     const index = getDatasetIndex(dataset);

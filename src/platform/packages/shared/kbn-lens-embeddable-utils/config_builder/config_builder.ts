@@ -10,7 +10,7 @@
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { LensAttributes, LensConfig, LensConfigOptions } from './types';
+import { LensAttributes, LensConfigOptions } from './types';
 import {
   buildGauge,
   buildHeatmap,
@@ -22,21 +22,26 @@ import {
   buildPartitionChart,
 } from './charts';
 
+import { LensApiState } from './zod_schema'
+
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export class LensConfigBuilder {
   private charts = {
+    legacy_metric: buildMetric,
     metric: buildMetric,
     tagcloud: buildTagCloud,
     treemap: buildPartitionChart,
     pie: buildPartitionChart,
     donut: buildPartitionChart,
+    waffle: buildPartitionChart,
     gauge: buildGauge,
     heatmap: buildHeatmap,
     mosaic: buildPartitionChart,
     regionmap: buildRegionMap,
     xy: buildXY,
     table: buildTable,
+    datatable: buildTable,
   };
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
@@ -48,11 +53,11 @@ export class LensConfigBuilder {
   }
 
   async build(
-    config: LensConfig,
+    config: LensApiState,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
-    const { chartType } = config;
-    const chartConfig = await this.charts[chartType](config as any, {
+    const { type } = config;
+    const chartConfig = await this.charts[type](config as any, {
       formulaAPI: this.formulaAPI,
       dataViewsAPI: this.dataViewsAPI,
     });
