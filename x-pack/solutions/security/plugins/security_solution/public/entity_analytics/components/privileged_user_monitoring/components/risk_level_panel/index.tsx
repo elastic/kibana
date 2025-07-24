@@ -79,11 +79,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
   const isDisabled = !hasEngineBeenInstalled && !isLoading;
 
   if (isDisabled) {
-    return (
-      <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
-      </EuiPanel>
-    );
+    return <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />;
   }
 
   return (
