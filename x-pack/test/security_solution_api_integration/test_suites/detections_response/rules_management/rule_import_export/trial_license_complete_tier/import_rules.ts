@@ -974,16 +974,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
-            // console.log(JSON.stringify(await es.search({ index: '.kibana_alerting_cases' })));
+            log.debug(
+              `TEST SUITE - .kibana_alerting_cases before: ${JSON.stringify(
+                await es.search({ index: '.kibana_alerting_cases' })
+              )}`
+            );
 
-            const { body } = await supertest
+            const importResult = await supertest
               .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
               .set('kbn-xsrf', 'true')
               .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson')
-              .expect(200);
+              .attach('file', buffer, 'rules.ndjson');
 
-            expect(body).toMatchObject({
+            log.debug(`TEST SUITE - importResult: ${JSON.stringify(importResult)}`);
+
+            log.debug(
+              `TEST SUITE - .kibana_alerting_cases after: ${JSON.stringify(
+                await es.search({ index: '.kibana_alerting_cases' })
+              )}`
+            );
+
+            expect(importResult.body).toMatchObject({
               success: true,
               success_count: 1,
               errors: [],

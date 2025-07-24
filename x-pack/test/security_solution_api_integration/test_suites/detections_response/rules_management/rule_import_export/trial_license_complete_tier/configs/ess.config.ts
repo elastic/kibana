@@ -28,8 +28,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             name: 'plugins.securitySolution',
             level: 'debug',
           },
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+          },
         ])}`,
       ],
+    },
+    mochaReporter: {
+      ...functionalConfig.get('mochaReporter'),
+      captureLogOutput: true,
+      sendToCiStats: true,
     },
   };
 }

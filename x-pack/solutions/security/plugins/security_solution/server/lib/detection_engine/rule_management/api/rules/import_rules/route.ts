@@ -45,7 +45,7 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  logger: Logger
+  logger?: Logger
 ) => {
   router.versioned
     .post({
@@ -80,7 +80,9 @@ export const importRulesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         function logDebug(message: string) {
-          logger.debug(message);
+          if (logger?.debug) {
+            logger.debug(message);
+          }
         }
 
         logDebug('IMPORT HANDLER - Import rules route handler started.');
