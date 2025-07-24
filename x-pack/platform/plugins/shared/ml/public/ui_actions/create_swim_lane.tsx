@@ -65,27 +65,41 @@ export function createAddSwimlanePanelAction(
           '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
         );
 
-        const initialState = await resolveAnomalySwimlaneUserInput(
+        resolveAnomalySwimlaneUserInput(
           {
             ...coreStart,
             ...pluginStart,
           },
           context.embeddable,
-          context.embeddable.uuid
+          (initialState) => {
+            presentationContainerParent.addNewPanel({
+              panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+              serializedState: { rawState: initialState },
+            });
+          }
         );
-
-        presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState: {
-              ...initialState,
-              title: initialState.panelTitle,
-            },
-          },
-        });
       } catch (e) {
         return Promise.reject();
       }
     },
   };
 }
+
+// const initialState = await resolveAnomalySwimlaneUserInput(
+//   {
+//     ...coreStart,
+//     ...pluginStart,
+//   },
+//   context.embeddable,
+//   context.embeddable.uuid
+// );
+
+// presentationContainerParent.addNewPanel({
+//   panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+//   serializedState: {
+//     rawState: {
+//       ...initialState,
+//       title: initialState.panelTitle,
+//     },
+//   },
+// });
