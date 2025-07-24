@@ -254,27 +254,29 @@ async function getActions(
 export async function getCancelledActions(
   esClient: ElasticsearchClient
 ): Promise<Array<{ actionId: string; timestamp?: string }>> {
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    ignore_unavailable: true,
-    size: SO_SEARCH_LIMIT,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              type: 'CANCEL',
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  return res.hits.hits.map((hit) => ({
-    actionId: hit._source?.data?.target_id as string,
-    timestamp: hit._source?.['@timestamp'],
-  }));
+  try {
+    const esqlQuery = `FROM ${AGENT_ACTIONS_INDEX} METADATA _source
+  | WHERE type == "CANCEL"
+  | SORT @timestamp DESC 
+  | KEEP _source
+  | LIMIT ${SO_SEARCH_LIMIT}`;
+    const res = await esClient.esql.query({
+      query: esqlQuery,
+    });
+    return res.values.map((value: any) => {
+      const source = value[0] as FleetServerAgentAction;
+      return {
+        actionId: source.data?.target_id as string,
+        timestamp: source['@timestamp'] as string,
+      };
+    });
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return [];
+    } else {
+      throw err;
+    }
+  }
 }
 
 async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {

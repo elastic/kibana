@@ -73,37 +73,28 @@ export const getAgentsPerVersion = async (
   abortController: AbortController
 ): Promise<AgentPerVersion[]> => {
   try {
+    const esqlQuery = `FROM ${AGENTS_INDEX}
+  | WHERE active: "true"
+  | STATS COUNT(*) BY "agent.version"`;
+
     const response = await retryTransientEsErrors(() =>
-      esClient.search(
+      esClient.esql.query(
         {
-          index: AGENTS_INDEX,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    active: 'true',
-                  },
-                },
-              ],
-            },
-          },
-          size: 0,
-          aggs: {
-            versions: {
-              terms: { field: 'agent.version' },
-            },
-          },
+          query: esqlQuery,
         },
         { signal: abortController.signal }
       )
     );
-    return ((response?.aggregations?.versions as any).buckets ?? []).map((bucket: any) => ({
-      version: bucket.key,
-      count: bucket.doc_count,
-    }));
+    return response.values.map((value: any) => {
+      const version = value[1] as string;
+      const count = value[0] as number;
+      return {
+        version,
+        count,
+      };
+    });
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (error.statusCode === 400 && error.message.includes('Unknown index')) {
       appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
     } else {
       throw error;
@@ -128,59 +119,48 @@ export const getUpgradingSteps = async (
     failed: 0,
   };
   try {
+    const esqlQuery = `FROM ${AGENTS_INDEX}
+  | WHERE active: "true" AND "upgrade_details.state" IS NOT NULL
+  | STATS COUNT(*) BY "upgrade_details.state"`;
+
     const response = await retryTransientEsErrors(() =>
-      esClient.search(
+      esClient.esql.query(
         {
-          index: AGENTS_INDEX,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    active: 'true',
-                  },
-                },
-              ],
-            },
-          },
-          size: 0,
-          aggs: {
-            upgrade_details: {
-              terms: { field: 'upgrade_details.state' },
-            },
-          },
+          query: esqlQuery,
         },
         { signal: abortController.signal }
       )
     );
-    ((response?.aggregations?.upgrade_details as any).buckets ?? []).forEach((bucket: any) => {
-      switch (bucket.key) {
+    response.values.forEach((value: any) => {
+      const state = value[1] as string;
+      const count = value[0] as number;
+      switch (state) {
         case 'UPG_REQUESTED':
-          upgradingSteps.requested = bucket.doc_count;
+          upgradingSteps.requested = count;
           break;
         case 'UPG_SCHEDULED':
-          upgradingSteps.scheduled = bucket.doc_count;
+          upgradingSteps.scheduled = count;
           break;
         case 'UPG_DOWNLOADING':
-          upgradingSteps.downloading = bucket.doc_count;
+          upgradingSteps.downloading = count;
           break;
         case 'UPG_EXTRACTING':
-          upgradingSteps.extracting = bucket.doc_count;
+          upgradingSteps.extracting = count;
           break;
         case 'UPG_REPLACING':
-          upgradingSteps.replacing = bucket.doc_count;
+          upgradingSteps.replacing = count;
           break;
         case 'UPG_RESTARTING':
-          upgradingSteps.restarting = bucket.doc_count;
+          upgradingSteps.restarting = count;
           break;
         case 'UPG_WATCHING':
-          upgradingSteps.watching = bucket.doc_count;
+          upgradingSteps.watching = count;
           break;
         case 'UPG_ROLLBACK':
-          upgradingSteps.rollback = bucket.doc_count;
+          upgradingSteps.rollback = count;
           break;
         case 'UPG_FAILED':
-          upgradingSteps.failed = bucket.doc_count;
+          upgradingSteps.failed = count;
           break;
         default:
           break;
@@ -188,7 +168,7 @@ export const getUpgradingSteps = async (
     });
     return upgradingSteps;
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (error.statusCode === 400 && error.message.includes('Unknown index')) {
       appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
     } else {
       throw error;
@@ -207,30 +187,29 @@ export const getUnhealthyReason = async (
     other: 0,
   };
   try {
+    const esqlQuery = `FROM ${AGENTS_INDEX}
+  | WHERE "unhealthy_reason" IS NOT NULL
+  | STATS COUNT(*) BY "unhealthy_reason"`;
     const response = await retryTransientEsErrors(() =>
-      esClient.search(
+      esClient.esql.query(
         {
-          index: AGENTS_INDEX,
-          size: 0,
-          aggs: {
-            unhealthy_reason: {
-              terms: { field: 'unhealthy_reason' },
-            },
-          },
+          query: esqlQuery,
         },
         { signal: abortController.signal }
       )
     );
-    ((response?.aggregations?.unhealthy_reason as any)?.buckets ?? []).forEach((bucket: any) => {
-      switch (bucket.key) {
+    response.values.forEach((value: any) => {
+      const reason = value[1] as string;
+      const count = value[0] as number;
+      switch (reason) {
         case 'input':
-          unhealthyReason.input = bucket.doc_count;
+          unhealthyReason.input = count;
           break;
         case 'output':
-          unhealthyReason.output = bucket.doc_count;
+          unhealthyReason.output = count;
           break;
         case 'other':
-          unhealthyReason.other = bucket.doc_count;
+          unhealthyReason.other = count;
           break;
         default:
           break;
@@ -238,7 +217,7 @@ export const getUnhealthyReason = async (
     });
     return unhealthyReason;
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (error.statusCode === 400 && error.message.includes('Unknown index')) {
       appContextService.getLogger().debug('Index .fleet-agents does not exist yet.');
     } else {
       throw error;
