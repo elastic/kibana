@@ -278,25 +278,32 @@ export async function getCancelledActions(
 }
 
 async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
-  const esqlQuery = `FROM ${AGENTS_INDEX} 
+  try {
+    const esqlQuery = `FROM ${AGENTS_INDEX} 
     | WHERE \`agent.id\` IN (${agentIds.map((a) => `"${a}"`).join(', ')}) 
     | KEEP \`agent.id\`, \`local_metadata.host.name\`
     | LIMIT ${agentIds.length}`;
 
-  const agentsRes = await esClient.esql.query({
-    query: esqlQuery,
-  });
+    const agentsRes = await esClient.esql.query({
+      query: esqlQuery,
+    });
 
-  const hostNames = agentsRes.values.reduce((acc: { [key: string]: string }, curr) => {
-    if (curr[1]) {
-      const agentId = curr[0] as string;
-      const hostName = curr[1] as string;
-      acc[agentId] = hostName;
+    const hostNames = agentsRes.values.reduce((acc: { [key: string]: string }, curr) => {
+      if (curr[1]) {
+        const agentId = curr[0] as string;
+        const hostName = curr[1] as string;
+        acc[agentId] = hostName;
+      }
+      return acc;
+    }, {});
+
+    return hostNames;
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return {};
     }
-    return acc;
-  }, {});
-
-  return hostNames;
+    throw err;
+  }
 }
 
 export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>

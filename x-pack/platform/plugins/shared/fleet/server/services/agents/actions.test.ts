@@ -455,58 +455,39 @@ describe('Agent actions', () => {
     });
 
     it('should find agents assigned to agent policies when passing agent policy action ids', async () => {
-      esClientMock.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'agent1',
-            },
-            {
-              _id: 'agent2',
-            },
-          ],
-        },
+      esClientMock.esql.query.mockResponse({
+        values: [['agent1'], ['agent2']],
       } as any);
       const actionsIds = ['action1:1'];
       expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual(['agent1', 'agent2']);
     });
 
     it('should find agents when passing both agent action and agent policy action ids', async () => {
-      esClientMock.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  action_id: 'action2',
-                  agents: ['agent3', 'agent4'],
-                  expiration: '2022-05-12T18:16:18.019Z',
-                  type: 'UPGRADE',
-                },
+      esClientMock.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action_id: 'action2',
+                agents: ['agent3', 'agent4'],
+                expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UPGRADE',
               },
-              {
-                _source: {
-                  action_id: 'action3',
-                  agents: ['agent5', 'agent6', 'agent7'],
-                  expiration: '2022-05-12T18:16:18.019Z',
-                  type: 'UNENROLL',
-                },
+            },
+            {
+              _source: {
+                action_id: 'action3',
+                agents: ['agent5', 'agent6', 'agent7'],
+                expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UNENROLL',
               },
-            ],
-          },
-        } as any)
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'agent1',
-              },
-              {
-                _id: 'agent2',
-              },
-            ],
-          },
-        } as any);
+            },
+          ],
+        },
+      } as any);
+      esClientMock.esql.query.mockResponse({
+        values: [['agent1'], ['agent2']],
+      } as any);
 
       const actionsIds = ['action1:1', 'action2', 'actions3'];
 
@@ -527,6 +508,9 @@ describe('Agent actions', () => {
         hits: {
           hits: [],
         },
+      } as any);
+      esClientMock.esql.query.mockResponse({
+        values: [],
       } as any);
       const actionsIds = ['action1:1', 'action2'];
       expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual([]);

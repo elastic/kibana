@@ -13,47 +13,18 @@ import { getAgentCountForAgentPolicies } from './agent_policy_agent_count';
 describe('When using `getAgentCountForAgentPolicies()`', () => {
   let esClientMock: ElasticsearchClientMock;
   let agentPolicyIds: string[];
-  let aggrBuckets: Array<{ key: string; doc_count: number }>;
 
   beforeEach(() => {
     agentPolicyIds = ['agent-policy-id-a', 'agent-policy-id-b'];
 
-    aggrBuckets = [
-      {
-        key: 'agent-policy-id-a',
-        doc_count: 100,
-      },
-      {
-        key: 'agent-policy-id-b',
-        doc_count: 50,
-      },
-    ];
-
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClientMock.search.mockImplementation(async () => {
-      return {
-        took: 3,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 100,
-          max_score: 0,
-          hits: [],
-        },
-        aggregations: {
-          agent_counts: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: aggrBuckets,
-          },
-        },
-      };
-    });
+
+    esClientMock.esql.query.mockResolvedValue({
+      values: [
+        [100, 'agent-policy-id-a'],
+        [50, 'agent-policy-id-b'],
+      ],
+    } as any);
   });
 
   it('should return an object with counts', async () => {
@@ -64,7 +35,9 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
   });
 
   it('should always return the policy id count, even if agent counts are not found for it', async () => {
-    aggrBuckets.pop();
+    esClientMock.esql.query.mockResolvedValue({
+      values: [[100, 'agent-policy-id-a']],
+    } as any);
 
     await expect(getAgentCountForAgentPolicies(esClientMock, agentPolicyIds)).resolves.toEqual({
       'agent-policy-id-a': 100,

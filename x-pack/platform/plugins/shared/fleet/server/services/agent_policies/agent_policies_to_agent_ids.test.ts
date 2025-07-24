@@ -37,23 +37,9 @@ describe('getAgentIdsForAgentPolicies', () => {
     ];
 
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClientMock.search.mockImplementation(async () => {
-      return {
-        took: 3,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: 100,
-          max_score: 0,
-          hits: agents,
-        },
-      };
-    });
+    esClientMock.esql.query.mockResponse({
+      values: agents.map((agent) => [agent._id]),
+    } as any);
   });
 
   it('should return an array of agent ids', async () => {
@@ -66,6 +52,9 @@ describe('getAgentIdsForAgentPolicies', () => {
 
   it('should return an empty array if no agents were found', async () => {
     agents = [];
+    esClientMock.esql.query.mockResponse({
+      values: [],
+    } as any);
     expect(await getAgentIdsForAgentPolicies(esClientMock, agentPolicyIds)).toEqual([]);
   });
 });

@@ -554,36 +554,10 @@ describe('When calling package policy', () => {
         },
       });
       (
-        (await context.core).elasticsearch.client.asInternalUser.search as jest.Mock
-      ).mockImplementation(() => {
-        return {
-          took: 3,
-          timed_out: false,
-          _shards: {
-            total: 2,
-            successful: 2,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            total: 100,
-            max_score: 0,
-            hits: [],
-          },
-          aggregations: {
-            agent_counts: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'agent-policy-id-a',
-                  doc_count: 100,
-                },
-              ],
-            },
-          },
-        };
-      });
+        (await context.core).elasticsearch.client.asInternalUser.esql.query as jest.Mock
+      ).mockResolvedValue({
+        values: [[100, 'agent-policy-id-a']],
+      } as any);
 
       await getPackagePoliciesHandler(context, request, response);
       const responseBody: ListResult<PackagePolicy> = {

@@ -167,7 +167,9 @@ describe('actions', () => {
   describe('getActionsByIds()', () => {
     it('should get an action by id', async () => {
       const actions = [generateFleetAction({ action_id: '1', input_type: 'foo' })];
-      esClientMock.search.mockResponse(generateFleetActionsESResponse(actions));
+      esClientMock.esql.query.mockResponse({
+        values: actions.map((action) => [action]),
+      } as any);
 
       expect(await fleetActionsClient.getActionsByIds(['1'])).toEqual({
         items: actions,
@@ -176,9 +178,9 @@ describe('actions', () => {
     });
 
     it('should reject when trying to get an action from a different package', async () => {
-      esClientMock.search.mockResponse(
-        generateFleetActionsESResponse([generateFleetAction({ action_id: '3', input_type: 'bar' })])
-      );
+      esClientMock.esql.query.mockResponse({
+        values: [[{ action_id: '3', input_type: 'bar' }]],
+      } as any);
 
       await expect(
         async () => await fleetActionsClient.getActionsByIds(['3'])
