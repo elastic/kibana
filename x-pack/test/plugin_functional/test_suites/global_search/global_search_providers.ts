@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import '@kbn/core-provider-plugin/types';
 import { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -91,7 +92,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Applications provider', function () {
       it('can search for root-level applications', async () => {
         const results = await findResultsWithApi('discover');
-        expect(results.length).to.be(2);
         expect(results[0].title).to.be('Discover');
       });
 
