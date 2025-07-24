@@ -197,7 +197,8 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash"
+        "@types/cache-manager-fs-hash",
+        "@arizeai/phoenix-client"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -1464,7 +1465,8 @@
       "matchDepNames": [
         "@apidevtools/swagger-parser",
         "@redocly/cli",
-        "openapi-types"
+        "openapi-types",
+        "@seriousme/openapi-schema-validator"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1916,6 +1918,25 @@
       "matchDepNames": [
         "normalize-path",
         "@types/normalize-path"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "resolve.exports",
+      "matchDepNames": [
+        "resolve.exports"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -4356,6 +4377,7 @@
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/semantic-conventions"
