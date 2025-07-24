@@ -15,7 +15,7 @@ Previous versions: {kibana-ref-all}/8.18/whats-new.html[8.18] | {kibana-ref-all}
 
 You can now easily spot patterns in your logs with CATEGORIZE in ES|QL, which automatically groups recurring log patterns and surfaces meaningful insights directly in Discover.
 
-This ML-powered feature helps you detect anomalies, common error messages, and repeating behavior across large volumes of data without writing complex queries. The new visualization presents patterns in a clear and contextual way, making it easy to scan, interpret, and act on what you see. 
+This ML-powered feature helps you detect anomalies, common error messages, and repeating behavior across large volumes of data without writing complex queries. The new table rendering presents patterns in a clear and contextual way, making it easy to scan, interpret, and act on what you see. 
 
 Whether you're troubleshooting issues or monitoring system behavior, CATEGORIZE speeds up your log analysis and gives you ML-powered insights in just a few clicks without any special setup. 
 
