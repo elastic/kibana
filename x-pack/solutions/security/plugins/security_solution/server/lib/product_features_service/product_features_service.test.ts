@@ -158,7 +158,9 @@ describe('ProductFeaturesService', () => {
     const mockSiemMigrationsConfig = new Map([
       [ProductFeatureKey.siemMigrations, {}],
     ]) as ProductFeaturesConfigMap;
-    const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfigMap;
+    const mockTimelineConfig = new Map([
+      [ProductFeatureKey.timeline, {}],
+    ]) as ProductFeaturesConfigMap;
     const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfigMap;
 
     const configurator: ProductFeaturesConfigurator = {
