@@ -404,6 +404,17 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+  mock: {
+    fields: {
+      'mock.attr': {
+        name: 'mock.attr',
+        aggregatable: false,
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+      },
+    },
+  },
 
   process: {
     fields: {

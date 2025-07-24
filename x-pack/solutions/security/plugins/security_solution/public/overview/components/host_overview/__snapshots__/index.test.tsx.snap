@@ -81,19 +81,31 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+            data-test-subj="cellActions-renderContent-host.id"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            <div>
+              <div
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                aa7ca589f1b8220002f2fc61c64cfbf1
-              </span>
-            </span>
+                <div>
+                  <div
+                    data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-host.id"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        aa7ca589f1b8220002f2fc61c64cfbf1
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </dd>
         <dt
@@ -749,19 +761,31 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
-            tabindex="-1"
+            data-test-subj="cellActions-renderContent-host.id"
           >
-            <span
-              class="c1"
-              data-test-subj="render-content-host.id"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            <div>
+              <div
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                aa7ca589f1b8220002f2fc61c64cfbf1
-              </span>
-            </span>
+                <div>
+                  <div
+                    data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
+                    tabindex="-1"
+                  >
+                    <span
+                      class="c1"
+                      data-test-subj="render-content-host.id"
+                    >
+                      <span
+                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      >
+                        aa7ca589f1b8220002f2fc61c64cfbf1
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </dd>
         <dt
