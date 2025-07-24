@@ -8,7 +8,6 @@
  */
 
 import type { DiscoverServices } from '../../build_services';
-import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
 import type {
   DataSourceProfileService,
   DocumentProfileService,
