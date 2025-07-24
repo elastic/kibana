@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   EuiFlyout,
@@ -65,6 +66,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   refresh,
 }) => {
   const flyoutTitleId = useGeneratedHtmlId();
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const mlApi = useMlApi();
   const { toasts } = useNotifications();
@@ -382,9 +384,11 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
       </EuiFlyout>
       {revertModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
             defaultMessage: 'Apply snapshot revert',
           })}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={hideRevertModal}
           onConfirm={applyRevert}
           cancelButtonText={i18n.translate(

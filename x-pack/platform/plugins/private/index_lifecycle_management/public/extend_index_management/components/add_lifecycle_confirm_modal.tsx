@@ -286,7 +286,9 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={title}
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={this.addPolicy}
         cancelButtonText={
