@@ -91,5 +91,8 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-security",
     "@kbn/streams-schema",
+    "@kbn/infra-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/response-ops-rule-params",
   ]
 }
