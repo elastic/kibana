@@ -121,7 +121,7 @@ export const geoIpProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsGeoIpLink"
               external
               target="_blank"
-              href={docLinks.links.ingest.geoip}
+              href={docLinks.links.ingest.geoIp}
             >
               {i18n.translate('xpack.streams.availableProcessors.geoIpLinkLabel', {
                 defaultMessage: 'IPv4 or IPv6 address.',
