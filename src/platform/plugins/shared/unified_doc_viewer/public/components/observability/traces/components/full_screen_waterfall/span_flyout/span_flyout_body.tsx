@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
@@ -85,12 +84,7 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
           <EuiTabs size="s">{renderTabs()}</EuiTabs>
           <EuiSkeletonText isLoading={loading}>
             {selectedTabId === tabIds.OVERVIEW && (
-              <KibanaSectionErrorBoundary
-                sectionName={i18n.translate(
-                  'unifiedDocViewer.observability.traces.spanFlyout.overview.kibanaSectionErrorBoundary.sectionName',
-                  { defaultMessage: 'Overview' }
-                )}
-              >
+              <EuiErrorBoundary>
                 {isSpan ? (
                   <SpanOverview
                     hit={hit}
@@ -108,7 +102,7 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
                     dataView={dataView}
                   />
                 )}
-              </KibanaSectionErrorBoundary>
+              </EuiErrorBoundary>
             )}
 
             {selectedTabId === tabIds.TABLE && <DocViewerTable hit={hit} dataView={dataView} />}
