@@ -20,7 +20,7 @@ import {
   PRIMARY_MENU_ITEMS,
   PRIMARY_MENU_FOOTER_ITEMS,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from '@kbn/core-chrome-navigation/src/mocks/observability';
+} from '@kbn/core-chrome-navigation/src/mocks/elasticsearch';
 
 const demoItems = {
   primaryItems: PRIMARY_MENU_ITEMS,
