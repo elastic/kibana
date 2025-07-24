@@ -47,7 +47,6 @@ export const SideNavPrimaryMenuItem = forwardRef<
 
     const label = (
       <EuiText
-        className="label"
         size={horizontal ? 's' : 'xs'}
         textAlign="center"
         css={css`
