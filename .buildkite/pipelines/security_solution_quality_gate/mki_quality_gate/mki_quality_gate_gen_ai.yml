@@ -16,7 +16,7 @@ steps:
   - group: "API MKI - GenAI"
     key: api_test_ai_assistant
     steps:
-      - label: Running nlp_cleanup_task:complete:qa:serverless:release
+      - label: 'API MKI - nlp_cleanup_task:complete:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless:release
         key: nlp_cleanup_task:complete:qa:serverless:release
         agents:
@@ -30,7 +30,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running nlp_cleanup_task:essentials:qa:serverless:release
+      - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless:release
         key: nlp_cleanup_task:essentials:qa:serverless:release
         agents:
