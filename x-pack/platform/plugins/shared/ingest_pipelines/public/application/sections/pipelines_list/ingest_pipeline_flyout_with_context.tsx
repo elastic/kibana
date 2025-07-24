@@ -13,6 +13,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { AuthorizationProvider } from '@kbn/es-ui-shared-plugin/public';
+import { EuiFlyout } from '@elastic/eui';
 import {
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,
@@ -24,12 +25,11 @@ import { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_w
 
 import { KibanaRenderContextProvider, KibanaContextProvider } from '../../../shared_imports';
 import { PipelineDeleteModal } from './delete_modal';
-import { PipelineFlyout } from './pipeline_flyout';
+import { FlyoutContent } from './flyout_content';
 
 export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithContextProps> = ({
   coreServices,
   services,
-  ingestPipelineName,
   onClose,
   reload,
 }) => {
@@ -60,14 +60,21 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
         httpClient={coreServices.http}
       >
         <KibanaContextProvider services={services}>
-          <PipelineFlyout
-            embedded
-            pipeline={ingestPipelineName}
-            onClose={onClose}
-            onEditClick={editPipeline}
-            onCloneClick={clonePipeline}
-            onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
-          />
+          <EuiFlyout
+            onClose={goHome}
+            aria-labelledby="pipelineDetailsFlyoutTitle"
+            data-test-subj="pipelineDetails"
+            size="l"
+          >
+            <FlyoutContent
+              embedded={true}
+              pipeline={ingestPipelineName}
+              onClose={onClose}
+              onEditClick={editPipeline}
+              onCloneClick={clonePipeline}
+              onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
+            />
+          </EuiFlyout>
           {pipelinesToDelete?.length > 0 ? (
             <PipelineDeleteModal
               callback={() => {

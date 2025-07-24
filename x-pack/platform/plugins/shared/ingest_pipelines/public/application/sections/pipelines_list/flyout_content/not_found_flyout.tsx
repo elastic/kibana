@@ -8,30 +8,25 @@
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiCallOut,
   EuiCode,
   EuiButton,
   useGeneratedHtmlId,
+  EuiSpacer,
+  EuiSplitPanel,
 } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { Error, useKibana } from '../../../shared_imports';
-import { getCreatePath } from '../../services/navigation';
-import { getErrorText, isIntegrationsPipeline } from '../utils';
+import { Error, useKibana } from '../../../../shared_imports';
+import { getCreatePath } from '../../../services/navigation';
+import { getErrorText, isIntegrationsPipeline } from '../../utils';
 
 interface Props {
-  onClose: () => void;
   pipelineName: string;
   error: Error;
 }
 
-export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({
-  onClose,
-  pipelineName,
-  error,
-}) => {
+export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ pipelineName, error }) => {
   const { history } = useKibana().services;
   const renderErrorCallOut = () => {
     if (error.statusCode === 404 && isIntegrationsPipeline(pipelineName)) {
@@ -93,22 +88,16 @@ export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({
   const pipelineErrorTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size="m"
-      maxWidth={550}
-      data-test-subj="pipelineErrorFlyout"
-      aria-labelledby={pipelineErrorTitleId}
-    >
-      <EuiFlyoutHeader>
-        {pipelineName && (
-          <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
-            <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>
-          </EuiTitle>
-        )}
-      </EuiFlyoutHeader>
+    <EuiSplitPanel.Inner>
+      {pipelineName && (
+        <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
+          <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>
+        </EuiTitle>
+      )}
 
-      <EuiFlyoutBody>{renderErrorCallOut()} </EuiFlyoutBody>
-    </EuiFlyout>
+      <EuiSpacer size="s" />
+
+      {renderErrorCallOut()}
+    </EuiSplitPanel.Inner>
   );
 };

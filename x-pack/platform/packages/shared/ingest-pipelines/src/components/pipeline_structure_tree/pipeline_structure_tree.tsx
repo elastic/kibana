@@ -14,6 +14,7 @@ import { getStyles } from './styles';
 
 export interface PipelineStructureTreeProps {
   pipelineTree: PipelineTreeNode;
+  selectedPipeline: string;
   /**
    * Specifies whether the tree is an extension of the main tree; i.e. displayed
    * when the user clicks on the last "+X more pipelines" tree node.
@@ -30,37 +31,41 @@ export interface PipelineStructureTreeProps {
  * corresponding pipelines from the children node.
  * See more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor
  */
-export const PipelineStructureTree = React.memo(({
-  pipelineTree,
-  isExtension,
-  setSelectedPipeline,
-  clickMorePipelines,
-  goBack,
-}: PipelineStructureTreeProps) => {
-  const { euiTheme } = useEuiTheme();
-  const styles = getStyles(euiTheme, isExtension);
-
-  const treeNode = createTreeNodesFromPipelines(
+export const PipelineStructureTree = React.memo(
+  ({
     pipelineTree,
+    selectedPipeline,
+    isExtension,
     setSelectedPipeline,
-    clickMorePipelines
-  );
+    clickMorePipelines,
+    goBack,
+  }: PipelineStructureTreeProps) => {
+    const { euiTheme } = useEuiTheme();
+    const styles = getStyles(euiTheme, isExtension);
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-      {isExtension && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
-            <FormattedMessage
-              id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
-              defaultMessage="Back to previous pipelines"
-            />
-          </EuiButtonEmpty>
+    const treeNode = createTreeNodesFromPipelines(
+      pipelineTree,
+      selectedPipeline,
+      setSelectedPipeline,
+      clickMorePipelines,
+    );
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+        {isExtension && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
+              <FormattedMessage
+                id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
+                defaultMessage="Back to previous pipelines"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
+          <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />
         </EuiFlexItem>
-      )}
-      <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
-        <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+      </EuiFlexGroup>
+    );
+  }
+);

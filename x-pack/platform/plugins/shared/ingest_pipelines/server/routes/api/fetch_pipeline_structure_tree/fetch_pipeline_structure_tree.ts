@@ -36,7 +36,6 @@ export const fetchPipelineStructureTree = (
   if (!rootPipeline) {
     return {
       pipelineName: rootPipelineId,
-      isExisting: false,
       isManaged: false,
       isDeprecated: false,
       children: [],
@@ -45,7 +44,6 @@ export const fetchPipelineStructureTree = (
 
   const pipelineNode: PipelineTreeNode = {
     pipelineName: rootPipelineId,
-    isExisting: true,
     isManaged: rootPipeline._meta?.managed === true,
     isDeprecated: rootPipeline.deprecated === true,
     children: [],

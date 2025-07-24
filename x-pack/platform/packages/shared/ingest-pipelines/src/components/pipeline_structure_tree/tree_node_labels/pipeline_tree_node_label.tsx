@@ -11,7 +11,6 @@ import React from 'react';
 
 interface PipelineTreeNodeLabelProps {
   pipelineName: string;
-  isExisting: boolean;
   isManaged: boolean;
   isDeprecated: boolean;
   setSelected: () => void;
@@ -19,7 +18,6 @@ interface PipelineTreeNodeLabelProps {
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
-  isExisting,
   isManaged,
   isDeprecated,
   setSelected,
@@ -32,7 +30,7 @@ export const PipelineTreeNodeLabel = ({
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
     >
-      <EuiFlexItem grow={7 + (isExisting + !isDeprecated + !isManaged)}>
+      <EuiFlexItem grow={8 + (!isDeprecated + !isManaged)}>
         <EuiLink
           color="text"
           onClick={setSelected}
@@ -41,22 +39,6 @@ export const PipelineTreeNodeLabel = ({
           {pipelineName}
         </EuiLink>
       </EuiFlexItem>
-      {!isExisting && (
-        <EuiFlexItem
-          grow={1}
-          data-test-subj={`pipelineTreeNode-${pipelineName}-nonexistingIcon`}
-        >
-          <EuiIconTip
-            content={i18n.translate(
-              'ingestPipelines.pipelineStructureTree.treeNodeNonexistingTooltip',
-              {
-                defaultMessage: 'Pipeline does not exist',
-              }
-            )}
-            type="error"
-          />
-        </EuiFlexItem>
-      )}
       {isManaged && (
         <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>
           <EuiIconTip

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export interface PipelineTreeNode {
-  pipelineName: string;
-  isManaged: boolean;
-  isDeprecated: boolean;
-  children: PipelineTreeNode[];
-}
+export { DetailsPanel } from './details_panel';
+export { TreePanel } from './tree_panel';
+export { PipelineNotFoundFlyout } from './not_found_flyout';
+export { FlyoutFooter } from './flyout_footer';

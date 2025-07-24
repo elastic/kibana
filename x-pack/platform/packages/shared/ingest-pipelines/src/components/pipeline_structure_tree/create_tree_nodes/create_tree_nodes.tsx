@@ -17,6 +17,7 @@ import { PipelineTreeNodeLabel, MorePipelinesLabel } from '../tree_node_labels';
  */
 export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
+  selectedPipeline: string,
   setSelectedPipeline: (pipelineName: string) => void,
   clickMorePipelines: (name: string) => void,
   level: number = 1
@@ -26,18 +27,19 @@ export const createTreeNodesFromPipelines = (
     label: (
       <PipelineTreeNodeLabel
         pipelineName={treeNode.pipelineName}
-        isExisting={treeNode.isExisting}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
         setSelected={() => setSelectedPipeline(treeNode.pipelineName)}
       />
     ),
-    className: level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children',
+    className:
+      (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
+      (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
     children: treeNode.children.length ? ([] as Node[]) : undefined,
     isExpanded: level === 1,
     // Disable EUI's logic for activating tree node when expanding/collapsing them
     // We should only activate a tree node when we click on the pipeline name
-    isActive: true,
+    isActive: false,
   };
 
   if (level === MAX_TREE_LEVEL) {
@@ -59,7 +61,7 @@ export const createTreeNodesFromPipelines = (
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      createTreeNodesFromPipelines(node, setSelectedPipeline, clickMorePipelines,level + 1)
+      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, clickMorePipelines,level + 1)
     );
   });
   return currentNode;
