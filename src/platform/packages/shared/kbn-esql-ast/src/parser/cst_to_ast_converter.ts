@@ -2184,11 +2184,17 @@ export class CstToAstConverter {
 
   // ------------------------------------------- constant expression: "literal"
 
+  /**
+   * @deprecated
+   * @todo This method should not exist, the two call sites should be replaced
+   *     by a more specific implementation.
+   */
   private toLiteral(
     type: ast.ESQLLiteral['literalType'],
     node: antlr.TerminalNode | null
   ): ast.ESQLLiteral {
     if (!node) {
+      // TODO: This should not return a *broken) literal.
       return {
         type: 'literal',
         name: 'unknown',
@@ -2196,7 +2202,7 @@ export class CstToAstConverter {
         value: 'unknown',
         literalType: type,
         location: { min: 0, max: 0 },
-        incomplete: false,
+        incomplete: false, // TODO: Should be true?
       } as ast.ESQLLiteral;
     }
 
