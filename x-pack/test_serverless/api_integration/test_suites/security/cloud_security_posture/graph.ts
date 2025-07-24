@@ -16,6 +16,7 @@ import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/grap
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestViewer: Pick<Agent, 'post'>;
@@ -35,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
     before(async () => {
       await esArchiver.load(
-        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts',
+        { docsOnly: true }
       );
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
@@ -47,9 +49,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
-      );
+      // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+      // Instead we delete all alerts from the index
+      await es.deleteByQuery({
+        index: '.internal.alerts-*',
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
