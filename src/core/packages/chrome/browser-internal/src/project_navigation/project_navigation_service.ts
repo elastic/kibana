@@ -86,6 +86,7 @@ export class ProjectNavigationService {
   private readonly nextSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
   // The active solution navigation definition id that has been initiated and is currently active
   private readonly activeSolutionNavDefinitionId$ = new BehaviorSubject<SolutionId | null>(null);
+  private readonly activeDataTestSubj$ = new BehaviorSubject<string | undefined>(undefined);
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
@@ -94,7 +95,6 @@ export class ProjectNavigationService {
   private _http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
-  private dataTestSubj?: string;
 
   constructor(private isServerless: boolean) {}
 
@@ -187,9 +187,7 @@ export class ProjectNavigationService {
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
       getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
       setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
-      getDataTestSubj: () => {
-        return this.dataTestSubj;
-      },
+      getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
     };
   }
 
@@ -209,7 +207,7 @@ export class ProjectNavigationService {
     if (this.activeSolutionNavDefinitionId$.getValue() === id) return;
 
     if (config?.dataTestSubj) {
-      this.dataTestSubj = config.dataTestSubj;
+      this.activeDataTestSubj$.next(config.dataTestSubj);
     }
 
     if (this.navigationChangeSubscription) {
@@ -342,7 +340,9 @@ export class ProjectNavigationService {
           this.setProjectHome(navLink.href);
         });
 
-        this.initNavigation(nextId, definition.navigationTree$);
+        this.initNavigation(nextId, definition.navigationTree$, {
+          dataTestSubj: definition.dataTestSubj,
+        });
       });
   }
 

@@ -144,10 +144,9 @@ export class NavigationPublicPlugin
 
   private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
-    const { dataTestSubj, ...rest } = solutionNavigation;
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
-      [solutionNavigation.id]: { ...rest },
+      [solutionNavigation.id]: solutionNavigation,
     });
   }
 

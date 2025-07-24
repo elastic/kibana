@@ -481,6 +481,7 @@ export class ChromeService {
     const panelSelectedNode$ = projectNavigation.getPanelSelectedNode$();
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
+    const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
 
     const getProjectHeader = ({
       includeSideNav,
@@ -546,7 +547,7 @@ export class ChromeService {
                 setPanelSelectedNode={projectNavigation.setPanelSelectedNode}
                 loadingCount$={loadingCount$}
                 reportEvent={analytics.reportEvent}
-                dataTestSubj={projectNavigation.getDataTestSubj()}
+                dataTestSubj={activeDataTestSubj$}
               />
             )}
 
