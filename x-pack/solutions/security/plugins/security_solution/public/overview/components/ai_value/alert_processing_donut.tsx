@@ -7,14 +7,15 @@
 
 import React from 'react';
 
-import { css } from '@emotion/react';
+import { Global, css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
-const ChartSize = 300;
+const ChartSize = 250;
 interface Props {
   attackAlertIds: string[];
   from: string;
@@ -22,6 +23,10 @@ interface Props {
 }
 export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   const spaceId = useSpaceId();
+  const {
+    euiTheme: { font },
+  } = useEuiTheme();
+
   return (
     <div
       css={css`
@@ -31,6 +36,20 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         }
       `}
     >
+      <Global
+        styles={css`
+          .donutText {
+            text-align: center;
+            left: -1%;
+            .donutTitleLabel {
+              font-size: ${font.scale.m}em;
+            }
+            b {
+              font-size: ${font.scale.xl}em;
+            }
+          }
+        `}
+      />
       <VisualizationEmbeddable
         applyGlobalQueriesAndFilters={false}
         getLensAttributes={(args) =>
@@ -44,6 +63,8 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         width={'100%'}
         id={`open`}
         isDonut={true}
+        donutTitleLabel={'Total alerts processed'}
+        donutTextWrapperClassName={'donutText'}
         scopeId={SourcererScopeName.detections}
         timerange={{ from, to }}
         withActions={[
@@ -54,4 +75,17 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
       />
     </div>
   );
+  // return (
+  //   <DonutChart
+  //     data={[
+  //       { label: 'Escalated', key: 'escalated', value: 30 },
+  //       { label: 'AI Filtered', key: 'filtered', value: 70 },
+  //     ]}
+  //     fillColor={fillColor}
+  //     height={300}
+  //     label={'Total alerts processed'}
+  //     title={<ChartLabel count={123} />}
+  //     totalCount={123}
+  //   />
+  // );
 };

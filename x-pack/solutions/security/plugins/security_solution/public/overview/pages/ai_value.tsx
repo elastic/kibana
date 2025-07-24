@@ -47,7 +47,7 @@ import { getTimeRangeAsDays } from '../components/ai_value/utils';
 const AIValueComponent = () => {
   const { cases } = useKibana().services;
 
-  const { indicesExist: oldIndicesExist, loading: oldIsSourcererLoading } = useSourcererDataView();
+  const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
   );

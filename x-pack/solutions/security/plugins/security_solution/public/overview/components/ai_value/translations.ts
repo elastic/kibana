@@ -77,7 +77,7 @@ export const FILTERING_RATE = i18n.translate('xpack.securitySolution.aiValue.fil
 });
 
 export const COMPARED = i18n.translate('xpack.securitySolution.aiValue.compared', {
-  defaultMessage: 'Compared to the previous period',
+  defaultMessage: 'Compared to the previous period:',
 });
 
 export const NON_SUSPICIOUS = i18n.translate('xpack.securitySolution.aiValue.falsePositives', {

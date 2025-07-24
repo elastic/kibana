@@ -78,7 +78,15 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
     },
     [addFilter]
   );
-
+  console.log('donut args', {
+    data,
+    fillColor,
+    height: DONUT_HEIGHT,
+    label: TOTAL_COUNT_OF_ALERTS,
+    title: <ChartLabel count={count} />,
+    totalCount: count,
+    onPartitionClick: onDonutPartitionClicked,
+  });
   return (
     <EuiFlexGroup gutterSize="none" data-test-subj="severity-level-chart">
       <EuiFlexItem>

@@ -40,37 +40,45 @@ export const AlertProcessing: React.FC<Props> = ({
         <p>{i18n.ALERT_PROCESSING_DESC}</p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xs" wrap>
+      <EuiFlexGroup gutterSize="xs" direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             <p>{i18n.COMPARED}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ComparePercentageBadge
-            currentCount={filteredAlertsPerc}
-            previousCount={filteredAlertsPercCompare}
-            stat={formatPercent(filteredAlertsPercCompare)}
-            statType={i18n.FILTERING_RATE}
-          />
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <ComparePercentageBadge
+                currentCount={filteredAlertsPerc}
+                previousCount={filteredAlertsPercCompare}
+                stat={formatPercent(filteredAlertsPercCompare)}
+                statType={i18n.FILTERING_RATE}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <p>{i18n.NON_SUSPICIOUS}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <p>{i18n.NON_SUSPICIOUS}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ComparePercentageBadge
-            currentCount={attackAlertsCountPerc}
-            previousCount={attackAlertsCountPercCompare}
-            stat={formatPercent(attackAlertsCountPercCompare)}
-            statType={i18n.ESCALATED_RATE}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <p>{i18n.ESCALATED_ALERTS}</p>
-          </EuiText>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <ComparePercentageBadge
+                currentCount={attackAlertsCountPerc}
+                previousCount={attackAlertsCountPercCompare}
+                stat={formatPercent(attackAlertsCountPercCompare)}
+                statType={i18n.ESCALATED_RATE}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <p>{i18n.ESCALATED_ALERTS}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
