@@ -72,7 +72,9 @@ export const SPLUNK_TEST_RULES = [
   },
 ];
 
-describe('Rule Migrations - Basic Workflow', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
+const tags = ['@ess', '@serverless', '@skipInServerlessMKI'];
+describe('Rule Migrations - Basic Workflow', { tags }, () => {
   before(() => {
     role.setup();
   });

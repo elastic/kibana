@@ -17,6 +17,7 @@ import type {
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createPatternDataSourceProfileProvider } from './common/patterns';
+import { registerEnabledProfileProviders } from './register_enabled_profile_providers';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
 import {
@@ -86,46 +87,6 @@ export const registerProfileProviders = async ({
     enabledExperimentalProfileIds,
     services,
   });
-};
-
-/**
- * Register enabled profile providers to the provided profile service
- * @param options Register enabled profile providers options
- */
-export const registerEnabledProfileProviders = <
-  TProvider extends BaseProfileProvider<{}, {}>,
-  TService extends BaseProfileService<TProvider>
->({
-  profileService,
-  providers: availableProviders,
-  enabledExperimentalProfileIds = [],
-  services,
-}: {
-  /**
-   * Profile service to register providers
-   */
-  profileService: TService;
-  /**
-   * Array of available profile providers
-   */
-  providers: TProvider[];
-  /**
-   * Array of experimental profile IDs which are enabled in `kibana.yml`
-   */
-  enabledExperimentalProfileIds?: string[];
-  services: DiscoverServices;
-}) => {
-  for (const provider of availableProviders) {
-    const checkForExperimentalProfile =
-      !provider.isExperimental || enabledExperimentalProfileIds.includes(provider.profileId);
-    const checkForProductFeature =
-      !provider.restrictedToProductFeature ||
-      services.core.pricing.isFeatureAvailable(provider.restrictedToProductFeature);
-
-    if (checkForExperimentalProfile && checkForProductFeature) {
-      profileService.registerProvider(provider);
-    }
-  }
 };
 
 /**
