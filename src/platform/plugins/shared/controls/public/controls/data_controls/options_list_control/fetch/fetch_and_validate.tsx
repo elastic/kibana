@@ -164,12 +164,14 @@ export function fetchAndValidate$({
           if (isESQLInputMode && searchString && OptionsListFetchCache.isSuccessResponse(result)) {
             // Run client-side search on ES|QL results
             // TODO: Add a named parameter to handle this natively in the ES|QL query
+            const suggestions = result.suggestions.filter(({ value }) =>
+              // ES|QL searchTechnique is always 'wildcard'
+              String(value).toLowerCase().includes(searchString.toLowerCase())
+            );
             return {
               ...result,
-              suggestions: result.suggestions.filter(({ value }) =>
-                // ES|QL searchTechnique is always 'wildcard'
-                String(value).toLowerCase().includes(searchString.toLowerCase())
-              ),
+              suggestions,
+              totalCardinality: suggestions.length,
             };
           }
           return result;
