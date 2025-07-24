@@ -65,17 +65,12 @@ const securitySolution = 'security-solution';
 interface Props extends RouteComponentProps {
   canSave: boolean;
   setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  title: string
+  title: string;
 }
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const IndexPatternTable = ({
-  history,
-  canSave,
-  setShowCreateDialog,
-  title,
-}: Props) => {
+export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title }: Props) => {
   const {
     setBreadcrumbs,
     http,
@@ -113,7 +108,7 @@ export const IndexPatternTable = ({
   const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
   const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
 
-    const useOnTryESQLParams = {
+  const useOnTryESQLParams = {
     locatorClient: share?.url.locators,
     navigateToApp: application.navigateToApp,
   };
