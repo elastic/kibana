@@ -29,7 +29,7 @@ import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
 
-interface WorkflowExecutionProps {
+export interface WorkflowExecutionProps {
   workflowExecutionId: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
 }
