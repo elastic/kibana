@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy } from 'lodash';
+import { difference, groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
