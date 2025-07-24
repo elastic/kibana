@@ -43,7 +43,7 @@ export function HeaderControl({ slo }: Props) {
   } = services;
 
   const isAddToCaseEnabled =
-    observabilityShared.config?.unsafe?.investigativeExperienceEnabled ?? false;
+    observabilityShared?.config?.unsafe?.investigativeExperienceEnabled ?? false;
 
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
