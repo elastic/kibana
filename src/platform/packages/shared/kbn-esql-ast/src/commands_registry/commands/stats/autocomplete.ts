@@ -28,8 +28,8 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
-import { getPosition } from './utils';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { getPosition, getSuggestionsAfterCompleteExpression } from './utils';
+// import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
@@ -104,15 +104,16 @@ export async function autocomplete(
     lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    query,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
-  }
+  // TODO: reenable
+  // const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+  //   query,
+  //   cursorPosition,
+  //   callbacks,
+  //   context
+  // );
+  // if (functionsSpecificSuggestions) {
+  //   return functionsSpecificSuggestions;
+  // }
 
   switch (pos) {
     case 'expression_without_assignment':
@@ -144,6 +145,7 @@ export async function autocomplete(
 
     case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
+      // TODO do we still need this check?
       const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
 
       if (expressionRoot && !!Array.isArray(expressionRoot)) {
@@ -199,38 +201,51 @@ export async function autocomplete(
     case 'grouping_expression_without_assignment': {
       const histogramBarTarget = context?.histogramBarTarget;
 
+      // TODO - incorporate columns to ignore
       const ignored = alreadyUsedColumns(command);
 
-      const columnSuggestions = pushItUpInTheList(
-        await callbacks.getByType('any', ignored, { openSuggestions: true }),
-        true
-      );
+      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
 
-      const suggestions = await suggestColumns(
-        columnSuggestions,
-        [
-          ...getFunctionSuggestions(
-            { location: Location.STATS_BY },
-            callbacks?.hasMinimumLicenseRequired
-          ),
+      const expressionRoot = byNode.args[byNode.args.length - 1];
+
+      // guaranteed by the getPosition function, but we check it here for type safety
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions: ISuggestionItem[] = [];
+
+      if (!expressionRoot) {
+        suggestions.push(
           getDateHistogramCompletionItem(histogramBarTarget),
-        ],
-        innerText,
-        context
-      );
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+        );
+      }
 
-      suggestions.push(
-        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-      );
+      const expressionSuggestions = await suggestForExpression({
+        innerText,
+        getColumnsByType: callbacks?.getByType,
+        expressionRoot,
+        location: Location.STATS_BY,
+        context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+      });
+
+      suggestions.push(...expressionSuggestions);
+
+      if (
+        isExpressionComplete(
+          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
+          innerText
+        )
+      ) {
+        suggestions.push(
+          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
+        );
+      }
 
       return suggestions;
     }
-
-    case 'grouping_expression_complete':
-      return [
-        pipeCompleteItem,
-        { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
-      ];
 
     default:
       return [];

@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import {
   isFunctionExpression,
@@ -15,10 +16,11 @@ import {
   isOptionNode,
   isLiteral,
   isAssignment,
+  isColumn,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
-  findPreviousWord,
+  getFragmentData,
   getLastNonWhitespaceChar,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { ISuggestionItem } from '../../types';
@@ -81,14 +83,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
       return 'grouping_expression_after_assignment';
     }
 
-    // check if the cursor follows a comma or the BY keyword
-    // optionally followed by a fragment of a word
-    // e.g. ", field/"
-    if (/\,\s+\S*$/.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'by')) {
-      return 'grouping_expression_without_assignment';
-    } else {
-      return 'grouping_expression_complete';
-    }
+    return 'grouping_expression_without_assignment';
   }
 
   if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
@@ -193,3 +188,53 @@ export function checkFunctionContent(arg: ESQLFunction) {
     );
   });
 }
+
+export const rightAfterColumn = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
+): boolean => {
+  return (
+    isColumn(expressionRoot) &&
+    columnExists(expressionRoot.parts.join('.')) &&
+    // this prevents the branch from being entered for something like "SORT column NULLS LA/"
+    // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
+    /(?:sort|,)\s+\S+$/i.test(innerText)
+  );
+};
+
+export const getSuggestionsAfterCompleteExpression = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
+): ISuggestionItem[] => {
+  const pipeSuggestion = { ...pipeCompleteItem };
+  const commaSuggestion = {
+    ...commaCompleteItem,
+    text: ', ',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  };
+
+  // does the query end with whitespace?
+  if (/\s$/.test(innerText)) {
+    // if so, comma needs to be sent back a column to replace the trailing space
+    commaSuggestion.rangeToReplace = {
+      start: innerText.length - 1,
+      end: innerText.length,
+    };
+  }
+  // special case: cursor right after a column name
+  else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
+    const { fragment, rangeToReplace } = getFragmentData(innerText);
+
+    pipeSuggestion.filterText = fragment;
+    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
+    pipeSuggestion.rangeToReplace = rangeToReplace;
+
+    commaSuggestion.filterText = fragment;
+    commaSuggestion.text = fragment + commaSuggestion.text;
+    commaSuggestion.rangeToReplace = rangeToReplace;
+  }
+
+  return [pipeSuggestion, commaSuggestion];
+};
