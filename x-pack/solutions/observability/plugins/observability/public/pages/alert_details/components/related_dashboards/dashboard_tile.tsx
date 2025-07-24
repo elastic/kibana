@@ -43,12 +43,10 @@ export function DashboardTile({
   } = useKibana();
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
-  const tagsReferences: SavedObjectsReference[] = dashboard.tags?.length
-    ? dashboard.tags.reduce((acc, value) => {
-        const reference = savedObjectsTaggingUi.convertNameToReference(value);
-        return reference ? [...acc, { ...reference, name: value }] : acc;
-      }, [] as SavedObjectsReference[])
-    : [];
+  const tagsReferences: SavedObjectsReference[] = (dashboard.tags || []).flatMap((tag) => {
+    const ref = savedObjectsTaggingUi.convertNameToReference(tag);
+    return ref ? [{ ...ref, name: tag }] : [];
+  });
 
   return (
     <>

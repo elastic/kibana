@@ -66,7 +66,7 @@ jest.mock('./hooks/use_related_dashboards', () => ({
         id: 'suggested-dashboard-1',
         title: 'Suggested Dashboard 1',
         description: 'A suggested dashboard for testing',
-        tags: ['SuggestedTag'],
+        tags: ['SuggestedTag', 'SecondTag'],
       },
     ],
     linkedDashboards: [
@@ -303,7 +303,8 @@ describe('Alert details', () => {
     ).toBeTruthy();
 
     // Verify that tags are displayed
-    expect(mockConvertNameToReference).toHaveBeenCalledWith('SuggestedTag');
+    expect(mockConvertNameToReference).toHaveBeenNthCalledWith(1, 'SuggestedTag');
+    expect(mockConvertNameToReference).toHaveBeenNthCalledWith(2, 'SecondTag');
     expect(alertDetails.queryByTestId('tagList')).toBeTruthy();
   });
 });
