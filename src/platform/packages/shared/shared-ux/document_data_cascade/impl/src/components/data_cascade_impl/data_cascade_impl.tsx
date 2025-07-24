@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps, useCallback, useEffect, useRef } from 'react';
+import React, {
+  type ComponentProps,
+  Children,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import ReactDOM from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
@@ -29,43 +37,29 @@ import {
   type LeafNode,
 } from '../data_cascade_provider';
 import {
-  CascadeRow,
-  type CascadeRowProps,
-  CascadeRowCell,
-  type CascadeRowCellProps,
-  getCascadeRowLeafDataCacheKey,
-  getCascadeRowNodePath,
-  getCascadeRowNodePathValueRecord,
+  CascadeRowPrimitive,
+  CascadeRowCellPrimitive,
+  type CascadeRowPrimitiveProps,
+  type CascadeRowCellPrimitiveProps,
 } from './data_cascade_row';
 
-interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
-  /**
-   * @description The path of the row that was expanded in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * @description KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
+export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
+  CascadeRowCellPrimitiveProps<G, L>,
+  'onCascadeLeafNodeExpanded' | 'children'
+>;
 
-interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
+export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
+  CascadeRowPrimitiveProps<G, L>,
+  'onCascadeGroupNodeExpanded' | 'rowHeaderMetaSlots' | 'rowHeaderTitleSlot'
+> & {
   /**
-   * @description The path of the row that was expanded in the group by hierarchy.
+   * @description The children for the cascade row.
    */
-  nodePath: string[];
-  /**
-   * @description KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
+  children: React.ReactElement<DataCascadeRowCellProps<G, L>>;
+};
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<CascadeRowProps<G>, 'rowHeaderTitleSlot' | 'rowHeaderMetaSlots'>,
-    Pick<CascadeRowCellProps<G, L>, 'leafContentSlot'>,
-    Pick<Parameters<typeof useVirtualizer>[0], 'overscan'> {
+  extends Pick<Parameters<typeof useVirtualizer>[0], 'overscan'> {
   /**
    * @description The data to be displayed in the cascade. It should be an array of group nodes.
    */
@@ -75,45 +69,65 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
    */
   onCascadeGroupingChange: ComponentProps<typeof SelectionDropdown>['onSelectionChange'];
   /**
-   * @description Callback function that is called when a cascade node is expanded.
-   */
-  onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
-  /**
-   * @description Callback function for leaf expansion, which can be used to fetch data for leaf nodes.
-   */
-  onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
-  /**
    * @description The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
-  size?: CascadeRowProps<G>['size'];
+  size?: CascadeRowPrimitiveProps<G, L>['size'];
   tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
   /**
    * @description Whether to cause the group root to stick to the top of the viewport.
    */
   stickyGroupRoot?: boolean;
+  children: React.ReactElement<DataCascadeRowProps<G, L>>;
 }
+
+/**
+ * @description Public Component for rendering a data cascade row cell
+ */
+export const DataCascadeRowCell = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
+  props: DataCascadeRowCellProps<G, L>
+) => {
+  return null;
+};
+
+/**
+ * @description Public Component for rendering a data cascade row
+ */
+export const DataCascadeRow = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
+  props: DataCascadeRowProps<G, L>
+) => {
+  return null;
+};
 
 export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   data,
   onCascadeGroupingChange,
-  onCascadeGroupNodeExpanded,
-  onCascadeLeafNodeExpanded,
-  rowHeaderTitleSlot,
-  rowHeaderMetaSlots,
-  leafContentSlot,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
   stickyGroupRoot = false,
   overscan = 10,
+  children,
 }: DataCascadeImplProps<G, L>) {
+  const rowElement = Children.only(children);
+
+  if (!isValidElement(rowElement) || rowElement.type !== DataCascadeRow) {
+    throw new Error('DataCascade only accepts `DataCascadeRow` as child');
+  }
+
+  if (
+    !isValidElement(rowElement.props.children) ||
+    rowElement.props.children.type !== DataCascadeRowCell
+  ) {
+    throw new Error('DataCascadeRow only accepts `DataCascadeRowCell` as Child');
+  }
+
   const dispatch = useDataCascadeDispatch<G, L>();
   const state = useDataCascadeState<G, L>();
   const columnHelper = createColumnHelper<G>();
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [expanded, setExpanded] = useState<ExpandedState>({});
 
   // The scrollable element for your list
-  const scrollElementRef = React.useRef(null);
-  const virtualizerItemSizeCacheRef = React.useRef<Map<number, number>>(new Map());
+  const scrollElementRef = useRef(null);
+  const virtualizerItemSizeCacheRef = useRef<Map<number, number>>(new Map());
   const activeStickyIndexRef = useRef<number | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
 
@@ -123,67 +137,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
       payload: data,
     });
   }, [data, dispatch]);
-
-  const fetchGroupNodeData = useCallback(
-    ({ row }: { row: Row<G> }) => {
-      const dataFetchFn = async () => {
-        const groupNodeData = await onCascadeGroupNodeExpanded({
-          row,
-          nodePath: getCascadeRowNodePath(state.currentGroupByColumns, row),
-          nodePathMap: getCascadeRowNodePathValueRecord(state.currentGroupByColumns, row),
-        });
-
-        if (!groupNodeData) {
-          return;
-        }
-        dispatch({
-          type: 'UPDATE_ROW_GROUP_NODE_DATA',
-          payload: {
-            id: row.id,
-            data: groupNodeData,
-          },
-        });
-      };
-      return dataFetchFn().catch((error) => {
-        // eslint-disable-next-line no-console -- added for debugging purposes
-        console.error('Error fetching data for row with ID: %s', row.id, error);
-      });
-    },
-    [dispatch, onCascadeGroupNodeExpanded, state.currentGroupByColumns]
-  );
-
-  const fetchGroupLeafData = useCallback(
-    ({ row }: { row: Row<G> }) => {
-      const nodePath = getCascadeRowNodePath(state.currentGroupByColumns, row);
-      const nodePathMap = getCascadeRowNodePathValueRecord(state.currentGroupByColumns, row);
-
-      const dataFetchFn = async () => {
-        const groupLeafData = await onCascadeLeafNodeExpanded({
-          row,
-          nodePathMap,
-          nodePath,
-        });
-
-        if (!groupLeafData) {
-          return;
-        }
-
-        dispatch({
-          type: 'UPDATE_ROW_GROUP_LEAF_DATA',
-          payload: {
-            cacheKey: getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, row.id),
-            data: groupLeafData,
-          },
-        });
-      };
-
-      return dataFetchFn().catch((error) => {
-        // eslint-disable-next-line no-console -- added for debugging purposes
-        console.error('Error fetching data for leaf node', error);
-      });
-    },
-    [dispatch, onCascadeLeafNodeExpanded, state.currentGroupByColumns]
-  );
 
   const table = useReactTable<G>({
     data: state.groupNodes,
@@ -219,16 +172,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             );
           }, props),
         cell: React.memo((props) => {
-          return (
-            <CascadeRowCell<G, L>
-              {...{
-                ...props,
-                leafContentSlot,
-                populateGroupLeafDataFn: fetchGroupLeafData,
-                size,
-              }}
-            />
-          );
+          return React.createElement<CascadeRowCellPrimitiveProps<G, L>>(CascadeRowCellPrimitive, {
+            size,
+            ...props,
+            ...rowElement.props.children.props,
+          });
         }),
       }),
     ],
@@ -284,8 +232,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     rangeExtractor,
     onChange: (rowVirtualizerInstance) => {
       // @ts-expect-error -- the itemsSizeCache property does exist,
-      // but it not included in the type definition
-      // because it is marked as a private property,
+      // but it not included in the type definition because it is marked as a private property,
       // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
       virtualizerItemSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
     },
@@ -401,21 +348,20 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                           virtualItem.start
                         );
 
-                        const rowToRender = (
-                          <CascadeRow<G>
-                            innerRef={rowVirtualizer.measureElement}
-                            isActiveSticky={isActiveSticky}
-                            populateGroupNodeDataFn={fetchGroupNodeData}
-                            rowHeaderTitleSlot={rowHeaderTitleSlot}
-                            rowHeaderMetaSlots={rowHeaderMetaSlots}
-                            rowInstance={row}
-                            size={size}
-                            virtualRow={virtualItem}
-                            virtualRowStyle={getGridRowPositioningStyle(
+                        const rowToRender = React.createElement<CascadeRowPrimitiveProps<G, L>>(
+                          CascadeRowPrimitive,
+                          {
+                            size,
+                            innerRef: rowVirtualizer.measureElement,
+                            isActiveSticky,
+                            rowInstance: row,
+                            virtualRow: virtualItem,
+                            virtualRowStyle: getGridRowPositioningStyle(
                               renderIndex,
                               isActiveSticky
-                            )}
-                          />
+                            ),
+                            ...rowElement.props,
+                          }
                         );
 
                         return (
