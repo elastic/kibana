@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -18,18 +19,18 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
-import { WorkflowEditor } from '../../features/workflow-editor/ui';
-import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
-import { WorkflowExecutionList } from '../../features/workflow-execution-list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow-visual-editor/ui';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
+import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
+import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowEditor } from '../../features/workflow_editor/ui';
+import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
+import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
+import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { TestWorkflowModal } from '../../features/run-workflow/ui/TestWorkflowModal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -71,9 +72,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(originalWorkflowYaml !== wfString);
   };
 
-  const [buttonGroupSelectedId, setButtonGroupSelectedId] = useState('workflow');
+  const { activeTab, setActiveTab } = useWorkflowUrlState();
   const handleButtonGroupChange = (buttonGroupId: string) => {
-    setButtonGroupSelectedId(buttonGroupId);
+    setActiveTab(buttonGroupId as 'workflow' | 'executions');
   };
 
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
@@ -100,8 +101,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             toastLifeTimeMs: 3000,
           });
         },
-        onError: (error: unknown) => {
-          notifications?.toasts.addError(error, {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
             title: 'Failed to run workflow',
           });
@@ -134,7 +135,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiFlexGroup>
         <EuiFlexItem>
           <WorkflowEditor
-            workflowId={workflow?.id}
+            workflowId={workflow?.id ?? ''}
             value={workflowYaml}
             onChange={handleChange}
             hasChanges={hasChanges}
@@ -164,7 +165,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (workflow === undefined) {
       return <EuiText>Failed to load workflow</EuiText>;
     }
-    return <WorkflowExecutionList workflow={workflow} />;
+    return <WorkflowExecutionList workflowId={workflow?.id} />;
   };
 
   if (isLoadingWorkflow) {
@@ -181,6 +182,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         pageTitle={workflow?.name ?? 'Workflow Detail'}
         restrictWidth={false}
         rightSideItems={[
+          <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
+            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
+          </EuiButton>,
           <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
           </EuiButton>,
@@ -191,7 +195,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             <EuiButtonGroup
               color="primary"
               options={buttonGroupOptions}
-              idSelected={buttonGroupSelectedId}
+              idSelected={activeTab}
               legend="Switch between workflow and executions"
               type="single"
               onChange={handleButtonGroupChange}
@@ -200,7 +204,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         </EuiFlexGroup>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth={false}>
-        {buttonGroupSelectedId === 'workflow' ? renderWorkflowEditor() : renderWorkflowExecutions()}
+        {activeTab === 'workflow' ? renderWorkflowEditor() : renderWorkflowExecutions()}
       </EuiPageTemplate.Section>
       {workflowEventModalOpen && (
         <WorkflowEventModal

@@ -54,6 +54,7 @@ function transformToWorkflowExecutionListModel(
         finishedAt: workflowExecution.finishedAt,
         duration: workflowExecution.duration,
         workflowId: workflowExecution.workflowId,
+        triggeredBy: workflowExecution.triggeredBy,
       };
     }),
     _pagination: {

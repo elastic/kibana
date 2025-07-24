@@ -335,6 +335,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.locationMode}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.locationMode)}
             options={locationModeOptions}
             value={locationMode || locationModeOptions[0].value}
             onChange={(e) => {

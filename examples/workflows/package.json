@@ -1,6 +1,7 @@
 {
-  "name": "workflows-example",
-  "version": "0.0.0",
+  "name": "@kbn/workflows-plugin-example",
+  "version": "1.0.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "private": true,
   "scripts": {
     "bootstrap": "yarn kbn bootstrap && yarn install",

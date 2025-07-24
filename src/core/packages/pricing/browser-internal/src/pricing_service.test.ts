@@ -8,7 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { GetPricingResponse } from '@kbn/core-pricing-browser';
+import type { GetPricingResponse } from '@kbn/core-pricing-common';
 import { PricingService } from './pricing_service';
 
 describe('PricingService', () => {

@@ -1,25 +1,23 @@
-// We need to adjust the whole workflow schema here to the actual workflow schema
-// https://docs.google.com/document/d/1c4cyLIMTzEYn9XxDFwrNSmFpVJVLavRVM9DOa_HI9w8
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageTemplate,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
+import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN_NAME } from '../../common';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
+import React, { useEffect, useState } from 'react';
+import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
   basename: string;
@@ -39,11 +37,11 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       try {
         if (services.security) {
           const user = await services.security.authc.getCurrentUser();
-          console.log(user);
           setCurrentUser(user);
         }
       } catch (error) {
-        console.error('Failed to get current user:', error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     };
 
@@ -92,7 +90,7 @@ workflow:
   );
 
   // Update workflow inputs with current user email
-  const getWorkflowInputs = () => {
+  const getWorkflowInputs = React.useCallback(() => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
     return yaml.dump({
@@ -104,14 +102,15 @@ workflow:
         },
       },
     });
-  };
+  }, [currentUser]);
+
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
   const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
 
   // Update workflow inputs when current user changes
   useEffect(() => {
     setWorkflowInputs(getWorkflowInputs());
-  }, [currentUser]);
+  }, [currentUser, getWorkflowInputs]);
 
   const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
 
@@ -120,12 +119,11 @@ workflow:
     http
       .post('/api/workflows/test', {
         body: JSON.stringify({
-          workflowYaml: workflowYaml,
+          workflowYaml,
           inputs: yaml.load(workflowInputs),
         }),
       })
       .then((res: any) => {
-        console.log('Workflow run response:', res);
         setWorkflowExecutionId(res.workflowExecutionId);
         // Use the core notifications service to display a success message.
         notifications.toasts.addSuccess(

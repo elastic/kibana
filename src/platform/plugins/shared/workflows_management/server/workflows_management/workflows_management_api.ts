@@ -15,18 +15,43 @@ import {
   WorkflowDetailDto,
   EsWorkflow,
   WorkflowExecutionEngineModel,
-  transformWorkflowYamlJsontoEsWorkflow,
+  UpdatedWorkflowResponseDto,
 } from '@kbn/workflows';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
   limit: number;
   offset: number;
   _full?: boolean;
+}
+
+export interface GetWorkflowExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface WorkflowExecutionLogEntry {
+  id: string;
+  timestamp: string;
+  level: 'info' | 'debug' | 'warn' | 'error';
+  message: string;
+  stepId?: string;
+  stepName?: string;
+  connectorType?: string;
+  duration?: number;
+  additionalData?: Record<string, any>;
+}
+
+export interface WorkflowExecutionLogsDto {
+  logs: WorkflowExecutionLogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export class WorkflowsManagementApi {
@@ -54,7 +79,7 @@ export class WorkflowsManagementApi {
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>
-  ): Promise<WorkflowDetailDto> {
+  ): Promise<UpdatedWorkflowResponseDto> {
     return await this.workflowsService.updateWorkflow(id, workflow);
   }
 
@@ -72,15 +97,6 @@ export class WorkflowsManagementApi {
     return await this.schedulerService.runWorkflow(workflow, inputs);
   }
 
-  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
-    if (!this.schedulerService) {
-      throw new Error('Scheduler service not set');
-    }
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-    const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
-    return await this.schedulerService.runWorkflow(updatedWorkflow, inputs);
-  }
-
   public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
     return await this.workflowsService.searchWorkflowExecutions({
       workflowId,
@@ -91,5 +107,29 @@ export class WorkflowsManagementApi {
     workflowExecutionId: string
   ): Promise<WorkflowExecutionDto | null> {
     return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
+  }
+
+  public async getWorkflowExecutionLogs(
+    params: GetWorkflowExecutionLogsParams
+  ): Promise<WorkflowExecutionLogsDto> {
+    const result = await this.workflowsService.getExecutionLogs(params.executionId);
+
+    // Transform the logs to match our API format
+    return {
+      logs: result.logs.map((log: any) => ({
+        id: log.id,
+        timestamp: log.source['@timestamp'],
+        level: log.source.level,
+        message: log.source.message,
+        stepId: log.source.workflow?.step_id,
+        stepName: log.source.workflow?.step_name,
+        connectorType: log.source.workflow?.step_type,
+        duration: log.source.duration,
+        additionalData: log.source.additionalData,
+      })),
+      total: typeof result.total === 'number' ? result.total : result.total?.value || 0,
+      limit: params.limit || 100,
+      offset: params.offset || 0,
+    };
   }
 }

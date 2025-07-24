@@ -7,51 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiPageHeader } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CreateWorkflowCommand, WorkflowStatus } from '@kbn/workflows';
-import { WorkflowList } from '../../features/workflow-list/ui';
-import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
+import React from 'react';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
+import { WorkflowList } from '../../features/workflow_list/ui';
 
-const workflowTemplate: CreateWorkflowCommand = {
-  name: 'New workflow',
-  status: WorkflowStatus.DRAFT,
-  triggers: [
-    {
-      id: 'manual',
-      type: 'manual',
-      enabled: true,
-      config: {},
-    },
-  ],
-  steps: [
-    {
-      id: 'first-step',
-      connectorType: 'console',
-      connectorName: 'console',
-      inputs: {
-        message: 'First step executed',
-      },
-    },
-  ],
-  tags: [],
-  yaml: '',
-  // yaml: `
-  // name: New workflow
-  // enabled: false
-  // triggers:
-  //   - type: elastic.triggers.manual
-  // steps:
-  //   - name: first-step
-  //     type: console
-  //     with:
-  //       message: First step executed
-  // `,
-};
+const workflowTemplateYaml = `workflow:
+  name: New workflow
+  enabled: false
+  triggers:
+    - type: triggers.elastic.manual
+  steps:
+    - name: first-step
+      type: console
+      with:
+        message: First step executed
+`;
 
 export function WorkflowsPage() {
   const { application, chrome, notifications } = useKibana().services;
@@ -70,19 +45,24 @@ export function WorkflowsPage() {
   ]);
 
   const handleCreateWorkflow = () => {
-    createWorkflow.mutate(workflowTemplate, {
-      onSuccess: (data) => {
-        application!.navigateToUrl(application!.getUrlForApp('workflows', { path: `/${data.id}` }));
-        refetch();
-      },
-      onError: (error) => {
-        notifications!.toasts.addError(error, {
-          title: i18n.translate('workflows.createWorkflowError', {
-            defaultMessage: 'Error creating workflow',
-          }),
-        });
-      },
-    });
+    createWorkflow.mutate(
+      { yaml: workflowTemplateYaml },
+      {
+        onSuccess: (data) => {
+          application!.navigateToUrl(
+            application!.getUrlForApp('workflows', { path: `/${data.id}` })
+          );
+          refetch();
+        },
+        onError: (error) => {
+          notifications!.toasts.addError(error, {
+            title: i18n.translate('workflows.createWorkflowError', {
+              defaultMessage: 'Error creating workflow',
+            }),
+          });
+        },
+      }
+    );
   };
 
   return (

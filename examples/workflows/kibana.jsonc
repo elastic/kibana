@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/workflows-plugin-example",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/workflows-eng",
   "description": "a plugin for One Workflow",
   "plugin": {
     "id": "workflowsExample",

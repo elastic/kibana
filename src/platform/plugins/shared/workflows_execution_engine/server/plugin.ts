@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -5,12 +14,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import {
-  ExecutionStatus,
-  WorkflowExecution,
-  WorkflowExecutionEngineModel,
-  WorkflowStepExecution,
-} from '@kbn/workflows';
+import { ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
 
@@ -20,11 +24,15 @@ import type {
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { StepRunner } from './step-runner/step-runner';
-import { TemplatingEngine } from './templating-engine';
 
-import { ConnectorExecutor } from './connector-executor';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
+import { ConnectorExecutor } from './connector_executor';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+} from '../common';
+import { StepFactory } from './step/step_factory';
+import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -60,38 +68,58 @@ export class WorkflowsExecutionEnginePlugin
       const workflowStartedAt = new Date();
       let workflowExecutionStatus: ExecutionStatus = ExecutionStatus.RUNNING;
       let workflowExecutionError: string | null = null;
+      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       await this.esClient.index({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: workflowRunId,
         refresh: true,
         document: {
-          workflowId: workflow.id,
           id: workflowRunId,
-          triggers: workflow.triggers,
-          steps: workflow.steps,
+          workflowId: workflow.id,
+          workflowDefinition: workflow.definition,
           status: workflowExecutionStatus,
-          createdAt: workflowCreatedAt,
-          startedAt: workflowStartedAt,
-        } as WorkflowExecution,
+          createdAt: workflowCreatedAt.toISOString(),
+          startedAt: workflowStartedAt.toISOString(),
+          error: null,
+          createdBy: context.createdBy || '', // TODO: set if available
+          lastUpdatedAt: workflowCreatedAt.toISOString(),
+          lastUpdatedBy: context.createdBy || '', // TODO: set if available
+          finishedAt: null,
+          duration: null,
+          tags: [],
+          description: '',
+          triggeredBy, // <-- new field for scheduled workflows
+        } as any, // EsWorkflowExecution (add triggeredBy to type if needed)
       });
 
+      const connectorExecutor = new ConnectorExecutor(
+        context.connectorCredentials,
+        await plugins.actions.getUnsecuredActionsClient()
+      );
+
+      const contextManager = new WorkflowContextManager({
+        workflowRunId,
+        workflow: workflow as any,
+        stepResults: {},
+        event: context.event,
+        esApiKey: context.esApiKey,
+        // Enable workflow event logging
+        logger: this.logger,
+        workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
+        esClient: this.esClient,
+      });
+
+      // Log workflow execution start
+      contextManager.logWorkflowStart();
+
       try {
-        const stepRunner = new StepRunner(
-          new ConnectorExecutor(
-            context.connectorCredentials,
-            await plugins.actions.getUnsecuredActionsClient()
-          ),
-          new TemplatingEngine()
-        );
-
-        const stepsContext: any = {
-          workflowRunId,
-          event: context.event,
-          steps: {},
-        };
-
-        for (const currentStep of workflow.steps) {
-          const workflowExecutionId = `${workflowRunId}-${currentStep.id}`;
+        for (const currentStep of workflow.definition.workflow.steps) {
+          const step = new StepFactory().create(
+            currentStep as any,
+            contextManager,
+            connectorExecutor
+          );
+          const workflowExecutionId = `${workflowRunId}-${currentStep.name}`;
           const stepStartedAt = new Date();
 
           await this.esClient.index({
@@ -102,15 +130,17 @@ export class WorkflowsExecutionEnginePlugin
               id: workflowExecutionId,
               workflowId: workflow.id,
               workflowRunId,
-              stepId: currentStep.id,
+              stepId: currentStep.name,
               status: ExecutionStatus.RUNNING,
-              startedAt: stepStartedAt,
-            } as WorkflowStepExecution,
+              startedAt: stepStartedAt.toISOString(),
+              completedAt: null,
+              executionTimeMs: null,
+              error: null,
+              output: null,
+            } as any, // EsWorkflowStepExecution
           });
 
-          const stepResult = await stepRunner.runStep(currentStep, stepsContext);
-
-          stepsContext.steps[currentStep.id] = { outputs: stepResult.output };
+          const stepResult = await step.run();
 
           let stepStatus: ExecutionStatus;
 
@@ -129,24 +159,31 @@ export class WorkflowsExecutionEnginePlugin
             refresh: true,
             doc: {
               status: stepStatus,
-              completedAt,
-              executionTimeMs, // Placeholder, calculate if needed
+              completedAt: completedAt.toISOString(),
+              executionTimeMs,
               error: stepResult.error,
               output: stepResult.output,
-            } as WorkflowStepExecution,
+            } as any, // EsWorkflowStepExecution
           });
 
           if (stepStatus === ExecutionStatus.FAILED) {
             throw new Error(
-              `Step "${currentStep.id}" failed with error: ${stepResult.error || 'Unknown error'}`
+              `Step "${currentStep.name}" failed with error: ${stepResult.error || 'Unknown error'}`
             );
           }
         }
 
         workflowExecutionStatus = ExecutionStatus.COMPLETED;
+        // Log workflow success
+        contextManager.logWorkflowComplete(true);
       } catch (error) {
         workflowExecutionStatus = ExecutionStatus.FAILED;
         workflowExecutionError = error instanceof Error ? error.message : String(error);
+        // Log workflow failure
+        // contextManager.logError('Workflow execution failed', error as Error, {
+        //   event: { action: 'workflow-failed', outcome: 'failure' },
+        // });
+        contextManager.logWorkflowComplete(false);
       } finally {
         await this.esClient.update({
           index: WORKFLOWS_EXECUTIONS_INDEX,
@@ -155,9 +192,11 @@ export class WorkflowsExecutionEnginePlugin
           doc: {
             status: workflowExecutionStatus,
             error: workflowExecutionError,
-            finishedAt: new Date(),
+            finishedAt: new Date().toISOString(),
             duration: new Date().getTime() - workflowStartedAt.getTime(),
-          } as WorkflowExecution,
+            lastUpdatedAt: new Date().toISOString(),
+            lastUpdatedBy: context.createdBy || '', // TODO: set if available
+          } as any, // EsWorkflowExecution
         });
       }
     };

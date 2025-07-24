@@ -30,11 +30,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        return response.ok({
-          body: await api.getWorkflow(id),
-        });
+        const workflow = await api.getWorkflow(id);
+        if (!workflow) {
+          return response.notFound({
+            body: {
+              message: `Workflow not found`,
+            },
+          });
+        }
+        return response.ok({ body: workflow });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -64,7 +69,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           }),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -83,17 +87,14 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
         },
       },
       validate: {
-        body: CreateWorkflowCommandSchema.partial(),
+        body: CreateWorkflowCommandSchema,
       },
     },
     async (context, request, response) => {
       try {
         const createdWorkflow = await api.createWorkflow(request.body);
-        return response.ok({
-          body: createdWorkflow,
-        });
+        return response.ok({ body: createdWorkflow });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -125,7 +126,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.updateWorkflow(id, request.body),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -152,11 +152,9 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        return response.ok({
-          body: await api.deleteWorkflows([id]),
-        });
+        await api.deleteWorkflows([id]);
+        return response.ok();
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -183,11 +181,9 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { ids } = request.body as { ids: string[] };
-        return response.ok({
-          body: await api.deleteWorkflows(ids),
-        });
+        await api.deleteWorkflows(ids);
+        return response.ok();
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -227,45 +223,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: workflowRunId,
         });
       } catch (error) {
-        console.error(error);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
-      }
-    }
-  );
-  router.post(
-    {
-      path: '/api/workflows/test',
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
-      validate: {
-        body: schema.object({
-          inputs: schema.recordOf(schema.string(), schema.any()),
-          workflowYaml: schema.string(),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const workflowExecutionId = await api.testWorkflow(
-          request.body.workflowYaml,
-          request.body.inputs
-        );
-
-        return response.ok({
-          body: {
-            workflowExecutionId,
-          },
-        });
-      } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -296,7 +253,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.getWorkflowExecutions(workflowId),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -324,11 +280,60 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       try {
         const { workflowExecutionId } = request.params;
         const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
+        if (!workflowExecution) {
+          return response.notFound();
+        }
         return response.ok({
           body: workflowExecution,
         });
       } catch (error) {
-        console.error(error);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/workflowExecutions/{workflowExecutionId}/logs',
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+        query: schema.object({
+          limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
+          offset: schema.maybe(schema.number({ min: 0 })),
+          sortField: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const { limit, offset, sortField, sortOrder } = request.query;
+
+        const logs = await api.getWorkflowExecutionLogs({
+          executionId: workflowExecutionId,
+          limit,
+          offset,
+          sortField,
+          sortOrder,
+        });
+
+        return response.ok({
+          body: logs,
+        });
+      } catch (error) {
         return response.customError({
           statusCode: 500,
           body: {

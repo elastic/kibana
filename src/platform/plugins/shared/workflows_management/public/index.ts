@@ -15,4 +15,4 @@ export function plugin() {
   return new WorkflowsPlugin();
 }
 export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
-export { WorkflowExecution } from './features/workflow-detail/ui/workflow-execution';
+export { WorkflowExecution } from './features/workflow_detail/ui/workflow_execution';

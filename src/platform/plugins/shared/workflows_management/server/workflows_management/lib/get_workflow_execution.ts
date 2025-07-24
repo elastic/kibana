@@ -63,5 +63,6 @@ function transformToWorkflowExecutionDetailDto(
   return {
     ...workflowExecution,
     stepExecutions,
+    triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
   };
 }

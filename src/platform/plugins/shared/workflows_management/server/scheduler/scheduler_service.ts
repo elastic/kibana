@@ -1,20 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/core/server';
-import { WorkflowExecutionEngineModel, WorkflowModel } from '@kbn/workflows';
+import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { v4 as generateUuid } from 'uuid';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { v4 as generateUuid } from 'uuid';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { workflowsGrouppedByTriggerType } from '../mock';
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
-  return workflowsGrouppedByTriggerType[triggerType] || [];
+  return [];
 };
 
 export class SchedulerService {
   private readonly logger: Logger;
-  private readonly workflowsService: WorkflowsService;
   private readonly actionsClient: IUnsecuredActionsClient;
   private readonly workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
 
@@ -25,7 +31,6 @@ export class SchedulerService {
     workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart
   ) {
     this.logger = logger;
-    this.workflowsService = workflowsService;
     this.actionsClient = actionsClient;
     this.workflowsExecutionEngine = workflowsExecutionEngine;
   }
@@ -44,7 +49,7 @@ export class SchedulerService {
     // }
   }
 
-  public async scheduleWorkflow(workflow: WorkflowModel) {
+  public async scheduleWorkflow(workflow: EsWorkflow) {
     this.logger.info(`Scheduling workflow ${workflow.id}`);
     // this.workflowsExecutionEngine.scheduleWorkflow(workflow);
   }
@@ -56,11 +61,12 @@ export class SchedulerService {
     const connectorCredentials = await extractConnectorIds(workflow, this.actionsClient);
 
     const workflowRunId = generateUuid();
-    this.workflowsExecutionEngine.executeWorkflow(workflow, {
+    await this.workflowsExecutionEngine.executeWorkflow(workflow, {
       workflowRunId,
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
       connectorCredentials,
+      triggeredBy: 'manual', // <-- mark as manual
     });
 
     return workflowRunId;
@@ -71,7 +77,7 @@ export class SchedulerService {
       const worklfowsToRun = findWorkflowsByTrigger(eventType);
 
       for (const workflow of worklfowsToRun) {
-        this.runWorkflow(workflow, {
+        await this.runWorkflow(workflow, {
           event: eventData,
         });
       }
