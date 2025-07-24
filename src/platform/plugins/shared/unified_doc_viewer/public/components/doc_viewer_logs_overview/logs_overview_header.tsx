@@ -37,6 +37,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
     includeFormattedValue: true,
   });
+  const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
@@ -89,6 +90,7 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
         value={value}
         formattedValue={formattedValue}
         field={field}
+        rawFieldValue={rawFieldValue}
         anchorPosition="downCenter"
         display="block"
       >
