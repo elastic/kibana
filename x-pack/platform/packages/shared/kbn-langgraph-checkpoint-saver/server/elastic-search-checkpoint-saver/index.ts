@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Client as ESClient, estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import {
   BaseCheckpointSaver,
@@ -19,6 +20,7 @@ import {
 } from '@langchain/langgraph-checkpoint';
 
 interface CheckpointDocument {
+  created_at: string;
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -29,6 +31,7 @@ interface CheckpointDocument {
 }
 
 interface WritesDocument {
+  created_at: string;
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -40,7 +43,8 @@ interface WritesDocument {
 }
 
 export interface ElasticSearchSaverParams {
-  client: ESClient;
+  client: ElasticsearchClient;
+  logger: Logger;
   checkpointIndex?: string;
   checkpointWritesIndex?: string;
   refreshPolicy?: estypes.Refresh;
@@ -55,6 +59,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
   static readonly checkpointIndexMapping = {
+    created_at: { type: 'date' },
     thread_id: { type: 'keyword' },
     checkpoint_ns: { type: 'keyword' },
     checkpoint_id: { type: 'keyword' },
@@ -65,6 +70,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   } as const;
 
   static readonly checkpointWritesIndexMapping = {
+    created_at: { type: 'date' },
     thread_id: { type: 'keyword' },
     checkpoint_ns: { type: 'keyword' },
     checkpoint_id: { type: 'keyword' },
@@ -75,7 +81,8 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     value: { type: 'binary' },
   } as const;
 
-  protected client: ESClient;
+  protected client: ElasticsearchClient;
+  protected logger: Logger;
 
   checkpointIndex: string;
 
@@ -89,6 +96,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       checkpointIndex,
       checkpointWritesIndex,
       refreshPolicy = 'wait_for',
+      logger
     }: ElasticSearchSaverParams,
     serde?: SerializerProtocol
   ) {
@@ -98,6 +106,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     this.checkpointWritesIndex =
       checkpointWritesIndex ?? ElasticSearchSaver.defaultCheckpointWritesIndex;
     this.refreshPolicy = refreshPolicy;
+    this.logger = logger;
   }
 
   /**
@@ -126,7 +135,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
           ],
         },
       },
-    });
+    })
 
     if (result.hits.hits.length === 0 || result.hits.hits[0]?._source === undefined) {
       return undefined;
@@ -184,12 +193,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-              configurable: {
-                thread_id: threadId,
-                checkpoint_ns: checkpointNs,
-                checkpoint_id: doc.parent_checkpoint_id,
-              },
-            }
+            configurable: {
+              thread_id: threadId,
+              checkpoint_ns: checkpointNs,
+              checkpoint_id: doc.parent_checkpoint_id,
+            },
+          }
           : undefined,
     };
   }
@@ -267,12 +276,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-              configurable: {
-                thread_id: source.thread_id,
-                checkpoint_ns: source.checkpoint_ns,
-                checkpoint_id: source.parent_checkpoint_id,
-              },
-            }
+            configurable: {
+              thread_id: source.thread_id,
+              checkpoint_ns: source.checkpoint_ns,
+              checkpoint_id: source.parent_checkpoint_id,
+            },
+          }
           : undefined,
       };
     }
@@ -304,6 +313,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     }
 
     const doc: CheckpointDocument = {
+      created_at: new Date().toISOString(),
       thread_id: threadId,
       checkpoint_ns: checkpointNs,
       checkpoint_id: checkpointId,
@@ -354,6 +364,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       const [type, serializedValue] = this.serde.dumpsTyped(value);
 
       const doc: WritesDocument = {
+        created_at: new Date().toISOString(),
         thread_id: threadId,
         checkpoint_ns: checkpointNs,
         checkpoint_id: checkpointId,

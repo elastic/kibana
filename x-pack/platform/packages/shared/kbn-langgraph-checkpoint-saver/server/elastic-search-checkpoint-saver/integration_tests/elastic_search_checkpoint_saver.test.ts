@@ -2,6 +2,10 @@ import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helper
 import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
 import { Checkpoint, CheckpointTuple, uuid6 } from '@langchain/langgraph-checkpoint';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
+const mockLoggerFactory = loggingSystemMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
 
 // Define test checkpoints
 const checkpoint1: Checkpoint = {
@@ -106,6 +110,7 @@ describe('ElasticSearchSaver', () => {
     saver = new ElasticSearchSaver({
       client,
       refreshPolicy: 'wait_for',
+      logger: mockLogger
     });
   });
 
