@@ -11,9 +11,9 @@ module.exports = {
   roots: ['<rootDir>/x-pack/platform/plugins/shared/context_registry'],
   setupFiles: [],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest//x-pack/platform/plugins/shared/context_registry',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/context_registry',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>//x-pack/platform/plugins/shared/context_registry/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/context_registry/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
