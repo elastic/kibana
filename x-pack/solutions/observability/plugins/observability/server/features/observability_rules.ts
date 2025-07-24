@@ -16,7 +16,6 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
-  GENERIC_ALERTING_CONSUMERS,
   AlertConsumers,
   LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -37,7 +36,7 @@ const infraRuleTypes = [
 ];
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
-const baseConsumers = [ALERTING_FEATURE_ID, ...GENERIC_ALERTING_CONSUMERS];
+const baseConsumers = [ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY];
 
 // Consolidated privileges for all rule/alert types
 const observabilityRulePrivileges = [

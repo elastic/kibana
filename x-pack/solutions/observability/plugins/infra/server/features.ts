@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  GENERIC_ALERTING_CONSUMERS,
+  AlertConsumers,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -33,8 +33,7 @@ const metricRuleTypes = [
 
 export const getMetricsFeature = (): KibanaFeatureConfig => {
   const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => {
-    const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, ...GENERIC_ALERTING_CONSUMERS];
-
+    const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY];
     return {
       ruleTypeId,
       consumers,

@@ -10,7 +10,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
   AlertConsumers,
-  GENERIC_ALERTING_CONSUMERS,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -29,7 +28,7 @@ const logsRuleTypes = [
 ];
 export const getLogsFeature = (): KibanaFeatureConfig => {
   const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
-    const consumers = [AlertConsumers.LOGS, ALERTING_FEATURE_ID, ...GENERIC_ALERTING_CONSUMERS];
+    const consumers = [AlertConsumers.LOGS, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY];
 
     return {
       ruleTypeId,
