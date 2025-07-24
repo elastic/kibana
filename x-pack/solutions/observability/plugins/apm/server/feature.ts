@@ -22,6 +22,7 @@ import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
   ruleTypeId,
+  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY],
 }));
 
 export const APM_FEATURE: KibanaFeatureConfig = {
