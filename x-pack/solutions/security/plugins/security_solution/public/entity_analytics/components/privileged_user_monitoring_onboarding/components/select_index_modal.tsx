@@ -20,6 +20,8 @@ import {
   EuiModal,
   EuiFormRow,
   EuiCallOut,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -126,11 +128,16 @@ export const IndexSelectorModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.description"
-          defaultMessage="Add your privileged users by selecting one or more indices as data source. All user names in the indices, specified in user.name field, will be defined as privileged users."
-        />
-        <EuiSpacer size="l" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.description"
+            defaultMessage="Add your privileged users by selecting one or more indices as a data source. All users specified in the {nameField} field will be defined as privileged users."
+            values={{
+              nameField: <EuiCode>{'user.name'}</EuiCode>,
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
         {error ? (
           <>
             <EuiCallOut color="danger">{LOADING_ERROR_MESSAGE}</EuiCallOut>
