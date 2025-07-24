@@ -235,7 +235,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
-              sourcererDataView={newDataViewPickerEnabled ? dataView : oldSourcererDataView}
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              }
             />
           </FiltersGlobal>
 

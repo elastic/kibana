@@ -69,7 +69,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
     setViewMode(mode);
   }, []);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView();
+  const { dataView: experimentalDataView } = useDataView();
 
   return (
     <>
