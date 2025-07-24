@@ -19,9 +19,9 @@ export const findSloDefinitionsRoute = createSloServerRoute({
     },
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+  handler: async ({ request, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { repository } = await getScopedClients({ request, logger });
+    const { repository } = await getScopedClients(request);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
     return await findSloDefinitions.execute(params?.query ?? {});

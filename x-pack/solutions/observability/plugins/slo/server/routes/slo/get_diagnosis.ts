@@ -20,8 +20,8 @@ export const getDiagnosisRoute = createSloServerRoute({
     },
   },
   params: undefined,
-  handler: async ({ request, logger, plugins, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request, logger });
+  handler: async ({ request, plugins, getScopedClients }) => {
+    const { scopedClusterClient } = await getScopedClients(request);
     const licensing = await plugins.licensing.start();
 
     try {

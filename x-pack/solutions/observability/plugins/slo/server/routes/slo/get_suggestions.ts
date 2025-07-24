@@ -17,12 +17,9 @@ export const getSLOSuggestionsRoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  handler: async ({ request, logger, plugins, getScopedClients }) => {
+  handler: async ({ request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { soClient } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { soClient } = await getScopedClients(request);
 
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
     return await getSLOSuggestions.execute();

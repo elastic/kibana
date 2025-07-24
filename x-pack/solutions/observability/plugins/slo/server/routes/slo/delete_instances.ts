@@ -19,10 +19,10 @@ export const deleteSloInstancesRoute = createSloServerRoute({
     },
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ request, logger, response, params, plugins, getScopedClients }) => {
+  handler: async ({ request, response, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { scopedClusterClient } = await getScopedClients({ request, logger });
+    const { scopedClusterClient } = await getScopedClients(request);
 
     const deleteSloInstances = new DeleteSLOInstances(scopedClusterClient.asCurrentUser);
     await deleteSloInstances.execute(params.body);
