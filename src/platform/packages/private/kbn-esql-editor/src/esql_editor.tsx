@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiOutsideClickDetector,
   useEuiTheme,
-  EuiDatePicker,
   EuiToolTip,
   EuiButton,
   type EuiButtonColor,
@@ -20,7 +19,6 @@ import {
   EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import useObservable from 'react-use/lib/useObservable';
@@ -34,13 +32,14 @@ import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
-import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { FieldType } from '@kbn/esql-ast';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { useResourcesCommand } from './popover_elements/open_resources_popover';
+import { DatePickerPopover } from './popover_elements/date_picker';
 import {
   clearCacheWhenOld,
   getESQLSources,
@@ -153,8 +152,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [resizableContainerHeight, setResizableContainerHeight] = useState(
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
-  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
-  const [timePickerDate, setTimePickerDate] = useState(moment());
+  const [datePickerPopoverPosition, setDatePickerPopoverPosition] = useState<{
+    top?: number;
+    left?: number;
+  }>({});
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
@@ -280,7 +281,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
       }
 
-      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+      setDatePickerPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
       popoverRef.current?.focus();
     }
@@ -576,6 +577,19 @@ export const ESQLEditor = memo(function ESQLEditor({
     activeSolutionId,
   ]);
 
+  const {
+    resourcesBadgeStyle,
+    resourcesLabelClickHandler,
+    resourcesLabelKeyDownHandler,
+    addResourcesDecorator,
+    ResourcesPopover,
+  } = useResourcesCommand(
+    editor1,
+    editorModel,
+    query,
+    esqlCallbacks?.getSources ? async () => (await esqlCallbacks.getSources?.()) ?? [] : undefined
+  );
+
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
@@ -779,6 +793,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
+      <Global styles={resourcesBadgeStyle} />
       {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
@@ -883,27 +898,34 @@ export const ESQLEditor = memo(function ESQLEditor({
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      addResourcesDecorator();
                     }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
+                    });
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown((e) => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
                       if (datePickerOpenStatusRef.current) {
-                        setPopoverPosition({});
+                        setDatePickerPopoverPosition({});
                       }
+                      resourcesLabelClickHandler(e);
                     });
 
                     editor.onDidFocusEditorText(() => {
                       onEditorFocus();
                     });
 
-                    editor.onKeyDown(() => {
+                    editor.onKeyDown((e) => {
                       onEditorFocus();
+                      resourcesLabelKeyDownHandler(e);
                     });
 
                     // on CMD/CTRL + / comment out the entire line
@@ -991,76 +1013,15 @@ export const ESQLEditor = memo(function ESQLEditor({
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
       />
-      {createPortal(
-        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
-          <div
-            tabIndex={0}
-            style={{
-              ...popoverPosition,
-              backgroundColor: theme.euiTheme.colors.emptyShade,
-              borderRadius: theme.euiTheme.border.radius.small,
-              position: 'absolute',
-              overflow: 'auto',
-              zIndex: 1001,
-              border: theme.euiTheme.border.thin,
-            }}
-            ref={popoverRef}
-            data-test-subj="ESQLEditor-timepicker-popover"
-          >
-            <EuiDatePicker
-              selected={timePickerDate}
-              autoFocus
-              onChange={(date) => {
-                if (date) {
-                  setTimePickerDate(date);
-                }
-              }}
-              onSelect={(date, event) => {
-                if (date && event) {
-                  const currentCursorPosition = editor1.current?.getPosition();
-                  const lineContent = editorModel.current?.getLineContent(
-                    currentCursorPosition?.lineNumber ?? 0
-                  );
-                  const contentAfterCursor = lineContent?.substring(
-                    (currentCursorPosition?.column ?? 0) - 1,
-                    lineContent.length + 1
-                  );
-
-                  const addition = `"${date.toISOString()}"${contentAfterCursor}`;
-                  editor1.current?.executeEdits('time', [
-                    {
-                      range: {
-                        startLineNumber: currentCursorPosition?.lineNumber ?? 0,
-                        startColumn: currentCursorPosition?.column ?? 0,
-                        endLineNumber: currentCursorPosition?.lineNumber ?? 0,
-                        endColumn: (currentCursorPosition?.column ?? 0) + addition.length + 1,
-                      },
-                      text: addition,
-                      forceMoveMarkers: true,
-                    },
-                  ]);
-
-                  setPopoverPosition({});
-
-                  datePickerOpenStatusRef.current = false;
-
-                  // move the cursor past the date we just inserted
-                  editor1.current?.setPosition({
-                    lineNumber: currentCursorPosition?.lineNumber ?? 0,
-                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
-                  });
-                  // restore focus to the editor
-                  editor1.current?.focus();
-                }
-              }}
-              inline
-              showTimeSelect={true}
-              shadow={true}
-            />
-          </div>
-        ),
-        document.body
-      )}
+      <DatePickerPopover
+        editorRef={editor1}
+        editorModel={editorModel}
+        position={datePickerPopoverPosition}
+        popoverRef={popoverRef}
+        setPopoverPosition={setDatePickerPopoverPosition}
+        datePickerOpenStatusRef={datePickerOpenStatusRef}
+      />
+      <ResourcesPopover />
     </>
   );
 
