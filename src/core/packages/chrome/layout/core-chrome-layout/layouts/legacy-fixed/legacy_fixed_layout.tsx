@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useChromeState } from '@kbn/core-chrome-browser-internal/src/ui_store';
+import { useChromeObservable } from '@kbn/core-chrome-browser-internal/src/store';
 import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
 import { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
@@ -30,7 +30,7 @@ export class LegacyFixedLayout implements LayoutService {
     const appComponent = application.getComponent();
 
     return React.memo(() => {
-      const chromeVisible = useChromeState((state) => state.isVisible);
+      const chromeVisible = useChromeObservable((state) => state.isVisible$, false);
 
       return (
         <>

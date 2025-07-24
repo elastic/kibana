@@ -34,7 +34,7 @@ import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions'
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -64,12 +64,12 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
 
-  const navControlsCenter = useChromeState((state) => state.navControlsCenter);
-  const navControlsLeft = useChromeState((state) => state.navControlsLeft);
-  const navControlsRight = useChromeState((state) => state.navControlsRight);
-  const navControlsExtension = useChromeState((state) => state.navControlsExtension);
-  const headerActionMenuMounter = useChromeState((state) => state.currentActionMenu);
-  const breadcrumbs = useChromeState((state) => state.breadcrumbs);
+  const navControlsCenter = useChromeObservable((state) => state.navControlsCenter$);
+  const navControlsLeft = useChromeObservable((state) => state.navControlsLeft$);
+  const navControlsRight = useChromeObservable((state) => state.navControlsRight$);
+  const navControlsExtension = useChromeObservable((state) => state.navControlsExtension$);
+  const headerActionMenuMounter = useChromeObservable((state) => state.currentActionMenu$);
+  const breadcrumbs = useChromeObservable((state) => state.breadcrumbs$);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');

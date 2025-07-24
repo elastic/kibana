@@ -61,7 +61,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
-import { createChromeStore, useChromeState } from './ui_store';
+import { createChromeStore, useChromeObservable, ChromeStoreProvider } from './store';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -439,20 +439,22 @@ export class ChromeService {
        */
       includeBanner: boolean;
     }) => (
-      <Header
-        /* customizable header variations */
-        as={as}
-        includeBanner={includeBanner}
-        isFixed={isFixed}
-        /* consistent header properties */
-        isServerless={this.isServerless}
-        application={application}
-        basePath={http.basePath}
-        kibanaDocLink={docLinks.links.kibana.guide}
-        docLinks={docLinks}
-        homeHref={http.basePath.prepend('/app/home')}
-        kibanaVersion={injectedMetadata.getKibanaVersion()}
-      />
+      <ChromeWrapper>
+        <Header
+          /* customizable header variations */
+          as={as}
+          includeBanner={includeBanner}
+          isFixed={isFixed}
+          /* consistent header properties */
+          isServerless={this.isServerless}
+          application={application}
+          basePath={http.basePath}
+          kibanaDocLink={docLinks.links.kibana.guide}
+          docLinks={docLinks}
+          homeHref={http.basePath.prepend('/app/home')}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
+        />
+      </ChromeWrapper>
     );
 
     const getProjectHeader = ({
@@ -485,20 +487,22 @@ export class ChromeService {
        */
       includeAppMenu: boolean;
     }) => (
-      <ProjectHeader
-        isServerless={this.isServerless}
-        isFixed={isFixed}
-        as={as}
-        application={application}
-        includesActionMenu={includeAppMenu}
-        includesHeaderBanner={includeBanner}
-        docLinks={docLinks}
-        kibanaVersion={injectedMetadata.getKibanaVersion()}
-        prependBasePath={http.basePath.prepend}
-        toggleSideNav={setIsSideNavCollapsed}
-      >
-        {includeSideNavigation ? getProjectSideNavComponent() : null}
-      </ProjectHeader>
+      <ChromeWrapper>
+        <ProjectHeader
+          isServerless={this.isServerless}
+          isFixed={isFixed}
+          as={as}
+          application={application}
+          includesActionMenu={includeAppMenu}
+          includesHeaderBanner={includeBanner}
+          docLinks={docLinks}
+          kibanaVersion={injectedMetadata.getKibanaVersion()}
+          prependBasePath={http.basePath.prepend}
+          toggleSideNav={setIsSideNavCollapsed}
+        >
+          {includeSideNavigation ? getProjectSideNavComponent() : null}
+        </ProjectHeader>
+      </ChromeWrapper>
     );
 
     /**
@@ -530,8 +534,8 @@ export class ChromeService {
 
     const getLegacyHeaderComponentForFixedLayout = () => {
       const HeaderComponent = () => {
-        const isVisible = useChromeState((state) => state.isVisible);
-        const chromeStyle = useChromeState((state) => state.chromeStyle);
+        const isVisible = useChromeObservable((state) => state.isVisible$);
+        const chromeStyle = useChromeObservable((state) => state.chromeStyle$);
 
         if (!isVisible) {
           return (
@@ -607,28 +611,39 @@ export class ChromeService {
       homeHref$: projectNavigation.getProjectHome$(),
     });
 
-    return {
-      getUiStore: () => {
-        return store;
-      },
+    const ChromeWrapper = ({ children }: { children: React.ReactNode }) => {
+      return <ChromeStoreProvider store={store}>{children}</ChromeStoreProvider>;
+    };
 
+    return {
+      getChromeStoreProvider: () => ChromeWrapper,
       // TODO: this service does too much and doesn't have to compose these headers components.
       // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
       getHeaderBanner: () => {
-        return <HeaderTopBanner position={'static'} />;
+        return (
+          <ChromeWrapper>
+            <HeaderTopBanner position={'static'} />
+          </ChromeWrapper>
+        );
       },
       getChromelessHeader: () => {
         return (
-          <div data-test-subj="kibanaHeaderChromeless">
-            <LoadingIndicator showAsBar />
-          </div>
+          <ChromeWrapper>
+            <div data-test-subj="kibanaHeaderChromeless">
+              <LoadingIndicator showAsBar />
+            </div>
+          </ChromeWrapper>
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar isFixed={false} />;
+        return (
+          <ChromeWrapper>
+            <AppMenuBar isFixed={false} />
+          </ChromeWrapper>
+        );
       },
 
       // chrome APIs

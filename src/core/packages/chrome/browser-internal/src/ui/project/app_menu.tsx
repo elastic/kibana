@@ -9,7 +9,7 @@
 
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 import { HeaderActionMenu } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
@@ -51,7 +51,7 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = ({ isFixed = true }: AppMenuBarProps) => {
-  const headerActionMenuMounter = useChromeState((state) => state.currentActionMenu);
+  const headerActionMenuMounter = useChromeObservable((state) => state.currentActionMenu$);
   const { euiTheme } = useEuiTheme();
 
   const styles = useAppMenuBarStyles(euiTheme);

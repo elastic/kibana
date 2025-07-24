@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 export const HeaderBadge: React.FC = () => {
-  const badge = useChromeState((state) => state.badge);
+  const badge = useChromeObservable((state) => state.badge$);
 
   if (badge == null) {
     return null;

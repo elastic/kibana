@@ -33,7 +33,6 @@ import {
 } from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
-import { ChromeUiStoreProvider } from '@kbn/core-chrome-browser-internal/src/ui_store';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -113,11 +112,13 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
+    const ChromeStoreProvider = chrome.getChromeStoreProvider();
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <ChromeUiStoreProvider store={chrome.getUiStore()}>
+        <ChromeStoreProvider>
           <Layout />
-        </ChromeUiStoreProvider>
+        </ChromeStoreProvider>
       </KibanaRootContextProvider>,
       targetDomElement
     );

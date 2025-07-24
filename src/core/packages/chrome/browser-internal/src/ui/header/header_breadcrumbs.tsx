@@ -11,10 +11,10 @@ import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 export function HeaderBreadcrumbs() {
-  const breadcrumbs = useChromeState((state) => state.breadcrumbs);
+  const breadcrumbs = useChromeObservable((state) => state.breadcrumbs$);
 
   let crumbs = breadcrumbs;
 

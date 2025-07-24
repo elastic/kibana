@@ -12,7 +12,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 const styles = {
   breadcrumbsWithExtensionContainer: css`
@@ -34,8 +34,8 @@ const styles = {
 };
 
 export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
-  const breadcrumbsAppendExtensions = useChromeState(
-    (state) => state.breadcrumbsAppendExtensions
+  const breadcrumbsAppendExtensions = useChromeObservable(
+    (state) => state.breadcrumbsAppendExtensions$
   );
 
   return breadcrumbsAppendExtensions.length === 0 ? (

@@ -34,7 +34,7 @@ import {
   isModifiedOrPrevented,
 } from './nav_link';
 import { getCollapsibleNavStyles } from './get_collapsible_nav_styles';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -91,8 +91,6 @@ const overviewIDs = [
   'enterpriseSearch',
 ];
 
-const EMPTY: ChromeNavLink[] = [];
-
 export function CollapsibleNav({
   basePath,
   id,
@@ -105,7 +103,7 @@ export function CollapsibleNav({
   button,
   ...observables
 }: Props) {
-  const allLinks = useChromeState((state) => state.navLinks ?? EMPTY);
+  const allLinks = useChromeObservable((state) => state.navLinks$, []);
 
   const allowedLinks = useMemo(
     () =>
@@ -128,9 +126,9 @@ export function CollapsibleNav({
     () => allLinks.filter((link) => overviewIDs.includes(link.id)),
     [allLinks]
   );
-  const recentlyAccessed = useChromeState((state) => state.recentlyAccessed) ?? [];
-  const customNavLink = useChromeState((state) => state.customNavLink);
-  const appId = useChromeState((state) => state.currentAppId);
+  const recentlyAccessed = useChromeObservable((state) => state.recentlyAccessed$, []);
+  const customNavLink = useChromeObservable((state) => state.customNavLink$);
+  const appId = useChromeObservable((state) => state.currentAppId$);
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);

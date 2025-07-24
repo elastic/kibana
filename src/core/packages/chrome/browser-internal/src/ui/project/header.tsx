@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { type ComponentProps, useCallback } from 'react';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -33,7 +34,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -118,11 +119,18 @@ type LogoProps = Pick<Props, 'application' | 'prependBasePath'> & {
 };
 
 const Logo = ({ prependBasePath, application, logoCss }: LogoProps) => {
-  // TODO: add debounce to isLoading to avoid flickering
-  const isLoading = useChromeState((state) => state.loadingCount > 0);
-  const homeHref = useChromeState((state) => state.homeHref);
-  const customBranding = useChromeState((state) => state.customBranding);
-  const { logo } = customBranding ?? {};
+  const isLoading = useChromeObservable(
+    (state) =>
+      state.loadingCount$.pipe(
+        map((count) => count > 0),
+        distinctUntilChanged(),
+        debounceTime(250) // Debounce to avoid flickering
+      ),
+    false
+  );
+  const homeHref = useChromeObservable((state) => state.homeHref$);
+  const customBranding = useChromeObservable((state) => state.customBranding$, {});
+  const { logo } = customBranding;
 
   let fullHref: string | undefined;
   if (homeHref) {
@@ -202,11 +210,11 @@ export const ProjectHeader = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const navControlsCenter = useChromeState((state) => state.navControlsCenter);
-  const navControlsLeft = useChromeState((state) => state.navControlsLeft);
-  const navControlsRight = useChromeState((state) => state.navControlsRight);
-  const projectBreadcrumbs = useChromeState((state) => state.projectBreadcrumbs) ?? [];
-  const isSideNavCollapsed = useChromeState((state) => state.isSideNavCollapsed);
+  const navControlsCenter = useChromeObservable((state) => state.navControlsCenter$);
+  const navControlsLeft = useChromeObservable((state) => state.navControlsLeft$);
+  const navControlsRight = useChromeObservable((state) => state.navControlsRight$);
+  const projectBreadcrumbs = useChromeObservable((state) => state.projectBreadcrumbs$, []);
+  const isSideNavCollapsed = useChromeObservable((state) => state.isSideNavCollapsed$, false);
 
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;

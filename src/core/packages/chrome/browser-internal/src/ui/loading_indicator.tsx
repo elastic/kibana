@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Global, css } from '@emotion/react';
-import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
+import { css, Global } from '@emotion/react';
+import { EuiIcon, EuiImage, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import classNames from 'classnames';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 
-import { useChromeState } from '../ui_store';
+import { useChromeObservable } from '../store';
 
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
@@ -28,37 +29,26 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   maxAmount,
   valueAmount,
 }) => {
-  const isLoading = useChromeState((state) => state.loadingCount > 0);
+  const isLoading = useChromeObservable(
+    (state) =>
+      state.loadingCount$.pipe(
+        map((count) => count > 0),
+        distinctUntilChanged(),
+        debounceTime(250) // Debounce to avoid flickering
+      ),
+    false
+  );
   console.log('LoadingIndicator rendered with isLoading:', isLoading);
-  const [visible, setVisible] = useState(false);
-  const timerRef = useRef<any>();
-  const incrementRef = useRef<number>(1);
 
-  useEffect(() => {
-    if (incrementRef.current > 1 && timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    incrementRef.current += incrementRef.current;
-    timerRef.current = setTimeout(() => {
-      setVisible(isLoading);
-    }, 250);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [isLoading]);
-
-  const className = classNames(!visible && 'kbnLoadingIndicator-hidden');
-  const indicatorHiddenCss = !visible
+  const className = classNames(!isLoading && 'kbnLoadingIndicator-hidden');
+  const indicatorHiddenCss = !isLoading
     ? css({
         visibility: 'hidden',
         animationPlayState: 'paused',
       })
     : undefined;
 
-  const testSubj = visible ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
+  const testSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
 
   const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
     defaultMessage: 'Loading content',
@@ -85,7 +75,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
     />
   );
 
-  const logo = visible ? (
+  const logo = isLoading ? (
     <EuiLoadingSpinner
       size="l"
       data-test-subj={testSubj}

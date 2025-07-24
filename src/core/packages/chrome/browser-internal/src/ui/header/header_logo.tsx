@@ -13,7 +13,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ElasticMark } from './elastic_mark';
 import { LoadingIndicator } from '../loading_indicator';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;
@@ -54,7 +54,7 @@ interface Props {
 
 export function HeaderLogo({ href, navigateToApp }: Props) {
   const { euiTheme } = useEuiTheme();
-  const customBranding = useChromeState((state) => state.customBranding) ?? {};
+  const customBranding = useChromeObservable((state) => state.customBranding$, {});
   const { customizedLogo, logo } = customBranding;
 
   const styles = {

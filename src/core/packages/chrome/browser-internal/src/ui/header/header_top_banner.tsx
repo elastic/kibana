@@ -10,7 +10,7 @@
 import React, { FC } from 'react';
 import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
-import { useChromeState } from '../../ui_store';
+import { useChromeObservable } from '../../store';
 
 export interface HeaderTopBannerProps {
   position?: 'fixed' | 'static';
@@ -39,7 +39,7 @@ const styles = {
 };
 
 export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ position = 'fixed' }) => {
-  const headerBanner = useChromeState((state) => state.headerBanner);
+  const headerBanner = useChromeObservable((state) => state.headerBanner$);
 
   if (!headerBanner) {
     return null;
