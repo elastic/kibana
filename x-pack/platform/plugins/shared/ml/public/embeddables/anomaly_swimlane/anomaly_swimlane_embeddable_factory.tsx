@@ -184,7 +184,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             core: coreStartServices,
             parentApi,
             flyoutProps: {
-              'data-test-subj': 'ooooooooo',
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
@@ -197,9 +196,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                   pluginStart={pluginsStartServices}
                   onConfirm={(result) => {
                     swimlaneManager.api.updateUserInput(result);
-                    closeFlyout();
                   }}
-                  closeFlyout={closeFlyout}
+                  onClose={closeFlyout}
                   input={{ ...titleManager.getLatestState(), ...swimlaneManager.getLatestState() }}
                 />
               );

@@ -66,7 +66,6 @@ export function createAddSwimlanePanelAction(
         core: coreStart,
         parentApi: context.embeddable,
         flyoutProps: {
-          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
@@ -84,11 +83,8 @@ export function createAddSwimlanePanelAction(
                     rawState: initialState,
                   },
                 });
-                closeFlyout();
               }}
-              closeFlyout={() => {
-                closeFlyout();
-              }}
+              onClose={closeFlyout}
             />
           );
         },
