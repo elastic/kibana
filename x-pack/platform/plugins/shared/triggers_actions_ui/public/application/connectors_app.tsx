@@ -24,7 +24,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
@@ -44,7 +43,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
