@@ -124,4 +124,4 @@ export const GlobalHeader = React.memo(() => {
     </InPortal>
   );
 });
-GlobalHeader.displayName = 'GlobalHeader';
+GlobalHeader.displayName = 'ThisisATest';
