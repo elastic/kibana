@@ -49,6 +49,7 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
 } from '../lib/types';
@@ -1015,6 +1016,44 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     >(reqIndexOptions);
 
     return actionDetails;
+  }
+
+  async getCustomScripts(): Promise<CustomScriptsResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `'runscript' response action not supported for [${this.agentType}]`
+      );
+    }
+
+    this.log.debug(`Retrieving list of scripts`);
+
+    const s1ScriptQueryOptions: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
+      sortBy: 'scriptName',
+      sortOrder: 'asc',
+      limit: 1000,
+    };
+
+    const { data: scriptSearchResults } =
+      await this.sendAction<SentinelOneGetRemoteScriptsResponse>(
+        SUB_ACTION.GET_REMOTE_SCRIPTS,
+        s1ScriptQueryOptions
+      );
+
+    return {
+      data: (scriptSearchResults?.data ?? []).map((scriptInfo) => {
+        return {
+          id: scriptInfo.id,
+          name: scriptInfo.scriptName,
+          description: `${scriptInfo.scriptDescription ?? ''} ${
+            scriptInfo.inputInstructions
+              ? `Input instructions: ${scriptInfo.inputInstructions}`
+              : ''
+          }`.trim(),
+        };
+      }),
+    };
   }
 
   async processPendingActions({
