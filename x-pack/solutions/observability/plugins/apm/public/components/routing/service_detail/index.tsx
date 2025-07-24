@@ -330,7 +330,10 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showQueryInput: false,
+          showQueryInput: true,
+          searchBarPlaceholder: i18n.translate('xpack.apm.views.logs.searchBarPlaceholder', {
+            defaultMessage: 'Search for log entries',
+          }),
         },
       }),
       '/services/{serviceName}/infrastructure': {

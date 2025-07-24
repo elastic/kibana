@@ -15,7 +15,7 @@ import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode'];
+const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
 
 export function defineUpdateUserProfileDataRoute({
   router,

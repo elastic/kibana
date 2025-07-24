@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { OnechatTools } from '../components/tools/tools';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { labels } from '../utils/i18n';
+import { appPaths } from '../utils/app_paths';
 
 export const OnechatToolsPage = () => {
-  useBreadcrumb([
-    { text: i18n.translate('xpack.onechat.chat.title', { defaultMessage: 'Chat' }) },
-    { text: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }) },
-  ]);
+  useBreadcrumb([{ text: labels.tools.title, path: appPaths.tools.list }]);
   return <OnechatTools />;
 };

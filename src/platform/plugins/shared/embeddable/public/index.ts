@@ -11,7 +11,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export { useAddFromLibraryTypes } from './add_from_library/registry';
-export { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
+export { AddFromLibraryFlyout } from './add_from_library/add_from_library_flyout';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
