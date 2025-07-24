@@ -133,7 +133,7 @@ const visLegendStyles = {
     }
 
     .vislib--legend-bottom & {
-      margin-left: ${euiThemeContext.euiTheme.size.l};
+      margin-left: ${euiThemeContext.euiTheme.size.xl};
     }
 
     &.hidden {
