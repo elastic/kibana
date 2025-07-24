@@ -32,6 +32,7 @@ export const services = {
   globalNav: platformfunctionalServices.globalNav,
   inspector: platformfunctionalServices.inspector,
   listingTable: platformfunctionalServices.listingTable,
+  managementMenu: platformfunctionalServices.managementMenu,
   menuToggle: platformfunctionalServices.menuToggle,
   ml: platformfunctionalServices.ml,
   monacoEditor: platformfunctionalServices.monacoEditor,
