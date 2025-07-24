@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
+  DataTableRecord,
   LogDocumentOverview,
   fieldConstants,
   getMessageFieldWithFallbacks,
@@ -31,10 +32,16 @@ export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOvervie
   defaultMessage: 'Content breakdown',
 });
 
-export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
-  const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
-  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(doc, {
+export function LogsOverviewHeader({
+  doc,
+  formattedDoc,
+}: {
+  doc: DataTableRecord;
+  formattedDoc: LogDocumentOverview;
+}) {
+  const hasLogLevel = Boolean(formattedDoc[fieldConstants.LOG_LEVEL_FIELD]);
+  const hasTimestamp = Boolean(formattedDoc[fieldConstants.TIMESTAMP_FIELD]);
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
   });
   const rawFieldValue = doc && field ? doc.flattened[field] : undefined;
@@ -57,15 +64,15 @@ export function LogsOverviewHeader({ doc }: { doc: LogDocumentOverview }) {
 
   const logLevelAndTimestamp = hasBadges && (
     <EuiFlexGroup responsive={false} gutterSize="m">
-      {doc[fieldConstants.LOG_LEVEL_FIELD] && (
+      {formattedDoc[fieldConstants.LOG_LEVEL_FIELD] && (
         <HoverActionPopover
-          value={doc[fieldConstants.LOG_LEVEL_FIELD]}
+          value={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]}
           field={fieldConstants.LOG_LEVEL_FIELD}
         >
-          <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
+          <LogLevel level={formattedDoc[fieldConstants.LOG_LEVEL_FIELD]} />
         </HoverActionPopover>
       )}
-      {hasTimestamp && <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />}
+      {hasTimestamp && <Timestamp timestamp={formattedDoc[fieldConstants.TIMESTAMP_FIELD]} />}
     </EuiFlexGroup>
   );
 
