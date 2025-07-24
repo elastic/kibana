@@ -582,20 +582,12 @@ export const ESQLEditor = memo(function ESQLEditor({
     application?.currentAppId$,
   ]);
 
-  const onIndexCreated = useCallback(
-    async (resultQueryString: string) => {
-      onQueryUpdate(resultQueryString);
-      await esqlCallbacks.getJoinIndices?.();
-    },
-    [esqlCallbacks, onQueryUpdate]
-  );
-
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
     editor1,
     editorModel,
     esqlCallbacks?.getJoinIndices,
     query,
-    onIndexCreated
+    onQueryUpdate
   );
 
   const queryRunButtonProperties = useMemo(() => {
@@ -901,13 +893,12 @@ export const ESQLEditor = memo(function ESQLEditor({
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
-                  editorDidMount={(editor) => {
+                  editorDidMount={async (editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
-                      // TODO add decorator here
-                      addLookupIndicesDecorator();
+                      await addLookupIndicesDecorator();
                     }
 
                     monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {

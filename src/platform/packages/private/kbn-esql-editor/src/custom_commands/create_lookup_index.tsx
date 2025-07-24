@@ -11,12 +11,11 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { mutate, type ESQLSource, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { Parser } from '@kbn/esql-ast';
-import { memoize } from 'lodash';
 import { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
@@ -153,6 +152,20 @@ export const useLookupIndexCommand = (
   const { euiTheme } = useEuiTheme();
   const inQueryLookupIndices = useRef<string[]>([]);
 
+  const lookupCache = useRef<{ data: IndexAutocompleteItem[] }>();
+
+  const fetchLookupIndices = useCallback(async () => {
+    if (lookupCache.current) return lookupCache.current.data; // memoised
+    const resp = await (getLookupIndices?.() ?? Promise.resolve({ indices: [] }));
+    lookupCache.current = { data: resp.indices };
+    return resp.indices;
+  }, [getLookupIndices]);
+
+  const refreshLookupIndices = useCallback(async () => {
+    lookupCache.current = undefined; // clear
+    await fetchLookupIndices();
+  }, [fetchLookupIndices]);
+
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
@@ -203,8 +216,14 @@ export const useLookupIndexCommand = (
   );
 
   const onFlyoutClose = useCallback(
-    (initialIndexName: string | undefined, resultIndexName: string, indexCreated: boolean) => {
+    async (
+      initialIndexName: string | undefined,
+      resultIndexName: string,
+      indexCreated: boolean
+    ) => {
       if (!indexCreated) return;
+
+      await refreshLookupIndices(); // get the latest list if indices
 
       const cursorPosition = editorRef.current?.getPosition();
 
@@ -219,7 +238,7 @@ export const useLookupIndexCommand = (
       );
       onIndexCreated(resultQuery);
     },
-    [onIndexCreated, query.esql, editorRef]
+    [refreshLookupIndices, editorRef, query.esql, onIndexCreated]
   );
 
   // TODO: Replace with the actual lookup index docs URL once it's available
@@ -231,8 +250,8 @@ export const useLookupIndexCommand = (
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
-        onClose: ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
+        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
+          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },
       } as EditLookupIndexContentContext);
     },
@@ -247,12 +266,7 @@ export const useLookupIndexCommand = (
     }
   );
 
-  const getLookupIndicesMemoized = useMemo(
-    () => memoize(getLookupIndices ?? (() => Promise.resolve({ indices: [] }))),
-    [getLookupIndices]
-  );
-
-  const addLookupIndicesDecorator = useCallback(() => {
+  const addLookupIndicesDecorator = useCallback(async () => {
     // we need to remove the previous decorations first
     const lineCount = editorModel.current?.getLineCount() || 1;
     for (let i = 1; i <= lineCount; i++) {
@@ -263,65 +277,58 @@ export const useLookupIndexCommand = (
       editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
     }
 
-    getLookupIndicesMemoized().then(({ indices: existingIndices }) => {
-      // TODO extract aliases as well
-      const lookupIndices: string[] = inQueryLookupIndices.current;
+    const existingIndices = await fetchLookupIndices();
 
-      for (let i = 0; i < lookupIndices.length; i++) {
-        const lookupIndex = lookupIndices[i];
+    // TODO extract aliases as well
+    const lookupIndices: string[] = inQueryLookupIndices.current;
 
-        const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
+    for (let i = 0; i < lookupIndices.length; i++) {
+      const lookupIndex = lookupIndices[i];
 
-        const matches =
-          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+      const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
 
-        matches.forEach((match) => {
-          const range = new monaco.Range(
-            match.range.startLineNumber,
-            match.range.startColumn,
-            match.range.endLineNumber,
-            match.range.endColumn
-          );
+      const matches =
+        editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
-          editorRef?.current?.createDecorationsCollection([
-            {
-              range,
-              options: {
-                isWholeLine: false,
-                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-                hoverMessage: {
-                  value: `[${
-                    isExistingIndex
-                      ? i18n.translate('esqlEditor.lookupIndex.edit', {
-                          defaultMessage: 'Edit lookup index',
-                        })
-                      : i18n.translate('esqlEditor.lookupIndex.create', {
-                          defaultMessage: 'Create lookup index',
-                        })
-                  }](command:esql.lookup_index.create?${encodeURIComponent(
-                    JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
-                  )})`,
-                  isTrusted: true,
-                },
+      matches.forEach((match) => {
+        const range = new monaco.Range(
+          match.range.startLineNumber,
+          match.range.startColumn,
+          match.range.endLineNumber,
+          match.range.endColumn
+        );
 
-                inlineClassName:
-                  lookupIndexBaseBadgeClassName +
-                  ' ' +
-                  (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+        editorRef?.current?.createDecorationsCollection([
+          {
+            range,
+            options: {
+              isWholeLine: false,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              hoverMessage: {
+                value: `[${
+                  isExistingIndex
+                    ? i18n.translate('esqlEditor.lookupIndex.edit', {
+                        defaultMessage: 'Edit lookup index',
+                      })
+                    : i18n.translate('esqlEditor.lookupIndex.create', {
+                        defaultMessage: 'Create lookup index',
+                      })
+                }](command:esql.lookup_index.create?${encodeURIComponent(
+                  JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
+                )})`,
+                isTrusted: true,
               },
-            },
-          ]);
-        });
-      }
-    });
-  }, [editorModel, getLookupIndicesMemoized, editorRef]);
 
-  useEffect(
-    function updateOnQueryChange() {
-      addLookupIndicesDecorator();
-    },
-    [query.esql, addLookupIndicesDecorator]
-  );
+              inlineClassName:
+                lookupIndexBaseBadgeClassName +
+                ' ' +
+                (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+            },
+          },
+        ]);
+      });
+    }
+  }, [editorModel, fetchLookupIndices, editorRef]);
 
   return {
     addLookupIndicesDecorator,
