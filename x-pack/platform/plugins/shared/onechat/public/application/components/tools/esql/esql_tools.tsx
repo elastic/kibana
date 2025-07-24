@@ -20,6 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useCreateToolFlyout } from '../../../hooks/tools/use_create_tools';
@@ -125,7 +126,7 @@ export const OnechatEsqlTools: React.FC = () => {
   );
 
   const onDeleteError = useCallback(
-    (toolId: string) => {
+    (error: Error, toolId: string) => {
       addErrorToast({
         title: i18n.translate('xpack.onechat.tools.deleteToolErrorToast', {
           defaultMessage: 'Unable to delete tool "{toolId}"',
@@ -133,6 +134,7 @@ export const OnechatEsqlTools: React.FC = () => {
             toolId,
           },
         }),
+        text: formatOnechatErrorMessage(error),
       });
     },
     [addErrorToast]
@@ -155,13 +157,17 @@ export const OnechatEsqlTools: React.FC = () => {
     });
   }, [addSuccessToast]);
 
-  const handleCreateError = useCallback(() => {
-    addErrorToast({
-      title: i18n.translate('xpack.onechat.tools.createEsqlToolErrorToast', {
-        defaultMessage: 'Unable to create ES|QL tool',
-      }),
-    });
-  }, [addErrorToast]);
+  const handleCreateError = useCallback(
+    (error: Error) => {
+      addErrorToast({
+        title: i18n.translate('xpack.onechat.tools.createEsqlToolErrorToast', {
+          defaultMessage: 'Unable to create ES|QL tool',
+        }),
+        text: formatOnechatErrorMessage(error),
+      });
+    },
+    [addErrorToast]
+  );
 
   const {
     isOpen: isCreateToolFlyoutOpen,
@@ -189,13 +195,17 @@ export const OnechatEsqlTools: React.FC = () => {
     });
   }, [addSuccessToast]);
 
-  const handleEditError = useCallback(() => {
-    addErrorToast({
-      title: i18n.translate('xpack.onechat.tools.editEsqlToolErrorToast', {
-        defaultMessage: 'Unable to update ES|QL tool',
-      }),
-    });
-  }, [addErrorToast]);
+  const handleEditError = useCallback(
+    (error: Error) => {
+      addErrorToast({
+        title: i18n.translate('xpack.onechat.tools.editEsqlToolErrorToast', {
+          defaultMessage: 'Unable to update ES|QL tool',
+        }),
+        text: formatOnechatErrorMessage(error),
+      });
+    },
+    [addErrorToast]
+  );
 
   const {
     isOpen: isEditToolFlyoutOpen,

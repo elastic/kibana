@@ -39,7 +39,7 @@ export const useDeleteToolModal = ({
   onError,
 }: {
   onSuccess?: (toolId: string) => void;
-  onError?: (toolId: string) => void;
+  onError?: (error: Error, toolId: string) => void;
 }) => {
   const [deleteToolId, setDeleteToolId] = useState<string | null>(null);
 
@@ -51,7 +51,7 @@ export const useDeleteToolModal = ({
 
   const onDeleteSuccess: DeleteToolSuccessCallback = (data, { toolId }) => {
     if (!data.success) {
-      onError?.(toolId);
+      onError?.(new Error('Delete operation failed. API returned: { success: false }'), toolId);
       return;
     }
 
@@ -59,8 +59,8 @@ export const useDeleteToolModal = ({
     setDeleteToolId(null);
   };
 
-  const onDeleteError: DeleteToolErrorCallback = (_, { toolId }) => {
-    onError?.(toolId);
+  const onDeleteError: DeleteToolErrorCallback = (error, { toolId }) => {
+    onError?.(error, toolId);
   };
 
   const { deleteTool: deleteToolMutation, isLoading } = useDeleteTool({
