@@ -73,7 +73,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsProjectMonitorsRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
-  testNowMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
@@ -123,4 +122,5 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
   syntheticsGetLatestTestRunRoute,
+  testNowMonitorRoute,
 ];
