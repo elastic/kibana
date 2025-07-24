@@ -127,7 +127,7 @@ export function getSystemPrompt({
       corePrinciples.push(
         `${
           corePrinciples.length + 1
-        }. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call.`
+        }. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call. **DO NOT** call multiple tools in one turn.`
       );
     }
 
@@ -193,7 +193,11 @@ export function getSystemPrompt({
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
             ? `first try \`${CONTEXT_FUNCTION_NAME}\` to find time range. If no time range is found in context,`
             : ''
-        } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user.`
+        } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. ${
+          isFunctionAvailable(ALERTS_FUNCTION_NAME)
+            ? `Use the Elasticseach datemath format for the time range when calling the \`${ALERTS_FUNCTION_NAME}\` tool (e.g.: 'now', 'now-15m', 'now-24h', 'now-2d')`
+            : ''
+        }`
       );
     }
 
@@ -283,7 +287,8 @@ export function getSystemPrompt({
       isFunctionAvailable(ALERTS_FUNCTION_NAME)
     ) {
       usage.push(
-        `**Alerts:** Always use the \`${GET_ALERTS_DATASET_INFO_FUNCTION_NAME}\` tool first to find fields, then the \`${ALERTS_FUNCTION_NAME}\` tool (using general time range handling) to fetch details. The \`${ALERTS_FUNCTION_NAME}\` tool returns only "active" alerts by default. `
+        `**Alerts:** Always use the \`${GET_ALERTS_DATASET_INFO_FUNCTION_NAME}\` tool first to find fields, wait for the response of the \`${GET_ALERTS_DATASET_INFO_FUNCTION_NAME}\` tool and then call the \`${ALERTS_FUNCTION_NAME}\` tool in the next turn.
+          * The \`${ALERTS_FUNCTION_NAME}\` tool returns only "active" alerts by default.`
       );
     }
 
