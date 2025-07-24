@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -27,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 
@@ -40,6 +33,7 @@ export function Welcome({
   onConfirm: () => void;
 }) {
   const servicesInventory = useKibanaUrl('/plugins/apm/assets/services_inventory.png');
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!isModalVisible) {
     return null;
@@ -47,6 +41,8 @@ export function Welcome({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       style={{
         width: '630px',
       }}

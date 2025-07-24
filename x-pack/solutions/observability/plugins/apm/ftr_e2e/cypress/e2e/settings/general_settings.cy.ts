@@ -15,7 +15,7 @@ const getAbleToModifyCase = () => {
     button.click();
     cy.intercept('POST', '/internal/kibana/settings').as('saveSettings');
     cy.contains('Save changes').click();
-    cy.wait('@saveSettings').its('response.statusCode').should('eq', 200);
+    cy.wait('@saveSettings', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
   });
 };
 

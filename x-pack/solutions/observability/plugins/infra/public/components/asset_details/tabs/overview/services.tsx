@@ -86,7 +86,7 @@ export const ServicesContent = ({
       collapsible
       data-test-subj="infraAssetDetailsServicesCollapsible"
       id="services"
-      extraAction={<LinkToApmServices assetId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
+      extraAction={<LinkToApmServices entityId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
     >
       {error ? (
         <EuiCallOut

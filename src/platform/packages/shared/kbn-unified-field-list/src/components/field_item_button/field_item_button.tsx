@@ -154,6 +154,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         <EuiToolTip
           key={`selected-to-remove-${field.name}-${removeFieldFromWorkspaceTooltip}`}
           content={removeFieldFromWorkspaceTooltip}
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             data-test-subj={`fieldToggle-${field.name}`}
@@ -178,6 +179,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         <EuiToolTip
           key={`deselected-to-add-${field.name}-${addFieldToWorkspaceTooltip}`}
           content={addFieldToWorkspaceTooltip}
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             data-test-subj={`fieldToggle-${field.name}`}

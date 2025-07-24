@@ -80,14 +80,14 @@ export const useIntegrations = ({
         const currentFilter = filterExistsInFiltersArray(
           currentFilters,
           FILTER_KEY,
-          matchingRule.id
+          matchingRule.rule_id
         );
 
         // A EuiSelectableOption is checked only if there is no matching filter for that rule
         const integration = {
           'data-test-subj': `${INTEGRATION_OPTION_TEST_ID}${p.title}`,
           ...(!currentFilter && { checked: 'on' as EuiSelectableOptionCheckedType }),
-          key: matchingRule?.id, // we save the rule id that we will match again the signal.rule.id field on the alerts
+          key: matchingRule?.rule_id, // we save the rule id that we will match again the signal.rule.rule_id field on the alerts
           label: p.title,
         };
         result.push(integration);

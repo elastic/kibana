@@ -13,18 +13,18 @@ import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
-  assetId: string;
+  entityId: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({ assetId, apmField }: LinkToApmServicesProps) => {
+export const LinkToApmServices = ({ entityId, apmField }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const queryString = new URLSearchParams(
     encode(
       stringify({
-        kuery: `${apmField}:"${assetId}"`,
+        kuery: `${apmField}:"${entityId}"`,
       })
     )
   );
