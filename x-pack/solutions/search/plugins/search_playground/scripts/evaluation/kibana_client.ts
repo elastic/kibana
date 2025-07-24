@@ -339,7 +339,7 @@ export class KibanaClient {
         that.log.info('Calling complete');
 
         // set scope
-        currentScopes = [newScope || 'observability'];
+        currentScopes = [newScope || 'search'];
 
         const messages = [
           ...this.getMessages(messagesArg!).map((msg) => ({
