@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -27,6 +26,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
   const { searchSession, api, onActionDismiss } = props;
   const { name, id } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   const title = i18n.translate('data.mgmt.searchSessions.cancelModal.title', {
     defaultMessage: 'Delete search session',
@@ -46,6 +46,8 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={title}
       onCancel={onActionDismiss}
       onConfirm={async () => {

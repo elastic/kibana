@@ -10,7 +10,7 @@
 import * as React from 'react';
 import type { FunctionComponent } from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useFilePickerContext } from '../../context';
 import { i18nTexts } from '../../i18n_texts';
@@ -20,6 +20,8 @@ export const DeletePrompt: FunctionComponent = () => {
   const isMounted = useMountedState();
   const { state } = useFilePickerContext();
   const file = useBehaviorSubject(state.deletePrompt$);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!file) return null;
 
@@ -36,6 +38,8 @@ export const DeletePrompt: FunctionComponent = () => {
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       defaultFocusedButton="confirm"
       isLoading={deleting}
