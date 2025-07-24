@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
-import { get } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import {
@@ -48,9 +47,6 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         'scope.version': {
           type: 'keyword',
         },
-        observed_timestamp: {
-          type: 'date',
-        },
         trace_id: {
           type: 'keyword',
         },
@@ -70,6 +66,9 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
           type: 'long',
         },
         'resource.attributes.host.name': {
+          type: 'keyword',
+        },
+        'resource.attributes.service.name': {
           type: 'keyword',
         },
         'stream.name': {
@@ -118,10 +117,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Desired stream state is invalid');
-
-      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
-        'Root stream processing rules cannot be changed'
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream processing rules cannot be changed'
       );
     });
 
@@ -147,10 +145,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
       const response = await putStream(apiClient, 'logs', body, 400);
 
-      expect(response).to.have.property('message', 'Desired stream state is invalid');
-
-      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
-        'Root stream fields cannot be changed'
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream fields cannot be changed'
       );
     });
 
