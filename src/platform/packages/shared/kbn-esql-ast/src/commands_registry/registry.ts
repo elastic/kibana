@@ -66,8 +66,8 @@ export interface ICommandMetadata {
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
   hidden?: boolean; // Optional property to indicate if the command should be hidden in UI
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
-  license?: ESQLSignatureLicenseType; // Optional property for the license type of the command
-  observabilityTier?: string; // Optional property for the observability tier of the command
+  license?: ESQLSignatureLicenseType; // Optional property indicating the license for the command's availability
+  observabilityTier?: string; // Optional property indicating the observability tier availability
 }
 
 /**

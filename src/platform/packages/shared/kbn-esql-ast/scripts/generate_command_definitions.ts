@@ -32,12 +32,16 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   try {
     // Read and parse all Elasticsearch command definition files
-    esCommandDefinitions = readdirSync(esCommandsDirectory).map((fileName) => {
-      const filePath = join(esCommandsDirectory, fileName);
-      const fileContent = readFileSync(filePath, 'utf-8');
+    esCommandDefinitions = readdirSync(esCommandsDirectory)
+      .map((fileName) => {
+        const filePath = join(esCommandsDirectory, fileName);
+        const fileContent = readFileSync(filePath, 'utf-8');
 
-      return JSON.parse(fileContent) as ElasticsearchCommandDefinition;
-    });
+        return JSON.parse(fileContent);
+      })
+      .filter((command) => {
+        Object.entries(command).filter(([key]) => key !== 'comment');
+      });
   } catch (error) {
     const errorMessage =
       error.code === 'ENOENT'
@@ -58,7 +62,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {};
 
-  // Populate the metadata object
+  // Populate the metadata object without the comment field
   esCommandDefinitions.forEach((command) => {
     commandsMetadata[command.name] = command;
   });
@@ -71,7 +75,7 @@ export const commandsMetadata: Record<string, unknown> = ${JSON.stringify(
     commandsMetadata,
     null,
     2
-  )} as const;
+  )};
 `;
 
   await writeFile(outputTsPath, tsContent);

@@ -190,8 +190,7 @@ export interface FunctionParameter {
 export interface ElasticsearchCommandDefinition {
   type: string;
   name: string;
-  comment: string;
-  license?: string;
+  license?: ESQLSignatureLicenseType;
   observability_tier?: string;
 }
 
