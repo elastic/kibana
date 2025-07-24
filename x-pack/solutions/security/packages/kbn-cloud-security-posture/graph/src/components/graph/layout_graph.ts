@@ -8,7 +8,12 @@
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
-import { ACTUAL_LABEL_HEIGHT, GroupStyleOverride } from '../node/styles';
+import {
+  ACTUAL_LABEL_HEIGHT,
+  COUNTRY_FLAGS_HEIGHT,
+  GroupStyleOverride,
+  IPS_HEIGHT,
+} from '../node/styles';
 import { isStackedLabel } from '../utils';
 import {
   GRID_SIZE,
@@ -54,8 +59,20 @@ export const layoutGraph = (
     let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
 
     if (node.data.shape === 'label') {
+      let labelNodeHeight = NODE_LABEL_HEIGHT;
+
+      // TODO Remove type-casting when `ips` exist in schema
+      if (node.data.ips && (node.data.ips as string[]).length > 0) {
+        labelNodeHeight += IPS_HEIGHT;
+      }
+
+      // TODO Remove type-casting when `countryCodes` exist in schema
+      if (node.data.countryCodes && (node.data.countryCodes as string[]).length > 0) {
+        labelNodeHeight += COUNTRY_FLAGS_HEIGHT;
+      }
+
       size = {
-        height: NODE_LABEL_HEIGHT,
+        height: labelNodeHeight,
         width: NODE_LABEL_WIDTH,
       };
 
