@@ -110,7 +110,6 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/css-utils",
     "@kbn/restorable-state",
-    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": [
     "target/**/*"
