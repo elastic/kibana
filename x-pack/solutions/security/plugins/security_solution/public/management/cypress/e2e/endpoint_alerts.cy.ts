@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
 import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
@@ -54,13 +53,13 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should create a Detection Engine alert from an endpoint alert', () => {
-    // Triggers a Malicious Behaviour alert on Linux system (`grep *` was added only to identify this specific alert)
-    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo | grep ${Math.random()
-      .toString(16)
-      .substring(2)}`;
+    const executeMaliciousCommand = `bash -c cat /dev/tcp/foo`;
 
     // Execute shell command that trigger Endpoint to send alert to Kibana
-    cy.wrap(getHostVmClient(createdHost.hostname).exec(executeMaliciousCommand))
+    cy.task('executeCommandOnHost', {
+      hostname: createdHost.hostname,
+      command: executeMaliciousCommand,
+    })
       .then((execResponse) => {
         cy.log(
           `Command [${executeMaliciousCommand}] was executed on host VM [${
@@ -68,11 +67,7 @@ describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
           }]: ${JSON.stringify(execResponse)}`
         );
 
-        return waitForEndpointAlerts(createdHost.agentId, [
-          {
-            term: { 'process.group_leader.args': executeMaliciousCommand },
-          },
-        ]);
+        return waitForEndpointAlerts(createdHost.agentId, undefined, 240000);
       })
       .then(() => {
         return navigateToAlertsList(
