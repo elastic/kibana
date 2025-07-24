@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
