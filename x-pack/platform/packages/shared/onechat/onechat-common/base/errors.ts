@@ -6,7 +6,6 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import { inspect } from 'util';
 
 /**
  * Code to identify onechat errors
@@ -185,33 +184,6 @@ export const createRequestAbortedError = (
   return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
 };
 
-/*
- * Produce a string version of an error,
- */
-export function formatOnechatErrorMessage(error: any): string {
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  if (!error) {
-    // stringify undefined/null/whatever this falsy value is
-    return inspect(error);
-  }
-
-  // handle http response errors with error messages
-  if (error.body && typeof error.body.message === 'string') {
-    return error.body.message;
-  }
-
-  // handle standard error objects with messages
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  // everything else can just be serialized using util.inspect()
-  return inspect(error);
-}
-
 /**
  * Global utility exposing all error utilities from a single export.
  */
@@ -225,5 +197,4 @@ export const OnechatErrorUtils = {
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
-  formatOnechatErrorMessage,
 };

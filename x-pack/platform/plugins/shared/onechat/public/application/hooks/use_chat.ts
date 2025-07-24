@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import {
   OnechatError,
   OnechatErrorCode,
-  formatOnechatErrorMessage,
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -17,6 +16,7 @@ import {
   isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useCallback, useState } from 'react';
 import { useConversation } from './use_conversation';

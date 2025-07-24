@@ -20,7 +20,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentDefinition, formatOnechatErrorMessage } from '@kbn/onechat-common';
+import { AgentDefinition } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';

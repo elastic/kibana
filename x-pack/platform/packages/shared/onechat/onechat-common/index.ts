@@ -47,7 +47,6 @@ export {
   createConversationNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
-  formatOnechatErrorMessage,
   type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
