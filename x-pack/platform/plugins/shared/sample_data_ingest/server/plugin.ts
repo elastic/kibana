@@ -18,6 +18,7 @@ import {
 
 import { SampleDataManager } from './services/sample_data_manager';
 import { registerRoutes } from './routes';
+import { indexNamePrefix } from '../common';
 
 export class SampleDataIngestPlugin
   implements Plugin<SampleDataSetupDependencies, SampleDataStartDependencies>
@@ -55,7 +56,7 @@ export class SampleDataIngestPlugin
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
-      indexPrefixName: 'sample-data',
+      indexPrefixName: indexNamePrefix,
       isServerlessPlatform: this.isServerlessPlatform,
     });
 
