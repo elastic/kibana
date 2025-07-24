@@ -22,7 +22,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import { DataCascade } from '.';
+import { DataCascade, DataCascadeRow, DataCascadeRowCell } from '.';
 import { getESQLStatsQueryMeta } from '../lib/parse_esql';
 
 /**
@@ -99,106 +99,115 @@ export const CascadeGridImplementation: StoryObj<
                 })}
               </EuiText>
             )}
-            rowHeaderTitleSlot={({ row }) => (
-              <EuiText>
-                <h2>{row.original[groupByFields[row.depth]]}</h2>
-              </EuiText>
-            )}
-            rowHeaderMetaSlots={({ row }) => {
-              const baseSlotDef: React.ReactNode[] = [
-                <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
-                  <FormattedMessage
-                    id="sharedUXPackages.data_cascade.demo.row.action"
-                    defaultMessage="Take Action"
-                  />
-                </EuiButtonEmpty>,
-              ];
-
-              return row.depth === groupByFields.length - 1
-                ? [
-                    <EuiStat
-                      title={row.original.count}
-                      textAlign="right"
-                      description={
-                        <FormattedMessage
-                          id="sharedUXPackages.data_cascade.demo.row.count"
-                          defaultMessage="<indicator>{identifier} record count</indicator>"
-                          values={{
-                            identifier: groupByFields[row.depth].replace(/_/g, ' '),
-                            indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
-                          }}
-                        />
-                      }
-                    />,
-                    ...baseSlotDef,
-                  ]
-                : baseSlotDef;
-            }}
-            leafContentSlot={({ data }) => {
-              return (
-                <EuiBasicTable
-                  columns={[
-                    {
-                      field: 'id',
-                      name: 'ID',
-                    },
-                    ...groupByFields.map((field, index, groupArray) => ({
-                      field,
-                      name: field.replace(/_/g, ' '),
-                      ...(index === groupArray.length - 1
-                        ? { align: 'right' as HorizontalAlignment }
-                        : {}),
-                    })),
-                  ]}
-                  items={(data ?? []).map((datum) => ({
-                    id: datum.id,
-                    ...groupByFields.reduce(
-                      (acc, field) => ({
-                        ...acc,
-                        [field]: datum[field],
-                      }),
-                      {} as Record<string, string>
-                    ),
-                  }))}
-                />
-              );
-            }}
             onCascadeGroupingChange={(groupBy) => {
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onCascadeGroupNodeExpanded={async ({ row, nodePath, nodePathMap }) => {
-              // Simulate a data fetch on row expansion
-              return new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve(
-                    new Array(row.original.count).fill(null).map(() => {
-                      return {
-                        id: faker.string.uuid(),
-                        count: faker.number.int({ min: 1, max: row.original.count }),
-                        ...generateGroupFieldRecord(nodePath, nodePathMap),
-                      };
-                    })
+          >
+            <DataCascadeRow
+              onCascadeGroupNodeExpanded={async ({ row, nodePath, nodePathMap }) => {
+                // Simulate a data fetch on row expansion
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve(
+                      new Array(row.original.count).fill(null).map(() => {
+                        return {
+                          id: faker.string.uuid(),
+                          count: faker.number.int({ min: 1, max: row.original.count }),
+                          ...generateGroupFieldRecord(nodePath, nodePathMap),
+                        };
+                      })
+                    );
+                  }, 3000);
+                });
+              }}
+              rowHeaderTitleSlot={({ row }) => (
+                <EuiText>
+                  <h2>{row.original[groupByFields[row.depth]]}</h2>
+                </EuiText>
+              )}
+              rowHeaderMetaSlots={({ row }) => {
+                const baseSlotDef: React.ReactNode[] = [
+                  <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+                    <FormattedMessage
+                      id="sharedUXPackages.data_cascade.demo.row.action"
+                      defaultMessage="Take Action"
+                    />
+                  </EuiButtonEmpty>,
+                ];
+
+                return row.depth === groupByFields.length - 1
+                  ? [
+                      <EuiStat
+                        title={row.original.count}
+                        textAlign="right"
+                        description={
+                          <FormattedMessage
+                            id="sharedUXPackages.data_cascade.demo.row.count"
+                            defaultMessage="<indicator>{identifier} record count</indicator>"
+                            values={{
+                              identifier: groupByFields[row.depth].replace(/_/g, ' '),
+                              indicator: (chunks) => (
+                                <EuiHealth color="subdued">{chunks}</EuiHealth>
+                              ),
+                            }}
+                          />
+                        }
+                      />,
+                      ...baseSlotDef,
+                    ]
+                  : baseSlotDef;
+              }}
+            >
+              <DataCascadeRowCell
+                onCascadeLeafNodeExpanded={async ({ row, nodePathMap, nodePath }) => {
+                  // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
+                  return new Promise((resolve) => {
+                    setTimeout(() => {
+                      resolve(
+                        new Array(row.original.count).fill(null).map(() => {
+                          return {
+                            id: faker.string.uuid(),
+                            ...generateGroupFieldRecord(nodePath, nodePathMap),
+                          };
+                        })
+                      );
+                    }, 3000);
+                  });
+                }}
+              >
+                {({ data }) => {
+                  return (
+                    <EuiBasicTable
+                      columns={[
+                        {
+                          field: 'id',
+                          name: 'ID',
+                        },
+                        ...groupByFields.map((field, index, groupArray) => ({
+                          field,
+                          name: field.replace(/_/g, ' '),
+                          ...(index === groupArray.length - 1
+                            ? { align: 'right' as HorizontalAlignment }
+                            : {}),
+                        })),
+                      ]}
+                      items={(data ?? []).map((datum) => ({
+                        id: datum.id,
+                        ...groupByFields.reduce(
+                          (acc, field) => ({
+                            ...acc,
+                            [field]: datum[field],
+                          }),
+                          {} as Record<string, string>
+                        ),
+                      }))}
+                    />
                   );
-                }, 3000);
-              });
-            }}
-            onCascadeLeafNodeExpanded={async ({ row, nodePathMap, nodePath }) => {
-              // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
-              return new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve(
-                    new Array(row.original.count).fill(null).map(() => {
-                      return {
-                        id: faker.string.uuid(),
-                        ...generateGroupFieldRecord(nodePath, nodePathMap),
-                      };
-                    })
-                  );
-                }, 3000);
-              });
-            }}
-          />
+                }}
+              </DataCascadeRowCell>
+            </DataCascadeRow>
+          </DataCascade>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
