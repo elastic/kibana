@@ -128,19 +128,9 @@ export const AlertOverview = memo(
         {
           id: ColumnIDs.OBSERVED_VALUE,
           key: i18n.translate('xpack.observability.alertFlyout.overviewTab.observedValue', {
-            defaultMessage: 'Observed value',
+            defaultMessage: 'Observed value / Threshold',
           }),
           value: alert.fields[ALERT_EVALUATION_VALUES] || [alert.fields[ALERT_EVALUATION_VALUE]],
-          meta: {
-            ruleCriteria,
-          },
-        },
-        {
-          id: ColumnIDs.THRESHOLD,
-          key: i18n.translate('xpack.observability.alertFlyout.overviewTab.threshold', {
-            defaultMessage: 'Threshold',
-          }),
-          value: [],
           meta: {
             ruleCriteria,
           },
