@@ -155,18 +155,16 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       <EuiDescriptionList type="column" listItems={executionProps} compressed />
       {workflowYamlObject && (
         <>
-          {workflowYamlObject && (
-            <>
-              <EuiSpacer size="s" />
-              <div css={{ height: '500px' }}>
-                <WorkflowVisualEditor
-                  workflow={workflowYamlObject}
-                  stepExecutions={workflowExecution?.stepExecutions}
-                />
-              </div>
-              <EuiSpacer size="m" />
-            </>
-          )}
+          <>
+            <EuiSpacer size="s" />
+            <div css={{ height: '500px' }}>
+              <WorkflowVisualEditor
+                workflow={workflowYamlObject}
+                stepExecutions={workflowExecution?.stepExecutions}
+              />
+            </div>
+            <EuiSpacer size="m" />
+          </>
         </>
       )}
       <EuiTitle size="xs">

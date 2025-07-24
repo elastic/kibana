@@ -31,7 +31,7 @@ import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
-import { TestWorkflowModal } from '../../features/run-workflow/ui/TestWorkflowModal';
+import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
