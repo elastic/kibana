@@ -17,9 +17,7 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
   GENERIC_ALERTING_CONSUMERS,
-  STACK_ALERTS_FEATURE_ID,
   AlertConsumers,
-  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -38,9 +36,8 @@ const infraRuleTypes = [
   LOG_THRESHOLD_ALERT_TYPE_ID,
 ];
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
-const stackRuleTypes = STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY;
 
-const baseConsumers = [ALERTING_FEATURE_ID, STACK_ALERTS_FEATURE_ID, ...GENERIC_ALERTING_CONSUMERS];
+const baseConsumers = [ALERTING_FEATURE_ID, ...GENERIC_ALERTING_CONSUMERS];
 
 // Consolidated privileges for all rule/alert types
 const observabilityRulePrivileges = [
@@ -59,10 +56,6 @@ const observabilityRulePrivileges = [
   ...sloRuleTypes.map((ruleTypeId) => ({
     ruleTypeId,
     consumers: [sloFeatureId, ...baseConsumers],
-  })),
-  ...stackRuleTypes.map((ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [STACK_ALERTS_FEATURE_ID],
   })),
 ];
 
