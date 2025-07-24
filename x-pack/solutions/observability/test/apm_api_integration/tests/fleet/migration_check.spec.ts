@@ -38,8 +38,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     });
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/229299
-  registry.when.skip('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
+  registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
     before(async () => {
       await setupFleet(bettertest);
     });
