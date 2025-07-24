@@ -89,47 +89,6 @@ export function createAddSwimlanePanelAction(
           );
         },
       });
-
-      // try {
-      //   const { ResolveAnomalySwimlaneUserInput } = await import(
-      //     '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-      //   );
-
-      //   ResolveAnomalySwimlaneUserInput(
-      //     {
-      //       ...coreStart,
-      //       ...pluginStart,
-      //     },
-      //     context.embeddable,
-      //     (initialState) => {
-      //       presentationContainerParent.addNewPanel({
-      //         panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-      //         serializedState: { rawState: initialState },
-      //       });
-      //     }
-      //   );
-      // } catch (e) {
-      //   return Promise.reject();
-      // }
     },
   };
 }
-
-// const initialState = await resolveAnomalySwimlaneUserInput(
-//   {
-//     ...coreStart,
-//     ...pluginStart,
-//   },
-//   context.embeddable,
-//   context.embeddable.uuid
-// );
-
-// presentationContainerParent.addNewPanel({
-//   panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-//   serializedState: {
-//     rawState: {
-//       ...initialState,
-//       title: initialState.panelTitle,
-//     },
-//   },
-// });
