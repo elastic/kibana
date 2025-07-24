@@ -48,7 +48,7 @@ export interface KibanaPrivilege {
 export interface Role {
   name: string;
   privileges: {
-    elasticsearch?: ElasticSearchPrivilege;
-    kibana?: KibanaPrivilege[];
+    elasticsearch: ElasticSearchPrivilege;
+    kibana: KibanaPrivilege[];
   };
 }
