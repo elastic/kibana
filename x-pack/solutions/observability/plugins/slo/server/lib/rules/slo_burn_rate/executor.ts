@@ -11,7 +11,7 @@ import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alert
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroupings, getFormattedGroups } from '@kbn/alerting-rule-utils';
+import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -177,7 +177,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
-              ...getEcsGroupings(groupings),
+              ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
             },
           });
 

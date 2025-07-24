@@ -14,5 +14,5 @@ export default createTestConfig({
     reportName: 'Serverless Security Screenshot Creation',
   },
 
-  esServerArgs: ['xpack.ml.ad.enabled=false', 'xpack.ml.dfa.enabled=false'],
+  esServerArgs: [],
 });

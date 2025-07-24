@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { getEcsGroups } from './src/get_ecs_groups';
-export { getEcsGroupings } from './src/get_ecs_groupings';
+export { getEcsGroups, getEcsGroupsFromFlattenGrouping } from './src/get_ecs_groups';
 export {
   unflattenGrouping,
   getFormattedGroups,
