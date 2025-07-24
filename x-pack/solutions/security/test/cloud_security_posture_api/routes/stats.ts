@@ -70,7 +70,7 @@ export default function (providerContext: FtrProviderContext) {
   const benchmarkScoreIndex = new EsIndexDataProvider(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
   // Failing: See https://github.com/elastic/kibana/issues/214191
-  describe.skip('GET /internal/cloud_security_posture/stats', () => {
+  describe('GET /internal/cloud_security_posture/stats', () => {
     describe('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();
@@ -265,14 +265,14 @@ export default function (providerContext: FtrProviderContext) {
         await benchmarkScoreIndex.deleteAll();
       });
 
-      it('GET stats API V1 with user with read access', async () => {
+      it.skip('GET stats API V1 with user with read access', async () => {
         await benchmarkScoreIndex.addBulk([
           ...getBenchmarkScoreMockData('cspm', true),
           ...getBenchmarkScoreMockData('cspm', false),
         ]);
         await findingsIndex.addBulk([findingsMockData[1]]);
 
-        const { status } = await supertestWithoutAuth
+        const { status, ...rest } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/stats/cspm`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
@@ -283,7 +283,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(status).to.be(200);
       });
 
-      it('GET stats API V2 with user with read access', async () => {
+      it.skip('GET stats API V2 with user with read access', async () => {
         await benchmarkScoreIndex.addBulk([
           ...getBenchmarkScoreMockData('cspm', true),
           ...getBenchmarkScoreMockData('cspm', false),

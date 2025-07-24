@@ -23,6 +23,7 @@ export const getBenchmarkScoreMockData = (postureType: string, isEnabledRulesSco
         failed_findings: 0,
       },
     },
+    namespace: 'default',
     score_by_benchmark_id: {
       cis_aws: {
         v1_5_0: {
@@ -114,6 +115,7 @@ export const cspmComplianceDashboardDataMockV1 = {
 };
 
 export const cspmComplianceDashboardDataMockV2 = {
+  namespaces: ['default'],
   stats: {
     totalFailed: 0,
     totalPassed: 1,
@@ -241,6 +243,7 @@ export const kspmComplianceDashboardDataMockV1 = {
 };
 
 export const kspmComplianceDashboardDataMockV2 = {
+  namespaces: ['default'],
   stats: {
     totalFailed: 0,
     totalPassed: 1,
