@@ -162,6 +162,12 @@ const genericOperationOptionsSchema = schema.object({
       of: fieldMetricOperationsSchema,
       ...genericOperationOptionsSchema.getPropSchemas()
     });
+
+  export const valueOperationSchema = schema.object({
+    operation: schema.literal("value"),
+    column: schema.string({ meta: { description: 'Value' } }),
+    ...genericOperationOptionsSchema.getPropSchemas()
+  });
     
   
   export const metricOperationDefinitionSchema = schema.oneOf([
@@ -176,7 +182,7 @@ const genericOperationOptionsSchema = schema.object({
     uniqueValuesMetricOperationSchema,
     lastValueOperationSchema,
     percentileOperationSchema,
-    percentileRanksOperationSchema
+    percentileRanksOperationSchema,
   ]);
 
   export type LensApiMetricOperations = typeof metricOperationDefinitionSchema.type;
@@ -194,4 +200,4 @@ const genericOperationOptionsSchema = schema.object({
   export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
   export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
   export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
-  
+  export type LensApiValueOperation = typeof valueOperationSchema.type;

@@ -37,6 +37,7 @@ import { getMetricColumn } from '../columns/metric';
 import { LensApiMetricOperations } from '../schema/metric_ops';
 import { LensApiBucketOperations } from '../schema/bucket_ops';
 import { generateLayer, DeepMutable } from '../utils';
+import { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -110,8 +111,32 @@ function reverseBuildVisualizationState(
   let props: Partial<DeepMutable<MetricState>>;
 
   if (dataset.type === 'esql' || dataset.type === 'table') {
+    const esqlLayer = layer as unknown as TextBasedLayer;
     // handle for esql case (just column name)
-    props = {};
+    props = {
+      metric: {
+        operation: 'value',
+        column: esqlLayer.columns.find(c => c.columnId == visualization.metricAccessor)!.fieldName,
+      },
+      ...(visualization.secondaryMetricAccessor ? {
+        secondary_metric: {
+          operation: 'value',
+          column: esqlLayer.columns.find(c => c.columnId == visualization.secondaryMetricAccessor)!.fieldName,
+        },
+      } : {}),
+      ...(visualization.maxAccessor ? {
+        max_value: {
+          operation: 'value',
+          column: esqlLayer.columns.find(c => c.columnId == visualization.maxAccessor)!.fieldName,
+        },
+      } : {}),
+      ...(visualization.breakdownByAccessor ? {
+        breakdown_by: {
+          operation: 'value',
+          column: esqlLayer.columns.find(c => c.columnId == visualization.breakdownByAccessor)!.fieldName,
+        },
+      } : {}),
+    };
   } else if (dataset.type === 'adhoc' || dataset.type === 'index') {
     const metric = operationFromColumn(visualization.metricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations;
     const secondary_metric = visualization.secondaryMetricAccessor ? operationFromColumn(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI) as LensApiMetricOperations : undefined;
@@ -126,6 +151,10 @@ function reverseBuildVisualizationState(
     };
   } else {
     throw new Error('Unsupported dataset type');
+  }
+
+  if (visualization.subtitle) {
+    props.metric!.sub_label = visualization.subtitle;
   }
 
   if (props.secondary_metric) {

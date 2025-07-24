@@ -11,7 +11,9 @@ const test: NarrowByType<LensApiState, 'metric'> = {
     time_field: 'test'
   },
   metric: {
-    operation: 'count',
+    operation: 'value',
+    column: 'test',
+    
 
   },
   secondary_metric: {
