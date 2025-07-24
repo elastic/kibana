@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,

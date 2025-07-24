@@ -19,7 +19,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   createListsIndex,
   deleteAllExceptions,

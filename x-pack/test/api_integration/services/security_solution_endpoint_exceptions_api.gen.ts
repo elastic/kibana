@@ -24,7 +24,7 @@ import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-e
 import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
 import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
 import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
+import { routeWithNamespace } from './helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {

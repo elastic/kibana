@@ -15,7 +15,7 @@ import {
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { refreshIndex } from '..';
-import { getAlertsByIds, waitForRuleStatus } from '../../../../../common/utils/security_solution';
+import { getAlertsByIds, waitForRuleStatus } from '../../../../config/services/detections_response';
 
 export type GetAlerts = (
   supertest: SuperTest.Agent,

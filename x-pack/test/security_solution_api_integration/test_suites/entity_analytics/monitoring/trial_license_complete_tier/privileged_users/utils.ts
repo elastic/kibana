@@ -10,7 +10,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
-import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
