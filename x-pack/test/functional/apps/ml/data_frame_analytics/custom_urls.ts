@@ -6,12 +6,12 @@
  */
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,
   type OtherUrlConfig,
-} from '../../../services/ml/data_frame_analytics_edit';
+} from '@kbn/test-suites-xpack-platform/functional/services/ml/data_frame_analytics_edit';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',

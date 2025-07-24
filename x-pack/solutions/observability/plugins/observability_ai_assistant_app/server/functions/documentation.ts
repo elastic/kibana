@@ -18,7 +18,11 @@ export async function registerDocumentationFunction({
   resources,
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
-  const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient)) ?? defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable =
+    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
   if (isProductDocAvailable) {
     functions.registerInstruction(({ availableFunctionNames }) => {
@@ -43,6 +47,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,
@@ -65,11 +70,6 @@ export async function registerDocumentationFunction({
       } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
-      const esClient = (await resources.context.core).elasticsearch.client;
-
-      const inferenceId =
-        (await getInferenceIdFromWriteIndex(esClient)) ?? defaultInferenceEndpoints.ELSER;
-
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,

@@ -31,7 +31,6 @@ import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface NetworkDetailsProps {
@@ -86,24 +85,27 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataView: experimentalDataView, status } = useDataView();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(uiSettings),
-    dataViewSpec: sourcererDataView,
-    queries: [query],
-    filters,
-  });
+  const [filterQuery, kqlError] = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: getEsQueryConfig(uiSettings),
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
+        queries: [query],
+        filters,
+      }),
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
+  );
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     skip: isInitializing || filterQuery === undefined,

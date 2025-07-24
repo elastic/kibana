@@ -121,6 +121,7 @@
     "@kbn/core-ui-settings-common",
     "@kbn/management-settings-ids",
     "@kbn/xstate-utils",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

@@ -6,7 +6,7 @@
  */
 
 import { Agent as SuperTestAgent } from 'supertest';
-import { LlmProxy } from '../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy } from '../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
 
 export async function createConnector(proxy: LlmProxy, supertest: SuperTestAgent) {
   await supertest

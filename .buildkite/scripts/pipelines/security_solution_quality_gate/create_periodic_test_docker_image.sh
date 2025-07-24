@@ -45,11 +45,11 @@ node scripts/build \
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
 
 docker rmi "$KIBANA_IMAGE"
-docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"

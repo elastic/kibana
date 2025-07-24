@@ -35,93 +35,99 @@ export default ({ getService }: FtrProviderContext): void => {
 
     const ruleId = 'ml-rule';
 
-    it('rule is excluded from response if target is an ML rule', async () => {
-      await createMlRuleThroughAlertingEndpoint(supertest, {
-        ruleId,
-        version: 1,
-      });
+    describe(`rule is excluded from response`, function () {
+      this.tags('skipFIPS');
 
-      const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
-        rule_id: ruleId,
-        version: 2,
-      });
-      await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
+      it('if target is an ML rule', async () => {
+        await createMlRuleThroughAlertingEndpoint(supertest, {
+          ruleId,
+          version: 1,
+        });
 
-      const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
-      expect(upgradeReviewResult).toMatchObject({
-        total: 0,
-        rules: [],
-      });
-    });
+        const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
+          rule_id: ruleId,
+          version: 2,
+        });
+        await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
 
-    it('rule is included in response if current rule is an ML rule, but target is a non-ML rule', async () => {
-      await createMlRuleThroughAlertingEndpoint(supertest, {
-        ruleId,
-        version: 1,
-      });
-
-      const targetRuleAsset = createRuleAssetSavedObjectOfType('query', {
-        rule_id: ruleId,
-        version: 2,
-      });
-      await createPrebuiltRuleAssetSavedObjects(es, [targetRuleAsset]);
-
-      const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
-      expect(upgradeReviewResult).toMatchObject({
-        total: 1,
-        rules: [
-          {
-            current_rule: {
-              rule_id: ruleId,
-              type: 'machine_learning',
-              version: 1,
-            },
-            target_rule: {
-              rule_id: ruleId,
-              type: 'query',
-              version: 2,
-            },
-          },
-        ],
+        const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect(upgradeReviewResult).toMatchObject({
+          total: 0,
+          rules: [],
+        });
       });
     });
 
-    it('rule is included in response if both current and target are non-ML rules', async () => {
-      await setUpRuleUpgrade({
-        assets: {
-          installed: {
-            type: 'query',
-            rule_id: ruleId,
-            version: 1,
-          },
-          upgrade: {
-            type: 'query',
-            rule_id: ruleId,
-            version: 2,
-          },
-          patch: {},
-        },
-        deps,
+    describe(`rule is included in response`, function () {
+      it('if current rule is an ML rule, but target is a non-ML rule', async () => {
+        await createMlRuleThroughAlertingEndpoint(supertest, {
+          ruleId,
+          version: 1,
+        });
+
+        const targetRuleAsset = createRuleAssetSavedObjectOfType('query', {
+          rule_id: ruleId,
+          version: 2,
+        });
+        await createPrebuiltRuleAssetSavedObjects(es, [targetRuleAsset]);
+
+        const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
+        expect(upgradeReviewResult).toMatchObject({
+          total: 1,
+          rules: [
+            {
+              current_rule: {
+                rule_id: ruleId,
+                type: 'machine_learning',
+                version: 1,
+              },
+              target_rule: {
+                rule_id: ruleId,
+                type: 'query',
+                version: 2,
+              },
+            },
+          ],
+        });
       });
 
-      const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
-
-      expect(upgradeReviewResult).toMatchObject({
-        total: 1,
-        rules: [
-          {
-            current_rule: {
-              rule_id: ruleId,
+      it('if both current and target are non-ML rules', async () => {
+        await setUpRuleUpgrade({
+          assets: {
+            installed: {
               type: 'query',
+              rule_id: ruleId,
               version: 1,
             },
-            target_rule: {
-              rule_id: ruleId,
+            upgrade: {
               type: 'query',
+              rule_id: ruleId,
               version: 2,
             },
+            patch: {},
           },
-        ],
+          deps,
+        });
+
+        const upgradeReviewResult = await reviewPrebuiltRulesToUpgrade(supertest);
+
+        expect(upgradeReviewResult).toMatchObject({
+          total: 1,
+          rules: [
+            {
+              current_rule: {
+                rule_id: ruleId,
+                type: 'query',
+                version: 1,
+              },
+              target_rule: {
+                rule_id: ruleId,
+                type: 'query',
+                version: 2,
+              },
+            },
+          ],
+        });
       });
     });
   });
