@@ -108,6 +108,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     return res.total as number;
   }
 
+  // Failing: See https://github.com/elastic/kibana/issues/228130
   // Failing: See https://github.com/elastic/kibana/issues/228131
   registry.when.skip('APM package policy', { config: 'basic', archives: [] }, () => {
     let apmPackagePolicy: PackagePolicy;
