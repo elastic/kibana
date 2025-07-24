@@ -63,6 +63,7 @@ const thresholdRule = getNewThresholdRule({ rule_id: '7', name: 'Threshold Rule'
 
 // skipInServerlessMKI because of experiment feature flag
 // Failing: See https://github.com/elastic/kibana/issues/229353
+// Failing: See https://github.com/elastic/kibana/issues/229354
 describe.skip(
   'Bulk Edit - Alert Suppression',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
