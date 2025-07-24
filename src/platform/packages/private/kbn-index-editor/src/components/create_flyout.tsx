@@ -39,9 +39,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   });
 
   const onFlyoutClose = async () => {
-    if (indexUpdateService.isIndexCreated()) {
-      indexUpdateService.discardUnsavedChanges();
-    }
+    indexUpdateService.discardUnsavedChanges();
 
     const pendingColumnsToBeSaved = await firstValueFrom(
       indexUpdateService.pendingColumnsToBeSaved$
