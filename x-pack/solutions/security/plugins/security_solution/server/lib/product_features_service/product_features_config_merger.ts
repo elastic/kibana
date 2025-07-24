@@ -12,6 +12,7 @@ import type {
   ProductFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
+  FeatureConfigModifier,
 } from '@kbn/security-solution-features';
 
 export class ProductFeaturesConfigMerger<T extends string = string> {
@@ -33,16 +34,18 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     productFeaturesConfigs: ProductFeatureKibanaConfig[]
   ): KibanaFeatureConfig {
     const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
-    const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
+
     const enabledSubFeaturesIndexed = Object.fromEntries(
       kibanaSubFeatureIds.map((id) => [id, true])
     );
+    const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
+    const featureConfigModifiers: FeatureConfigModifier[] = [];
 
     productFeaturesConfigs.forEach((productFeatureConfig) => {
       const {
         subFeaturesPrivileges,
         subFeatureIds,
-        baseFeatureConfigModifier,
+        featureConfigModifier,
         ...productFeatureConfigToMerge
       } = cloneDeep(productFeatureConfig);
 
@@ -54,10 +57,10 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
       }
 
-      // apply custom modifications before merging
-      if (baseFeatureConfigModifier) {
-        baseFeatureConfigModifier(mergedKibanaFeatureConfig);
+      if (featureConfigModifier) {
+        featureConfigModifiers.push(featureConfigModifier);
       }
+
       mergeWith(mergedKibanaFeatureConfig, productFeatureConfigToMerge, featureConfigMerger);
     });
 
@@ -75,6 +78,11 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     });
 
     mergedKibanaFeatureConfig.subFeatures = mergedKibanaSubFeatures;
+
+    // Apply custom modifications after merging all the product feature configs, including the subFeatures
+    featureConfigModifiers.forEach((modifier) => {
+      modifier(mergedKibanaFeatureConfig);
+    });
 
     return mergedKibanaFeatureConfig;
   }

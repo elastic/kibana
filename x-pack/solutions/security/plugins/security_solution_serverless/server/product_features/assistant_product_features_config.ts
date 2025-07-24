@@ -7,7 +7,7 @@
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
-  ProductFeaturesAssistantConfig,
+  AssistantProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   assistantDefaultProductFeaturesConfig,
@@ -19,7 +19,7 @@ import type {
 } from '@kbn/security-solution-features/keys';
 
 export const getSecurityAssistantProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesAssistantConfig => {
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): AssistantProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
       assistantProductFeaturesConfig,
       enabledProductFeatureKeys

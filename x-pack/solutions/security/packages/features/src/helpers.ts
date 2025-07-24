@@ -18,16 +18,17 @@ export const createEnabledProductFeaturesConfigMap = <
   K extends ProductFeatureKeyType,
   T extends string = string
 >(
-  productFeatures: Record<K, ProductFeatureKibanaConfig<T>>,
+  productFeatures: Partial<Record<K, ProductFeatureKibanaConfig<T>>>,
   enabledProductFeaturesKeys: ProductFeatureKeys
 ) =>
   new Map(
-    Object.entries<ProductFeatureKibanaConfig<T>>(productFeatures).reduce<
-      Array<[K, ProductFeatureKibanaConfig<T>]>
-    >((acc, [key, value]) => {
-      if (enabledProductFeaturesKeys.includes(key as K)) {
-        acc.push([key as K, value]);
-      }
-      return acc;
-    }, [])
+    Object.entries(productFeatures).reduce<Array<[K, ProductFeatureKibanaConfig<T>]>>(
+      (acc, [key, value]) => {
+        if (enabledProductFeaturesKeys.includes(key as K)) {
+          acc.push([key as K, value as ProductFeatureKibanaConfig<T>]);
+        }
+        return acc;
+      },
+      []
+    )
   );

@@ -8,7 +8,7 @@
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
-  ProductFeaturesSiemMigrationsConfig,
+  SiemMigrationsProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   siemMigrationsDefaultProductFeaturesConfig,
@@ -34,7 +34,7 @@ const siemMigrationsProductFeaturesConfig: Record<
 };
 
 export const getSiemMigrationsProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSiemMigrationsConfig =>
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): SiemMigrationsProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
       siemMigrationsProductFeaturesConfig,
       enabledProductFeatureKeys

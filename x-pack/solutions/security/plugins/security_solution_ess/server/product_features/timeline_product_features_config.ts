@@ -8,7 +8,7 @@
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
-  ProductFeaturesTimelineConfig,
+  TimelineProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   createEnabledProductFeaturesConfigMap,
@@ -34,5 +34,5 @@ const timelineProductFeaturesConfig: Record<
 };
 
 export const getTimelineProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesTimelineConfig =>
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): TimelineProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(timelineProductFeaturesConfig, enabledProductFeatureKeys);

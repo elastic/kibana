@@ -7,7 +7,7 @@
 
 import { SIEM_MIGRATIONS_API_ACTION_ALL } from '../actions';
 import { ProductFeatureSiemMigrationsKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 /**
  * App features privileges configuration for the Attack discovery feature.
@@ -19,16 +19,14 @@ import type { ProductFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const siemMigrationsDefaultProductFeaturesConfig: Record<
-  ProductFeatureSiemMigrationsKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureSiemMigrationsKey.siemMigrations]: {
-    privileges: {
-      all: {
-        api: [SIEM_MIGRATIONS_API_ACTION_ALL],
-        ui: ['all'],
+export const siemMigrationsDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureSiemMigrationsKey> =
+  {
+    [ProductFeatureSiemMigrationsKey.siemMigrations]: {
+      privileges: {
+        all: {
+          api: [SIEM_MIGRATIONS_API_ACTION_ALL],
+          ui: ['all'],
+        },
       },
     },
-  },
-};
+  };

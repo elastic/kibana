@@ -31,56 +31,72 @@ export type ProductFeatureKeys = ProductFeatureKeyType[];
 // Features types
 export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
 export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
+
+export type FeatureConfigModifier = (baseFeatureConfig: BaseKibanaFeatureConfig) => void;
+
 export type ProductFeatureKibanaConfig<T extends string = string> =
   RecursivePartial<BaseKibanaFeatureConfig> & {
+    /**
+     * List of sub-feature IDs that will be added into the Security subFeatures entry.
+     */
     subFeatureIds?: T[];
+
+    /**
+     * List of additional privileges that will be merged into existing Security subFeature with the privilege `id` specified.
+     */
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
 
     /**
-     * Optional function to apply custom modifications to the base feature config, for specific ProductFeatures.
-     * The base config received is a clone of the original KibanaFeatureConfig, so it can be mutated safely.
-     * The modifications are applied before applying the rest of the properties of the ProductFeatureConfigs.
+     * Function to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
+     * The `kibanaFeatureConfig` object received is a deep copy of the original configuration, it can be mutated safely.
+     * The modifications are applied after merging the configs of all the ProductFeatureKeys, it includes the final `subFeatures` array.
      *
-     * @param baseFeatureConfig to be mutated
+     * @param kibanaFeatureConfig to be mutated
      * @returns void
      */
-    baseFeatureConfigModifier?: (baseFeatureConfig: BaseKibanaFeatureConfig) => void;
+    featureConfigModifier?: FeatureConfigModifier;
   };
-export type ProductFeaturesConfig<T extends string = string> = Map<
+
+export type ProductFeaturesConfig<
+  K extends ProductFeatureKeyType,
+  T extends string = string
+> = Partial<Record<K, ProductFeatureKibanaConfig<T>>>;
+
+export type ProductFeaturesConfigMap<T extends string = string> = Map<
   ProductFeatureKeyType,
   ProductFeatureKibanaConfig<T>
 >;
 
-export type ProductFeaturesSecurityConfig = Map<
+export type SecurityProductFeaturesConfigMap = Map<
   ProductFeatureSecurityKey,
   ProductFeatureKibanaConfig<SecuritySubFeatureId>
 >;
-export type ProductFeaturesCasesConfig = Map<
+export type CasesProductFeaturesConfigMap = Map<
   ProductFeatureCasesKey,
   ProductFeatureKibanaConfig<CasesSubFeatureId>
 >;
 
-export type ProductFeaturesAssistantConfig = Map<
+export type AssistantProductFeaturesConfigMap = Map<
   ProductFeatureAssistantKey,
   ProductFeatureKibanaConfig<AssistantSubFeatureId>
 >;
 
-export type ProductFeaturesAttackDiscoveryConfig = Map<
+export type AttackDiscoveryProductFeaturesConfigMap = Map<
   ProductFeatureAttackDiscoveryKey,
   ProductFeatureKibanaConfig
 >;
 
-export type ProductFeaturesTimelineConfig = Map<
+export type TimelineProductFeaturesConfigMap = Map<
   ProductFeatureTimelineFeatureKey,
   ProductFeatureKibanaConfig
 >;
 
-export type ProductFeaturesNotesConfig = Map<
+export type NotesProductFeaturesConfigMap = Map<
   ProductFeatureNotesFeatureKey,
   ProductFeatureKibanaConfig
 >;
 
-export type ProductFeaturesSiemMigrationsConfig = Map<
+export type SiemMigrationsProductFeaturesConfigMap = Map<
   ProductFeatureSiemMigrationsKey,
   ProductFeatureKibanaConfig
 >;
@@ -94,11 +110,11 @@ export interface ProductFeatureParams<T extends string = string> {
 }
 
 export interface ProductFeaturesConfigurator {
-  security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
-  cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
-  securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
-  attackDiscovery: () => ProductFeaturesConfig;
-  timeline: () => ProductFeaturesConfig;
-  notes: () => ProductFeaturesConfig;
-  siemMigrations: () => ProductFeaturesConfig;
+  security: () => SecurityProductFeaturesConfigMap;
+  cases: () => CasesProductFeaturesConfigMap;
+  securityAssistant: () => AssistantProductFeaturesConfigMap;
+  attackDiscovery: () => AttackDiscoveryProductFeaturesConfigMap;
+  timeline: () => TimelineProductFeaturesConfigMap;
+  notes: () => NotesProductFeaturesConfigMap;
+  siemMigrations: () => SiemMigrationsProductFeaturesConfigMap;
 }

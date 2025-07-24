@@ -12,24 +12,18 @@ import type {
   FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
-  ProductFeaturesConfig,
-  AppSubFeaturesMap,
-  BaseKibanaFeatureConfig,
+  ProductFeaturesConfigMap,
+  ProductFeatureParams,
 } from '@kbn/security-solution-features';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
-export class ProductFeatures<T extends string = string, S extends string = string> {
+export class ProductFeatures<S extends string = string> {
   private featureConfigMerger: ProductFeaturesConfigMerger;
   private featuresSetup?: FeaturesPluginSetup;
   private readonly registeredActions: Set<string>;
 
-  constructor(
-    private readonly logger: Logger,
-    subFeaturesMap: AppSubFeaturesMap<S>,
-    private readonly baseKibanaFeature: BaseKibanaFeatureConfig,
-    private readonly baseKibanaSubFeatureIds: T[]
-  ) {
-    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
+  constructor(private readonly logger: Logger, private readonly params: ProductFeatureParams<S>) {
+    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, params.subFeaturesMap);
     this.registeredActions = new Set();
   }
 
@@ -37,7 +31,7 @@ export class ProductFeatures<T extends string = string, S extends string = strin
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(productFeatureConfig: ProductFeaturesConfig<S>) {
+  public setConfig(productFeatureConfig: ProductFeaturesConfigMap<S>) {
     if (this.featuresSetup == null) {
       throw new Error(
         'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
@@ -45,8 +39,8 @@ export class ProductFeatures<T extends string = string, S extends string = strin
     }
 
     const completeProductFeatureConfig = this.featureConfigMerger.mergeProductFeatureConfigs(
-      this.baseKibanaFeature,
-      this.baseKibanaSubFeatureIds,
+      this.params.baseKibanaFeature,
+      this.params.baseKibanaSubFeatureIds,
       Array.from(productFeatureConfig.values())
     );
 

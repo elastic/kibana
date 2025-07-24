@@ -8,7 +8,7 @@
 import { ProductFeaturesService } from './product_features_service';
 import { ProductFeatures } from './product_features';
 import type {
-  ProductFeaturesConfig,
+  ProductFeaturesConfigMap,
   BaseKibanaFeatureConfig,
   ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
@@ -92,13 +92,13 @@ describe('ProductFeaturesService', () => {
     const featuresSetup = featuresPluginMock.createSetup();
     productFeaturesService.init(featuresSetup);
 
-    const mockSecurityConfig = new Map() as ProductFeaturesConfig<SecuritySubFeatureId>;
-    const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
-    const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
-    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
-    const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfig;
-    const mockTimelineConfig = new Map() as ProductFeaturesConfig;
-    const mockNotesConfig = new Map() as ProductFeaturesConfig;
+    const mockSecurityConfig = new Map() as ProductFeaturesConfigMap<SecuritySubFeatureId>;
+    const mockCasesConfig = new Map() as ProductFeaturesConfigMap<CasesSubFeatureId>;
+    const mockAssistantConfig = new Map() as ProductFeaturesConfigMap<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfigMap;
+    const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfigMap;
+    const mockTimelineConfig = new Map() as ProductFeaturesConfigMap;
+    const mockNotesConfig = new Map() as ProductFeaturesConfigMap;
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),
@@ -145,21 +145,21 @@ describe('ProductFeaturesService', () => {
     const mockSecurityConfig = new Map([
       [ProductFeatureKey.advancedInsights, {}],
       [ProductFeatureKey.endpointExceptions, {}],
-    ]) as ProductFeaturesConfig<SecuritySubFeatureId>;
+    ]) as ProductFeaturesConfigMap<SecuritySubFeatureId>;
     const mockCasesConfig = new Map([
       [ProductFeatureKey.casesConnectors, {}],
-    ]) as ProductFeaturesConfig<CasesSubFeatureId>;
+    ]) as ProductFeaturesConfigMap<CasesSubFeatureId>;
     const mockAssistantConfig = new Map([
       [ProductFeatureKey.assistant, {}],
-    ]) as ProductFeaturesConfig<AssistantSubFeatureId>;
+    ]) as ProductFeaturesConfigMap<AssistantSubFeatureId>;
     const mockAttackDiscoveryConfig = new Map([
       [ProductFeatureKey.attackDiscovery, {}],
-    ]) as ProductFeaturesConfig;
+    ]) as ProductFeaturesConfigMap;
     const mockSiemMigrationsConfig = new Map([
       [ProductFeatureKey.siemMigrations, {}],
-    ]) as ProductFeaturesConfig;
-    const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfig;
-    const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfig;
+    ]) as ProductFeaturesConfigMap;
+    const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfigMap;
+    const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfigMap;
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),

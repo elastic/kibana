@@ -6,7 +6,7 @@
  */
 import type {
   ProductFeatureKibanaConfig,
-  ProductFeaturesCasesConfig,
+  CasesProductFeaturesConfigMap,
   ProductFeatureKeys,
 } from '@kbn/security-solution-features';
 import {
@@ -23,7 +23,7 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 
 export const getCasesProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesCasesConfig => {
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): CasesProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
       casesProductFeaturesConfig,
       enabledProductFeatureKeys

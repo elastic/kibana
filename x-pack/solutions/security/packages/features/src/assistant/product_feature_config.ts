@@ -6,7 +6,7 @@
  */
 
 import { AssistantSubFeatureId, ProductFeatureAssistantKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 /**
  * App features privileges configuration for the Security Assistant Kibana Feature app.
@@ -18,9 +18,9 @@ import type { ProductFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const assistantDefaultProductFeaturesConfig: Record<
+export const assistantDefaultProductFeaturesConfig: ProductFeaturesConfig<
   ProductFeatureAssistantKey,
-  ProductFeatureKibanaConfig<AssistantSubFeatureId>
+  AssistantSubFeatureId
 > = {
   [ProductFeatureAssistantKey.assistant]: {
     privileges: {

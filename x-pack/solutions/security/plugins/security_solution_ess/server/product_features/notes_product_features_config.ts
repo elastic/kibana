@@ -7,7 +7,7 @@
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
-  ProductFeaturesNotesConfig,
+  NotesProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   notesDefaultProductFeaturesConfig,
@@ -33,5 +33,5 @@ const notesProductFeaturesConfig: Record<
 };
 
 export const getNotesProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesNotesConfig =>
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): NotesProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(notesProductFeaturesConfig, enabledProductFeatureKeys);

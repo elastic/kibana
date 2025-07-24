@@ -6,7 +6,7 @@
  */
 
 import { ProductFeatureNotesFeatureKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 /**
  * App features privileges configuration for the notes feature.
@@ -18,20 +18,18 @@ import type { ProductFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const notesDefaultProductFeaturesConfig: Record<
-  ProductFeatureNotesFeatureKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureNotesFeatureKey.notes]: {
-    privileges: {
-      all: {
-        api: ['notes_read', 'notes_write'],
-        ui: ['read', 'crud'],
-      },
-      read: {
-        api: ['notes_read'],
-        ui: ['read'],
+export const notesDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureNotesFeatureKey> =
+  {
+    [ProductFeatureNotesFeatureKey.notes]: {
+      privileges: {
+        all: {
+          api: ['notes_read', 'notes_write'],
+          ui: ['read', 'crud'],
+        },
+        read: {
+          api: ['notes_read'],
+          ui: ['read'],
+        },
       },
     },
-  },
-};
+  };

@@ -8,7 +8,7 @@
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
-  ProductFeaturesAttackDiscoveryConfig,
+  AttackDiscoveryProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   attackDiscoveryDefaultProductFeaturesConfig,
@@ -34,7 +34,7 @@ const attackDiscoveryProductFeaturesConfig: Record<
 };
 
 export const getAttackDiscoveryProductFeaturesConfigurator =
-  (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesAttackDiscoveryConfig =>
+  (enabledProductFeatureKeys: ProductFeatureKeys) => (): AttackDiscoveryProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
       attackDiscoveryProductFeaturesConfig,
       enabledProductFeatureKeys

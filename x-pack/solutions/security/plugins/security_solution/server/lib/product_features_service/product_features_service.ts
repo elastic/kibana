@@ -58,120 +58,63 @@ export class ProductFeaturesService {
   ) {
     const securityFeature = getSecurityFeature({
       savedObjects: securityV1SavedObjects,
-      experimentalFeatures: this.experimentalFeatures,
+      experimentalFeatures,
     });
-    this.securityProductFeatures = new ProductFeatures(
-      this.logger,
-      securityFeature.subFeaturesMap,
-      securityFeature.baseKibanaFeature,
-      securityFeature.baseKibanaSubFeatureIds
-    );
+    this.securityProductFeatures = new ProductFeatures(this.logger, securityFeature);
+
     const securityV2Feature = getSecurityV2Feature({
       savedObjects: securityDefaultSavedObjects,
-      experimentalFeatures: this.experimentalFeatures,
+      experimentalFeatures,
     });
-    this.securityV2ProductFeatures = new ProductFeatures(
-      this.logger,
-      securityV2Feature.subFeaturesMap,
-      securityV2Feature.baseKibanaFeature,
-      securityV2Feature.baseKibanaSubFeatureIds
-    );
+    this.securityV2ProductFeatures = new ProductFeatures(this.logger, securityV2Feature);
 
     const securityV3Feature = getSecurityV3Feature({
       savedObjects: securityDefaultSavedObjects,
-      experimentalFeatures: this.experimentalFeatures,
+      experimentalFeatures,
     });
-    this.securityV3ProductFeatures = new ProductFeatures(
-      this.logger,
-      securityV3Feature.subFeaturesMap,
-      securityV3Feature.baseKibanaFeature,
-      securityV3Feature.baseKibanaSubFeatureIds
-    );
+    this.securityV3ProductFeatures = new ProductFeatures(this.logger, securityV3Feature);
 
     const casesFeature = getCasesFeature({
       uiCapabilities: casesUiCapabilities,
       apiTags: casesApiTags,
       savedObjects: { files: filesSavedObjectTypes },
     });
-
-    this.casesProductFeatures = new ProductFeatures(
-      this.logger,
-      casesFeature.subFeaturesMap,
-      casesFeature.baseKibanaFeature,
-      casesFeature.baseKibanaSubFeatureIds
-    );
+    this.casesProductFeatures = new ProductFeatures(this.logger, casesFeature);
 
     const casesV2Feature = getCasesV2Feature({
       uiCapabilities: casesUiCapabilities,
       apiTags: casesApiTags,
       savedObjects: { files: filesSavedObjectTypes },
     });
-
-    this.casesProductV2Features = new ProductFeatures(
-      this.logger,
-      casesV2Feature.subFeaturesMap,
-      casesV2Feature.baseKibanaFeature,
-      casesV2Feature.baseKibanaSubFeatureIds
-    );
+    this.casesProductV2Features = new ProductFeatures(this.logger, casesV2Feature);
 
     const casesV3Feature = getCasesV3Feature({
       uiCapabilities: casesUiCapabilities,
       apiTags: casesApiTags,
       savedObjects: { files: filesSavedObjectTypes },
     });
-    this.casesProductFeaturesV3 = new ProductFeatures(
-      this.logger,
-      casesV3Feature.subFeaturesMap,
-      casesV3Feature.baseKibanaFeature,
-      casesV3Feature.baseKibanaSubFeatureIds
-    );
+    this.casesProductFeaturesV3 = new ProductFeatures(this.logger, casesV3Feature);
 
-    const assistantFeature = getAssistantFeature(this.experimentalFeatures);
-    this.securityAssistantProductFeatures = new ProductFeatures(
-      this.logger,
-      assistantFeature.subFeaturesMap,
-      assistantFeature.baseKibanaFeature,
-      assistantFeature.baseKibanaSubFeatureIds
-    );
+    const assistantFeature = getAssistantFeature(experimentalFeatures);
+    this.securityAssistantProductFeatures = new ProductFeatures(this.logger, assistantFeature);
 
     const attackDiscoveryFeature = getAttackDiscoveryFeature();
-
-    this.attackDiscoveryProductFeatures = new ProductFeatures(
-      this.logger,
-      attackDiscoveryFeature.subFeaturesMap,
-      attackDiscoveryFeature.baseKibanaFeature,
-      attackDiscoveryFeature.baseKibanaSubFeatureIds
-    );
+    this.attackDiscoveryProductFeatures = new ProductFeatures(this.logger, attackDiscoveryFeature);
 
     const timelineFeature = getTimelineFeature({
       savedObjects: securityTimelineSavedObjects,
-      experimentalFeatures: {},
+      experimentalFeatures,
     });
-    this.timelineProductFeatures = new ProductFeatures(
-      this.logger,
-      timelineFeature.subFeaturesMap,
-      timelineFeature.baseKibanaFeature,
-      timelineFeature.baseKibanaSubFeatureIds
-    );
+    this.timelineProductFeatures = new ProductFeatures(this.logger, timelineFeature);
 
     const notesFeature = getNotesFeature({
       savedObjects: securityNotesSavedObjects,
-      experimentalFeatures: {},
+      experimentalFeatures,
     });
-    this.notesProductFeatures = new ProductFeatures(
-      this.logger,
-      notesFeature.subFeaturesMap,
-      notesFeature.baseKibanaFeature,
-      notesFeature.baseKibanaSubFeatureIds
-    );
+    this.notesProductFeatures = new ProductFeatures(this.logger, notesFeature);
 
     const siemMigrationsFeature = getSiemMigrationsFeature();
-    this.siemMigrationsProductFeatures = new ProductFeatures(
-      this.logger,
-      siemMigrationsFeature.subFeaturesMap,
-      siemMigrationsFeature.baseKibanaFeature,
-      siemMigrationsFeature.baseKibanaSubFeatureIds
-    );
+    this.siemMigrationsProductFeatures = new ProductFeatures(this.logger, siemMigrationsFeature);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {

@@ -6,7 +6,7 @@
  */
 
 import { ProductFeatureAttackDiscoveryKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 /**
  * App features privileges configuration for the Attack discovery feature.
@@ -18,16 +18,14 @@ import type { ProductFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const attackDiscoveryDefaultProductFeaturesConfig: Record<
-  ProductFeatureAttackDiscoveryKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureAttackDiscoveryKey.attackDiscovery]: {
-    privileges: {
-      all: {
-        ui: ['attack-discovery'],
+export const attackDiscoveryDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureAttackDiscoveryKey> =
+  {
+    [ProductFeatureAttackDiscoveryKey.attackDiscovery]: {
+      privileges: {
+        all: {
+          ui: ['attack-discovery'],
+        },
       },
+      subFeatureIds: [],
     },
-    subFeatureIds: [],
-  },
-};
+  };

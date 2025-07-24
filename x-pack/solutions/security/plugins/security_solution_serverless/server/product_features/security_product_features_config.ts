@@ -6,8 +6,7 @@
  */
 import type {
   ProductFeatureKeys,
-  ProductFeatureKibanaConfig,
-  ProductFeaturesSecurityConfig,
+  SecurityProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import {
   securityDefaultProductFeaturesConfig,
@@ -19,6 +18,7 @@ import {
 } from '@kbn/security-solution-features/keys';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 import { APP_ID } from '@kbn/security-solution-plugin/common';
+import type { SecurityProductFeaturesConfig } from '@kbn/security-solution-features/src/security/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export const getSecurityProductFeaturesConfigurator =
@@ -26,27 +26,16 @@ export const getSecurityProductFeaturesConfigurator =
     enabledProductFeatureKeys: ProductFeatureKeys,
     _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
   ) =>
-  (): ProductFeaturesSecurityConfig => {
+  (): SecurityProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
       securityProductFeaturesConfig,
       enabledProductFeatureKeys
     );
   };
 
-/**
- * Maps the ProductFeatures keys to Kibana privileges that will be merged
- * into the base privileges config for the Security app.
- *
- * Privileges can be added in different ways:
- * - `privileges`: the privileges that will be added directly into the main Security feature.
- * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
- */
-const securityProductFeaturesConfig: Record<
-  ProductFeatureSecurityKey,
-  ProductFeatureKibanaConfig<SecuritySubFeatureId>
-> = {
+const securityProductFeaturesConfig: SecurityProductFeaturesConfig = {
   ...securityDefaultProductFeaturesConfig,
+
   [ProductFeatureSecurityKey.endpointExceptions]: {
     subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
   },
@@ -66,7 +55,7 @@ const securityProductFeaturesConfig: Record<
 
     // When endpointArtifactManagement PLI is enabled, the replacedBy for the siemV3 feature needs to
     // account for the privileges of the sub-features that are introduced by it.
-    baseFeatureConfigModifier: (baseFeatureConfig) => {
+    featureConfigModifier: (baseFeatureConfig) => {
       const replacedBy = baseFeatureConfig.privileges?.all?.replacedBy;
       if (!replacedBy || !('default' in replacedBy)) {
         return;

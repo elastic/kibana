@@ -6,7 +6,7 @@
  */
 
 import { ProductFeatureTimelineFeatureKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 /**
  * App features privileges configuration for the timeline feature.
@@ -18,20 +18,18 @@ import type { ProductFeatureKibanaConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const timelineDefaultProductFeaturesConfig: Record<
-  ProductFeatureTimelineFeatureKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureTimelineFeatureKey.timeline]: {
-    privileges: {
-      all: {
-        api: ['timeline_read', 'timeline_write'],
-        ui: ['read', 'crud'],
-      },
-      read: {
-        api: ['timeline_read'],
-        ui: ['read'],
+export const timelineDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureTimelineFeatureKey> =
+  {
+    [ProductFeatureTimelineFeatureKey.timeline]: {
+      privileges: {
+        all: {
+          api: ['timeline_read', 'timeline_write'],
+          ui: ['read', 'crud'],
+        },
+        read: {
+          api: ['timeline_read'],
+          ui: ['read'],
+        },
       },
     },
-  },
-};
+  };

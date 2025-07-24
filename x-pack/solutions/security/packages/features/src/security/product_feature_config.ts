@@ -7,7 +7,7 @@
 
 import { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
-import type { DefaultSecurityProductFeaturesConfig } from './types';
+import type { SecurityProductFeaturesConfig } from './types';
 
 /**
  * App features privileges configuration for the Security Solution Kibana Feature app.
@@ -20,7 +20,7 @@ import type { DefaultSecurityProductFeaturesConfig } from './types';
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
 
-export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
+export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig = {
   [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
       all: {
@@ -164,16 +164,4 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.securityWorkflowInsights]: {
     subFeatureIds: [SecuritySubFeatureId.workflowInsights],
   },
-  // Product features without RBAC
-  // Endpoint/Osquery PLIs
-  [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
-  [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
-  [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
-  [ProductFeatureSecurityKey.endpointCustomNotification]: {},
-  [ProductFeatureSecurityKey.externalRuleActions]: {},
-  [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
-
-  // Security PLIs
-  [ProductFeatureSecurityKey.automaticImport]: {},
-  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
 };
