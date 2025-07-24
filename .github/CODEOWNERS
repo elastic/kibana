@@ -1364,6 +1364,19 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.index.ts @elastic/observability-ui
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/kibana.jsonc @elastic/observability-ui
+/x-pack/solutions/observability/test/tsconfig.json @elastic/observability-ui
+/x-pack/solutions/observability/test/accessibility/ @elastic/observability-ui
+/x-pack/solutions/observability/test/api_integration/config.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/api_integration/ftr_provider_context.d.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/ @elastic/observability-ui
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional/config.base.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional/services/index.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/observability-ui
 
 ### Observability Plugins
 
@@ -1904,7 +1917,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/lib @elastic/appex-qa
 /src/platform/test/functional/services/remote @elastic/appex-qa
 /src/platform/test/visual_regression @elastic/appex-qa
-/x-pack/test/visual_regression @elastic/appex-qa
 /src/platform/packages/shared/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
@@ -1925,36 +1937,15 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/tsconfig.json @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/config.basic_license.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration_basic/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/kibana.jsonc @elastic/appex-qa
-/x-pack/solutions/observability/test/tsconfig.json @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration/config.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/kibana.jsonc @elastic/appex-qa
 /x-pack/solutions/security/test/tsconfig.json @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/config.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/platform/test/serverless @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic @elastic/appex-qa
 /x-pack/platform/test/functional/services/ml/api.ts @elastic/appex-qa # temporarily due to SKA tests relocation
-/x-pack/solutions/observability/test/functional/config.base.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/functional/services/index.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/config.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/index.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/page_objects.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/services.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/accessibility/apps/index.ts @elastic/appex-qa
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/appex-qa
 /x-pack/platform/test/.gitignore @elastic/appex-qa
 /x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 /x-pack/platform/test/functional/services/pipeline_list.ts @elastic/appex-qa
