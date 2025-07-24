@@ -453,7 +453,7 @@ export class DiscoverPlugin
     });
 
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { searchEmbeddableTransforms } = await import('../common/embeddable');
+      const { searchEmbeddableTransforms } = await getEmbeddableServices();
       return searchEmbeddableTransforms;
     });
   }
