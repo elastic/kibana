@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getPrebuiltRuleMock,
   getPrebuiltRuleMockOfType,
@@ -25,731 +26,487 @@ export default ({ getService }: FtrProviderContext): void => {
   const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
 
-  const ruleAsset = createRuleAssetSavedObject({
-    rule_id: 'rule_1',
-  });
-
   describe('@ess @serverless @skipInServerlessMKI Customize prebuilt rules', () => {
-    before(async () => {
+    beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     describe('detecting rule customizations', () => {
+      const testFieldCustomization = async ({
+        fieldName,
+        customizedValue,
+        ruleType,
+      }: {
+        fieldName: string;
+        customizedValue: unknown;
+        // Rule type shouldn't be required to customize prebuilt rules.
+        // However prebuilt rules customization doesn't work as expected when rule type
+        // isn't provided for non custom query rule types.
+        ruleType?: RuleResponse['type'];
+      }) => {
+        const { body } = await securitySolutionApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, type: ruleType, [fieldName]: customizedValue },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+        });
+      };
+
       describe('common rule fields', () => {
         beforeEach(async () => {
-          await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
+        it('name field', () =>
+          testFieldCustomization({ fieldName: 'name', customizedValue: 'some other name' }));
 
-        it('name field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', name: 'some other name' } })
-            .expect(200);
+        it('description field', () =>
+          testFieldCustomization({
+            fieldName: 'description',
+            customizedValue: 'some other description',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('note field', () =>
+          testFieldCustomization({
+            fieldName: 'note',
+            customizedValue: '# some note markdown',
+          }));
 
-        it('description field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', description: 'some other description' } })
-            .expect(200);
+        it('severity field', () =>
+          testFieldCustomization({
+            fieldName: 'severity',
+            customizedValue: 'medium',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('tags field', () =>
+          testFieldCustomization({
+            fieldName: 'tags',
+            customizedValue: ['red fish', 'blue fish'],
+          }));
 
-        it('interval field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', interval: '30m' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('from field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', from: 'now-10m' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('to field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', to: 'now-1m' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('note field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', note: '# some note markdown' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('severity field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', severity: 'medium' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('tags field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', tags: ['red fish', 'blue fish'] } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('severity_mapping field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                severity_mapping: [
-                  {
-                    field: 'event.severity',
-                    operator: 'equals',
-                    severity: 'low',
-                    value: 'LOW',
-                  },
-                ],
+        it('severity_mapping field', () =>
+          testFieldCustomization({
+            fieldName: 'severity_mapping',
+            customizedValue: [
+              {
+                field: 'event.severity',
+                operator: 'equals',
+                severity: 'low',
+                value: 'LOW',
               },
-            })
-            .expect(200);
+            ],
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('risk_score field', () =>
+          testFieldCustomization({
+            fieldName: 'risk_score',
+            customizedValue: 72,
+          }));
 
-        it('risk_score field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', risk_score: 72 } })
-            .expect(200);
+        it('risk_score_mapping field', () =>
+          testFieldCustomization({
+            fieldName: 'risk_score_mapping',
+            customizedValue: [{ field: 'event.risk_score', operator: 'equals', value: '' }],
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('references field', () =>
+          testFieldCustomization({
+            fieldName: 'references',
+            customizedValue: ['http://test.test'],
+          }));
 
-        it('risk_score_mapping field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                risk_score_mapping: [{ field: 'event.risk_score', operator: 'equals', value: '' }],
+        it('false_positives field', () =>
+          testFieldCustomization({
+            fieldName: 'false_positives',
+            customizedValue: ['false positive example'],
+          }));
+
+        it('threat field', () =>
+          testFieldCustomization({
+            fieldName: 'threat',
+            customizedValue: [
+              {
+                framework: 'MITRE ATT&CK',
+                tactic: {
+                  id: 'TA0000',
+                  name: 'test tactic',
+                  reference: 'https://attack.mitre.org/tactics/TA0000/',
+                },
               },
-            })
-            .expect(200);
+            ],
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('setup field', () =>
+          testFieldCustomization({
+            fieldName: 'setup',
+            customizedValue: '# some setup markdown',
+          }));
 
-        it('references field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', references: ['http://test.test'] } })
-            .expect(200);
+        it('related_integrations field', () =>
+          testFieldCustomization({
+            fieldName: 'related_integrations',
+            customizedValue: [{ package: 'package-a', version: '^1.2.3' }],
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('required_fields field', () =>
+          testFieldCustomization({
+            fieldName: 'required_fields',
+            customizedValue: [{ name: '@timestamp', type: 'date' }],
+          }));
 
-        it('false_positives field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', false_positives: ['false positive example'] } })
-            .expect(200);
+        it('max_signals field', () =>
+          testFieldCustomization({
+            fieldName: 'max_signals',
+            customizedValue: 42,
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('investigation_fields field', () =>
+          testFieldCustomization({
+            fieldName: 'investigation_fields',
+            customizedValue: { field_names: ['blob', 'boop'] },
+          }));
 
-        it('threat field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                threat: [
-                  {
-                    framework: 'MITRE ATT&CK',
-                    tactic: {
-                      id: 'TA0000',
-                      name: 'test tactic',
-                      reference: 'https://attack.mitre.org/tactics/TA0000/',
-                    },
-                  },
-                ],
-              },
-            })
-            .expect(200);
+        it('rule_name_override field', () =>
+          testFieldCustomization({
+            fieldName: 'rule_name_override',
+            customizedValue: 'override string',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('setup field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({ body: { rule_id: 'rule_1', setup: '# some setup markdown' } })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('related_integrations field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                related_integrations: [{ package: 'package-a', version: '^1.2.3' }],
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('required_fields field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                required_fields: [{ name: '@timestamp', type: 'date' }],
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('max_signals field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                max_signals: 42,
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('investigation_fields field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', investigation_fields: { field_names: ['blob', 'boop'] } },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('rule_name_override field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', rule_name_override: 'override string' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('timestamp_override field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', timestamp_override: 'event.ingested' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('timestamp_override field', () =>
+          testFieldCustomization({
+            fieldName: 'timestamp_override',
+            customizedValue: 'event.ingested',
+          }));
 
         it('timeline_template fields', async () => {
           const { body } = await securitySolutionApi
             .patchRule({
-              body: { rule_id: 'rule_1', timeline_id: '123', timeline_title: 'timeline title' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('building_block_type field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', building_block_type: 'building block string' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-      });
-
-      describe('query rule fields', () => {
-        beforeEach(async () => {
-          await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
-          await installPrebuiltRules(es, supertest);
-        });
-
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
-
-        it('query field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', query: 'event.action: *' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('language field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', language: 'lucene' },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('filters field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
               body: {
-                rule_id: 'rule_1',
-                filters: [
-                  {
-                    meta: {
-                      negate: false,
-                      disabled: false,
-                      type: 'phrase',
-                      key: 'test',
-                      params: {
-                        query: 'value',
-                      },
-                    },
-                    query: {
-                      term: {
-                        field: 'value',
-                      },
-                    },
-                  },
-                ],
+                rule_id: PREBUILT_RULE_ID,
+                timeline_id: '123',
+                timeline_title: 'timeline title',
               },
             })
             .expect(200);
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
+          expect(body.rule_source).toMatchObject({
+            type: 'external',
+            is_customized: true,
+          });
         });
 
-        it('index field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: { rule_id: 'rule_1', index: ['new-index-pattern-*'] },
-            })
-            .expect(200);
+        it('building_block_type field', () =>
+          testFieldCustomization({
+            fieldName: 'building_block_type',
+            customizedValue: 'building block string',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
+        describe('rule schedule', () => {
+          it('interval field', () => {
+            testFieldCustomization({
+              fieldName: 'interval',
+              customizedValue: '30m',
+            });
+          });
+
+          it('from field', () => {
+            testFieldCustomization({
+              fieldName: 'from',
+              customizedValue: 'now-10m',
+            });
+          });
+
+          it('to field', () => {
+            testFieldCustomization({
+              fieldName: 'to',
+              customizedValue: 'now-1m',
+            });
+          });
         });
+      });
+
+      describe('Custom Query rule fields', () => {
+        beforeEach(async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
+          await installPrebuiltRules(es, supertest);
+        });
+
+        it('query field', () =>
+          testFieldCustomization({
+            fieldName: 'query',
+            customizedValue: 'event.action: *',
+          }));
+
+        it('language field', () =>
+          testFieldCustomization({
+            fieldName: 'language',
+            customizedValue: 'lucene',
+          }));
+
+        it('filters field', () =>
+          testFieldCustomization({
+            fieldName: 'filters',
+            customizedValue: [
+              {
+                meta: {
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'test',
+                  params: {
+                    query: 'value',
+                  },
+                },
+                query: {
+                  term: {
+                    field: 'value',
+                  },
+                },
+              },
+            ],
+          }));
+
+        it('index field', () =>
+          testFieldCustomization({
+            fieldName: 'index',
+            customizedValue: ['new-index-pattern-*'],
+          }));
 
         it('data_view_id field', async () => {
           const { body } = await securitySolutionApi
             .patchRule({
-              body: { rule_id: 'rule_1', data_view_id: 'new-data-view', index: [] },
+              body: { rule_id: PREBUILT_RULE_ID, data_view_id: 'new-data-view', index: [] },
             })
             .expect(200);
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
+          expect(body.rule_source).toMatchObject({
+            type: 'external',
+            is_customized: true,
+          });
         });
 
-        it('alert_suppression field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                alert_suppression: {
-                  group_by: ['host.name'],
-                  duration: { value: 5, unit: 'm' },
-                  missing_fields_strategy: 'suppress',
-                },
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('alert_suppression field', () =>
+          testFieldCustomization({
+            fieldName: 'alert_suppression',
+            customizedValue: {
+              group_by: ['host.name'],
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+            },
+          }));
       });
 
-      describe('eql rule type fields', () => {
+      describe('EQL rule type fields', () => {
         beforeEach(async () => {
-          const eqlRuleAsset = createRuleAssetSavedObject({
-            ...getPrebuiltRuleMockOfType('eql'),
-            rule_id: 'rule_1',
-          });
-
-          await createPrebuiltRuleAssetSavedObjects(es, [eqlRuleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [EQL_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
+        it('query field', () =>
+          testFieldCustomization({
+            fieldName: 'query',
+            customizedValue: 'process where process.name == "some_process"',
+          }));
 
-        it('event_category_override field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                event_category_override: 'host.name',
-              },
-            })
-            .expect(200);
+        it('event_category_override field', () =>
+          testFieldCustomization({
+            fieldName: 'event_category_override',
+            customizedValue: 'host.name',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('timestamp_field field', () =>
+          testFieldCustomization({
+            fieldName: 'timestamp_field',
+            customizedValue: 'event.ingested',
+          }));
 
-        it('timestamp_field field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                timestamp_field: 'event.ingested',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('tiebreaker_field field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                tiebreaker_field: 'event.ingested',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('tiebreaker_field field', () =>
+          testFieldCustomization({
+            fieldName: 'tiebreaker_field',
+            customizedValue: 'event.ingested',
+          }));
       });
 
       describe('threat match rule type fields', () => {
         beforeEach(async () => {
-          const threatMatchRuleAsset = createRuleAssetSavedObject({
-            ...getPrebuiltRuleMockOfType('threat_match'),
-            rule_id: 'rule_1',
-          });
-
-          await createPrebuiltRuleAssetSavedObjects(es, [threatMatchRuleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [THREAT_MATCH_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
+        it('threat_index field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_index',
+            customizedValue: ['blue fish', 'red fish'],
+            ruleType: 'threat_match',
+          }));
 
-        it('threat_index field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_index: ['blue fish', 'red fish'],
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('threat_mapping field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_mapping: [
+        it('threat_mapping field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_mapping',
+            customizedValue: [
+              {
+                entries: [
                   {
-                    entries: [
-                      {
-                        field: 'Endpoint.capabilities',
-                        type: 'mapping',
-                        value: 'Target.dll.pe.description',
-                      },
-                    ],
+                    field: 'Endpoint.capabilities',
+                    type: 'mapping',
+                    value: 'Target.dll.pe.description',
                   },
                 ],
               },
-            })
-            .expect(200);
+            ],
+            ruleType: 'threat_match',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('threat_indicator_path field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_indicator_path',
+            customizedValue: 'C:over/there.exe',
+            ruleType: 'threat_match',
+          }));
 
-        it('threat_indicator_path field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_indicator_path: 'C:over/there.exe',
-              },
-            })
-            .expect(200);
+        it('threat_query field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_query',
+            customizedValue: 'event.action: *',
+            ruleType: 'threat_match',
+          }));
 
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('threat_language field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_language',
+            customizedValue: 'lucene',
+            ruleType: 'threat_match',
+          }));
 
-        it('threat_query field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_query: 'event.action: *',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('threat_language field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_language: 'lucene',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('threat_filters field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threat_match',
-                threat_filters: [
-                  {
-                    meta: {
-                      negate: false,
-                      disabled: false,
-                      type: 'phrase',
-                      key: 'test',
-                      params: {
-                        query: 'value',
-                      },
-                    },
-                    query: {
-                      term: {
-                        field: 'value',
-                      },
-                    },
+        it('threat_filters field', () =>
+          testFieldCustomization({
+            fieldName: 'threat_filters',
+            customizedValue: [
+              {
+                meta: {
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'test',
+                  params: {
+                    query: 'value',
                   },
-                ],
+                },
+                query: {
+                  term: {
+                    field: 'value',
+                  },
+                },
               },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+            ],
+            ruleType: 'threat_match',
+          }));
       });
 
       describe('threshold rule type fields', () => {
         beforeEach(async () => {
-          const thresholdRuleAsset = createRuleAssetSavedObject({
-            ...getPrebuiltRuleMockOfType('threshold'),
-            rule_id: 'rule_1',
-          });
-
-          await createPrebuiltRuleAssetSavedObjects(es, [thresholdRuleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [THRESHOLD_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
-
-        it('threshold field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'threshold',
-                threshold: {
-                  field: ['Responses.process.pid'],
-                  value: 100,
-                  cardinality: [{ field: 'host.id', value: 2 }],
-                },
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('threshold field', () =>
+          testFieldCustomization({
+            fieldName: 'threshold',
+            customizedValue: {
+              field: ['Responses.process.pid'],
+              value: 100,
+              cardinality: [{ field: 'host.id', value: 2 }],
+            },
+            ruleType: 'threshold',
+          }));
       });
 
       describe('machine learning rule type fields', () => {
         beforeEach(async () => {
-          const machineLearningRuleAsset = createRuleAssetSavedObject({
-            ...getPrebuiltRuleMockOfType('machine_learning'),
-            rule_id: 'rule_1',
-          });
-
-          await createPrebuiltRuleAssetSavedObjects(es, [machineLearningRuleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [MACHINE_LEARNING_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
-        });
+        it('machine_learning_job_id field', () =>
+          testFieldCustomization({
+            fieldName: 'machine_learning_job_id',
+            customizedValue: '123',
+            ruleType: 'machine_learning',
+          }));
 
-        it('machine_learning_job_id field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'machine_learning',
-                machine_learning_job_id: '123',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('anomaly_threshold field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'machine_learning',
-                anomaly_threshold: 20,
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('anomaly_threshold field', () =>
+          testFieldCustomization({
+            fieldName: 'anomaly_threshold',
+            customizedValue: 20,
+            ruleType: 'machine_learning',
+          }));
       });
 
       describe('new terms rule type fields', () => {
         beforeEach(async () => {
-          const newTermsRuleAsset = createRuleAssetSavedObject({
-            ...getPrebuiltRuleMockOfType('new_terms'),
-            rule_id: 'rule_1',
-          });
-
-          await createPrebuiltRuleAssetSavedObjects(es, [newTermsRuleAsset]);
+          await createPrebuiltRuleAssetSavedObjects(es, [NEW_TERMS_PREBUILT_RULE_ASSET]);
           await installPrebuiltRules(es, supertest);
         });
 
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-          await deleteAllPrebuiltRuleAssets(es, log);
+        it('new_terms_fields field', () =>
+          testFieldCustomization({
+            fieldName: 'new_terms_fields',
+            customizedValue: ['event.action'],
+            ruleType: 'new_terms',
+          }));
+
+        it('history_window_start field', () =>
+          testFieldCustomization({
+            fieldName: 'history_window_start',
+            customizedValue: 'now-7d',
+            ruleType: 'new_terms',
+          }));
+      });
+
+      describe('ES|QL rule type fields', () => {
+        beforeEach(async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [ESQL_PREBUILT_RULE_ASSET]);
+          await installPrebuiltRules(es, supertest);
         });
 
-        it('new_terms_fields field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'new_terms',
-                new_terms_fields: ['event.action'],
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
-
-        it('history_window_start field', async () => {
-          const { body } = await securitySolutionApi
-            .patchRule({
-              body: {
-                rule_id: 'rule_1',
-                type: 'new_terms',
-                history_window_start: 'now-7d',
-              },
-            })
-            .expect(200);
-
-          expect(body.rule_source.is_customized).toEqual(true);
-          expect(body.rule_source.type).toEqual('external');
-        });
+        it('ES|QL query field', () =>
+          testFieldCustomization({
+            fieldName: 'query',
+            customizedValue: 'FROM sample_data | SORT @timestamp DESC | LIMIT 3',
+          }));
       });
     });
 
     describe('is_customized calculation is not affected by', () => {
       beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
         await installPrebuiltRules(es, supertest);
       });
 
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-        await deleteAllPrebuiltRuleAssets(es, log);
-      });
+      const testFieldDoesNotAffectCustomizationState = async ({
+        fieldName,
+        value,
+      }: {
+        fieldName: string;
+        value: unknown;
+      }) => {
+        const { body } = await securitySolutionApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, [fieldName]: value },
+          })
+          .expect(200);
+
+        expect(body.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: false,
+        });
+      };
 
       it('actions field', async () => {
         // create connector/action
@@ -759,94 +516,58 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getWebHookAction())
           .expect(200);
 
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule_1',
-              actions: [
-                {
-                  group: 'default',
-                  id: hookAction.id,
-                  action_type_id: hookAction.connector_type_id,
-                  params: {},
-                },
-              ],
+        await testFieldDoesNotAffectCustomizationState({
+          fieldName: 'actions',
+          value: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.connector_type_id,
+              params: {},
             },
-          })
-          .expect(200);
-
-        expect(body.rule_source.is_customized).toEqual(false);
-        expect(body.rule_source.type).toEqual('external');
+          ],
+        });
       });
 
-      it('exceptions_list field', async () => {
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule_1',
-              exceptions_list: [
-                {
-                  id: 'some_uuid',
-                  list_id: 'list_id_single',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
+      it('exceptions_list field', () =>
+        testFieldDoesNotAffectCustomizationState({
+          fieldName: 'exceptions_list',
+          value: [
+            {
+              id: 'some_uuid',
+              list_id: 'list_id_single',
+              namespace_type: 'single',
+              type: 'detection',
             },
-          })
-          .expect(200);
+          ],
+        }));
 
-        expect(body.rule_source.is_customized).toEqual(false);
-        expect(body.rule_source.type).toEqual('external');
-      });
+      it('enabled field', () =>
+        testFieldDoesNotAffectCustomizationState({
+          fieldName: 'enabled',
+          value: true,
+        }));
 
-      it('enabled field', async () => {
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule_1',
-              enabled: true,
-            },
-          })
-          .expect(200);
-
-        expect(body.rule_source.is_customized).toEqual(false);
-        expect(body.rule_source.type).toEqual('external');
-      });
-
-      it('meta field', async () => {
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule_1',
-              meta: {
-                severity_override_field: 'field',
-              },
-            },
-          })
-          .expect(200);
-
-        expect(body.rule_source.is_customized).toEqual(false);
-        expect(body.rule_source.type).toEqual('external');
-      });
+      it('meta field', () =>
+        testFieldDoesNotAffectCustomizationState({
+          fieldName: 'meta',
+          value: {
+            severity_override_field: 'field',
+          },
+        }));
     });
 
     describe('cannot change non-customizable rule fields', () => {
       beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
         await installPrebuiltRules(es, supertest);
-      });
-
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-        await deleteAllPrebuiltRuleAssets(es, log);
       });
 
       it('id field', async () => {
         await securitySolutionApi
           .patchRule({
             body: {
-              rule_id: 'rule_1',
+              rule_id: PREBUILT_RULE_ID,
               id: 'new-id',
             },
           })
@@ -857,7 +578,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await securitySolutionApi
           .patchRule({
             body: {
-              rule_id: 'rule_1',
+              rule_id: PREBUILT_RULE_ID,
               author: ['new author'],
             },
           })
@@ -868,7 +589,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await securitySolutionApi
           .patchRule({
             body: {
-              rule_id: 'rule_1',
+              rule_id: PREBUILT_RULE_ID,
               license: 'custom-license',
             },
           })
@@ -878,7 +599,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('user can revert a customized prebuilt rule to its non-customized state', () => {
       beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
         await installPrebuiltRules(es, supertest);
       });
 
@@ -890,7 +611,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('using name field', async () => {
         // Modify the prebuilt rule
         const { body: customizedRuleBody } = await securitySolutionApi
-          .patchRule({ body: { rule_id: 'rule_1', name: 'new name' } })
+          .patchRule({ body: { rule_id: PREBUILT_RULE_ID, name: 'new name' } })
           .expect(200);
 
         expect(customizedRuleBody.rule_source.is_customized).toEqual(true);
@@ -898,7 +619,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Change the name field back to the original value
         const { body: nonCustomizedRuleBody } = await securitySolutionApi
-          .patchRule({ body: { rule_id: 'rule_1', name: getPrebuiltRuleMock().name } })
+          .patchRule({ body: { rule_id: PREBUILT_RULE_ID, name: getPrebuiltRuleMock().name } })
           .expect(200);
 
         expect(nonCustomizedRuleBody.rule_source.is_customized).toEqual(false);
@@ -907,3 +628,39 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   });
 };
+
+const PREBUILT_RULE_ID = 'test-prebuilt-rule';
+const QUERY_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const EQL_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('eql'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const THREAT_MATCH_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('threat_match'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const THRESHOLD_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('threshold'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const MACHINE_LEARNING_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('machine_learning'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const NEW_TERMS_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('new_terms'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});
+const ESQL_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+  ...getPrebuiltRuleMockOfType('esql'),
+  rule_id: PREBUILT_RULE_ID,
+  version: 3,
+});

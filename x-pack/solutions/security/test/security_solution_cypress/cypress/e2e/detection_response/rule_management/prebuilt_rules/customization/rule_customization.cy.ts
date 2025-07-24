@@ -96,9 +96,6 @@ describe(
       deletePrebuiltRulesAssets();
       /* Create a new rule and install it */
       createAndInstallMockedPrebuiltRules([PREBUILT_RULE]);
-
-      login();
-      visitRulesManagementTable();
       createRule(
         getCustomQueryRuleParams({
           name: 'Custom rule',
@@ -107,60 +104,67 @@ describe(
           enabled: false,
         })
       );
-    });
 
-    it('user can navigate to rule editing page from the rule details page', function () {
-      cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
-
-      goToRuleEditSettings();
-      cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-      cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-      cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-      cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
-    });
-
-    it('user can edit a non-customized prebuilt rule from the rule edit page', function () {
-      const newDescriptionValue = 'New rule description';
-      cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
-
-      goToRuleEditSettings();
-      goToAboutStepTab();
-      fillDescription(newDescriptionValue);
-      saveEditedRule();
-
-      expectModifiedRuleBadgeToBeDisplayed();
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
-    });
-
-    it('user can edit a customized prebuilt rule from the rule edit page', function () {
-      const newDescriptionValue = 'New rule description';
-      patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+      login();
       visitRulesManagementTable();
-
-      cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
-      expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to already be displayed
-
-      goToRuleEditSettings();
-      goToAboutStepTab();
-      fillDescription(newDescriptionValue);
-      saveEditedRule();
-
-      expectModifiedRuleBadgeToBeDisplayed();
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
     });
 
-    it('user can navigate to rule editing page from the rule management page', function () {
-      filterByElasticRules();
-      editFirstRule();
+    describe('navigation to the prebuilt rule editing page', () => {
+      it('navigates from the rule details page', () => {
+        cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
 
-      cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
-      cy.get(ABOUT_EDIT_TAB).should('be.enabled');
-      cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
-      cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+        goToRuleEditSettings();
+        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+      });
+
+      it('navigates from the rule management page', () => {
+        filterByElasticRules();
+        editFirstRule();
+
+        cy.get(DEFINITION_EDIT_TAB).should('be.enabled');
+        cy.get(ABOUT_EDIT_TAB).should('be.enabled');
+        cy.get(SCHEDULE_EDIT_TAB).should('be.enabled');
+        cy.get(ACTIONS_EDIT_TAB).should('be.enabled');
+      });
     });
 
-    describe('user can bulk edit prebuilt rules from rules management page', () => {
-      it('add index patterns', () => {
+    describe('editing a single prebuilt rule on the rule edit page', () => {
+      it('edits a non-customized prebuilt rule', () => {
+        const newDescriptionValue = 'New rule description';
+        cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
+
+        goToRuleEditSettings();
+        goToAboutStepTab();
+        fillDescription(newDescriptionValue);
+        saveEditedRule();
+
+        expectModifiedRuleBadgeToBeDisplayed();
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
+      });
+
+      it('edits a customized prebuilt rule', () => {
+        const newDescriptionValue = 'New rule description';
+        patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+        visitRulesManagementTable();
+
+        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+        expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to already be displayed
+
+        goToRuleEditSettings();
+        goToAboutStepTab();
+        fillDescription(newDescriptionValue);
+        saveEditedRule();
+
+        expectModifiedRuleBadgeToBeDisplayed();
+        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
+      });
+    });
+
+    describe('bulk editing prebuilt rules from the rules management page', () => {
+      it('adds index patterns', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -175,7 +179,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete index patterns', () => {
+      it('deletes index patterns', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -190,7 +194,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('add tags', () => {
+      it('adds tags', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -205,7 +209,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete tags', () => {
+      it('deletes tags', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -220,7 +224,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('add custom highlighted fields', () => {
+      it('adds custom highlighted fields', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -235,7 +239,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('delete custom highlighted fields', () => {
+      it('deletes custom highlighted fields', () => {
         filterByElasticRules();
         selectAllRules();
 
@@ -250,7 +254,7 @@ describe(
         expectToContainModifiedBadge('Non-customized prebuilt rule');
       });
 
-      it('modify rule schedules', () => {
+      it('modifies rule schedules', () => {
         filterByElasticRules();
         selectAllRules();
 
