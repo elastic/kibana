@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { dashboardMigrationRouteFactory } from '../../../../utils/dashboards';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { defaultRawDashboard } from '../../../../utils/dashboard_mocks';
+import { defaultOriginalDashboardExports } from '../../../../utils/dashboard_mocks';
+import {
+  deleteAllDashboardMigrations,
+  getDashboardsPerMigrationFromES,
+} from '../../../../utils/es_queries_dashboards';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -17,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Create Rules API', () => {
     let migrationId: string;
     beforeEach(async () => {
-      // await deleteAllRuleMigrations(es);
+      deleteAllDashboardMigrations(es);
       const response = await dashboardMigrationRoutes.create({});
       migrationId = response.body.migration_id;
     });
@@ -25,7 +30,32 @@ export default ({ getService }: FtrProviderContext) => {
     it('should create migrations with provided id', async () => {
       await dashboardMigrationRoutes.addDashboardsToMigration({
         migrationId,
-        body: [defaultRawDashboard],
+        body: [defaultOriginalDashboardExports],
+      });
+
+      const actualIndexedData = await getDashboardsPerMigrationFromES({
+        es,
+        migrationId,
+      });
+
+      expect(actualIndexedData.hits.hits.length).toBe(1);
+      const doc = actualIndexedData.hits.hits[0]._source;
+      expect(doc).toBeDefined();
+      expect(doc?.migration_id).toBe(migrationId);
+      expect(doc?.status).toBe('pending');
+      expect(doc?.original_dashboard).toMatchObject({
+        id: defaultOriginalDashboardExports.result.id,
+        title: defaultOriginalDashboardExports.result.label,
+        description: defaultOriginalDashboardExports.result.description,
+        data: defaultOriginalDashboardExports.result['eai:data'],
+        format: 'xml',
+        vendor: 'splunk',
+        last_updated: defaultOriginalDashboardExports.result.updated,
+        vendor_properties: {
+          app: defaultOriginalDashboardExports.result['eai:acl.app'],
+          owner: defaultOriginalDashboardExports.result['eai:acl.owner'],
+          sharing: defaultOriginalDashboardExports.result['eai:acl.sharing'],
+        },
       });
     });
   });

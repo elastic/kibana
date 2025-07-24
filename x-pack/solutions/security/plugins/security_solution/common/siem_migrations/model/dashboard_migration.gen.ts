@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
  * The last execution of the dashboard migration task.
@@ -82,42 +83,48 @@ export const DashboardMigration = z
   .merge(DashboardMigrationData);
 
 /**
- * The raw dashboard object.
+ * Additional properties specific to the vendor
  */
-export type RawDashboard = z.infer<typeof RawDashboard>;
-export const RawDashboard = z.object({
+export type OriginalDashboardVendorProperties = z.infer<typeof OriginalDashboardVendorProperties>;
+export const OriginalDashboardVendorProperties = SplunkOriginalDashboardProperties;
+
+/**
+ * The raw dashboard object from different vendors
+ */
+export type OriginalDashboard = z.infer<typeof OriginalDashboard>;
+export const OriginalDashboard = z.object({
   /**
-   * The dashboard ID.
+   * The unique identifier for the dashboard
    */
   id: z.string(),
   /**
-   * The dashboard label.
+   * The vendor of the dashboard (e.g., 'splunk')
    */
-  label: z.string(),
+  vendor: z.string(),
   /**
-   * The dashboard title.
+   * The title of the dashboard
    */
   title: z.string(),
   /**
-   * The raw XML data of the dashboard.
+   * The description of the dashboard
    */
-  xml: z.string(),
+  description: z.string(),
   /**
-   * The app associated with the EAI ACL.
+   * The data of the dashboard, typically in JSON format
    */
-  app: z.string(),
+  data: z.object({}),
   /**
-   * The sharing level of the EAI ACL.
+   * The last updated timestamp of the dashboard
    */
-  sharing: z.string(),
+  last_updated: z.string(),
   /**
-   * The owner of the EAI ACL.
+   * The format of the dashboard (e.g., 'json', 'xml')
    */
-  owner: z.string(),
+  format: z.string(),
   /**
-   * The last updated timestamp of the dashboard.
+   * Additional properties specific to the vendor
    */
-  updated: z.string(),
+  vendor_properties: OriginalDashboardVendorProperties.optional(),
 });
 
 /**
@@ -148,7 +155,7 @@ export const DashboardMigrationDashboardData = z.object({
   /**
    * The original rule to migrate.
    */
-  raw: RawDashboard,
+  original_dashboard: OriginalDashboard,
   /**
    * The status of the rule migration process.
    */

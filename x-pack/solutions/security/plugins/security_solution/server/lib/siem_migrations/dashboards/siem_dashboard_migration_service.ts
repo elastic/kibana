@@ -42,11 +42,7 @@ export class SiemDashboardMigrationsService {
 
   constructor(logger: LoggerFactory, kibanaVersion: string, elserInferenceId?: string) {
     this.logger = logger.get('siemDashboardMigrations');
-    this.dataService = new DashboardMigrationsDataService(
-      this.logger,
-      kibanaVersion,
-      elserInferenceId
-    );
+    this.dataService = new DashboardMigrationsDataService(this.logger, kibanaVersion);
   }
 
   setup({ esClusterClient, ...params }: SiemDashboardsMigrationsSetupParams) {

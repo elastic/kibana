@@ -41,7 +41,7 @@ export interface SetupParams extends Omit<InstallParams, 'logger'> {
 export class DashboardMigrationsDataService extends SiemMigrationsBaseDataService {
   private readonly adapters: DashboardMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
+  constructor(private logger: Logger, protected kibanaVersion: string) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createDashboardIndexPatternAdapter({
@@ -52,18 +52,6 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
         adapterId: 'dashboards',
         fieldMap: dashboardMigrationsDashboardsFieldMap,
       }),
-      // resources: this.createDashboardIndexPatternAdapter({
-      //   adapterId: 'resources',
-      //   fieldMap: ruleMigrationResourcesFieldMap,
-      // }),
-      // integrations: this.createDashboardIndexAdapter({
-      //   adapterId: 'integrations',
-      //   fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
-      // }),
-      // prebuiltrules: this.createDashboardIndexAdapter({
-      //   adapterId: 'prebuiltrules',
-      //   fieldMap: getPrebuiltDashboardsFieldMap({ elserInferenceId }),
-      // }),
     };
   }
 
@@ -77,11 +65,6 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
   }: CreateDashboardAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
     return this.createIndexPatternAdapter({ name, fieldMap });
-  }
-
-  private createDashboardIndexAdapter({ adapterId, fieldMap }: CreateDashboardAdapterParams) {
-    const name = this.getAdapterIndexName(adapterId);
-    return this.createIndexAdapter({ name, fieldMap });
   }
 
   private async install(params: SetupParams): Promise<void> {

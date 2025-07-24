@@ -32,17 +32,16 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateDashboardMigrationDashboardsRequestBody),
             params: buildRouteValidationWithZod(CreateDashboardMigrationDashboardsRequestParams),
+            body: buildRouteValidationWithZod(CreateDashboardMigrationDashboardsRequestBody),
           },
         },
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<undefined>> => {
         const { migration_id: migrationId } = req.params;
-        const rawDashboards = req.body;
-        logger.warn(JSON.stringify(rawDashboards, null, 2));
-        const rawDashboardsCount = rawDashboards.length;
-        if (rawDashboardsCount === 0) {
+        const originalDashboardsExport = req.body;
+        const originalDashboardsCount = originalDashboardsExport.length;
+        if (originalDashboardsCount === 0) {
           return res.badRequest({
             body: `No dashboards provided for migration ID ${migrationId}. Please provide at least one dashboard.`,
           });
@@ -50,7 +49,10 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
         try {
           const ctx = await context.resolve(['securitySolution']);
           const dashboardMigrationsClient = ctx.securitySolution.getSiemDashboardMigrationsClient();
-          await dashboardMigrationsClient.data.dashboards.create(migrationId, rawDashboards);
+          await dashboardMigrationsClient.data.dashboards.create(
+            migrationId,
+            originalDashboardsExport
+          );
           return res.ok();
         } catch (error) {
           return res.badRequest({

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-export const defaultRawDashboard = {
-  id: 'https://127.0.0.1:8089/servicesNS/nobody/system/data/ui/views/_admin',
-  label: 'Internal Admin Nav',
-  title: '_admin',
-  xml: '<view isVisible="false" >\n  <label>Internal Admin Nav</label>\n  <module name="Message" layoutPanel="messaging">\n    <param name="filter">*</param>\n    <param name="clearOnJobDispatch">False</param>\n    <param name="maxSize">1</param>\n  </module>\n  <module name="AccountBar" layoutPanel="appHeader">\n    <param name="mode">lite</param>\n  </module>\n  <module name="LiteBar" layoutPanel="liteHeader"></module>\n</view>',
-  app: 'system',
-  sharing: 'system',
-  owner: 'nobody',
-  updated: '1970-01-01T00:00:00+00:00',
+export const defaultOriginalDashboardExports = {
+  preview: false,
+  result: {
+    id: 'https://127.0.0.1:8089/servicesNS/nobody/SplunkEnterpriseSecuritySuite/data/ui/views/access_analyzer',
+    label: 'Access Analyzer',
+    title: 'access_analyzer',
+    description: 'Description of Access Analyzer',
+    'eai:data':
+      '<view template="SplunkEnterpriseSecuritySuite:/templates/udf_generic.html" type="html">\n  <label>Access Analyzer</label>\n  <description>Description of Access Analyzer</description>\n</view>',
+    'eai:acl.app': 'SplunkEnterpriseSecuritySuite',
+    'eai:acl.sharing': 'global',
+    'eai:acl.owner': 'nobody',
+    updated: '2025-07-23T14:33:10+00:00',
+  },
 };

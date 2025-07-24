@@ -5,9 +5,21 @@
  * 2.0.
  */
 
+import type {
+  AggregationsMaxAggregate,
+  AggregationsMinAggregate,
+  AggregationsStringTermsAggregate,
+  AggregationsStringTermsBucket,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
-import type { RawDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import {
+  DashboardMigrationTaskStatusEnum,
+  type DashboardMigrationDashboard,
+  type DashboardMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
@@ -15,21 +27,34 @@ const BULK_MAX_SIZE = 500 as const;
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
-  async create(migrationId: string, rawDashboards: RawDashboard[]): Promise<void> {
+  async create(migrationId: string, rawDashboards: SplunkOriginalDashboardExport[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let rawDashboardMaxBatch: RawDashboard[];
+    let rawDashboardMaxBatch: SplunkOriginalDashboardExport[];
     const createdAt = new Date().toISOString();
     while ((rawDashboardMaxBatch = rawDashboards.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
-        .bulk({
+        .bulk<DashboardMigrationDashboard>({
           refresh: 'wait_for',
-          operations: rawDashboardMaxBatch.flatMap((rawDashboard) => [
+          operations: rawDashboardMaxBatch.flatMap(({ result: { ...rawDashboard } }) => [
             { create: { _index: index } },
             {
               migration_id: migrationId,
-              raw: rawDashboard,
+              original_dashboard: {
+                id: rawDashboard.id,
+                title: rawDashboard.label ?? rawDashboard.title,
+                description: rawDashboard.description,
+                data: rawDashboard?.['eai:data'],
+                format: 'xml',
+                vendor: 'splunk',
+                last_updated: rawDashboard.updated,
+                vendor_properties: {
+                  app: rawDashboard['eai:acl.app'],
+                  owner: rawDashboard['eai:acl.owner'],
+                  sharing: rawDashboard['eai:acl.sharing'],
+                },
+              },
               '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
               created_by: profileId,
@@ -45,5 +70,56 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
           throw error;
         });
     }
+  }
+
+  async getStats(migrationId: string): Promise<Omit<DashboardMigrationTaskStats, 'name'>> {
+    const index = await this.getIndexName();
+
+    const migrationIdFilter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+    const query = {
+      bool: {
+        filter: migrationIdFilter,
+      },
+    };
+    const aggregations = {
+      status: { terms: { field: 'status' } },
+      createdAt: { min: { field: '@timestamp' } },
+      lastUpdatedAt: { max: { field: 'updated_at' } },
+    };
+    const result = await this.esClient
+      .search({ index, query, aggregations, _source: false })
+      .catch((error) => {
+        this.logger.error(`Error getting rule migrations stats: ${error.message}`);
+        throw error;
+      });
+
+    const aggs = result.aggregations ?? {};
+
+    return {
+      id: migrationId,
+      dashboards: {
+        total: this.getTotalHits(result),
+        ...this.statusAggCounts(aggs.status as AggregationsStringTermsAggregate),
+      },
+      created_at: (aggs.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
+      last_updated_at: (aggs.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
+      status: DashboardMigrationTaskStatusEnum.ready,
+    };
+  }
+
+  private statusAggCounts(
+    statusAgg: AggregationsStringTermsAggregate
+  ): Record<SiemMigrationStatus, number> {
+    const buckets = statusAgg.buckets as AggregationsStringTermsBucket[];
+    return {
+      [SiemMigrationStatus.PENDING]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.PENDING)?.doc_count ?? 0,
+      [SiemMigrationStatus.PROCESSING]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.PROCESSING)?.doc_count ?? 0,
+      [SiemMigrationStatus.COMPLETED]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.COMPLETED)?.doc_count ?? 0,
+      [SiemMigrationStatus.FAILED]:
+        buckets.find(({ key }) => key === SiemMigrationStatus.FAILED)?.doc_count ?? 0,
+    };
   }
 }

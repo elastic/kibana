@@ -107,8 +107,8 @@ paths:
             schema:
               type: array
               items:
-                description: List of RAW Dashboards to be added to the migration
-                $ref: '../../dashboard_migration.schema.yaml#/components/schemas/RawDashboard'
+                description: List of Original Dashboards to be added to the migration
+                $ref: '../../vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardExport'
       responses:
         200:
           description: Indicates rules have been added to the migration successfully.

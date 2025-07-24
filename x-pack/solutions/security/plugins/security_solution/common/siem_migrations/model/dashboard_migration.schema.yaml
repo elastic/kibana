@@ -79,7 +79,7 @@ components:
       required:
         - '@timestamp'
         - migration_id
-        - raw
+        - original_dashboard
         - status
         - created_by
       properties:
@@ -92,9 +92,9 @@ components:
         created_by:
           description: The user profile ID of the user who created the migration.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        raw:
+        original_dashboard:
           description: The original rule to migrate.
-          $ref: '#/components/schemas/RawDashboard'
+          $ref: '#/components/schemas/OriginalDashboard'
         status:
           description: The status of the rule migration process.
           $ref: '#/components/schemas/DashboardMigrationStatus'
@@ -106,45 +106,46 @@ components:
           type: string
           description: The user who last updated the migration
 
-    RawDashboard:
+    OriginalDashboard:
       type: object
-      description: The raw dashboard object.
       required:
         - id
-        - label
+        - vendor
         - title
-        - xml
-        - app
-        - sharing
-        - owner
-        - updated
+        - description
+        - data
+        - last_updated
+        - format
+      description: The raw dashboard object from different vendors
       properties:
         id:
           type: string
-          description: The dashboard ID.
-        label:
+          description: The unique identifier for the dashboard
+        vendor:
           type: string
-          description: The dashboard label.
+          description: The vendor of the dashboard (e.g., 'splunk')
         title:
           type: string
-          description: The dashboard title.
-        xml:
+          description: The title of the dashboard
+        description:
           type: string
-          description: The raw XML data of the dashboard.
-        app:
+          description: The description of the dashboard
+        data:
+          type: object
+          description: The data of the dashboard, typically in JSON format
+        last_updated:
           type: string
-          description: The app associated with the EAI ACL.
-        sharing:
+          description: The last updated timestamp of the dashboard
+        format:
           type: string
-          description: The sharing level of the EAI ACL.
-        owner:
-          type: string
-          description: The owner of the EAI ACL.
-        updated:
-          type: string
-          format: string
-          description: The last updated timestamp of the dashboard.
+          description: The format of the dashboard (e.g., 'json', 'xml')
+        vendor_properties:
+          description: Additional properties specific to the vendor
+          $ref: '#/components/schemas/OriginalDashboardVendorProperties'
 
+    OriginalDashboardVendorProperties:
+      description: Additional properties specific to the vendor
+      $ref: './vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardProperties'
 
     DashboardMigrationStatus:
       type: string

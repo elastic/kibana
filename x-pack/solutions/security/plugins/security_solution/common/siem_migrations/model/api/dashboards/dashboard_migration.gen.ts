@@ -16,12 +16,9 @@
 
 import { z } from '@kbn/zod';
 
-import {
-  DashboardMigrationTaskStats,
-  DashboardMigration,
-  RawDashboard,
-} from '../../dashboard_migration.gen';
+import { DashboardMigrationTaskStats, DashboardMigration } from '../../dashboard_migration.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 
 export type CreateDashboardMigrationRequestBody = z.infer<
   typeof CreateDashboardMigrationRequestBody
@@ -57,7 +54,7 @@ export type CreateDashboardMigrationDashboardsRequestParamsInput = z.input<
 export type CreateDashboardMigrationDashboardsRequestBody = z.infer<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
-export const CreateDashboardMigrationDashboardsRequestBody = z.array(RawDashboard);
+export const CreateDashboardMigrationDashboardsRequestBody = z.array(SplunkOriginalDashboardExport);
 export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
