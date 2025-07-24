@@ -339,6 +339,19 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           },
         },
       },
+      "mock": Object {
+        "fields": Object {
+          "mock.attr": Object {
+            "aggregatable": false,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "mock.attr",
+            "searchable": true,
+            "type": "string",
+          },
+        },
+      },
       "nestedField": Object {
         "fields": Object {
           "nestedField.firstAttributes": Object {
