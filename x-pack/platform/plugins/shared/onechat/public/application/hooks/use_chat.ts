@@ -36,7 +36,7 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
   } = useKibana();
   const [status, setStatus] = useState<ChatStatus>('ready');
   const { actions, conversationId, conversation } = useConversation();
-  const { agentId } = conversation ?? {};
+  const { agent_id: agentId } = conversation ?? {};
 
   const sendMessage = useCallback(
     (nextMessage: string) => {

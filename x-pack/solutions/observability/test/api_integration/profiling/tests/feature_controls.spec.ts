@@ -105,7 +105,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             `Endpoint: ${endpointPath}
               Status code: ${e.res.status}
               Response: ${e.res}
-    
+
               ${e.message}`
           );
         }
