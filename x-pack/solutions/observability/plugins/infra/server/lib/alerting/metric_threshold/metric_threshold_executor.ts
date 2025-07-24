@@ -27,7 +27,7 @@ import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  getEcsGroupsFromGrouping,
+  getEcsGroupsFromFlattenGrouping,
   unflattenGrouping,
   getFlattenGrouping,
   type Group,
@@ -171,9 +171,9 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
-          ...flattenAdditionalContext(additionalContext),
-          ...getEcsGroupsFromGrouping(grouping?.flatten),
           [ALERT_GROUPING]: grouping?.unflatten,
+          ...flattenAdditionalContext(additionalContext),
+          ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
         context: {
           ...contextWithoutAlertDetailsUrl,

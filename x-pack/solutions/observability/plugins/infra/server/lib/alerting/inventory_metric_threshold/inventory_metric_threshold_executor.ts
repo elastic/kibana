@@ -318,8 +318,8 @@ export const createInventoryMetricThresholdExecutor =
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
-          ...flattenAdditionalContext(additionalContext),
           [ALERT_GROUPING]: grouping,
+          ...flattenAdditionalContext(additionalContext),
         };
 
         alertsClient.setAlertData({

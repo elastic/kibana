@@ -33,7 +33,7 @@ import type {
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
 import {
-  getEcsGroupsFromGrouping,
+  getEcsGroupsFromFlattenGrouping,
   getFormattedGroups,
   unflattenGrouping,
   type Group,
@@ -194,9 +194,9 @@ export const createLogThresholdExecutor =
             [ALERT_REASON]: reason,
             [ALERT_CONTEXT]: alertContext,
             [ALERT_GROUP]: groups,
-            ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroupsFromGrouping(grouping),
             [ALERT_GROUPING]: grouping,
+            ...flattenAdditionalContext(rootLevelContext),
+            ...getEcsGroupsFromFlattenGrouping(grouping),
           };
 
           alertsClient.setAlertData({
