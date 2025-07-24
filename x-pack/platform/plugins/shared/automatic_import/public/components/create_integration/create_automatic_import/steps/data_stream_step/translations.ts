@@ -148,20 +148,42 @@ export const LOGS_SAMPLE_LABEL = i18n.translate(
   }
 );
 
-export const LOGS_SAMPLE_WARNING = i18n.translate(
-  'xpack.automaticImport.step.dataStream.logsSample.warning',
-  {
-    defaultMessage:
-      'Please note that this data will be analyzed by a third-party AI tool. Ensure that you comply with privacy and security guidelines when selecting data.',
-  }
-);
+export const LOGS_SAMPLE_WARNING = {
+  MAIN: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warning',
+    {
+      defaultMessage:
+        'Please note that this data will be analyzed by a third-party AI tool. Ensure that you comply with privacy and security guidelines when selecting data.',
+    }
+  ),
+  INFO_PRETEXT: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warningInfoPretext',
+    {
+      defaultMessage:
+        'For more information, ',
+    }),
+  INFO_LINK: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warningInfoLink',
+    {
+      defaultMessage:
+        'Refer to the documentation for supported log formats.',
+    })
+}
 
-export const LOGS_SAMPLE_DESCRIPTION = i18n.translate(
-  'xpack.automaticImport.step.dataStream.logsSample.description',
-  {
-    defaultMessage: 'Drag and drop a file or Browse files.',
-  }
-);
+export const LOGS_SAMPLE_DESCRIPTION =
+{
+  MAIN: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.description',
+    {
+      defaultMessage: 'Drag and drop a file or Browse files.',
+    }),
+  SUBTEXT: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.descriptionSubtext',
+    {
+      defaultMessage: 'Supported file types include JSON/NDJSON, CSV, ...',
+    }),
+}
+
 export const LOGS_SAMPLE_ERROR = {
   CAN_NOT_READ: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorCanNotRead', {
     defaultMessage: 'Failed to read the logs sample file',
@@ -192,6 +214,18 @@ export const LOGS_SAMPLE_ERROR = {
   NOT_OBJECT: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.errorNotObject', {
     defaultMessage: 'The logs sample file contains non-object entries',
   }),
+  DOCUMENTATION_LINK_TEXT: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.documentationLinkText',
+    {
+      defaultMessage: 'Refer to the documentation for supported log formats',
+    }
+  ),
+  HELP_TEXT_PREFIX: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.helpTextPrefix',
+    {
+      defaultMessage: 'Having issues?',
+    }
+  ),
 };
 
 export const ANALYZING = i18n.translate('xpack.automaticImport.step.dataStream.analyzing', {

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { isPlainObject } from 'lodash/fp';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
@@ -14,6 +14,7 @@ import { useActions } from '../../state';
 import type { SamplesFormat } from '../../../../../../common';
 import { partialShuffleArray } from '../../../../../../common';
 import { FRONTEND_SAMPLE_ROWS } from '../../../../../../common/constants';
+import { AUTOMATIC_IMPORT_DOCUMENTATION_URL } from '../../../../../common/constants';
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
@@ -288,19 +289,38 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
     },
     [integrationSettings, setIntegrationSettings, setIsParsing]
   );
+
+  const sampleFileErrorMessage = () => {
+    if (!sampleFileError) {
+      return null;
+    }
+    return (
+      <EuiText color="danger" size="xs">
+        <span>
+          {sampleFileError + ". " + i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX} <EuiLink
+            href={AUTOMATIC_IMPORT_DOCUMENTATION_URL}
+            target="_blank"
+            external>{i18n.LOGS_SAMPLE_ERROR.DOCUMENTATION_LINK_TEXT}</EuiLink>
+        </span>
+      </EuiText>
+    );
+  }
+
   return (
     <EuiFormRow
       label={i18n.LOGS_SAMPLE_LABEL}
-      helpText={
-        <EuiText color="danger" size="xs">
-          {sampleFileError}
-        </EuiText>
-      }
+      helpText={sampleFileErrorMessage()}
       isInvalid={sampleFileError != null}
     >
       <>
         <EuiCallOut iconType="info" color="warning">
-          {i18n.LOGS_SAMPLE_WARNING}
+          {i18n.LOGS_SAMPLE_WARNING.MAIN}
+          <EuiSpacer size="s" />
+          {i18n.LOGS_SAMPLE_WARNING.INFO_PRETEXT}
+          <EuiLink
+            href={AUTOMATIC_IMPORT_DOCUMENTATION_URL}
+            target="_blank"
+            external>{i18n.LOGS_SAMPLE_WARNING.INFO_LINK}</EuiLink>
         </EuiCallOut>
         <EuiSpacer size="s" />
 
@@ -309,7 +329,10 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           initialPromptText={
             <>
               <EuiText size="s" textAlign="center">
-                {i18n.LOGS_SAMPLE_DESCRIPTION}
+                {i18n.LOGS_SAMPLE_DESCRIPTION.MAIN}
+              </EuiText>
+              <EuiText size="xs" textAlign="center" color="subdued">
+                {i18n.LOGS_SAMPLE_DESCRIPTION.SUBTEXT}
               </EuiText>
             </>
           }
