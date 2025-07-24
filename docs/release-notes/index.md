@@ -43,31 +43,31 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Implements functionality to add observables, procedures, and custom fields to alerts for {{hive}} [#207255]({{kib-pull}}207255).
 
 **Dashboards and Visualizations**:
-* Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).
-* Adds collapsible sections to **Dashboard**. Collapsible sections allow you to group panels into logical groups, and to help your dashboards load faster by only loading their content when expanded [#220877]({{kib-pull}}220877).
+* Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This rule allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).
+* Adds collapsible sections to dashboards that allow you to group panels into logical groups. Collapsible sections also help dashboards load faster by only loading their content when expanded [#220877]({{kib-pull}}220877).
 * Adds the ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page [#201596]({{kib-pull}}201596).
 * Adds the ability to resize and move dashboard panels using a keyboard [#208286]({{kib-pull}}208286).
 * Adds a highlight effect when adding a panel to a dashboard [#223614]({{kib-pull}}223614).
 * Adds the ability to create {{esql}} controls from the dashboard **Controls** menu [#219495]({{kib-pull}}219495).
-* Adds the ability to create {{esql}} controls by typing a question mark `?` when editing an {{esql}} visualization's query [#216839]({{kib-pull}}216839).
+* Adds the ability to create {{esql}} controls by typing a question mark (`?`) when editing an {{esql}} visualization's query [#216839]({{kib-pull}}216839).
 * Allows the creation of dynamic aggregations controls for {{esql}} visualizations [#210170]({{kib-pull}}210170).
 * Improves handling of `?_tstart` and `?_tend` named parameters when the {{esql}} visualization's query includes controls [#225054]({{kib-pull}}225054).
-* Adds CRUD API routes for **Lens** [#223296]({{kib-pull}}223296).
-* The **Color Mapping** feature is now GA. Previous **Lens** palette definitions are deprecated and will continue to function normally with no visual change to existing visualizations. Toggling off legacy mode will replace the palette with an equivalent color mapping configuration [#220296]({{kib-pull}}220296).
-* Adds "Compare to" badge for Metric charts in **Lens** [#214811]({{kib-pull}}214811).
-* Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning. [#210579]({{kib-pull}}210579).
-* Enables read-only editor mode to inspect a panel's configuration in **Lens** [#208554]({{kib-pull}}208554).
-* Adds a **Point visibility** option to Area and Line charts in **Lens** [#222187]({{kib-pull}}222187).
-* Adds a setting to control the data table density in **Lens** [#220252]({{kib-pull}}220252).
-* When clicking "Open in Lens" from a visualization, **Lens** now opens in the same tab [#217528]({{kib-pull}}217528).
-* Adds the ability to open links from **Vega** visualizations in a new tab by specifying the `"target": "_blank"` option for the `usermeta.embedOptions.loader` property of the Vega chart configuration [#216200]({{kib-pull}}216200).
-* Adds globe projection improvements to **Maps** [#212437]({{kib-pull}}212437).
-* Keeps the chart configuration when possible after editing the {{esql}} visualization's query [#210780]({{kib-pull}}210780).
+* Adds CRUD API routes for Lens [#223296]({{kib-pull}}223296).
+* The **Color Mapping** feature is now GA. Previous Lens palette definitions are deprecated and will continue to function normally with no visual change to existing visualizations. Toggling off legacy mode will replace the palette with an equivalent color mapping configuration [#220296]({{kib-pull}}220296).
+* Adds **Compare to** badge for Metric charts in Lens [#214811]({{kib-pull}}214811).
+* Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning [#210579]({{kib-pull}}210579).
+* Enables read-only editor mode to inspect a panel's configuration in Lens [#208554]({{kib-pull}}208554).
+* Adds a **Point visibility** option to Area and Line charts in Lens [#222187]({{kib-pull}}222187).
+* Adds a setting to control the data table density in Lens [#220252]({{kib-pull}}220252).
+* Opens Lens in the same tab when you select **Open in Lens** on a visualization [#217528]({{kib-pull}}217528).
+* Adds the ability to open links from Vega visualizations in a new tab by specifying the `"target": "_blank"` option for the `usermeta.embedOptions.loader` property of the Vega chart configuration [#216200]({{kib-pull}}216200).
+* Adds globe projection improvements to Maps [#212437]({{kib-pull}}212437).
+* When possible, keeps the chart configuration after editing an {{esql}} visualization's query [#210780]({{kib-pull}}210780).
 
 **Data ingestion and Fleet**:
 * Adds support for bulk agent migration using the **Bulk actions** menu in the agent list table [#224334]({{kib-pull}}224334).
-* Enables the **Tabular integrations** UI feature flag [#222842]({{kib-pull}}222842).
-* Adds support for single agent migration using the **Actions** menu in {{fleet}}. Users can provide a remote cluster URL and enrollment token, and customize parameters for the migration [#222111]({{kib-pull}}222111).
+* Enables the `Tabular integrations` UI feature flag [#222842]({{kib-pull}}222842).
+* Adds support for single agent migration using the **Actions** menu in {{fleet}}. Users can provide a remote cluster URL and enrollment token, as well as customize parameters for the migration [#222111]({{kib-pull}}222111).
 * Adds an API endpoint to migrate a single agent to another cluster using a URL and enrollment token. Tamper-protected and {{fleet}}-managed agents are not supported and return a `403` response if attempted [#220601]({{kib-pull}}220601).
 * Adds a new integration flyout component [#220229]({{kib-pull}}220229).
 * Enables the `enableSyncIntegrationsOnRemote` feature flag [#220215]({{kib-pull}}220215).
@@ -91,14 +91,14 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 
 **Discover**:
 * Adds an **Attributes** tab to the document viewer when exploring OTel documents in the Observability solution view [#222391]({{kib-pull}}222391).
-* When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown [#219027]({{kib-pull}}219027).
+* Shows any available results when an ES|QL query times out as a result of the `search:timeout` advanced setting [#219027]({{kib-pull}}219027).
 * Adds click actions for Stacktrace and Degraded Fields when exploring logs in Discover [#214413]({{kib-pull}}214413).
-* Shows a **Load more** option instead of pagination when exploring Logs in **Discover** [#211176]({{kib-pull}}211176).
-* Expands the {{esql}} editor to fit the query size automatically when loading **Discover** [#225509]({{kib-pull}}225509).
-* Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value [#220624]({{kib-pull}}220624).
+* Shows a **Load more** option instead of pagination when exploring Logs in Discover [#211176]({{kib-pull}}211176).
+* Expands the {{esql}} editor to fit the query size automatically when loading Discover [#225509]({{kib-pull}}225509).
+* Hides the **Selected only** toggle in pages that don't support filtering by value [#220624]({{kib-pull}}220624).
 * Adds a **Copy value** button to field value cells in the Document viewer [#218817]({{kib-pull}}218817).
-* Adds a warning and a tooltip for explaining the `_score` column in **Discover** [#211013]({{kib-pull}}211013).
-* Adds support for `command`/`ctrl` + click to open new Discover sessions in a separate tab, for example allowing to conduct simultaneous searches in parallel more efficiently [#210982]({{kib-pull}}210982).
+* Adds a warning and a tooltip for explaining the `_score` column in Discover [#211013]({{kib-pull}}211013).
+* Adds support for `command`/`ctrl` + click to open new Discover sessions in a separate tab. This is useful, for example, when conducting multiple searches simultaneously [#210982]({{kib-pull}}210982).
 * Improves the **Display options** menu layout [#210180]({{kib-pull}}210180).
 * Updates styles for Color formatter to look like badges [#189391]({{kib-pull}}189391).
 
@@ -115,7 +115,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds autocomplete suggestions for `STATS...WHERE` [#216379]({{kib-pull}}216379).
 * Enables suggestions for the `CHANGE_POINT` command [#218100]({{kib-pull}}218100).
 * Adds validation and autocomplete support for the `CHANGE_POINT` command [#216043]({{kib-pull}}216043).
-* Adds highlighting to code examples in the in-product documentation [#214915]({{kib-pull}}214915).
+* Highlights code examples in the in-product documentation [#214915]({{kib-pull}}214915).
 * Suggests triple quotes when using `KQL` and `QSTR` functions [#211457]({{kib-pull}}211457).
 
 **Elastic Observability solution**:
@@ -126,8 +126,8 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 
 **Kibana platform**:
 * Adds an option to User Settings that allows displaying the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
-* Adds an unused "URL" saved objects cleanup task to reduce upgrade downtime [#220138]({{kib-pull}}220138).
-* Adds a `defaultSolution` setting to spaces configuration to allow starting Kibana with its default space set to specific solution view [#218360]({{kib-pull}}218360).
+* Adds an unused URL saved objects cleanup task to reduce upgrade downtime [#220138]({{kib-pull}}220138).
+* Adds a `defaultSolution` setting to spaces configuration so that you can start Kibana with its default space set to a specific solution view [#218360]({{kib-pull}}218360).
 * Kibana logging's pattern layout, used by default for the console appender, will now use a new default pattern layout: `[%date][%level][%logger] %message %error`. This includes the error name and stack trace if these were included in the log entry. To opt out of this behavior, you can omit the `%error` placeholder from your log pattern configuration in `kibana.yml` [#219940]({{kib-pull}}219940). For example: 
 
 ```yml
@@ -143,7 +143,7 @@ logging:
 **Machine Learning**:
 * Moves job and trained model management features into Stack Management [#204290]({{kib-pull}}204290).
 * Updates NL-2-ESQL docs [#224868]({{kib-pull}}224868).
-* Hides Adaptive Allocations Toggle in Serverless [#224097]({{kib-pull}}224097).
+* Hides the **Adaptive Allocations** toggle in Serverless [#224097]({{kib-pull}}224097).
 * Adds rare scripts job to preconfigured Security:Windows anomaly detection jobs [#223041]({{kib-pull}}223041).
 * Adds new subAction for converse and converseStream for Bedrock [#223033]({{kib-pull}}223033).
 * Adds a recommended query for the `CATEGORIZE` function in {{esql}} [#222871]({{kib-pull}}222871).
@@ -162,9 +162,9 @@ logging:
 
 
 **Search solution**:
-* Adds a section that enables adding, updating, and deleting query rules written on top of the Query Rules APIs to pin or exclude documents to a query according to criteria you set. [#227226]({{kib-pull}}227226).
+* Adds a section that enables adding, updating, and deleting query rules written on top of the Query Rules APIs to pin or exclude documents according to criteria you set. [#227226]({{kib-pull}}227226).
 * Adds a **Home** page dedicated to the Elasticsearch solution to Classic and Elasticsearch solution views [#225162]({{kib-pull}}225162).
-* Updates the navigation items available for the Elasticsearch solution view and Elasticsearch section of the Classic view [#224755]({{kib-pull}}224755).
+* Updates the navigation items available for the Elasticsearch solution view and the Elasticsearch section of the Classic view [#224755]({{kib-pull}}224755).
 
 **Sharing**:
 * Adds the ability to switch between relative and absolute time range when sharing objects [#218056]({{kib-pull}}218056).
@@ -175,27 +175,27 @@ logging:
 * Fixes a regression that caused the cases actions to disappear from the Alerts table **Bulk actions** menu [#215111]({{kib-pull}}215111).
 
 **Dashboards and Visualizations**:
-* Forwards the secondary prefix correctly when the state value is an empty string (`None` option) in **Lens** [#228183]({{kib-pull}}228183).
-* Fixes an issue where a **Lens** Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette [#228051]({{kib-pull}}228051).
+* Forwards the secondary prefix correctly when the state value is an empty string (`None` option) in Lens [#228183]({{kib-pull}}228183).
+* Fixes an issue where a Lens Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette [#228051]({{kib-pull}}228051).
 * Fixes an accessibility issue where dashboard controls should be grouped as a labelled list [#227633]({{kib-pull}}227633).
 * Fixes incorrectly disabled range slider tooltip and moves the **Delete control** button to be more visible [#227295]({{kib-pull}}227295).
-* Fixes secondary metric styles to prevent wrapping in **Lens** [#227234]({{kib-pull}}227234).
+* Fixes secondary metric styles to prevent wrapping in Lens [#227234]({{kib-pull}}227234).
 * Keeps the **Save** button enabled in case of save error [#227091]({{kib-pull}}227091).
 * Hides the **Select All** checkbox from single select controls [#226311]({{kib-pull}}226311).
 * Removes `kebab-case` warnings [#226114]({{kib-pull}}226114).
 * Fixes an issue with dashboards not saving due to exceptionally high number of references in the request payload [#225908]({{kib-pull}}225908).
-* Prevents Dashboard from recommending adhoc data views [#225705]({{kib-pull}}225705).
+* Prevents dashboards from recommending adhoc data views [#225705]({{kib-pull}}225705).
 * Prevents Lens Embeddable `defaultTitle` from being overwritten with a custom title after reload [#225664]({{kib-pull}}225664).
-* Fixes panel title synchronization with corresponding saved object when using `defaultTitle` [#225237]({{kib-pull}}225237).
+* Fixes panel title synchronization with the corresponding saved object when using `defaultTitle` [#225237]({{kib-pull}}225237).
 * Fixes visual issues causing labels to be truncated [#225430]({{kib-pull}}225430).
-* Refreshes "Values from a query" options for {{esql}} controls on dashboard reload [#225101]({{kib-pull}}225101).
+* Refreshes **Values from a query** options for {{esql}} controls on dashboard reload [#225101]({{kib-pull}}225101).
 * Fixes an issue with calculating the query for retrieving {{esql}} control values [#214905]({{kib-pull}}214905).
 * Fixes an issue with the {{esql}} **Create control** suggestions not triggering if the query already contained a control [#214833]({{kib-pull}}214833).
 * Fixes the visibility of the date picker when writing {{esql}} visualization queries [#214728]({{kib-pull}}214728).
 * Fixes a performance issue with {{esql}} visualizations in case of errors in the query [#225067]({{kib-pull}}225067).
 * Fixes dashboard control value changes causing multiple fetches [#224761]({{kib-pull}}224761).
-* Fixes an issue in **Lens** where reordering the groups within a layer would incorrectly assign the color mapping to a group other than the first [#215426]({{kib-pull}}215426).
-* Fixes invalid dashboard displayed as 404 instead of showing validation error [#211661]({{kib-pull}}211661).
+* Fixes an issue in Lens where reordering the groups within a layer would incorrectly assign the color mapping to a group other than the first [#215426]({{kib-pull}}215426).
+* Fixes invalid dashboard being displayed as 404 instead of showing a validation error [#211661]({{kib-pull}}211661).
 * Fixes an issue where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations [#207957]({{kib-pull}}207957).
 
 **Data ingestion and Fleet**:
@@ -214,18 +214,18 @@ logging:
 
 **Discover**:
 * Fixes an issue where an {{esql}} query was overwritten when edited while the previous request was still running [#224671]({{kib-pull}}224671).
-* Fixes invalid input highlight in **Data View** flyout [#226822]({{kib-pull}}226822).
-* Fixes an issue causing **Discover** to freeze when dragging & dropping columns with animations disabled [#226592]({{kib-pull}}226592).
+* Fixes invalid input highlight in the **Data View** flyout [#226822]({{kib-pull}}226822).
+* Fixes an issue causing Discover to freeze when dragging and dropping columns with animations disabled [#226592]({{kib-pull}}226592).
 * Fixes row highlighting when reordering columns [#226584]({{kib-pull}}226584).
-* Fixes an issue causing an error when updating then deleting a saved query [#226569]({{kib-pull}}226569).
+* Fixes error appearing when updating and then deleting a saved query [#226569]({{kib-pull}}226569).
 * Fixes a cell value alignment issue for aggregate metric fields [#226562]({{kib-pull}}226562).
 * Adds missing information icon to the document viewer table [#222299]({{kib-pull}}222299).
-* Fixes an issue incorrectly showing the *unmapped* icon when a field changed from unmapped to mapped [#221308]({{kib-pull}}221308).
-* Fixes the parsing of index patterns in the **Inspect** feature of Kibana. Previously, certain index pattern strings were not being parsed and displayed correctly in the **Inspect** feature [#221084]({{kib-pull}}221084).
-* Fixes an issue that causes redirects from the deprecated **Logs Stream** and **Logs Explorer** routes to **Discover** to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
+* Fixes an issue incorrectly showing the unmapped icon when a field changed from unmapped to mapped [#221308]({{kib-pull}}221308).
+* Fixes the parsing of index patterns in Kibana's **Inspect** feature. Previously, certain index pattern strings were not being parsed and displayed correctly [#221084]({{kib-pull}}221084).
+* Fixes an issue that causes redirects from the deprecated **Logs Stream** and **Logs Explorer** routes to Discover to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
 * Excludes only {{es}} metadata fields from the Summary column instead of all fields starting with `_` [#213255]({{kib-pull}}213255).
-* Fixes inability to clear Document ID in data view field editor preview [#220891]({{kib-pull}}220891).
-* Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
+* Fixes inability to clear the **Document ID** in data view field editor preview [#220891]({{kib-pull}}220891).
+* Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with Discover features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
 
 **{{esql}} editor**:
 * Fixes wrong validation on expressions between aggregations [#227989]({{kib-pull}}227989).
@@ -257,17 +257,17 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 
 **Machine Learning**:
 * Fixes unknown fields not supported in Data Visualizer and Field Statistics [#223903]({{kib-pull}}223903).
-* Fixes overflow of cards in Machine Learning Overview page [#223431]({{kib-pull}}223431).
-* Fixes 'Use full data' button issue which could cause page to crash [#217291]({{kib-pull}}217291).
+* Fixes overflow of cards in the Machine Learning **Overview** page [#223431]({{kib-pull}}223431).
+* Fixes an issue with the **Use full data** button that was causing the page to crash [#217291]({{kib-pull}}217291).
 * Fixes permission to view ML nodes [#215503]({{kib-pull}}215503).
 * Fixes chart in single metric anomaly detection wizard [#214837]({{kib-pull}}214837).
-* Prevents multiple clicks in the Delete Model dialog [#211580]({{kib-pull}}211580).
+* Prevents multiple clicks in the **Delete Model** dialog [#211580]({{kib-pull}}211580).
 * Fixes further deployment of models after a failed deployment [#211459]({{kib-pull}}211459).
-* AIOps Hides saved query controls [#210556]({{kib-pull}}210556).
+* Allows hiding the **Load query** and **Save query** options in the query bar menu on AIOps pages [#210556]({{kib-pull}}210556).
 
 **Management**:
-* Fixes spaces search functionality for spaces created with avatar type as image [#220398]({{kib-pull}}220398).
-* Fixes flyout styling issues in data views **Edit** flyout [#228078]({{kib-pull}}228078).
+* Fixes the search functionality for spaces created with an image as their avatar type [#220398]({{kib-pull}}220398).
+* Fixes styling issues in the **Edit data view** flyout [#228078]({{kib-pull}}228078).
 
 **Search**:
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
@@ -436,7 +436,7 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
 * Alerting rules:
   * Adds the reason message to the rules recovery context [#211411]({{kib-pull}}211411).
 * SLOs:
-  * Split Up SLO Details from Overview. Static data that describes the SLO definition has been moved to a separate tab, making charts and valuable information about SLIs faster to access. [#212826]({{kib-pull}}212826).
+  * Splits Up SLO Details from Overview. Static data that describes the SLO definition has been moved to a separate tab, making charts and valuable information about SLIs faster to access. [#212826]({{kib-pull}}212826).
   * SpaceId can now be referenced in document-based access filters for roles to restrict a user's access to SLI data for spaces where they do not have access [#214278]({{kib-pull}}214278).
   * Adds a link to the location badge on synthetics SLOs that sends to the Monitors page with a filter applied that matches the location of the origin SLO [#210695]({{kib-pull}}210695).
 * Synthetics:
