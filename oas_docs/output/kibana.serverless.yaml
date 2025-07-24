@@ -11155,6 +11155,45 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/delete:
+    delete:
+      operationId: DeleteMonitoringEngine
+      parameters:
+        - description: Whether to delete all the privileged user data
+          in: query
+          name: data
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                required:
+                  - deleted
+          description: Successful response
+      summary: Delete the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
+      operationId: DisableMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Disable the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
       operationId: InitMonitoringEngine
@@ -11187,7 +11226,7 @@ paths:
                       - status
                   status:
                     oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                       - enum:
                           - not_found
                         type: string
@@ -67516,10 +67555,19 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
       required:
         - type
         - status
+    Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+        - disabled
+      type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object
       properties:
