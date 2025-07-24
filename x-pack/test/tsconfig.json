@@ -35,7 +35,6 @@
     "@kbn/infra-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
-    "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
@@ -52,7 +51,6 @@
     "@kbn/test-subj-selector",
     "@kbn/rison",
     "@kbn/data-views-plugin",
-    "@kbn/datemath",
     "@kbn/es-archiver",
     "@kbn/es-query",
     "@kbn/core-http-common",
@@ -69,6 +67,5 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
-    "@kbn/uptime-plugin",
   ]
 }
