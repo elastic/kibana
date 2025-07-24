@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ingestTestDataHook } from './data_ingestion';
-export { ingestSynthtraceDataHook } from './synthtrace_ingestion';
+require('../src/setup_node_env');
+require('@kbn/validate-oas');
