@@ -82,7 +82,7 @@ export function updateGlobalNavigation({
       ? ['sideNav', 'home', 'kibanaOverview']
       : [];
 
-    if (isCompleteOverviewEnabled) {
+    if (isCompleteOverviewEnabled && someVisible) {
       visibleIn.push('globalSearch');
     }
 
