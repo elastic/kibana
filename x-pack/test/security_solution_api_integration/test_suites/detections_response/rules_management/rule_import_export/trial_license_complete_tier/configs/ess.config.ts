@@ -37,7 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     mochaReporter: {
       ...functionalConfig.get('mochaReporter'),
-      captureLogOutput: true,
+      captureLogOutput: false,
       sendToCiStats: true,
     },
   };
