@@ -34,6 +34,7 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { visualizeStyle } from '../../vis.styles';
 
 const flexParentStyle = css({
   flex: '1 1 auto',
@@ -70,6 +71,30 @@ const visEditorCommonStyles = {
     z-index: 0;
     ${flexParentStyle};
   `,
+  visType: (euiThemeContext: UseEuiTheme) =>
+    css({
+      '&.visEditor--timelion': {
+        '.visEditorSidebar__timelionOptions': {
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        },
+      },
+      '&.visEditor--vega': {
+        '.visEditorSidebar__config': {
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden',
+
+          minHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+
+          [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+            maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+          },
+        },
+      },
+    }),
 };
 
 interface VisualizeEditorCommonProps {
@@ -176,7 +201,7 @@ export const VisualizeEditorCommon = ({
   return (
     <div
       className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
-      css={styles.base}
+      css={[styles.base, styles.visType]}
     >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
@@ -243,7 +268,7 @@ export const VisualizeEditorCommon = ({
       <div
         className={isChromeVisible ? 'visEditor__content' : 'visualize'}
         ref={visEditorRef}
-        css={isChromeVisible && styles.content}
+        css={isChromeVisible ? styles.content : visualizeStyle}
       />
     </div>
   );
