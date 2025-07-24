@@ -927,7 +927,7 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '42'
+            '43'
           );
         });
 
