@@ -36,7 +36,10 @@ export function combineAndSortSavedObjects<T>(
         aValue = aRaw;
         bValue = bRaw;
       } else {
-        // fallback: convert to string and compare
+        // fallback: null/undefined always last in asc, first in desc
+        if (aRaw == null && bRaw == null) return 0;
+        if (aRaw == null) return sortOrder === 'desc' ? -1 : 1;
+        if (bRaw == null) return sortOrder === 'desc' ? 1 : -1;
         aValue = String(aRaw).toLowerCase();
         bValue = String(bRaw).toLowerCase();
       }

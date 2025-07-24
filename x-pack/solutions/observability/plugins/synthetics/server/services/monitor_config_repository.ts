@@ -33,7 +33,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
-import { combineAndSortSavedObjects } from '../utils/combine_and_sort_saved_objects';
+import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -265,13 +265,11 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
-    // Calculate how many extra pages to fetch
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;
     // fetch all possible monitors, sort locally since we can't sort across multiple types yet
     const maximumPageSize = 10_000;
 
-    // Fetch extra pages from both sources
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
