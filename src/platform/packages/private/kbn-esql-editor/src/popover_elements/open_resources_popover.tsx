@@ -198,54 +198,57 @@ export const useResourcesCommand = (
     [editorModel, editorRef, openPopover, query.esql]
   );
 
-  function ResourcesPopover() {
-    const handleKeydown = useCallback((e: KeyboardEvent) => {
-      if (
-        e.key === 'Escape' &&
-        resourcesOpenStatusRef.current &&
-        popoverRef.current &&
-        popoverRef.current.contains(document.activeElement)
-      ) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        setPopoverPosition({});
-        resourcesOpenStatusRef.current = false;
-      }
-    }, []);
+  const MemoizedResourcesPopover = useMemo(() => {
+    function ResourcesPopoverInner() {
+      const handleKeydown = useCallback((e: KeyboardEvent) => {
+        if (
+          e.key === 'Escape' &&
+          resourcesOpenStatusRef.current &&
+          popoverRef.current &&
+          popoverRef.current.contains(document.activeElement)
+        ) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          setPopoverPosition({});
+          resourcesOpenStatusRef.current = false;
+        }
+      }, []);
 
-    useEffect(() => {
-      document.addEventListener('keydown', handleKeydown, true);
-      return () => {
-        document.removeEventListener('keydown', handleKeydown, true);
-      };
-    }, [handleKeydown]);
+      useEffect(() => {
+        document.addEventListener('keydown', handleKeydown, true);
+        return () => {
+          document.removeEventListener('keydown', handleKeydown, true);
+        };
+      }, [handleKeydown]);
 
-    useEffect(() => {
-      if (popoverRef.current && Object.keys(popoverPosition).length > 0 && sources.length) {
-        popoverRef.current.focus();
-      }
-    }, []);
-    return (
-      <PopoverWrapper
-        position={popoverPosition}
-        popoverRef={popoverRef}
-        dataTestSubj="ESQLEditor-resources-popover"
-      >
-        <ResourcesArea
-          editorRef={editorRef}
-          editorModel={editorModel}
-          sources={sources}
-          query={query.esql}
-        />
-      </PopoverWrapper>
-    );
-  }
+      useEffect(() => {
+        if (popoverRef.current && Object.keys(popoverPosition).length > 0) {
+          popoverRef.current.focus();
+        }
+      }, []);
+      return (
+        <PopoverWrapper
+          position={popoverPosition}
+          popoverRef={popoverRef}
+          dataTestSubj="ESQLEditor-resources-popover"
+        >
+          <ResourcesArea
+            editorRef={editorRef}
+            editorModel={editorModel}
+            sources={sources}
+            query={query.esql}
+          />
+        </PopoverWrapper>
+      );
+    }
+    return React.memo(ResourcesPopoverInner);
+  }, [popoverPosition, popoverRef, sources, editorRef, editorModel, query.esql]);
 
   return {
     addResourcesDecorator,
     resourcesBadgeStyle,
     resourcesLabelClickHandler,
     resourcesLabelKeyDownHandler,
-    ResourcesPopover,
+    ResourcesPopover: MemoizedResourcesPopover,
   };
 };

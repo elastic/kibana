@@ -36,12 +36,13 @@ export function PopoverWrapper({
               position: 'absolute',
               overflowY: 'auto',
               maxHeight: '400px',
+              outline: 'none',
               zIndex: 1001,
               border: theme.euiTheme.border.thin,
             }}
             ref={popoverRef}
             data-test-subj={dataTestSubj}
-            tabIndex={0} // Make the popover div focusable
+            tabIndex={-1} // Make the popover div focusable
             role="dialog" // Indicate it's a dialog for accessibility
             aria-modal="true"
           >

@@ -10,7 +10,7 @@
 /**
  * This is a temporary component to PoC the resources popover.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFieldSearch, EuiListGroup, EuiListGroupItem, EuiText } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { css } from '@emotion/react';
@@ -66,6 +66,7 @@ export function ResourcesArea({
 }) {
   const [value, setValue] = useState('');
   const [filteredSources, setFilteredSources] = useState<ESQLSourceResult[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const onChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
@@ -130,8 +131,13 @@ export function ResourcesArea({
         <strong>Data sources</strong>
       </EuiText>
       <div
+        ref={scrollContainerRef} // Attach ref to the scrollable div
         css={css`
           padding-top: 8px;
+          flex-grow: 1; // Allows it to take up remaining vertical space
+          overflow-y: auto; // Make this specific area scrollable
+          tabIndex={-1}; // Make it focusable for scroll
+          outline: none; // Remove default focus outline
         `}
       >
         <EuiFieldSearch
@@ -149,8 +155,9 @@ export function ResourcesArea({
             padding-top: 8px;
           `}
         >
-          {(filteredSources.length ? filteredSources : sources).map((source) => (
+          {(filteredSources.length ? filteredSources : sources).map((source, index) => (
             <EuiListGroupItem
+              id={source.name}
               key={source.name}
               label={source.title ?? source.name}
               isActive={query.includes(source.name)}
