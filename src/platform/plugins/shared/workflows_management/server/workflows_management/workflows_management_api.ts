@@ -18,10 +18,10 @@ import {
   UpdatedWorkflowResponseDto,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
-import { parseWorkflowYamlToJSON } from '@kbn/workflows-management-plugin/common/lib/yaml-utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '@kbn/workflows-management-plugin/common';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
