@@ -8,12 +8,9 @@
 import { CloudSetup } from '@kbn/cloud-plugin/public/types';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
-import {
-  CSPM_POLICY_TEMPLATE,
-  SUPPORTED_CLOUDBEAT_INPUTS,
-  SUPPORTED_POLICY_TEMPLATES,
-} from './constants';
+import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { AwsCredentialsType } from './aws_credentials_form/aws_types';
 import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/gcp_constants';

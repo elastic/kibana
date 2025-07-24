@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect } from 'react';
 import {
   EuiAccordion,
   EuiFieldText,
@@ -17,26 +17,16 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
-import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { assert } from '../../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../../common/types_old';
-import {
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_VULN_MGMT_AWS,
-  SUPPORTED_POLICY_TEMPLATES,
-} from '../../../../common/constants';
-import { getMaxPackageName, getVulnMgmtCloudFormationDefaultValue, isPostureInput } from '../utils';
-import { usePackagePolicyList } from '../../../common/api/use_package_policy_list';
+import { CLOUDBEAT_VULN_MGMT_AWS, SUPPORTED_POLICY_TEMPLATES } from '../../../../common/constants';
+import { getVulnMgmtCloudFormationDefaultValue, isPostureInput } from '../utils';
 import { CnvmKspmTemplateInfo } from './cnvm_kspm_info';
 import { KspmEksInputSelector } from './kspm_eks_input_selector';
 import { EksCredentialsForm } from './eks_credentials_form';
-
-const DEFAULT_INPUT_TYPE = {
-  kspm: CLOUDBEAT_VANILLA,
-  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
-} as const;
 
 interface IntegrationInfoFieldsProps {
   fields: Array<{ id: string; value: string; label: React.ReactNode; error: string[] | null }>;
@@ -57,49 +47,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
     ))}
   </div>
 );
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  integration,
-  newPolicy,
-  packagePolicyList,
-  updatePolicy,
-  setCanFetchIntegration,
-}: {
-  isEditPage: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-  setCanFetchIntegration: (canFetch: boolean) => void;
-}) => {
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-
-    const packagePolicyListByIntegration = packagePolicyList?.filter(
-      (policy) => policy?.vars?.posture?.value === integration
-    );
-
-    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
-
-    /*
-     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
-     * if policie were fetched its an array - the check will return true
-     */
-    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
-    updatePolicy(
-      {
-        ...newPolicy,
-        name: currentIntegrationName,
-      },
-      isPoliciesLoaded
-    );
-    setCanFetchIntegration(false);
-    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [integration, isEditPage, packagePolicyList]);
-};
 
 const getSelectedOption = (
   options: NewPackagePolicyInput[],
@@ -164,8 +111,6 @@ const useCloudFormationTemplate = ({
 interface CnvmKspmSetupProps {
   isEditPage: boolean;
   integrationToEnable: Extract<CloudSecurityPolicyTemplate, 'kspm' | 'vuln_mgmt'>;
-  setIsValid: (isValid: boolean) => void;
-  isLoading: boolean;
   setEnabledPolicyInput: (input: Extract<PostureInput, 'kspm' | 'vuln_mgmt'>) => void;
   updatePolicy: (policy: NewPackagePolicy) => void;
   newPolicy: NewPackagePolicy;
@@ -185,7 +130,7 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
     isEditPage,
     validationResults,
     integrationToEnable,
-    isLoading,
+    // isLoading,
     setEnabledPolicyInput,
     updatePolicy,
   }) => {
@@ -195,42 +140,9 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
         ? integrationToEnable
         : undefined;
 
-    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
-
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const { euiTheme } = useEuiTheme();
-
-    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
-      enabled: canFetchIntegration,
-    });
-
-    useEffect(() => {
-      if (isEditPage) return;
-      if (isLoading) return;
-
-      // Pick default input type for policy template.
-      // Only 1 enabled input is supported when all inputs are initially enabled.
-      // Required for mount only to ensure a single input type is selected
-      // This will remove errors in validationResults.vars
-      if (input.policy_template in DEFAULT_INPUT_TYPE) {
-        setEnabledPolicyInput(
-          // @ts-expect-error - TypeScript doesn't know that input.policy_template is a key of DEFAULT_INPUT_TYPE
-          DEFAULT_INPUT_TYPE[input.policy_template as keyof typeof DEFAULT_INPUT_TYPE]
-        );
-      }
-      refetch();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, isEditPage]);
-
-    usePolicyTemplateInitialName({
-      packagePolicyList: packagePolicyList?.items,
-      isEditPage,
-      integration: integration as CloudSecurityPolicyTemplate,
-      newPolicy,
-      updatePolicy,
-      setCanFetchIntegration,
-    });
 
     useCloudFormationTemplate({
       packageInfo,

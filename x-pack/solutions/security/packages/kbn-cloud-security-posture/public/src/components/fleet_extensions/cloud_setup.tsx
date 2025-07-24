@@ -15,12 +15,10 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/public/types';
-import type { CloudSetup as CloudSetupType } from '@kbn/cloud-plugin/public';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 // import { assert } from '../../../common/utils/helpers';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
 import {
@@ -50,6 +48,7 @@ import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
+import { useKibana } from './hooks/use_kibana';
 
 const DEFAULT_INPUT_TYPE = {
   cspm: CLOUDBEAT_AWS,
@@ -140,8 +139,6 @@ const getSelectedOption = (
 };
 
 interface CloudSetupProps {
-  cloud: CloudSetupType;
-  uiSettings: IUiSettingsClient;
   namespaceSupportEnabled?: boolean;
   isEditPage: boolean;
   newPolicy: NewPackagePolicy;
@@ -173,9 +170,8 @@ export const CloudSetup = memo<CloudSetupProps>(
     integrationToEnable,
     setIntegrationToEnable,
     namespaceSupportEnabled = false,
-    cloud,
-    uiSettings,
   }) => {
+    const { cloud, uiSettings } = useKibana().services;
     const integration =
       integrationToEnable &&
       SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
@@ -183,10 +179,10 @@ export const CloudSetup = memo<CloudSetupProps>(
         : undefined;
 
     const cloudConnectorsEnabled =
-      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+      uiSettings?.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
     const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
-    const isServerless = !!cloud.serverless.projectType;
+    const isServerless = !!cloud?.serverless?.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
@@ -208,11 +204,13 @@ export const CloudSetup = memo<CloudSetupProps>(
       [onChange]
     );
 
-    const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
-      input,
-      cloud,
-      packageInfo,
-    });
+    const cloudConnectorRemoteRoleTemplate =
+      cloud &&
+      getCloudConnectorRemoteRoleTemplate({
+        input,
+        cloud,
+        packageInfo,
+      });
 
     const showCloudConnectors =
       cloudConnectorsEnabled &&

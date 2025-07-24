@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import type { CloudPostureIntegrations } from './types';
 import googleCloudLogo from '../../assets/icons/google_cloud_logo.svg';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
@@ -15,8 +16,6 @@ import { CLOUDBEAT_GCP } from './gcp_credentials_form/gcp_constants';
 export const POSTURE_NAMESPACE = 'default';
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';
-
-export const CSPM_POLICY_TEMPLATE = 'cspm';
 
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
 export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';

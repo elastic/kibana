@@ -12,9 +12,12 @@ import type {
   RegistryPolicyTemplate,
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { merge } from 'lodash';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common/constants';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,

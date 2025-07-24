@@ -5,21 +5,18 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
+  PackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import {
+  CSPM_POLICY_TEMPLATE,
+  KSPM_POLICY_TEMPLATE,
+} from '@kbn/cloud-security-posture-common/constants';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CloudSetup } from '@kbn/cloud-security-posture';
@@ -35,14 +32,15 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import {
+  getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
   isPostureInput,
-  POLICY_TEMPLATE_FORM_DTS,
 } from './utils';
 import { PolicyTemplateSelector } from './policy_template_selectors';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CnvmKspmSetup } from './cnvm_kspm/cnvm_kspm_setup';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -82,6 +80,49 @@ const getSelectedOption = (
   return selectedOption;
 };
 
+const usePolicyTemplateInitialName = ({
+  isEditPage,
+  integration,
+  newPolicy,
+  packagePolicyList,
+  updatePolicy,
+  setCanFetchIntegration,
+}: {
+  isEditPage: boolean;
+  integration: CloudSecurityPolicyTemplate | undefined;
+  newPolicy: NewPackagePolicy;
+  packagePolicyList: PackagePolicy[] | undefined;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  setCanFetchIntegration: (canFetch: boolean) => void;
+}) => {
+  useEffect(() => {
+    if (!integration) return;
+    if (isEditPage) return;
+
+    const packagePolicyListByIntegration = packagePolicyList?.filter(
+      (policy) => policy?.vars?.posture?.value === integration
+    );
+
+    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
+
+    /*
+     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
+     * if policie were fetched its an array - the check will return true
+     */
+    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
+    updatePolicy(
+      {
+        ...newPolicy,
+        name: currentIntegrationName,
+      },
+      isPoliciesLoaded
+    );
+    setCanFetchIntegration(false);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [integration, isEditPage, packagePolicyList]);
+};
+
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
     newPolicy,
@@ -95,7 +136,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
-    const { cloud, uiSettings } = useKibana().services;
+    const { cloud } = useKibana().services;
     const isServerless = !!cloud.serverless.projectType;
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const isParentSecurityPosture = !integrationParam;
@@ -107,7 +148,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ? integrationToEnable
         : undefined;
     const input = getSelectedOption(newPolicy.inputs, integration);
-
     // search for non null fields of the validation?.vars object
     const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
       (key) => (validationResults?.vars || {})[key] !== null
@@ -115,12 +155,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const [isValid, setIsValid] = useState(true);
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
+    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
+
+    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+      enabled: canFetchIntegration,
+    });
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
-        onChange({ isValid, updatedPolicy, isExtensionLoaded });
+        onChange({
+          isValid,
+          updatedPolicy,
+          isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
+        });
       },
-      [onChange, isValid]
+      [isLoading, isValid, onChange]
     );
 
     /**
@@ -135,6 +184,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
       [newPolicy, updatePolicy]
     );
+
+    usePolicyTemplateInitialName({
+      packagePolicyList: packagePolicyList?.items,
+      isEditPage,
+      integration: integration as CloudSecurityPolicyTemplate,
+      newPolicy,
+      updatePolicy,
+      setCanFetchIntegration,
+    });
 
     // delaying component rendering due to a race condition issue from Fleet
     // TODO: remove this workaround when the following issue is resolved:
@@ -158,15 +216,17 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }
     }, [isServerless, isSubscriptionValid]);
 
-    if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+    useEffect(() => {
+      if (isEditPage) return;
+      if (isLoading) return;
+      // Pick default input type for policy template.
+      // Only 1 enabled input is supported when all inputs are initially enabled.
+      // Required for mount only to ensure a single input type is selected
+      // This will remove errors in validationResults.vars
+      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+      refetch();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoading, input.policy_template, isEditPage]);
 
     if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
@@ -221,8 +281,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             defaultSetupTechnology={defaultSetupTechnology}
             isAgentlessEnabled={isAgentlessEnabled}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            cloud={cloud}
-            uiSettings={uiSettings}
             namespaceSupportEnabled={true}
           />
         )}
@@ -235,8 +293,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <CnvmKspmSetup
               newPolicy={newPolicy}
               packageInfo={packageInfo}
-              isLoading={isLoading}
-              setIsValid={setIsValid}
+              // isLoading={isLoading}
+              // setIsValid={setIsValid}
               setEnabledPolicyInput={setEnabledPolicyInput}
               updatePolicy={updatePolicy}
               validationResults={validationResults}

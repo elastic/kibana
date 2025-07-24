@@ -7,8 +7,8 @@
 
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { AwsCredentialsType } from './aws_types';
-import { CSPM_POLICY_TEMPLATE } from '../constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
