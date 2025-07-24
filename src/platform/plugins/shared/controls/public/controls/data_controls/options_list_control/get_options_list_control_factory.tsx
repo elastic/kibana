@@ -423,8 +423,19 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const isESQLOutputMode = api.output$.getValue() === ControlOutputOption.ESQL;
-          // ES|QL variable output controls must always have a value selected
-          if (isESQLOutputMode) return;
+
+          if (isESQLOutputMode) {
+            // ES|QL variable output controls must always have a value selected, so the only valid code path
+            // is to deselect an invalid option and select the first available
+            const currentInvalid = temporaryStateManager.api.invalidSelections$.getValue();
+            if (currentInvalid.size > 0) {
+              const newSelection = temporaryStateManager.api.availableOptions$.getValue()?.[0];
+              if (!newSelection) return;
+              temporaryStateManager.api.setInvalidSelections(new Set([]));
+              selectionsManager.api.setSelectedOptions([newSelection.value]);
+            }
+            return;
+          }
 
           const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
           const field = api.field$.getValue();
@@ -492,6 +503,8 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             // replace selection
             selectionsManager.api.setSelectedOptions([keyAsType]);
             if (existsSelected) selectionsManager.api.setExistsSelected(false);
+            // clear invalid selections
+            temporaryStateManager.api.setInvalidSelections(new Set([]));
           } else {
             // select option
             if (existsSelected) selectionsManager.api.setExistsSelected(false);
