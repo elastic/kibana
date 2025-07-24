@@ -13,7 +13,6 @@ import {
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  installMockPrebuiltRulesPackage,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
@@ -23,11 +22,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Prebuilt Rules Upgrade Notifications', () => {
-    before(async () => {
-      // Prevent the real package installation
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllPrebuiltRuleAssets(es, log);
       await deleteAllRules(supertest, log);
