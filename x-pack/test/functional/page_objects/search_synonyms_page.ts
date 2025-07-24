@@ -31,8 +31,8 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
       },
       async clickCreateSynonymsSetButton() {
         await retry.tryForTime(10000, async () => {
-          await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
           await browser.refresh();
+          await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
         });
       },
       async setSynonymsSetName(name: string) {
