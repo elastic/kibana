@@ -44,6 +44,13 @@ describe('UploadFileButton', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         uiActions: mockUiActions,
+        application: {
+          capabilities: {
+            fileUpload: {
+              show: true, // Mocking the capability to show the upload button
+            },
+          },
+        },
       },
     });
 
@@ -96,5 +103,25 @@ describe('UploadFileButton', () => {
     // Check if the flyout trigger was executed
     expect(mockUiActions.getTrigger).toHaveBeenCalledWith('OPEN_FILE_UPLOAD_LITE_TRIGGER');
     expect(mockUiActions.getTrigger().exec).toHaveBeenCalled();
+  });
+
+  it('does not render button when file upload capability is false', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        uiActions: mockUiActions,
+        application: {
+          capabilities: {
+            fileUpload: {
+              show: false,
+            },
+          },
+        },
+      },
+    });
+
+    render(<UploadFileButton isSetup={false} />, { wrapper: Wrapper });
+    // Check that no button is rendered
+    expect(screen.queryByTestId('uploadFileButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('uploadFileButtonEmpty')).not.toBeInTheDocument();
   });
 });

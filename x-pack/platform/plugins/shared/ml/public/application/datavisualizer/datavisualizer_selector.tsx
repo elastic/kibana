@@ -63,7 +63,7 @@ export const DatavisualizerSelector: FC = () => {
     },
   } = useMlKibana();
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
-  const canUploadFile = useMemo(() => !!capabilities.fileUpload.show, [capabilities]);
+  const canUploadFile = useMemo(() => Boolean(capabilities.fileUpload.show), [capabilities]);
   const helpLink = docLinks.links.ml.guide;
 
   const startTrialVisible =

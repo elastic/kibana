@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { type FileUploadResults, OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
@@ -18,9 +18,13 @@ interface Props {
 
 export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
   const {
-    services: { uiActions },
+    services: { uiActions, application },
   } = useKibana();
   const { setIndices: setSelectedIndices } = useSourceIndicesFields();
+  const canUploadFile = useMemo(
+    () => Boolean(application.capabilities.fileUpload.show),
+    [application]
+  );
 
   const showFileUploadFlyout = React.useCallback(() => {
     if (uiActions !== null) {
@@ -32,6 +36,10 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
       });
     }
   }, [setSelectedIndices, uiActions]);
+
+  if (!canUploadFile) {
+    return null;
+  }
 
   return (
     <>
