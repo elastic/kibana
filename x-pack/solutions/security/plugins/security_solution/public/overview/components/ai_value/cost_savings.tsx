@@ -18,7 +18,7 @@ interface Props {
 
 export const CostSavings: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   return (
-    <EuiPanel paddingSize="l">
+    <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
       <EuiTitle size="s">
         <h3>{i18n.COST_SAVINGS_TREND}</h3>
       </EuiTitle>

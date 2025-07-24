@@ -32,7 +32,7 @@ export const AlertProcessing: React.FC<Props> = ({
   to,
 }) => {
   return (
-    <EuiPanel paddingSize="l">
+    <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
       <EuiTitle size="s">
         <h3>{i18n.ALERT_PROCESSING_TITLE}</h3>
       </EuiTitle>

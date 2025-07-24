@@ -33,6 +33,14 @@ interface Props {
   valueMetricsCompare: ValueMetrics;
 }
 
+const LI_PADDING = css`
+  padding: 5px 0;
+`;
+
+const ICON_PADDING = css`
+  margin: 0px 8px 0 0;
+`;
+
 export const ExecutiveSummary: React.FC<Props> = ({
   analystHourlyRate,
   filteredAlerts,
@@ -108,10 +116,16 @@ export const ExecutiveSummary: React.FC<Props> = ({
         <EuiSpacer size="m" />
 
         <EuiText size="s">
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            <li style={{ padding: '5px 0' }}>
-              <EuiIcon type="checkInCircleFilled" color="success" /> <strong>{costSavings}</strong>{' '}
-              {i18n.EXECUTIVE_COST_SAVINGS_DESC}
+          <ul
+            css={css`
+              list-style: none !important;
+              padding: 0 !important;
+              margin: 0 !important;
+            `}
+          >
+            <li css={LI_PADDING}>
+              <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
+              <strong>{costSavings}</strong> {i18n.EXECUTIVE_COST_SAVINGS_DESC}
               {'. '}
               <ComparePercentage
                 currentCount={valueMetrics.filteredAlerts}
@@ -121,8 +135,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
                 timeRange={getTimeRangeAsDays({ from, to })}
               />
             </li>
-            <li style={{ padding: '5px 0' }}>
-              <EuiIcon type="checkInCircleFilled" color="success" />{' '}
+            <li css={LI_PADDING}>
+              <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
               <strong>{formatPercent(valueMetrics.filteredAlertsPerc)}</strong>{' '}
               {i18n.EXECUTIVE_ALERT_FILTERING_DESC}
               {'. '}
@@ -134,8 +148,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
                 timeRange={getTimeRangeAsDays({ from, to })}
               />
             </li>
-            <li style={{ padding: '5px 0' }}>
-              <EuiIcon type="checkInCircleFilled" color="success" />{' '}
+            <li css={LI_PADDING}>
+              <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
               <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
               {i18n.EXECUTIVE_HOURS_SAVED_DESC}
               {'. '}
@@ -147,8 +161,8 @@ export const ExecutiveSummary: React.FC<Props> = ({
                 timeRange={getTimeRangeAsDays({ from, to })}
               />
             </li>
-            <li style={{ padding: '5px 0' }}>
-              <EuiIcon type="checkInCircleFilled" color="success" />{' '}
+            <li css={LI_PADDING}>
+              <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
               <strong>
                 {getFormattedPercChange(
                   valueMetrics.attackDiscoveryCount,
