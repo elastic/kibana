@@ -350,7 +350,6 @@ export class Plugin
           ...coreStart,
           actions: plugins.actions,
           cloud: plugins.cloud,
-          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
