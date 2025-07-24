@@ -134,7 +134,7 @@ const detectAndPreProcessPastedCommand = (
     while ((match = argPattern.exec(rawInput)) !== null) {
       hasProcessedSelectorArgs = true; // Mark that we processed a selector argument
 
-      if (argDef.selectorStringDefaultValue === true) {
+      if (argDef.selectorShowTextValue === true) {
         let value = match[1];
 
         // Remove quotes if present

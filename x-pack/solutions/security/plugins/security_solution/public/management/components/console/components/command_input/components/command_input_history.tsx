@@ -101,11 +101,11 @@ export const CommandInputHistory = memo(() => {
         const originalArgState = historyItem.argState;
 
         // Clean file selector values from history argState
-        // File selectors (selectorStringDefaultValue !== true) should not populate from history
+        // File selectors (selectorShowTextValue !== true) should not populate from history
         const cleanedArgState: typeof originalArgState = {};
 
         if (originalArgState) {
-          // Get command definitions to check selectorStringDefaultValue
+          // Get command definitions to check selectorShowTextValue
           const commandName = historyItem.input.split(' ')[0];
           const commandDef = consoleState.commands.find(
             (def: CommandDefinition) => def.name === commandName
@@ -114,7 +114,7 @@ export const CommandInputHistory = memo(() => {
           for (const [argName, argValues] of Object.entries(originalArgState)) {
             const argDef = commandDef?.args?.[argName];
 
-            if (argDef?.SelectorComponent && argDef.selectorStringDefaultValue !== true) {
+            if (argDef?.SelectorComponent && argDef.selectorShowTextValue !== true) {
               // File selectors: Clear values (set to empty)
               cleanedArgState[argName] = [];
             } else {

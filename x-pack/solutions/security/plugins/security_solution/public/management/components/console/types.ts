@@ -71,7 +71,7 @@ export interface CommandArgDefinition {
   /**
    * If defined, the selector will use `true` as the default value which results in empty array as args value
    */
-  selectorStringDefaultValue?: boolean;
+  selectorShowTextValue?: boolean;
 }
 
 /** List of arguments for a Command */
