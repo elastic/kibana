@@ -39,6 +39,10 @@ export interface RunAgentParams {
    * The agent this run is for. Used for tracing.
    */
   agentId?: string;
+  /**
+   * optional signal to abort the execution of the agent
+   */
+  abortSignal?: AbortSignal;
 }
 
 export interface RunAgentResponse {

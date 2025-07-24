@@ -92,7 +92,7 @@ describe('getVisualizationInstance', () => {
     );
     expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
       searchSessionId: undefined,
-      timeRange: undefined,
+      timeRange: { from: 'now-15m', to: 'now' },
       filters: undefined,
       renderMode: 'edit',
       id: '',
@@ -213,7 +213,7 @@ describe('getVisualizationInstanceInput', () => {
     expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
     expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
       searchSessionId: undefined,
-      timeRange: undefined,
+      timeRange: { from: 'now-15m', to: 'now' },
       filters: undefined,
       renderMode: 'edit',
       id: '',
