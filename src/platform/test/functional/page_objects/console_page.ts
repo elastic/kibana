@@ -99,13 +99,12 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAutocompleteSuggestion(index: number) {
-    const suggestionsWidget = await this.find.byClassName('suggest-widget');
-
     await this.retry.waitFor(
-      'verify suggestions widget to be displayed',
-      async () => await suggestionsWidget.isDisplayed()
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
     );
 
+    const suggestionsWidget = await this.find.byClassName('suggest-widget');
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
     if (!suggestion) {
