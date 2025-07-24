@@ -106,6 +106,10 @@ describe('helpers', () => {
           options: [{ label: 'host.name' }, { label: 'host.id' }],
         },
         {
+          label: 'mock',
+          options: [{ label: 'mock.attr' }],
+        },
+        {
           label: 'nestedField',
           options: [
             {
