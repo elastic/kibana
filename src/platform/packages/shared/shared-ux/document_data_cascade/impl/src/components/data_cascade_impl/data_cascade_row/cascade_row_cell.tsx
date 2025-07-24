@@ -15,47 +15,104 @@ import {
   getCascadeRowNodePath,
   getCascadeRowNodePathValueRecord,
 } from './utils';
-import { type GroupNode, type LeafNode, useDataCascadeState } from '../../data_cascade_provider';
+import {
+  type GroupNode,
+  type LeafNode,
+  useDataCascadeState,
+  useDataCascadeDispatch,
+} from '../../data_cascade_provider';
 
-export interface CascadeRowCellProps<G extends GroupNode, L extends LeafNode>
-  extends CellContext<G, unknown> {
-  populateGroupLeafDataFn: (args: { row: Row<G> }) => Promise<void>;
-  leafContentSlot: React.FC<{ data: L[] | null }>;
-  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
+interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
+  row: Row<G>;
+  /**
+   * @description The path of the row that was expanded in the group by hierarchy.
+   */
+  nodePath: string[];
+  /**
+   * @description KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
 }
 
-export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
-  leafContentSlot: LeafContentSlot,
-  populateGroupLeafDataFn,
+export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
+  extends CellContext<G, unknown> {
+  /**
+   * @description Size of the row cell
+   */
+  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
+  /**
+   * @description Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
+   */
+  onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
+  children: (args: { data: L[] | null }) => React.ReactNode;
+}
+
+export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
+  children,
+  onCascadeLeafNodeExpanded,
   row,
   size,
-}: CascadeRowCellProps<G, L>) {
-  const hasPendingRequest = useRef<boolean>(false);
+}: CascadeRowCellPrimitiveProps<G, L>) {
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
+  const dispatch = useDataCascadeDispatch<G, L>();
+  const hasPendingRequest = useRef<boolean>(false);
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
 
-  const getLeafCacheKey = useCallback(() => {
-    return getCascadeRowLeafDataCacheKey(
-      getCascadeRowNodePath(currentGroupByColumns, row),
-      getCascadeRowNodePathValueRecord(currentGroupByColumns, row),
-      row.id
-    );
-  }, [currentGroupByColumns, row]);
+  const nodePath = useMemo(
+    () => getCascadeRowNodePath(currentGroupByColumns, row),
+    [currentGroupByColumns, row]
+  );
+
+  const nodePathMap = useMemo(
+    () => getCascadeRowNodePathValueRecord(currentGroupByColumns, row),
+    [currentGroupByColumns, row]
+  );
+
+  const leafCacheKey = useMemo(() => {
+    return getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, row.id);
+  }, [nodePath, nodePathMap, row]);
 
   const leafData = useMemo(() => {
-    return leafNodes.get(getLeafCacheKey()) ?? null;
-  }, [getLeafCacheKey, leafNodes]);
+    return leafNodes.get(leafCacheKey) ?? null;
+  }, [leafCacheKey, leafNodes]);
+
+  const fetchGroupLeafData = useCallback(() => {
+    const dataFetchFn = async () => {
+      const groupLeafData = await onCascadeLeafNodeExpanded({
+        row,
+        nodePathMap,
+        nodePath,
+      });
+
+      if (!groupLeafData) {
+        return;
+      }
+
+      dispatch({
+        type: 'UPDATE_ROW_GROUP_LEAF_DATA',
+        payload: {
+          cacheKey: leafCacheKey,
+          data: groupLeafData,
+        },
+      });
+    };
+
+    return dataFetchFn().catch((error) => {
+      // eslint-disable-next-line no-console -- added for debugging purposes
+      console.error('Error fetching data for leaf node', error);
+    });
+  }, [dispatch, leafCacheKey, nodePath, nodePathMap, onCascadeLeafNodeExpanded, row]);
 
   const fetchCascadeRowGroupLeafData = useCallback(() => {
     if (!hasPendingRequest.current) {
       hasPendingRequest.current = true;
 
-      populateGroupLeafDataFn({ row }).finally(() => {
+      fetchGroupLeafData().finally(() => {
         setRowLeafDataFetch(false);
         hasPendingRequest.current = false;
       });
     }
-  }, [populateGroupLeafDataFn, row]);
+  }, [fetchGroupLeafData]);
 
   useEffect(() => {
     if (!leafData && !isPendingRowLeafDataFetch) {
@@ -73,7 +130,7 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <LeafContentSlot data={leafData} />
+          React.createElement(children, { data: leafData })
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
