@@ -15,8 +15,8 @@ import {
   ExecutionStatus,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { RunStepResult } from '../step/step_base';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows-execution-engine/common';
 
 export interface ContextManagerInit {
   workflowRunId: string;

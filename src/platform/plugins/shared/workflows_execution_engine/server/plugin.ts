@@ -165,7 +165,6 @@ export class WorkflowsExecutionEnginePlugin
         // contextManager.logError('Workflow execution failed', error as Error, {
         //   event: { action: 'workflow-failed', outcome: 'failure' },
         // });
-        console.error(error);
         contextManager.logWorkflowComplete(false);
       } finally {
         await this.esClient.update({

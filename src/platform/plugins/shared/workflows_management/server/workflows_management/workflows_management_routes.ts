@@ -87,14 +87,12 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
         },
       },
       validate: {
-        body: CreateWorkflowCommandSchema.partial(),
+        body: CreateWorkflowCommandSchema,
       },
     },
     async (context, request, response) => {
       try {
-        const createdWorkflow = await api.createWorkflow({
-          yaml: (request.body as string) || '',
-        });
+        const createdWorkflow = await api.createWorkflow(request.body);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
@@ -282,15 +280,9 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       try {
         const { workflowExecutionId } = request.params;
         const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
-
         if (!workflowExecution) {
-          return response.notFound({
-            body: {
-              message: `Workflow execution not found`,
-            },
-          });
+          return response.notFound();
         }
-
         return response.ok({
           body: workflowExecution,
         });

@@ -176,12 +176,6 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
-
-// export type WorkflowExecutionEngineModel = Pick<
-//   EsWorkflow,
-//   'id' | 'name' | 'status' | 'definition'
-// >;
-
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
   executionGraph?: ExecutionGraph;
