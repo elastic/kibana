@@ -33,6 +33,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { combineAndSortSavedObjects } from '../utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -264,20 +265,26 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
+    // Calculate how many extra pages to fetch
+    const perPage = options.perPage ?? 5000;
+    const page = options.page ?? 1;
+    const extraPages = 5; // fetch 5 extra pages from each source
+
+    // Fetch extra pages from both sources
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
         ...options,
-        perPage: options.perPage ?? 5000,
+        perPage: Math.min(perPage * (extraPages + 1), 5000),
+        page: 1,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
-    const [result, legacyResult] = await Promise.all(promises);
-    return {
-      ...result,
-      total: result.total + legacyResult.total,
-      saved_objects: [...result.saved_objects, ...legacyResult.saved_objects],
-    };
+
+    const results = await Promise.all(promises);
+
+    // Use util to combine, sort, and slice
+    return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
