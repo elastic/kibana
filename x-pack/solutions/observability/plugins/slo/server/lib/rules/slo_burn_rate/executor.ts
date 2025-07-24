@@ -125,10 +125,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         } = result;
 
         const groupingsFlattened = flattenObject(groupings ?? {});
-        const groupingsFlattenedString = Object.fromEntries(
-          Object.entries(groupingsFlattened).map(([key, value]) => [key, String(value)])
-        );
-        const groups = getFormattedGroups(groupingsFlattenedString);
+        const groups = getFormattedGroups(groupingsFlattened);
 
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
