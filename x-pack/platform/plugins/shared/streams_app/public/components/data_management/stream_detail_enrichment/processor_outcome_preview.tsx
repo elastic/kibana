@@ -19,13 +19,14 @@ import { Sample } from '@kbn/grok-ui';
 import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   PreviewDocsFilterOption,
   getSourceField,
   getTableColumns,
+  getUniqueDetectedFields,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
@@ -230,8 +231,10 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         fields.add(key);
       });
     });
-    return Array.from(fields);
-  }, [previewDocuments]);
+    // Keep the detected fields as first columns on the table
+    const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
+    return Array.from(fields).sort((curr) => (uniqDetectedFields.includes(curr) ? -1 : 1));
+  }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)

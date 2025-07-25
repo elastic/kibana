@@ -22,6 +22,10 @@ export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
   return undefined;
 }
 
+export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
+  return uniq(detectedFields.map((field) => field.name));
+}
+
 export function getTableColumns({
   currentProcessorSourceField,
   detectedFields = [],
@@ -39,7 +43,7 @@ export function getTableColumns({
     return [currentProcessorSourceField];
   }
 
-  const uniqueDetectedFields = uniq(detectedFields.map((field) => field.name));
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
 
   return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
