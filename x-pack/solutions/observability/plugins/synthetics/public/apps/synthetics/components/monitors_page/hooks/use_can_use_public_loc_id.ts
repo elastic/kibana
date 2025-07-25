@@ -12,14 +12,14 @@ import { selectServiceLocationsState } from '../../../state';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { useEnablement } from '../../../hooks';
 
-export const useCanUsePublicLocById = (configId: string) => {
+export const useCanUsePublicLocById = (configId: string): boolean => {
   const { allConfigs } = useSelector(selectOverviewStatus);
   const { isServiceAllowed } = useEnablement();
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
   const kibana = useKibana();
 
   const canUsePublicLocations = useMemo(
-    () => kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true,
+    () => Boolean(kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled),
     [kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled]
   );
 
