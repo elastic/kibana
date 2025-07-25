@@ -10,8 +10,8 @@
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { SearchUsageCollector } from '../../../collectors';
@@ -24,14 +24,16 @@ export function openSearchSessionsFlyout({
   usageCollector,
   config,
   sessionsClient,
+  share,
 }: {
   coreStart: CoreStart;
   kibanaVersion: string;
   usageCollector: SearchUsageCollector;
   config: SearchSessionsConfigSchema;
   sessionsClient: ISessionsClient;
+  share: SharePluginStart;
 }) {
-  return ({ locators }: { locators: LocatorClient }) => {
+  return () => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
       application: coreStart.application,
@@ -50,7 +52,7 @@ export function openSearchSessionsFlyout({
               usageCollector={usageCollector}
               config={config}
               kibanaVersion={kibanaVersion}
-              locators={locators}
+              locators={share.url.locators}
             />
           </KibanaReactContextProvider>
         ),
