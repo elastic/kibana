@@ -8,12 +8,14 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(
-    require.resolve('../../../functional_search/config.ts')
-  );
+  const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
 
   return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    ...searchFuncationalConfig.getAll(),
+    junit: {
+      reportName: 'Search Solution Functional Tests - Apps - Search Playground',
+    },
+    // load tests in the index file
+    testFiles: [require.resolve('../apps/search_playground/index.ts')],
   };
 }
