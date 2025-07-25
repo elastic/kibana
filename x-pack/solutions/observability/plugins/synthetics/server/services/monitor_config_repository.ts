@@ -18,6 +18,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -333,7 +334,7 @@ export class MonitorConfigRepository {
     filter,
     sortField = 'name.keyword',
     sortOrder = 'asc',
-    searchFields,
+    searchFields = MONITOR_SEARCH_FIELDS,
     showFromAllSpaces,
   }: {
     search?: string;
