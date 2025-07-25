@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+
 import { downloadJson } from '../../../../utils/download_json';
 import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
 import { DiagnosticResults } from './diagnostic_results';
@@ -97,7 +97,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       form.destinationNode &&
       form.traceId
     ) {
-      console.log('form in front', form);
       const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
         params: {
           body: {
@@ -125,7 +124,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       onClose={onClose}
       size="m"
       type="push"
-      style={{ zIndex: 11000 }}
+      style={{ zIndex: 20000 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"
     >
@@ -145,7 +144,13 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        style={{
+          overflowY: 'auto',
+          maxHeight: 'calc(100vh - 200px)',
+          padding: '16px',
+        }}
+      >
         <DiagnosticConfigurationForm
           selectedNode={selectedNode}
           onSelectionUpdate={handleSelectionUpdate}

@@ -6,25 +6,25 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function DiagnosticInformationalMessage() {
   return (
-    <EuiCallOut
-      title={i18n.translate('xpack.apm.serviceMap.diagnosticResults.informationalTitle', {
-        defaultMessage: 'For detailed analysis',
-      })}
-      color="primary"
-      iconType="iInCircle"
-      size="s"
-    >
-      <p>
-        {i18n.translate('xpack.apm.serviceMap.diagnosticResults.informationalMessage', {
-          defaultMessage:
-            'This information is provided for initial troubleshooting. For comprehensive analysis and further investigation, please download the full diagnostic report using the "Download report" button.',
-        })}
-      </p>
-    </EuiCallOut>
+    <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="iInCircle" color="subdued" size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s" color="subdued" style={{ fontStyle: 'italic' }}>
+          <p>
+            {i18n.translate('xpack.apm.serviceMap.diagnosticResults.informationalMessage', {
+              defaultMessage:
+                '*This information is provided for initial troubleshooting. For comprehensive analysis and further investigation, please download the full diagnostic report using the "Download report" button.',
+            })}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

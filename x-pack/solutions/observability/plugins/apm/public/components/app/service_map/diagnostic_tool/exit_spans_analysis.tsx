@@ -76,11 +76,10 @@ export function ExitSpansAnalysis({
             <p>
               {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansFoundDescription', {
                 defaultMessage:
-                  'Found {count} exit span(s) from {sourceNode} during the selected time range.',
+                  'Found {count} exit span(s) from {sourceNode} during the selected time range. These represent all outbound connections that were traced from this {sourceNode}.',
                 values: {
                   count: exitSpansList.length,
                   sourceNode: sourceNodeName,
-                  destinationNode: destinationNodeName,
                 },
               })}
             </p>
@@ -110,11 +109,23 @@ export function ExitSpansAnalysis({
                 'xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundDescription',
                 {
                   defaultMessage:
-                    'No exit spans were found from {sourceNode} to {destinationNode} during the selected time range. This may indicate a instrumentation issue or that the connection does not exist.',
+                    'No exit spans were found from {sourceNode} to {destinationNode} during the selected time range. This could indicate:',
                   values: { sourceNode: sourceNodeName, destinationNode: destinationNodeName },
                 }
               )}
             </p>
+            <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
+              <li>
+                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundReason1', {
+                  defaultMessage: 'An instrumentation issue preventing proper span collection',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundReason2', {
+                  defaultMessage: 'The trace/connection was not found during this time range',
+                })}
+              </li>
+            </ul>
           </EuiText>
         </>
       )}

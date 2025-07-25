@@ -15,17 +15,12 @@ import {
   EuiBadge,
   EuiIcon,
   EuiPanel,
-  EuiAccordion,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface ParentRelationshipAnalysisProps {
   hasParent: boolean;
   destinationHits: any[];
-  destinationResponse: any;
   sourceNodeName: string;
   destinationNodeName: string;
 }
@@ -33,7 +28,6 @@ interface ParentRelationshipAnalysisProps {
 export function ParentRelationshipAnalysis({
   hasParent,
   destinationHits,
-  destinationResponse,
   sourceNodeName,
   destinationNodeName,
 }: ParentRelationshipAnalysisProps) {
@@ -120,7 +114,7 @@ export function ParentRelationshipAnalysis({
                 'xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundDescription',
                 {
                   defaultMessage:
-                    'No parent IDs were found pointing from {sourceNode} to {destinationNode} during the selected time range. Found {count} total document(s) for analysis.',
+                    'No parent IDs were found pointing from {sourceNode} to {destinationNode} during the selected time range. Found {count} total document(s) for analysis. This could indicate:',
                   values: {
                     sourceNode: sourceNodeName,
                     destinationNode: destinationNodeName,
@@ -129,59 +123,19 @@ export function ParentRelationshipAnalysis({
                 }
               )}
             </p>
+            <ul>
+              <li>
+                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundReason1', {
+                  defaultMessage: 'An instrumentation issue preventing proper trace correlation',
+                })}
+              </li>
+              <li>
+                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundReason2', {
+                  defaultMessage: 'Missing distributed tracing configuration between services',
+                })}
+              </li>
+            </ul>
           </EuiText>
-        </>
-      )}
-
-      {destinationResponse && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="parentIdsDetails"
-            buttonContent={
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.apm.serviceMap.diagnosticResults.viewQueryDetails', {
-                    defaultMessage: 'View query details',
-                  })}
-                </strong>
-              </EuiText>
-            }
-            paddingSize="none"
-          >
-            <EuiSpacer size="s" />
-            <EuiDescriptionList compressed>
-              <EuiDescriptionListTitle>
-                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.queryTook', {
-                  defaultMessage: 'Query time',
-                })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {destinationResponse.took}
-                {i18n.translate('xpack.apm.diagnosticResults.msDescriptionListDescriptionLabel', {
-                  defaultMessage: 'ms',
-                })}
-              </EuiDescriptionListDescription>
-
-              <EuiDescriptionListTitle>
-                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.totalShards', {
-                  defaultMessage: 'Shards',
-                })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {destinationResponse._shards?.successful}/{destinationResponse._shards?.total}
-              </EuiDescriptionListDescription>
-
-              <EuiDescriptionListTitle>
-                {i18n.translate('xpack.apm.serviceMap.diagnosticResults.totalHits', {
-                  defaultMessage: 'Total hits',
-                })}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {destinationResponse.hits?.total?.value || 0}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiAccordion>
         </>
       )}
     </EuiPanel>
