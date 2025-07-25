@@ -999,8 +999,6 @@ export default ({ getService }: FtrProviderContext): void => {
               success_count: 1,
               errors: [],
             });
-
-            expect(true).toBe(false);
           });
 
           it('should import a non-default-space 7.16 rule with a connector made in the non-default space', async () => {
