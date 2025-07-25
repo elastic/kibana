@@ -21,6 +21,7 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
+  policyFactoryWithoutPaidEnterpriseFeatures,
 } from '../../common/endpoint/models/policy_config';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
@@ -846,7 +847,7 @@ describe('Fleet integrations', () => {
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',
         async ({ date, message }) => {
-          const mockPolicy = policyFactory(); // defaults with paid features on
+          const mockPolicy = policyFactoryWithoutPaidEnterpriseFeatures(); // Use platinum-compatible policy
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
@@ -885,6 +886,7 @@ describe('Fleet integrations', () => {
       );
 
       it('updates successfully when paid features are turned on', async () => {
+        licenseEmitter.next(Enterprise); // Temporarily use Enterprise for this test
         const mockPolicy = policyFactory();
         mockPolicy.windows.popup.malware.message = 'paid feature';
         const callback = getPackagePolicyUpdateCallback(
@@ -906,6 +908,7 @@ describe('Fleet integrations', () => {
       });
 
       it('should turn off protections if endpointPolicyProtections productFeature is disabled', async () => {
+        licenseEmitter.next(Enterprise); // Temporarily use Enterprise for this test
         productFeaturesService = createProductFeaturesServiceMock(
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
         );
@@ -973,13 +976,13 @@ describe('Fleet integrations', () => {
       esClient.info.mockResolvedValue(infoResponse);
 
       beforeEach(() => {
-        licenseEmitter.next(Platinum); // set license level to platinum
+        licenseEmitter.next(Enterprise); // set license level to enterprise
       });
 
       it('updates successfully when meta fields differ from services', async () => {
         const mockPolicy = policyFactory();
         mockPolicy.meta.cloud = true; // cloud mock will return true
-        mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+        mockPolicy.meta.license = 'enterprise'; // license is set to emit enterprise
         mockPolicy.meta.cluster_name = 'updated-name';
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
@@ -1014,7 +1017,7 @@ describe('Fleet integrations', () => {
       it('meta fields stay the same where there is no difference', async () => {
         const mockPolicy = policyFactory();
         mockPolicy.meta.cloud = true; // cloud mock will return true
-        mockPolicy.meta.license = 'platinum'; // license is set to emit platinum
+        mockPolicy.meta.license = 'enterprise'; // license is set to emit enterprise
         mockPolicy.meta.cluster_name = 'updated-name';
         mockPolicy.meta.cluster_uuid = 'updated-uuid';
         mockPolicy.meta.license_uuid = 'updated-uid';
@@ -1179,7 +1182,7 @@ describe('Fleet integrations', () => {
         config.inputs[0].config!.policy.value.windows.antivirus_registration.enabled;
 
       beforeEach(() => {
-        licenseEmitter.next(Platinum);
+        licenseEmitter.next(Enterprise);
 
         callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,

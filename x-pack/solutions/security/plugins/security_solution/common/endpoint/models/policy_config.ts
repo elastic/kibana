@@ -217,12 +217,26 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
       },
+      popup: {
+        ...policy.windows.popup,
+        device_control: {
+          enabled: false,
+          message: '',
+        },
+      },
     },
     mac: {
       ...policy.mac,
       device_control: {
         enabled: false,
         usb_storage: DeviceControlAccessLevel.audit,
+      },
+      popup: {
+        ...policy.mac.popup,
+        device_control: {
+          enabled: false,
+          message: '',
+        },
       },
     },
   };
