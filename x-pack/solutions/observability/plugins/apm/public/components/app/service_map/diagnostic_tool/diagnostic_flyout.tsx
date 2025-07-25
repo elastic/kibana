@@ -198,7 +198,12 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
                   filters: {
                     rangeFrom,
                     rangeTo,
+                    sourceNode: form.sourceNode,
+                    destinationNode: form.destinationNode,
+                    traceId: form.traceId,
                   },
+                  analysis: data?.analysis,
+                  elasticsearchResponses: data?.elasticsearchResponses,
                 },
               })
             }
