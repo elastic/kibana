@@ -34,7 +34,7 @@ export const FieldsList = React.memo(function FieldsListComponent({
   return (
     <ul
       data-test-subj="fieldsList"
-      aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListTypeLabel', {
+      aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListLabel', {
         defaultMessage: 'Saved mapping fields',
       })}
     >
