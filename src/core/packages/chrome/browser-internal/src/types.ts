@@ -25,6 +25,11 @@ import type { Observable } from 'rxjs';
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
+   * Used only by the rendering service
+   */
+  getChromeStoreProvider(): React.ComponentType<{ children: React.ReactNode }>;
+
+  /**
    * Used only by the rendering service to render the header UI
    * @internal
    *

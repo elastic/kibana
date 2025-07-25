@@ -112,9 +112,13 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
+    const ChromeStoreProvider = chrome.getChromeStoreProvider();
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <Layout />
+        <ChromeStoreProvider>
+          <Layout />
+        </ChromeStoreProvider>
       </KibanaRootContextProvider>,
       targetDomElement
     );

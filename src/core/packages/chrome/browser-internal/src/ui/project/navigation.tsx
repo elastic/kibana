@@ -9,23 +9,21 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
 
 interface Props {
   toggleSideNav: (isVisible: boolean) => void;
-  isSideNavCollapsed$: Observable<boolean>;
+  isSideNavCollapsed: boolean;
 }
 
 const PANEL_WIDTH = 290;
 
 export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
   children,
-  isSideNavCollapsed$,
+  isSideNavCollapsed,
   toggleSideNav,
 }) => {
-  const isCollapsed = useObservable(isSideNavCollapsed$, false);
+  const isCollapsed = isSideNavCollapsed;
 
   return (
     <EuiCollapsibleNavBeta
