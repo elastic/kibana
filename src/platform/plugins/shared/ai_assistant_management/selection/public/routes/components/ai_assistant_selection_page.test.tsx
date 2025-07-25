@@ -23,6 +23,11 @@ describe('AiAssistantSelectionPage', () => {
   const generateMockCapabilities = (hasPermission: boolean) =>
     ({
       observabilityAIAssistant: { show: hasPermission },
+      management: {
+        kibana: {
+          aiAssistantManagementSelection: hasPermission,
+        },
+      },
     } as unknown as CoreStart['application']['capabilities']);
 
   const testCapabilities = generateMockCapabilities(true);
