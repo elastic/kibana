@@ -596,7 +596,9 @@ export class WrappingPrettyPrinter {
       switch (node.subtype) {
         case 'unary-expression': {
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          txt = `${operator}${separator}${ctx.visitArgument(0, inp).txt}`;
+          const formatted = ctx.visitArgument(0, inp);
+
+          txt = `${operator}${separator}${formatted.txt}`;
           break;
         }
         case 'postfix-unary-expression': {
@@ -615,7 +617,7 @@ export class WrappingPrettyPrinter {
 
           let breakClosingParenthesis = false;
 
-          if (getPrettyPrintStats(ctx.node).hasRightSingleLineComments) {
+          if (getPrettyPrintStats(ctx.node.args).hasRightSingleLineComments) {
             breakClosingParenthesis = true;
           }
 
@@ -629,9 +631,7 @@ export class WrappingPrettyPrinter {
         }
       }
 
-      txt = this.decorateWithComments({ ...inp, suffix: '' }, ctx.node, txt).txt;
-
-      return { txt };
+      return this.decorateWithComments({ ...inp, suffix: '' }, ctx.node, txt);
     })
 
     .on('visitCommandOption', (ctx, inp: Input): Output => {
