@@ -15,6 +15,15 @@ interface RoundLayoutProps {
   output: ReactNode;
 }
 
+const labels = {
+  container: i18n.translate('xpack.onechat.round.container', {
+    defaultMessage: 'Conversation round',
+  }),
+  userMessage: i18n.translate('xpack.onechat.round.userInput', {
+    defaultMessage: 'User input',
+  }),
+};
+
 export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
@@ -23,14 +32,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
     max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
-  const labels = {
-    container: i18n.translate('xpack.onechat.round.container', {
-      defaultMessage: 'Conversation round',
-    }),
-    userMessage: i18n.translate('xpack.onechat.round.userInput', {
-      defaultMessage: 'User input',
-    }),
-  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
       <EuiFlexItem grow={false}>

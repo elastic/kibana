@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiButton } from '@elastic/eui';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface RoundErrorProps {
   error: unknown;
@@ -17,12 +17,15 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error }) => {
   return (
     <EuiAccordion
       id="round-error"
-      buttonContent={i18n.translate('xpack.onechat.roundError.title', {
-        defaultMessage: 'The model had a brain freeze.',
-      })}
+      buttonContent={
+        <FormattedMessage
+          id="xpack.onechat.round.error.title"
+          defaultMessage="The model had a brain freeze."
+        />
+      }
       extraAction={
         <EuiButton size="s">
-          {i18n.translate('xpack.onechat.roundError.tryAgain', { defaultMessage: 'Try again?' })}
+          <FormattedMessage id="xpack.onechat.round.error.tryAgain" defaultMessage="Try again?" />
         </EuiButton>
       }
     >

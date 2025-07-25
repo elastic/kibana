@@ -8,11 +8,16 @@
 import { css } from '@emotion/react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface RoundTimerProps {
   elapsedTime: number;
   isStopped: boolean;
 }
+
+const secondsSuffix = i18n.translate('xpack.onechat.round.timer.secondsSuffix', {
+  defaultMessage: 's',
+});
 
 export const RoundTimer: React.FC<RoundTimerProps> = ({ elapsedTime, isStopped }) => {
   const { euiTheme } = useEuiTheme();
@@ -27,5 +32,9 @@ export const RoundTimer: React.FC<RoundTimerProps> = ({ elapsedTime, isStopped }
     color: ${euiTheme.colors.success};
   `;
 
-  return <EuiBadge css={isStopped ? successStyles : loadingStyles}>{`${elapsedTime}s`}</EuiBadge>;
+  return (
+    <EuiBadge css={isStopped ? successStyles : loadingStyles}>
+      {`${elapsedTime}${secondsSuffix}`}
+    </EuiBadge>
+  );
 };
