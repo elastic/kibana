@@ -9,10 +9,24 @@
 
 import { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
+export type TracingGRPCExporterConfig =
+  | {
+      grpc: {
+        url: string;
+        headers?: Record<string, string>;
+      };
+    }
+  | {
+      http: {
+        url: string;
+        headers?: Record<string, string>;
+      };
+    };
+
 /**
  * Allowed configurations for OTLP tracing exporters
  */
-export type TracingExporterConfig = InferenceTracingExportConfig;
+export type TracingExporterConfig = InferenceTracingExportConfig | TracingGRPCExporterConfig;
 /**
  * Configuration for OpenTelemetry tracing
  */
