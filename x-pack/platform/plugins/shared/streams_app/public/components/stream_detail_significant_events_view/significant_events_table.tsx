@@ -16,6 +16,7 @@ import { formatChangePoint } from './change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 function WithLoadingSpinner({ onClick, ...props }: React.ComponentProps<typeof EuiButtonIcon>) {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,6 +56,7 @@ export function SignificantEventsTable({
       start: { discover },
     },
   } = useKibana();
+  const { timeState } = useTimefilter();
 
   const items = useMemo(() => {
     return response.value ?? [];
@@ -69,7 +71,9 @@ export function SignificantEventsTable({
       render: (_, record) => (
         <EuiLink
           target="_blank"
-          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(record, definition))}
+          href={discover?.locator?.getRedirectUrl(
+            buildDiscoverParams(record, definition, timeState)
+          )}
         >
           {record.query.title}
         </EuiLink>
