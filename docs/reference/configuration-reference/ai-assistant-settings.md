@@ -48,7 +48,7 @@ Add the following line to your {{kib}} configuration file:
 
 ```yaml
 # Replace with the root of your custom bucket
-xpack.productDocBase.artifactRepositoryUrl: "https://my-custom-repository.example.com"
+xpack.productDocBase.artifactRepositoryUrl: "<MY_CUSTOM_REPOSITORY_URL>"
 ```
 
 **4. Restart {{kib}}**
@@ -103,7 +103,7 @@ Add the following line to your {{kib}} configuration file:
 
 ```yaml
 # Replace with the path to the CDN folder previously configured
-xpack.productDocBase.artifactRepositoryUrl: "https://my-custom-repository.example.com"
+xpack.productDocBase.artifactRepositoryUrl: "<MY_CUSTOM_REPOSITORY_URL>"
 ```
 
 **5. Restart {{kib}}**
