@@ -11,6 +11,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import {
+  CDR_VULNERABILITIES_INDEX_PATTERN,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
@@ -44,6 +49,26 @@ export const FindingsSearchBar = ({
 
   const { dataView } = useDataViewContext();
 
+  const queryClient = useQueryClient();
+
+  const misconfigurationRefreshQueryKey = [CDR_MISCONFIGURATIONS_INDEX_PATTERN];
+
+  const vulnerabilityRefreshQueryKey = [CDR_VULNERABILITIES_INDEX_PATTERN];
+
+  const refreshQueryKey =
+    dataView.id === 'security_solution_cdr_latest_vulnerabilities-default'
+      ? vulnerabilityRefreshQueryKey
+      : misconfigurationRefreshQueryKey;
+  const isFetchingData = useIsFetching({
+    queryKey: refreshQueryKey,
+  });
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({
+      queryKey: refreshQueryKey,
+    });
+  };
+
   let searchBarNode = (
     <div css={getContainerStyle(euiTheme)}>
       <SearchBar
@@ -51,9 +76,14 @@ export const FindingsSearchBar = ({
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}
-        isLoading={loading}
+        isLoading={loading || isFetchingData > 0}
         indexPatterns={[dataView]}
-        onQuerySubmit={setQuery}
+        onQuerySubmit={(payload, isUpdated) => {
+          if (isUpdated) setQuery(payload);
+          if (!isUpdated) {
+            handleRefresh();
+          }
+        }}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
         query={{

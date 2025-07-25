@@ -45,7 +45,7 @@ export const useGroupedFindings = ({
   } = useKibana().services;
 
   return useQuery(
-    ['csp_grouped_findings', { query }],
+    [CDR_MISCONFIGURATIONS_INDEX_PATTERN, 'csp_grouped_findings', { query }],
     async () => {
       const {
         rawResponse: { aggregations },
