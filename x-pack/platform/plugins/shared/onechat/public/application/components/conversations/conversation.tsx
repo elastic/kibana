@@ -51,8 +51,10 @@ export const Conversation: React.FC<{}> = () => {
           <>
             {hasActiveConversation ? (
               <EuiResizablePanel initialSize={80}>
-                <div ref={scrollContainerRef} css={scrollContainerStyles}>
-                  <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+                <div css={scrollContainerStyles}>
+                  <div ref={scrollContainerRef}>
+                    <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+                  </div>
                 </div>
               </EuiResizablePanel>
             ) : (

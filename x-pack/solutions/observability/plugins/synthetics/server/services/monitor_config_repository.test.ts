@@ -285,14 +285,14 @@ describe('MonitorConfigRepository', () => {
           attributes: {
             name: 'Updated Monitor 1',
           },
-          soType: 'synthetics-monitor-multi-space',
+          previousMonitor: { type: 'synthetics-monitor-multi-space' },
         },
         {
           id: 'test-id-2',
           attributes: {
             name: 'Updated Monitor 2',
           },
-          soType: 'synthetics-monitor',
+          previousMonitor: { type: 'synthetics-monitor' },
         },
       ] as any;
 
@@ -330,7 +330,228 @@ describe('MonitorConfigRepository', () => {
         },
       ]);
 
-      expect(result).toBe(mockBulkUpdateResult);
+      expect(result).toEqual(mockBulkUpdateResult);
+    });
+
+    it('should update multiple monitors in bulk when spaces do not change', async () => {
+      const monitors = [
+        {
+          id: 'test-id-1',
+          attributes: {
+            name: 'Updated Monitor 1',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-1',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+        {
+          id: 'test-id-2',
+          attributes: {
+            name: 'Updated Monitor 2',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-2',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'test-id-1',
+            attributes: { name: 'Updated Monitor 1' },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2' },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-1',
+          attributes: { name: 'Updated Monitor 1', spaces: ['default'] },
+        },
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-2',
+          attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+        },
+      ]);
+
+      expect(result).toEqual({
+        saved_objects: mockBulkUpdateResult.saved_objects,
+      });
+    });
+
+    it('should delete legacy monitor and recreate in new type if spaces change', async () => {
+      const monitors = [
+        {
+          id: 'legacy-id',
+          attributes: {
+            name: 'Monitor With Changed Spaces',
+            spaces: ['space-2'],
+          },
+          soType: legacySyntheticsMonitorTypeSingle,
+          previousMonitor: {
+            id: 'legacy-id',
+            type: legacySyntheticsMonitorTypeSingle,
+            namespaces: ['space-1'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      const mockBulkCreateResult = {
+        saved_objects: [
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      soClient.bulkCreate.mockResolvedValue(mockBulkCreateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: 'legacy-id', type: legacySyntheticsMonitorTypeSingle }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id: 'legacy-id',
+          type: syntheticsMonitorSavedObjectType,
+          attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+          initialNamespaces: ['space-2'],
+        },
+      ]);
+      expect(result).toEqual({
+        saved_objects: mockBulkCreateResult.saved_objects,
+      });
+    });
+
+    it('should handle mixed updates and recreations', async () => {
+      const monitors = [
+        {
+          id: 'legacy-id',
+          attributes: {
+            name: 'Monitor With Changed Spaces',
+            spaces: ['space-2'],
+          },
+          soType: legacySyntheticsMonitorTypeSingle,
+          previousMonitor: {
+            id: 'legacy-id',
+            type: legacySyntheticsMonitorTypeSingle,
+            namespaces: ['space-1'],
+            attributes: {},
+            references: [],
+          },
+        },
+        {
+          id: 'test-id-2',
+          attributes: {
+            name: 'Updated Monitor 2',
+            spaces: ['default'],
+          },
+          soType: syntheticsMonitorSavedObjectType,
+          previousMonitor: {
+            id: 'test-id-2',
+            type: syntheticsMonitorSavedObjectType,
+            namespaces: ['default'],
+            attributes: {},
+            references: [],
+          },
+        },
+      ] as any;
+
+      soClient.bulkDelete.mockResolvedValue({} as any);
+      const mockBulkCreateResult = {
+        saved_objects: [
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkCreate.mockResolvedValue(mockBulkCreateResult);
+      const mockBulkUpdateResult = {
+        saved_objects: [
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      };
+      soClient.bulkUpdate.mockResolvedValue(mockBulkUpdateResult);
+
+      const result = await repository.bulkUpdate({ monitors });
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: 'legacy-id', type: legacySyntheticsMonitorTypeSingle }],
+        { force: true }
+      );
+      expect(soClient.bulkCreate).toHaveBeenCalledWith([
+        {
+          id: 'legacy-id',
+          type: syntheticsMonitorSavedObjectType,
+          attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+          initialNamespaces: ['space-2'],
+        },
+      ]);
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: syntheticsMonitorSavedObjectType,
+          id: 'test-id-2',
+          attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+        },
+      ]);
+      expect(result).toEqual({
+        saved_objects: [
+          {
+            id: 'test-id-2',
+            attributes: { name: 'Updated Monitor 2', spaces: ['default'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+          {
+            id: 'legacy-id',
+            attributes: { name: 'Monitor With Changed Spaces', spaces: ['space-2'] },
+            type: syntheticsMonitorSavedObjectType,
+            references: [],
+          },
+        ],
+      });
     });
   });
 

@@ -76,7 +76,6 @@ export interface HeaderProps {
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
   isFixed: boolean;
-  as?: 'div' | 'header';
 }
 
 export function Header({
@@ -91,7 +90,6 @@ export function Header({
   customBranding$,
   isServerless,
   isFixed,
-  as = 'header',
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -102,7 +100,6 @@ export function Header({
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
   const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
-  const HeaderElement = as === 'header' ? 'header' : 'div';
 
   return (
     <>
@@ -114,7 +111,7 @@ export function Header({
       <SkipToMainContent />
 
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
-      <HeaderElement className={className} data-test-subj="headerGlobalNav">
+      <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
@@ -227,7 +224,7 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </HeaderElement>
+      </header>
     </>
   );
 }

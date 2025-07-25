@@ -17,7 +17,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { Reference } from '../../common/content_management';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   getAnalytics,
   getDataViews,
