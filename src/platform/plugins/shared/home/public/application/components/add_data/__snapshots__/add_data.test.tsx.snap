@@ -43,6 +43,9 @@ exports[`AddData render 1`] = `
               Object {
                 "application": Object {
                   "capabilities": Object {
+                    "fileUpload": Object {
+                      "show": true,
+                    },
                     "navLinks": Object {
                       "integrations": true,
                     },

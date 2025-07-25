@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 const applicationStartMock = {
-  capabilities: { navLinks: { integrations: true } },
+  capabilities: { navLinks: { integrations: true }, fileUpload: { show: true } },
 } as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
