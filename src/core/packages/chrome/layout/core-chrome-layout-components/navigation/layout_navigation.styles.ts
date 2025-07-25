@@ -19,6 +19,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   height: 100%;
   width: var(--kbn-layout--navigation-width);
   z-index: var(--kbn-layout--aboveFlyoutLevel);
+  display: flex;
 `;
 
 export const styles = {
