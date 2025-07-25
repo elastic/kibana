@@ -16,9 +16,3 @@ export const PagePath = {
   [Page.upload]: '/create/upload',
   [Page.assistant]: '/create/assistant',
 };
-<<<<<<< HEAD
-
-export const AUTOMATIC_IMPORT_DOCUMENTATION_URL =
-  'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
-=======
->>>>>>> 3325978c54a (FIX: Added link to documentation file and retrieve URL from useKibana)
