@@ -18,8 +18,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import { DataSchemaFormat } from '../../common/http_api/shared';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',

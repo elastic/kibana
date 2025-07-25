@@ -14,7 +14,8 @@ import type {
   InventoryMetricsConfig,
   LensMetricChartConfig,
 } from './shared/metrics/types';
-export type { BaseMetricsCatalog } from './shared/metrics/types';
+
+export { DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,

@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo, useEffect } from 'react';
-import { DataSchemaFormat } from '../../../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';

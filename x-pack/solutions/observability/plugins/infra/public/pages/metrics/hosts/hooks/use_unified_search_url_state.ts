@@ -16,7 +16,7 @@ import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import { DataSchemaFormat } from '../../../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,

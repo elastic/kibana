@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { DataSchemaFormat } from '../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   GetInfraMetricsRequestBodyPayloadRT,
   GetInfraMetricsRequestParamsRT,

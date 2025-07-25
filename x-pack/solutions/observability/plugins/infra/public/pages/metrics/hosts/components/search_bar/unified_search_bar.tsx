@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -21,7 +22,6 @@ import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../../hooks/use_fetcher';
-import { DataSchemaFormat } from '../../../../../../common/http_api/shared';
 
 export const UnifiedSearchBar = () => {
   const {

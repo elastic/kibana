@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { DataSchemaFormat } from '../../../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {

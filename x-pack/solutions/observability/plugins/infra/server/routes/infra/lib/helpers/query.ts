@@ -10,9 +10,9 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
-import { DataSchemaFormat } from '../../../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { integrationNameByEntityType } from '../../../../lib/sources/constants';
-import type { EntityTypes } from '../../../../../common/http_api/shared/entity_type';
+import type { EntityTypes } from '../../../../../common/http_api/shared';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import {
   DATASTREAM_DATASET,

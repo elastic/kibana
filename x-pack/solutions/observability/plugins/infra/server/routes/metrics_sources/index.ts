@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { DataSchemaFormat } from '../../../common/http_api/shared';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { DATASTREAM_DATASET, EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,

@@ -15,11 +15,15 @@ import type {
 } from '../../types';
 
 /* base types */
-export type SchemaTypes = 'ecs' | 'semconv';
+export enum DataSchemaFormat {
+  ECS = 'ecs',
+  SEMCONV = 'semconv',
+}
+
 export type SchemaBasedFormulas = Omit<LensBaseLayer, 'value'> & {
-  value: Record<SchemaTypes, LensBaseLayer['value']>;
+  value: Record<DataSchemaFormat, LensBaseLayer['value']>;
 };
-export type SchemaBasedAggregations = Record<SchemaTypes, MetricsUIAggregation>;
+export type SchemaBasedAggregations = Record<DataSchemaFormat, MetricsUIAggregation>;
 
 export type FormulasConfig = LensBaseLayer | SchemaBasedFormulas;
 export type AggregationConfig = MetricsUIAggregation | SchemaBasedAggregations;
@@ -79,8 +83,10 @@ export interface BaseInventoryMetricsConfig<TAggregations extends AggregationCon
   defaultTimeRangeInSeconds: number;
   legacyMetrics?: SnapshotMetricType[];
 
-  getWaffleMapTooltipMetrics: (args?: { schema?: SchemaTypes }) => SnapshotMetricType[];
-  getAggregations: (args?: { schema?: SchemaTypes }) => Promise<AggregationsCatalog<TAggregations>>;
+  getWaffleMapTooltipMetrics: (args?: { schema?: DataSchemaFormat }) => SnapshotMetricType[];
+  getAggregations: (args?: {
+    schema?: DataSchemaFormat;
+  }) => Promise<AggregationsCatalog<TAggregations>>;
 }
 
 export interface InventoryTsvbMetrics {
@@ -91,7 +97,7 @@ export interface InventoryMetricsConfigWithLens<
   TFormulas extends FormulasConfigMap,
   TCharts extends LensMetricChartConfig
 > {
-  getFormulas: (args?: { schema?: SchemaTypes }) => Promise<FormulasCatalog<TFormulas>>;
+  getFormulas: (args?: { schema?: DataSchemaFormat }) => Promise<FormulasCatalog<TFormulas>>;
   getCharts: () => Promise<TCharts>;
 }
 

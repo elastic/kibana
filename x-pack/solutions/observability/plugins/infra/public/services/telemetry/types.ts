@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type { DataSchemaFormat } from '../../../common/http_api/shared';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;

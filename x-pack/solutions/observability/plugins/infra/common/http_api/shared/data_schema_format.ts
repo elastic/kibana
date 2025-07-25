@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
-
-export enum DataSchemaFormat {
-  ECS = 'ecs',
-  SEMCONV = 'semconv',
-}
 
 export const DataSchemaFormatRT = rt.keyof({
   [DataSchemaFormat.ECS]: null,

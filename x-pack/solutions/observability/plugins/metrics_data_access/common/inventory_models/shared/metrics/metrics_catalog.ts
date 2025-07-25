@@ -6,6 +6,7 @@
  */
 
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import { DataSchemaFormat } from './types';
 import type {
   AggregationConfig,
   BaseMetricsCatalog,
@@ -13,7 +14,6 @@ import type {
   MetricConfigEntry,
   MetricConfigMap,
   ResolvedMetricMap,
-  SchemaTypes,
   SchemaWrappedEntry,
 } from './types';
 
@@ -26,7 +26,7 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
 
   constructor(
     configCatalog: TConfig,
-    private readonly schema: SchemaTypes = 'ecs',
+    private readonly schema: DataSchemaFormat = DataSchemaFormat.ECS,
     options?: {
       includeLegacyMetrics?: boolean;
       legacyMetrics?: Array<keyof TConfig>;
