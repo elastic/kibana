@@ -489,11 +489,14 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 ### Visualization [kibana-visualization-settings]
 
+$$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis` {applies_to}`stack: deprecated 8.10, removed 9.1`
+:   Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB.
+
 $$$visualization-heatmap-maxbuckets$$$`visualization:heatmap:maxBuckets`
 :   The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 $$$visualization-visualize-heatmapChartslibrary$$$`visualization:visualize:legacyHeatmapChartsLibrary`
-:   Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
+:   Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more.
 
 
 ## Change the global settings [kibana-global-settings-reference]
