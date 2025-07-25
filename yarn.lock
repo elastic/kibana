@@ -5826,6 +5826,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-streams@link:x-pack/platform/packages/private/kbn-evals-suite-streams":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals@link:x-pack/platform/packages/shared/kbn-evals":
   version "0.0.0"
   uid ""
