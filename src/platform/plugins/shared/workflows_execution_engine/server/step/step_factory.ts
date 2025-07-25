@@ -14,6 +14,7 @@ import { StepImplementation } from './step_base';
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
 import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
+import { WorkflowState } from '../workflow_context_manager/workflow_state';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -25,7 +26,8 @@ export class StepFactory {
   public create<TStep extends BaseStep>(
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor // this is temporary, we will remove it when we have a proper connector executor
+    connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
+    workflowState: WorkflowState
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -37,9 +39,9 @@ export class StepFactory {
       case 'foreach':
       // return new ForEachStepImpl(step as ForEachStep, contextManager);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, contextManager);
+        return new EnterIfNodeImpl(step as any, contextManager, workflowState);
       case 'exit-if':
-        return new ExitIfNodeImpl(step as any, contextManager);
+        return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
       // return new AtomicStepImpl(step as AtomicStep, contextManager);
       case 'parallel':
@@ -47,7 +49,7 @@ export class StepFactory {
       case 'merge':
       // return new MergeStepImpl(step as MergeStep, contextManager);
       default:
-        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor);
+        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor, workflowState);
     }
   }
 }

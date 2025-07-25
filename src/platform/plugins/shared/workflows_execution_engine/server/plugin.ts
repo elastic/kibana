@@ -14,7 +14,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
 import { graphlib } from '@dagrejs/dagre';
@@ -30,7 +30,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import { RunStepResult } from './step/step_base';
+import { WorkflowState } from './workflow_context_manager/workflow_state';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -63,32 +63,31 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
-      const workflowStartedAt = new Date();
-      let workflowExecutionStatus: ExecutionStatus = ExecutionStatus.RUNNING;
-      let workflowExecutionError: string | null = null;
+
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
+      const workflowExecution = {
+        id: workflowRunId,
+        workflowId: workflow.id,
+        workflowDefinition: workflow.definition,
+        status: ExecutionStatus.PENDING,
+        createdAt: workflowCreatedAt.toISOString(),
+        createdBy: context.createdBy || '', // TODO: set if available
+        lastUpdatedAt: workflowCreatedAt.toISOString(),
+        lastUpdatedBy: context.createdBy || '', // TODO: set if available
+        triggeredBy, // <-- new field for scheduled workflows
+      } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await this.esClient.index({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: workflowRunId,
         refresh: true,
-        document: {
-          id: workflowRunId,
-          workflowId: workflow.id,
-          workflowDefinition: workflow.definition,
-          status: workflowExecutionStatus,
-          createdAt: workflowCreatedAt.toISOString(),
-          startedAt: workflowStartedAt.toISOString(),
-          error: null,
-          createdBy: context.createdBy || '', // TODO: set if available
-          lastUpdatedAt: workflowCreatedAt.toISOString(),
-          lastUpdatedBy: context.createdBy || '', // TODO: set if available
-          finishedAt: null,
-          duration: null,
-          tags: [],
-          description: '',
-          triggeredBy, // <-- new field for scheduled workflows
-        } as any, // EsWorkflowExecution (add triggeredBy to type if needed)
+        document: workflowExecution,
       });
+      const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
+      const workflowState = new WorkflowState(
+        workflowExecution as EsWorkflowExecution,
+        this.esClient,
+        workflowExecutionGraph
+      );
 
       const connectorExecutor = new ConnectorExecutor(
         context.connectorCredentials,
@@ -105,77 +104,36 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
-        workflowExecutionGraph: graphlib.json.read(workflow.executionGraph),
+        workflowExecutionGraph,
       });
 
       // Log workflow execution start
       contextManager.logWorkflowStart();
 
-      try {
-        while (!contextManager.isFinished()) {
-          const currentNode = contextManager.getCurrentStep();
+      await workflowState.startWorkflow();
 
-          if (contextManager.isStepSkipped(currentNode.id)) {
-            contextManager.goToNextStep(); // Skip current step and move to the next one
-            continue; // Skip if step is marked as skipped
-          }
+      try {
+        do {
+          const currentNode = workflowState.getCurrentStep();
+
+          // if (workflowState.getStepStatus(currentNode.id) === ExecutionStatus.SKIPPED) {
+          //   workflowState.goToNextStep();
+          //   continue;
+          // }
 
           const step = new StepFactory().create(
             currentNode as any,
             contextManager,
-            connectorExecutor
+            connectorExecutor,
+            workflowState
           );
 
           await step.run();
+        } while (workflowState.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
 
-          const stepResult: RunStepResult = contextManager.getStepResults()[currentNode.id] || {};
-
-          let stepStatus: ExecutionStatus;
-
-          if (stepResult.error) {
-            stepStatus = ExecutionStatus.FAILED;
-          } else {
-            stepStatus = ExecutionStatus.COMPLETED;
-          }
-
-          if (stepStatus === ExecutionStatus.FAILED) {
-            throw new Error(
-              `Step "${currentNode.id}" failed with error: ${stepResult.error || 'Unknown error'}`
-            );
-          }
-
-          const nodeFromContext = contextManager.getCurrentStep();
-          if (nodeFromContext && nodeFromContext.id === currentNode.id) {
-            // Move to next step in the graph
-            contextManager.goToNextStep();
-          }
-        }
-
-        workflowExecutionStatus = ExecutionStatus.COMPLETED;
-        // Log workflow success
         contextManager.logWorkflowComplete(true);
       } catch (error) {
-        workflowExecutionStatus = ExecutionStatus.FAILED;
-        workflowExecutionError = error instanceof Error ? error.message : String(error);
-        // Log workflow failure
-        // contextManager.logError('Workflow execution failed', error as Error, {
-        //   event: { action: 'workflow-failed', outcome: 'failure' },
-        // });
         contextManager.logWorkflowComplete(false);
-      } finally {
-        await this.esClient.update({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
-          id: workflowRunId,
-          refresh: true,
-          doc: {
-            status: workflowExecutionStatus,
-            error: workflowExecutionError,
-            finishedAt: new Date().toISOString(),
-            duration: new Date().getTime() - workflowStartedAt.getTime(),
-            lastUpdatedAt: new Date().toISOString(),
-            lastUpdatedBy: context.createdBy || '', // TODO: set if available
-          } as any, // EsWorkflowExecution
-        });
       }
     };
 
