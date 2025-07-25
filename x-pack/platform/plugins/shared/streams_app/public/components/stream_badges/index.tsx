@@ -146,11 +146,10 @@ export function DiscoverBadgeButton({
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
-        indexPatterns,
         esqlQuery,
       },
     }),
-    [esqlQuery, indexPatterns]
+    [esqlQuery]
   );
 
   if (!discoverLink || !dataStreamExists || !esqlQuery) {
