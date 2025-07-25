@@ -30,6 +30,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -90,6 +91,7 @@ export interface SearchServiceStartDependencies {
   indexPatterns: DataViewsContract;
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -225,6 +227,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       inspector,
       screenshotMode,
       scriptedFieldsEnabled,
+      share,
     }: SearchServiceStartDependencies
   ): ISearchStart {
     const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
@@ -314,6 +317,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         usageCollector: this.usageCollector!,
         config: config.search.sessions,
         sessionsClient: this.sessionsClient,
+        share,
       }),
       showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {

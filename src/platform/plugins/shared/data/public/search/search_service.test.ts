@@ -17,6 +17,7 @@ import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/moc
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { ISearchStart } from './types';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -63,6 +64,7 @@ describe('Search service', () => {
         inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,
+        share: {} as SharePluginStart,
       });
     });
 
