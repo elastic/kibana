@@ -36,5 +36,6 @@
     "@kbn/rison",
     "@kbn/core-lifecycle-browser",
     "@kbn/expandable-flyout",
+    "@kbn/grouping",
   ]
 }
