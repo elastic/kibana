@@ -35,10 +35,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
       ],
     },
-    mochaReporter: {
-      ...functionalConfig.get('mochaReporter'),
-      captureLogOutput: false,
-      sendToCiStats: true,
-    },
+    // mochaReporter: {
+    //   ...functionalConfig.get('mochaReporter'),
+    //   captureLogOutput: false, // Alternative: DISABLE_CI_LOG_OUTPUT_CAPTURE=true
+    // },
   };
 }
