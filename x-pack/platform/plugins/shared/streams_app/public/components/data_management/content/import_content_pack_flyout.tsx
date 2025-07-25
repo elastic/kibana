@@ -22,18 +22,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
-import { importContent, previewContent } from './content/requests';
+import { importContent, previewContent } from './requests';
 import { ContentPackMetadata } from './content_pack_manifest';
-import { getFormattedError } from '../../util/errors';
+import { getFormattedError } from '../../../util/errors';
+import { prepareIncludePayload } from './utils';
 
 export function ImportContentPackFlyout({
   definition,
   onImport,
   onClose,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.WiredStream.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
@@ -111,8 +112,9 @@ export function ImportContentPackFlyout({
             <EuiSpacer />
 
             <ContentPackObjectsList
+              definition={definition}
               objects={contentPackObjects}
-              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
+              onSelectionChange={setSelectedContentPackObjects}
             />
           </>
         ) : null}
@@ -127,7 +129,7 @@ export function ImportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              disabled={!file || selectedContentPackObjects.length === 0}
+              disabled={!file}
               isLoading={isLoading}
               fill
               onClick={async () => {
@@ -140,9 +142,7 @@ export function ImportContentPackFlyout({
                     http,
                     file,
                     definition,
-                    include: {
-                      objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
-                    },
+                    include: prepareIncludePayload(contentPackObjects, selectedContentPackObjects),
                   });
 
                   setIsLoading(false);
