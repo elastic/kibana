@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
-  const wd = getService('__webdriver__');
+  const log = getService('log');
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
@@ -47,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
     for (const errorEmbeddable of errorEmbeddables) {
-      console.log(await errorEmbeddable.getVisibleText());
+      log.error('GETTING ERRORED EMBEDDABLE TEXT');
+      log.error(await errorEmbeddable.getVisibleText());
     }
     // if (errorEmbeddables.length > 0) {
     //   console.log(await wd.driver.takeScreenshot());
