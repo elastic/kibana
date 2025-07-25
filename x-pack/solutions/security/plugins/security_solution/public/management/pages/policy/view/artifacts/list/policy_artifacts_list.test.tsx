@@ -18,11 +18,14 @@ import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_ut
 import { PolicyArtifactsList } from './policy_artifacts_list';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { ExceptionsListItemGenerator } from '../../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { buildPerPolicyTag } from '../../../../../../../common/endpoint/service/artifacts/utils';
+
+jest.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -55,9 +58,6 @@ describe('Policy details artifacts list', () => {
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
     handleOnDeleteActionCallbackMock = jest.fn();
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: true,
-    });
     render = async (canWriteArtifact = true) => {
       renderResult = mockedContext.render(
         <PolicyArtifactsList
@@ -161,9 +161,9 @@ describe('Policy details artifacts list', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: false,
-    });
+    mockedContext
+      .getUserPrivilegesMockSetter(useUserPrivilegesMock)
+      .set({ canCreateArtifactsByPolicy: false });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock()
     );

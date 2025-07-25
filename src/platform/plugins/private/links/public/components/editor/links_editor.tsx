@@ -72,7 +72,7 @@ export interface LinksEditorProps {
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }
 
-const LinksEditor = ({
+export const LinksEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
   onClose,
@@ -356,7 +356,7 @@ const styles = {
     return css({
       '.linkEditor': {
         maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-        height: 'calc(100vh - var(--euiFixedHeadersOffset, 0))',
+        height: 'var(--kbn-application--content-height)',
         position: 'fixed',
         display: 'flex',
         inlineSize: '50vw',

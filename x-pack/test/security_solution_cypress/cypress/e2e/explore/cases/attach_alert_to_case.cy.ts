@@ -42,12 +42,12 @@ describe('Alerts timeline', () => {
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
     });
 
     it('should not allow user with read only privileges to attach alerts to a new case', () => {
       // Disabled actions for read only users are hidden, so the ... icon is not even shown
-      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
     });
   });
 

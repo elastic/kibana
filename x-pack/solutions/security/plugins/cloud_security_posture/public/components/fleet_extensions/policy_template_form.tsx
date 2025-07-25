@@ -24,7 +24,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
+import {
+  SetupTechnology,
+  NamespaceComboBox,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -71,7 +75,6 @@ import {
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -1018,28 +1021,33 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           </>
         )}
         {shouldRenderAgentlessSelector && (
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
-            disabled={isEditPage}
-            setupTechnology={setupTechnology}
-            isAgentless={!!newPolicy?.supports_agentless}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >
+                    )
                   )
-                )
-              );
-            }}
-          />
+                );
+              }}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+            />
+          </>
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}

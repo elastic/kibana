@@ -17,10 +17,8 @@ All features in the Onechat plugin are developed behind UI settings (feature fla
 
 ```yml
 uiSettings.overrides:
-  onechat:agentApi:enabled: true
-  onechat:mcpServer:enabled: true
-  onechat:esqlToolApi:enabled: true
-  onechat:tools:enabled: true
+  onechat:mcp:enabled: true
+  onechat:api:enabled: true
   onechat:ui:enabled: true
 ```
 
@@ -29,14 +27,12 @@ This will ensure all Onechat features are available in your Kibana instance.
 If running in Serverless or Cloud dev environments, it may be more practical to adjust these via API:
 
 ```
-POST kbn://api/kibana/settings
+POST kbn://internal/kibana/settings
 {
    "changes": {
-      "onechat:agentApi:enabled": true,
-      "onechat:ui:enabled": true,
-      "onechat:tools:enabled": true,
-      "onechat:esqlToolApi:enabled": true,
-      "onechat:mcpServer:enabled": true
+      "onechat:mcp:enabled": true,
+      "onechat:api:enabled": true,
+      "onechat:ui:enabled": true
    }
 }
 ```
@@ -263,7 +259,7 @@ To enable the MCP server, add the following to your Kibana config:
 
 ```yaml
 uiSettings.overrides:
-  onechat:mcpServer:enabled: true
+  onechat:mcp:enabled: true
 ```
 Configure Claude Desktop by adding this to its configuration:
 ```json
@@ -290,20 +286,21 @@ Configure Claude Desktop by adding this to its configuration:
 The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
 
 ```json
-POST kbn://api/chat/tools/esql
+POST kbn://api/chat/tools
 {
   "id": "case_by_id",
   "description": "Find a custom case by id.",
-  "query": "FROM my_cases | WHERE case_id == ?case_id | KEEP title, description | LIMIT 1",
-  "params": {
-    "case_id": {
-      "type": "keyword",
-      "description": "The id of the case to retrieve"
+  "configuration": {
+    "query": "FROM my_cases | WHERE case_id == ?case_id | KEEP title, description | LIMIT 1",
+    "params": {
+      "case_id": {
+        "type": "keyword",
+        "description": "The id of the case to retrieve"
+      }
     }
   },
-  "meta": {
-    "tags": ["salesforce"]
-  }
+  "type": "esql",
+  "tags": ["salesforce"]
 }
 ```
 
@@ -311,7 +308,7 @@ To enable the API, add the following to your Kibana config
 
 ```yaml
 uiSettings.overrides:
-  onechat:esqlToolApi:enabled: true
+  onechat:api:enabled: true
 ```
 ## Chat UI
 To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
@@ -319,12 +316,4 @@ To enable the Chat UI located at `/app/chat/`, add the following to your Kibana 
 ```yaml
 uiSettings.overrides:
   onechat:ui:enabled: true
-```
-
-### Tools UI
-To enable the Tools UI located at `/app/chat/tools`, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:tools:enabled: true
 ```

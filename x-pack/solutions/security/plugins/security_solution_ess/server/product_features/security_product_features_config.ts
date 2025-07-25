@@ -25,6 +25,7 @@ import {
   SECURITY_FEATURE_ID_V3,
   SECURITY_FEATURE_ID_V4,
 } from '@kbn/security-solution-features/constants';
+import { APP_ID } from '@kbn/security-solution-plugin/common';
 
 export const getSecurityProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSecurityConfig => {
@@ -49,7 +50,16 @@ const securityProductFeaturesConfig: Record<
 > = {
   ...securityDefaultProductFeaturesConfig,
   [ProductFeatureSecurityKey.endpointExceptions]: {
-    privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
+    privileges: {
+      all: {
+        ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+        api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+      },
+      read: {
+        ui: ['showEndpointExceptions'],
+        api: [`${APP_ID}-showEndpointExceptions`],
+      },
+    },
   },
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
@@ -119,6 +129,12 @@ const securityProductFeaturesConfig: Record<
                 }
               ),
             },
+            api: [
+              ...(baseFeatureConfig.privileges.all.api ?? []),
+
+              // API access must be also added, as only UI privileges are copied when replacing a deprecated feature
+              `${APP_ID}-writeGlobalArtifacts`,
+            ],
           },
         },
       };

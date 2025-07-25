@@ -144,7 +144,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
       <EuiPopover
         anchorPosition="downLeft"
         button={
-          <EuiToolTip content={actionsToolTip}>
+          <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={actionsToolTip}
               color="text"

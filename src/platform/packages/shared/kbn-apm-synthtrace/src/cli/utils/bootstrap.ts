@@ -10,7 +10,7 @@
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { setIdGeneratorStrategy } from '@kbn/apm-synthtrace-client';
 import { createLogger } from '../../lib/utils/create_logger';
-import { getClients } from './get_clients';
+import { SynthtraceClientsManager } from './clients_manager';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
@@ -37,16 +37,22 @@ export async function bootstrap({
     requestTimeout: 30_000,
   });
 
-  const clients = await getClients({
+  const clientManager = new SynthtraceClientsManager({
+    client,
     logger,
-    packageVersion: runOptions['assume-package-version'],
-    options: {
-      client,
-      logger,
-      concurrency: runOptions.concurrency,
-      kibana: kibanaClient,
+    concurrency: runOptions.concurrency,
+  });
+
+  const clients = clientManager.getClients({
+    kibana: kibanaClient,
+  });
+
+  await clientManager.initFleetPackageForClient({
+    clients: {
+      apmEsClient: clients.apmEsClient,
     },
-    skipBootstrap: skipClientBootstrap,
+    version: runOptions['assume-package-version'],
+    skipInstallation: skipClientBootstrap,
   });
 
   if (runOptions.clean) {

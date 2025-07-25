@@ -22,7 +22,7 @@ export type GenerateEsqlParams = Require<
 const TOOL_NAME = 'GenerateESQLTool';
 
 const toolDetails = {
-  id: 'gnerate-esql-tool',
+  id: 'generate-esql-tool',
   name: TOOL_NAME,
   // note: this description is overwritten when `getTool` is called
   // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
@@ -43,7 +43,6 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
       inference != null &&
       connectorId != null &&
       assistantContext != null &&
-      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration &&
       createLlmInstance != null
     );
   },

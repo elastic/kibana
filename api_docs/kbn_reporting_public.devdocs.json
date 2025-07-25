@@ -970,7 +970,7 @@
             "label": "list",
             "description": [],
             "signature": [
-              "(page?: number, jobIds?: string[]) => Promise<",
+              "(page?: number, perPage?: number, jobIds?: string[]) => Promise<",
               {
                 "pluginId": "@kbn/reporting-public",
                 "scope": "public",
@@ -1002,6 +1002,21 @@
               {
                 "parentPluginId": "@kbn/reporting-public",
                 "id": "def-public.ReportingAPIClient.list.$2",
+                "type": "number",
+                "tags": [],
+                "label": "perPage",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.list.$3",
                 "type": "Array",
                 "tags": [],
                 "label": "jobIds",
@@ -1113,7 +1128,7 @@
             "label": "getScheduledReportInfo",
             "description": [],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, page?: number, perPage?: number) => Promise<",
               "ScheduledReportApiJSON",
               " | undefined>"
             ],
@@ -1130,6 +1145,36 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getScheduledReportInfo.$2",
+                "type": "number",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getScheduledReportInfo.$3",
+                "type": "number",
+                "tags": [],
+                "label": "perPage",
+                "description": [],
+                "signature": [
+                  "number"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,

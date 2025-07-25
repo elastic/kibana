@@ -77,6 +77,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       pageSize,
       alertSampleSizePerShard,
       filter: userFilter,
+      excludeAlertStatuses,
+      excludeAlertTags,
     } = entityAnalyticsConfig;
 
     if (!enabled) {
@@ -115,6 +117,8 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       runtimeMappings,
       weights: [],
       alertSampleSizePerShard,
+      excludeAlertStatuses,
+      excludeAlertTags,
       afterKeys,
       returnScores: true,
       refresh,

@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
@@ -21,7 +20,7 @@ import { Header, ControlType, VariableName, Footer } from './shared_form_compone
 import { IdentifierControlForm } from './identifier_control_form';
 import {
   updateQueryStringWithVariable,
-  getFlyoutStyling,
+  flyoutStyles,
   getVariableSuggestion,
   getRecurrentVariableName,
   validateVariableName,
@@ -42,6 +41,7 @@ interface ESQLControlsFlyoutProps {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
+  ariaLabelledBy: string;
 }
 
 export function ESQLControlsFlyout({
@@ -55,6 +55,7 @@ export function ESQLControlsFlyout({
   cursorPosition,
   initialState,
   closeFlyout,
+  ariaLabelledBy,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -68,7 +69,6 @@ export function ESQLControlsFlyout({
   }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
-  const styling = useMemo(() => getFlyoutStyling(), []);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
@@ -204,12 +204,8 @@ export function ESQLControlsFlyout({
 
   return (
     <>
-      <Header isInEditMode={isControlInEditMode} />
-      <EuiFlyoutBody
-        css={css`
-          ${styling}
-        `}
-      >
+      <Header isInEditMode={isControlInEditMode} ariaLabelledBy={ariaLabelledBy} />
+      <EuiFlyoutBody css={flyoutStyles}>
         <ControlType
           isDisabled={variableType !== ESQLVariableType.VALUES}
           initialControlFlyoutType={controlFlyoutType}

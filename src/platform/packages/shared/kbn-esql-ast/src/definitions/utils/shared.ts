@@ -12,8 +12,7 @@ import type {
   ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../commands_registry/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../parser/constants';
-import { getLastNonWhitespaceChar } from './autocomplete';
+import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../types';
 import type { SupportedDataType } from '../types';
 /**
@@ -116,8 +115,8 @@ export function isRestartingExpression(text: string) {
 export function unescapeColumnName(columnName: string) {
   // TODO this doesn't cover all escaping scenarios... the best thing to do would be
   // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  if (columnName.startsWith('`') && columnName.endsWith('`')) {
+    return columnName.slice(1, -1).replace(/``/g, '`');
   }
   return columnName;
 }
@@ -144,7 +143,66 @@ export function getColumnForASTNode(
   return getColumnByName(formatted, { fields, userDefinedColumns });
 }
 
+function hasWildcard(name: string) {
+  return /\*/.test(name);
+}
+
+function getMatcher(name: string, position: 'start' | 'end' | 'middle' | 'multiple-within') {
+  if (position === 'start') {
+    const prefix = name.substring(1);
+    return (resource: string) => resource.endsWith(prefix);
+  }
+  if (position === 'end') {
+    const prefix = name.substring(0, name.length - 1);
+    return (resource: string) => resource.startsWith(prefix);
+  }
+  if (position === 'multiple-within') {
+    // make sure to remove the * at the beginning of the name if present
+    const safeName = name.startsWith('*') ? name.slice(1) : name;
+    // replace 2 ore more consecutive wildcards with a single one
+    const setOfChars = safeName.replace(/\*{2+}/g, '*').split('*');
+    return (resource: string) => {
+      let index = -1;
+      return setOfChars.every((char) => {
+        index = resource.indexOf(char, index + 1);
+        return index !== -1;
+      });
+    };
+  }
+  const [prefix, postFix] = name.split('*');
+  return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
+}
+
+function getWildcardPosition(name: string) {
+  if (!hasWildcard(name)) {
+    return 'none';
+  }
+  const wildCardCount = name.match(/\*/g)!.length;
+  if (wildCardCount > 1) {
+    return 'multiple-within';
+  }
+  if (name.startsWith('*')) {
+    return 'start';
+  }
+  if (name.endsWith('*')) {
+    return 'end';
+  }
+  return 'middle';
+}
+
 /**
  * Type guard to check if the type is 'param'
  */
 export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
+
+export function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
+  const wildCardPosition = getWildcardPosition(fuzzyName);
+  if (wildCardPosition !== 'none') {
+    const matcher = getMatcher(fuzzyName, wildCardPosition);
+    for (const resourceName of resources) {
+      if (matcher(resourceName)) {
+        return true;
+      }
+    }
+  }
+}

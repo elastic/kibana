@@ -156,7 +156,6 @@ describe('Discover documents layout', () => {
       customization.rowAdditionalLeadingControls
     );
     expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 
   describe('context awareness', () => {

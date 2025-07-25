@@ -14,8 +14,6 @@ import { PresentationPanelError } from '@kbn/presentation-panel-plugin/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
-import './error_embeddable.scss';
-
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput, ReactNode> {

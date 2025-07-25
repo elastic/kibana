@@ -59,6 +59,7 @@ export {
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { buildEsqlQuery } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -68,7 +69,7 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
 
 export {
   isChildOf,
@@ -77,6 +78,7 @@ export {
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  MAX_NESTING_LEVEL,
   isRoot,
 } from './src/shared/hierarchy';
 
@@ -111,6 +113,9 @@ export {
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
   type IngestStreamLifecycleILM,
+  type IngestStreamLifecycleDSL,
+  type IngestStreamLifecycleDisabled,
+  type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
   isDslLifecycle,

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { SpanLinkDetails } from '../../../../common/span_links';
@@ -27,7 +28,6 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { ServiceLink } from '../links/apm/service_link';
-import { getSpanIcon } from '../span_icon/get_span_icon';
 
 interface Props {
   items: SpanLinkDetails[];
@@ -40,7 +40,8 @@ export function SpanLinksTable({ items }: Props) {
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall'
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
   const {

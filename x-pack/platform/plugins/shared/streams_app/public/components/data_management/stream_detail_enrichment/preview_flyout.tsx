@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils';
 import useAsync from 'react-use/lib/useAsync';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
-import { docViewJson } from './doc_viewer_json';
-import { docViewDiff } from './doc_viewer_diff';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
@@ -25,24 +23,16 @@ export const PreviewFlyout = ({
   currentDoc,
   hits,
   setExpandedDoc,
+  docViewsRegistry,
 }: {
   currentDoc?: DataTableRecordWithIndex;
   hits: DataTableRecordWithIndex[];
   setExpandedDoc: (doc?: DataTableRecordWithIndex) => void;
+  docViewsRegistry: DocViewsRegistry;
 }) => {
   const streamName = useSimulatorSelector((state) => state.context.streamName);
   const { core, dependencies } = useKibana();
-  const { data, unifiedDocViewer } = dependencies.start;
-
-  const docViewsRegistry = useMemo(() => {
-    const docViewers = unifiedDocViewer.registry.getAll();
-    const myRegistry = new DocViewsRegistry([
-      docViewers.find((docView) => docView.id === 'doc_view_table')!,
-      docViewDiff,
-      docViewJson,
-    ]);
-    return myRegistry;
-  }, [unifiedDocViewer.registry]);
+  const { data } = dependencies.start;
 
   const { value: streamDataView } = useAsync(() =>
     data.dataViews.create({

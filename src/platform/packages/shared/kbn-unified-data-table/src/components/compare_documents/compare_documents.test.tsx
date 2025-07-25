@@ -19,12 +19,15 @@ import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
 
-jest.mock('react-use/lib/useLocalStorage', () =>
-  jest.fn((key: string, value: unknown) => {
-    mockLocalStorage[key] = JSON.stringify(value);
-    return [value, jest.fn()];
-  })
-);
+jest.mock('../../restorable_state', () => {
+  const real = jest.requireActual('../../restorable_state');
+  return {
+    useRestorableLocalStorage: jest.fn((key: string, storageKey, value: unknown) => {
+      mockLocalStorage[storageKey] = JSON.stringify(value);
+      return real.useRestorableLocalStorage(key, storageKey, value);
+    }),
+  };
+});
 
 let mockDataGridProps: EuiDataGridProps | undefined;
 

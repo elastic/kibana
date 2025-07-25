@@ -14,9 +14,14 @@ import { PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../
 import type { HapiReadableStream } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_prvileged_monitoring_resources';
+import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_privileged_monitoring_resources';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -62,6 +67,11 @@ export const uploadUsersCSVRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+
           await checkAndInitPrivilegedMonitoringResources(context, logger);
 
           const secSol = await context.securitySolution;

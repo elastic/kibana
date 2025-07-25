@@ -65,11 +65,11 @@ export const UpdatedMonitoringEntitySource = z.object({
     .optional(),
 });
 
-export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
-export const MonitoringEntitySource = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: z.string(),
+export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
+export const MonitoringEntitySourceProperties = z.object({
+  name: z.string().optional(),
+  type: z.string().optional(),
+  managed: z.boolean().optional(),
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
@@ -87,6 +87,16 @@ export const MonitoringEntitySource = z.object({
     })
     .optional(),
 });
+
+export type MonitoringEntitySourceNoId = z.infer<typeof MonitoringEntitySourceNoId>;
+export const MonitoringEntitySourceNoId = MonitoringEntitySourceProperties.merge(z.object({}));
+
+export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
+export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
+  z.object({
+    id: z.string(),
+  })
+);
 
 export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
 export const CreateEntitySourceRequestBody = CreateMonitoringEntitySource;
@@ -127,7 +137,7 @@ export const UpdateEntitySourceRequestParams = z.object({
 export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
 
 export type UpdateEntitySourceRequestBody = z.infer<typeof UpdateEntitySourceRequestBody>;
-export const UpdateEntitySourceRequestBody = MonitoringEntitySource;
+export const UpdateEntitySourceRequestBody = MonitoringEntitySourceNoId;
 export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
 
 export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;

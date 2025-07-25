@@ -1,0 +1,191 @@
+{
+  "id": "@kbn/controls-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlsChainingSystem",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlsChainingSystem",
+        "description": [],
+        "signature": [
+          "\"NONE\" | \"HIERARCHICAL\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlsGroupState",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlsGroupState",
+        "description": [],
+        "signature": [
+          "{ readonly enhancements?: Record<string, any> | undefined; readonly controls: Readonly<{ id?: string | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>[]; readonly chainingSystem: \"NONE\" | \"HIERARCHICAL\"; readonly labelPosition: \"oneLine\" | \"twoLine\"; readonly autoApplySelections: boolean; readonly ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlsIgnoreParentSettings",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlsIgnoreParentSettings",
+        "description": [],
+        "signature": [
+          "{ readonly ignoreFilters: boolean; readonly ignoreQuery: boolean; readonly ignoreTimerange: boolean; readonly ignoreValidations: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.ControlsLabelPosition",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlsLabelPosition",
+        "description": [],
+        "signature": [
+          "\"oneLine\" | \"twoLine\""
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/controls-schemas",
+        "id": "def-server.controlsGroupSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "controlsGroupSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ controls: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ id?: string | undefined; controlConfig?: Readonly<{} & {}> | undefined; } & { type: string; order: number; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>[]>; labelPosition: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"oneLine\" | \"twoLine\">; chainingSystem: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"NONE\" | \"HIERARCHICAL\">; enhancements: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any> | undefined>; ignoreParentSettings: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ ignoreFilters: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ignoreQuery: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ignoreTimerange: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; ignoreValidations: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>; autoApplySelections: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

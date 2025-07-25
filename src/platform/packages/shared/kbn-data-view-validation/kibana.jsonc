@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/data-view-validation",
+  "owner": "@elastic/kibana-data-discovery"
+}
