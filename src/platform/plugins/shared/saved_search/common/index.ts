@@ -9,12 +9,15 @@
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
 export { fromSavedSearchAttributes } from './saved_searches_utils';
+export { extractTabs, extractTabsTransformFn } from './service/extract_tabs';
 
 export type {
   DiscoverGridSettings,
   DiscoverGridSettingsColumn,
   SavedSearch,
   SavedSearchAttributes,
+  DiscoverSession,
+  DiscoverSessionTab,
 } from './types';
 
 export enum VIEW_MODE {

@@ -7,34 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
   type DiscoverInternalState,
   InternalStateProvider,
   internalStateActions,
+  useInternalStateDispatch,
+  useInternalStateSelector,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
-import { DiscoverError } from '../../components/common/error_alert';
-import type { DiscoverSessionViewProps } from './components/session_view';
+import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
-  DiscoverSessionView,
+  SingleTabView,
   NoDataPage,
-} from './components/session_view';
+  InitializationError,
+} from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { TABS_ENABLED } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
-import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
+import { useUrl } from './hooks/use_url';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -54,7 +58,6 @@ export const DiscoverMainRoute = ({
   stateStorageContainer,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
-  const rootProfileState = useRootProfile();
   const history = useHistory();
   const [urlStateStorage] = useState(
     () =>
@@ -66,36 +69,64 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-
   const { internalState, runtimeStateManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
   });
-  const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
+
+  return (
+    <InternalStateProvider store={internalState}>
+      <DiscoverMainRouteContent
+        customizationContext={customizationContext}
+        customizationCallbacks={customizationCallbacks}
+        urlStateStorage={urlStateStorage}
+        internalState={internalState}
+        runtimeStateManager={runtimeStateManager}
+      />
+    </InternalStateProvider>
+  );
+};
+
+const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
+  const { core, dataViews } = useDiscoverServices();
+  const history = useHistory();
+  const dispatch = useInternalStateDispatch();
+  const rootProfileState = useRootProfile();
+
+  const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
-      const { dataViews } = services;
-      const [hasESData, hasUserDataView, defaultDataViewExists, userAndSpaceIds] =
-        await Promise.all([
-          dataViews.hasData.hasESData().catch(() => false),
-          dataViews.hasData.hasUserDataView().catch(() => false),
-          dataViews.defaultDataViewExists().catch(() => false),
-          getUserAndSpaceIds(services),
-          internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-        ]);
-
-      internalState.dispatch(internalStateActions.initializeTabs(userAndSpaceIds));
-
+      const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
+        dataViews.hasData.hasESData().catch(() => false),
+        dataViews.hasData.hasUserDataView().catch(() => false),
+        dataViews.defaultDataViewExists().catch(() => false),
+        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+      ]);
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
       };
 
-      internalState.dispatch(internalStateActions.setInitializationState(initializationState));
+      dispatch(internalStateActions.setInitializationState(initializationState));
 
       return initializationState;
+    }
+  );
+
+  const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
+  const [tabsInitializationState, initializeTabs] = useAsyncFunction(
+    async ({
+      discoverSessionId,
+      shouldClearAllTabs,
+    }: {
+      discoverSessionId?: string;
+      shouldClearAllTabs?: boolean;
+    }) => {
+      await dispatch(
+        internalStateActions.initializeTabs({ discoverSessionId, shouldClearAllTabs })
+      ).unwrap();
     }
   );
 
@@ -105,18 +136,46 @@ export const DiscoverMainRoute = ({
     }
   }, [initializeMainRoute, rootProfileState]);
 
+  useEffect(() => {
+    initializeTabs({ discoverSessionId: currentDiscoverSessionId });
+  }, [currentDiscoverSessionId, initializeTabs]);
+
   useUnmount(() => {
-    for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
-      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    for (const tabId of Object.keys(props.runtimeStateManager.tabs.byId)) {
+      dispatch(internalStateActions.disconnectTab({ tabId }));
     }
   });
 
-  if (rootProfileState.rootProfileLoading || mainRouteInitializationState.loading) {
+  useUrl({
+    history,
+    savedSearchId: currentDiscoverSessionId,
+    onNewUrl: () => {
+      initializeTabs({ shouldClearAllTabs: true });
+    },
+  });
+
+  useAlertResultsToast();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: currentDiscoverSessionId || 'new',
+  });
+
+  const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
+  const isLoading =
+    rootProfileState.rootProfileLoading ||
+    mainRouteInitializationState.loading ||
+    areTabsInitializing;
+
+  if (isLoading) {
     return <BrandedLoadingIndicator />;
   }
 
-  if (mainRouteInitializationState.error) {
-    return <DiscoverError error={mainRouteInitializationState.error} />;
+  const error = mainRouteInitializationState.error || tabsInitializationState.error;
+
+  if (error) {
+    return <InitializationError error={error} />;
   }
 
   if (
@@ -133,25 +192,11 @@ export const DiscoverMainRoute = ({
     );
   }
 
-  const sessionViewProps: DiscoverSessionViewProps = {
-    customizationContext,
-    customizationCallbacks,
-    urlStateStorage,
-    internalState,
-    runtimeStateManager,
-  };
-
   return (
-    <InternalStateProvider store={internalState}>
-      <rootProfileState.AppWrapper>
-        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
-          {TABS_ENABLED ? (
-            <TabsView {...sessionViewProps} />
-          ) : (
-            <DiscoverSessionView {...sessionViewProps} />
-          )}
-        </ChartPortalsRenderer>
-      </rootProfileState.AppWrapper>
-    </InternalStateProvider>
+    <rootProfileState.AppWrapper>
+      <ChartPortalsRenderer runtimeStateManager={props.runtimeStateManager}>
+        {TABS_ENABLED ? <TabsView {...props} /> : <SingleTabView {...props} />}
+      </ChartPortalsRenderer>
+    </rootProfileState.AppWrapper>
   );
 };

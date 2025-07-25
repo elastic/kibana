@@ -10,6 +10,7 @@
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { getSavedSearch } from './services/saved_searches';
+export type { DiscoverSessionAttributes } from './saved_objects';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { SavedSearchServerPlugin } = await import('./plugin');

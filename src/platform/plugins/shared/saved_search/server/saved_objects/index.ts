@@ -8,3 +8,4 @@
  */
 
 export { getSavedSearchObjectType } from './search';
+export type { DiscoverSessionAttributes } from './schema';

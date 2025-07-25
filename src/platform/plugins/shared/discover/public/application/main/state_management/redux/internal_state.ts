@@ -16,23 +16,19 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
-  type AnyAction,
-  type Dispatch,
   createListenerMiddleware,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
-  LoadingStatus,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList } from './actions/data_views';
+import { loadDataViewList, initializeTabs } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverAppState } from '../discover_app_state_container';
@@ -40,45 +36,22 @@ import type { DiscoverAppState } from '../discover_app_state_container';
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
-export const defaultTabState: Omit<TabState, keyof TabItem> = {
-  lastPersistedGlobalState: {},
-  dataViewId: undefined,
-  isDataViewLoading: false,
-  dataRequestParams: {
-    timeRangeAbsolute: undefined,
-    timeRangeRelative: undefined,
-    searchSessionId: undefined,
-  },
-  overriddenVisContextAfterInvalidation: undefined,
-  resetDefaultProfileState: {
-    resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
-  },
-  documentsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: [],
-  },
-  totalHitsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: 0,
-  },
-  chartRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: {},
-  },
-  uiState: {},
-};
-
 const initialState: DiscoverInternalState = {
   initializationState: { hasESData: false, hasUserDataView: false },
+  userId: undefined,
+  spaceId: undefined,
+  persistedDiscoverSession: undefined,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
+  tabs: {
+    areInitializing: false,
+    byId: {},
+    allIds: [],
+    unsafeCurrentId: '',
+    recentlyClosedTabIds: [],
+  },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -129,15 +102,6 @@ export const internalStateSlice = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
-
-    setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
-      withTab(state, action, (tab) => {
-        if (action.payload.dataViewId !== tab.dataViewId) {
-          state.expandedDoc = undefined;
-        }
-
-        tab.dataViewId = action.payload.dataViewId;
-      }),
 
     setIsDataViewLoading: (state, action: TabAction<{ isDataViewLoading: boolean }>) =>
       withTab(state, action, (tab) => {
@@ -258,6 +222,23 @@ export const internalStateSlice = createSlice({
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
       state.savedDataViews = action.payload;
     });
+
+    builder.addCase(initializeTabs.pending, (state) => {
+      state.tabs.areInitializing = true;
+    });
+
+    builder.addCase(initializeTabs.fulfilled, (state, action) => {
+      state.userId = action.payload.userId;
+      state.spaceId = action.payload.spaceId;
+      state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
+    });
+
+    builder.addMatcher(
+      (action) => initializeTabs.fulfilled.match(action) || initializeTabs.rejected.match(action),
+      (state) => {
+        state.tabs.areInitializing = false;
+      }
+    );
   },
 });
 
@@ -323,12 +304,7 @@ export const createInternalStateStore = (options: InternalStateDependencies) => 
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
-export type InternalStateDispatch = ThunkDispatch<
-  DiscoverInternalState,
-  InternalStateDependencies,
-  AnyAction
-> &
-  Dispatch<AnyAction>;
+export type InternalStateDispatch = InternalStateStore['dispatch'];
 
 type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
