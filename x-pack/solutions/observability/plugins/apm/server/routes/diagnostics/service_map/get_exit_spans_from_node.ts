@@ -100,13 +100,37 @@ export async function getExitSpansFromSourceNode({
         transactionId: doc?.transaction?.id ?? '',
         serviceNodeName: doc?.service?.node?.name ?? '',
         traceId: doc?.trace?.id ?? '',
+        agentName: doc?.agent?.name ?? '',
         docCount: item?.doc_count ?? 0,
+        isOtel: false,
       };
     }) || [];
 
+  const otelExitSpans =
+    response?.aggregations?.otel_destination_resources?.buckets?.map((item: any) => {
+      const doc = item?.sample_doc?.hits?.hits?.[0]?._source;
+      return {
+        destinationService: doc?.destination?.address ?? '',
+        spanSubType: doc?.span?.subtype ?? '',
+        spanId: doc?.span?.id ?? '',
+        spanType: doc?.span?.type ?? '',
+        transactionId: doc?.transaction?.id ?? '',
+        serviceNodeName: doc?.service?.node?.name ?? '',
+        traceId: doc?.trace?.id ?? '',
+        agentName: doc?.agent?.name ?? '',
+        docCount: item?.doc_count ?? 0,
+        isOtel: true,
+      };
+    }) || [];
+
+  // Combine regular and OTEL exit spans
+  const allExitSpans = [...exitSpans, ...otelExitSpans];
+
   return {
-    exitSpans,
-    totalConnections: exitSpans.length,
+    exitSpans: allExitSpans,
+    otelExitSpans,
+    regularExitSpans: exitSpans,
+    totalConnections: allExitSpans.length,
     rawResponse: response,
     hasMatchingDestinationResources:
       response?.aggregations?.matching_destination_resources?.sample_doc?.hits?.total?.value > 0,

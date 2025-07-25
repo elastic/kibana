@@ -19,6 +19,8 @@ interface DiagnosticResultsProps {
         found: boolean;
         totalConnections: number;
         spans: any[];
+        otelExitSpans?: any[];
+        regularExitSpans?: any[];
         hasMatchingDestinationResources: boolean;
       };
       parentRelationships: {
@@ -53,6 +55,8 @@ export function DiagnosticResults({
   traceId,
 }: DiagnosticResultsProps) {
   const exitSpansList = data?.analysis?.exitSpans?.spans || [];
+  const otelExitSpans = data?.analysis?.exitSpans?.otelExitSpans || [];
+  const regularExitSpans = data?.analysis?.exitSpans?.regularExitSpans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
   const hasMatchingDestinationResources =
     data?.analysis?.exitSpans?.hasMatchingDestinationResources || false;
@@ -77,6 +81,8 @@ export function DiagnosticResults({
         hasMatchingDestinationResources={hasMatchingDestinationResources}
         totalConnections={totalConnections}
         exitSpansList={exitSpansList}
+        otelExitSpans={otelExitSpans}
+        regularExitSpans={regularExitSpans}
         sourceNodeName={sourceNodeName}
         destinationNodeName={destinationNodeName}
       />

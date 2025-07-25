@@ -24,6 +24,8 @@ interface ExitSpansAnalysisProps {
   hasMatchingDestinationResources: boolean;
   totalConnections: number;
   exitSpansList: any[];
+  otelExitSpans?: any[];
+  regularExitSpans?: any[];
   sourceNodeName: string;
   destinationNodeName: string;
 }
@@ -32,6 +34,8 @@ export function ExitSpansAnalysis({
   hasMatchingDestinationResources,
   totalConnections,
   exitSpansList,
+  otelExitSpans = [],
+  regularExitSpans = [],
   sourceNodeName,
   destinationNodeName,
 }: ExitSpansAnalysisProps) {
@@ -83,6 +87,20 @@ export function ExitSpansAnalysis({
                 },
               })}
             </p>
+            {otelExitSpans.length > 0 && (
+              <p style={{ marginTop: '8px' }}>
+                <strong>
+                  {i18n.translate('xpack.apm.serviceMap.diagnosticResults.otelSpansFound', {
+                    defaultMessage:
+                      'OTEL spans detected: {count} of {total} spans use OpenTelemetry instrumentation.',
+                    values: {
+                      count: otelExitSpans.length,
+                      total: exitSpansList.length,
+                    },
+                  })}
+                </strong>
+              </p>
+            )}
           </EuiText>
         </>
       ) : (
@@ -96,7 +114,10 @@ export function ExitSpansAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFound', {
                     defaultMessage: 'No exit spans found for {sourceNode} → {destinationNode}',
-                    values: { sourceNode: sourceNodeName, destinationNode: destinationNodeName },
+                    values: {
+                      sourceNode: sourceNodeName,
+                      destinationNode: destinationNodeName,
+                    },
                   })}
                 </strong>
               </EuiText>

@@ -103,15 +103,12 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     setData(undefined);
     setIsLoading(true);
 
+    console.log('click');
+
     try {
-      if (
-        start &&
-        end &&
-        selectedNode?.id &&
-        form.sourceNode &&
-        form.destinationNode &&
-        form.traceId
-      ) {
+      if (start && end && form.sourceNode && form.destinationNode && form.traceId) {
+        console.log('passed validation');
+
         const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
           params: {
             body: {
@@ -127,6 +124,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         setData(response);
       } else {
+        console.log('failed validation');
         // If validation fails, ensure loading is stopped
         setIsLoading(false);
       }
@@ -153,7 +151,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       ownFocus
       onClose={onClose}
       size="m"
-      type="push"
       style={{ zIndex: 20000 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"

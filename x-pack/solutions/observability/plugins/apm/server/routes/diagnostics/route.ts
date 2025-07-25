@@ -142,12 +142,14 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
           found: exitSpans.exitSpans.length > 0,
           totalConnections: exitSpans.totalConnections,
           spans: exitSpans.exitSpans,
+          otelExitSpans: exitSpans.otelExitSpans,
+          regularExitSpans: exitSpans.regularExitSpans,
           hasMatchingDestinationResources: exitSpans.hasMatchingDestinationResources,
         },
         parentRelationships: {
           found: destinationParentIds.hasParent,
           documentCount: destinationParentIds.response?.hits?.hits?.length || 0,
-          sourceSpanIds: sourceSpanIds.spanIds.map(String),
+          sourceSpanIds: sourceSpanIds.spanIds.map((id) => String(id)),
         },
         traceCorrelation: {
           found: traceCorrelation.analysis.foundInBothNodes,

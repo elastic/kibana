@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiBadge } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface ExitSpanFields {
-  'span.destination.service.resource'?: string;
-  'span.subtype'?: string;
-  'span.id'?: string;
-  'span.type'?: string;
-  'transaction.id'?: string;
-  'service.node.name'?: string;
-  'trace.id'?: string;
+  destinationService?: string;
+  spanSubType?: string;
+  spanId?: string;
+  spanType?: string;
+  transactionId?: string;
+  serviceNodeName?: string;
+  traceId?: string;
+  agentName?: string;
+  docCount?: number;
+  isOtel?: boolean;
 }
 
 export interface HighlightedExitSpansTableProps {
@@ -33,37 +37,71 @@ export interface HighlightedExitSpansTableProps {
 const columns: Array<EuiBasicTableColumn<ExitSpanFields>> = [
   {
     field: 'destinationService',
-    name: 'Destination Service',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.destinationService', {
+      defaultMessage: 'Destination Service',
+    }),
+    render: (value: string | undefined, item: ExitSpanFields) => (
+      <div>
+        {value || <em>—</em>}
+        {item.isOtel && (
+          <div style={{ marginTop: '4px' }}>
+            <EuiBadge color="accent" size="s">
+              {i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.otelBadge', {
+                defaultMessage: 'OTEL (destination.address)',
+              })}
+            </EuiBadge>
+          </div>
+        )}
+      </div>
+    ),
+  },
+  {
+    field: 'agentName',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.agentName', {
+      defaultMessage: 'Agent',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'spanSubType',
-    name: 'Subtype',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.subtype', {
+      defaultMessage: 'Subtype',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'spanId',
-    name: 'Span ID',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.spanId', {
+      defaultMessage: 'Span ID',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'spanType',
-    name: 'Span Type',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.type', {
+      defaultMessage: 'Type',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'transactionId',
-    name: 'Transaction ID',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.transactionId', {
+      defaultMessage: 'Transaction ID',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'serviceNodeName',
-    name: 'Service Node',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.serviceNode', {
+      defaultMessage: 'Service Node',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
     field: 'traceId',
-    name: 'Trace ID',
+    name: i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.traceId', {
+      defaultMessage: 'Trace ID',
+    }),
     render: (value: string | undefined) => value || <em>—</em>,
   },
 ];

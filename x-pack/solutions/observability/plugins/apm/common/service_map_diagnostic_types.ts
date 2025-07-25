@@ -11,6 +11,8 @@ export interface ServiceMapDiagnosticResponse {
       found: boolean;
       totalConnections: number;
       spans: any[];
+      otelExitSpans?: any[];
+      regularExitSpans?: any[];
       hasMatchingDestinationResources: boolean;
     };
     parentRelationships: {
