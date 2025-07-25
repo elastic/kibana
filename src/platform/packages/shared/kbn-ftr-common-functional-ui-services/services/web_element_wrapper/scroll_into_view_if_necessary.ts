@@ -65,7 +65,7 @@ export function scrollIntoViewIfNecessary(
 
   // First, let the browser do a minimal scroll if needed
   if (!isFullyVisible()) {
-    target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    target.scrollIntoView();
   }
 
   // Re‑measure after the initial scroll
