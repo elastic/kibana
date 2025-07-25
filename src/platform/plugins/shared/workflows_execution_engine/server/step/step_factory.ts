@@ -38,11 +38,11 @@ export class StepFactory {
 
     switch (stepType) {
       case 'enter-foreach':
-        return new EnterForeachNodeImpl(step as any, contextManager, workflowState);
+        return new EnterForeachNodeImpl(step as any, workflowState);
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, contextManager, workflowState);
+        return new EnterIfNodeImpl(step as any, workflowState);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':

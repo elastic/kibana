@@ -82,12 +82,12 @@ export class WorkflowsExecutionEnginePlugin
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
-      const workflowState = new WorkflowExecutionRuntimeManager(
-        workflowExecution as EsWorkflowExecution,
+      const workflowRuntime = new WorkflowExecutionRuntimeManager({
+        workflowExecution: workflowExecution as EsWorkflowExecution,
         workflowExecutionRepository,
         stepExecutionRepository,
-        workflowExecutionGraph
-      );
+        workflowExecutionGraph,
+      });
 
       const connectorExecutor = new ConnectorExecutor(
         context.connectorCredentials,
@@ -105,35 +105,31 @@ export class WorkflowsExecutionEnginePlugin
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
         workflowExecutionGraph,
-        workflowState,
+        workflowState: workflowRuntime,
       });
 
       // Log workflow execution start
       contextManager.logWorkflowStart();
 
-      await workflowState.startWorkflow();
+      await workflowRuntime.start();
 
       try {
         do {
-          const currentNode = workflowState.getCurrentStep();
-
-          // if (workflowState.getStepStatus(currentNode.id) === ExecutionStatus.SKIPPED) {
-          //   workflowState.goToNextStep();
-          //   continue;
-          // }
+          const currentNode = workflowRuntime.getCurrentStep();
 
           const step = new StepFactory().create(
             currentNode as any,
             contextManager,
             connectorExecutor,
-            workflowState
+            workflowRuntime
           );
 
           await step.run();
-        } while (workflowState.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
+        } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
 
         contextManager.logWorkflowComplete(true);
       } catch (error) {
+        workflowRuntime.fail(error);
         contextManager.logWorkflowComplete(false);
       }
     };

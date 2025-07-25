@@ -15,6 +15,14 @@ export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
   constructor(private esClient: ElasticsearchClient) {}
 
+  // public async searchStepExecutionsByExecutionId(
+  //   executionId: string
+  // ): Promise<EsWorkflowStepExecution[]> {
+  //   // TODO: To be implemented
+  //   // Will be used to fetch step executions by execution ID during state recovery
+  //   return [];
+  // }
+
   public async createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
     await this.esClient.index({
       index: this.indexName,

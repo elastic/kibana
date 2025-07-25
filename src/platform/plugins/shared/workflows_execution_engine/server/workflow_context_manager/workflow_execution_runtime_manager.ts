@@ -13,20 +13,49 @@ import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 
+interface WorkflowExecutionRuntimeManagerInit {
+  workflowExecution: EsWorkflowExecution;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowExecutionGraph: graphlib.Graph;
+}
+
+/**
+ * Manages the runtime execution state of a workflow, including step execution, results, and transitions.
+ *
+ * The `WorkflowExecutionRuntimeManager` class is responsible for orchestrating the execution of workflow steps,
+ * tracking their statuses, results, and runtime states, and updating the overall workflow execution status.
+ * It maintains the topological order of steps, supports step navigation, and interacts with repositories to persist
+ * execution data.
+ *
+ * Key responsibilities:
+ * - Tracks execution status, results, and runtime state for each workflow step.
+ * - Navigates between steps according to topological order, skipping steps as needed.
+ * - Initiates and finalizes step and workflow executions, updating persistent storage.
+ * - Handles workflow completion and error propagation.
+ *
+ * @remarks
+ * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
+ * and uses topological sorting to determine execution order.
+ */
 export class WorkflowExecutionRuntimeManager {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private stepResults: Map<string, RunStepResult> = new Map();
   private stepStates: Map<string, Record<string, any> | undefined> = new Map();
-  private workflowStartedAt: Date | undefined = undefined;
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
 
-  constructor(
-    private workflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
-    private stepExecutionRepository: StepExecutionRepository,
-    private workflowExecutionGraph: graphlib.Graph
-  ) {
+  public workflowExecution: EsWorkflowExecution;
+  private workflowExecutionRepository: WorkflowExecutionRepository;
+  private stepExecutionRepository: StepExecutionRepository;
+  private workflowExecutionGraph: graphlib.Graph;
+
+  constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
+    this.workflowExecution = workflowExecutionRuntimeManagerInit.workflowExecution;
+    this.workflowExecutionRepository =
+      workflowExecutionRuntimeManagerInit.workflowExecutionRepository;
+    this.stepExecutionRepository = workflowExecutionRuntimeManagerInit.stepExecutionRepository;
+    this.workflowExecutionGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
   }
 
@@ -94,7 +123,7 @@ export class WorkflowExecutionRuntimeManager {
       workflowId, // Replace with actual workflow ID
       workflowRunId,
       stepId: nodeId,
-      topologicalIndex: 0, // TODO: this.topologicalOrder.indexOf(stepId),
+      topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
     } as Partial<EsWorkflowStepExecution>;
@@ -119,6 +148,7 @@ export class WorkflowExecutionRuntimeManager {
     const executionTimeMs =
       completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
     const stepExecutionUpdate = {
+      id: startedStepExecution.id,
       status: stepStatus,
       completedAt: completedAt.toISOString(),
       executionTimeMs,
@@ -160,7 +190,7 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public async startWorkflow(): Promise<void> {
+  public async start(): Promise<void> {
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
       status: ExecutionStatus.RUNNING,
@@ -173,21 +203,32 @@ export class WorkflowExecutionRuntimeManager {
     };
   }
 
-  public async finishWorkflow(): Promise<void> {
-    const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+  public async fail(error: any): Promise<void> {
+    const currentStep = this.getCurrentStep();
+
+    if (currentStep) {
+      await this.setStepResult(currentStep.id, {
+        output: undefined,
+        error,
+      });
+    }
+
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
-      status: ExecutionStatus.RUNNING,
-      startedAt: this.workflowStartedAt?.toISOString(),
+      status: ExecutionStatus.FAILED,
+      error: String(error),
     };
-    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+    await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
     this.workflowExecution = {
       ...this.workflowExecution,
-      ...updatedWorkflowExecution,
+      ...workflowExecutionUpdate,
     };
   }
 
   private async updateWorkflowState(): Promise<void> {
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+      id: this.workflowExecution.id,
+    };
 
     if (this.isWorkflowFinished()) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
@@ -207,10 +248,12 @@ export class WorkflowExecutionRuntimeManager {
       const startedAt = new Date(this.workflowExecution.startedAt);
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
-      workflowExecutionUpdate.duration = completeDate.getTime() - (startedAt.getTime() || 0);
-      await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
+      workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
     }
 
+    // TODO: Consider saving runtime state to workflow execution document
+
+    await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
     this.workflowExecution = {
       ...this.workflowExecution,
       ...workflowExecutionUpdate,
