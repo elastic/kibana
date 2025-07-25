@@ -12,7 +12,7 @@ import { selectServiceLocationsState } from '../../../state';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { useEnablement } from '../../../hooks';
 
-export const useCanUsePublicLocById = (configId: string): boolean => {
+export const useCanUsePublicLocById = (configId: string) => {
   const { allConfigs } = useSelector(selectOverviewStatus);
   const { isServiceAllowed } = useEnablement();
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
