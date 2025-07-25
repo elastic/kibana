@@ -13,14 +13,14 @@ interface PipelineTreeNodeLabelProps {
   pipelineName: string;
   isManaged: boolean;
   isDeprecated: boolean;
-  setSelected: () => void;
+  onClick: () => void;
 }
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
   isDeprecated,
-  setSelected,
+  onClick,
 }: PipelineTreeNodeLabelProps) => {
   return (
     <EuiFlexGroup
@@ -33,7 +33,7 @@ export const PipelineTreeNodeLabel = ({
       <EuiFlexItem grow={8 + (!isDeprecated + !isManaged)}>
         <EuiLink
           color="text"
-          onClick={setSelected}
+          onClick={onClick}
           data-test-subj={`pipelineTreeNodeLink-${pipelineName}`}
         >
           {pipelineName}

@@ -18,7 +18,7 @@ import { PipelineTreeNodeLabel, MorePipelinesLabel } from '../tree_node_labels';
 export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
   selectedPipeline: string,
-  setSelectedPipeline: (pipelineName: string) => void,
+  clickTreeNode: (pipelineName: string) => void,
   clickMorePipelines: (name: string) => void,
   level: number = 1
 ): Node => {
@@ -29,7 +29,7 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
-        setSelected={() => setSelectedPipeline(treeNode.pipelineName)}
+        onClick={() => clickTreeNode(treeNode.pipelineName)}
       />
     ),
     className:
@@ -61,7 +61,7 @@ export const createTreeNodesFromPipelines = (
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, clickMorePipelines,level + 1)
+      createTreeNodesFromPipelines(node, selectedPipeline, clickTreeNode, clickMorePipelines,level + 1)
     );
   });
   return currentNode;

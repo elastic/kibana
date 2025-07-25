@@ -20,6 +20,7 @@ import {
   EuiContextMenu,
   EuiPopover,
 } from '@elastic/eui';
+import { Location } from 'history';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
@@ -39,13 +40,20 @@ import { PipelineDeleteModal } from './delete_modal';
 import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
 
+const getPipelineNameFromLocation = (location: Location) => {
+  const params = new URLSearchParams(location.search);
+  return params.get('pipeline');
+};
+
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,
   location,
 }) => {
   const { services } = useKibana();
 
-  const [showFlyout, setShowFlyout] = useState<boolean>(false);
+  const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
+
+  const [showFlyout, setShowFlyout] = useState<boolean>(pipelineNameFromLocation !== null);
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const [pipelinesToDelete, setPipelinesToDelete] = useState<Pipeline[]>([]);
@@ -67,6 +75,11 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const goToClonePipeline = (clonedPipelineName: string) => {
     const encodedParam = encodeURIComponent(clonedPipelineName);
     history.push(getClonePath({ clonedPipelineName: encodedParam }));
+  };
+
+  const goToCreatePipeline = (pipelineName: string) => {
+    const encodedParam = encodeURIComponent(pipelineName);
+    history.push(getCreatePath({ pipelineName: encodedParam }));
   };
 
   const goHome = () => {
@@ -251,8 +264,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
       {showFlyout && (
         <PipelineFlyout
-          location={location}
+          pipelineNameFromLocation={pipelineNameFromLocation ?? ''}
           onClose={goHome}
+          onCreateClick={goToCreatePipeline}
           onEditClick={goToEditPipeline}
           onCloneClick={goToClonePipeline}
           onDeleteClick={setPipelinesToDelete}

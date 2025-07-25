@@ -20,7 +20,7 @@ export interface PipelineStructureTreeProps {
    * when the user clicks on the last "+X more pipelines" tree node.
    */
   isExtension: boolean;
-  setSelectedPipeline: (name: string) => void;
+  clickTreeNode: (name: string) => void;
   clickMorePipelines: (name: string) => void;
   goBack: () => void;
 }
@@ -36,7 +36,7 @@ export const PipelineStructureTree = React.memo(
     pipelineTree,
     selectedPipeline,
     isExtension,
-    setSelectedPipeline,
+    clickTreeNode,
     clickMorePipelines,
     goBack,
   }: PipelineStructureTreeProps) => {
@@ -46,7 +46,7 @@ export const PipelineStructureTree = React.memo(
     const treeNode = createTreeNodesFromPipelines(
       pipelineTree,
       selectedPipeline,
-      setSelectedPipeline,
+      clickTreeNode,
       clickMorePipelines,
     );
 

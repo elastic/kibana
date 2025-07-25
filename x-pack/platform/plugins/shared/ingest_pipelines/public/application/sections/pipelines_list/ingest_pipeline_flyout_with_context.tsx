@@ -13,7 +13,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { AuthorizationProvider } from '@kbn/es-ui-shared-plugin/public';
-import { EuiFlyout } from '@elastic/eui';
 import {
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,
@@ -25,16 +24,24 @@ import { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_w
 
 import { KibanaRenderContextProvider, KibanaContextProvider } from '../../../shared_imports';
 import { PipelineDeleteModal } from './delete_modal';
-import { FlyoutContent } from './flyout_content';
+import { PipelineFlyout } from './pipeline_flyout';
 
 export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithContextProps> = ({
   coreServices,
   services,
+  ingestPipelineName,
   onClose,
   reload,
 }) => {
   const locator = services.share.url.locators.get<IngestPipelinesParams>(
     INGEST_PIPELINES_APP_LOCATOR
+  );
+
+  const createPipeline = useCallback(
+    (name: string) => {
+      locator?.navigate({ page: INGEST_PIPELINES_PAGES.CREATE, pipelineId: name });
+    },
+    [locator]
   );
 
   const editPipeline = useCallback(
@@ -60,21 +67,15 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
         httpClient={coreServices.http}
       >
         <KibanaContextProvider services={services}>
-          <EuiFlyout
-            onClose={goHome}
-            aria-labelledby="pipelineDetailsFlyoutTitle"
-            data-test-subj="pipelineDetails"
-            size="l"
-          >
-            <FlyoutContent
-              embedded={true}
-              pipeline={ingestPipelineName}
-              onClose={onClose}
-              onEditClick={editPipeline}
-              onCloneClick={clonePipeline}
-              onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
-            />
-          </EuiFlyout>
+          <PipelineFlyout
+            embedded={true}
+            pipelineNameFromLocation={ingestPipelineName}
+            onClose={onClose}
+            onCreateClick={createPipeline}
+            onEditClick={editPipeline}
+            onCloneClick={clonePipeline}
+            onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
+          />
           {pipelinesToDelete?.length > 0 ? (
             <PipelineDeleteModal
               callback={() => {

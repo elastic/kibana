@@ -7,5 +7,5 @@
 
 export { DetailsPanel } from './details_panel';
 export { TreePanel } from './tree_panel';
-export { PipelineNotFoundFlyout } from './not_found_flyout';
+export { NotFoundPanel } from './not_found_panel';
 export { FlyoutFooter } from './flyout_footer';

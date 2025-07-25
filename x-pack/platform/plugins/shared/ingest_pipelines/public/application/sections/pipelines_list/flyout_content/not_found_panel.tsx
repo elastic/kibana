@@ -16,49 +16,61 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { Error, useKibana } from '../../../../shared_imports';
-import { getCreatePath } from '../../../services/navigation';
+import { Error } from '../../../../shared_imports';
 import { getErrorText, isIntegrationsPipeline } from '../../utils';
 
 interface Props {
   pipelineName: string;
   error: Error;
+  displayWarning: boolean;
+  onCreatePipeline: () => void;
 }
 
-export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ pipelineName, error }) => {
-  const { history } = useKibana().services;
+export const NotFoundPanel: FunctionComponent<Props> = ({
+  pipelineName,
+  error,
+  displayWarning,
+  onCreatePipeline,
+}) => {
   const renderErrorCallOut = () => {
-    if (error.statusCode === 404 && isIntegrationsPipeline(pipelineName)) {
+    const isCustom = isIntegrationsPipeline(pipelineName);
+    if (displayWarning || (error.statusCode === 404 && isCustom)) {
       return (
         <EuiCallOut
           title={
-            <FormattedMessage
-              id="xpack.ingestPipelines.list.missingCustomPipeline.title"
-              defaultMessage="Custom pipeline does not exist"
-            />
+            isCustom ? (
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.missingCustomPipeline.title"
+                defaultMessage="Custom pipeline does not exist"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.missingPipeline.title"
+                defaultMessage="The pipeline {pipelineName} does not exist."
+                values={{
+                  pipelineName: <EuiCode>{pipelineName}</EuiCode>,
+                }}
+              />
+            )
           }
           color="warning"
           iconType="warning"
           data-test-subj="missingCustomPipeline"
         >
-          <p data-test-subj="cause">
-            <FormattedMessage
-              id="xpack.ingestPipelines.list.missingCustomPipeline.text"
-              defaultMessage="The pipeline {pipelineName} does not exist."
-              values={{
-                pipelineName: <EuiCode>{pipelineName}</EuiCode>,
-              }}
-            />
-          </p>
+          {isCustom && (
+            <p data-test-subj="cause">
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.missingCustomPipeline.text"
+                defaultMessage="The pipeline {pipelineName} does not exist."
+                values={{
+                  pipelineName: <EuiCode>{pipelineName}</EuiCode>,
+                }}
+              />
+            </p>
+          )}
           <EuiButton
             color="warning"
-            {...reactRouterNavigate(
-              history,
-              getCreatePath({
-                pipelineName,
-              })
-            )}
+            onClick={onCreatePipeline}
             data-test-subj="createCustomPipeline"
           >
             <FormattedMessage

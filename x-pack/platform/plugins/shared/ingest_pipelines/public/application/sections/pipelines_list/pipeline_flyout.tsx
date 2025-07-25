@@ -8,45 +8,41 @@ import React, { FunctionComponent, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiSplitPanel } from '@elastic/eui';
-import { Location } from 'history';
-import { FlyoutFooter, DetailsPanel, TreePanel, PipelineNotFoundFlyout } from './flyout_content';
+import { FlyoutFooter, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import { Pipeline } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
 export interface Props {
+  pipelineNameFromLocation: string;
+  onClose: () => void;
+  onCreateClick: (pipelineName: string) => void;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;
-  onClose: () => void;
   embedded?: boolean;
 }
 
-const getPipelineNameFromLocation = (location: Location) => {
-  const params = new URLSearchParams(location.search);
-  return params.get('pipeline');
-};
-
 export const PipelineFlyout: FunctionComponent<Props> = ({
+  pipelineNameFromLocation,
   onClose,
+  onCreateClick,
   onEditClick,
   onCloneClick,
   onDeleteClick,
   embedded,
 }) => {
   const {
-    services: { history, api },
+    services: { api },
   } = useKibana();
 
-  const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
-
-  const [pipelineName, setPipelineName] = useState(pipelineNameFromLocation ?? '');
-  const [treeRootStack, setTreeRootStack] = useState([pipelineNameFromLocation ?? '']);
+  const [pipelineName, setPipelineName] = useState(pipelineNameFromLocation);
+  const [treeRootStack, setTreeRootStack] = useState([pipelineNameFromLocation]);
 
   const { data: pipeline, isLoading, error } = api.useLoadPipeline(pipelineName);
-  const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1));
+  const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1) ?? '');
 
   const pipelineTree =
-    treeData?.pipelineStructureTree?.children.length > 0
+    treeData?.pipelineStructureTree?.children && treeData.pipelineStructureTree.children.length > 0
       ? treeData.pipelineStructureTree
       : undefined;
 
@@ -61,53 +57,46 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
         </SectionLoading>
       )}
 
-      {error && embedded ? (
-        <EuiFlyout
-          onClose={onClose}
-          aria-labelledby="pipelineDetailsFlyoutTitle"
-          data-test-subj="pipelineDetails"
-          size="m"
-          maxWidth={550}
-        >
-          <PipelineNotFoundFlyout pipelineName={pipelineName} error={error} />
-        </EuiFlyout>
-      ) : (
-        <EuiFlyout
-          onClose={onClose}
-          aria-labelledby="pipelineDetailsFlyoutTitle"
-          data-test-subj="pipelineDetails"
-          size="l"
-          maxWidth={pipelineTree ? 1100 : 550}
-        >
-          <EuiSplitPanel.Outer direction="row" grow={true}>
-            {pipelineTree && (
-              <TreePanel
-                pipelineTree={pipelineTree}
-                selectedPipeline={pipelineName}
-                setSelectedPipeline={setPipelineName}
-                setTreeRootStack={setTreeRootStack}
-                isExtension={treeRootStack.length > 1}
-              />
-            )}
-
-            {error ? (
-              <PipelineNotFoundFlyout pipelineName={pipelineName} onClose={onClose} error={error} />
-            ) : (
-              pipeline && <DetailsPanel pipeline={pipeline} />
-            )}
-          </EuiSplitPanel.Outer>
-
-          {pipeline && (
-            <FlyoutFooter
-              pipeline={pipeline}
-              onEditClick={onEditClick}
-              onCloneClick={onCloneClick}
-              onDeleteClick={onDeleteClick}
-              onClose={onClose}
+      <EuiFlyout
+        onClose={onClose}
+        aria-labelledby="pipelineDetailsFlyoutTitle"
+        data-test-subj="pipelineDetails"
+        size="l"
+        maxWidth={pipelineTree ? 1100 : 550}
+      >
+        <EuiSplitPanel.Outer direction="row" grow={true} responsive={false}>
+          {pipelineTree && (
+            <TreePanel
+              pipelineTree={pipelineTree}
+              selectedPipeline={pipelineName}
+              clickTreeNode={setPipelineName}
+              setTreeRootStack={setTreeRootStack}
+              isExtension={treeRootStack.length > 1}
             />
           )}
-        </EuiFlyout>
-      )}
+
+          {error ? (
+            <NotFoundPanel
+              pipelineName={pipelineName}
+              onCreatePipeline={() => onCreateClick(pipelineName)}
+              error={error}
+              displayWarning={pipelineName !== pipelineNameFromLocation}
+            />
+          ) : (
+            pipeline && <DetailsPanel pipeline={pipeline} />
+          )}
+        </EuiSplitPanel.Outer>
+
+        {pipeline && (
+          <FlyoutFooter
+            pipeline={pipeline}
+            onEditClick={onEditClick}
+            onCloneClick={onCloneClick}
+            onDeleteClick={onDeleteClick}
+            onClose={onClose}
+          />
+        )}
+      </EuiFlyout>
     </>
   );
 };
