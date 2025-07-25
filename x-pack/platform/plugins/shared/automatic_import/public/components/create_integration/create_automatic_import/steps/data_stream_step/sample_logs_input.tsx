@@ -8,10 +8,10 @@
 import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiFilePicker, EuiFormRow, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { isPlainObject } from 'lodash/fp';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SamplesFormat } from '../../../../../../common';
 import { partialShuffleArray } from '../../../../../../common';
 import { FRONTEND_SAMPLE_ROWS } from '../../../../../../common/constants';
@@ -217,7 +217,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
   const { setIntegrationSettings } = useActions();
   const [isParsing, setIsParsing] = useState(false);
   const [sampleFileError, setSampleFileError] = useState<string>();
-  const { docLinks } = useKibana().services
+  const { docLinks } = useKibana().services;
   const AUTOMATIC_IMPORT_DOCUMENTATION_URL = docLinks?.links.siem.automaticImport;
 
   const onChangeLogsSample = useCallback(
@@ -299,7 +299,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
     return (
       <EuiText color="danger" size="xs">
         <span>
-          {`${sampleFileError  }. ${  i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX}`}
+          {`${sampleFileError}. ${i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX}`}
           <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
             {i18n.LOGS_SAMPLE_ERROR.DOCUMENTATION_LINK_TEXT}
           </EuiLink>
