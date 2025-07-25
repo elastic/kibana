@@ -27,8 +27,8 @@ export const WorkflowSettingsSchema = z.object({
 
 /* --- Triggers --- */
 export const DetectionRuleTriggerSchema = z.object({
-  id: z.string().min(1),
   type: z.literal('triggers.elastic.detectionRule'),
+  enabled: z.boolean().optional().default(true),
   with: z.union([
     z.object({ rule_id: z.string().min(1) }),
     z.object({ rule_name: z.string().min(1) }),
@@ -36,8 +36,8 @@ export const DetectionRuleTriggerSchema = z.object({
 });
 
 export const ScheduledTriggerSchema = z.object({
-  id: z.string().min(1),
   type: z.literal('triggers.elastic.scheduled'),
+  enabled: z.boolean().optional().default(true),
   with: z.union([
     z.object({
       every: z.string().min(1),
@@ -48,8 +48,8 @@ export const ScheduledTriggerSchema = z.object({
 });
 
 export const ManualTriggerSchema = z.object({
-  id: z.string().min(1),
   type: z.literal('triggers.elastic.manual'),
+  enabled: z.boolean().optional().default(true),
 });
 
 export const TriggerSchema = z.discriminatedUnion('type', [
