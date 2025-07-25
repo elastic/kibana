@@ -45,5 +45,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
         total,
       });
     }
+
+    this.workflowState.goToNextStep();
   }
 }

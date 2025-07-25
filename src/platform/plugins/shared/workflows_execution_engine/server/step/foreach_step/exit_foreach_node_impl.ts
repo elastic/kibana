@@ -34,5 +34,6 @@ export class ExitForeachNodeImpl implements StepImplementation {
 
     await this.workflowState.setStepState(this.step.startNodeId, undefined);
     await this.workflowState.finishStep(this.step.startNodeId);
+    this.workflowState.goToNextStep();
   }
 }
