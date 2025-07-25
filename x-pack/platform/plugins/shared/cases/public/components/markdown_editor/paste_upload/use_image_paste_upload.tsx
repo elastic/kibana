@@ -16,16 +16,17 @@ import { SUPPORTED_PASTE_MIME_TYPES } from '../constants';
 import { constructFileKindIdByOwner } from '../../../../common/files';
 import { type PasteUploadState, UploadPhase, ActionType } from './types';
 import { reducer } from './reducer';
-import { canUpload, getTextarea, isOwner, markdownImage } from './utils';
+import { canUpload, getTextarea, markdownImage } from './utils';
 import { useUploadStart } from './use_upload_start';
 import { useUploadComplete } from './use_upload_complete';
 import { useFileUploadApi } from './use_file_upload_api';
+import { type Owner } from '../../../../common/constants/types';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
   field: FieldHook<string>;
   caseId: string;
-  owner: string;
+  owner: Owner;
   fileKindId: string;
 }
 
@@ -64,7 +65,7 @@ export function useImagePasteUpload({
 
   const replacePlaceholder = useCallback(
     (file: DoneNotification, placeholder: string) => {
-      if (!textarea || !isOwner(owner)) return;
+      if (!textarea) return;
       const newText = textarea.value.replace(
         placeholder,
         markdownImage(

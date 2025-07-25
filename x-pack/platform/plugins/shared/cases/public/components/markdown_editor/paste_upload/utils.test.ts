@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { markdownImage, getTextarea, isOwner, canUpload } from './utils';
+import { markdownImage, getTextarea, canUpload } from './utils';
 import type { MarkdownEditorRef } from '../types';
 import type { UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 
@@ -39,15 +39,6 @@ describe('utils', () => {
       const callbackRef: React.ForwardedRef<MarkdownEditorRef | null> = () => {};
       const result = getTextarea(callbackRef);
       expect(result).toBeNull();
-    });
-  });
-  describe('isOwner', () => {
-    it('returns true for a valid owner', () => {
-      expect(isOwner('cases')).toBe(true);
-    });
-
-    it('returns false for an invalid owner', () => {
-      expect(isOwner('notAnOwner')).toBe(false);
     });
   });
   describe('canUpload', () => {

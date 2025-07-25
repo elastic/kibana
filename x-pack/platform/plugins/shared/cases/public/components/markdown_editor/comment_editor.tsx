@@ -11,6 +11,8 @@ import React, { forwardRef } from 'react';
 import { PastableMarkdownEditor } from './pastable_editor';
 import { type MarkdownEditorRef, type EditorBaseProps } from './types';
 import { MarkdownEditor } from './editor';
+import { isOwner } from './utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 /** Shared props required by both editor variants */
 interface Props extends EditorBaseProps {
@@ -42,10 +44,18 @@ function useHasFilesContext(): boolean {
 export const CommentEditor = forwardRef<MarkdownEditorRef, Props>((props, ref) => {
   // Consumers of Cases may not wrap their tree in <FilesContext>, so guard it.
   const hasFilesContext = useHasFilesContext();
+  const { owner: ownerList } = useCasesContext();
+  const owner = ownerList[0];
 
-  if (hasFilesContext && props.caseId) {
+  if (hasFilesContext && props.caseId && isOwner(owner)) {
     return (
-      <PastableMarkdownEditor {...props} ref={ref} field={props.field} caseId={props.caseId} />
+      <PastableMarkdownEditor
+        {...props}
+        ref={ref}
+        field={props.field}
+        caseId={props.caseId}
+        owner={owner}
+      />
     );
   }
 
