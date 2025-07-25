@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
+import { extractTabs } from '@kbn/saved-search-plugin/common';
+import type { SearchEmbeddableSerializedState } from '../../public';
 
-export type { DiscoverSessionTab } from './saved_objects/schema';
-export { getSavedSearch } from './services/saved_searches';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { SavedSearchServerPlugin } = await import('./plugin');
-  return new SavedSearchServerPlugin(initContext);
+export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
+  transformOut: (state) => {
+    if (!state.attributes) return state;
+    const attributes = extractTabs(state.attributes);
+    return { ...state, attributes };
+  },
 };
