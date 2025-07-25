@@ -168,7 +168,7 @@ $$$action-config-email-domain-allowlist$$$
     Default: `465`
 
 `xpack.actions.email.services.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+:   {applies_to}`stack: ga 9.1` An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
 
     Data type: `string`
     Default: `["*"]`
