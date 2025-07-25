@@ -56,16 +56,15 @@ export class LocatorClient implements ILocatorClient {
     return this.locators.get(id);
   }
 
-  public useUrl<P extends SerializableRecord>(
+  public readonly useUrl = <P extends SerializableRecord>(
     params: () => { id: string; params: P },
     deps?: DependencyList,
     getUrlParams?: LocatorGetUrlParams
-  ): string | undefined {
+  ): string | undefined => {
     const { id, params: locatorParams } = params();
     const locator = this.get<P>(id);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useLocatorUrl(locator, locatorParams, getUrlParams, deps);
-  }
+  };
 
   protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
     const locator = this.locators.get(id);

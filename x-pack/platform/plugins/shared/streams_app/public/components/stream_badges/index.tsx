@@ -146,7 +146,7 @@ export function DiscoverBadgeButton({
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
-        esqlQuery,
+        query: { esql: esqlQuery || '' },
       },
     }),
     [esqlQuery]
