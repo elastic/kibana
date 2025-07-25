@@ -41,36 +41,36 @@ export class GenAiSettingsPlugin
 {
   constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
-  public setup(
+  public async setup(
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
-  ): GenAiSettingsPluginSetup {
-    const genAISettingsApp = management.sections.section.ai.registerApp({
-      id: 'genAiSettings',
-      title: i18n.translate('genAiSettings.managementSectionLabel', {
-        defaultMessage: 'GenAI Settings',
-      }),
-      order: 1,
-      keywords: ['ai', 'generative', 'settings', 'configuration'],
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section/mount_section');
+  ): Promise<GenAiSettingsPluginSetup> {
+    const [coreStart] = await core.getStartServices();
 
-        return mountManagementSection({
-          core,
-          mountParams,
-          config: this.initializerContext.config.get(),
-        });
-      },
-    });
+    // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
+    if (
+      coreStart.application.capabilities.management.insightsAndAlerting.triggersActionsConnectors
+    ) {
+      management.sections.section.ai.registerApp({
+        id: 'genAiSettings',
+        title: i18n.translate('genAiSettings.managementSectionLabel', {
+          defaultMessage: 'GenAI Settings',
+        }),
+        order: 1,
+        keywords: ['ai', 'generative', 'settings', 'configuration'],
 
-    // GenAI Settings currently relies mainly on the Connectors feature, in the future, it should have its own Kibana feature setting.
-    core.getStartServices().then(([coreStart]) => {
-      if (
-        !coreStart.application.capabilities.management.insightsAndAlerting.triggersActionsConnectors
-      ) {
-        genAISettingsApp.disable();
-      }
-    });
+        mount: async (mountParams) => {
+          const { mountManagementSection } = await import('./management_section/mount_section');
+
+          return mountManagementSection({
+            core,
+            mountParams,
+            config: this.initializerContext.config.get(),
+          });
+        },
+      });
+    }
+
     return {};
   }
 
