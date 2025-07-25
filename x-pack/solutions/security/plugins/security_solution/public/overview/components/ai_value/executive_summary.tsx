@@ -86,7 +86,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           `}
         >
           <span>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoElastic" size="m" />
               </EuiFlexItem>

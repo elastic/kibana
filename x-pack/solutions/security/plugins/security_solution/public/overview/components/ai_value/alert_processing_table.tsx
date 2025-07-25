@@ -43,7 +43,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
         <EuiSpacer size="s" />
 
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiHealth color="#00BFB3" />
             </EuiFlexItem>
@@ -61,7 +61,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiHealth color="#FEC514" />
             </EuiFlexItem>
