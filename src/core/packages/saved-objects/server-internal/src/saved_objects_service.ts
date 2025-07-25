@@ -37,11 +37,7 @@ import type {
   SavedObjectsExtensions,
   SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
-import {
-  ENCRYPTION_EXTENSION_ID,
-  SECURITY_EXTENSION_ID,
-  SPACES_EXTENSION_ID,
-} from '@kbn/core-saved-objects-server';
+import { ENCRYPTION_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
   SavedObjectsSerializer,
@@ -419,15 +415,11 @@ export class SavedObjectsService
   private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
     // For internal clients, we automatically exclude security extension to avoid user scoping
     // and handle extensions that can work without a request context
-    const finalExcludedExtensions = Array.isArray(excludedExtensions)
-      ? [...excludedExtensions, SECURITY_EXTENSION_ID]
-      : [SECURITY_EXTENSION_ID];
-
     const createExt = <T>(
       extensionId: string,
       extensionFactory?: SavedObjectsExtensionFactory<T | undefined>
     ): T | undefined => {
-      if (finalExcludedExtensions.includes(extensionId) || !extensionFactory) {
+      if (excludedExtensions.includes(extensionId) || !extensionFactory) {
         return undefined;
       }
 
