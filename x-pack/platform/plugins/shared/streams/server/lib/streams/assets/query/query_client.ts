@@ -8,14 +8,14 @@
 import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
-import { StreamQuery } from '@kbn/streams-schema';
+import { StreamQuery, buildEsqlQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
 import { QueryLink } from '../../../../../common/assets';
 import { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetClient, getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
-import { getKqlAsCommandArg, getRuleIdFromQueryLink } from './helpers/query';
+import { getRuleIdFromQueryLink } from './helpers/query';
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return currentQuery.kql.query !== nextQuery.kql.query;
@@ -216,6 +216,8 @@ export class QueryClient {
 
   private toCreateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       data: {
         name: query.query.title,
@@ -224,9 +226,7 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
         enabled: true,
         tags: ['streams'],
@@ -242,6 +242,7 @@ export class QueryClient {
 
   private toUpdateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       id: ruleId,
       data: {
@@ -249,9 +250,7 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(\"${getKqlAsCommandArg(
-            query.query.kql.query
-          )}\")`,
+          query: esqlQuery,
         },
         tags: ['streams'],
         schedule: {
