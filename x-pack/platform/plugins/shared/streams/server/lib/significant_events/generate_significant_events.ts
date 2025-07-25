@@ -13,7 +13,7 @@ import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
-import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
+import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
 import KQL_GUIDE from './prompts/kql_guide.text';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 

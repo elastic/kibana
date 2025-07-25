@@ -24,9 +24,9 @@ import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 import {
   generateSignificantEventDefinitions,
   type GeneratedSignificantEventQuery,
-} from './generate_significant_events';
-import { previewSignificantEvents } from './preview_significant_events';
-import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
+} from '../../../lib/significant_events/generate_significant_events';
+import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
+import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
