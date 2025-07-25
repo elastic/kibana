@@ -25,7 +25,8 @@ export function createIndexDocRecordsStream(
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false,
-  performance?: LoadActionPerfOptions
+  performance?: LoadActionPerfOptions,
+  targetsWithoutIdGeneration: string[] = []
 ) {
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
@@ -40,8 +41,8 @@ export function createIndexDocRecordsStream(
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
           const index = doc.data_stream || doc.index;
-          // generate id for non-data-streams if it doesn't exist yet
-          const id = doc.data_stream ? doc.id : doc.id ?? uuidv4();
+          // generate id for valid targets if it doesn't exist yet
+          const id = targetsWithoutIdGeneration.includes(index) ? doc.id : doc.id ?? uuidv4();
           ops.set(body, {
             [op]: {
               _index: index,
