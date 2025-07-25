@@ -16,7 +16,7 @@ import { RunStepResult } from '../step/step_base';
 export class WorkflowState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private stepResults: Map<string, RunStepResult> = new Map();
-  private stepStates: Map<string, Record<string, any>> = new Map();
+  private stepStates: Map<string, Record<string, any> | undefined> = new Map();
   private workflowStartedAt: Date | undefined = undefined;
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
@@ -78,7 +78,7 @@ export class WorkflowState {
     return stepExecution ? stepExecution.status : undefined;
   }
 
-  public async setStepState(stepId: string, state: Record<string, any>): Promise<void> {
+  public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
     this.stepStates.set(stepId, state);
   }
 

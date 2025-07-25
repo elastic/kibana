@@ -10,18 +10,23 @@
 import { EnterForeachNode } from '@kbn/workflows';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { StepImplementation } from '../step_base';
+import { WorkflowState } from '../../workflow_context_manager/workflow_state';
 
 export class EnterForeachNodeImpl implements StepImplementation {
-  constructor(private step: EnterForeachNode, private contextManager: WorkflowContextManager) {}
+  constructor(
+    private step: EnterForeachNode,
+    private contextManager: WorkflowContextManager, // TODO: Will be used later for items evaluation
+    private workflowState: WorkflowState
+  ) {}
 
   public async run(): Promise<void> {
     const evaluatedItems = this.step.configuration.foreach; // must be real items from step definition
-    const foreachState = this.contextManager.getNodeState(this.step.id);
+    const foreachState = this.workflowState.getStepState(this.step.id);
 
     if (!foreachState) {
-      await this.contextManager.startStep(this.step.id);
+      await this.workflowState.startStep(this.step.id);
       // Initialize foreach state
-      this.contextManager.setNodeState(this.step.id, {
+      this.workflowState.setStepState(this.step.id, {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
@@ -33,7 +38,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
       const index = foreachState.index + 1;
       const item = evaluatedItems[index];
       const total = foreachState.total;
-      this.contextManager.setNodeState(this.step.id, {
+      this.workflowState.setStepState(this.step.id, {
         items,
         index,
         item,
