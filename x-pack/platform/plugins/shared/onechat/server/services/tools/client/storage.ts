@@ -8,8 +8,9 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import { chatSystemIndex } from '@kbn/onechat-server';
 
-export const toolIndexName = '.kibana_onechat_tools';
+export const toolIndexName = chatSystemIndex('tools');
 
 const storageSettings = {
   name: toolIndexName,
