@@ -181,7 +181,6 @@ export async function getDestinationParentIds({
         filter: [
           ...rangeQuery(start, end),
           ...termQuery(destinationNode.field, destinationNode.value),
-          ...existsQuery(PARENT_ID),
           ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
         ],
       },

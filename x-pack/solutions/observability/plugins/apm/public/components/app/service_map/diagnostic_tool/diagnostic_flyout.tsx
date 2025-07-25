@@ -18,13 +18,12 @@ import {
   EuiSpacer,
   EuiButton,
   EuiFlexGroup,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
-import { HighlightedExitSpansTable } from './diagnostic_highlighted_exit_spans_table';
 import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
+import { DiagnosticResults } from './diagnostic_results';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -46,7 +45,26 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [data, setData] = useState();
+  const [data, setData] = useState<{
+    analysis: {
+      exitSpans: {
+        found: boolean;
+        totalConnections: number;
+        spans: any[];
+        hasMatchingDestinationResources: boolean;
+      };
+      parentRelationships: {
+        found: boolean;
+        documentCount: number;
+        sourceSpanIds: string[];
+      };
+    };
+    elasticsearchResponses: {
+      exitSpansQuery?: any;
+      sourceSpanIdsQuery?: any;
+      destinationParentIdsQuery?: any;
+    };
+  }>();
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setForm] = useState<DiagnosticFormState>({
@@ -90,6 +108,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
             traceId: form.traceId,
           },
         },
+        signal: null,
       });
 
       setData(response);
@@ -138,41 +157,11 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         {isLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : data ? (
-          data?.response?.exitSpans?.exitSpans?.length > 0 ? (
-            <>
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate(
-                    'xpack.apm.serviceMap.diagnosticFlyout.highlightedExitSpansTitle',
-                    {
-                      defaultMessage: 'Connections found',
-                    }
-                  )}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <HighlightedExitSpansTable items={data?.response?.exitSpans?.exitSpans} />
-            </>
-          ) : (
-            <>
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noConnectionsTitle', {
-                    defaultMessage: 'No connections found',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued">
-                <p>
-                  {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noConnectionsMessage', {
-                    defaultMessage:
-                      'No connections were found between the specified services during the selected time range.',
-                  })}
-                </p>
-              </EuiText>
-            </>
-          )
+          <DiagnosticResults
+            data={data}
+            sourceNodeName={form?.sourceNode?.value}
+            destinationNodeName={form?.destinationNode?.value}
+          />
         ) : null}
         <EuiSpacer size="m" />
       </EuiFlyoutBody>

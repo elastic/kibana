@@ -100,7 +100,26 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
   }),
   handler: async (
     resources
-  ): Promise<{ exitSpans: any[]; sourceSpanIds: string[]; destinationParentIds: string[] }> => {
+  ): Promise<{
+    analysis: {
+      exitSpans: {
+        found: boolean;
+        totalConnections: number;
+        spans: any[];
+        hasMatchingDestinationResources: boolean;
+      };
+      parentRelationships: {
+        found: boolean;
+        documentCount: number;
+        sourceSpanIds: string[];
+      };
+    };
+    elasticsearchResponses: {
+      exitSpansQuery?: any;
+      sourceSpanIdsQuery?: any;
+      destinationParentIdsQuery?: any;
+    };
+  }> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
 
@@ -128,7 +147,27 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       destinationNode,
     });
 
-    return { exitSpans, destinationParentIds, sourceSpanIds };
+    return {
+      analysis: {
+        exitSpans: {
+          found: exitSpans.exitSpans.length > 0,
+          totalConnections: exitSpans.totalConnections,
+          spans: exitSpans.exitSpans,
+          hasMatchingDestinationResources: exitSpans.hasMatchingDestinationResources,
+        },
+        parentRelationships: {
+          found: destinationParentIds.hasParent,
+          documentCount: destinationParentIds.response?.hits?.hits?.length || 0,
+          sourceSpanIds: sourceSpanIds.spanIds as string[],
+        },
+      },
+      // Include raw Elasticsearch responses for debugging and advanced analysis
+      elasticsearchResponses: {
+        exitSpansQuery: exitSpans.rawResponse,
+        sourceSpanIdsQuery: sourceSpanIds.sourceSpanIdsRawResponse,
+        destinationParentIdsQuery: destinationParentIds.response,
+      },
+    };
   },
 });
 
