@@ -30,6 +30,7 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   // Skipping here will skip the entire apm api test suite
   // Instead skip (flaky) tests individually
   // Failing: See https://github.com/elastic/kibana/issues/228130
+  // Failing: See https://github.com/elastic/kibana/issues/228131
   describe.skip('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
