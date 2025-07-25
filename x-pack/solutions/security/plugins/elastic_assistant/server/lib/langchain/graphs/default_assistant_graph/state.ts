@@ -5,38 +5,20 @@
  * 2.0.
  */
 
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { BaseMessage } from '@langchain/core/messages';
-import { Annotation } from '@langchain/langgraph';
-import { AgentStep, AgentAction, AgentFinish } from 'langchain/agents';
+import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
-export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: () => string }) => {
-  const graphAnnotation = Annotation.Root({
-    input: Annotation<string>({
-      reducer: (x: string, y?: string) => y ?? x,
-      default: () => '',
-    }),
+export const AssistantStateAnnotation = Annotation.Root({
     lastNode: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
       default: () => 'start',
-    }),
-    steps: Annotation<AgentStep[]>({
-      reducer: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
-      default: () => [],
     }),
     hasRespondStep: Annotation<boolean>({
       reducer: (x: boolean, y?: boolean) => y ?? x,
       default: () => false,
     }),
-    agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
-      reducer: (
-        x: AgentAction | AgentFinish | undefined,
-        y?: AgentAction | AgentFinish | undefined
-      ) => y ?? x,
-      default: () => undefined,
-    }),
     messages: Annotation<BaseMessage[]>({
-      reducer: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
+      reducer: messagesStateReducer,
       default: () => [],
     }),
     chatTitle: Annotation<string>({
@@ -59,11 +41,6 @@ export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: ()
       reducer: (x: string, y?: string) => y ?? x,
       default: () => '',
     }),
-    conversation: Annotation<ConversationResponse | undefined>({
-      reducer: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
-        y ?? x,
-      default: () => undefined,
-    }),
     conversationId: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,
       default: () => '',
@@ -76,11 +53,4 @@ export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: ()
       reducer: (x: string, y?: string) => y ?? x,
       default: () => '',
     }),
-    formattedTime: Annotation<string>({
-      reducer: (x: string, y?: string) => y ?? x,
-      default: getFormattedTime ?? (() => ''),
-    }),
   });
-
-  return graphAnnotation;
-};

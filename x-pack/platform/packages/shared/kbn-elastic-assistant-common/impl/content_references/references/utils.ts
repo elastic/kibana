@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ContentReference } from '../../schemas';
-import { ContentReferenceBlock, ContentReferenceId } from '../types';
+import { knowledgeBaseReference } from '.';
+import { ContentReference, DocumentEntry } from '../../schemas';
+import { ContentReferenceBlock, ContentReferenceId, ContentReferencesStore } from '../types';
+import { BaseMessage } from '@langchain/core/messages';
 
 /**
  * Returns "Arid2" from "{reference(Arid2)}"
@@ -76,4 +78,35 @@ export const removeContentReferences = (content: string) => {
   }
 
   return result;
+};
+
+/**
+ * Removes content references from chat history
+ */
+export const sanitizeMessages = (messages: BaseMessage[]): BaseMessage[] => {
+  return messages.map((message) => {
+    if (!Array.isArray(message.content)) {
+      message.content = removeContentReferences(message.content).trim();
+    }
+    return message;
+  });
+};
+
+/**
+ * Enriches a DocumentEntry with a content reference.
+ */
+export const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+  return (document: DocumentEntry): DocumentEntry => {
+    if (document.id == null) {
+      return document;
+    }
+    const documentId = document.id;
+    const reference = contentReferencesStore.add((p) =>
+      knowledgeBaseReference(p.id, document.name, documentId)
+    );
+    return {
+      ...document,
+      text: `${contentReferenceString(reference)}\n${document.text}`,
+    };
+  };
 };

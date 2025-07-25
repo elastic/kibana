@@ -1,0 +1,49 @@
+import { AIAssistantConversationsDataClient } from "@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/conversations";
+import type { Logger } from '@kbn/logging';
+import { getLangChainMessages } from "../helpers";
+import { Replacements, replaceAnonymizedValuesWithOriginalValues } from "@kbn/elastic-assistant-common";
+import { BaseMessage, _isMessageFieldWithRole } from "@langchain/core/messages";
+
+type Params = {
+    logger: Logger
+    conversationsDataClient?: AIAssistantConversationsDataClient;
+    conversationId?: string;
+    replacements?: Replacements;
+    newMessages: BaseMessage[];
+}
+export const getConversationWithNewMessage = async (params: Params) => {
+    const { conversationsDataClient, conversationId } = params;
+    if (!conversationsDataClient || !conversationId) {
+        params.logger.debug('No conversationsDataClient or conversationId provided, returning empty messages array');
+        return []
+    }
+    const existingConversation = await conversationsDataClient.getConversation({ id: conversationId });
+    if (!existingConversation) {
+        params.logger.debug(`No conversation found for id: ${conversationId}`);
+        return [];
+    }
+
+    const updatedConversation = await conversationsDataClient.appendConversationMessages({
+        existingConversation: existingConversation,
+        messages: params.newMessages.map((newMessage) => {
+            const role = _isMessageFieldWithRole(newMessage) ? newMessage.role as "assistant" | "user" : 'user';
+            return {
+                content: replaceAnonymizedValuesWithOriginalValues({
+                    messageContent: newMessage.text,
+                    replacements: params.replacements,
+                }),
+                role: role,
+                timestamp: new Date().toISOString(),
+            }
+        })
+    });
+
+    if (!updatedConversation) {
+        params.logger.debug('Not updated conversation');
+        return [];
+    }
+
+    const langChainMessages = getLangChainMessages(updatedConversation.messages ?? []);
+
+    return langChainMessages;
+}

@@ -82,8 +82,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
           return Promise.resolve(localReplacements);
         };
 
-        return JSON.stringify(
-          result.hits?.hits?.map((hit) => {
+        const content = result.hits?.hits?.map((hit) => {
             const transformed = transformRawData({
               anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
@@ -100,7 +99,8 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
             return `${transformed}${citation ?? ''}`;
           })
-        );
+
+        return JSON.stringify(content);
       },
       {
         name: 'OpenAndAcknowledgedAlertsTool',

@@ -17,13 +17,11 @@ import { AgentState } from '../types';
 export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
-      if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+      const lastMessage = state.messages[state.messages.length - 1];
+      if ("tool_calls" in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls?.length) {
+        return NodeType.TOOLS;
       }
-      return NodeType.TOOLS;
-
-    case NodeType.MODEL_INPUT:
-      return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
+      return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
 
     default:
       return NodeType.END;

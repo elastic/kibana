@@ -18,6 +18,7 @@ import { GraphInputs, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getActionTypeId } from '../../../../../routes/utils';
+import { BaseMessage } from '@langchain/core/messages';
 
 export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt,
@@ -26,15 +27,17 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt: string;
   responseLanguage: string;
 }) =>
-  ChatPromptTemplate.fromMessages([
+  ChatPromptTemplate.fromMessages<{
+    newMessages: BaseMessage[];
+  }>([
     ['system', `${prompt}\nPlease create the title in ${responseLanguage}.`],
-    ['human', '{input}'],
+    ['placeholder', '{newMessages}'],
   ]);
 
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: Pick<
     GraphInputs,
-    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'input' | 'isStream'
+    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'newMessages' | 'isStream'
   >;
   model: BaseChatModel;
   conversationsDataClient?: AIAssistantConversationsDataClient;
@@ -88,7 +91,7 @@ export async function generateChatTitle({
       .withConfig({ runName: 'Generate Chat Title' });
 
     const chatTitle = await graph.invoke({
-      input: JSON.stringify(state.input, null, 2),
+      newMessages: state.newMessages,
     });
     logger.debug(`chatTitle: ${chatTitle}`);
 

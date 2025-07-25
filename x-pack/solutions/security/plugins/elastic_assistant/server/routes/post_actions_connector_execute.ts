@@ -208,7 +208,7 @@ export const postActionsConnectorExecuteRoute = (
               context: ctx,
               logger,
               inference,
-              messages: (newMessage ? [newMessage] : messages) ?? [],
+              messages: newMessage ? [newMessage] : [],
               onLlmResponse,
               onNewReplacements,
               replacements: latestReplacements,

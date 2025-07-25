@@ -269,8 +269,9 @@ export const invokeGraph = async ({
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,
     });
-    const output = (result.agentOutcome as AgentFinish).returnValues.output;
-    const conversationId = result.conversation?.id;
+    const lastMessage = result.messages[result.messages.length - 1];
+    const output = lastMessage.text
+    const conversationId = result.conversationId
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }

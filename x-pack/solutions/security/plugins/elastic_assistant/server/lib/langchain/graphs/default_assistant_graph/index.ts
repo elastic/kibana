@@ -21,13 +21,17 @@ import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { formatPrompt } from './prompts';
+import { chatPromptValueFactory, formatPrompt } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { agentRunnableFactory } from './agentRunnable';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { BaseMessage } from '@langchain/core/messages';
+import { enrichGraphInputMessages } from '../../utils/enrich_graph_input_messages';
+import { getConversationWithNewMessage } from '../../utils/get_conversation';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -78,46 +82,46 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const createLlmInstance = async () =>
     !inferenceChatModelDisabled
       ? inference.getChatModel({
-          request,
-          connectorId,
-          chatModelOptions: {
-            model: request.body.model,
-            signal: abortSignal,
-            temperature: getDefaultArguments(llmType).temperature,
-            // prevents the agent from retrying on failure
-            // failure could be due to bad connector, we should deliver that result to the client asap
-            maxRetries: 0,
-            metadata: {
-              connectorTelemetry: {
-                pluginId: 'security_ai_assistant',
-              },
-            },
-            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
-            // timeout,
-          },
-        })
-      : new llmClass({
-          actionsClient,
-          connectorId,
-          llmType,
-          logger,
-          // possible client model override,
-          // let this be undefined otherwise so the connector handles the model
+        request,
+        connectorId,
+        chatModelOptions: {
           model: request.body.model,
-          // ensure this is defined because we default to it in the language_models
-          // This is where the LangSmith logs (Metadata > Invocation Params) are set
-          temperature: getDefaultArguments(llmType).temperature,
           signal: abortSignal,
-          streaming: isStream,
+          temperature: getDefaultArguments(llmType).temperature,
           // prevents the agent from retrying on failure
           // failure could be due to bad connector, we should deliver that result to the client asap
           maxRetries: 0,
-          convertSystemMessageToHumanContent: false,
-          timeout,
-          telemetryMetadata: {
-            pluginId: 'security_ai_assistant',
+          metadata: {
+            connectorTelemetry: {
+              pluginId: 'security_ai_assistant',
+            },
           },
-        });
+          // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+          // timeout,
+        },
+      })
+      : new llmClass({
+        actionsClient,
+        connectorId,
+        llmType,
+        logger,
+        // possible client model override,
+        // let this be undefined otherwise so the connector handles the model
+        model: request.body.model,
+        // ensure this is defined because we default to it in the language_models
+        // This is where the LangSmith logs (Metadata > Invocation Params) are set
+        temperature: getDefaultArguments(llmType).temperature,
+        signal: abortSignal,
+        streaming: isStream,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+        convertSystemMessageToHumanContent: false,
+        timeout,
+        telemetryMetadata: {
+          pluginId: 'security_ai_assistant',
+        },
+      });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -129,7 +133,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
     : undefined;
 
-  const latestMessage = langChainMessages.slice(-1); // the last message
+  const newMessages = langChainMessages.slice(-1); // this is the message that was just added
 
   // Check if KB is available (not feature flag related)
   const isEnabledKnowledgeBase =
@@ -189,14 +193,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
     ? new TelemetryTracer(
-        {
-          // this line MUST come before kbTools are added
-          elasticTools: tools.map(({ name }) => name),
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
+      {
+        // this line MUST come before kbTools are added
+        elasticTools: tools.map(({ name }) => name),
+        telemetry,
+        telemetryParams,
+      },
+      logger
+    )
     : undefined;
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -240,36 +244,66 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
-          connectorId,
-          actionsClient,
-        })
+        connectorId,
+        actionsClient,
+      })
       : { provider: llmType };
 
   const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
     DEFAULT_DATE_FORMAT_TZ
   );
 
-  const assistantGraph = getDefaultAssistantGraph({
-    agentRunnable,
-    dataClients,
+  const assistantGraph = await getDefaultAssistantGraph({
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
     actionsClient,
     savedObjectsClient,
     tools,
-    replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
-    getFormattedTime: () =>
-      getFormattedTime({
-        screenContextTimezone: screenContext?.timeZone,
-        uiSettingsDateFormatTimezone,
-      }),
-    telemetry,
-    telemetryParams,
     contentReferencesStore,
   });
+
+  const conversationMessages = await getConversationWithNewMessage({
+    logger,
+    conversationsDataClient: dataClients?.conversationsDataClient,
+    conversationId: conversationId,
+    replacements: replacements,
+    newMessages: newMessages,
+  })
+
+  const promptTemplate = ChatPromptTemplate.fromMessages<{
+    systemPrompt: string;
+    knowledgeHistory: string;
+    messages: BaseMessage[];
+  }, any>([
+    ['system', "{systemPrompt}"],
+    new MessagesPlaceholder("messages"),
+  ]);
+
+  const chatPromptValue = await chatPromptValueFactory(promptTemplate, {
+    prompt: defaultSystemPrompt,
+    additionalPrompt: systemPrompt,
+    kbClient: dataClients?.kbDataClient,
+    contentReferencesStore,
+    logger,
+    conversationMessages,
+    formattedTime: getFormattedTime({
+      screenContextTimezone: screenContext?.timeZone,
+      uiSettingsDateFormatTimezone,
+    }),
+  });
+
+  const inputMessagesEnricher = enrichGraphInputMessages({
+    actionsClient,
+    savedObjectsClient,
+    connectorId,
+    llmType
+  })
+
+  const enrichedMessages = await inputMessagesEnricher(chatPromptValue.messages)
+
   const inputs: GraphInputs = {
     responseLanguage,
     conversationId,
@@ -277,7 +311,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
     isStream,
     isOssModel,
-    input: latestMessage[0]?.content as string,
+    messages: enrichedMessages,
+    newMessages,
+    isRegeneration: newMessages.length === 0,
     provider: provider ?? '',
   };
 
@@ -308,7 +344,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       inputs,
       inferenceChatModelDisabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
-
       logger,
       onLlmResponse,
       request,

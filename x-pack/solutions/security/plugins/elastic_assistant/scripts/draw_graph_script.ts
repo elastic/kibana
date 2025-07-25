@@ -39,14 +39,6 @@ interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
 }
 
-// Just defining some test variables to get the graph to compile..
-const testPrompt = ChatPromptTemplate.fromMessages([
-  ['system', 'You are a helpful assistant'],
-  ['placeholder', '{chat_history}'],
-  ['human', '{input}'],
-  ['placeholder', '{agent_scratchpad}'],
-]);
-
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
@@ -56,22 +48,13 @@ const createLlmInstance = () => {
 };
 
 async function getAssistantGraph(logger: Logger): Promise<Drawable> {
-  const agentRunnable = await createOpenAIFunctionsAgent({
-    llm: mockLlm,
-    tools: [],
-    prompt: testPrompt,
-    streamRunnable: false,
-  });
-  const graph = getDefaultAssistantGraph({
+  const graph = await getDefaultAssistantGraph({
     actionsClient: actionsClientMock.create(),
-    agentRunnable,
     logger,
     createLlmInstance,
     tools: [],
-    replacements: {},
     savedObjectsClient: savedObjectsClientMock.create(),
     contentReferencesStore: newContentReferencesStoreMock(),
-    telemetry: coreMock.createSetup().analytics,
   });
   return graph.getGraph();
 }

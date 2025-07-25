@@ -5,8 +5,6 @@
  * 2.0.
  */
 export const NodeType = {
-  PERSIST_CONVERSATION_CHANGES: 'persistConversationChanges',
-  GET_PERSISTED_CONVERSATION: 'getPersistedConversation',
   GENERATE_CHAT_TITLE: 'generateChatTitle',
   AGENT: 'agent',
   TOOLS: 'tools',

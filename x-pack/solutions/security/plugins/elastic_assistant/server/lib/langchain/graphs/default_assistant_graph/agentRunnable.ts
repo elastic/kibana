@@ -13,7 +13,10 @@ import {
 } from '@kbn/langchain/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import {
+  AgentAction,
+  AgentFinish,
   AgentRunnableSequence,
+  AgentStep,
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
@@ -43,7 +46,10 @@ export const agentRunnableFactory = async ({
   tools: StructuredToolInterface[] | ToolDefinition[];
   isStream: boolean;
   prompt: ChatPromptTemplate;
-}): Promise<AgentRunnableSequence> => {
+}): Promise<AgentRunnableSequence<{
+    steps: AgentStep[];
+
+}, AgentFinish | AgentAction | AgentAction[]>> => {
   const params = {
     llm,
     tools,
