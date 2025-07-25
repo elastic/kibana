@@ -15,6 +15,7 @@ import { ThreatMatchComponent } from '../../../../common/components/threat_match
 import * as i18n from '../../../../common/components/threat_match/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const DEFAULT_THREAT_MAPPING_VALUE = [createOrNewEntryItem()];
 
@@ -62,16 +63,24 @@ export function ThreatMatchMappingField({
     [setValue]
   );
 
+  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
+
   return (
     <EuiFormRow
       label={
-        <div>
-          <EuiFlexGroup gutterSize="s">
-            <label>{field.label}</label>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs">{i18n.THREAT_FIELD_LABEL_HELP_TEXT}</EuiText>
-        </div>
+        isDoesNotMatchForIndicatorMatchRuleEnabled ? (
+          <div>
+            <EuiFlexGroup gutterSize="s">
+              <label>{field.label}</label>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs">{i18n.THREAT_FIELD_LABEL_HELP_TEXT}</EuiText>
+          </div>
+        ) : (
+          field.label
+        )
       }
       labelAppend={field.labelAppend}
       helpText={field.helpText}

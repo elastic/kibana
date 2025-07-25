@@ -1608,7 +1608,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('DOES NOT MATCH clause', () => {
+    // skips serverless MKI due to feature flag
+    describe('@skipInServerlessMKI DOES NOT MATCH condition', () => {
       // cases to cover 2 execution paths of IM
       const cases = [
         {

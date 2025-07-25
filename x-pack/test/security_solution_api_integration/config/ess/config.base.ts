@@ -110,6 +110,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
             'bulkEditAlertSuppressionEnabled',
+            'doesNotMatchForIndicatorMatchRuleEnabled',
           ])}`,
           `--plugin-path=${path.resolve(
             __dirname,

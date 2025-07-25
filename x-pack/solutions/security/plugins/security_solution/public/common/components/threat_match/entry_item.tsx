@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
 import {
@@ -38,6 +39,10 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   onChange,
   doesNotMatchDisabled,
 }): JSX.Element => {
+  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
+
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
@@ -130,6 +135,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
     );
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 
+  const matchOperatorLabel = entry.negate ? i18n.DOES_NOT_MATCH : i18n.MATCHES;
   return (
     <EuiFlexGroup
       direction="row"
@@ -143,9 +149,10 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         grow={2}
         css={css`
           padding-top: ${showLabel ? LABEL_PADDING : 0}px;
+          text-align: center;
         `}
       >
-        {renderMatchInput}
+        {isDoesNotMatchForIndicatorMatchRuleEnabled ? renderMatchInput : matchOperatorLabel}
       </EuiFlexItem>
       <EuiFlexItem grow={3}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
