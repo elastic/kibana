@@ -13,7 +13,7 @@ import {
   Parser,
   isFunctionExpression,
   isColumn,
-  BasicPrettyPrinter,
+  WrappingPrettyPrinter,
 } from '@kbn/esql-ast';
 
 import type {
@@ -141,7 +141,7 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
 
 export const prettifyQuery = (src: string): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return BasicPrettyPrinter.print(root, { multiline: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
