@@ -237,7 +237,9 @@ describe('actions', () => {
         { action_id: 'action-id-1', agent_id: 'agent-1', action_input_type: 'foo' },
         { action_id: 'action-id-2', agent_id: 'agent-2', action_input_type: 'foo' },
       ].map(generateFleetActionResult);
-      esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
+      esClientMock.esql.query.mockResponse({
+        values: [[results[0]], [results[1]]],
+      } as any);
 
       expect(await fleetActionsClient.getResultsByIds(['action-id-1', 'action-id-2'])).toEqual({
         items: results,
@@ -246,11 +248,12 @@ describe('actions', () => {
     });
 
     it('should reject when given package name does not match result', async () => {
-      const results = [
-        { action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' },
-        { action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' },
-      ].map(generateFleetActionResult);
-      esClientMock.search.mockResponse(generateFleetActionsResultsESResponse(results));
+      esClientMock.esql.query.mockResponse({
+        values: [
+          [{ action_id: 'action-id-21', agent_id: 'agent-1', action_input_type: 'foo' }],
+          [{ action_id: 'action-id-23', agent_id: 'agent-2', action_input_type: 'bar' }],
+        ],
+      } as any);
       await expect(
         async () => await fleetActionsClient.getResultsByIds(['action-id-1', 'action-id-2'])
       ).rejects.toBeInstanceOf(FleetActionsClientError);
