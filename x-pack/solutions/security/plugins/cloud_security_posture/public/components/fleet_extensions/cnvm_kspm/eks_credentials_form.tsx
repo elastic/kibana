@@ -207,8 +207,8 @@ const options: AwsOptions = {
   },
 };
 
-export type AwsCredentialsType = keyof typeof options;
-export const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
+type AwsCredentialsType = keyof typeof options;
+
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -245,6 +245,21 @@ const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | unde
   input.streams[0].vars?.['aws.credentials.type']
     ? input.streams[0].vars?.['aws.credentials.type'].value
     : undefined;
+
+const AwsCredentialTypeSelector = ({
+  type,
+  onChange,
+}: {
+  onChange(type: AwsCredentialsType): void;
+  type: AwsCredentialsType;
+}) => (
+  <RadioGroup
+    size="s"
+    options={[...AWS_CREDENTIALS_OPTIONS]}
+    idSelected={type}
+    onChange={(id) => onChange(id as AwsCredentialsType)}
+  />
+);
 
 export const EksCredentialsForm = ({ input, newPolicy, packageInfo, updatePolicy }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
@@ -283,18 +298,3 @@ export const EksCredentialsForm = ({ input, newPolicy, packageInfo, updatePolicy
     </>
   );
 };
-
-const AwsCredentialTypeSelector = ({
-  type,
-  onChange,
-}: {
-  onChange(type: AwsCredentialsType): void;
-  type: AwsCredentialsType;
-}) => (
-  <RadioGroup
-    size="s"
-    options={[...AWS_CREDENTIALS_OPTIONS]}
-    idSelected={type}
-    onChange={(id) => onChange(id as AwsCredentialsType)}
-  />
-);

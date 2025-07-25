@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import {
   EuiAccordion,
   EuiFieldText,
@@ -18,12 +18,8 @@ import { NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { assert } from '../../../../common/utils/helpers';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../../common/types_old';
-import { CLOUDBEAT_VULN_MGMT_AWS, SUPPORTED_POLICY_TEMPLATES } from '../../../../common/constants';
-import { getVulnMgmtCloudFormationDefaultValue, isPostureInput } from '../utils';
+import type { PostureInput } from '../../../../common/types_old';
 import { CnvmKspmTemplateInfo } from './cnvm_kspm_info';
 import { KspmEksInputSelector } from './kspm_eks_input_selector';
 import { EksCredentialsForm } from './eks_credentials_form';
@@ -48,69 +44,9 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const getSelectedOption = (
-  options: NewPackagePolicyInput[],
-  policyTemplate: string = CSPM_POLICY_TEMPLATE
-) => {
-  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
-  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
-  const selectedOption =
-    options.find((i) => i.enabled) ||
-    options.find((i) => i.policy_template === policyTemplate) ||
-    options[0];
-
-  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
-
-  return selectedOption;
-};
-
-/**
- * Update CloudFormation template and stack name in the Agent Policy
- * based on the selected policy template
- */
-const useCloudFormationTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-}) => {
-  useEffect(() => {
-    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
-
-    // If the template is not available, do not update the policy
-    if (templateUrl === '') return;
-
-    const checkCurrentTemplate = newPolicy?.inputs?.find(
-      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
-    )?.config?.cloud_formation_template_url?.value;
-
-    // If the template is already set, do not update the policy
-    if (checkCurrentTemplate === templateUrl) return;
-
-    updatePolicy?.({
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
-          return {
-            ...input,
-            config: { cloud_formation_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
-};
-
 interface CnvmKspmSetupProps {
   isEditPage: boolean;
-  integrationToEnable: Extract<CloudSecurityPolicyTemplate, 'kspm' | 'vuln_mgmt'>;
+  input: NewPackagePolicyInput;
   setEnabledPolicyInput: (input: Extract<PostureInput, 'kspm' | 'vuln_mgmt'>) => void;
   updatePolicy: (policy: NewPackagePolicy) => void;
   newPolicy: NewPackagePolicy;
@@ -129,26 +65,17 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
     packageInfo,
     isEditPage,
     validationResults,
-    integrationToEnable,
-    // isLoading,
+    input,
     setEnabledPolicyInput,
     updatePolicy,
   }) => {
-    const integration =
-      integrationToEnable &&
-      SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
-        ? integrationToEnable
-        : undefined;
-
-    const input = getSelectedOption(newPolicy.inputs, integration);
-
     const { euiTheme } = useEuiTheme();
 
-    useCloudFormationTemplate({
-      packageInfo,
-      updatePolicy,
-      newPolicy,
-    });
+    // useCloudFormationTemplate({
+    //   packageInfo,
+    //   updatePolicy,
+    //   newPolicy,
+    // });
 
     const integrationFields = [
       {

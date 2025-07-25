@@ -13,11 +13,11 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { merge } from 'lodash';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
+import { i18n } from '@kbn/i18n';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -27,26 +27,119 @@ import {
   CLOUDBEAT_VULN_MGMT_AWS,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import type {
-  // AwsCredentialsType,
   PostureInput,
   CloudSecurityPolicyTemplate,
-  // CredentialsType,
+  AwsCredentialsType,
 } from '../../../common/types_old';
-import { cloudPostureIntegrations } from '../../common/constants';
-import { DEFAULT_EKS_VARS_GROUP } from './cnvm_kspm/eks_credentials_form';
-import {
-  getTemplateUrlFromPackageInfo,
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-} from '../../common/utils/get_template_url_package_info';
+import { CloudPostureIntegrations } from '../../common/constants';
+import eksLogo from '../../assets/icons/cis_eks_logo.svg';
+import googleCloudLogo from '../../assets/icons/google_cloud_logo.svg';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
-const AWS_SINGLE_ACCOUNT = 'single-account';
+
+const cloudPostureIntegrations: CloudPostureIntegrations = {
+  cspm: {
+    policyTemplate: CSPM_POLICY_TEMPLATE,
+    name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
+      defaultMessage: 'Cloud Security Posture Management',
+    }),
+    shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
+      defaultMessage: 'CSPM',
+    }),
+    options: [
+      {
+        type: CLOUDBEAT_AWS,
+        name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
+          defaultMessage: 'AWS',
+        }),
+        benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
+          defaultMessage: 'CIS AWS',
+        }),
+        icon: 'logoAWS',
+        testId: 'cisAwsTestId',
+      },
+      {
+        type: CLOUDBEAT_GCP,
+        name: i18n.translate('xpack.csp.cspmIntegration.gcpOption.nameTitle', {
+          defaultMessage: 'GCP',
+        }),
+        benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
+          defaultMessage: 'CIS GCP',
+        }),
+        icon: googleCloudLogo,
+        testId: 'cisGcpTestId',
+      },
+      {
+        type: CLOUDBEAT_AZURE,
+        name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
+          defaultMessage: 'Azure',
+        }),
+        benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
+          defaultMessage: 'CIS Azure',
+        }),
+        icon: 'logoAzure',
+        testId: 'cisAzureTestId',
+      },
+    ],
+  },
+  kspm: {
+    policyTemplate: KSPM_POLICY_TEMPLATE,
+    name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
+      defaultMessage: 'Kubernetes Security Posture Management',
+    }),
+    shortName: i18n.translate('xpack.csp.kspmIntegration.integration.shortNameTitle', {
+      defaultMessage: 'KSPM',
+    }),
+    options: [
+      {
+        type: CLOUDBEAT_VANILLA,
+        name: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.nameTitle', {
+          defaultMessage: 'Self-Managed',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
+          defaultMessage: 'CIS Kubernetes',
+        }),
+        icon: 'logoKubernetes',
+        testId: 'cisK8sTestId',
+      },
+      {
+        type: CLOUDBEAT_EKS,
+        name: i18n.translate('xpack.csp.kspmIntegration.eksOption.nameTitle', {
+          defaultMessage: 'EKS',
+        }),
+        benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
+          defaultMessage: 'CIS EKS',
+        }),
+        icon: eksLogo,
+        tooltip: i18n.translate('xpack.csp.kspmIntegration.eksOption.tooltipContent', {
+          defaultMessage: 'Elastic Kubernetes Service',
+        }),
+        testId: 'cisEksTestId',
+      },
+    ],
+  },
+  vuln_mgmt: {
+    policyTemplate: VULN_MGMT_POLICY_TEMPLATE,
+    name: 'Vulnerability Management', // TODO: we should use i18n and fix this
+    shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
+    options: [
+      {
+        type: CLOUDBEAT_VULN_MGMT_AWS,
+        name: i18n.translate('xpack.csp.vulnMgmtIntegration.awsOption.nameTitle', {
+          defaultMessage: 'Amazon Web Services',
+        }),
+        icon: 'logoAWS',
+        benchmark: 'N/A', // TODO: change benchmark to be optional
+      },
+    ],
+  },
+};
+
+const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
@@ -56,21 +149,6 @@ type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_EKS; policy_template: typeof KSPM_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_VULN_MGMT_AWS; policy_template: typeof VULN_MGMT_POLICY_TEMPLATE };
 
-// export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_connectors_aws'; // we need to add more types depending integrations such Asset Inventory
-
-interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyPostureInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-}
 // Extend NewPackagePolicyInput with known string literals for input type and policy template
 export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
 
@@ -261,39 +339,4 @@ export const getKibanaComponentId = (cloudId: string | undefined): string | unde
   const [, , kibanaComponentId] = decoded.split('$');
 
   return kibanaComponentId || undefined;
-};
-
-export const getCloudConnectorRemoteRoleTemplate = ({
-  input,
-  cloud,
-  packageInfo,
-}: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-
-  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  if (!provider || provider !== 'aws') return undefined;
-
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
-  }
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
-
-  if (!elasticResourceId) return undefined;
-
-  return getTemplateUrlFromPackageInfo(
-    packageInfo,
-    input.policy_template,
-    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-  )
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };

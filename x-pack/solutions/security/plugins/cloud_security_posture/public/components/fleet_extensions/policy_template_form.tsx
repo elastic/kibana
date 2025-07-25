@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import React, { memo } from 'react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  NewPackagePolicyInput,
-  PackagePolicy,
-  PackagePolicyReplaceDefineStepExtensionComponentProps,
-} from '@kbn/fleet-plugin/public/types';
+import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
@@ -20,33 +22,19 @@ import {
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CloudSetup } from '@kbn/cloud-security-posture';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
-import { assert } from '../../../common/utils/helpers';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
+import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SUPPORTED_POLICY_TEMPLATES,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import {
-  getMaxPackageName,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
-  isPostureInput,
-} from './utils';
+import { POLICY_TEMPLATE_FORM_DTS } from './utils';
 import { PolicyTemplateSelector } from './policy_template_selectors';
-import { useKibana } from '../../common/hooks/use_kibana';
 import { CnvmKspmSetup } from './cnvm_kspm/cnvm_kspm_setup';
-import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-
-const DEFAULT_INPUT_TYPE = {
-  kspm: CLOUDBEAT_VANILLA,
-  cspm: CLOUDBEAT_AWS,
-  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
-} as const;
+import { useLoadFleetExtension } from './use_load_fleet_extension';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 
 const EditScreenStepTitle = () => (
   <>
@@ -62,66 +50,11 @@ const EditScreenStepTitle = () => (
   </>
 );
 
-const getSelectedOption = (
-  options: NewPackagePolicyInput[],
-  policyTemplate: string = CSPM_POLICY_TEMPLATE
-) => {
-  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
-  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
-  const selectedOption =
-    options.find((i) => i.enabled) ||
-    options.find((i) => i.policy_template === policyTemplate) ||
-    options[0];
-
-  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
-
-  return selectedOption;
-};
-
-const usePolicyTemplateInitialName = ({
-  isEditPage,
-  integration,
-  newPolicy,
-  packagePolicyList,
-  updatePolicy,
-  setCanFetchIntegration,
-}: {
-  isEditPage: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
-  newPolicy: NewPackagePolicy;
-  packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-  setCanFetchIntegration: (canFetch: boolean) => void;
-}) => {
-  useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
-
-    const packagePolicyListByIntegration = packagePolicyList?.filter(
-      (policy) => policy?.vars?.posture?.value === integration
-    );
-
-    const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
-
-    /*
-     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
-     * if policie were fetched its an array - the check will return true
-     */
-    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
-    updatePolicy(
-      {
-        ...newPolicy,
-        name: currentIntegrationName,
-      },
-      isPoliciesLoaded
-    );
-    setCanFetchIntegration(false);
-    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [integration, isEditPage, packagePolicyList]);
-};
+const DEFAULT_INPUT_TYPE = {
+  kspm: CLOUDBEAT_VANILLA,
+  cspm: CLOUDBEAT_AWS,
+  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
+} as const;
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
@@ -136,99 +69,35 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
-    const { cloud } = useKibana().services;
-    const isServerless = !!cloud.serverless.projectType;
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const isParentSecurityPosture = !integrationParam;
+
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
-    const integration =
-      integrationToEnable &&
-      SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
-        ? integrationToEnable
-        : undefined;
-    const input = getSelectedOption(newPolicy.inputs, integration);
-    // search for non null fields of the validation?.vars object
-    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
-      (key) => (validationResults?.vars || {})[key] !== null
-    );
+    const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
 
-    const [isValid, setIsValid] = useState(true);
-    const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
-    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
-
-    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
-      enabled: canFetchIntegration,
-    });
-
-    const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
-        onChange({
-          isValid,
-          updatedPolicy,
-          isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
-        });
-      },
-      [isLoading, isValid, onChange]
-    );
-
-    /**
-     * - Updates policy inputs by user selection
-     * - Updates hidden policy vars
-     */
-    const setEnabledPolicyInput = useCallback(
-      (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType);
-        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-        updatePolicy(policy);
-      },
-      [newPolicy, updatePolicy]
-    );
-
-    usePolicyTemplateInitialName({
-      packagePolicyList: packagePolicyList?.items,
-      isEditPage,
-      integration: integration as CloudSecurityPolicyTemplate,
+    const { isLoading, setEnabledPolicyInput, updatePolicy, input } = useLoadFleetExtension({
       newPolicy,
-      updatePolicy,
-      setCanFetchIntegration,
+      onChange,
+      validationResults,
+      isEditPage,
+      packageInfo,
+      integrationToEnable,
+      isSubscriptionValid,
+      isSubscriptionLoading,
     });
 
-    // delaying component rendering due to a race condition issue from Fleet
-    // TODO: remove this workaround when the following issue is resolved:
-    // https://github.com/elastic/kibana/issues/153246
-    useEffect(() => {
-      // using validation?.vars to know if the newPolicy state was reset due to race condition
-      if (validationResultsNonNullFields.length > 0) {
-        // Forcing rerender to recover from the validation errors state
-        setIsLoading(true);
-      }
-      setTimeout(() => setIsLoading(false), 200);
-    }, [validationResultsNonNullFields]);
+    if (isLoading) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
-    useEffect(() => {
-      setIsLoading(getIsSubscriptionValid.isLoading);
-    }, [getIsSubscriptionValid.isLoading]);
-
-    useEffect(() => {
-      if (!isServerless) {
-        setIsValid(isSubscriptionValid);
-      }
-    }, [isServerless, isSubscriptionValid]);
-
-    useEffect(() => {
-      if (isEditPage) return;
-      if (isLoading) return;
-      // Pick default input type for policy template.
-      // Only 1 enabled input is supported when all inputs are initially enabled.
-      // Required for mount only to ensure a single input type is selected
-      // This will remove errors in validationResults.vars
-      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-      refetch();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, input.policy_template, isEditPage]);
-
-    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
+    if (isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
     }
     // If the input type is one of the cloud providers, we need to render the account type selector
@@ -268,15 +137,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             <EuiSpacer size="l" />
           </>
         )}
-        {(input.type === 'cloudbeat/cis_aws' ||
-          input.type === 'cloudbeat/cis_azure' ||
-          input.type === 'cloudbeat/cis_gcp') && (
+        {input.policy_template === CSPM_POLICY_TEMPLATE && (
           <CloudSetup
             newPolicy={newPolicy}
             onChange={onChange}
             packageInfo={packageInfo}
             isEditPage={isEditPage}
-            setIntegrationToEnable={setIntegrationToEnable}
+            // setIntegrationToEnable={setIntegrationToEnable}
+            setEnabledPolicyInput={setEnabledPolicyInput}
             validationResults={validationResults}
             defaultSetupTechnology={defaultSetupTechnology}
             isAgentlessEnabled={isAgentlessEnabled}
@@ -285,24 +153,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           />
         )}
 
-        {(input.type === 'cloudbeat/cis_eks' ||
-          input.type === 'cloudbeat/cis_k8s' ||
-          input.type === 'cloudbeat/vuln_mgmt_aws') &&
-          (integrationToEnable === KSPM_POLICY_TEMPLATE ||
-            integrationToEnable === VULN_MGMT_POLICY_TEMPLATE) && (
-            <CnvmKspmSetup
-              newPolicy={newPolicy}
-              packageInfo={packageInfo}
-              // isLoading={isLoading}
-              // setIsValid={setIsValid}
-              setEnabledPolicyInput={setEnabledPolicyInput}
-              updatePolicy={updatePolicy}
-              validationResults={validationResults}
-              isEditPage={isEditPage}
-              integrationToEnable={integrationToEnable}
-              onChange={onChange}
-            />
-          )}
+        {(input.policy_template === KSPM_POLICY_TEMPLATE ||
+          input.policy_template === VULN_MGMT_POLICY_TEMPLATE) && (
+          <CnvmKspmSetup
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            setEnabledPolicyInput={setEnabledPolicyInput}
+            updatePolicy={updatePolicy}
+            validationResults={validationResults}
+            isEditPage={isEditPage}
+            input={input}
+            onChange={onChange}
+          />
+        )}
 
         <EuiSpacer />
       </>

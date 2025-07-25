@@ -153,7 +153,8 @@ interface CloudSetupProps {
   isAgentlessEnabled?: boolean;
   defaultSetupTechnology?: SetupTechnology;
   integrationToEnable?: CloudSecurityPolicyTemplate;
-  setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
+  // setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
+  setEnabledPolicyInput: (input: PostureInput) => void;
 }
 
 export const CloudSetup = memo<CloudSetupProps>(
@@ -168,8 +169,9 @@ export const CloudSetup = memo<CloudSetupProps>(
     isAgentlessEnabled,
     defaultSetupTechnology,
     integrationToEnable,
-    setIntegrationToEnable,
+    // setIntegrationToEnable,
     namespaceSupportEnabled = false,
+    setEnabledPolicyInput,
   }) => {
     const { cloud, uiSettings } = useKibana().services;
     const integration =
@@ -221,63 +223,63 @@ export const CloudSetup = memo<CloudSetupProps>(
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
      */
-    const setEnabledPolicyInput = useCallback(
-      (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(
-          inputType,
-          packageInfo,
-          setupTechnology,
-          showCloudConnectors
-        );
-        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-        updatePolicy(policy);
-      },
-      [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
-    );
+    // const setEnabledPolicyInput = useCallback(
+    //   (inputType: PostureInput) => {
+    //     const inputVars = getPostureInputHiddenVars(
+    //       inputType,
+    //       packageInfo,
+    //       setupTechnology,
+    //       showCloudConnectors
+    //     );
+    //     const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+    //     updatePolicy(policy);
+    //   },
+    //   [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
+    // );
 
     const hasInvalidRequiredVars = !!hasErrors(validationResults);
 
-    const [canFetchIntegration, setCanFetchIntegration] = useState(true);
+    // const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
-    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
-      enabled: canFetchIntegration,
-    });
-
-    useEffect(() => {
-      if (isEditPage) return;
-      // Pick default input type for policy template.
-      // Only 1 enabled input is supported when all inputs are initially enabled.
-      // Required for mount only to ensure a single input type is selected
-      // This will remove errors in validationResults.vars
-      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-      refetch();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [input.policy_template, isEditPage]);
-
-    useEffect(() => {
-      if (isEditPage) {
-        return;
-      }
-
-      setEnabledPolicyInput(input.type);
-      setIntegrationToEnable?.(input.policy_template);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setupTechnology]);
-
-    // useCloudFormationTemplate({
-    //   packageInfo,
-    //   updatePolicy,
-    //   newPolicy,
+    // const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+    //   enabled: canFetchIntegration,
     // });
 
-    usePolicyTemplateInitialName({
-      packagePolicyList: packagePolicyList?.items,
-      isEditPage,
-      integration,
-      newPolicy,
-      updatePolicy,
-      setCanFetchIntegration,
-    });
+    // useEffect(() => {
+    //   if (isEditPage) return;
+    //   // Pick default input type for policy template.
+    //   // Only 1 enabled input is supported when all inputs are initially enabled.
+    //   // Required for mount only to ensure a single input type is selected
+    //   // This will remove errors in validationResults.vars
+    //   setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+    //   refetch();
+    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [input.policy_template, isEditPage]);
+
+    // useEffect(() => {
+    //   if (isEditPage) {
+    //     return;
+    //   }
+
+    //   setEnabledPolicyInput(input.type);
+    //   setIntegrationToEnable?.(input.policy_template);
+    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [setupTechnology]);
+
+    // // useCloudFormationTemplate({
+    // //   packageInfo,
+    // //   updatePolicy,
+    // //   newPolicy,
+    // // });
+
+    // usePolicyTemplateInitialName({
+    //   packagePolicyList: packagePolicyList?.items,
+    //   isEditPage,
+    //   integration,
+    //   newPolicy,
+    //   updatePolicy,
+    //   setCanFetchIntegration,
+    // });
 
     return (
       <>
