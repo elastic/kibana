@@ -58,6 +58,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           const rulesClient = await (await context.alerting).getRulesClient();
           const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
+          // rulesClient.bulkEditRuleParamsWithReadAuth();
           const existingRule = await readRules({
             rulesClient,
             ruleId: params.rule_id,
@@ -73,16 +74,51 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           }
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+          // when validating default exception list,
+          // do the authz check via capabilities
+          // check for minimum read rules && all exceptions
+          // otherwise throw an error.
+          // remove exceptionsList as a parameter to patched
+          // and updated in the client functions.
           await validateRuleDefaultExceptionList({
             exceptionsList: params.exceptions_list,
             rulesClient,
             ruleRuleId: params.rule_id,
             ruleId: params.id,
           });
+          // uncomment this when ying's pr merges
+          // let patchedRule;
+          // if (params.exceptions_list != null) {
+          //   patchedRule = await rulesClient.bulkEditRuleParamsWithReadAuth({
+          //     ids: [existingRule.id],
+          //     operations: [
+          //       {
+          //         field: 'exceptionsList',
+          //         operation: 'set',
+          //         value: [
+          //           // ...ruleExceptionLists,
+          //           ...params.exceptions_list,
+          //           // {
+          //           //   id: exceptionListToAssociate.id,
+          //           //   list_id: exceptionListToAssociate.list_id,
+          //           //   type: exceptionListToAssociate.type,
+          //           //   namespace_type: exceptionListToAssociate.namespace_type,
+          //           // },
+          //         ],
+          //       },
+          //     ],
+          //   });
+          // } else {
+          //   patchedRule = await detectionRulesClient.patchRule({
+          //     rulePatch: params,
+          //   });
+          // }
 
           const patchedRule = await detectionRulesClient.patchRule({
             rulePatch: params,
           });
+
+          // console.error('PATCHED RULE', JSON.stringify(patchedRule, null, 2));
 
           return response.ok({
             body: patchedRule,
