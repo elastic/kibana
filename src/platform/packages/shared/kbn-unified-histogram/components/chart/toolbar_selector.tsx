@@ -136,7 +136,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
                 defaultMessage: 'Search',
               }
             ),
-            onChange: (value) => setSearchTerm(value),
+            onChange: setSearchTerm,
           }
         : undefined,
     [dataTestSubj, searchable, setSearchTerm]
@@ -197,7 +197,6 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         isPreFiltered={searchable}
         options={filteredOptions}
         onChange={onSelectionChange}
-        optionMatcher={optionMatcher}
         listProps={{
           truncationProps: { truncation: 'middle' },
           isVirtualized: searchable,
