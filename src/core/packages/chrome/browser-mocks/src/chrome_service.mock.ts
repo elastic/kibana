@@ -21,6 +21,7 @@ const createStartContractMock = () => {
     getHeaderBanner: jest.fn(),
     getProjectAppMenuComponent: jest.fn(),
     getProjectHeaderComponentForGridLayout: jest.fn(),
+    getProjectSideNavV2Component: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
