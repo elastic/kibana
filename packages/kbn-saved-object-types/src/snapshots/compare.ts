@@ -50,10 +50,14 @@ export async function assertValidUpdates({
         // check that defined modelVersions are consecutive integer numbers, starting at 1
         infoAfter.modelVersions
           .map<number>(({ version }) => parseInt(version, 10))
-          .sort()
-          .forEach((versionNumber, index) => {
+          .sort((a, b) => a - b)
+          .forEach((versionNumber, index, list) => {
             if (versionNumber !== index + 1) {
-              throw new Error(`❌ The '${name}' SO type is missing model version '${index}'.`);
+              throw new Error(
+                `❌ The '${name}' SO type is missing model version '${
+                  index + 1
+                }'. Model versions defined: ${list}`
+              );
             }
           });
 
