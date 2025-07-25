@@ -130,6 +130,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('uploadFileButton');
             expect(await browser.getCurrentUrl()).contain('ml/filedatavisualizer');
           });
+
+          describe('Sample data section', function () {
+            it('renders the sample data section', async () => {
+              await testSubjects.existOrFail('sampleDataSection');
+            });
+
+            describe('when sample-data-elasticsearch index does not exist', function () {
+              it('renders the "Install sample data" button', async () => {
+                await testSubjects.existOrFail('installSampleBtn');
+              });
+            });
+
+            describe('when sample-data-elasticsearch index exists', function () {
+              before(async () => {
+                await es.indices.create({ index: 'sample-data-elasticsearch' });
+              });
+
+              after(async () => {
+                await esDeleteAllIndices(['sample-data-elasticsearch']);
+              });
+
+              it('renders the "View data" button', async () => {
+                await testSubjects.existOrFail('viewDataBtn');
+              });
+            });
+          });
         });
 
         describe('AI search capabilities', function () {
