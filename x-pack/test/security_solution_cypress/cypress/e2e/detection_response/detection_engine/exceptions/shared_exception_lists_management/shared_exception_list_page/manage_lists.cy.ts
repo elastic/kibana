@@ -56,7 +56,8 @@ const getExceptionList2 = () => ({
 
 let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/229356
+describe.skip(
   'Manage lists from "Shared Exception Lists" page',
   { tags: ['@ess', '@serverless'] },
   () => {
