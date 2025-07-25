@@ -31,7 +31,7 @@ import {
   ESQLLocation,
 } from '../../../types';
 import { collectUserDefinedColumns, excludeUserDefinedColumnsFromCurrentCommand } from './columns';
-import { getFunctionDefinition } from '../functions';
+import { filterFunctionSignatures, getFunctionDefinition } from '../functions';
 import {
   extractTypeFromASTArg,
   getFieldsOrFunctionsSuggestions,
@@ -166,6 +166,12 @@ export async function getFunctionArgsSuggestions(
   if (!fnDefinition) {
     return [];
   }
+
+  const filteredFnDefinition = {
+    ...fnDefinition,
+    signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
+  };
+
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = context?.fields || new Map();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
@@ -184,7 +190,7 @@ export async function getFunctionArgsSuggestions(
     getValidSignaturesAndTypesToSuggestNext(
       functionNode,
       references,
-      fnDefinition,
+      filteredFnDefinition,
       fullText,
       offset
     );
