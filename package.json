@@ -107,7 +107,7 @@
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^11.9.1",
+    "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
     "@aws-crypto/sha256-js": "^5.2.0",
@@ -1247,7 +1247,7 @@
     "isbinaryfile": "4.0.2",
     "jest-diff": "^29.7.0",
     "joi": "^17.13.3",
-    "joi-to-json": "^4.3.0",
+    "joi-to-json": "^4.3.2",
     "jquery": "^3.7.1",
     "js-search": "^1.4.3",
     "js-sha256": "^0.11.0",
@@ -1432,7 +1432,7 @@
     "@elastic/synthetics": "^1.18.2",
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.11.0",
-    "@fast-check/jest": "^2.1.0",
+    "@fast-check/jest": "^2.1.1",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
     "@huggingface/hub": "^2.2.0",
     "@jest/console": "^29.7.0",
