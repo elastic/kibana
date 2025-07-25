@@ -65,6 +65,7 @@ describe('ingest_pipeline', () => {
         },
       ],
       dynamic: false,
+      identityFieldMapping: {},
     };
     const options = { namespace: 'default' };
 
@@ -225,6 +226,7 @@ describe('ingest_pipeline', () => {
       },
       fields: [],
       dynamic: false,
+      identityFieldMapping: {},
     };
 
     it('should call deletePipeline with the correct ID', async () => {
