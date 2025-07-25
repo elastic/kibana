@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -64,12 +65,21 @@ export default ({ getService }: FtrProviderContext) => {
       };
       afterEach(async () => {
         log.info(`Cleaning up after test`);
-        await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await api.deleteMonitoringEngine({ query: { data: true } });
+        try {
+          await es.indices.delete({ index: indexName }, { ignore: [404] });
+          await api.deleteMonitoringEngine({ query: { data: true } });
+        } catch (err) {
+          this.log('warn', `Failed to clean up in afterEach: ${err.message}`);
+        }
       });
-      before(async () => {
-        await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await api.deleteMonitoringEngine({ query: { data: true } });
+      beforeEach(async () => {
+        log.info(`Cleaning up before test`);
+        try {
+          await es.indices.delete({ index: indexName }, { ignore: [404] });
+          await api.deleteMonitoringEngine({ query: { data: true } });
+        } catch (err) {
+          this.log('warn', `Failed to clean up in beforeEach: ${err.message}`);
+        }
         // create the tatooine index
         await es.indices.create({
           index: indexName,
@@ -91,8 +101,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         });
+      });
+
+      it('should sync plain index', async () => {
         // Bulk insert documents
-        const bulkBody = [
+        const uniqueUsers = [
           'Luke Skywalker',
           'Leia Organa',
           'Han Solo',
@@ -103,20 +116,16 @@ export default ({ getService }: FtrProviderContext) => {
           'C-3PO',
           'Darth Vader',
         ].flatMap((name) => [{ index: {} }, { user: { name, role: 'admin' } }]);
-        await es.bulk({ index: indexName, body: bulkBody, refresh: true });
-      });
+        const repeatedUsers = Array.from({ length: 150 }).flatMap(() => [
+          { index: {} },
+          { user: { name: 'C-3PO', role: 'admin' } },
+        ]);
 
-      it('should sync plain index', async () => {
+        const bulkBody = [...uniqueUsers, ...repeatedUsers];
+        await es.bulk({ index: indexName, body: bulkBody, refresh: true });
         // register entity source
         const response = await api.createEntitySource({ body: entitySource }, 'default');
         expect(response.status).to.be(200);
-        const boop = await es.search({
-          index: 'tatooine-privileged-users',
-          size: 1000,
-          query: {
-            match_all: {},
-          },
-        });
         const listedSources = await api.listEntitySources({ query: {} }, 'default');
         expect(response.status).to.be(200);
         // Call init to trigger the sync
@@ -138,8 +147,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(userNames.length).to.be.greaterThan(0);
         expect(userNames).contain('Luke Skywalker');
         expect(userNames).contain('Leia Organa');
+        expect(userNames).to.contain('C-3PO');
+        // Test that duplicate C-3PO is counted only once
+        expect(userNames.filter((name: string) => name === 'C-3PO').length).to.be(1);
       });
-      // add a test to handle duplicate users
     });
   });
 };
