@@ -1756,6 +1756,20 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_required_role",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "has_required_role",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.ProfilingStatus.unauthorized",
             "type": "CompoundType",
             "tags": [],
