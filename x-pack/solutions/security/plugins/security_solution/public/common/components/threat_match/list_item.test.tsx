@@ -24,6 +24,9 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 const singlePayload = (): ThreatMapEntries => ({
   entries: [

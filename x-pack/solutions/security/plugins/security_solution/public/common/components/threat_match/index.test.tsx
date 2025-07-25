@@ -27,6 +27,9 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const getDoublePayLoad = (): ThreatMapEntries[] => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },

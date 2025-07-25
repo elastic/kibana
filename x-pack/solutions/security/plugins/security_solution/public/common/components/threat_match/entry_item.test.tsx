@@ -17,6 +17,9 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 describe('EntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {
