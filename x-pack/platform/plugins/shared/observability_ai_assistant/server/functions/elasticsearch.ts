@@ -52,8 +52,12 @@ export function registerElasticsearchFunction({
       },
     },
     async ({ arguments: { method, path, body } }) => {
-      // Allowlist: (1) all GET requests, (2) _search requests via GET or POST.
-      const isSearchEndpoint = /(^|\/)[^/]*_search(\?|$)/.test(path);
+      // Allowlist: (1) all GET requests, (2) POST requests whose *final* path segment is exactly "_search".
+      const [pathWithoutQuery] = path.split('?');
+      const pathSegments = pathWithoutQuery.replace(/^\//, '').split('/');
+      const lastPathSegment = pathSegments[pathSegments.length - 1];
+      const isSearchEndpoint = lastPathSegment === '_search';
+
       if (method !== 'GET' && !(method === 'POST' && isSearchEndpoint)) {
         throw new Error(
           'Only GET requests or POST requests to the "_search" endpoint are permitted through this assistant function.'
