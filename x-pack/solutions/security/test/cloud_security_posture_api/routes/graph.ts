@@ -27,15 +27,23 @@ import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
+  const es = getService('es');
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
 
-  const postGraph = (agent: Agent, body: GraphRequest, auth?: { user: string; pass: string }) => {
+  const postGraph = (
+    agent: Agent,
+    body: GraphRequest,
+    auth?: { user: string; pass: string },
+    spaceId?: string
+  ) => {
+    logger.debug(`POST ${spaceId ? `/s/${spaceId}` : ''}/internal/cloud_security_posture/graph`);
     let req = agent
-      .post('/internal/cloud_security_posture/graph')
+      .post(`${spaceId ? `/s/${spaceId}` : ''}/internal/cloud_security_posture/graph`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'xxxx');
@@ -67,67 +75,143 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Validation', () => {
+      it('should return 400 when missing `originEventIds` field', async () => {
+        await postGraph(supertest, {
+          // @ts-expect-error ignore error for testing
+          query: {
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 400 when missing `esQuery` field is not of type bool', async () => {
+        await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+            esQuery: {
+              // @ts-expect-error ignore error for testing
+              match_all: {},
+            },
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 400 with unsupported `esQuery`', async () => {
+        await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+            esQuery: {
+              bool: {
+                filter: [
+                  {
+                    unsupported: 'unsupported',
+                  },
+                ],
+              },
+            },
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 400 when index patterns is an empty array', async () => {
+        await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+            indexPatterns: [],
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 400 when index patterns has empty string value', async () => {
+        await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+            indexPatterns: ['logs-*', ''],
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 400 when index patterns has illegal character (space, |)', async () => {
+        await postGraph(supertest, {
+          query: {
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+            indexPatterns: ['logs-*', '.alerts-security-*| FROM *'],
+          },
+        }).expect(result(400, logger));
+      });
+
+      it('should return 500 when space id is invalid', async () => {
+        await postGraph(
+          supertest,
+          {
+            query: {
+              originEventIds: [],
+              start: 'now-1d/d',
+              end: 'now/d',
+            },
+          },
+          undefined,
+          encodeURIComponent('foo | FROM *').replace('*', '%2A')
+        ).expect(result(500, logger));
+      });
+
+      it('should return 400 when index pattern contains illegal characters', async () => {
+        await postGraph(supertest, {
+          query: {
+            indexPatterns: ['foo | FROM *'],
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        }).expect(result(400, logger));
+      });
+    });
+
     describe('Happy flows', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+        );
+        await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
+        await spacesService.create({
+          id: 'foo',
+          name: 'foo',
+          disabledFeatures: [],
+        });
       });
 
       after(async () => {
+        // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+        // Instead we delete all alerts from the index
+        await es.deleteByQuery({
+          index: '.internal.alerts-*',
+          query: { match_all: {} },
+          conflicts: 'proceed',
+        });
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
-      });
-
-      describe('Validation', () => {
-        it('should return 400 when missing `originEventIds` field', async () => {
-          await postGraph(supertest, {
-            // @ts-expect-error ignore error for testing
-            query: {
-              start: 'now-1d/d',
-              end: 'now/d',
-            },
-          }).expect(result(400, logger));
-        });
-
-        it('should return 400 when missing `esQuery` field is not of type bool', async () => {
-          await postGraph(supertest, {
-            query: {
-              originEventIds: [],
-              start: 'now-1d/d',
-              end: 'now/d',
-              esQuery: {
-                // @ts-expect-error ignore error for testing
-                match_all: {},
-              },
-            },
-          }).expect(result(400, logger));
-        });
-
-        it('should return 400 with unsupported `esQuery`', async () => {
-          await postGraph(supertest, {
-            query: {
-              originEventIds: [],
-              start: 'now-1d/d',
-              end: 'now/d',
-              esQuery: {
-                bool: {
-                  filter: [
-                    {
-                      unsupported: 'unsupported',
-                    },
-                  ],
-                },
-              },
-            },
-          }).expect(result(400, logger));
-        });
+        await spacesService.delete('foo');
       });
 
       it('should return an empty graph / should return 200 when missing `esQuery` field', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: 'now-1d/d',
             end: 'now/d',
@@ -142,6 +226,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by actor', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -199,6 +284,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by alert', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -238,6 +324,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by origin event', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: false }],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -276,6 +363,7 @@ export default function (providerContext: FtrProviderContext) {
       it('color of alert of failed event should be danger', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [{ id: 'failed-event', isAlert: true }],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -314,6 +402,7 @@ export default function (providerContext: FtrProviderContext) {
       it('color of event of failed event should be primary', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -363,6 +452,7 @@ export default function (providerContext: FtrProviderContext) {
       it('2 grouped events', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -416,6 +506,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should support more than 1 originEventIds', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [
               { id: 'kabcd1234efgh5678', isAlert: true },
               { id: 'failed-event', isAlert: true },
@@ -457,6 +548,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a graph with nodes and edges by alert and actor', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -510,6 +602,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -536,6 +629,7 @@ export default function (providerContext: FtrProviderContext) {
         const response = await postGraph(supertest, {
           showUnknownTarget: true,
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -562,6 +656,7 @@ export default function (providerContext: FtrProviderContext) {
         const response = await postGraph(supertest, {
           nodesLimit: 1,
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [],
             start: '2024-09-01T00:00:00Z',
             end: '2024-09-02T00:00:00Z',
@@ -588,6 +683,7 @@ export default function (providerContext: FtrProviderContext) {
       it('should support date math', async () => {
         const response = await postGraph(supertest, {
           query: {
+            indexPatterns: ['logs-*'],
             originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: true }],
             start: '2024-09-01T12:30:00.000Z||-30m',
             end: '2024-09-01T12:30:00.000Z||+30m',

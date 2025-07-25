@@ -17,12 +17,12 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
+  ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
   ElasticsearchRoleDescriptor,
   KibanaRole,
 } from '../../../common/services';
-import { ScoutLogger } from '../../../common/services/logger';
 import type { ScoutTestOptions } from '../../types';
 import type { ScoutTestConfig } from '.';
 
