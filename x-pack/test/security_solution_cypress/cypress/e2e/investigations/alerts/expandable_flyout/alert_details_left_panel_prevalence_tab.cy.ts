@@ -44,6 +44,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 // Failing: See https://github.com/elastic/kibana/issues/229360
+// Failing: See https://github.com/elastic/kibana/issues/229361
 describe.skip(
   'Alert details expandable flyout left panel prevalence',
   { tags: ['@ess', '@serverless'] },
