@@ -23,7 +23,12 @@ import type {
 } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
-import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
+import {
+  ReferencedPanelAttributes,
+  SuggestedDashboardsValidPanelType,
+  isSuggestedDashboardsValidPanelType,
+  isSuggestedDashboardsValidRuleTypeId,
+} from './helpers';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -37,6 +42,46 @@ export class RelatedDashboardsClient {
     private alertId: string,
     private soClient: SavedObjectsClientContract
   ) {}
+
+  private getPanelIndicesMap: Record<
+    SuggestedDashboardsValidPanelType,
+    (panelAttributes: unknown) => Set<string> | undefined
+  > = {
+    lens: (panelAttributes: unknown) => {
+      if (this.isLensVizAttributes(panelAttributes)) {
+        return new Set(
+          panelAttributes.references
+            .filter((r) => r.name.match(`indexpattern`))
+            .map((reference) => reference.id)
+        );
+      }
+    },
+  };
+
+  private getPanelFieldsMap: Record<
+    SuggestedDashboardsValidPanelType,
+    (panelAttributes: unknown) => Set<string> | undefined
+  > = {
+    lens: (panelAttributes: unknown) => {
+      if (this.isLensVizAttributes(panelAttributes)) {
+        const fields = new Set<string>();
+        const dataSourceLayers = panelAttributes.state.datasourceStates.formBased?.layers || {};
+        Object.values(dataSourceLayers).forEach((ds) => {
+          const columns = ds.columns;
+          Object.values(columns).forEach((col) => {
+            const hasSourceField = (
+              c: FieldBasedIndexPatternColumn | GenericIndexPatternColumn
+            ): c is FieldBasedIndexPatternColumn =>
+              (c as FieldBasedIndexPatternColumn).sourceField !== undefined;
+            if (hasSourceField(col)) {
+              fields.add(col.sourceField);
+            }
+          });
+        });
+        return fields;
+      }
+    },
+  };
 
   public async fetchRelatedDashboards(): Promise<{
     suggestedDashboards: SuggestedDashboard[];
@@ -132,7 +177,7 @@ export class RelatedDashboardsClient {
     }
 
     try {
-      const so = await this.soClient.get(panel.type, panelReference.id);
+      const so = await this.soClient.get<ReferencedPanelAttributes>(panel.type, panelReference.id);
       return {
         ...panel,
         panelConfig: {
@@ -165,7 +210,9 @@ export class RelatedDashboardsClient {
     for (const dashboard of hits) {
       const panels: DashboardAttributes['panels'] = await Promise.all(
         dashboard.attributes.panels.map(async (panel) =>
-          isDashboardPanel(panel) && isEmpty(panel.panelConfig)
+          isDashboardPanel(panel) &&
+          isEmpty(panel.panelConfig) &&
+          isSuggestedDashboardsValidPanelType(panel.type)
             ? await this.fetchReferencedPanel({
                 dashboard,
                 panel,
@@ -299,33 +346,17 @@ export class RelatedDashboardsClient {
   }
 
   private getPanelIndices(panel: DashboardPanel): Set<string> {
-    const emptyIndicesSet = new Set<string>();
-    switch (panel.type) {
-      case 'lens':
-        const maybeLensAttr = panel.panelConfig.attributes;
-        if (this.isLensVizAttributes(maybeLensAttr)) {
-          const lensIndices = this.getLensVizIndices(maybeLensAttr);
-          return lensIndices;
-        }
-        return emptyIndicesSet;
-      default:
-        return emptyIndicesSet;
-    }
+    const indices = isSuggestedDashboardsValidPanelType(panel.type)
+      ? this.getPanelIndicesMap[panel.type](panel.panelConfig.attributes)
+      : undefined;
+    return indices ?? new Set<string>();
   }
 
   private getPanelFields(panel: DashboardPanel): Set<string> {
-    const emptyFieldsSet = new Set<string>();
-    switch (panel.type) {
-      case 'lens':
-        const maybeLensAttr = panel.panelConfig.attributes;
-        if (this.isLensVizAttributes(maybeLensAttr)) {
-          const lensFields = this.getLensVizFields(maybeLensAttr);
-          return lensFields;
-        }
-        return emptyFieldsSet;
-      default:
-        return emptyFieldsSet;
-    }
+    const fields = isSuggestedDashboardsValidPanelType(panel.type)
+      ? this.getPanelFieldsMap[panel.type](panel.panelConfig.attributes)
+      : undefined;
+    return fields ?? new Set<string>();
   }
 
   private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
@@ -344,33 +375,6 @@ export class RelatedDashboardsClient {
     const alert = this.checkAlert();
     const index = alert.getRuleQueryIndex();
     return index;
-  }
-
-  private getLensVizIndices(lensAttr: LensAttributes): Set<string> {
-    const indices = new Set(
-      lensAttr.references
-        .filter((r) => r.name.match(`indexpattern`))
-        .map((reference) => reference.id)
-    );
-    return indices;
-  }
-
-  private getLensVizFields(lensAttr: LensAttributes): Set<string> {
-    const fields = new Set<string>();
-    const dataSourceLayers = lensAttr.state.datasourceStates.formBased?.layers || {};
-    Object.values(dataSourceLayers).forEach((ds) => {
-      const columns = ds.columns;
-      Object.values(columns).forEach((col) => {
-        const hasSourceField = (
-          c: FieldBasedIndexPatternColumn | GenericIndexPatternColumn
-        ): c is FieldBasedIndexPatternColumn =>
-          (c as FieldBasedIndexPatternColumn).sourceField !== undefined;
-        if (hasSourceField(col)) {
-          fields.add(col.sourceField);
-        }
-      });
-    });
-    return fields;
   }
 
   private async getLinkedDashboards(): Promise<LinkedDashboard[]> {
