@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable, firstValueFrom, toArray } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import {
   AgentMode,
@@ -28,7 +28,12 @@ import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
-export function registerChatRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerChatRoutes({
+  router,
+  getInternalServices,
+  coreSetup,
+  logger,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
@@ -51,10 +56,12 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
     payload,
     request,
     chatService,
+    abortSignal,
   }: {
     chatService: ChatService;
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
+    abortSignal: AbortSignal;
   }) => {
     const {
       agent_id: agentId,
@@ -69,6 +76,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
       mode,
       connectorId,
       conversationId,
+      abortSignal,
       nextInput: { message: input },
       request,
     });
@@ -100,7 +108,17 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
-        const chatEvents$ = callConverse({ chatService, payload, request });
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
         const {
@@ -147,6 +165,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         },
       },
       wrapHandler(async (ctx, request, response) => {
+        const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
 
@@ -155,13 +174,25 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           abortController.abort();
         });
 
-        const chatEvents$ = callConverse({ chatService, payload, request });
+        const chatEvents$ = callConverse({
+          chatService,
+          payload,
+          request,
+          abortSignal: abortController.signal,
+        });
 
         return response.ok({
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          },
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
+              flushThrottleMs: 100,
+              flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
               logger,
             }
           ),
