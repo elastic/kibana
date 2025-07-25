@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DataErrorsControl } from './src/types';
-export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
-export type { ESQLEditorProps } from './src/esql_editor';
-import { ESQLEditor } from './src/esql_editor';
-export type { ESQLEditorRestorableState } from './src/restorable_state';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { HistoryTabId } from './types';
 
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default ESQLEditor;
+export interface ESQLEditorRestorableState {
+  editorHeight: number;
+  resizableContainerHeight: number;
+  isHistoryOpen: boolean;
+  historySelectedTabId: HistoryTabId;
+}
+
+export const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<ESQLEditorRestorableState>();
