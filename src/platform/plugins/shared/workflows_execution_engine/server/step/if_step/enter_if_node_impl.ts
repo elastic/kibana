@@ -10,13 +10,13 @@
 import { EnterIfNode } from '@kbn/workflows';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { StepImplementation } from '../step_base';
-import { WorkflowState } from '../../workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_state';
 
 export class EnterIfNodeImpl implements StepImplementation {
   constructor(
     private step: EnterIfNode,
     private contextManager: WorkflowContextManager, // TODO: Will be used later for condition evaluation
-    private workflowState: WorkflowState
+    private workflowState: WorkflowExecutionState
   ) {}
 
   public async run(): Promise<void> {

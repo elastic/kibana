@@ -9,7 +9,7 @@
 
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowState } from '../workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from '../workflow_context_manager/workflow_state';
 import { RunStepResult, StepBase, BaseStep } from './step_base';
 
 // Extend BaseStep for connector-specific properties
@@ -23,7 +23,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     step: ConnectorStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor,
-    workflowState: WorkflowState,
+    workflowState: WorkflowExecutionState,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     super(step, contextManager, connectorExecutor, workflowState, templatingEngineType);

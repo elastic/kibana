@@ -13,7 +13,7 @@ import { graphlib } from '@dagrejs/dagre';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { RunStepResult } from '../step/step_base';
 
-export class WorkflowState {
+export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private stepResults: Map<string, RunStepResult> = new Map();
   private stepStates: Map<string, Record<string, any>> = new Map();
