@@ -60,9 +60,10 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
-  const { http } = useAssistantContext();
+  const { http, inferenceEnabled } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    inferenceEnabled,
   });
 
   // for showing / hiding anonymized data:

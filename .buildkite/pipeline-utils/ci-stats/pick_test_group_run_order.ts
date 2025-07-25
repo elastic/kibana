@@ -461,7 +461,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 80,
+              diskSizeGb: 85,
             },
             retry: {
               automatic: [
@@ -564,7 +564,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [
       {
         group: 'Scout Configs',
-        key: 'scout-configs',
         depends_on: ['build'],
         steps: scoutGroups.map(
           ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({

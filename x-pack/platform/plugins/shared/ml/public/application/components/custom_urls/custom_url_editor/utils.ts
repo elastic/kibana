@@ -291,8 +291,8 @@ async function buildDashboardUrlFromSettings(
   // Override with filters and queries from saved dashboard if they are available.
   const { searchSource } = dashboard.attributes.kibanaSavedObjectMeta;
   if (searchSource !== undefined) {
-    if (Array.isArray(searchSource.filter) && searchSource.filter.length > 0) {
-      filters = searchSource.filter;
+    if (Array.isArray(searchSource.filters) && searchSource.filters.length > 0) {
+      filters = searchSource.filters;
     }
     query = searchSource.query;
   }

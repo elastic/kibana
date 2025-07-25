@@ -17,8 +17,6 @@ import { TimelionVisParams } from './timelion_vis_fn';
 import { TimelionInterval, TimelionExpressionInput } from './components';
 import { TimelionVisDependencies } from './plugin';
 
-import './timelion_options.scss';
-
 export type TimelionOptionsProps = VisEditorOptionsProps<TimelionVisParams>;
 
 function TimelionOptions({

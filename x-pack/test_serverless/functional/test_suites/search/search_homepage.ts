@@ -82,6 +82,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('uploadFileButton');
           await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
         });
+
+        it('does not render the "Add sample data" card', async () => {
+          await testSubjects.missingOrFail('sampleDataSection');
+        });
       });
 
       describe('AI search capabilities', function () {
@@ -208,6 +212,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
         });
       });
+
+      describe('Sample data section', function () {
+        it('renders the sample data section', async () => {
+          await pageObjects.common.navigateToApp('searchHomepage');
+          await testSubjects.existOrFail('sampleDataSection');
+          await testSubjects.existOrFail('installSampleBtn');
+        });
+
+        describe('when sample-data-elasticsearch index exists', function () {
+          before(async () => {
+            await es.indices.create({ index: 'sample-data-elasticsearch' });
+            await pageObjects.common.navigateToApp('searchHomepage');
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(['sample-data-elasticsearch']);
+          });
+
+          it('renders the "View data" button', async () => {
+            await testSubjects.existOrFail('viewDataBtn');
+          });
+        });
+      });
     });
 
     describe('as developer', function () {
@@ -262,6 +289,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('opens API keys management page on clicking Manage API Keys', async () => {
           await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
           await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+        });
+      });
+
+      describe('Sample data section', function () {
+        it('renders the sample data section', async () => {
+          await pageObjects.common.navigateToApp('searchHomepage');
+          await testSubjects.existOrFail('sampleDataSection');
+          await testSubjects.existOrFail('installSampleBtn');
+        });
+
+        describe('when sample-data-elasticsearch index exists', function () {
+          before(async () => {
+            await es.indices.create({ index: 'sample-data-elasticsearch' });
+            await pageObjects.common.navigateToApp('searchHomepage');
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(['sample-data-elasticsearch']);
+          });
+
+          it('renders the "View data" button', async () => {
+            await testSubjects.existOrFail('viewDataBtn');
+          });
         });
       });
     });

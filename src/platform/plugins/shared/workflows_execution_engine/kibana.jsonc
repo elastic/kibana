@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-execution-engine",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Stateless execution engine for workflows.",
+  "plugin": {
+    "configPath": ["workflowsExecutionEngine"],
+    "id": "workflowsExecutionEngine",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["taskManager", "actions"]
+  }
+}

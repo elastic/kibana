@@ -13,10 +13,11 @@ import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
 
+import MarkdownIt from 'markdown-it';
+
 import { useLinks } from '../../../../../hooks';
 
 import { markdownRenderers } from './markdown_renderers';
-import MarkdownIt from 'markdown-it';
 
 export function Readme({
   packageName,
@@ -93,11 +94,30 @@ export function Readme({
     return newLines.join('\n');
   };
 
-  const markdownWithCollapsable = useMemo(() => wrapAllExportedFieldsTables(markdown), [markdown]);
+  const wrapSampleEvents = (content: string | undefined): string | undefined => {
+    if (!content) return content;
+
+    // Use regex to find the pattern and code block together
+    // This pattern matches the intro text and the following code block
+    const regex =
+      /(An example event looks as following|An example event for.*?:?)(\s*```[\s\S]*?```)/g;
+
+    // Replace with the collapsible structure
+    return content.replace(regex, (_match, _introText, codeBlock) => {
+      return `<details>\n<summary>Example</summary>\n${codeBlock}\n</details>`;
+    });
+  };
+
+  const processedMarkdown = useMemo(() => {
+    if (!markdown) return markdown;
+    let processedContent = wrapAllExportedFieldsTables(markdown);
+    processedContent = wrapSampleEvents(processedContent);
+    return processedContent;
+  }, [markdown]);
 
   return (
     <>
-      {markdownWithCollapsable !== undefined ? (
+      {processedMarkdown !== undefined ? (
         <EuiText grow={true}>
           <ReactMarkdown
             transformImageUri={handleImageUri}
@@ -105,7 +125,7 @@ export function Readme({
             rehypePlugins={[rehypeRaw, [rehypeSanitize]]}
             remarkPlugins={[remarkGfm]}
           >
-            {markdownWithCollapsable}
+            {processedMarkdown}
           </ReactMarkdown>
         </EuiText>
       ) : (

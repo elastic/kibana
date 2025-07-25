@@ -125,6 +125,7 @@ const SavedPlaygroundFieldErrors: string[] = [
   SavedPlaygroundFormFields.citations,
   SavedPlaygroundFormFields.sourceFields,
   SavedPlaygroundFormFields.docSize,
+  SavedPlaygroundFormFields.summarizationModel,
 ];
 
 type SavedPlaygroundFormErrors = FormState<SavedPlaygroundForm>['errors'];

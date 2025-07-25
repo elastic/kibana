@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import * as i18n from '../../../../common/translations';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
@@ -64,13 +64,16 @@ const BulkActionDryRunConfirmationComponent = ({
   result,
   bulkAction,
 }: BulkEditDryRunConfirmationProps) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { failedRulesCount = 0, succeededRulesCount = 0, ruleErrors = [] } = result ?? {};
 
   // if no rule can be edited, modal window that denies bulk edit action will be displayed
   if (succeededRulesCount === 0) {
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={getActionRejectedTitle(bulkAction, failedRulesCount)}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onCancel}
         onConfirm={onCancel}
         confirmButtonText={i18n.BULK_ACTION_CONFIRMATION_CLOSE}
@@ -85,7 +88,9 @@ const BulkActionDryRunConfirmationComponent = ({
   // if there are rules that can and cannot be edited, modal window that propose edit of some the rules will be displayed
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18n.BULK_ACTION_CONFIRMATION_PARTLY_TITLE(succeededRulesCount)}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={getActionConfirmLabel(bulkAction, succeededRulesCount)}

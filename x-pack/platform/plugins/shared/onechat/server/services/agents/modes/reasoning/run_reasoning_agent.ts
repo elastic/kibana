@@ -39,6 +39,7 @@ export const runReasoningAgent: RunChatAgentFn = async (
     toolSelection = allToolsSelection,
     runId = uuidv4(),
     agentId,
+    abortSignal,
     customInstructions,
   },
   { logger, request, modelProvider, toolProvider, events }
@@ -72,6 +73,7 @@ export const runReasoningAgent: RunChatAgentFn = async (
     { initialMessages },
     {
       version: 'v2',
+      signal: abortSignal,
       runName: chatAgentGraphName,
       metadata: {
         graphName: chatAgentGraphName,

@@ -52,8 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const addFeatureControlSuite = ({ user, description, privileges }: FeatureControlUserSuite) => {
     const testPrefix = (allowed: boolean) => (allowed ? `can` : `can't`);
 
-    // Failing: See https://github.com/elastic/kibana/issues/216512
-    describe.skip(description, () => {
+    describe(description, () => {
       before(async () => {
         await loginAs(user);
         await tagManagementPage.navigateTo();

@@ -7,6 +7,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   EuiConfirmModal,
@@ -93,6 +94,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
   isUpdating = false,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { notifications, docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion() || '';
   const config = useConfig();
@@ -384,6 +387,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   return (
     <EuiConfirmModal
       data-test-subj="agentUpgradeModal"
+      aria-labelledby={confirmModalTitleId}
+      titleProps={{ id: confirmModalTitleId }}
       title={
         <>
           {isSingleAgent ? (

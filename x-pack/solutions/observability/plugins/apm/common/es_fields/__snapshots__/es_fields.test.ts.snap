@@ -252,6 +252,8 @@ exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Error OTEL_EVENT_NAME 1`] = `"otel event name"`;
+
 exports[`Error OTEL_SPAN_LINKS 1`] = `undefined`;
 
 exports[`Error OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
@@ -644,6 +646,8 @@ exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Span OTEL_EVENT_NAME 1`] = `"otel event name"`;
 
 exports[`Span OTEL_SPAN_LINKS 1`] = `undefined`;
 
@@ -1047,6 +1051,8 @@ exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Transaction OTEL_EVENT_NAME 1`] = `"otel event name"`;
 
 exports[`Transaction OTEL_SPAN_LINKS 1`] = `undefined`;
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,12 +40,16 @@ export const DeleteParam = ({
     }
   }, [isDeleting, setIsDeleteModalVisible, name, dispatch, listOfParams]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.synthetics.paramManagement.deleteParamNameLabel', {
         defaultMessage: 'Delete "{name}" param?',
         values: { name },
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => setIsDeleteModalVisible(false)}
       onConfirm={() => {
         dispatch(deleteGlobalParamsAction.get(items.map(({ id }) => id)));

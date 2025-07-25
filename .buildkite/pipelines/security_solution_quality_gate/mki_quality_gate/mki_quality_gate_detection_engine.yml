@@ -19,7 +19,7 @@ steps:
   - group: 'API MKI - Detection Engine'
     key: api_test_detections_engine
     steps:
-      - label: Running exception_lists_items:qa:serverless:release
+      - label: 'API MKI - exception_lists_items:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless:release
         key: exception_lists_items:qa:serverless:release
         agents:
@@ -33,7 +33,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_lists:auth:lists:qa:serverless:release
+      - label: 'API MKI - exception_lists:auth:lists:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:lists:qa:serverless:release
         key: exception_lists:auth:lists:qa:serverless:release
         agents:
@@ -47,7 +47,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_lists:auth:common:qa:serverless:release
+      - label: 'API MKI - exception_lists:auth:common:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:common:qa:serverless:release
         key: exception_lists:auth:common:qa:serverless:release
         agents:
@@ -61,7 +61,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_lists:auth:items:qa:serverless
+      - label: 'API MKI - exception_lists:auth:items:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
         key: exception_lists:auth:items:qa:serverless
         agents:
@@ -75,7 +75,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running lists_items:qa:serverless:release
+      - label: 'API MKI - lists_items:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
         key: lists_items:qa:serverless:release
         agents:
@@ -89,7 +89,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running user_roles:qa:serverless:release
+      - label: 'API MKI - user_roles:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless:release
         key: user_roles:qa:serverless:release
         agents:
@@ -103,7 +103,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running telemetry:qa:serverless:release
+      - label: 'API MKI - telemetry:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless:release
         key: telemetry:qa:serverless:release
         agents:
@@ -117,7 +117,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_workflows:essentials:qa:serverless:release
+      - label: 'API MKI - exception_workflows:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless:release
         key: exception_workflows:essentials:qa:serverless:release
         agents:
@@ -131,7 +131,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_date_types:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_date_types:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_types:essentials:qa:serverless:release
         key: exception_operators_date_types:essentials:qa:serverless:release
         agents:
@@ -145,7 +145,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running exception_operators_double:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_double:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_double:essentials:qa:serverless:release
         key: exception_operators_double:essentials:qa:serverless:release
         agents:
@@ -159,7 +159,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running exception_operators_float:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_float:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_float:essentials:qa:serverless:release
         key: exception_operators_float:essentials:qa:serverless:release
         agents:
@@ -173,7 +173,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running exception_operators_integer:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_integer:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_integer:essentials:qa:serverless:release
         key: exception_operators_integer:essentials:qa:serverless:release
         agents:
@@ -187,7 +187,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_keyword:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_keyword:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless:release
         key: exception_operators_keyword:essentials:qa:serverless:release
         agents:
@@ -201,7 +201,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_ips:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_ips:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless:release
         key: exception_operators_ips:essentials:qa:serverless:release
         agents:
@@ -215,7 +215,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_long:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_long:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless:release
         key: exception_operators_long:essentials:qa:serverless:release
         agents:
@@ -229,7 +229,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running exception_operators_text:essentials:qa:serverless:release
+      - label: 'API MKI - exception_operators_text:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless:release
         key: exception_operators_text:essentials:qa:serverless:release
         agents:
@@ -243,7 +243,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running actions:qa:serverless:release
+      - label: 'API MKI - actions:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless:release
         key: actions:qa:serverless:release
         agents:
@@ -257,7 +257,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running alerts:qa:serverless:release
+      - label: 'API MKI - alerts:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless:release
         key: alerts:qa:serverless:release
         agents:
@@ -271,7 +271,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running alerts:essentials:qa:serverless:release
+      - label: 'API MKI - alerts:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless:release
         key: alerts:essentials:qa:serverless:release
         agents:
@@ -285,7 +285,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running rule_execution_logic:eql:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:eql:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:eql:qa:serverless:release
         key: rule_execution_logic:eql:qa:serverless:release
         agents:
@@ -299,7 +299,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:esql:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:esql:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:esql:qa:serverless:release
         key: rule_execution_logic:esql:qa:serverless:release
         agents:
@@ -313,7 +313,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:general_logic:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:general_logic:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:qa:serverless:release
         key: rule_execution_logic:general_logic:qa:serverless:release
         agents:
@@ -327,7 +327,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:general_logic:essentials:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:general_logic:essentials:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:essentials:qa:serverless:release
         key: rule_execution_logic:general_logic:essentials:qa:serverless:release
         agents:
@@ -341,7 +341,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: Running rule_execution_logic:indicator_match:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:indicator_match:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless:release
         key: rule_execution_logic:indicator_match:qa:serverless:release
         agents:
@@ -355,7 +355,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:machine_learning:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:machine_learning:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:machine_learning:qa:serverless:release
         key: rule_execution_logic:machine_learning:qa:serverless:release
         agents:
@@ -369,7 +369,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:new_terms:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:new_terms:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:new_terms:qa:serverless:release
         key: rule_execution_logic:new_terms:qa:serverless:release
         agents:
@@ -383,7 +383,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:query:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:query:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:query:qa:serverless:release
         key: rule_execution_logic:query:qa:serverless:release
         agents:
@@ -397,7 +397,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running rule_execution_logic:threshold:qa:serverless:release
+      - label: 'API MKI - rule_execution_logic:threshold:qa:serverless:release'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:threshold:qa:serverless:release
         key: rule_execution_logic:threshold:qa:serverless:release
         agents:

@@ -12,5 +12,5 @@ export const getAuthenticationsEsqlCount = (namespace: string, sourcerDataView: 
   const indexPattern = sourcerDataView?.title ?? '';
   const fields = sourcerDataView?.fields ?? {};
   return `${getAuthenticationsEsqlSource(namespace, indexPattern, fields)}
-    | STATS COUNT(*)`;
+    | STATS count = COUNT(*)`;
 };

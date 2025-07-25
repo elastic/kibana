@@ -47,6 +47,7 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
     customInstructions,
     runId = uuidv4(),
     agentId,
+    abortSignal,
     cycleBudget = defaultCycleBudget,
   },
   { logger, request, modelProvider, toolProvider, events }
@@ -85,6 +86,7 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
     },
     {
       version: 'v2',
+      signal: abortSignal,
       runName: agentGraphName,
       metadata: {
         graphName: agentGraphName,

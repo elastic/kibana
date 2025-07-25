@@ -39,18 +39,21 @@ export {
   isAgentNotFoundError,
   isConversationNotFoundError,
   isBadRequestError,
+  isRequestAbortedError,
   createOnechatError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createBadRequestError,
+  createRequestAbortedError,
   type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
   type OnechatAgentNotFoundError,
   type OnechatConversationNotFoundError,
   type OnechatBadRequestError,
+  type OnechatRequestAbortedError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
 export {

@@ -36,8 +36,8 @@ export type DashboardSettings = Writable<DashboardOptions> & {
 };
 
 export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
+  query?: Query;
+  filters?: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
   panels: DashboardAttributes['panels'];

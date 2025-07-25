@@ -1098,6 +1098,7 @@ paths:
         The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
       tags:
         - synthetics
+      x-state: Generally available; added in 9.2.0
       parameters:
         - in: path
           name: monitorId

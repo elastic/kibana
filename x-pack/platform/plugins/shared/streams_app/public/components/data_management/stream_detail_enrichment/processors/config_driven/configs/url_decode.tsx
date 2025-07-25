@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { UrlDecodeProcessorConfig, UrlDecodeProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
@@ -67,7 +68,7 @@ export const urlDecodeProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'URL Decode',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeHelpText"
@@ -78,7 +79,7 @@ export const urlDecodeProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsUrlDecodeLink"
               external
               target="_blank"
-              href={esDocUrl + 'urldecode-processor.html'}
+              href={docLinks.links.ingest.urlDecode}
             >
               {i18n.translate('xpack.streams.availableProcessors.urlDecodeLinkLabel', {
                 defaultMessage: 'URL-decodes a string.',

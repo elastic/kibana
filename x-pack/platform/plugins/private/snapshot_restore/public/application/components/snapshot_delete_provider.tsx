@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
@@ -41,6 +42,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteSnapshotPrompt: DeleteSnapshot = (ids, onSuccess = () => undefined) => {
     if (!ids || !ids.length) {
@@ -118,6 +120,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={
           isSingle ? (
             <FormattedMessage
@@ -133,6 +136,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
             />
           )
         }
+        titleProps={{ id: modalTitleId }}
         onCancel={closeModal}
         onConfirm={deleteSnapshot}
         cancelButtonText={

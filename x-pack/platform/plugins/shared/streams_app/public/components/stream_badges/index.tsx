@@ -157,11 +157,13 @@ function DiscoverBadgeButtonInner({
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>;
   esqlQuery: string;
 }) {
-  const discoverLink = discoverLocator.useUrl({
-    query: {
-      esql: esqlQuery,
+  const discoverLink = discoverLocator.useUrl(
+    {
+      query: { esql: esqlQuery },
     },
-  });
+    undefined,
+    [esqlQuery]
+  );
 
   return (
     <EuiButtonIcon

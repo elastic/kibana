@@ -9,6 +9,7 @@ import { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
 import { InferenceConnector } from '../connectors';
 import { BoundOutputAPI, OutputAPI } from '../output';
 import { BoundPromptAPI, PromptAPI } from '../prompt';
+import { BoundOptions } from '../bind';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
@@ -36,6 +37,10 @@ export interface InferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * Create a {@link BoundInferenceClient}.
+   */
+  bindTo: (options: BoundOptions) => BoundInferenceClient;
 }
 
 /**
@@ -64,4 +69,8 @@ export interface BoundInferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * Create a {@link BoundInferenceClient}.
+   */
+  bindTo: (options: BoundOptions) => BoundInferenceClient;
 }

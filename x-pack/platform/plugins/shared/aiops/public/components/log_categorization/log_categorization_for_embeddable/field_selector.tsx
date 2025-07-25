@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiToken,
   useGeneratedHtmlId,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -88,7 +89,11 @@ export const FieldSelector: FC<Props> = ({
   WarningComponent,
 }) => {
   const fieldOptions = useMemo(
-    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
+    () =>
+      fields.map((field) => ({
+        inputDisplay: <EuiTextTruncate text={field.name} />,
+        value: field,
+      })),
     [fields]
   );
   const fieldId = useGeneratedHtmlId({ prefix: 'fieldSelector', suffix: 'select' });
@@ -115,6 +120,9 @@ export const FieldSelector: FC<Props> = ({
           disabled={fields.length === 0}
           valueOfSelected={selectedField ?? undefined}
           onChange={setSelectedField}
+          css={{
+            minWidth: 250,
+          }}
         />
       </EuiFormRow>
     </>

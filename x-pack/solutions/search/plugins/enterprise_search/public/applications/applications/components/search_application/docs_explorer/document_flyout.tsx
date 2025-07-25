@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +37,8 @@ import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 
 export const DocumentFlyout: React.FC = () => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { fieldTypesByIndex } = useValues(SearchApplicationDocsExplorerLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 
@@ -86,11 +89,11 @@ export const DocumentFlyout: React.FC = () => {
   ];
 
   return (
-    <EuiFlyout onClose={() => setSelectedDocument(null)}>
+    <EuiFlyout onClose={() => setSelectedDocument(null)} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="m">
-            <h2>
+            <h2 id={modalTitleId}>
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.documentFlyout.title"
                 defaultMessage="Document: {id}"

@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
@@ -43,6 +44,8 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     open: openDeleteModal,
     close: closeDeleteModal,
   } = useIsOpenState(false);
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const onRenameError = useCallback(() => {
     setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
@@ -152,7 +155,9 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
             </EuiPopover>
             {isDeleteModalOpen && (
               <EuiConfirmModal
+                aria-labelledby={confirmModalTitleId}
                 title={i18n.DELETE_MIGRATION_TITLE}
+                titleProps={{ id: confirmModalTitleId }}
                 onCancel={closeDeleteModal}
                 onConfirm={confirmDeleteMigration}
                 confirmButtonText={i18n.DELETE_MIGRATION_TEXT}

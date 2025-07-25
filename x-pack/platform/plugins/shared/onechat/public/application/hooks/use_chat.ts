@@ -16,6 +16,7 @@ import {
   isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useCallback, useState } from 'react';
 import { useConversation } from './use_conversation';
@@ -92,11 +93,11 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
           if (isOnechatError(err)) {
             onError?.(err);
 
-            notifications.toasts.addError(err, {
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.onechat.chat.chatError.title', {
                 defaultMessage: 'Error loading chat response',
               }),
-              toastMessage: `${err.code} - ${err.message}`,
+              text: formatOnechatErrorMessage(err),
             });
           }
         },

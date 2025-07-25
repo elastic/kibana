@@ -6,6 +6,7 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import {
@@ -16,6 +17,10 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -25,6 +30,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
 import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
@@ -49,6 +55,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
+  cases?: CasesServerSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
@@ -57,6 +64,7 @@ interface PluginSetup {
   cloud?: CloudSetup;
   contentManagement: ContentManagementServerSetup;
   esql: ESQLSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
 }
 
 interface PluginStart {
@@ -65,6 +73,7 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -93,6 +102,14 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
+    if (
+      plugins.cases &&
+      plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: PAGE_ATTACHMENT_TYPE,
+      });
+    }
     plugins.features.registerKibanaFeature(getLogsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;

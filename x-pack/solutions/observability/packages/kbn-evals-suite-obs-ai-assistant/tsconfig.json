@@ -1,0 +1,25 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/apm-synthtrace-client",
+    "@kbn/evals",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/tooling-log",
+    "@kbn/ai-assistant-common",
+    "@kbn/core",
+    "@kbn/core-http-browser",
+  ]
+}

@@ -88,7 +88,10 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const columns = buildPrivilegedUsersTableColumns(openUserFlyout, euiTheme);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const privilegedUsersTableQuery = getPrivilegedUsersQuery(spaceId);
+  const privilegedUsersTableQuery = getPrivilegedUsersQuery(
+    spaceId,
+    currentPage * DEFAULT_PAGE_SIZE + 1 // we add 1 so that we know if there are more results to show
+  );
 
   const { filterQuery: filterQueryWithoutTimerange } = useGlobalFilterQuery();
 
@@ -128,7 +131,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
       cursorStart: 0,
       querySize: records.length,
     },
-    skip: nameFilterQuery === undefined,
+    skip: nameFilterQuery === undefined || records.length === 0,
   });
 
   const riskScores = riskScoreData && riskScoreData.length > 0 ? riskScoreData : [];
@@ -136,7 +139,6 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const riskScoreByUserName: RiskScoresByUserName = Object.fromEntries(
     riskScores.map((riskScore) => [riskScore.user.name, riskScore])
   );
-
   const {
     data: assetCriticalityData,
     isError: assetCriticalityError,
@@ -144,9 +146,8 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   } = useAssetCriticalityFetchList({
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
-    skip: !toggleStatus,
+    skip: !toggleStatus || records.length === 0,
   });
-
   const assetCriticalityRecords =
     assetCriticalityData && assetCriticalityData.records.length > 0
       ? assetCriticalityData.records
@@ -192,8 +193,9 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     [records, riskScoreByUserName, assetCriticalityByUserName]
   );
 
+  const isLoading =
+    loadingPrivilegedUsers || (records.length > 0 && (loadingRiskScore || loadingAssetCriticality));
   const visibleRecords = take(currentPage * DEFAULT_PAGE_SIZE, enrichedRecords);
-
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-users-table-panel">
       <HeaderSection
@@ -224,11 +226,12 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
       {toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            {(loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality) && (
-              <EuiProgress size="xs" color="accent" />
-            )}
+            {isLoading &&
+              (loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality) && (
+                <EuiProgress size="xs" color="accent" />
+              )}
           </EuiFlexItem>
-          {records.length > 0 && (
+          {records.length > 0 ? (
             <>
               <EuiText size={'s'}>
                 <FormattedMessage
@@ -251,16 +254,25 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
               <EuiHorizontalRule margin="none" css={{ height: 2 }} />
               <EuiBasicTable
                 id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-                loading={loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality}
+                loading={isLoading}
                 items={visibleRecords || []}
                 columns={columns}
               />
             </>
+          ) : (
+            !isLoading && (
+              <EuiText size="s" color="subdued" textAlign="center">
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.noData"
+                  defaultMessage="No privileged users found"
+                />
+              </EuiText>
+            )
           )}
           {records.length > currentPage * DEFAULT_PAGE_SIZE && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isLoading={loadingRiskScore || loadingPrivilegedUsers || loadingAssetCriticality}
+                isLoading={isLoading}
                 onClick={() => {
                   setCurrentPage((page) => page + 1);
                 }}

@@ -14,7 +14,3 @@ export function getRuleIdFromQueryLink(query: QueryLink) {
   const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
   return v5(queryHash, v5.DNS);
 }
-
-export const getKqlAsCommandArg = (str: string): string => {
-  return str.replace(/(?<!\\)"/g, '\\"');
-};

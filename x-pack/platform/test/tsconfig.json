@@ -149,6 +149,10 @@
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin",
     "@kbn/controls-plugin",
+    "@kbn/palettes",
+    "@kbn/field-formats-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/datemath",
     "@kbn/global-search-plugin",
     "@kbn/global-search-test-plugin"
   ]

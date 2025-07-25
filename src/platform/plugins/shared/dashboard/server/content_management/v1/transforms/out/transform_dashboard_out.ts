@@ -45,7 +45,7 @@ export function transformDashboardOut(
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
+      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...((panelsJSON || sections) && {

@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type Query,
-  type SerializedSearchSourceFields,
-  parseSearchSourceJSON,
-} from '@kbn/data-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { DashboardAttributes } from '../../types';
+import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
 
 export function transformSearchSourceOut(
-  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta']
+  kibanaSavedObjectMeta: DashboardSavedObjectAttributes['kibanaSavedObjectMeta'],
+  references: SavedObjectReference[] = []
 ): DashboardAttributes['kibanaSavedObjectMeta'] {
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON) {
     return {};
   }
-  // Dashboards do not yet support ES|QL (AggregateQuery) in the search source
+  const parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
+  const searchSource = injectReferences(parsedSearchSource, references);
+  const filters = cleanFiltersForSerialize(searchSource.filter);
+  const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+
   return {
-    searchSource: parseSearchSourceJSON(searchSourceJSON) as Omit<
-      SerializedSearchSourceFields,
-      'query'
-    > & { query?: Query },
+    searchSource: { filters, query },
   };
 }

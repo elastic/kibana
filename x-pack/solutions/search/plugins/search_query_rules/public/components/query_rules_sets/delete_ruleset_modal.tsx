@@ -28,6 +28,8 @@ export const DeleteRulesetModal = ({
   rulesetId,
   onSuccessAction,
 }: DeleteRulesetModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const onSuccess = () => {
@@ -53,6 +55,8 @@ export const DeleteRulesetModal = ({
   };
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.queryRules.deleteRulesetModal.title', {
         defaultMessage: 'Delete query ruleset?',
       })}

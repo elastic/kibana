@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
@@ -294,12 +295,15 @@ export class IndexActionsContextMenu extends Component {
       }
     );
     const selectedIndexCount = indexNames.length;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle', {
           defaultMessage: 'Force merge',
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this.closeConfirmModal}
         onConfirm={() => {
           if (!this.forcemergeSegmentsError()) {
@@ -394,6 +398,7 @@ export class IndexActionsContextMenu extends Component {
   renderConfirmDeleteModal = () => {
     const { deleteIndices, indexNames } = this.props;
     const selectedIndexCount = indexNames.length;
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
     const standardIndexModalBody = (
       <Fragment>
@@ -422,6 +427,7 @@ export class IndexActionsContextMenu extends Component {
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate(
           'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
           {
@@ -429,6 +435,7 @@ export class IndexActionsContextMenu extends Component {
             values: { selectedIndexCount },
           }
         )}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={() => {
           this.confirmAction(false);
           this.closeConfirmModal();

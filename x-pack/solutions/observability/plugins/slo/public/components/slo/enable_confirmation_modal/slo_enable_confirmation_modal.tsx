@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
@@ -19,9 +19,12 @@ export interface Props {
 
 export function SloEnableConfirmationModal({ slo, onCancel, onConfirm }: Props) {
   const { mutate: enableSlo } = useEnableSlo();
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="primary"
       data-test-subj="sloEnableConfirmationModal"
       title={i18n.translate('xpack.slo.enableConfirmationModal.title', {

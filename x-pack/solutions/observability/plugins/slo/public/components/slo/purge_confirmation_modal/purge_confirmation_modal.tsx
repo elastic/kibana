@@ -45,6 +45,7 @@ export function SloPurgeConfirmationModal({
   const [age, setAge] = React.useState('7d');
 
   const basicCheckboxId = useGeneratedHtmlId({ prefix: 'basicCheckbox' });
+  const modalTitleId = useGeneratedHtmlId();
 
   const purgeTimeLabel = i18n.translate('xpack.slo.purgeConfirmationModal.purgeDataDescription', {
     defaultMessage: 'Purge data older than',
@@ -56,9 +57,11 @@ export function SloPurgeConfirmationModal({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={modalTitle}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="sloPurgeConfirmationModal"
-      title={modalTitle}
       cancelButtonText={i18n.translate('xpack.slo.purgeConfirmationModal.cancelButtonLabel', {
         defaultMessage: 'Cancel',
       })}

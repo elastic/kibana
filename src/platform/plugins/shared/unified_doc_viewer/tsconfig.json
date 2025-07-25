@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    ".storybook/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/**/*.json"
+  ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
@@ -47,6 +54,7 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
+    "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
 }

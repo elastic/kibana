@@ -17,10 +17,10 @@ export const AlertsTriggeredTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.alertsTriggered.title', {
-        defaultMessage: 'Alerts Triggered',
+        defaultMessage: 'Alerts triggered',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.alertsTriggered.label', {
-        defaultMessage: 'Alerts Triggered',
+        defaultMessage: 'Alerts triggered',
       })}
       getEsqlQuery={(namespace) => getAlertsTriggeredEsqlCount(namespace, alertsIndexName)}
       id="privileged-user-monitoring-alerts-triggered"
@@ -28,7 +28,7 @@ export const AlertsTriggeredTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
       inspectTitle={
         <FormattedMessage
           id="xpack.securitySolution.privmon.alertsTriggered.inspectTitle"
-          defaultMessage="Alerts Triggered"
+          defaultMessage="Alerts triggered"
         />
       }
     />

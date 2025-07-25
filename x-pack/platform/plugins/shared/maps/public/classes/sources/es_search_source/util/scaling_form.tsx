@@ -15,6 +15,7 @@ import {
   EuiSwitchEvent,
   EuiTitle,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -188,11 +189,15 @@ export class ScalingForm extends Component<Props, State> {
       return null;
     }
 
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={i18n.translate('xpack.maps.source.esSearch.scalingModal.title', {
           defaultMessage: `Remove unsupported configurations?`,
         })}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={this._closeModal}
         onConfirm={this._acceptModal}
         cancelButtonText={i18n.translate('xpack.maps.source.esSearch.scalingModal.cancelBtnLabel', {

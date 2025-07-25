@@ -17,6 +17,8 @@ import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
@@ -78,6 +80,14 @@ export async function fetchEsqlQuery({
     const warning = `The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: ${Array.from(
       duplicateAlertIds
     ).join('; ')}`;
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
+
+  const isPartial = response.is_partial ?? false;
+
+  if (ruleResultService && isPartial) {
+    const warning = getPartialResultsWarning(response);
     ruleResultService.addLastRunWarning(warning);
     ruleResultService.setLastRunOutcomeMessage(warning);
   }
@@ -157,4 +167,25 @@ export function generateLink(
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
   return redirectUrl;
+}
+
+function getPartialResultsWarning(response: EsqlTable) {
+  const clusters = response?._clusters?.details ?? {};
+  const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
+    const failures = clusters[cluster]?.failures ?? [];
+
+    if (failures.length > 0) {
+      acc.push(...failures);
+    }
+
+    return acc;
+  }, []);
+
+  return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
+    defaultMessage:
+      shardFailures.length > 0
+        ? 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: {failures}'
+        : 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.',
+    values: { failures: JSON.stringify(shardFailures) },
+  });
 }

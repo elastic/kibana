@@ -31,7 +31,8 @@ import {
   FIRST_BACKFILL_ID,
 } from '../../../../tasks/api_calls/backfill';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/229350
+describe.skip(
   'Backfill groups',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

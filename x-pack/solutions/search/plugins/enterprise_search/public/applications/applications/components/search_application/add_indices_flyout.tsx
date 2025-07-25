@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -42,6 +43,8 @@ export interface AddIndicesFlyoutProps {
 }
 
 export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
     useValues(AddIndicesLogic);
@@ -61,10 +64,10 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
   );
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.title',
               { defaultMessage: 'Add new indices' }

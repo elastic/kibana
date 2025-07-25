@@ -45,6 +45,8 @@ import {
   useCloudSecurityIntegration,
 } from './hooks';
 
+import { useGeneratedHtmlId } from '@elastic/eui';
+
 export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
 export * from './instructions';
@@ -112,11 +114,18 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { isK8s } = useIsK8sPolicy(selectedPolicy ?? undefined);
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+    <EuiFlyout
+      data-test-subj="agentEnrollmentFlyout"
+      onClose={onClose}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      aria-labelledby={flyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder aria-labelledby={flyoutTitleId}>
         <EuiTitle size="m">
-          <h2 id="FleetAgentEnrollmentFlyoutTitle">
+          <h2 id={flyoutTitleId}>
             {isFleetServerPolicySelected ? (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"

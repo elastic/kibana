@@ -10,6 +10,7 @@ import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {
+  const es = getService('es');
   const retry = getService('retry');
   const logger = getService('log');
   const supertest = getService('supertest');
@@ -41,7 +42,20 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
-    beforeEach(async () => {
+    after(async () => {
+      // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+      // Instead we delete all alerts from the index
+      await es.deleteByQuery({
+        index: '.internal.alerts-*',
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+      );
+    });
+
+    it('expanded flyout - filter by node', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
@@ -51,22 +65,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`
       );
-
       await alertsPage.waitForListToHaveAlerts();
-    });
 
-    after(async () => {
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
-      );
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
-      );
-    });
-
-    it('expanded flyout - filter by node', async () => {
       await alertsPage.flyout.expandVisualizations();
-
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
 
@@ -165,6 +166,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     it('expanded flyout - show alert details', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${alertsPage.getFlyoutFilter(
+          '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
+        )}`
+      );
+      await alertsPage.waitForListToHaveAlerts();
+
       await alertsPage.flyout.expandVisualizations();
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
@@ -176,7 +188,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
       );
-      await alertsPage.flyout.assertEventPreviewPanelIsOpen();
+      await alertsPage.flyout.assertPreviewPanelIsOpen('event');
     });
   });
 }

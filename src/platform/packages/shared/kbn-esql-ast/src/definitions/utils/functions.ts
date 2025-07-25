@@ -85,6 +85,20 @@ export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
 
+export const filterFunctionSignatures = (
+  signatures: FunctionDefinition['signatures'],
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+): FunctionDefinition['signatures'] => {
+  if (!hasMinimumLicenseRequired) {
+    return signatures;
+  }
+
+  return signatures.filter((signature) => {
+    if (!signature.license) return true;
+    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType);
+  });
+};
+
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
@@ -95,38 +109,32 @@ export const filterFunctionDefinitions = (
   }
   const { location, returnTypes, ignored = [] } = predicates;
 
-  return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
-    if (ignoreAsSuggestion) {
-      return false;
-    }
-    const hasRestrictedSignature = signatures.some((signature) => signature.license);
-    if (!!hasMinimumLicenseRequired && hasRestrictedSignature) {
-      const availableSignatures = signatures.filter((signature) => {
-        if (!signature.license) return true;
-        return hasMinimumLicenseRequired
-          ? hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
-          : false;
-      });
-
-      if (availableSignatures.length === 0) {
+  return functions.filter(
+    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license }) => {
+      if (ignoreAsSuggestion) {
         return false;
       }
-    }
 
-    if (ignored.includes(name)) {
-      return false;
-    }
+      if (!!hasMinimumLicenseRequired && license) {
+        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+          return false;
+        }
+      }
 
-    if (location && !locationsAvailable.includes(location)) {
-      return false;
-    }
+      if (ignored.includes(name)) {
+        return false;
+      }
 
-    if (returnTypes && !returnTypes.includes('any')) {
-      return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
-    }
+      if (location && !locationsAvailable.includes(location)) {
+        return false;
+      }
+      if (returnTypes && !returnTypes.includes('any')) {
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+      }
 
-    return true;
-  });
+      return true;
+    }
+  );
 };
 
 export function getAllFunctions(options?: {

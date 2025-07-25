@@ -7,7 +7,6 @@
 
 import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
-import { bindClient } from '../inference_client/bind_client';
 import { createInferenceRestClient } from './inference_client';
 
 interface RestOptions {
@@ -27,8 +26,7 @@ export function createRestClient(
   const { fetch, signal } = options;
   const client = createInferenceRestClient({ fetch, signal });
   if ('bindTo' in options) {
-    return bindClient(client, options.bindTo);
-  } else {
-    return client;
+    return client.bindTo(options.bindTo);
   }
+  return client;
 }

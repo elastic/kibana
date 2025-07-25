@@ -7,10 +7,11 @@
 
 import React from 'react';
 
+import { waitFor } from '@testing-library/dom';
+
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 
 import { Readme } from './readme';
-import { waitFor } from '@testing-library/dom';
 
 describe('Readme', () => {
   function render(markdown: string | undefined) {
@@ -120,6 +121,145 @@ Some requirements and setup instructions.
 
       const accordion = result.queryByTestId('integrationsDocs.accordion');
       expect(accordion).not.toBeInTheDocument();
+    });
+  });
+
+  it('should collapse sample events with "An example event looks as following" pattern', async () => {
+    const result = render(`
+# Test Integration
+
+This is a test integration.
+
+An example event looks as following
+
+\`\`\`json
+{
+  "field": "value",
+  "nested": {
+    "field": "value"
+  }
+}
+\`\`\`
+
+Some other content.
+`);
+
+    await waitFor(() => {
+      const accordions = result.getAllByTestId('integrationsDocs.accordion');
+      expect(accordions.length).toBe(1);
+
+      // Check that the summary text is "Example"
+      const summary =
+        accordions[0].querySelector('.euiAccordion__buttonContent') ||
+        accordions[0].querySelector('[data-test-subj="euiAccordionDisplay"]');
+      expect(summary?.textContent).toContain('Example');
+
+      // Check that the code block is inside the accordion
+      const codeBlock = accordions[0].querySelector('code');
+      expect(codeBlock).toBeInTheDocument();
+      expect(codeBlock?.textContent).toContain('field');
+    });
+  });
+
+  it('should collapse sample events with "An example event for" pattern', async () => {
+    const result = render(`
+# Test Integration
+
+This is a test integration.
+
+An example event for version 8.0 looks like this:
+
+\`\`\`json
+{
+  "field": "value",
+  "version": "8.0"
+}
+\`\`\`
+
+Some other content.
+`);
+
+    await waitFor(() => {
+      const accordions = result.getAllByTestId('integrationsDocs.accordion');
+      expect(accordions.length).toBe(1);
+
+      // Check that the summary text is "Example"
+      const summary =
+        accordions[0].querySelector('.euiAccordion__buttonContent') ||
+        accordions[0].querySelector('[data-test-subj="euiAccordionDisplay"]');
+      expect(summary?.textContent).toContain('Example');
+
+      // Check that the code block is inside the accordion
+      const codeBlock = accordions[0].querySelector('code');
+      expect(codeBlock).toBeInTheDocument();
+      expect(codeBlock?.textContent).toContain('version');
+    });
+  });
+
+  it('should handle multiple sample events in the same document', async () => {
+    const result = render(`
+# Test Integration
+
+An example event looks as following
+
+\`\`\`json
+{
+  "event_type": "first",
+  "field": "value1"
+}
+\`\`\`
+
+An example event for the second type:
+
+\`\`\`json
+{
+  "event_type": "second",
+  "field": "value2"
+}
+\`\`\`
+`);
+
+    await waitFor(() => {
+      const accordions = result.getAllByTestId('integrationsDocs.accordion');
+      expect(accordions.length).toBe(2);
+
+      // Check that the code blocks are inside the accordions
+      const codeBlocks = result.container.querySelectorAll('code');
+      expect(codeBlocks.length).toBe(2);
+
+      // Verify the content of both code blocks
+      const codeTexts = Array.from(codeBlocks).map((block) => block.textContent);
+      expect(codeTexts).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('first'),
+          expect.stringContaining('second'),
+        ])
+      );
+    });
+  });
+
+  it('should not create collapsible sections when no sample events are present', async () => {
+    const result = render(`
+# Test Integration
+
+This is a test integration with no sample events.
+
+\`\`\`json
+{
+  "just": "a regular code block"
+}
+\`\`\`
+`);
+
+    await waitFor(() => {
+      // No accordions should be created
+      const accordions = result.queryAllByTestId('integrationsDocs.accordion');
+      expect(accordions.length).toBe(0);
+
+      // Code block should still be present
+      const codeBlock = result.container.querySelector('code');
+      expect(codeBlock).toBeInTheDocument();
+      expect(codeBlock?.textContent).toContain('regular code block');
     });
   });
 

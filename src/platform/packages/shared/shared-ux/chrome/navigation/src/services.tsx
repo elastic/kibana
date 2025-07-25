@@ -67,7 +67,16 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
 };
 
 /**
- * React hook for accessing pre-wired services.
+ * A React hook for accessing the top-level navigation services.
+ *
+ * This hook accesses the context value provided by `NavigationProvider` and
+ * returns the navigation services object containing observables and functions
+ * (e.g., `recentlyAccessed$`, `navigateToUrl`, `isSideNavCollapsed`).
+ * It is intended for use by components that need to access navigation-related
+ * services and state.
+ *
+ * @returns The navigation services object.
+ * @throws If the hook is used outside of a `NavigationProvider`.
  */
 export function useNavigation() {
   const context = useContext(Context);

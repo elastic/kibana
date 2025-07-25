@@ -45,10 +45,10 @@ describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {
     render(<AddDataSourcePanel onComplete={() => {}} />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Add data source of your privileged users')).toBeInTheDocument();
+    expect(screen.getByText('Add data source for your privileged users')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'To get started, define your privileged users by selecting an index with the relevant data, or importing your list of privileged users from a CSV file.'
+        'To get started, define your privileged users by selecting an index with user data or importing your list of privileged users from a supported file.'
       )
     ).toBeInTheDocument();
   });

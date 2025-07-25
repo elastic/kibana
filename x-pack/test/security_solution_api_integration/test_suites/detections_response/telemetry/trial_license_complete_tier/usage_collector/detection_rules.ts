@@ -1854,7 +1854,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "has_exceptions" greater than 1 when rule has attached exceptions', async () => {
+      // installMockPrebuiltRules and then fetching rule seems to not work in MKI
+      it('@skipInServerlessMKI should show "has_exceptions" greater than 1 when rule has attached exceptions', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
 

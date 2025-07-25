@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -71,6 +72,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     bulkSnoozeRules,
     bulkUnsnoozeRules,
   } = props;
+
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const {
     notifications: { toasts },
@@ -132,10 +135,14 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     return deleteConfirmPlural(numberOfSelectedRules);
   }, [rules, filter, numberOfSelectedRules]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   if (bulkEditAction === 'unsnooze' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={confirmationTitle}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onClose}
         onConfirm={onUnsnoozeRule}
         confirmButtonText={i18n.translate(
@@ -159,9 +166,9 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
 
   if (bulkEditAction === 'snooze' && (rules.length || filter)) {
     return (
-      <EuiModal onClose={onClose}>
+      <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeModal.modalTitle"
               defaultMessage="Add snooze now"

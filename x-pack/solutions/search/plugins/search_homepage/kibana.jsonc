@@ -20,6 +20,7 @@
       "console",
       "searchNavigation",
       "usageCollection",
+      "sampleDataIngest",
     ],
     "requiredBundles": [
       "kibanaReact"
