@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from '../../../../common';
-import { migrateLegacyQuery } from '../../../services/dashboard_content_management_service/lib/load_dashboard_state';
+import { DashboardState, migrateLegacyQuery } from '../../../../common';
 
 type DashboardSearchState = Pick<
   DashboardState,
