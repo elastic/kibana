@@ -41,6 +41,8 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   const { application, http, docLinks } = coreStart;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
 
+  const canManageSpaces = coreStart.application.capabilities.management.kibana.spaces;
+
   useEffect(() => {
     const breadcrumbs = [
       ...(showAiBreadcrumb
@@ -153,9 +155,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
             </EuiFormRow>
           </EuiDescribedFormGroup>
 
-          {showSpacesIntegration && <EuiSpacer size="l" />}
+          {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
 
-          {showSpacesIntegration && (
+          {showSpacesIntegration && canManageSpaces && (
             <EuiDescribedFormGroup
               fullWidth
               data-test-subj="aiFeatureVisibilitySection"

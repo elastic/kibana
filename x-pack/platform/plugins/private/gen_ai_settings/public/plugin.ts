@@ -45,7 +45,7 @@ export class GenAiSettingsPlugin
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
     { management }: GenAiSettingsSetupDeps
   ): GenAiSettingsPluginSetup {
-    management.sections.section.ai.registerApp({
+    const genAISettingsApp = management.sections.section.ai.registerApp({
       id: 'genAiSettings',
       title: i18n.translate('genAiSettings.managementSectionLabel', {
         defaultMessage: 'GenAI Settings',
@@ -61,6 +61,15 @@ export class GenAiSettingsPlugin
           config: this.initializerContext.config.get(),
         });
       },
+    });
+
+    // GenAI Settings currently relies mainly on the Connectors feature, in the future, it should have its own Kibana feature setting.
+    core.getStartServices().then(([coreStart]) => {
+      if (
+        !coreStart.application.capabilities.management.insightsAndAlerting.triggersActionsConnectors
+      ) {
+        genAISettingsApp.disable();
+      }
     });
     return {};
   }
