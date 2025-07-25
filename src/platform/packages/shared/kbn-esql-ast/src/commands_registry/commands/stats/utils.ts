@@ -19,10 +19,7 @@ import {
   isColumn,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
-import {
-  getFragmentData,
-  getLastNonWhitespaceChar,
-} from '../../../definitions/utils/autocomplete/helpers';
+import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
@@ -197,7 +194,7 @@ export const rightAfterColumn = (
   );
 };
 
-export const getSuggestionsAfterCompleteExpression = (
+export const getCommaAndPipe = (
   innerText: string,
   expressionRoot: ESQLSingleAstItem | undefined,
   columnExists: (name: string) => boolean

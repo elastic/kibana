@@ -15,6 +15,7 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLAstItem,
+  ESQLSingleAstItem,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/utils/functions';
@@ -33,8 +34,7 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
-import { getPosition, getSuggestionsAfterCompleteExpression } from './utils';
-// import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { getPosition, getCommaAndPipe } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
@@ -91,29 +91,21 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions = await suggestForExpression({
+      return getExpressionSuggestions({
         innerText,
         expressionRoot,
         location: Location.STATS,
         context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-      });
-
-      if (!expressionRoot) {
-        suggestions.push(
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-        );
-      }
-
-      if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
-        suggestions.push(
-          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists),
+        callbacks,
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+        ],
+        afterCompleteSuggestions: [
           whereCompleteItem,
-          byCompleteItem
-        );
-      }
-
-      return suggestions;
+          byCompleteItem,
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
+        ],
+      });
 
       // TODO: control suggestions
 
@@ -145,29 +137,21 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions = await suggestForExpression({
+      return getExpressionSuggestions({
         innerText,
         expressionRoot,
         location: Location.STATS,
         context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-      });
-
-      if (!expressionRoot) {
-        suggestions.push(
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-        );
-      }
-
-      if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
-        suggestions.push(
-          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists),
+        callbacks,
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+        ],
+        afterCompleteSuggestions: [
           whereCompleteItem,
-          byCompleteItem
-        );
-      }
-
-      return suggestions;
+          byCompleteItem,
+          ...getCommaAndPipe(innerText, expressionRoot, columnExists),
+        ],
+      });
 
       // TODO reinstate control suggestions
 
@@ -214,8 +198,6 @@ export async function autocomplete(
     }
 
     case 'grouping_expression_after_assignment': {
-      const histogramBarTarget = context?.histogramBarTarget ?? 0;
-
       // TODO - incorporate columns to ignore
       const ignored = alreadyUsedColumns(command);
 
@@ -237,35 +219,18 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions: ISuggestionItem[] = [];
-
-      if (!expressionRoot) {
-        suggestions.push(getDateHistogramCompletionItem(histogramBarTarget));
-      }
-
-      const expressionSuggestions = await suggestForExpression({
+      return getExpressionSuggestions({
         innerText,
-        getColumnsByType: callbacks?.getByType,
         expressionRoot,
-        location: Location.STATS_BY,
+        location: Location.STATS,
         context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        callbacks,
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+        ],
+        afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
       });
-
-      suggestions.push(...expressionSuggestions);
-
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
-        suggestions.push(
-          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
-        );
-      }
-
-      return suggestions;
     }
 
     case 'grouping_expression_without_assignment': {
@@ -285,41 +250,57 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions: ISuggestionItem[] = [];
-
-      if (!expressionRoot) {
-        suggestions.push(
-          getDateHistogramCompletionItem(histogramBarTarget),
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-        );
-      }
-
-      const expressionSuggestions = await suggestForExpression({
+      return getExpressionSuggestions({
         innerText,
-        getColumnsByType: callbacks?.getByType,
         expressionRoot,
-        location: Location.STATS_BY,
+        location: Location.STATS,
         context,
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        callbacks,
+        emptySuggestions: [
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+        ],
+        afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
       });
-
-      suggestions.push(...expressionSuggestions);
-
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
-        suggestions.push(
-          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
-        );
-      }
-
-      return suggestions;
     }
 
     default:
       return [];
   }
+}
+
+async function getExpressionSuggestions({
+  innerText,
+  expressionRoot,
+  location,
+  context,
+  callbacks,
+  emptySuggestions = [],
+  afterCompleteSuggestions = [],
+}: {
+  innerText: string;
+  expressionRoot: ESQLSingleAstItem | undefined;
+  location: Location;
+  context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
+  emptySuggestions?: ISuggestionItem[];
+  afterCompleteSuggestions?: ISuggestionItem[];
+}): Promise<ISuggestionItem[]> {
+  const suggestions = await suggestForExpression({
+    innerText,
+    expressionRoot,
+    location,
+    context,
+    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+  });
+
+  if (!expressionRoot) {
+    suggestions.push(...emptySuggestions);
+  }
+
+  if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
+    suggestions.push(...afterCompleteSuggestions);
+  }
+
+  return suggestions;
 }
