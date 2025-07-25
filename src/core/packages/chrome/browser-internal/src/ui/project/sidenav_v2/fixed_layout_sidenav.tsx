@@ -31,9 +31,6 @@ interface CollapsibleNavigationProps {
   isCollapsed$: BehaviorSubject<boolean>;
 }
 
-// TODO: make this dynamic?
-const navId = 'primary-navigation';
-
 export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigationProps> = ({
   toggle,
   isCollapsed$,
@@ -42,7 +39,7 @@ export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigatio
 
   return (
     <>
-      <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} aria-controls={navId} />
+      <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} />
       <CollapsibleNavigationFlyout>
         {
           ({ setWidth }) => null
@@ -77,7 +74,6 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         `}
       />
       <EuiFlyout
-        aria-labelledby={navId}
         size={width}
         side={'left'}
         type={'push'}

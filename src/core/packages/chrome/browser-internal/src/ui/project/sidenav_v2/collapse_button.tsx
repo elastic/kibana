@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   isCollapsed: boolean | Observable<boolean>;
   toggle: (isCollapsed: boolean) => void;
-  'aria-controls': string;
 }
 
 const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
@@ -90,7 +89,9 @@ export const SideNavV2CollapseButton: FC<Props> = ({ isCollapsed, toggle, ...res
         }
         aria-pressed={!collapsed}
         aria-expanded={!collapsed}
-        aria-controls={rest['aria-controls']}
+        aria-controls={
+          'primary-navigation' /** TODO: make this dynamic, hardcoded from sidenav code */
+        }
         onClick={() => toggle(!collapsed)}
       />
     </div>
