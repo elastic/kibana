@@ -328,7 +328,7 @@ $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 $$$observability-apm-labs$$$`observability:apmLabsButton` {applies_to}`stack: removed 9.1`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
-$$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
+$$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading` {applies_to}`stack: preview 9.0, ga 9.1`
 :   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
