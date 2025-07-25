@@ -7,25 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, UseEuiTheme, logicalCSS, logicalSizeCSS, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  UseEuiTheme,
+  logicalCSS,
+  logicalSizeCSS,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { FC, useMemo } from 'react';
 import { Observable, isObservable, of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   isCollapsed: boolean | Observable<boolean>;
   toggle: (isCollapsed: boolean) => void;
-  'aria-controls'?: string;
+  'aria-controls': string;
 }
 
-const collapsibleButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
+const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
   // packages/eui/src/components/header/header.styles.ts
   const height = euiTheme.size.xxxl; // TODO: hardcoded height of the euiHeader header
   const padding = euiTheme.size.s; // TODO: hardcoded padding of the euiHeader header
 
   return {
-    collapsibleNavButtonWrapper: css`
+    sideNavCollapseButtonWrapper: css`
       display: flex;
       align-items: center;
       justify-content: center;
@@ -34,7 +42,7 @@ const collapsibleButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
       ${logicalCSS('margin-left', `-${padding}`)}
       ${logicalCSS('margin-right', padding)}
     `,
-    collapsibleNavButton: css`
+    sideNavCollapseButton: css`
       &.euiButtonIcon:hover {
         transform: none;
       }
@@ -56,22 +64,33 @@ export const SideNavV2CollapseButton: FC<Props> = ({ isCollapsed, toggle, ...res
     typeof isCollapsed === 'boolean' ? isCollapsed : false
   );
 
-  const iconType = collapsed ? 'menuRight' : 'menuLeft';
+  const iconType = collapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const { euiTheme } = useEuiTheme();
-  const styles = collapsibleButtonStyles(euiTheme);
+  const styles = sideNavCollapseButtonStyles(euiTheme);
+
+  const isSmall = useIsWithinBreakpoints(['xs', 's']);
+  if (isSmall) return null;
 
   return (
-    <div className="collapsibleNavButtonWrapper" css={styles.collapsibleNavButtonWrapper}>
+    <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
       <EuiButtonIcon
-        data-test-subj="collapsibleNavButton"
-        css={styles.collapsibleNavButton}
+        data-test-subj="sideNavCollapseButton"
+        css={styles.sideNavCollapseButton}
         size="s"
         color="text"
         iconType={iconType}
-        {...rest}
-        aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+        aria-label={
+          collapsed
+            ? i18n.translate('core.ui.chrome.sideNavigation.expandButtonLabel', {
+                defaultMessage: 'Expand navigation menu',
+              })
+            : i18n.translate('core.ui.chrome.sideNavigation.collapseButtonLabel', {
+                defaultMessage: 'Collapse navigation menu',
+              })
+        }
         aria-pressed={!collapsed}
         aria-expanded={!collapsed}
+        aria-controls={rest['aria-controls']}
         onClick={() => toggle(!collapsed)}
       />
     </div>
