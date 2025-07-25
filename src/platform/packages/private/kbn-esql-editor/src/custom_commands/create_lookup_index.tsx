@@ -207,7 +207,7 @@ export const useLookupIndexCommand = (
         }
       });
 
-      inQueryLookupIndices.current = indexNames;
+      inQueryLookupIndices.current = Array.from(new Set(indexNames));
     },
     [query.esql]
   );
@@ -285,16 +285,9 @@ export const useLookupIndexCommand = (
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
       matches.forEach((match) => {
-        const range = new monaco.Range(
-          match.range.startLineNumber,
-          match.range.startColumn,
-          match.range.endLineNumber,
-          match.range.endColumn
-        );
-
         editorRef?.current?.createDecorationsCollection([
           {
-            range,
+            range: match.range,
             options: {
               isWholeLine: false,
               stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
