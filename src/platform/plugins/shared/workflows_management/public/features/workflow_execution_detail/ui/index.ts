@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'workflows';
-export const PLUGIN_NAME = 'Workflows';
-
-export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export { WorkflowExecution } from './workflow_execution';

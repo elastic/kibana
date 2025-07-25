@@ -9,7 +9,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { WorkflowYAMLEditor } from '../../../widgets/workflow_yaml_editor/ui';
+
+const WorkflowYAMLEditor = React.lazy(() =>
+  import('../../../widgets/workflow_yaml_editor/ui').then((module) => ({
+    default: module.WorkflowYAMLEditor,
+  }))
+);
 
 interface WorkflowEditorProps {
   workflowId: string;

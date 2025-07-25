@@ -21,15 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../features/workflow_visual_editor/ui').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
