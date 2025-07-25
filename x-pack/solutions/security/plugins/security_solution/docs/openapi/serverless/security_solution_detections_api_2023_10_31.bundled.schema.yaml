@@ -3733,14 +3733,18 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: >-
+              A list of user profile `uid`s to assign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: >-
+              A list of user profile `uid`s to unassign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -8745,7 +8749,9 @@ components:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
           items:
             format: nonempty
             minLength: 1
