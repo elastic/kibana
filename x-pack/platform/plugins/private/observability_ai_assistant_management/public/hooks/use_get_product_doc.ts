@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 import { useUninstallProductDoc } from './use_uninstall_product_doc';
 import { useInstallProductDoc } from './use_install_product_doc';
+
+/**
+ * Custom hook to get the status of the product documentation installation.
+ * It also provides methods to install and uninstall the product documentation.
+ *
+ * @param inferenceId - The ID of the inference for which to get the product documentation status.
+ * @returns An object containing the status of the product documentation, loading state, and methods to install and uninstall the product documentation.
+ */
+export type ProductDocStatus = InstallationStatus | 'uninstalling';
 
 export function useGetProductDoc(inferenceId: string | undefined) {
   const { productDocBase } = useKibana().services;
@@ -33,8 +43,21 @@ export function useGetProductDoc(inferenceId: string | undefined) {
     refetch();
   }, [inferenceId, isInstalling, isUninstalling, refetch]);
 
+  const status: ProductDocStatus | undefined = useMemo(() => {
+    if (!inferenceId || data?.inferenceId !== inferenceId) {
+      return undefined;
+    }
+    if (isInstalling) {
+      return 'installing';
+    }
+    if (isUninstalling) {
+      return 'uninstalling';
+    }
+    return data?.overall;
+  }, [inferenceId, isInstalling, isUninstalling, data]);
+
   return {
-    status: data?.inferenceId === inferenceId ? data?.overall : undefined,
+    status,
     refetch,
     isLoading,
     installProductDoc,
