@@ -79,6 +79,7 @@ export async function loadAction({
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const targetsWithoutIdGeneration: string[] = [];
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -112,8 +113,17 @@ export async function loadAction({
       docsOnly,
       isArchiveInExceptionList,
       log,
+      targetsWithoutIdGeneration,
     }),
-    createIndexDocRecordsStream(client, stats, progress, log, useCreate, performance),
+    createIndexDocRecordsStream(
+      client,
+      stats,
+      progress,
+      log,
+      useCreate,
+      performance,
+      targetsWithoutIdGeneration
+    ),
   ]);
 
   progress.deactivate();
