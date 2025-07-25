@@ -22,6 +22,8 @@ import {
   buildNewSavedPlaygroundFromForm,
   buildSavedPlaygroundFromForm,
   validatePlaygroundName,
+  validateSavedPlaygroundIndices,
+  validateSavedPlaygroundModel,
 } from './saved_playgrounds';
 
 // Mock data
@@ -433,6 +435,38 @@ describe('saved_playgrounds utils', () => {
 
     it('should handle whitespace-only names as empty', () => {
       expect(validatePlaygroundName('   ')).toBe('Playground name is required');
+    });
+  });
+
+  describe('validateSavedPlaygroundIndices', () => {
+    it('should return valid indices and missing indices', () => {
+      const { validIndices, missingIndices } = validateSavedPlaygroundIndices(
+        ['test-index', 'missing-index'],
+        ['test-index']
+      );
+
+      expect(validIndices).toEqual(['test-index']);
+      expect(missingIndices).toEqual(['missing-index']);
+    });
+  });
+
+  describe('validateSavedPlaygroundModel', () => {
+    it('should return undefined for valid models', () => {
+      expect(
+        validateSavedPlaygroundModel(mockPlaygroundResponse.data.summarizationModel, mockLLMModels)
+      ).toBeUndefined();
+    });
+
+    it('should undefined if not model was saved on playground', () => {
+      expect(validateSavedPlaygroundModel(undefined, mockLLMModels)).toBeUndefined();
+    });
+
+    it('should return error for unknown model', () => {
+      const result = validateSavedPlaygroundModel(
+        { connectorId: 'unknown', modelId: 'unknown' },
+        mockLLMModels
+      );
+      expect(result).toBe('unknown');
     });
   });
 });
