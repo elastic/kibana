@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // if (errorEmbeddables.length > 0) {
     //   console.log(await wd.driver.takeScreenshot());
     // }
-    expect(errorEmbeddables).to.be([]);
+    expect(errorEmbeddables).to.eql([]);
   };
 
   describe('should be able to handle multi-space imports correctly', function () {
