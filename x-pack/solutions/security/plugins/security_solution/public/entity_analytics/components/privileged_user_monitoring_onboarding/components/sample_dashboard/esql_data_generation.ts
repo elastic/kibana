@@ -50,7 +50,7 @@ export const generateListESQLQuery =
         | SORT ${String(sortField)} ${sortDirection}
         | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
 
-export const generateVisualizationESQLQuery = (esqlSource: string) => (stackByField: string) =>
-  `${esqlSource}
-    | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-    | STATS results = COUNT(*) by timestamp, ${stackByField}`;
+export const generateVisualizationESQLQuery =
+  (esqlSource: string) => (stackByField: string, timerange: { from: string; to: string }) =>
+    `${esqlSource}
+  | STATS results = COUNT(*) by timestamp = BUCKET(@timestamp, 30, "${timerange.from}", "${timerange.to}"), ${stackByField}`;
