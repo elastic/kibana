@@ -11,9 +11,12 @@ import { graphlib } from '@dagrejs/dagre';
 import {
   BaseStep,
   IfStep,
+  ForEachStep,
   WorkflowExecutionEngineModel,
   EnterIfNode,
   ExitIfNode,
+  EnterForeachNode,
+  ExitForeachNode,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -28,6 +31,10 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 
   if (currentStep.type === 'if') {
     return visitIfStep(graph, previousStep, currentStep);
+  }
+
+  if (currentStep.type === 'foreach') {
+    return visitForeachStep(graph, previousStep, currentStep);
   }
 
   graph.setNode(currentStep.id, currentStep);
@@ -85,6 +92,46 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
 
   if (previousStep) {
     graph.setEdge(getNodeId(previousStep), enterIfNodeId);
+  }
+
+  return ifElseEnd;
+}
+
+function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const enterForeachNodeId = getNodeId(currentStep);
+  const foreachStep = currentStep as ForEachStep;
+  const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
+
+  const enterForeachNode: EnterForeachNode = {
+    id: enterForeachNodeId,
+    type: 'enter-foreach',
+    itemNodeIds: [],
+    configuration: {
+      ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
+    },
+  };
+  const ifElseEnd: ExitForeachNode = {
+    type: 'exit-foreach',
+    id: enterForeachNodeId + '_exit',
+    startNodeId: enterForeachNodeId,
+  };
+
+  foreachNestedSteps.forEach((step: any, index: number) => {
+    const _previousStep = index > 0 ? foreachNestedSteps[index - 1] : foreachStep;
+    enterForeachNode.itemNodeIds.push(step.id);
+    const currentNode = visitAbstractStep(graph, _previousStep, step);
+    graph.setNode(currentNode.id, currentNode);
+    graph.setEdge(getNodeId(previousStep), currentNode.id);
+  });
+
+  const lastNestedForeachStep = foreachNestedSteps[foreachNestedSteps.length - 1];
+
+  graph.setNode(ifElseEnd.id, ifElseEnd);
+  graph.setEdge(getNodeId(lastNestedForeachStep), ifElseEnd.id);
+  graph.setNode(enterForeachNodeId, enterForeachNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterForeachNodeId);
   }
 
   return ifElseEnd;

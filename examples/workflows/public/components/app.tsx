@@ -60,46 +60,41 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
 
   // Use React hooks to manage state.
   const [stringWorkflow, setWorkflow] = useState<string>(
-    yaml.dump({
-      id: 'example-workflow-1',
-      name: 'Example Workflow 1',
-      status: 'active',
-      triggers: [
-        {
-          id: 'detection-rule',
-          type: 'detection-rule',
-          enabled: true,
-          config: {},
-        },
-      ],
-      steps: [
-        {
-          id: 'step-with-console-log-1',
-          type: 'console.log',
-          with: {
-            message: 'Step 1 executed "{{event.ruleName}}"',
-          },
-        },
-        {
-          id: 'step-with-slow-console',
-          type: 'console.sleep',
-          with: {
-            sleepTime: 1000,
-            message: 'Step 2 executed "{{event.additionalData.userName}}"',
-          },
-        },
-        {
-          id: 'step-with-slack-connector',
-          needs: ['step1', 'step2'],
-          type: 'slack-connector',
-          'connector-id': 'slack_keep',
-          with: {
-            message:
-              'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
-          },
-        },
-      ],
-    })
+    `id: example-workflow-1
+name: Example Workflow 1
+status: active
+triggers:
+  - id: detection-rule
+    type: detection-rule
+    enabled: true
+    config: {}
+steps:
+  - id: root-step-1
+    type: console.log
+    with:
+      message: Step 1 executed "{{event.ruleName}}"
+  - name: if-else-step
+    type: if
+    condition: false
+    steps:
+      - id: step-with-slack-connector-IF
+        type: slack-connector
+        connector-id: slack_keep
+        with:
+          message: IF TRUE
+    else:
+      - id: step-with-slack-connector-ELSE
+        type: slack-connector
+        connector-id: slack_keep
+        with:
+          message: IF FALSE
+  
+  - id: step-with-slack-connector-FINAL
+    type: slack-connector
+    connector-id: slack_keep
+    with:
+      message: FINAL STEP
+    `
   );
 
   // Update workflow inputs with current user email

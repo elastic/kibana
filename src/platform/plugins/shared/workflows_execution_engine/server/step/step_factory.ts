@@ -15,6 +15,7 @@ import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
 import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -36,8 +37,10 @@ export class StepFactory {
     }
 
     switch (stepType) {
-      case 'foreach':
-      // return new ForEachStepImpl(step as ForEachStep, contextManager);
+      case 'enter-foreach':
+        return new EnterForeachNodeImpl(step as any, contextManager, workflowState);
+      case 'exit-foreach':
+        return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
         return new EnterIfNodeImpl(step as any, contextManager, workflowState);
       case 'exit-if':
