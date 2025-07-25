@@ -15,24 +15,28 @@ import { RANGE_SLIDER_CONTROL } from '../../../common';
 
 export const DataControlEditorStrings = {
   manageControl: {
-    getFlyoutCreateTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
-        defaultMessage: 'Create control',
-      }),
+    getFlyoutCreateTitle: (showESQLOnly: boolean) =>
+      showESQLOnly
+        ? i18n.translate('controls.controlGroup.manageControl.createESQLFlyoutTitle', {
+            defaultMessage: 'Create ES|QL control',
+          })
+        : i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
+            defaultMessage: 'Create control',
+          }),
     getFlyoutEditTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
     getConfigureInputTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.configureInputTitle', {
-        defaultMessage: 'Configure input',
+      i18n.translate('controls.controlGroup.manageControl.valuesSourceTitle', {
+        defaultMessage: 'Values source',
       }),
     getConfigureOutputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.configureOutputTitle', {
         defaultMessage: 'Configure output',
       }),
     getConfigureControlTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.configurControlTitle', {
+      i18n.translate('controls.controlGroup.manageControl.configureControlTitle', {
         defaultMessage: 'Configure control',
       }),
     dataSource: {
@@ -248,7 +252,7 @@ export const DataControlEditorStrings = {
         defaultMessage: 'Delete control',
       }),
     fieldOutput: {
-      getFieldOutputDescription: (fieldName?: string) =>
+      getFieldOutputDescription: (fieldName?: string, isStaticInputMode?: boolean) =>
         fieldName ? (
           <FormattedMessage
             id="controls.controlGroup.manageControl.fieldOutput.fieldOutputDescription"
@@ -257,12 +261,19 @@ export const DataControlEditorStrings = {
               fieldName: <strong>{fieldName}</strong>,
             }}
           />
+        ) : isStaticInputMode ? (
+          i18n.translate(
+            'controls.controlGroup.manageControl.fieldOutput.fieldOutputDescriptionStaticNoSelectedField',
+            {
+              defaultMessage: 'Choose a field to create a filter.',
+            }
+          )
         ) : (
           i18n.translate(
-            'controls.controlGroup.manageControl.fieldOutput.fieldOutputDescriptionNoSelectedField',
+            'controls.controlGroup.manageControl.fieldOutput.fieldOutputDescriptionESQLNoSelectedField',
             {
               defaultMessage:
-                'Run the input query to try to auto-detect a field, or choose one manually.',
+                'Run the query below to try to auto-detect a field, or choose one manually.',
             }
           )
         ),

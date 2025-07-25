@@ -8,8 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { ControlInputOption, ControlOutputOption } from '../../../../common';
 
 export const CONTROL_WIDTH_OPTIONS = [
@@ -84,19 +82,10 @@ export const CONTROL_OUTPUT_OPTIONS = [
     label: i18n.translate('controls.controlGroup.management.output.dsl.label', {
       defaultMessage: 'Field filter',
     }),
-    description: (isDSLInput: boolean, fieldName?: string) =>
-      isDSLInput && fieldName ? (
-        <FormattedMessage
-          id="controls.controlGroup.management.output.dsl.description.dslToDsl"
-          defaultMessage="Filter data in all dashboard panels where the {fieldName} field matches the value chosen from this control"
-          values={{ fieldName: <strong>{fieldName}</strong> }}
-        />
-      ) : (
-        i18n.translate('controls.controlGroup.management.output.dsl.description.valueToDsl', {
-          defaultMessage:
-            'Select a field. This control will filter data in all dashboard panels where this field matches the chosen value.',
-        })
-      ),
+    toolTipContent: i18n.translate('controls.controlGroup.management.output.dsl.tooltip', {
+      defaultMessage:
+        'Select a field. This control will filter data in all dashboard panels where this field matches the chosen value.',
+    }),
   },
   {
     id: ControlOutputOption.ESQL,
@@ -104,11 +93,10 @@ export const CONTROL_OUTPUT_OPTIONS = [
     label: i18n.translate('controls.controlGroup.management.output.esql', {
       defaultMessage: 'ES|QL variable',
     }),
-    description: () =>
-      i18n.translate('controls.controlGroup.management.output.esql.description', {
-        defaultMessage:
-          'Define a variable. This control will set this variable to the chosen value and output it to any ES|QL panels in this dashboard.',
-      }),
+    toolTipContent: i18n.translate('controls.controlGroup.management.output.esql.tooltip', {
+      defaultMessage:
+        'Define a variable. This control will set this variable to the chosen value and output it to any ES|QL panels in this dashboard.',
+    }),
   },
 ];
 

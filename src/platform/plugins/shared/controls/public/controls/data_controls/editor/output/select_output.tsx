@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiText,
-  EuiFormRow,
-  EuiFieldText,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import {
   ControlGroupEditorConfig,
   ControlInputOption,
@@ -27,8 +18,7 @@ import {
 } from '../../../../../common';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker } from '../data_view_and_field_picker';
-import { DEFAULT_ESQL_VARIABLE_NAME } from '../editor_constants';
-import { OutputSelectRadioGroup } from './output_select_radio_group';
+import { CONTROL_OUTPUT_OPTIONS, DEFAULT_ESQL_VARIABLE_NAME } from '../editor_constants';
 
 interface SelectOutputProps<State> {
   inputMode: ControlInputOption;
@@ -37,7 +27,8 @@ interface SelectOutputProps<State> {
   editorConfig?: ControlGroupEditorConfig;
   setEditorState: (s: Partial<State>) => void;
   setDefaultPanelTitle: (title: string) => void;
-  setHasTouchedOutput: (b: boolean) => void;
+  setSelectedControlType: (type: string | undefined) => void;
+  setControlOptionsValid: (valid: boolean) => void;
   variableStringError: string | null;
   showESQLOnly: boolean;
 }
@@ -49,11 +40,11 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
   editorState,
   setEditorState,
   setDefaultPanelTitle,
-  setHasTouchedOutput,
+  setControlOptionsValid,
+  setSelectedControlType,
   variableStringError,
   showESQLOnly,
 }: SelectOutputProps<State>) => {
-  const [isFieldOutputPopoverOpen, setIsFieldOutputPopoverOpen] = useState<boolean>(false);
   const isStaticInputMode = useMemo(() => inputMode === ControlInputOption.STATIC, [inputMode]);
 
   const esqlVariableOutput = (
@@ -87,99 +78,47 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
     </EuiFormRow>
   );
 
-  const esqlInputToDSLOutput = (
-    <EuiPanel hasBorder>
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="center"
-        direction="column"
-        wrap
-        gutterSize="s"
-      >
-        <EuiFlexItem>
-          <EuiText textAlign="center" size="s">
-            {DataControlEditorStrings.manageControl.fieldOutput.getFieldOutputDescription(
-              editorState.fieldName
-            )}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            isOpen={isFieldOutputPopoverOpen}
-            closePopover={() => setIsFieldOutputPopoverOpen(false)}
-            button={
-              <EuiButtonEmpty onClick={() => setIsFieldOutputPopoverOpen(true)}>
-                {DataControlEditorStrings.manageControl.fieldOutput.getSelectFieldTitle(
-                  !!editorState.fieldName
-                )}
-              </EuiButtonEmpty>
-            }
-          >
-            <DataViewAndFieldPicker
-              editorConfig={editorConfig}
-              dataViewId={editorState.dataViewId}
-              onChangeDataViewId={(newDataViewId) => {
-                setEditorState({ ...editorState, dataViewId: newDataViewId });
-              }}
-              onSelectField={(field) => {
-                setEditorState({ ...editorState, fieldName: field.name });
-                /**
-                 * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
-                 */
-                const newDefaultTitle = field.displayName ?? field.name;
-                setDefaultPanelTitle(newDefaultTitle);
-              }}
-              fieldName={editorState.fieldName}
-            />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-
-  const staticInputToDSLOutput = (
+  const dslOutput = (
     <DataViewAndFieldPicker
       editorConfig={editorConfig}
       dataViewId={editorState.dataViewId}
+      fieldName={editorState.fieldName}
       onChangeDataViewId={(newDataViewId) => {
         setEditorState({ ...editorState, dataViewId: newDataViewId });
+        setSelectedControlType(undefined);
       }}
       onSelectField={(field) => {
-        setEditorState({ ...editorState, fieldName: field.name });
         /**
          * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
          */
         const newDefaultTitle = field.displayName ?? field.name;
         setDefaultPanelTitle(newDefaultTitle);
+
+        setControlOptionsValid(true); // reset options state
       }}
-      fieldName={editorState.fieldName}
     />
   );
 
   return (
     <>
       {!showESQLOnly && (
-        <EuiFormRow data-test-subj="control-editor-output-settings">
-          <div>
-            <OutputSelectRadioGroup
+        <>
+          <EuiFormRow
+            data-test-subj="control-editor-output-settings"
+            label={DataControlEditorStrings.manageControl.getConfigureOutputTitle()}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              options={CONTROL_OUTPUT_OPTIONS}
               idSelected={outputMode ?? DEFAULT_CONTROL_OUTPUT}
-              onChangeOutput={(output) => {
-                setEditorState({ ...editorState, output });
-                setHasTouchedOutput(true);
-              }}
-              isDSLInputMode={inputMode === ControlInputOption.DSL}
-              fieldName={editorState.fieldName}
+              onChange={(output) => setEditorState({ ...editorState, output })}
+              legend="Select control output"
             />
-          </div>
-        </EuiFormRow>
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </>
       )}
-      {outputMode === ControlOutputOption.ESQL
-        ? esqlVariableOutput
-        : inputMode === ControlInputOption.ESQL
-        ? esqlInputToDSLOutput
-        : isStaticInputMode
-        ? staticInputToDSLOutput
-        : null}
+      {outputMode === ControlOutputOption.ESQL ? esqlVariableOutput : dslOutput}
     </>
   );
 };

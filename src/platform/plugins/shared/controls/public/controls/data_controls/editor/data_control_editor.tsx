@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -30,12 +30,10 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
-  EuiSteps,
   EuiText,
 } from '@elastic/eui';
 
 import { asyncMap } from '@kbn/std';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { css } from '@emotion/react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
@@ -191,24 +189,6 @@ const CompatibleControlTypesComponent = ({
   );
 };
 
-const useStepStatus = (status: EditorComponentStatus, isEdit: boolean) => {
-  const hasInitialized = useRef(false);
-  const initialStatus = useRef(status);
-  if (isEdit && !hasInitialized.current) {
-    // In edit mode, render untouched complete steps as a filled in blue circle
-    if (status !== initialStatus.current) hasInitialized.current = true;
-    return undefined;
-  }
-  switch (status) {
-    case EditorComponentStatus.INCOMPLETE:
-      return 'incomplete';
-    case EditorComponentStatus.ERROR:
-      return 'danger';
-    case EditorComponentStatus.COMPLETE:
-      return 'complete';
-  }
-};
-
 export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
   initialState,
   controlId,
@@ -255,12 +235,18 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     isEdit && isESQLInputMode ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
   );
 
-  const [hasTouchedOutput, setHasTouchedOutput] = useState(isEdit);
+  const [hasTouchedInput, setHasTouchedInput] = useState(isEdit);
+
+  // ADD FIELD DETECTION INFO CALLOUT
+  // STATIC VALUE QUERY PRESERVATION
 
   useEffect(() => {
     // Set the default input mode to ES|QL for showESQLOnly editors
     if (isDSLInputMode && showESQLOnly) {
       setEditorState({ ...editorState, input: ControlInputOption.ESQL });
+    }
+    if (!isESQLOutputMode && showESQLOnly) {
+      setEditorState({ ...editorState, output: ControlOutputOption.ESQL });
     }
 
     // Set the default control label to either the selected field name or entered ES|QL variable name
@@ -277,25 +263,34 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         break;
     }
 
-    // When creating a new control, sync up the output mode with the input mode, unless the user
-    // has already modified the output mode
-    if (hasTouchedOutput) return;
-    switch (editorState.input) {
-      case ControlInputOption.DSL:
-      case ControlInputOption.STATIC:
-        if (!showESQLOnly && editorState.output !== ControlOutputOption.DSL) {
-          setEditorState({ ...editorState, output: ControlOutputOption.DSL });
-          setDefaultPanelTitle(editorState.fieldName ?? '');
-        }
-        break;
-      case ControlInputOption.ESQL:
-        if (editorState.output !== ControlOutputOption.ESQL) {
-          setEditorState({ ...editorState, output: ControlOutputOption.ESQL });
-          setDefaultPanelTitle(editorState.esqlVariableString ?? DEFAULT_ESQL_VARIABLE_NAME);
-        }
-        break;
+    //  When creating a new control, and the user has not yet touched the values source
+    if (!hasTouchedInput) {
+      // Sync up the output mode with the values source
+      switch (editorState.output) {
+        case ControlOutputOption.DSL:
+          if (!showESQLOnly && editorState.input !== ControlInputOption.DSL) {
+            setEditorState({ ...editorState, input: ControlInputOption.DSL });
+          }
+          break;
+        case ControlOutputOption.ESQL:
+          // If the user enters ?? in the ES|QL variable, set the values source to static
+          if (editorState.esqlVariableString?.startsWith('??') && !isStaticInputMode) {
+            setEditorState({ ...editorState, input: ControlInputOption.STATIC });
+          } else if (isDSLInputMode) {
+            setEditorState({ ...editorState, input: ControlInputOption.ESQL });
+          }
+          break;
+      }
     }
-  }, [hasTouchedOutput, editorState, defaultPanelTitle, isDSLInputMode, showESQLOnly]);
+  }, [
+    hasTouchedInput,
+    editorState,
+    defaultPanelTitle,
+    isDSLInputMode,
+    showESQLOnly,
+    isESQLOutputMode,
+    isStaticInputMode,
+  ]);
 
   const {
     loading: dataViewListLoading,
@@ -465,121 +460,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     return EditorComponentStatus.COMPLETE;
   }, [isESQLOutputMode, outputStatus, selectedControlType, controlOptionsValid]);
 
-  const steps: EuiContainedStepProps[] = [
-    {
-      title: DataControlEditorStrings.manageControl.getConfigureInputTitle(),
-      status: useStepStatus(inputStatus, isEdit),
-      children: (
-        <SelectInput
-          inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
-          editorState={editorState}
-          editorConfig={editorConfig}
-          selectedControlType={selectedControlType}
-          setEditorState={setEditorState}
-          setDefaultPanelTitle={setDefaultPanelTitle}
-          setSelectedControlType={setSelectedControlType}
-          setControlOptionsValid={setControlOptionsValid}
-          setESQLQueryValidation={setESQLQueryValidation}
-          isEdit={isEdit}
-          showESQLOnly={showESQLOnly}
-        />
-      ),
-    },
-    {
-      title: DataControlEditorStrings.manageControl.getConfigureOutputTitle(),
-      status: useStepStatus(outputStatus, isEdit),
-      children: (
-        <SelectOutput
-          outputMode={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
-          inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
-          editorState={editorState}
-          editorConfig={editorConfig}
-          setEditorState={setEditorState}
-          setDefaultPanelTitle={setDefaultPanelTitle}
-          setHasTouchedOutput={setHasTouchedOutput}
-          variableStringError={esqlVariableError}
-          showESQLOnly={showESQLOnly}
-        />
-      ),
-    },
-    {
-      title: DataControlEditorStrings.manageControl.getConfigureControlTitle(),
-      status: useStepStatus(controlConfigStatus, isEdit),
-      children: (
-        <>
-          {/* TODO remove !showESQLOnly when range siders can output ES|QL variables */}
-          {!showESQLOnly && (
-            <EuiFormRow
-              label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
-            >
-              {/* wrapping in `div` so that focus gets passed properly to the form row */}
-              <div>
-                <CompatibleControlTypesComponent
-                  fieldRegistry={fieldRegistry}
-                  selectedFieldName={editorState.fieldName}
-                  selectedControlType={selectedControlType}
-                  setSelectedControlType={setSelectedControlType}
-                  isESQLOutputMode={isESQLOutputMode}
-                  isStaticInputMode={isStaticInputMode}
-                />
-              </div>
-            </EuiFormRow>
-          )}
-          <EuiFormRow
-            label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {DataControlEditorStrings.manageControl.displaySettings.getTitleInputOptionalText()}
-              </EuiText>
-            }
-          >
-            <EuiFieldText
-              data-test-subj="control-editor-title-input"
-              placeholder={defaultPanelTitle}
-              value={panelTitle}
-              compressed
-              onChange={(e) => {
-                setPanelTitle(e.target.value ?? '');
-                setEditorState({
-                  ...editorState,
-                  title: e.target.value === '' ? undefined : e.target.value,
-                });
-              }}
-            />
-          </EuiFormRow>
-          {!editorConfig?.hideWidthSettings && (
-            <EuiFormRow
-              data-test-subj="control-editor-width-settings"
-              label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
-            >
-              <div>
-                <EuiButtonGroup
-                  buttonSize="compressed"
-                  legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
-                  options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
-                  onChange={(newWidth: string) =>
-                    setEditorState({ ...editorState, width: newWidth as ControlWidth })
-                  }
-                />
-                <EuiSpacer size="s" />
-                <EuiSwitch
-                  compressed
-                  label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
-                  color="primary"
-                  checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
-                  onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
-                  data-test-subj="control-editor-grow-switch"
-                />
-              </div>
-            </EuiFormRow>
-          )}
-          {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
-        </>
-      ),
-    },
-  ];
-
   return (
     <DataViewAndFieldContextProvider
       value={{
@@ -596,7 +476,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         <EuiTitle size="s">
           <h2 id={ariaLabelledBy}>
             {!isEdit
-              ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
+              ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle(showESQLOnly)
               : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
           </h2>
         </EuiTitle>
@@ -620,7 +500,102 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         }
       >
         <EuiForm fullWidth>
-          <EuiSteps steps={steps} titleSize="xxs" />
+          <SelectOutput
+            outputMode={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
+            inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
+            editorState={editorState}
+            editorConfig={editorConfig}
+            setEditorState={setEditorState}
+            setDefaultPanelTitle={setDefaultPanelTitle}
+            setSelectedControlType={setSelectedControlType}
+            setControlOptionsValid={setControlOptionsValid}
+            variableStringError={esqlVariableError}
+            showESQLOnly={showESQLOnly}
+          />
+          <SelectInput
+            inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
+            editorState={editorState}
+            editorConfig={editorConfig}
+            selectedControlType={selectedControlType}
+            setEditorState={setEditorState}
+            setDefaultPanelTitle={setDefaultPanelTitle}
+            setSelectedControlType={setSelectedControlType}
+            setControlOptionsValid={setControlOptionsValid}
+            setESQLQueryValidation={setESQLQueryValidation}
+            setHasTouchedInput={setHasTouchedInput}
+            isEdit={isEdit}
+            showESQLOnly={showESQLOnly}
+          />
+          <>
+            {/* TODO remove !showESQLOnly when range siders can output ES|QL variables */}
+            {!showESQLOnly && (
+              <EuiFormRow
+                label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
+              >
+                {/* wrapping in `div` so that focus gets passed properly to the form row */}
+                <div>
+                  <CompatibleControlTypesComponent
+                    fieldRegistry={fieldRegistry}
+                    selectedFieldName={editorState.fieldName}
+                    selectedControlType={selectedControlType}
+                    setSelectedControlType={setSelectedControlType}
+                    isESQLOutputMode={isESQLOutputMode}
+                    isStaticInputMode={isStaticInputMode}
+                  />
+                </div>
+              </EuiFormRow>
+            )}
+            <EuiFormRow
+              label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
+              labelAppend={
+                <EuiText size="xs" color="subdued">
+                  {DataControlEditorStrings.manageControl.displaySettings.getTitleInputOptionalText()}
+                </EuiText>
+              }
+            >
+              <EuiFieldText
+                data-test-subj="control-editor-title-input"
+                placeholder={defaultPanelTitle}
+                value={panelTitle}
+                compressed
+                onChange={(e) => {
+                  setPanelTitle(e.target.value ?? '');
+                  setEditorState({
+                    ...editorState,
+                    title: e.target.value === '' ? undefined : e.target.value,
+                  });
+                }}
+              />
+            </EuiFormRow>
+            {!editorConfig?.hideWidthSettings && (
+              <EuiFormRow
+                data-test-subj="control-editor-width-settings"
+                label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
+              >
+                <div>
+                  <EuiButtonGroup
+                    buttonSize="compressed"
+                    legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
+                    options={CONTROL_WIDTH_OPTIONS}
+                    idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
+                    onChange={(newWidth: string) =>
+                      setEditorState({ ...editorState, width: newWidth as ControlWidth })
+                    }
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    compressed
+                    label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
+                    onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </div>
+              </EuiFormRow>
+            )}
+            {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
+          </>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

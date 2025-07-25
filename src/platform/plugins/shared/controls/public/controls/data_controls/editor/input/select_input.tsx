@@ -46,6 +46,7 @@ interface SelectInputProps<State> {
   setDefaultPanelTitle: (title: string) => void;
   setControlOptionsValid: (valid: boolean) => void;
   setESQLQueryValidation: (status: EditorComponentStatus) => void;
+  setHasTouchedInput: (b: boolean) => void;
   isEdit: boolean;
   showESQLOnly: boolean;
 }
@@ -60,6 +61,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   setDefaultPanelTitle,
   setControlOptionsValid,
   setESQLQueryValidation,
+  setHasTouchedInput,
   isEdit,
   showESQLOnly,
 }: SelectInputProps<State>) => {
@@ -75,10 +77,16 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
     [editorState.esqlVariableString]
   );
 
+  const isESQLOutputMode = useMemo(
+    () => editorState.output === ControlOutputOption.ESQL,
+    [editorState.output]
+  );
+
   const { fieldRegistry } = useDataViewAndFieldContext();
 
   const onStaticValuesChange = useCallback(
     (staticValues: EuiSelectOption[]) => {
+      setHasTouchedInput(true);
       setEditorState({
         ...editorState,
         staticValues,
@@ -87,7 +95,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         setSelectedControlType(OPTIONS_LIST_CONTROL);
       }
     },
-    [setEditorState, editorState, selectedControlType, setSelectedControlType]
+    [setHasTouchedInput, setEditorState, editorState, selectedControlType, setSelectedControlType]
   );
 
   const submitESQLQuery = useCallback(
@@ -158,13 +166,14 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
 
   const onESQLQueryChange = useCallback(
     (q: AggregateQuery) => {
+      setHasTouchedInput(true);
       setEditorState({ ...editorState, esqlQuery: q.esql });
       setPreviewError(undefined);
       setPreviewOptions([]);
       setPreviewColumns([]);
       setESQLQueryValidation(EditorComponentStatus.INCOMPLETE);
     },
-    [editorState, setEditorState, setESQLQueryValidation]
+    [setHasTouchedInput, setEditorState, editorState, setESQLQueryValidation]
   );
 
   const appendColumnToESQLQuery = useCallback(
@@ -176,28 +185,49 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
     [editorState, setEditorState, submitESQLQuery]
   );
 
+  const lockToStatic = useMemo(
+    () =>
+      editorState.esqlVariableString?.startsWith('??') &&
+      editorState.input === ControlInputOption.STATIC,
+    [editorState.esqlVariableString, editorState.input]
+  );
   const inputOptions = useMemo(
     () =>
-      showESQLOnly
+      (showESQLOnly
         ? CONTROL_INPUT_OPTIONS.filter(({ id }) => id !== ControlInputOption.DSL)
-        : CONTROL_INPUT_OPTIONS,
-    [showESQLOnly]
+        : CONTROL_INPUT_OPTIONS
+      ).map(({ id, ...rest }) => {
+        if (!lockToStatic || id === ControlInputOption.STATIC) {
+          return { id, ...rest };
+        }
+        return {
+          id,
+          ...rest,
+          toolTipContent: DataControlEditorStrings.manageControl.esqlOutput.getInvalidPrefixError(),
+        };
+      }),
+    [showESQLOnly, lockToStatic]
   );
 
   return (
     <>
-      <EuiFormRow data-test-subj="control-editor-input-select">
+      <EuiFormRow
+        data-test-subj="control-editor-input-select"
+        label={DataControlEditorStrings.manageControl.getConfigureInputTitle()}
+      >
         <EuiButtonGroup
           isFullWidth
           options={inputOptions}
           idSelected={editorState.input ?? DEFAULT_CONTROL_INPUT}
           onChange={(input) => {
             setEditorState({ ...editorState, input });
+            setHasTouchedInput(true);
           }}
           legend="Select control input"
+          isDisabled={lockToStatic}
         />
       </EuiFormRow>
-      {inputMode === ControlInputOption.DSL && (
+      {inputMode === ControlInputOption.DSL && isESQLOutputMode && (
         <DataViewAndFieldPicker
           editorConfig={editorConfig}
           dataViewId={editorState.dataViewId}
@@ -205,14 +235,16 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           onChangeDataViewId={(newDataViewId) => {
             setEditorState({ ...editorState, dataViewId: newDataViewId });
             setSelectedControlType(undefined);
+            setHasTouchedInput(true);
           }}
           onSelectField={(field) => {
+            setHasTouchedInput(true);
             const newFieldName = field.name;
             const prevFieldName = editorState.fieldName;
             if (
-              // If the user is not in ES|QL output mode
-              editorState.output !== ControlOutputOption.ESQL ||
-              // Or, if the user the user is in ES|QL output mode, but has not changed the variable name
+              // If the user is in ES|QL output mode
+              editorState.output === ControlOutputOption.ESQL ||
+              // And has not changed the variable name
               isESQLVariableEmpty ||
               editorState.esqlVariableString === fieldToESQLVariable(prevFieldName ?? '')
             ) {
