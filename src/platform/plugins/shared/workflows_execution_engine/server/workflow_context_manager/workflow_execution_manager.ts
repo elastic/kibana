@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { RunStepResult } from '../step/step_base';
+import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { StepExecutionRepository } from '../repositories/step_execution_repository';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
@@ -23,7 +23,8 @@ export class WorkflowExecutionState {
 
   constructor(
     private workflowExecution: EsWorkflowExecution,
-    private esClient: ElasticsearchClient,
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private stepExecutionRepository: StepExecutionRepository,
     private workflowExecutionGraph: graphlib.Graph
   ) {
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
@@ -98,12 +99,7 @@ export class WorkflowExecutionState {
       startedAt: stepStartedAt.toISOString(),
     } as Partial<EsWorkflowStepExecution>;
 
-    await this.esClient?.index({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      id: workflowStepExecutionId,
-      refresh: true,
-      document: stepExecution,
-    });
+    await this.stepExecutionRepository.createStepExecution(stepExecution);
     this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
   }
 
@@ -129,12 +125,7 @@ export class WorkflowExecutionState {
       error: stepResult.error,
       output: stepResult.output,
     } as Partial<EsWorkflowStepExecution>;
-    await this.esClient?.update({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      id: startedStepExecution.id,
-      refresh: true,
-      doc: stepExecutionUpdate,
-    });
+    await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
     this.stepExecutions.set(stepId, {
       ...startedStepExecution,
       ...stepExecutionUpdate,
@@ -160,15 +151,11 @@ export class WorkflowExecutionState {
       } as Partial<EsWorkflowStepExecution>;
     });
 
-    await this.esClient?.bulk({
-      refresh: true,
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      body: toSave.flatMap((doc) => [{ update: { _id: doc.id } }, { doc }]),
-    });
-    toSave.forEach((workflowExecution) => {
+    await this.stepExecutionRepository.updateStepExecutions(toSave);
+    toSave.forEach((stepExecution) => {
       this.stepExecutions.set(
-        workflowExecution.stepId as string,
-        workflowExecution as EsWorkflowStepExecution
+        stepExecution.stepId as string,
+        stepExecution as EsWorkflowStepExecution
       );
     });
   }
@@ -179,12 +166,7 @@ export class WorkflowExecutionState {
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
     };
-    await this.esClient.index({
-      index: WORKFLOWS_EXECUTIONS_INDEX,
-      id: this.workflowExecution.id,
-      refresh: true,
-      document: updatedWorkflowExecution,
-    });
+    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
     this.workflowExecution = {
       ...this.workflowExecution,
       ...updatedWorkflowExecution,
@@ -197,12 +179,7 @@ export class WorkflowExecutionState {
       status: ExecutionStatus.RUNNING,
       startedAt: this.workflowStartedAt?.toISOString(),
     };
-    await this.esClient.index({
-      index: WORKFLOWS_EXECUTIONS_INDEX,
-      id: this.workflowExecution.id,
-      refresh: true,
-      document: updatedWorkflowExecution,
-    });
+    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
     this.workflowExecution = {
       ...this.workflowExecution,
       ...updatedWorkflowExecution,
@@ -231,12 +208,7 @@ export class WorkflowExecutionState {
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - (startedAt.getTime() || 0);
-      await this.esClient.index({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: this.workflowExecution.id,
-        refresh: true,
-        document: workflowExecutionUpdate,
-      });
+      await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
     }
 
     this.workflowExecution = {

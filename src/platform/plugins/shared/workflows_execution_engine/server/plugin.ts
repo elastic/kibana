@@ -30,7 +30,9 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
+import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -63,6 +65,8 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
+      const workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
+      const stepExecutionRepository = new StepExecutionRepository(this.esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
@@ -76,16 +80,12 @@ export class WorkflowsExecutionEnginePlugin
         lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
-      await this.esClient.index({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: workflowRunId,
-        refresh: true,
-        document: workflowExecution,
-      });
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
       const workflowState = new WorkflowExecutionState(
         workflowExecution as EsWorkflowExecution,
-        this.esClient,
+        workflowExecutionRepository,
+        stepExecutionRepository,
         workflowExecutionGraph
       );
 

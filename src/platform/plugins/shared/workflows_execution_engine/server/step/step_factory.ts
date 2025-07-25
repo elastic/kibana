@@ -14,7 +14,7 @@ import { StepImplementation } from './step_base';
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
 import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
-import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created

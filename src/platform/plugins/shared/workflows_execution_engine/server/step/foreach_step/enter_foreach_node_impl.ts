@@ -9,7 +9,7 @@
 
 import { EnterForeachNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
+import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_manager';
 
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(private step: EnterForeachNode, private workflowState: WorkflowExecutionState) {}
