@@ -25,8 +25,10 @@ import {
   getExitSpansFromSourceNode,
   getSourceSpanIds,
 } from './service_map/get_exit_spans_from_node';
+import { getTraceCorrelation } from './service_map/get_trace_correlation';
 import { rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
 
 export interface IndiciesItem {
   index: string;
@@ -98,32 +100,11 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  handler: async (
-    resources
-  ): Promise<{
-    analysis: {
-      exitSpans: {
-        found: boolean;
-        totalConnections: number;
-        spans: any[];
-        hasMatchingDestinationResources: boolean;
-      };
-      parentRelationships: {
-        found: boolean;
-        documentCount: number;
-        sourceSpanIds: string[];
-      };
-    };
-    elasticsearchResponses: {
-      exitSpansQuery?: any;
-      sourceSpanIdsQuery?: any;
-      destinationParentIdsQuery?: any;
-    };
-  }> => {
+  handler: async (resources): Promise<ServiceMapDiagnosticResponse> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
 
-    const [exitSpans, sourceSpanIds] = await Promise.all([
+    const [exitSpans, sourceSpanIds, traceCorrelation] = await Promise.all([
       getExitSpansFromSourceNode({
         apmEventClient,
         start,
@@ -136,6 +117,14 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         start,
         end,
         sourceNode,
+      }),
+      getTraceCorrelation({
+        apmEventClient,
+        start,
+        end,
+        traceId,
+        sourceNode,
+        destinationNode,
       }),
     ]);
 
@@ -158,7 +147,14 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         parentRelationships: {
           found: destinationParentIds.hasParent,
           documentCount: destinationParentIds.response?.hits?.hits?.length || 0,
-          sourceSpanIds: sourceSpanIds.spanIds as string[],
+          sourceSpanIds: sourceSpanIds.spanIds.map(String),
+        },
+        traceCorrelation: {
+          found: traceCorrelation.analysis.foundInBothNodes,
+          foundInSourceNode: traceCorrelation.analysis.foundInSourceNode,
+          foundInDestinationNode: traceCorrelation.analysis.foundInDestinationNode,
+          sourceNodeDocumentCount: traceCorrelation.analysis.sourceNodeDocumentCount,
+          destinationNodeDocumentCount: traceCorrelation.analysis.destinationNodeDocumentCount,
         },
       },
       // Include raw Elasticsearch responses for debugging and advanced analysis
@@ -166,6 +162,7 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         exitSpansQuery: exitSpans.rawResponse,
         sourceSpanIdsQuery: sourceSpanIds.sourceSpanIdsRawResponse,
         destinationParentIdsQuery: destinationParentIds.response,
+        traceCorrelationQuery: traceCorrelation.rawResponse,
       },
     };
   },

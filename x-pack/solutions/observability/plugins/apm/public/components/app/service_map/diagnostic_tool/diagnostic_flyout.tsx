@@ -30,6 +30,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
+import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
@@ -49,26 +50,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const {
     services: { notifications },
   } = useKibana();
-  const [data, setData] = useState<{
-    analysis: {
-      exitSpans: {
-        found: boolean;
-        totalConnections: number;
-        spans: any[];
-        hasMatchingDestinationResources: boolean;
-      };
-      parentRelationships: {
-        found: boolean;
-        documentCount: number;
-        sourceSpanIds: string[];
-      };
-    };
-    elasticsearchResponses: {
-      exitSpansQuery?: any;
-      sourceSpanIdsQuery?: any;
-      destinationParentIdsQuery?: any;
-    };
-  }>();
+  const [data, setData] = useState<ServiceMapDiagnosticResponse>();
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setForm] = useState<DiagnosticFormState>({
@@ -91,6 +73,8 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   );
 
   const handleRunDiagnostic = async () => {
+    // Clear previous data and set loading state
+    setData(undefined);
     setIsLoading(true);
 
     try {
@@ -116,9 +100,11 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         });
 
         setData(response);
+      } else {
+        // If validation fails, ensure loading is stopped
+        setIsLoading(false);
       }
     } catch (error) {
-      // Handle API errors gracefully
       notifications?.toasts.addDanger({
         title: i18n.translate('xpack.apm.diagnosticFlyout.errorTitle', {
           defaultMessage: 'Failed to run diagnostic',
@@ -130,7 +116,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       // Reset data on error to show clean state
       setData(undefined);
     } finally {
-      // Always reset loading state
       setIsLoading(false);
     }
   };
