@@ -11,10 +11,10 @@ import { isPlainObject } from 'lodash/fp';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SamplesFormat } from '../../../../../../common';
 import { partialShuffleArray } from '../../../../../../common';
 import { FRONTEND_SAMPLE_ROWS } from '../../../../../../common/constants';
-import { AUTOMATIC_IMPORT_DOCUMENTATION_URL } from '../../../../../common/constants';
 
 /**
  * Parse the logs sample file content as newiline-delimited JSON (NDJSON).
@@ -217,6 +217,8 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
   const { setIntegrationSettings } = useActions();
   const [isParsing, setIsParsing] = useState(false);
   const [sampleFileError, setSampleFileError] = useState<string>();
+  const { docLinks } = useKibana().services
+  const AUTOMATIC_IMPORT_DOCUMENTATION_URL = docLinks?.links.siem.automaticImport;
 
   const onChangeLogsSample = useCallback(
     (files: FileList | null) => {
@@ -297,7 +299,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
     return (
       <EuiText color="danger" size="xs">
         <span>
-          {`${sampleFileError  }. ${  i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX}`} <EuiLink
+          {`${sampleFileError  }. ${  i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX}`}
           <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
             {i18n.LOGS_SAMPLE_ERROR.DOCUMENTATION_LINK_TEXT}
           </EuiLink>
