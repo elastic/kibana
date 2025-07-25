@@ -25,7 +25,7 @@ import {
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
-import { waitForRuleExecute, runSoon } from '../../helpers';
+import { runSoon } from '../../helpers';
 
 const InstanceActions = new Set<string | undefined>([
   'new-instance',
@@ -85,7 +85,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
                 schedule: { interval: '24h' },
-                throttle: '1s',
+                throttle: null,
                 params: {
                   pattern,
                 },
@@ -103,12 +103,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-          await waitForRuleExecute({
-            id: alertId,
-            retry,
-            spaceId: space.id,
-            execute: 1,
-            getService,
+          await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
           });
 
           // Run 3 more times
@@ -120,13 +123,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               spaceId: space.id,
             });
 
-            await waitForRuleExecute({
-              id: alertId,
-              retry,
-              spaceId: space.id,
-              execute: runs,
-              actionExecute: Math.min(runs - 1, 2),
-              getService,
+            await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: space.id,
+                type: 'alert',
+                id: alertId,
+                provider: 'actions',
+                actions: new Map([['execute', { gte: Math.min(runs - 1, 2) }]]),
+              });
             });
           }
 

@@ -14,10 +14,11 @@ import {
   createRule,
   createAction,
   createMaintenanceWindow,
+  getRuleEvents,
   expectNoActionsFired,
 } from './test_helpers';
 import { Spaces } from '../../../scenarios';
-import { getRuleEvents, runSoon } from '../../helpers';
+import { runSoon } from '../../helpers';
 
 const alertAsDataIndex = '.internal.alerts-test.patternfiring.alerts-default-000001';
 
