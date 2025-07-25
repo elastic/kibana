@@ -543,6 +543,17 @@ export const ESQLEditor = memo(function ESQLEditor({
         };
       },
       getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
+      getLicense: async () => {
+        const ls = await kibana.services?.esql?.getLicense();
+
+        if (!ls) {
+          return undefined;
+        }
+
+        return {
+          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+        };
+      },
     };
     return callbacks;
   }, [

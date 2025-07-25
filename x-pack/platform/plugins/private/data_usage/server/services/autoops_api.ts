@@ -146,7 +146,11 @@ export class AutoOpsAPIService {
               },
             }
           );
-          throw new AutoOpsError(withRequestIdMessage(AUTO_OPS_REQUEST_FAILED_PREFIX));
+          throw new AutoOpsError(
+            withRequestIdMessage(
+              `${AUTO_OPS_REQUEST_FAILED_PREFIX} with status code: ${error.response.status}`
+            )
+          );
         } else if (error.request) {
           // The request was made but no response was received
           this.logger.error(

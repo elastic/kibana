@@ -11,11 +11,12 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('OneChat Endpoints', function () {
     const kibanaServer = getService('kibanaServer');
 
-    before(async () => {
+    beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'onechat:api:enabled': true,
       });
     });
     loadTestFile(require.resolve('./esql_tools.ts'));
+    loadTestFile(require.resolve('./agents.ts'));
   });
 }

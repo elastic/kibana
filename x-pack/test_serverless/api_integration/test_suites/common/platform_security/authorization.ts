@@ -11,18 +11,6 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-/*
- * This file contains authorization tests that...
- *  - are applicable to all peroject types
- *  - are applicable to only search and security projects, where custom roles are enabled (role CRUD endpoints are enabled):
- *       - security/authorization/Roles
- *       - security/authorization/route access/custom roles
- *  - are applicable to only observability projects, where custom roles are not enabled (role CRUD endpoints are disabled):
- *       - security/authorization/route access/disabled/oblt only
- *
- * The test blocks use skip tags to run only the relevant tests per project type.
- */
-
 function collectSubFeaturesPrivileges(feature: KibanaFeatureConfig) {
   return new Map(
     feature.subFeatures?.flatMap((subFeature) =>
@@ -64,9 +52,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Roles', function () {
-      // custom roles are not enabled for observability projects
-      this.tags(['skipSvlOblt']);
-
       describe('Create Role', function () {
         it('should allow us to create an empty role', async function () {
           await supertestAdminWithApiKey.put('/api/security/role/empty_role').send({}).expect(204);
@@ -952,47 +937,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
           svlCommonApi.assertApiNotFound(body, status);
         });
-
-        describe('oblt only', function () {
-          // custom roles are not enabled for observability projects
-          this.tags(['skipSvlSearch', 'skipSvlSec']);
-
-          it('create/update role', async function () {
-            const { body, status } = await supertestAdminWithApiKey.put('/api/security/role/test');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-
-          it('get role', async function () {
-            const { body, status } = await supertestAdminWithApiKey.get(
-              '/api/security/role/superuser'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-
-          it('get all roles', async function () {
-            const { body, status } = await supertestAdminWithApiKey.get('/api/security/role');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-
-          it('delete role', async function () {
-            const { body, status } = await supertestAdminWithApiKey.delete(
-              '/api/security/role/superuser'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-
-          it('get all privileges', async function () {
-            const { body, status } = await supertestAdminWithApiKey.get('/api/security/privileges');
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-
-          it('get built-in elasticsearch privileges', async function () {
-            const { body, status } = await supertestAdminWithCookieCredentials.get(
-              '/internal/security/esPrivileges/builtin'
-            );
-            svlCommonApi.assertApiNotFound(body, status);
-          });
-        });
       });
 
       describe('public', function () {
@@ -1006,9 +950,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('custom roles', function () {
-        // custom roles are not enabled for observability projects
-        this.tags(['skipSvlOblt']);
-
         describe('internal', function () {
           it('get built-in elasticsearch privileges', async function () {
             let body: any;

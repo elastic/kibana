@@ -57,6 +57,7 @@ export const ConnectorIndexNameForm: React.FC<ConnectorIndexNameFormProps> = ({
         })}
       >
         <EuiComboBox
+          isInvalid={!!newIndexName && !isValidIndexName(newIndexName)}
           async
           isClearable={false}
           customOptionText={i18n.translate(

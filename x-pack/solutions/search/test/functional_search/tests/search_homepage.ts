@@ -52,19 +52,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => {
         // Clean up space created
         await cleanUp();
-        await esDeleteAllIndices(indexName);
+        await esDeleteAllIndices(['test-*', 'search-*']);
       });
 
       describe('search home page', () => {
         beforeEach(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
           await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
             `/s/${spaceCreated.id}`
           );
         });
 
         afterEach(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
         });
 
         it('should have embedded dev console', async () => {
@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
         });
 
         describe('Elasticsearch endpoint and API Keys', function () {
@@ -137,7 +137,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
             await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
             await testSubjects.click('createSemanticOptimizedIndexButton');
-            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+            expect(await browser.getCurrentUrl()).contain(
+              'app/elasticsearch/indices/create?workflow=semantic'
+            );
+            await testSubjects.existOrFail('createIndexBtn');
+            expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+            await testSubjects.click('createIndexBtn');
+            await retry.tryForTime(60 * 1000, async () => {
+              expect(await browser.getCurrentUrl()).contain('data?workflow=semantic');
+            });
           });
 
           it('renders Vector Search content', async () => {
@@ -146,7 +154,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('aiSearchCapabilities-item-vector');
             await testSubjects.existOrFail('createVectorIndexButton');
             await testSubjects.click('createVectorIndexButton');
-            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+            expect(await browser.getCurrentUrl()).contain(
+              'app/elasticsearch/indices/create?workflow=vector'
+            );
+
+            await testSubjects.existOrFail('createIndexBtn');
+            expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+            await testSubjects.click('createIndexBtn');
+            await retry.tryForTime(60 * 1000, async () => {
+              expect(await browser.getCurrentUrl()).contain('data?workflow=vector');
+            });
           });
         });
 
