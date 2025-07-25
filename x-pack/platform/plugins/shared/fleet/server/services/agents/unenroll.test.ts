@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+import { AGENT_ACTIONS_INDEX } from '../../../common';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
@@ -163,17 +163,9 @@ describe('unenroll', () => {
             },
           } as any;
         }
-
-        if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
-          return {
-            hits: {
-              hits: [],
-            },
-          };
-        }
-
         return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
       });
+      esClient.esql.query.mockResolvedValue({ values: [] } as any);
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
       await unenrollAgents(soClient, esClient, {
@@ -206,19 +198,9 @@ describe('unenroll', () => {
             },
           } as any;
         }
-
-        if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
-          return {
-            hits: {
-              hits: [
-                { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-              ],
-            },
-          };
-        }
-
         return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
       });
+      esClient.esql.query.mockResolvedValue({ values: [['agent-in-regular-policy']] } as any);
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
       await unenrollAgents(soClient, esClient, {

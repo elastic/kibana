@@ -190,21 +190,22 @@ async function getAgentsWithoutActionResults(
   commonAgents: string[]
 ): Promise<string[]> {
   try {
-    const res = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      query: {
-        bool: {
-          must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
-        },
-      },
-      size: commonAgents.length,
+    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX}
+      | WHERE action_id == "${actionId}" AND agent_id IN (${commonAgents
+      .map((agentId) => `"${agentId}"`)
+      .join(', ')})
+      | KEEP agent_id
+      | LIMIT ${commonAgents.length}`;
+
+    const res = await esClient.esql.query({
+      query: esqlQuery,
     });
     const agentsToUpdate = commonAgents.filter(
-      (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
+      (agentId) => !res.values.find((value) => (value[0] as string) === agentId)
     );
     return agentsToUpdate;
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
       // .fleet-actions-results does not yet exist
       appContextService.getLogger().debug(err);
     } else {

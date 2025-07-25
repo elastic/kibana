@@ -115,21 +115,20 @@ async function _getRequestDiagnosticsActions(
   }>
 > {
   try {
-    const esqlQueryActions = `FROM ${AGENT_ACTIONS_INDEX} METADATA _source
+    const esqlQueryActions = `FROM ${AGENT_ACTIONS_INDEX}
       | WHERE agents == "${agentId}" AND type == "REQUEST_DIAGNOSTICS"
       | SORT @timestamp DESC
-      | KEEP _source`;
+      | KEEP action_id, @timestamp, expiration`;
 
     const agentActionRes = await esClient.esql.query({
       query: esqlQueryActions,
     });
 
     const agentActions = agentActionRes.values.map((value: any) => {
-      const source = value[0];
       return {
-        actionId: source.action_id,
-        timestamp: source['@timestamp'],
-        expiration: source.expiration,
+        actionId: value[0],
+        timestamp: value[1],
+        expiration: value[2],
       };
     });
 

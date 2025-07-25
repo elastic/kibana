@@ -34,8 +34,14 @@ describe('getAgentUploads', () => {
   it('should return right list of files', async () => {
     esClient.esql = {
       query: jest.fn().mockImplementation(({ query }) => {
-        if (query.includes(`${AGENT_ACTIONS_INDEX} `)) {
-          return { values: AGENT_ACTIONS_FIXTURES.map((hit) => [hit._source]) };
+        if (query.includes(AGENT_ACTIONS_INDEX) && !query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
+          return {
+            values: AGENT_ACTIONS_FIXTURES.map((hit) => [
+              hit._source.action_id,
+              hit._source['@timestamp'],
+              hit._source.expiration,
+            ]),
+          };
         }
         if (query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
           return { values: AGENT_ACTIONS_RESULTS_FIXTURES.map((hit) => [hit._source]) };
