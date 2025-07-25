@@ -10,7 +10,7 @@
 import React from 'react';
 import { LayoutApplication } from './application';
 import { LayoutBanner } from './banner';
-import { LayoutNavigation, LayoutNavigationPanel } from './navigation';
+import { LayoutNavigation } from './navigation';
 import { LayoutFooter } from './footer';
 import { LayoutHeader } from './header';
 import { LayoutSidebar, LayoutSidebarPanel } from './sidebar';
@@ -49,12 +49,6 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutFooter>{renderSlot(props.footer)}</LayoutFooter>
   ) : null;
 
-  const navigationPanel = layoutState.hasNavigationPanel ? (
-    <LayoutNavigationPanel width={layoutState.navigationPanelWidth}>
-      {renderSlot(props.navigationPanel)}
-    </LayoutNavigationPanel>
-  ) : null;
-
   const sidebar = layoutState.hasSidebar ? (
     <LayoutSidebar>{renderSlot(props.sidebar)}</LayoutSidebar>
   ) : null;
@@ -86,7 +80,6 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
       {banner}
       {header}
       {navigation}
-      {navigationPanel}
       {application}
       {footer}
       {sidebar}
