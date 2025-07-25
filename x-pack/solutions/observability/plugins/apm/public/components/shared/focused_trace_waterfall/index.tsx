@@ -14,7 +14,7 @@ import { TraceSummary } from './trace_summary';
 type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
 
 interface Props {
-  traceId: string;
+  docId: string;
   items: FocusedTrace;
   isEmbeddable?: boolean;
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
@@ -66,14 +66,14 @@ function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
   return traceItems;
 }
 
-export function FocusedTraceWaterfall({ traceId, items, onErrorClick }: Props) {
+export function FocusedTraceWaterfall({ docId, items, onErrorClick }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
 
   return (
     <>
       <TraceWaterfall
-        traceId={traceId}
+        waterfallId={docId}
         traceItems={traceItems}
         showAccordion={false}
         highlightedTraceId={reparentedItems?.focusedTraceDoc.id}

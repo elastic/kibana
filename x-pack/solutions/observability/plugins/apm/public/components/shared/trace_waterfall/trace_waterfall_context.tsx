@@ -27,7 +27,7 @@ const FALLBACK_WARNING = i18n.translate(
 );
 
 interface TraceWaterfallContextProps {
-  traceId: string;
+  waterfallId: string;
   duration: number;
   traceWaterfall: TraceWaterfallItem[];
   rootItem?: TraceItem;
@@ -49,7 +49,7 @@ interface TraceWaterfallContextProps {
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
-  traceId: '',
+  waterfallId: '',
   duration: 0,
   traceWaterfall: [],
   rootItem: undefined,
@@ -68,7 +68,7 @@ export type OnNodeClick = (id: string) => void;
 export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
 
 export function TraceWaterfallContextProvider({
-  traceId,
+  waterfallId,
   children,
   traceItems,
   showAccordion,
@@ -81,7 +81,7 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
 }: {
-  traceId: string;
+  waterfallId: string;
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
@@ -98,13 +98,13 @@ export function TraceWaterfallContextProvider({
     traceItems,
   });
   const [warningMessage, setWarningMessage] = useState(() => {
-    const hasBeenDismissed = DISMISSED_WARNINGS.has(traceId);
+    const hasBeenDismissed = DISMISSED_WARNINGS.has(waterfallId);
 
     return !(rootItem || hasBeenDismissed) ? FALLBACK_WARNING : undefined;
   });
 
   const dismissWarning = () => {
-    DISMISSED_WARNINGS.add(traceId);
+    DISMISSED_WARNINGS.add(waterfallId);
     setWarningMessage(undefined);
   };
 
@@ -116,7 +116,7 @@ export function TraceWaterfallContextProvider({
   return (
     <TraceWaterfallContext.Provider
       value={{
-        traceId,
+        waterfallId,
         duration,
         rootItem,
         traceWaterfall,

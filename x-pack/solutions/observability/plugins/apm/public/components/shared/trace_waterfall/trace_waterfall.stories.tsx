@@ -31,7 +31,7 @@ export default stories;
 export const ManyChildren: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       traceItems={[
         {
           id: '1',
@@ -62,7 +62,7 @@ export const ManyChildren: StoryFn<{}> = () => {
 export const ExampleClockSkew: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       onClick={action('onClick')}
       onErrorClick={action('onErrorClick')}
       traceItems={[
@@ -102,7 +102,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
 export const Example: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       traceItems={[
         {
           id: '06b480d1e6e2ac2e',
@@ -152,7 +152,7 @@ export const Example: StoryFn<{}> = () => {
 export const ExampleWithServiceLegend: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       traceItems={[
         {
           id: '06b480d1e6e2ac2e',
@@ -203,7 +203,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
 export const ExampleWithTypeLegend: StoryFn<{}> = () => {
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       traceItems={[
         {
           id: '06b480d1e6e2ac2e',
@@ -269,7 +269,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
   );
   return (
     <TraceWaterfall
-      traceId="ed1aacaf31264b93e0e405e42b00af74"
+      waterfallId="ed1aacaf31264b93e0e405e42b00af74"
       traceItems={traceItems}
       showAccordion={false}
       highlightedTraceId="99e36adf40935241"
@@ -290,7 +290,7 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         serviceName: item._source.resource.attributes['service.name'],
       } as TraceItem)
   );
-  return <TraceWaterfall traceId="ed1aacaf31264b93e0e405e42b00af74" traceItems={traceItems} />;
+  return <TraceWaterfall waterfallId="ed1aacaf31264b93e0e405e42b00af74" traceItems={traceItems} />;
 };
 
 export const APMExample: StoryFn<{}> = () => {
@@ -307,5 +307,5 @@ export const APMExample: StoryFn<{}> = () => {
       } as TraceItem)
   );
 
-  return <TraceWaterfall traceId="cc847a76570773d6fc96fac63dfcddd2" traceItems={traceItems} />;
+  return <TraceWaterfall waterfallId="cc847a76570773d6fc96fac63dfcddd2" traceItems={traceItems} />;
 };

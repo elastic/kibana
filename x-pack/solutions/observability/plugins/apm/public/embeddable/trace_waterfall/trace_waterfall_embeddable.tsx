@@ -39,7 +39,7 @@ export function TraceWaterfallEmbeddable({
 
   return (
     <TraceWaterfall
-      traceId={traceId}
+      waterfallId={traceId}
       traceItems={data?.traceItems!}
       onClick={onNodeClick}
       scrollElement={scrollElement}
