@@ -110,9 +110,9 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 You can assign specific colors to terms in your visualizations. This color mapping can be useful in several situations:
 
-* **Visual recognition and recall**: Keep colors consistent for each term regardless of filters or sorting
+* **Visual recognition and recall**: Keep colors consistent for each term regardless of filters or sorting.
 * **Semantic meaning**: Use colors to convey meaning or categorization.
-* **Consistency**: Align with brand colors and improve overall aesthetic consistency
+* **Consistency**: Align with brand colors and improve overall aesthetic consistency.
 
 image::images/color_mapping.png[A bar chart with terms mapped to specific colors]
 
@@ -121,10 +121,10 @@ image::images/color_mapping.png[A bar chart with terms mapped to specific colors
 
 Color mapping is available for the following **Lens** visualization types:
 
-* **Data tables**: Assign colors to terms in **Rows** or **Metrics** fields. You can apply colors to cell backgrounds or text
-* **XY charts (Area, Bar, Line)**: Assign colors to breakdown dimensions that split your data into multiple series
-* **Partition charts (Donut, Pie, Treemap, Waffle)**: Assign colors to the main slice or group-by dimension that defines the chart segments
-* **Tag clouds**: Assign colors to the tags dimension that determines the terms displayed in the cloud
+* **Data tables**: Assign colors to terms in **Rows** or **Metrics** fields. You can apply colors to cell backgrounds or text.
+* **XY charts (Area, Bar, Line)**: Assign colors to breakdown dimensions that split your data into multiple series.
+* **Partition charts (Donut, Pie, Treemap, Waffle)**: Assign colors to the main slice or group-by dimension that defines the chart segments.
+* **Tag clouds**: Assign colors to the tags dimension that determines the terms displayed in the cloud.
 
 [float]
 ===== Configure color mapping in a chart
