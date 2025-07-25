@@ -25,3 +25,4 @@ export * from './get_stats_url';
 export * from './combine_to_ndjson';
 export * from './set_advanced_settings';
 export * from './runtime';
+export * from './spaces';
