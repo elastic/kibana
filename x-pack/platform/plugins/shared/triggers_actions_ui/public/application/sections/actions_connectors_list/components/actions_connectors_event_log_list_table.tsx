@@ -280,10 +280,8 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     [search, setSearchText]
   );
 
-  const columns: EuiDataGridColumn[] = useMemo(() => {
-    const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
-
-    const baseColumms: EuiDataGridColumn[] = [
+  const columns: EuiDataGridColumn[] = useMemo(
+    () => [
       {
         id: 'connector_id',
         displayAsText: i18n.translate(
@@ -471,15 +469,18 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
             },
           ]
         : []),
-    ];
+    ],
+    [onFilterChange, hasConnectorNames, showFromAllSpaces]
+  );
 
-    return baseColumms.map((col) => {
+  const columnsWithoutInitialWidthForLastVisibleColumn = (): EuiDataGridColumn[] => {
+    const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
+    return columns.map((col) => {
       if (col.id !== lastVisibleColumnId) return col;
-
       const { initialWidth, ...rest } = col;
       return rest;
     });
-  }, [onFilterChange, hasConnectorNames, showFromAllSpaces, visibleColumns]);
+  };
 
   const renderList = () => {
     if (!logs) {
@@ -491,7 +492,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
         <EventLogDataGrid
-          columns={columns}
+          columns={columnsWithoutInitialWidthForLastVisibleColumn()}
           logs={logs}
           pagination={pagination}
           sortingColumns={sortingColumns}
