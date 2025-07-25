@@ -7,18 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
+import type { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
-export type TracingGRPCExporterConfig =
+/**
+ * Base tracing exporter configuration
+ */
+export type TracingBaseExporterConfig =
   | {
+      /** GRPC OTLP Exporter */
       grpc: {
+        /** The URL of the OTLP gRPC endpoint */
         url: string;
+        /** HTTP headers to send to the OTLP gRPC endpoint. Typically, the `Authorization` header is one of them */
         headers?: Record<string, string>;
       };
     }
   | {
+      /** HTTP OTLP Exporter */
       http: {
+        /** The URL of the OTLP HTTP endpoint */
         url: string;
+        /** HTTP headers to send to the OTLP HTTP endpoint. Typically, the `Authorization` header is one of them */
         headers?: Record<string, string>;
       };
     };
@@ -26,7 +35,7 @@ export type TracingGRPCExporterConfig =
 /**
  * Allowed configurations for OTLP tracing exporters
  */
-export type TracingExporterConfig = InferenceTracingExportConfig | TracingGRPCExporterConfig;
+export type TracingExporterConfig = InferenceTracingExportConfig | TracingBaseExporterConfig;
 /**
  * Configuration for OpenTelemetry tracing
  */
