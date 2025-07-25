@@ -25,9 +25,7 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       responsive={false}
       css={{ position: 'relative', width: `${TOGGLE_BUTTON_WIDTH}px` }}
       data-test-subj="toggleAccordionButton"
-      onClick={(e) => {
-        onClick();
-      }}
+      onClick={onClick}
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
           e.preventDefault(); // Prevent scroll if Space is pressed
