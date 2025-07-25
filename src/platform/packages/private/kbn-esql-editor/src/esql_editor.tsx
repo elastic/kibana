@@ -582,12 +582,22 @@ export const ESQLEditor = memo(function ESQLEditor({
     application?.currentAppId$,
   ]);
 
+  const onLookupIndexCreate = useCallback(
+    async (resultQuery: string) => {
+      if (esqlCallbacks?.getJoinIndices) {
+        await esqlCallbacks?.getJoinIndices();
+      }
+      onQueryUpdate(resultQuery);
+    },
+    [esqlCallbacks, onQueryUpdate]
+  );
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
     editor1,
     editorModel,
     esqlCallbacks?.getJoinIndices,
     query,
-    onQueryUpdate
+    onLookupIndexCreate
   );
 
   const queryRunButtonProperties = useMemo(() => {
@@ -949,7 +959,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(async () => {
+                      await addLookupIndicesDecorator();
+                      showSuggestionsIfEmptyQuery();
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

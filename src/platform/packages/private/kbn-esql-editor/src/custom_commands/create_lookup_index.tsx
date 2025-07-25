@@ -147,24 +147,10 @@ export const useLookupIndexCommand = (
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
-  onIndexCreated: (resultQuery: string) => void
+  onIndexCreated: (resultQuery: string) => Promise<void>
 ) => {
   const { euiTheme } = useEuiTheme();
   const inQueryLookupIndices = useRef<string[]>([]);
-
-  const lookupCache = useRef<{ data: IndexAutocompleteItem[] }>();
-
-  const fetchLookupIndices = useCallback(async () => {
-    if (lookupCache.current) return lookupCache.current.data; // memoised
-    const resp = await (getLookupIndices?.() ?? Promise.resolve({ indices: [] }));
-    lookupCache.current = { data: resp.indices };
-    return resp.indices;
-  }, [getLookupIndices]);
-
-  const refreshLookupIndices = useCallback(async () => {
-    lookupCache.current = undefined; // clear
-    await fetchLookupIndices();
-  }, [fetchLookupIndices]);
 
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
@@ -223,8 +209,6 @@ export const useLookupIndexCommand = (
     ) => {
       if (!indexCreated) return;
 
-      await refreshLookupIndices(); // get the latest list if indices
-
       const cursorPosition = editorRef.current?.getPosition();
 
       if (!initialIndexName && !cursorPosition) {
@@ -236,9 +220,9 @@ export const useLookupIndexCommand = (
         initialIndexName || cursorPosition!,
         resultIndexName
       );
-      onIndexCreated(resultQuery);
+      await onIndexCreated(resultQuery);
     },
-    [refreshLookupIndices, editorRef, query.esql, onIndexCreated]
+    [editorRef, query.esql, onIndexCreated]
   );
 
   // TODO: Replace with the actual lookup index docs URL once it's available
@@ -277,7 +261,7 @@ export const useLookupIndexCommand = (
       editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
     }
 
-    const existingIndices = await fetchLookupIndices();
+    const existingIndices = await getLookupIndices!();
 
     // TODO extract aliases as well
     const lookupIndices: string[] = inQueryLookupIndices.current;
@@ -285,7 +269,7 @@ export const useLookupIndexCommand = (
     for (let i = 0; i < lookupIndices.length; i++) {
       const lookupIndex = lookupIndices[i];
 
-      const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
+      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
 
       const matches =
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
@@ -328,7 +312,7 @@ export const useLookupIndexCommand = (
         ]);
       });
     }
-  }, [editorModel, fetchLookupIndices, editorRef]);
+  }, [editorModel, editorRef, getLookupIndices]);
 
   return {
     addLookupIndicesDecorator,
