@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { debounce } from 'rxjs';
 import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ApplicationStart, CoreStart, IBasePath } from '@kbn/core/public';
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
+import { SearchSessionIndicator } from '../search_session_indicator';
+import { SearchUsageCollector } from '../../../collectors';
 import { ISessionService } from '../../session_service';
-import { SearchSessionIndicator } from '.';
+import { SearchSessionState } from '../../search_session_state';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -23,49 +26,16 @@ export interface SearchSessionIndicatorDeps {
   basePath: IBasePath;
   storage: IStorageWrapper;
   tourDisabled: boolean;
-  coreStart: CoreStart;
-  onOpenFlyout?: () => void;
-  onSendToBackground: () => Promise<void>;
+  usageCollector?: SearchUsageCollector;
+  onOpenFlyout: () => void;
 }
 
-export enum SearchSessionState {
-  /**
-   * Pending search request has not been sent to the background yet
-   */
-  Loading = 'loading',
-
-  /**
-   * No action was taken and the page completed loading without search session creation.
-   */
-  Completed = 'completed',
-
-  /**
-   * Search request was sent to the background.
-   * The page is loading in background.
-   */
-  BackgroundLoading = 'backgroundLoading',
-
-  /**
-   * Page load completed with search session created.
-   */
-  BackgroundCompleted = 'backgroundCompleted',
-
-  /**
-   * Revisiting the page after background completion
-   */
-  Restored = 'restored',
-
-  Canceled = 'canceled',
-
-  None = 'none',
-}
-
-export const createConnectedBackgroundSessionButton = ({
+export const createConnectedSearchSessionIndicator = ({
   sessionService,
+  application,
+  usageCollector,
   basePath,
   onOpenFlyout,
-  onSendToBackground,
-  coreStart,
 }: SearchSessionIndicatorDeps): React.FC => {
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
@@ -114,6 +84,33 @@ export const createConnectedBackgroundSessionButton = ({
       );
     }
 
+    const onContinueInBackground = useCallback(() => {
+      if (saveDisabled) return;
+      usageCollector?.trackSessionSentToBackground();
+      sessionService.save();
+    }, [saveDisabled]);
+
+    const onSaveResults = useCallback(() => {
+      if (saveDisabled) return;
+      usageCollector?.trackSessionSavedResults();
+      sessionService.save();
+    }, [saveDisabled]);
+
+    const onCancel = useCallback(() => {
+      usageCollector?.trackSessionCancelled();
+      sessionService.cancel();
+    }, []);
+
+    const onViewSearchSessions = useCallback(() => {
+      usageCollector?.trackViewSessionsList();
+    }, []);
+
+    useEffect(() => {
+      if (state === SearchSessionState.Restored) {
+        usageCollector?.trackSessionIsRestored();
+      }
+    }, [state]);
+
     const {
       name: searchSessionName,
       startTime,
@@ -124,33 +121,33 @@ export const createConnectedBackgroundSessionButton = ({
       await sessionService.renameCurrentSession(newName);
     }, []);
 
-    const onSaveResults = useCallback(() => {
-      const onSaveResultsAsync = async () => {
-        if (saveDisabled) return;
-        await sessionService.save();
-        await onSendToBackground();
-        coreStart.notifications.toasts.addSuccess('Search sent to background');
-      };
-      return onSaveResultsAsync();
-    }, [saveDisabled]);
-
     if (!sessionService.isSessionStorageReady()) return null;
+
     return (
-      <SearchSessionIndicator
-        state={state}
-        onSaveResults={onSaveResults}
-        saveDisabled={saveDisabled}
-        saveDisabledReasonText={saveDisabledReasonText}
-        managementDisabled={managementDisabled}
-        managementDisabledReasonText={managementDisabledReasonText}
-        viewSearchSessionsLink={searchSessionsManagementUrl}
-        searchSessionName={searchSessionName}
-        saveSearchSessionNameFn={saveSearchSessionNameFn}
-        startedTime={startTime}
-        completedTime={completedTime}
-        canceledTime={canceledTime}
-        onOpenMangementFlyout={onOpenFlyout}
-      />
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
+        <SearchSessionIndicator
+          state={state}
+          saveDisabled={saveDisabled}
+          saveDisabledReasonText={saveDisabledReasonText}
+          managementDisabled={managementDisabled}
+          managementDisabledReasonText={managementDisabledReasonText}
+          onContinueInBackground={onContinueInBackground}
+          onSaveResults={onSaveResults}
+          onCancel={onCancel}
+          onViewSearchSessions={onViewSearchSessions}
+          viewSearchSessionsLink={searchSessionsManagementUrl}
+          searchSessionName={searchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
+          startedTime={startTime}
+          completedTime={completedTime}
+          canceledTime={canceledTime}
+          onOpenMangementFlyout={onOpenFlyout}
+        />
+      </RedirectAppLinks>
     );
   };
 };

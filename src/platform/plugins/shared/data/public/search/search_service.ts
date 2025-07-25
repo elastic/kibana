@@ -76,6 +76,7 @@ import {
   registerSearchSessionsMgmt,
 } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import { createConnectedSearchSessionIndicator as createConnectedSearchSessionIndicatorBackgroundSearch } from './session/session_indicator_background_search';
 import { createConnectedBackgroundSessionButton } from './session/button/search_session_indicator/connected_background_search_button';
 import { ISearchSetup, ISearchStart } from './types';
 import { BACKGROUND_SEARCH_ENABLED } from '../../common/constants';
@@ -327,7 +328,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         });
       } else {
         toolbarBackgroundSearchButton =
-          createConnectedSearchSessionIndicator(searchsessionBtnProps);
+          createConnectedSearchSessionIndicatorBackgroundSearch(searchsessionBtnProps);
       }
     }
 

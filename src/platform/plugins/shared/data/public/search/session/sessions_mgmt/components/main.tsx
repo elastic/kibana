@@ -102,7 +102,7 @@ export function SearchSessionsMgmtFlyout({ documentation, ...tableProps }: Props
       <EuiFlyoutHeader>
         <FormattedMessage
           id="data.mgmt.searchSessions.main.sectionTitle"
-          defaultMessage="Search Sessions"
+          defaultMessage="Background Search"
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
