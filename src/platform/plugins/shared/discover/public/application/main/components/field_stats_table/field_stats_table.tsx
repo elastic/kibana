@@ -17,6 +17,12 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
 import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  convertFieldsToFallbackFields,
+  getAllFallbackFields,
+  getAssociatedSmartFieldsAsString,
+  SmartFieldFallbackTooltip,
+} from '@kbn/unified-field-list';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 
@@ -44,15 +50,45 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     onAddFilter,
     trackUiMetric,
     searchSessionId,
+    additionalFieldGroups,
     timeRange,
   } = props;
 
-  // If `_source` is in the columns, we should exclude it for Field Statistics
-  const visibleFieldNames = useMemo(() => columns.filter((col) => col !== '_source'), [columns]);
+  const visibleFields = useMemo(
+    () =>
+      convertFieldsToFallbackFields({
+        // If `_source` is in the columns, we should exclude it for Field Statistics
+        fields: columns.filter((col) => col !== '_source'),
+        additionalFieldGroups,
+      }),
+    [additionalFieldGroups, columns]
+  );
+  const allFallbackFields = useMemo(
+    () => getAllFallbackFields(additionalFieldGroups),
+    [additionalFieldGroups]
+  );
+  const renderFieldName = useCallback(
+    (fieldName: string, item: DataVisualizerTableItem) => {
+      const displayName = item.displayName ?? item.fieldName;
+      const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
+      const associatedSmartFields = isDerivedAsPartOfSmartField
+        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
+        : '';
 
-  const renderFieldName = useCallback((_: string, item: DataVisualizerTableItem) => {
-    return <>{item.displayName ?? item.fieldName}</>;
-  }, []);
+      return (
+        <>
+          {displayName}
+          {isDerivedAsPartOfSmartField ? (
+            <>
+              {' '}
+              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
+            </>
+          ) : null}
+        </>
+      );
+    },
+    [additionalFieldGroups, allFallbackFields]
+  );
 
   const services = useDiscoverServices();
 
@@ -128,7 +164,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         filters={filters}
         esqlQuery={isEsqlMode && isOfAggregateQueryType(query) ? query : undefined}
         query={query}
-        visibleFieldNames={visibleFieldNames}
+        visibleFieldNames={visibleFields}
         sessionId={searchSessionId}
         totalDocuments={totalDocuments}
         samplingOption={samplingOption}

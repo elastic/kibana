@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './get_cell_renderers';
-export { getColumnsConfiguration } from './get_columns_configuration';
-export { getRecommendedFields } from './get_recommended_fields';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+const SmartFieldFallbackTooltip = dynamic(() => import('./smart_fields_tooltip'));
+
+export { SmartFieldFallbackTooltip };
