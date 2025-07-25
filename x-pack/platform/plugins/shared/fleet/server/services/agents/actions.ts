@@ -32,7 +32,7 @@ import { auditLoggingService } from '../audit_logging';
 import { getAgentIdsForAgentPolicies } from '../agent_policies/agent_policies_to_agent_ids';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import { namespaceFilterEsql } from '../spaces/query_namespaces_filtering';
 
 import { MAX_CONCURRENT_CREATE_ACTIONS } from '../../constants';
 
@@ -240,85 +240,75 @@ export async function bulkCreateAgentActionResults(
 }
 
 export async function getAgentActions(esClient: ElasticsearchClient, actionId: string) {
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              action_id: actionId,
-            },
-          },
-        ],
-      },
-    },
-    size: SO_SEARCH_LIMIT,
-  });
+  try {
+    const esqlQuery = `FROM ${AGENT_ACTIONS_INDEX} METADATA _id, _source
+    | WHERE action_id == "${actionId}"
+    | KEEP _id, _source`;
 
-  if (res.hits.hits.length === 0) {
-    throw new AgentActionNotFoundError('Action not found');
-  }
-
-  const result: FleetServerAgentAction[] = [];
-
-  for (const hit of res.hits.hits) {
-    auditLoggingService.writeCustomAuditLog({
-      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
+    const res = await esClient.esql.query({
+      query: esqlQuery,
     });
 
-    result.push({
-      ...hit._source,
-      id: hit._id,
-    });
-  }
+    if (res.values.length === 0) {
+      throw new AgentActionNotFoundError('Action not found');
+    }
 
-  return result;
+    const result: FleetServerAgentAction[] = [];
+
+    for (const value of res.values) {
+      const source = value[1] as any as FleetServerAgentAction;
+      auditLoggingService.writeCustomAuditLog({
+        message: `User retrieved Fleet action [id=${source.action_id}]`,
+      });
+
+      result.push({
+        ...source,
+        id: value[0],
+      });
+    }
+
+    return result;
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return [];
+    }
+    throw err;
+  }
 }
 
 export async function getUnenrollAgentActions(
   esClient: ElasticsearchClient
 ): Promise<FleetServerAgentAction[]> {
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              type: 'UNENROLL',
-            },
-          },
-          {
-            exists: {
-              field: 'agents',
-            },
-          },
-          {
-            range: {
-              expiration: { gte: new Date().toISOString() },
-            },
-          },
-        ],
-      },
-    },
-    size: SO_SEARCH_LIMIT,
-  });
+  try {
+    const esqlQuery = `FROM ${AGENT_ACTIONS_INDEX} METADATA _id, _source
+    | WHERE type == "UNENROLL" AND agents IS NOT NULL AND expiration >= "${new Date().toISOString()}"
+    | KEEP _id, _source`;
 
-  const result: FleetServerAgentAction[] = [];
-
-  for (const hit of res.hits.hits) {
-    auditLoggingService.writeCustomAuditLog({
-      message: `User retrieved Fleet action [id=${hit._source?.action_id}]`,
+    const res = await esClient.esql.query({
+      query: esqlQuery,
     });
 
-    result.push({
-      ...hit._source,
-      id: hit._id,
-    });
+    const result: FleetServerAgentAction[] = [];
+
+    for (const value of res.values) {
+      const source = value[1] as any as FleetServerAgentAction;
+      auditLoggingService.writeCustomAuditLog({
+        message: `User retrieved Fleet action [id=${source.action_id}]`,
+      });
+
+      result.push({
+        ...source,
+        id: value[0],
+      });
+    }
+
+    return result;
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return [];
+    }
+    throw err;
   }
-
-  return result;
 }
 
 export async function cancelAgentAction(
@@ -329,40 +319,39 @@ export async function cancelAgentAction(
   const currentSpaceId = getCurrentNamespace(soClient);
 
   const getUpgradeActions = async () => {
-    const query = {
-      bool: {
-        filter: [
-          {
-            term: {
-              action_id: actionId,
-            },
-          },
-        ],
-      },
-    };
-    const res = await esClient.search<FleetServerAgentAction>({
-      index: AGENT_ACTIONS_INDEX,
-      query: await addNamespaceFilteringToQuery(query, currentSpaceId),
-      size: SO_SEARCH_LIMIT,
-    });
+    try {
+      const esqlQuery = `FROM ${AGENT_ACTIONS_INDEX} METADATA _source
+    | WHERE action_id == "${actionId}" ${await namespaceFilterEsql(currentSpaceId)}
+    | KEEP _source`;
 
-    if (res.hits.hits.length === 0) {
-      throw new AgentActionNotFoundError('Action not found');
-    }
-
-    for (const hit of res.hits.hits) {
-      auditLoggingService.writeCustomAuditLog({
-        message: `User retrieved Fleet action [id=${hit._source?.action_id}]}]`,
+      const res = await esClient.esql.query({
+        query: esqlQuery,
       });
-    }
 
-    const upgradeActions: FleetServerAgentAction[] = res.hits.hits
-      .map((hit) => hit._source as FleetServerAgentAction)
-      .filter(
-        (action: FleetServerAgentAction | undefined): boolean =>
-          !!action && !!action.agents && !!action.action_id && action.type === 'UPGRADE'
-      );
-    return upgradeActions;
+      if (res.values.length === 0) {
+        throw new AgentActionNotFoundError('Action not found');
+      }
+
+      for (const value of res.values) {
+        const source = value[0] as any as FleetServerAgentAction;
+        auditLoggingService.writeCustomAuditLog({
+          message: `User retrieved Fleet action [id=${source.action_id}]}]`,
+        });
+      }
+
+      const upgradeActions: FleetServerAgentAction[] = res.values
+        .map((value) => value[0] as any as FleetServerAgentAction)
+        .filter(
+          (action: FleetServerAgentAction | undefined): boolean =>
+            !!action && !!action.agents && !!action.action_id && action.type === 'UPGRADE'
+        );
+      return upgradeActions;
+    } catch (err) {
+      if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+        return [];
+      }
+      throw err;
+    }
   };
 
   const cancelActionId = uuidv4();

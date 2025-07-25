@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
@@ -613,67 +612,6 @@ export async function getAgentsById(
   return agentIds.map(
     (agentId) => agents.find((agent) => agent.id === agentId) || { id: agentId, notFound: true }
   );
-}
-
-// given a list of agentPolicyIds, return a map of agent version => count of agents
-// this is used to get all fleet server versions
-export async function getAgentVersionsForAgentPolicyIds(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  agentPolicyIds: string[]
-): Promise<Array<{ policyId: string; versionCounts: Record<string, number> }>> {
-  const result: Array<{ policyId: string; versionCounts: Record<string, number> }> = [];
-
-  if (!agentPolicyIds.length) {
-    return result;
-  }
-
-  try {
-    const {
-      hits: { hits },
-    } = await esClient.search<
-      FleetServerAgent,
-      Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
-    >({
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                policy_id: agentPolicyIds,
-              },
-            },
-          ],
-        },
-      },
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-    });
-
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
-
-    for (const [policyId, policyHits] of Object.entries(groupedHits)) {
-      const versionCounts: Record<string, number> = {};
-
-      for (const hit of policyHits) {
-        const agentVersion = hit._source?.local_metadata?.elastic?.agent?.version;
-
-        if (!agentVersion) {
-          continue;
-        }
-
-        versionCounts[agentVersion] = (versionCounts[agentVersion] || 0) + 1;
-      }
-
-      result.push({ policyId, versionCounts });
-    }
-  } catch (error) {
-    if (error.statusCode !== 404) {
-      throw error;
-    }
-  }
-
-  return result;
 }
 
 export async function getAgentByAccessAPIKeyId(

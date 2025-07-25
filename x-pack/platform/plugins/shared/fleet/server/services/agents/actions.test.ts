@@ -309,10 +309,8 @@ describe('Agent actions', () => {
   describe('cancelAgentAction', () => {
     it('should throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [],
-        },
+      esClient.esql.query.mockResolvedValue({
+        values: [],
       } as any);
       const soClient = savedObjectsClientMock.create();
       await expect(() =>
@@ -322,27 +320,25 @@ describe('Agent actions', () => {
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [
+      esClient.esql.query.mockResolvedValue({
+        values: [
+          [
             {
-              _source: {
-                action_id: 'action1',
-                agents: ['agent1', 'agent2'],
-                expiration: '2022-05-12T18:16:18.019Z',
-                type: 'UPGRADE',
-              },
-            },
-            {
-              _source: {
-                action_id: 'action1',
-                agents: ['agent3', 'agent4'],
-                expiration: '2022-05-12T18:16:18.019Z',
-                type: 'UPGRADE',
-              },
+              type: 'UPGRADE',
+              action_id: 'action1',
+              agents: ['agent1', 'agent2'],
+              expiration: '2022-05-12T18:16:18.019Z',
             },
           ],
-        },
+          [
+            {
+              action_id: 'action1',
+              agents: ['agent3', 'agent4'],
+              expiration: '2022-05-12T18:16:18.019Z',
+              type: 'UPGRADE',
+            },
+          ],
+        ],
       } as any);
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
@@ -370,19 +366,17 @@ describe('Agent actions', () => {
 
     it('should cancel UPGRADE action', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
-      esClient.search.mockResolvedValue({
-        hits: {
-          hits: [
+      esClient.esql.query.mockResolvedValue({
+        values: [
+          [
             {
-              _source: {
-                type: 'UPGRADE',
-                action_id: 'action1',
-                agents: ['agent1', 'agent2'],
-                expiration: '2022-05-12T18:16:18.019Z',
-              },
+              type: 'UPGRADE',
+              action_id: 'action1',
+              agents: ['agent1', 'agent2'],
+              expiration: '2022-05-12T18:16:18.019Z',
             },
           ],
-        },
+        ],
       } as any);
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
