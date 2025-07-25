@@ -28,41 +28,42 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   }
 
   public async _run(): Promise<RunStepResult> {
-    const step = this.step;
-
-    // this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
-    //   event: { action: 'connector-step-start' },
-    //   tags: ['connector', step.type],
-    // });
-
-    // Evaluate optional 'if' condition
-    const shouldRun = await this.evaluateCondition(step.if);
-    if (!shouldRun) {
-      // this.contextManager.logInfo('Step skipped due to condition evaluation', {
-      //   event: { action: 'step-skipped', outcome: 'success' },
-      // });
-      return { output: undefined, error: undefined };
-    }
-
-    // Get current context for templating
-    const context = this.contextManager.getContext();
-
-    // Render inputs from 'with'
-    // this.contextManager.logDebug('Rendering step inputs');
-    const renderedInputs = Object.entries(step.with ?? {}).reduce(
-      (acc: Record<string, any>, [key, value]) => {
-        if (typeof value === 'string') {
-          acc[key] = this.templatingEngine.render(value, context);
-        } else {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {}
-    );
-
-    // Execute the connector
     try {
+      const step = this.step;
+
+      // this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
+      //   event: { action: 'connector-step-start' },
+      //   tags: ['connector', step.type],
+      // });
+
+      // Evaluate optional 'if' condition
+      const shouldRun = await this.evaluateCondition(step.if);
+      if (!shouldRun) {
+        // this.contextManager.logInfo('Step skipped due to condition evaluation', {
+        //   event: { action: 'step-skipped', outcome: 'success' },
+        // });
+        return { output: undefined, error: undefined };
+      }
+
+      // Get current context for templating
+      const context = this.contextManager.getContext();
+
+      // Render inputs from 'with'
+      // this.contextManager.logDebug('Rendering step inputs');
+      const renderedInputs = Object.entries(step.with ?? {}).reduce(
+        (acc: Record<string, any>, [key, value]) => {
+          if (typeof value === 'string') {
+            acc[key] = this.templatingEngine.render(value, context);
+          } else {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {}
+      );
+
+      // Execute the connector
+
       // this.contextManager.logInfo(`Executing connector: ${step.type}`, {
       //   event: { action: 'connector-execution' },
       //   tags: ['connector', 'execution'],

@@ -88,7 +88,30 @@ export class WorkflowContextManager {
   }
 
   public getContext(): Record<string, any> {
-    return { ...this.context };
+    const stepContex: Record<string, any> = {};
+
+    const visited = new Set<string>();
+    const collectPredecessors = (nodeId: string) => {
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+
+      stepContex[nodeId] = {};
+      if (this.context.stepResults?.[nodeId]) {
+        stepContex[nodeId] = this.context.stepResults[nodeId].output;
+      }
+      if (this.context.nodesState?.[nodeId]) {
+        stepContex[nodeId] = this.context.nodesState[nodeId];
+      }
+
+      const preds = this.executionGraph.predecessors(nodeId) || [];
+      preds.forEach((predId) => collectPredecessors(predId));
+    };
+
+    const currentNodeId = this.topologicalOrder[this.currentStepIndex];
+    const directPredecessors = this.executionGraph.predecessors(currentNodeId) || [];
+    directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
+
+    return stepContex;
   }
 
   public updateContext(updates: Record<string, any>): void {
@@ -105,6 +128,18 @@ export class WorkflowContextManager {
 
   public getStepResults(): { [stepId: string]: RunStepResult } {
     return this.context.stepResults;
+  }
+
+  public setNodeState(nodeId: string, state: any): void {
+    if (!this.context.nodesState) {
+      this.context.nodesState = {};
+    }
+
+    this.context.nodesState[nodeId] = state;
+  }
+
+  public getNodeState(nodeId: string): any {
+    return this.context.nodesState?.[nodeId];
   }
 
   // ======================
