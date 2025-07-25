@@ -425,6 +425,39 @@ export class AlertingPlugin {
       core.getStartServices
     );
 
+    // Register the gap-fill-processor task definition
+    plugins.taskManager.registerTaskDefinitions({
+      'gap-fill-processor': {
+        title: 'Gap Fill Processor',
+        timeout: '1h',
+        // Optionally add paramsSchema and stateSchemaByVersion here
+        createTaskRunner: ({ taskInstance }) => ({
+          async run() {
+            // Placeholder: implement gap fill logic here
+            try {
+              console.log('gap-fill-processor - ------------------------------- - -- - -  - - ----');
+              return {
+                state: {
+                  ...taskInstance.state,
+                  lastRun: new Date().toISOString(),
+                  status: 'success',
+                },
+              };
+            } catch (error) {
+              console.log('error', JSON.stringify(error, null, 2));
+              return {
+                state: {
+                  ...taskInstance.state,
+                  lastRun: new Date().toISOString(),
+                  status: 'error',
+                },
+              };
+            }
+          },
+        }),
+      },
+    });
+
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
       this.createRouteHandlerContext(core)

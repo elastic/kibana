@@ -186,7 +186,11 @@ export class TaskScheduling {
 
   public async bulkUpdateState(
     taskIds: string[],
-    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state'],
+    stateUpdateParams: (
+      s: ConcreteTaskInstance['params'],
+      id: string
+    ) => ConcreteTaskInstance['params']
   ) {
     return await retryableBulkUpdate({
       taskIds,
@@ -195,6 +199,7 @@ export class TaskScheduling {
       filter: () => true,
       map: (task) => ({
         ...task,
+        params: stateUpdateParams(task.params, task.id),
         state: stateMapFn(task.state, task.id),
       }),
       validate: false,

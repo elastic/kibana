@@ -92,6 +92,10 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
+import { createAutoFillJobRoute } from './gaps/apis/auto_fill/create_auto_fill_job_route';
+import { getAutoFillJobStatusRoute } from './gaps/apis/auto_fill/get_auto_fill_job_status_route';
+import { listAutoFillJobsRoute } from './gaps/apis/auto_fill/list_auto_fill_jobs_route';
+import { updateAutoFillJobRoute } from './gaps/apis/auto_fill/update_auto_fill_job_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -191,6 +195,10 @@ export function defineRoutes(opts: RouteOptions) {
   fillGapByIdRoute(router, licenseState);
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
+  createAutoFillJobRoute(router, licenseState);
+  getAutoFillJobStatusRoute(router, licenseState);
+  listAutoFillJobsRoute(router, licenseState);
+  updateAutoFillJobRoute(router, licenseState);
 
   // Rules Settings APIs
   if (alertingConfig.rulesSettings.enabled) {
