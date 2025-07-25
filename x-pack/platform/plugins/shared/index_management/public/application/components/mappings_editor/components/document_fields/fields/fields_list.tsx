@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FieldsListItemContainer } from './fields_list_item_container';
 import { NormalizedField, State } from '../../../types';
 
@@ -31,9 +32,15 @@ export const FieldsList = React.memo(function FieldsListComponent({
     return null;
   }
   return (
-    <ul data-test-subj="fieldsList">
+    <ul
+      data-test-subj="fieldsList"
+      aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListTypeLabel', {
+        defaultMessage: 'Saved mapping fields',
+      })}
+    >
       {fields.map((field, index) => (
         <FieldsListItemContainer
+          aria-label={`Field ${field.source.name}`}
           key={field.id}
           fieldId={field.id}
           treeDepth={treeDepth === undefined ? 0 : treeDepth}
