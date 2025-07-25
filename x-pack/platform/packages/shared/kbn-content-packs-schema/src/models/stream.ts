@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { UptimeProvider } from './uptime';
+import { Streams } from '@kbn/streams-schema';
+
+export const ROOT_STREAM_ID = '__ROOT__';
+
+export interface ContentPackStream {
+  type: 'stream';
+  name: string;
+  request: Streams.WiredStream.UpsertRequest;
+}

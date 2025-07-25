@@ -14,24 +14,24 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
 
 interface Props {
-  toggleSideNav: (isVisible: boolean) => void;
-  isSideNavCollapsed$: Observable<boolean>;
+  toggle: (isVisible: boolean) => void;
+  isCollapsed$: Observable<boolean>;
 }
 
 const PANEL_WIDTH = 290;
 
-export const ProjectNavigation: FC<PropsWithChildren<Props>> = ({
+export const ProjectSideNavV1: FC<PropsWithChildren<Props>> = ({
   children,
-  isSideNavCollapsed$,
-  toggleSideNav,
+  isCollapsed$,
+  toggle,
 }) => {
-  const isCollapsed = useObservable(isSideNavCollapsed$, false);
+  const isCollapsed = useObservable(isCollapsed$, false);
 
   return (
     <EuiCollapsibleNavBeta
       data-test-subj="projectLayoutSideNav"
       isCollapsed={isCollapsed}
-      onCollapseToggle={toggleSideNav}
+      onCollapseToggle={toggle}
       css={{
         overflow: 'visible',
         clipPath: `polygon(0 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 0, calc(var(--euiCollapsibleNavOffset) + ${PANEL_WIDTH}px) 100%, 0 100%)`,
