@@ -2396,6 +2396,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
+/x-pack/solutions/security/test/functional/ @elastic/security-solution
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
 /x-pack/solutions/security/test/plugin_functional/ @elastic/security-solution
