@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, type ComponentProps } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, type AggregateQuery } from '@kbn/es-query';
@@ -15,7 +15,14 @@ import { type Filter } from '@kbn/es-query';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataCascade, getESQLStatsQueryMeta } from '@kbn/shared-ux-document-data-cascade';
+import {
+  DataCascade,
+  DataCascadeRow,
+  DataCascadeRowCell,
+  type DataCascadeRowProps,
+  type DataCascadeRowCellProps,
+  getESQLStatsQueryMeta,
+} from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiBadge, EuiDescriptionList, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,8 +83,12 @@ export const ESQLDataCascade = ({
     }
   }, [defaultFilters, globalFilters, globalQuery]);
 
+  type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
+
   const onCascadeGroupNodeExpanded = useCallback<
-    NonNullable<ComponentProps<typeof DataCascade<DataTableRecord>>['onCascadeGroupNodeExpanded']>
+    NonNullable<
+      DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
+    >
   >(
     // @ts-expect-error - WIP to understand how data is structured
     async ({ nodePath }) => {
@@ -111,7 +122,9 @@ export const ESQLDataCascade = ({
   );
 
   const onCascadeLeafNodeExpanded = useCallback<
-    NonNullable<ComponentProps<typeof DataCascade<DataTableRecord>>['onCascadeLeafNodeExpanded']>
+    NonNullable<
+      DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
+    >['onCascadeLeafNodeExpanded']
   >(
     async ({ nodePath, nodePathMap }) => {
       const searchResult = await lastValueFrom(
@@ -132,14 +145,14 @@ export const ESQLDataCascade = ({
 
   return (
     <div
-      css={({ euiTheme }) => ({
+      css={{
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-      })}
+      }}
     >
-      <DataCascade<DataTableRecord['flattened'] & { id: string }>
+      <DataCascade<ESQLDataGroupNode>
         stickyGroupRoot
         data={initialData.map((datum) => ({
           id: datum.id,
@@ -158,59 +171,64 @@ export const ESQLDataCascade = ({
             })}
           </EuiText>
         )}
-        rowHeaderTitleSlot={({ row }) => {
-          return (
-            <EuiText size="s">
-              <h4>{row.original[cascadeGroups[row.depth]] as string}</h4>
-            </EuiText>
-          );
-        }}
-        rowHeaderMetaSlots={({ row }) =>
-          queryMeta.appliedFunctions
-            .map(({ identifier, operator }) => {
-              // maybe use operator to determine what meta component to render
-              return (
-                <EuiText size="s" textAlign="right">
-                  <p>
-                    <FormattedMessage
-                      id="discover.esql_data_cascade.grouping.function"
-                      defaultMessage="{identifier} <badge>{identifierValue}</badge>"
-                      values={{
-                        identifier,
-                        identifierValue: row.original[identifier] as string,
-                        badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              );
-            })
-            .concat([
-              <EuiButtonIcon
-                aria-label={i18n.translate('discover.esql_data_cascade.grouping.expand', {
-                  defaultMessage: 'Expand {groupValue} group',
-                  values: {
-                    groupValue: row.original[cascadeGroups[row.depth]] as string,
-                  },
-                })}
-                iconType="expand"
-              />,
-            ])
-        }
-        leafContentSlot={({ data }) => {
-          return (
-            <EuiDescriptionList
-              listItems={(data ?? []).map((datum) => ({
-                title: datum.group,
-                description: JSON.stringify(datum, null, 2),
-              }))}
-            />
-          );
-        }}
         onCascadeGroupingChange={() => {}}
-        onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
-        onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}
-      />
+      >
+        <DataCascadeRow<ESQLDataGroupNode>
+          rowHeaderTitleSlot={({ row }) => {
+            return (
+              <EuiText size="s">
+                <h4>{row.original[cascadeGroups[row.depth]] as string}</h4>
+              </EuiText>
+            );
+          }}
+          rowHeaderMetaSlots={({ row }) =>
+            queryMeta.appliedFunctions
+              .map(({ identifier, operator }) => {
+                // maybe use operator to determine what meta component to render
+                return (
+                  <EuiText size="s" textAlign="right">
+                    <p>
+                      <FormattedMessage
+                        id="discover.esql_data_cascade.grouping.function"
+                        defaultMessage="{identifier} <badge>{identifierValue}</badge>"
+                        values={{
+                          identifier,
+                          identifierValue: row.original[identifier] as string,
+                          badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                );
+              })
+              .concat([
+                <EuiButtonIcon
+                  aria-label={i18n.translate('discover.esql_data_cascade.grouping.expand', {
+                    defaultMessage: 'Expand {groupValue} group',
+                    values: {
+                      groupValue: row.original[cascadeGroups[row.depth]] as string,
+                    },
+                  })}
+                  iconType="expand"
+                />,
+              ])
+          }
+          onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+        >
+          <DataCascadeRowCell onCascadeLeafNodeExpanded={onCascadeLeafNodeExpanded}>
+            {({ data }) => {
+              return (
+                <EuiDescriptionList
+                  listItems={(data ?? []).map((datum) => ({
+                    title: datum.group,
+                    description: JSON.stringify(datum, null, 2),
+                  }))}
+                />
+              );
+            }}
+          </DataCascadeRowCell>
+        </DataCascadeRow>
+      </DataCascade>
     </div>
   );
 };
