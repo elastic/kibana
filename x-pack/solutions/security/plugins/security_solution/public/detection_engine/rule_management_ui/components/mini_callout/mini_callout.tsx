@@ -15,10 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui/src/components/icon';
 import type { Color } from '@elastic/eui/src/components/call_out/call_out';
 import { css } from '@emotion/react';
+import { useBoolean } from '@kbn/react-hooks';
 import * as i18n from './translations';
 
 export interface MiniCalloutProps {
@@ -26,6 +27,7 @@ export interface MiniCalloutProps {
   dismissible?: boolean;
   iconType: IconType | undefined;
   title: ReactNode | string;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -36,17 +38,17 @@ export interface MiniCalloutProps {
  * @param dismissible whether the callout can be dismissed, defaults to 'true'
  * @param iconType icon for the callout
  * @param title ReactNode or string title text to be displayed
- *
- * @constructor
+ * @param dataTestSubj data-test-subj attribute for testing purposes, defaults to 'mini-callout'
  */
-const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
+export const MiniCallout = memo(function MiniCallout({
   color = 'primary',
   dismissible = true,
   iconType,
   title,
-}: MiniCalloutProps) => {
+  'data-test-subj': dataTestSubj = 'mini-callout',
+}: MiniCalloutProps): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, { on: dismiss }] = useBoolean(false);
 
   if (isDismissed) {
     return null;
@@ -83,7 +85,7 @@ const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
               css={css`
                 font-weight: ${euiTheme.font.weight.regular};
               `}
-              onClick={() => setIsDismissed(true)}
+              onClick={dismiss}
             >
               {i18n.DISMISS}
             </EuiLink>
@@ -94,14 +96,11 @@ const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
   );
 
   return (
-    <EuiCallOut size="s" color={color} data-test-subj="mini-callout">
+    <EuiCallOut size="s" color={color} data-test-subj={dataTestSubj}>
       <div css={{ display: 'flex' }}>
         {iconType && <EuiIcon type={iconType} color={color} />}
         {calloutTitle}
       </div>
     </EuiCallOut>
   );
-};
-
-export const MiniCallout = React.memo(MiniCalloutComponent);
-MiniCallout.displayName = 'MiniCallout';
+});
