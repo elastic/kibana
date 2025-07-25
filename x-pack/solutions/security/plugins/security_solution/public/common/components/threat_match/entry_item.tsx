@@ -147,9 +147,9 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       <EuiFlexItem grow={3}>{renderFieldInput}</EuiFlexItem>
       <EuiFlexItem
         grow={2}
+        className="eui-textCenter"
         css={css`
           padding-top: ${showLabel ? LABEL_PADDING : 0}px;
-          text-align: center;
         `}
       >
         {isDoesNotMatchForIndicatorMatchRuleEnabled ? renderMatchInput : matchOperatorLabel}
