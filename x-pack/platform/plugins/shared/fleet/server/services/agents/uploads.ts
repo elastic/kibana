@@ -21,11 +21,7 @@ import {
   agentRouteService,
 } from '../../../common';
 import type { DeleteAgentUploadResponse } from '../../../common/types';
-import {
-  FILE_STORAGE_DATA_AGENT_INDEX,
-  FILE_STORAGE_METADATA_AGENT_INDEX,
-  SO_SEARCH_LIMIT,
-} from '../../constants';
+import { FILE_STORAGE_DATA_AGENT_INDEX, FILE_STORAGE_METADATA_AGENT_INDEX } from '../../constants';
 import { updateFilesStatus } from '../files';
 import { FleetError } from '../../errors';
 
@@ -35,30 +31,27 @@ export async function getAgentUploads(
 ): Promise<AgentDiagnostics[]> {
   const getFile = async (actionId: string) => {
     try {
-      const fileResponse = await esClient.search({
-        index: FILE_STORAGE_METADATA_AGENT_INDEX,
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must: [{ term: { agent_id: agentId } }, { term: { action_id: actionId } }],
-              },
-            },
-          },
-        },
+      const esqlQuery = `FROM ${FILE_STORAGE_METADATA_AGENT_INDEX} METADATA _id, _source
+  | WHERE agent_id == "${agentId}" AND action_id == "${actionId}"
+  | SORT @timestamp DESC 
+  | KEEP _id, _source`;
+
+      const fileResponse = await esClient.esql.query({
+        query: esqlQuery,
       });
-      if (fileResponse.hits.hits.length === 0) {
+
+      if (fileResponse.values.length === 0) {
         appContextService
           .getLogger()
           .trace(`No matches for action_id ${actionId} and agent_id ${agentId}`);
         return;
       }
       return {
-        id: fileResponse.hits.hits[0]._id,
-        ...(fileResponse.hits.hits[0]._source as any)?.file,
+        id: fileResponse.values[0][0],
+        ...(fileResponse.values[0][1] as any)?.file,
       };
     } catch (err) {
-      if (err.statusCode === 404) {
+      if (err.statusCode === 400 && err.message.includes('Unknown index')) {
         appContextService.getLogger().debug(err);
         return;
       } else {
@@ -121,67 +114,49 @@ async function _getRequestDiagnosticsActions(
     error?: string;
   }>
 > {
-  const agentActionRes = await esClient.search<any>({
-    index: AGENT_ACTIONS_INDEX,
-    ignore_unavailable: true,
-    size: SO_SEARCH_LIMIT,
-    sort: { '@timestamp': 'desc' },
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              type: 'REQUEST_DIAGNOSTICS',
-            },
-          },
-          {
-            term: {
-              agents: agentId,
-            },
-          },
-        ],
-      },
-    },
-  });
-
-  const agentActions = agentActionRes.hits.hits.map((hit) => ({
-    actionId: hit._source?.action_id as string,
-    timestamp: hit._source?.['@timestamp'],
-    expiration: hit._source?.expiration,
-  }));
-
-  if (agentActions.length === 0) {
-    return [];
-  }
-
   try {
-    const actionResultsRes = await esClient.search<any>({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      ignore_unavailable: true,
-      size: SO_SEARCH_LIMIT,
-      query: {
-        bool: {
-          must: [
-            {
-              terms: {
-                action_id: agentActions.map((action) => action.actionId),
-              },
-            },
-            {
-              term: {
-                agent_id: agentId,
-              },
-            },
-          ],
-        },
-      },
+    const esqlQueryActions = `FROM ${AGENT_ACTIONS_INDEX} METADATA _source
+      | WHERE agents == "${agentId}" AND type == "REQUEST_DIAGNOSTICS"
+      | SORT @timestamp DESC
+      | KEEP _source`;
+
+    const agentActionRes = await esClient.esql.query({
+      query: esqlQueryActions,
     });
-    const actionResults = actionResultsRes.hits.hits.map((hit) => ({
-      actionId: hit._source?.action_id as string,
-      timestamp: hit._source?.['@timestamp'],
-      fileId: hit._source?.data?.upload_id as string,
-      error: hit._source?.error,
-    }));
+
+    const agentActions = agentActionRes.values.map((value: any) => {
+      const source = value[0];
+      return {
+        actionId: source.action_id,
+        timestamp: source['@timestamp'],
+        expiration: source.expiration,
+      };
+    });
+
+    if (agentActions.length === 0) {
+      return [];
+    }
+
+    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX} METADATA _source
+      | WHERE agent_id == "${agentId}" AND action_id IN (${agentActions
+      .map((action) => `"${action.actionId}"`)
+      .join(', ')})
+      | KEEP _source`;
+
+    const actionResultsRes = await esClient.esql.query({
+      query: esqlQuery,
+    });
+
+    const actionResults = actionResultsRes.values.map((value: any) => {
+      const source = value[0];
+      return {
+        actionId: source.action_id,
+        timestamp: source['@timestamp'],
+        fileId: source.data?.upload_id,
+        error: source.error,
+      };
+    });
+
     return agentActions.map((action) => {
       const actionResult = actionResults.find((result) => result.actionId === action.actionId);
       return {
@@ -193,7 +168,7 @@ async function _getRequestDiagnosticsActions(
       };
     });
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
       // .fleet-actions-results does not yet exist
       appContextService.getLogger().debug(err);
       return [];

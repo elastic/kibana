@@ -21,7 +21,7 @@ import {
 } from './uploads.test_fixtures';
 
 describe('getAgentUploads', () => {
-  const esClient = {} as ElasticsearchClient;
+  const esClient = {} as any;
 
   beforeAll(async () => {
     appContextService.start(createAppContextStartContractMock());
@@ -32,24 +32,32 @@ describe('getAgentUploads', () => {
   });
 
   it('should return right list of files', async () => {
-    esClient.search = jest.fn().mockImplementation(({ index, query }) => {
-      if (index === AGENT_ACTIONS_INDEX) {
-        return { hits: { hits: AGENT_ACTIONS_FIXTURES } };
-      }
-
-      if (index === AGENT_ACTIONS_RESULTS_INDEX) {
-        return { hits: { hits: AGENT_ACTIONS_RESULTS_FIXTURES } };
-      }
-
-      if (index === FILE_STORAGE_METADATA_AGENT_INDEX) {
-        const actionId = query.bool.filter.bool.must[1].term.action_id as string;
-        if (FILES_METADATA_BY_ACTION_ID[actionId]) {
-          return { hits: { hits: [FILES_METADATA_BY_ACTION_ID[actionId]] } };
-        } else {
-          return { hits: { hits: [] } };
+    esClient.esql = {
+      query: jest.fn().mockImplementation(({ query }) => {
+        if (query.includes(`${AGENT_ACTIONS_INDEX} `)) {
+          return { values: AGENT_ACTIONS_FIXTURES.map((hit) => [hit._source]) };
         }
-      }
-    });
+        if (query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
+          return { values: AGENT_ACTIONS_RESULTS_FIXTURES.map((hit) => [hit._source]) };
+        }
+        if (query.includes(FILE_STORAGE_METADATA_AGENT_INDEX)) {
+          const actionId = query.match(/action_id == "([^"]+)"/)[1];
+          if (FILES_METADATA_BY_ACTION_ID[actionId]) {
+            return {
+              values: [
+                [
+                  FILES_METADATA_BY_ACTION_ID[actionId]._id,
+                  FILES_METADATA_BY_ACTION_ID[actionId]._source,
+                ],
+              ],
+            };
+          } else {
+            return { values: [] };
+          }
+        }
+        throw new Error('Unknown index');
+      }),
+    };
 
     const response = await getAgentUploads(esClient, 'agent-1');
     expect(response.length).toBe(7);
