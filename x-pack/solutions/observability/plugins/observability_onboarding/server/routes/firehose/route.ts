@@ -126,7 +126,7 @@ const hasFirehoseDataRoute = createObservabilityOnboardingServerRoute({
           bool: {
             should: [
               ...wildcardQuery('aws.kinesis.name', streamName),
-              ...wildcardQuery('aws.firehose.name', streamName),
+              ...wildcardQuery('aws.firehose.arn', streamName),
               ...wildcardQuery('aws.exporter.arn', stackName),
             ],
           },
