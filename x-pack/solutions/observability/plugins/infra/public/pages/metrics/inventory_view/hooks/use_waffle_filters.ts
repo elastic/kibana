@@ -44,6 +44,9 @@ export const useWaffleFilters = () => {
       query: { queryString: queryStringService },
     },
   } = services;
+  const {
+    inventoryPrefill: { setPartial },
+  } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
@@ -86,8 +89,8 @@ export const useWaffleFilters = () => {
   );
 
   useEffect(() => {
-    inventoryPrefill.setKuery(urlState.query);
-  }, [inventoryPrefill, urlState.query]);
+    setPartial({ kuery: urlState.query });
+  }, [setPartial, urlState.query]);
 
   return {
     filterQuery: urlState,

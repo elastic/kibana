@@ -101,6 +101,9 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 
 export const useWaffleOptions = () => {
   const { currentView } = useInventoryViewsContext();
+  const {
+    inventoryPrefill: { setPartial },
+  } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
@@ -197,17 +200,24 @@ export const useWaffleOptions = () => {
     [setUrlState]
   );
 
-  const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
-    const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
-    setNodeType(urlState.nodeType);
-    setMetric(urlState.metric);
-    setCustomMetrics(urlState.customMetrics);
-    // only shows for AWS when there are accounts info
-    setAccountId(urlState.accountId);
-    // only shows for AWS when there are regions info
-    setRegion(urlState.region);
-  }, [urlState, inventoryPrefill]);
+    setPartial({
+      nodeType: urlState.nodeType,
+      metric: urlState.metric,
+      customMetrics: urlState.customMetrics,
+      accountId: urlState.accountId,
+      region: urlState.region,
+      schema: urlState.preferredSchema,
+    });
+  }, [
+    setPartial,
+    urlState.accountId,
+    urlState.customMetrics,
+    urlState.metric,
+    urlState.nodeType,
+    urlState.preferredSchema,
+    urlState.region,
+  ]);
 
   const changeTimelineOpen = useCallback(
     (timelineOpen: boolean) => setUrlState((previous) => ({ ...previous, timelineOpen })),
