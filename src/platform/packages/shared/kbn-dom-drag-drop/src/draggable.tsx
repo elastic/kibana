@@ -9,8 +9,10 @@
 
 import React, { useContext, useCallback, useEffect, memo, useMemo } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
-import { keys, EuiScreenReaderOnly } from '@elastic/eui';
+import { keys, EuiScreenReaderOnly, euiFocusRing, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   DragDropIdentifier,
   DropIdentifier,
@@ -21,6 +23,7 @@ import {
   useDragDropContext,
 } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';
+import { domDragAndDrop } from './shared_styles';
 import './sass/draggable.scss';
 
 type DragEvent = React.DragEvent<HTMLElement>;
@@ -161,6 +164,8 @@ const DraggableImpl = memo(function DraggableImpl({
   extraKeyboardHandler,
   ariaDescribedBy,
 }: DraggableImplProps) {
+  const styles = useMemoCss(componentStyles);
+
   const { keyboardMode, hoveredDropTarget, dropTargetsByOrder } = draggedItemProps || {};
 
   const setTarget = useCallback(
@@ -397,6 +402,7 @@ const DraggableImpl = memo(function DraggableImpl({
           'domDraggable_dragover_keyboard--copy':
             keyboardMode && draggedItemProps && hoveredDropTarget,
         })}
+        css={styles.domDraggable}
         data-test-subj={
           dataTestSubj || `${dataTestSubjPrefix}_domDraggable_${value.humanData.label}`
         }
@@ -548,3 +554,27 @@ const ReorderableDraggableImpl = memo(function ReorderableDraggableImpl(
     </div>
   );
 });
+
+const componentStyles = {
+  domDraggable: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css([
+      domDragAndDrop(themeContext),
+      {
+        cursor: 'grab',
+
+        '& .kbnFieldButton__button, & .euiLink': {
+          cursor: 'grab',
+        },
+
+        '&:hover': {
+          transform: `translateX(${euiTheme.size.xs})`,
+          transition: `transform ${euiTheme.animation.slow} ease-out`,
+        },
+
+        '&:focus': euiFocusRing(themeContext),
+      },
+    ]);
+  },
+};
