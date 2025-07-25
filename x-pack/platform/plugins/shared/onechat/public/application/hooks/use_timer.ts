@@ -17,21 +17,22 @@ export const useTimer = ({
   | { showTimer: false; elapsedTime: undefined; isStopped: undefined }
   | { showTimer: true; elapsedTime: number; isStopped: boolean } => {
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [hasStarted, setHasStarted] = useState(false);
+  const hasStartedRef = useRef(false);
   const [isStopped, setIsStopped] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isLoading) {
-      setHasStarted(true);
+      setElapsedTime(0);
+      hasStartedRef.current = true;
       setIsStopped(false);
-      intervalRef.current = setInterval(() => {
+      intervalRef.current ??= setInterval(() => {
         setElapsedTime((prev) => prev + 1);
       }, 1000);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
-      if (hasStarted) {
+      if (hasStartedRef.current) {
         setIsStopped(true);
       }
     }
@@ -41,9 +42,9 @@ export const useTimer = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isLoading, hasStarted]);
+  }, [isLoading]);
 
-  if (!hasStarted) {
+  if (!hasStartedRef.current) {
     return { showTimer: false, elapsedTime: undefined, isStopped: undefined };
   }
 
