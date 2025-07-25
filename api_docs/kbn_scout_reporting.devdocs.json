@@ -1379,7 +1379,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"jest\" | \"playwright\" | \"ftr\""
+              "\"playwright\" | \"jest\" | \"ftr\""
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,
