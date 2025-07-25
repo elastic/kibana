@@ -15,6 +15,11 @@ For more information about osquery tables, see the [osquery schema documentation
 
 ## Fields [osquery-fields]
 
+::::{tab-set}
+
+:::{tab-item} 9.1+
+{applies_to}`stack: ga 9.1`
+
 **UUID** - keyword, text.text
 
 * *system_extensions.UUID* - Extension unique id
@@ -6599,3 +6604,169 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *azure_instance_metadata.zone* - Availability zone of the VM
 * *ycloud_instance_metadata.zone* - Availability zone of the VM
+
+:::
+
+:::{tab-item} 9.0
+{applies_to}`stack: ga 9.0`
+
+
+4 months ago
+
+[docs] Migrate docs from AsciiDoc to Markdown (#212558)
+* *osquery_extensions.version* - Extension’s version
+* *osquery_info.version* - osquery toolkit version
+* *osquery_packs.version* - Minimum osquery version that this query will run on
+* *package_install_history.version* - Package display version
+* *package_receipts.version* - Installed package version
+* *platform_info.version* - Platform code version
+* *portage_keywords.version* - The version which are affected by the use flags, empty means all
+* *portage_packages.version* - The version which are affected by the use flags, empty means all
+* *portage_use.version* - The version of the installed package
+* *programs.version* - Product version information.
+* *python_packages.version* - Package-supplied version
+* *rpm_packages.version* - Package version
+* *safari_extensions.version* - Extension long version
+* *system_extensions.version* - System extension version
+* *usb_devices.version* - USB Device version number
+* *vscode_extensions.version* - Extension version
+* *windows_crashes.version* - File version info of the crashed process
+
+**video_mode** - keyword, text.text
+
+* *video_info.video_mode* - The current resolution of the display.
+
+**virtual_process** - keyword, number.long
+
+* *processes.virtual_process* - Process is virtual (e.g. System, Registry, vmmem) yes=1, no=0
+
+**visible** - keyword, number.long
+
+* *firefox_addons.visible* - 1 If the addon is shown in browser else 0
+
+**visible_alarm** - keyword, text.text
+
+* *chassis_info.visible_alarm* - If TRUE, the frame is equipped with a visual alarm.
+
+**vm_id** - keyword, text.text
+
+* *azure_instance_metadata.vm_id* - Unique identifier for the VM
+* *azure_instance_tags.vm_id* - Unique identifier for the VM
+
+**vm_scale_set_name** - keyword, text.text
+
+* *azure_instance_metadata.vm_scale_set_name* - VM scale set name
+
+**vm_size** - keyword, text.text
+
+* *azure_instance_metadata.vm_size* - VM size
+
+**voltage** - keyword, number.long
+
+* *battery.voltage* - The battery’s current voltage in mV
+
+**volume_creation** - keyword, text.text
+
+* *prefetch.volume_creation* - Volume creation time.
+
+**volume_id** - keyword, number.long
+
+* *quicklook_cache.volume_id* - Parsed volume ID from fs_id
+
+**volume_serial** - keyword, text.text
+
+* *file.volume_serial* - Volume serial number
+* *prefetch.volume_serial* - Volume serial number.
+
+**volume_size** - keyword, number.long
+
+* *platform_info.volume_size* - (Optional) size of firmware volume
+
+**wall_time** - keyword, number.long
+
+* *osquery_schedule.wall_time* - Total wall time in seconds spent executing (deprecated), hidden=True
+
+**wall_time_ms** - keyword, number.long
+
+* *osquery_schedule.wall_time_ms* - Total wall time in milliseconds spent executing
+
+**warning** - keyword, number.long
+
+* *shadow.warning* - Number of days before password expires to warn user about it
+
+**was_captive_network** - keyword, number.long
+
+* *wifi_networks.was_captive_network* - 1 if this network was previously a captive network, 0 otherwise
+
+**watch_paths** - keyword, text.text
+
+* *launchd.watch_paths* - Key that launches daemon or agent if path is modified
+
+**watcher** - keyword, number.long
+
+* *osquery_info.watcher* - Process (or thread/handle) ID of optional watcher process
+
+**weekday** - keyword, text.text
+
+* *time.weekday* - Current weekday in UTC
+
+**win32_exit_code** - keyword, number.long
+
+* *services.win32_exit_code* - The error code that the service uses to report an error that occurs when it is starting or stopping
+
+**win_timestamp** - keyword, number.long
+
+* *time.win_timestamp* - Timestamp value in 100 nanosecond units
+
+**windows_security_center_service** - keyword, text.text
+
+* *windows_security_center.windows_security_center_service* - The health of the Windows Security Center Service
+
+**wired** - keyword, number.long
+
+* *virtual_memory_info.wired* - Total number of wired down pages.
+
+**wired_size** - keyword, number.long
+
+* *docker_container_processes.wired_size* - Bytes of unpageable memory used by process
+* *processes.wired_size* - Bytes of unpageable memory used by process
+
+**working_directory** - keyword, text.text
+
+* *launchd.working_directory* - Key used to specify a directory to chdir to before launch
+
+**working_disks** - keyword, number.long
+
+* *md_devices.working_disks* - Number of working disks in array
+
+**world** - keyword, number.long
+
+* *portage_packages.world* - If package is in the world file
+
+**writable** - keyword, number.long
+
+* *disk_events.writable* - 1 if writable, 0 if not
+
+**xpath** - keyword, text.text
+
+* *windows_eventlog.xpath* - The custom query to filter events
+
+**year** - keyword, number.long
+
+* *time.year* - Current year in UTC
+
+**zero_fill** - keyword, number.long
+
+* *virtual_memory_info.zero_fill* - Total number of zero filled pages.
+
+**zone** - keyword, text.text
+
+* *azure_instance_metadata.zone* - Availability zone of the VM
+* *ycloud_instance_metadata.zone* - Availability zone of the VM
+Blaming kibana/docs/reference/osquery-exported-fields.md at e01495507333c1eadd5536b374b02232475bb907 · elastic/kibana
+
+
+:::
+
+::::
+
