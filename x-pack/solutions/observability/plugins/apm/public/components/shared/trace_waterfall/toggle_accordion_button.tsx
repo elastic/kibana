@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { asBigNumber } from '../../../../common/utils/formatters';
 
 export const TOGGLE_BUTTON_WIDTH = 20;
@@ -22,12 +22,12 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       alignItems="center"
       justifyContent="center"
       responsive={false}
-      css={{ position: 'relative', display: 'flex', width: `${TOGGLE_BUTTON_WIDTH}px` }}
+      css={{ position: 'relative', width: `${TOGGLE_BUTTON_WIDTH}px` }}
     >
       <EuiFlexItem grow={false}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div
-          onClick={(e: any) => {
+          onClick={(e) => {
             e.stopPropagation();
             onClick();
           }}

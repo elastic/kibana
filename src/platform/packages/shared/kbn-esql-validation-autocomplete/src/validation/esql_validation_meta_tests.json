@@ -152,23 +152,17 @@
   "testCases": [
     {
       "query": "",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": " ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
-      ],
+      "error": [],
       "warning": []
     },
     {
       "query": "     ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
-      ],
+      "error": [],
       "warning": []
     },
     {

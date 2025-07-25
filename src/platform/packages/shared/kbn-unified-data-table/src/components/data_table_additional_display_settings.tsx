@@ -21,15 +21,15 @@ export const RANGE_STEP_SAMPLE_SIZE = 10;
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
   onChangeRowHeight?: (rowHeight: RowHeightSettingsProps['rowHeight']) => void;
-  onChangeRowHeightLines?: (rowHeightLines: number) => void;
+  onChangeRowHeightLines?: (rowHeightLines: number, isValid: boolean) => void;
   headerRowHeight: RowHeightSettingsProps['rowHeight'];
   onChangeHeaderRowHeight?: (headerRowHeight: RowHeightSettingsProps['rowHeight']) => void;
-  onChangeHeaderRowHeightLines?: (headerRowHeightLines: number) => void;
+  onChangeHeaderRowHeightLines?: (headerRowHeightLines: number, isValid: boolean) => void;
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
-  lineCountInput: number;
-  headerLineCountInput: number;
+  lineCountInput: number | undefined;
+  headerLineCountInput: number | undefined;
 }
 
 const defaultOnChangeSampleSize = () => {};
