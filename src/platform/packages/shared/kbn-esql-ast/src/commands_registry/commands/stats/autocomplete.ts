@@ -60,7 +60,7 @@ export async function autocomplete(
     return [];
   }
   const innerText = query.substring(0, cursorPosition);
-  const pos = getPosition(innerText, command);
+  const pos = getPosition(command);
 
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
@@ -121,8 +121,7 @@ export async function autocomplete(
 
     case 'expression_after_assignment': {
       // Find expression root
-      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
-      const assignment = byNode.args[byNode.args.length - 1];
+      const assignment = command.args[command.args.length - 1];
       const rightHandAssignment = isAssignment(assignment)
         ? assignment.args[assignment.args.length - 1]
         : undefined;
@@ -143,9 +142,7 @@ export async function autocomplete(
         location: Location.STATS,
         context,
         callbacks,
-        emptySuggestions: [
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-        ],
+        emptySuggestions: [],
         afterCompleteSuggestions: [
           whereCompleteItem,
           byCompleteItem,
@@ -225,10 +222,7 @@ export async function autocomplete(
         location: Location.STATS,
         context,
         callbacks,
-        emptySuggestions: [
-          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
-        ],
+        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
       });
     }

@@ -109,6 +109,7 @@ describe('STATS Autocomplete', () => {
    * @TODO check
    * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword not /
    * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword, /
+   * | STATS COUNT() * COUNT(), col0 = COUNT() WHERE aws.s3.object.key != aws.s3.object.key /
    */
 
   const suggest = async (query: string) => {
