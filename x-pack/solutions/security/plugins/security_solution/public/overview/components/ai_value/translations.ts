@@ -72,6 +72,10 @@ export const ATTACK_DISCOVERY_COUNT = i18n.translate(
   }
 );
 
+export const EXPORT_REPORT = i18n.translate('xpack.securitySolution.aiValue.exportReport', {
+  defaultMessage: 'Export report',
+});
+
 export const FILTERING_RATE = i18n.translate('xpack.securitySolution.aiValue.filteringRate', {
   defaultMessage: 'Alert filtering rate',
 });

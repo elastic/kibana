@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
-import { METRICS_OVER_TIME } from '../components/ai_value/translations';
+import { ValueReportExporter } from './value_report_exporter';
+import { EXPORT_REPORT, METRICS_OVER_TIME } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
@@ -73,29 +74,41 @@ const AIValueComponent = () => {
   return (
     <>
       <>
-        <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
-          <HeaderPage
-            title={i18n.AI_VALUE_DASHBOARD}
-            subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
-            rightSideItems={[
-              <SuperDatePicker
-                id={InputsModelId.valueReport}
-                showUpdateButton="iconOnly"
-                width="auto"
-                compressed
-              />,
-            ]}
-          />
-          {isSourcererLoading ? (
-            <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-          ) : (
-            <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-              <EuiFlexItem>
-                <AIValueMetrics from={from} to={to} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+        <ValueReportExporter>
+          {(exportPDF) => (
+            <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+              <HeaderPage
+                title={i18n.AI_VALUE_DASHBOARD}
+                subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
+                rightSideItems={[
+                  <SuperDatePicker
+                    id={InputsModelId.valueReport}
+                    showUpdateButton="iconOnly"
+                    width="auto"
+                    compressed
+                  />,
+                  <EuiButtonEmpty
+                    className="exportPdfButton"
+                    iconType="download"
+                    onClick={exportPDF}
+                    size="s"
+                  >
+                    {EXPORT_REPORT}
+                  </EuiButtonEmpty>,
+                ]}
+              />
+              {isSourcererLoading ? (
+                <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
+              ) : (
+                <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+                  <EuiFlexItem>
+                    <AIValueMetrics from={from} to={to} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </SecuritySolutionPageWrapper>
           )}
-        </SecuritySolutionPageWrapper>
+        </ValueReportExporter>
       </>
 
       <SpyRoute pageName={SecurityPageName.aiValue} />
