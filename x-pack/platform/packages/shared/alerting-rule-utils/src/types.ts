@@ -13,5 +13,3 @@ export interface Group {
 export interface FieldsObject {
   [x: string]: any;
 }
-
-export type GroupingObject = Record<string, unknown> | undefined;
