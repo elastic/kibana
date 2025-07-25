@@ -9,20 +9,16 @@
 
 import { EuiHeaderSectionItem } from '@elastic/eui';
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
 import type { ChromeNavControl } from '@kbn/core-chrome-browser';
 import { HeaderExtension } from './header_extension';
 
 interface Props {
-  navControls$: Observable<readonly ChromeNavControl[]>;
+  navControls?: ChromeNavControl[];
   side?: 'left' | 'right';
   append?: JSX.Element | null;
 }
 
-export function HeaderNavControls({ navControls$, append = null }: Props) {
-  const navControls = useObservable(navControls$, []);
-
+export function HeaderNavControls({ navControls, append = null }: Props) {
   if (!navControls || navControls.length === 0) {
     return null;
   }
