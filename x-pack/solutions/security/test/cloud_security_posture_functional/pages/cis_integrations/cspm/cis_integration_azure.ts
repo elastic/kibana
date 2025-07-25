@@ -32,7 +32,8 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
-  describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/229393
+  describe.skip('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_azure']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAzure: typeof pageObjects.cisAddIntegration.cisAzure;
