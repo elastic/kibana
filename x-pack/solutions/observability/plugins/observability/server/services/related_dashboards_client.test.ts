@@ -182,84 +182,12 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },
         {
           id: 'dashboard2',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 2,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-            {
-              matchedBy: { fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 2',
         },
@@ -365,28 +293,6 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'], fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [{ id: 'index1', name: 'indexpattern' }],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: '123',
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },
@@ -459,13 +365,11 @@ describe('RelatedDashboardsClient', () => {
 
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1 });
-
       expect(soClientMock.get).toHaveBeenCalledWith(PANEL_TYPE, PANEL_SO_ID);
-      expect(client.dashboardsById.get('dashboard1')?.attributes.panels[0]).toStrictEqual({
-        panelConfig: { attributes: PANEL_SO_ATTRIBUTES },
-        panelIndex: PANEL_INDEX,
-        type: PANEL_TYPE,
-      });
+      // @ts-ignore next-line
+      expect(client.referencedPanelsSOAttributesByPanelIndex.get(PANEL_INDEX)).toBe(
+        PANEL_SO_ATTRIBUTES
+      );
     });
   });
 
@@ -547,21 +451,6 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       const result = client.getDashboardsByField(['field1']);
       expect(result.dashboards).toEqual([]);
-    });
-  });
-
-  describe('dedupePanels', () => {
-    it('should deduplicate panels by panelIndex', () => {
-      const panels = [
-        { panel: { panelIndex: '1' }, matchedBy: { index: ['index1'] } },
-        { panel: { panelIndex: '1' }, matchedBy: { fields: ['field1'] } },
-      ];
-
-      // @ts-ignore next-line
-      const result = client.dedupePanels(panels as any);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].matchedBy).toEqual({ index: ['index1'], fields: ['field1'] });
     });
   });
 
@@ -839,28 +728,6 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'], fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [{ id: 'index1', name: 'indexpattern' }],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: '123',
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },

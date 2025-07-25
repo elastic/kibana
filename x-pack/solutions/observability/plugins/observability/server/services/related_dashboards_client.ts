@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import { isEmpty, omit } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
@@ -16,7 +15,6 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type {
-  RelevantPanel,
   RelatedDashboard,
   SuggestedDashboard,
   LinkedDashboard,
@@ -34,6 +32,7 @@ type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();
   private alert: AlertData | null = null;
+  private referencedPanelsSOAttributesByPanelIndex = new Map<string, ReferencedPanelAttributes>();
 
   constructor(
     private logger: Logger,
@@ -45,27 +44,35 @@ export class RelatedDashboardsClient {
 
   private getPanelIndicesMap: Record<
     SuggestedDashboardsValidPanelType,
-    (panelAttributes: unknown) => Set<string> | undefined
+    (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panelAttributes: unknown) => {
-      if (this.isLensVizAttributes(panelAttributes)) {
+    lens: (panel: DashboardPanel) => {
+      if (this.isLensVizAttributes(panel.panelConfig.attributes)) {
         return new Set(
-          panelAttributes.references
+          panel.panelConfig.attributes.references
             .filter((r) => r.name.match(`indexpattern`))
             .map((reference) => reference.id)
         );
+      }
+      if (panel.panelIndex) {
+        const referencedPanel = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex);
+        if (referencedPanel) {
+          // TODO: how to extract the panel indices from the referenced panel saved object attributes?
+          return;
+        }
       }
     },
   };
 
   private getPanelFieldsMap: Record<
     SuggestedDashboardsValidPanelType,
-    (panelAttributes: unknown) => Set<string> | undefined
+    (panel: DashboardPanel) => Set<string> | undefined
   > = {
-    lens: (panelAttributes: unknown) => {
-      if (this.isLensVizAttributes(panelAttributes)) {
+    lens: (panel: DashboardPanel) => {
+      if (this.isLensVizAttributes(panel.panelConfig.attributes)) {
         const fields = new Set<string>();
-        const dataSourceLayers = panelAttributes.state.datasourceStates.formBased?.layers || {};
+        const dataSourceLayers =
+          panel.panelConfig.attributes.state.datasourceStates.formBased?.layers || {};
         Object.values(dataSourceLayers).forEach((ds) => {
           const columns = ds.columns;
           Object.values(columns).forEach((col) => {
@@ -79,6 +86,13 @@ export class RelatedDashboardsClient {
           });
         });
         return fields;
+      }
+      if (panel.panelIndex) {
+        const referencedPanel = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex);
+        if (referencedPanel) {
+          // TODO: how to extract the panel fields from the referenced panel saved object attributes?
+          return;
+        }
       }
     },
   };
@@ -135,19 +149,12 @@ export class RelatedDashboardsClient {
       dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
     }
     allSuggestedDashboards.forEach((dashboard) => {
-      const dedupedPanels = this.dedupePanels([
-        ...(relevantDashboardsById.get(dashboard.id)?.relevantPanels || []),
-        ...dashboard.relevantPanels,
-      ]);
-      const relevantPanelCount = dedupedPanels.length;
       relevantDashboardsById.set(dashboard.id, {
         ...dashboard,
         matchedBy: {
           ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
           ...dashboard.matchedBy,
         },
-        relevantPanelCount,
-        relevantPanels: dedupedPanels,
         score: this.getScore(dashboard),
       });
     });
@@ -163,34 +170,30 @@ export class RelatedDashboardsClient {
   }: {
     dashboard: Dashboard;
     panel: DashboardPanel;
-  }): Promise<DashboardPanel> {
+  }): Promise<void> {
+    const { panelIndex, type } = panel;
+    if (!panelIndex) return;
+
     const panelReference = dashboard.references.find(
-      (r) => panel.panelIndex && r.name.includes(panel.panelIndex) && r.type === panel.type
+      (r) => r.name.includes(panelIndex) && r.type === type
     );
 
     // A reference of the panel was not found
     if (!panelReference) {
       this.logger.error(
-        `Reference for panel of type ${panel.type} and panelIndex ${panel.panelIndex} was not found in dashboard with id ${dashboard.id}`
+        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
       );
-      return panel;
+      return;
     }
 
     try {
-      const so = await this.soClient.get<ReferencedPanelAttributes>(panel.type, panelReference.id);
-      return {
-        ...panel,
-        panelConfig: {
-          ...panel.panelConfig,
-          attributes: so.attributes,
-        },
-      };
+      const so = await this.soClient.get<ReferencedPanelAttributes>(type, panelReference.id);
+      this.referencedPanelsSOAttributesByPanelIndex.set(panelIndex, so.attributes);
     } catch (error) {
       // There was an error fetching the referenced saved object
       this.logger.error(
-        `Error fetching panel with type ${panel.type} and id ${panelReference.id}: ${error.message}`
+        `Error fetching panel with type ${type} and id ${panelReference.id}: ${error.message}`
       );
-      return panel;
     }
   }
 
@@ -208,22 +211,18 @@ export class RelatedDashboardsClient {
       result: { hits },
     } = dashboards;
     for (const dashboard of hits) {
-      const panels: DashboardAttributes['panels'] = await Promise.all(
-        dashboard.attributes.panels.map(async (panel) =>
-          isDashboardPanel(panel) &&
-          isEmpty(panel.panelConfig) &&
-          isSuggestedDashboardsValidPanelType(panel.type)
-            ? await this.fetchReferencedPanel({
-                dashboard,
-                panel,
-              })
-            : panel
-        )
+      await Promise.all(
+        dashboard.attributes.panels.map(async (panel) => {
+          if (
+            isDashboardPanel(panel) &&
+            isEmpty(panel.panelConfig) &&
+            isSuggestedDashboardsValidPanelType(panel.type)
+          ) {
+            return this.fetchReferencedPanel({ dashboard, panel });
+          }
+        })
       );
-      this.dashboardsById.set(dashboard.id, {
-        ...dashboard,
-        attributes: { ...dashboard.attributes, panels },
-      });
+      this.dashboardsById.set(dashboard.id, dashboard);
     }
 
     const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
@@ -258,32 +257,11 @@ export class RelatedDashboardsClient {
           description: d.attributes.description,
           tags: d.attributes.tags,
           matchedBy: { index: [index] },
-          relevantPanelCount: matchingPanels.length,
-          relevantPanels: matchingPanels.map((p) => ({
-            panel: {
-              panelIndex: p.panelIndex || uuidv4(),
-              type: p.type,
-              panelConfig: p.panelConfig,
-              title: (p.panelConfig as { title?: string }).title,
-            },
-            matchedBy: { index: [index] },
-          })),
           score: 0, // scores are computed when dashboards are deduplicated
         });
       }
     });
     return { dashboards: relevantDashboards };
-  }
-
-  private dedupePanels(panels: RelevantPanel[]): RelevantPanel[] {
-    const uniquePanels = new Map<string, RelevantPanel>();
-    panels.forEach((p) => {
-      uniquePanels.set(p.panel.panelIndex, {
-        ...p,
-        matchedBy: { ...uniquePanels.get(p.panel.panelIndex)?.matchedBy, ...p.matchedBy },
-      });
-    });
-    return Array.from(uniquePanels.values());
   }
 
   private getDashboardsByField(fields: string[]): {
@@ -309,16 +287,6 @@ export class RelatedDashboardsClient {
           description: d.attributes.description,
           tags: d.attributes.tags,
           matchedBy: { fields: Array.from(allMatchingFields) },
-          relevantPanelCount: matchingPanels.length,
-          relevantPanels: matchingPanels.map((p) => ({
-            panel: {
-              panelIndex: p.panel.panelIndex || uuidv4(),
-              type: p.panel.type,
-              panelConfig: p.panel.panelConfig,
-              title: (p.panel.panelConfig as { title?: string }).title,
-            },
-            matchedBy: { fields: Array.from(p.matchingFields) },
-          })),
           score: 0, // scores are computed when dashboards are deduplicated
         });
       }
@@ -347,14 +315,14 @@ export class RelatedDashboardsClient {
 
   private getPanelIndices(panel: DashboardPanel): Set<string> {
     const indices = isSuggestedDashboardsValidPanelType(panel.type)
-      ? this.getPanelIndicesMap[panel.type](panel.panelConfig.attributes)
+      ? this.getPanelIndicesMap[panel.type](panel)
       : undefined;
     return indices ?? new Set<string>();
   }
 
   private getPanelFields(panel: DashboardPanel): Set<string> {
     const fields = isSuggestedDashboardsValidPanelType(panel.type)
-      ? this.getPanelFieldsMap[panel.type](panel.panelConfig.attributes)
+      ? this.getPanelFieldsMap[panel.type](panel)
       : undefined;
     return fields ?? new Set<string>();
   }
