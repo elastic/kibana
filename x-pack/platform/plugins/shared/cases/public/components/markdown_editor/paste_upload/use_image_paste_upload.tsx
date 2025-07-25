@@ -142,6 +142,7 @@ export function useImagePasteUpload({
       }
 
       if (canUpload(uploadState, caseId)) {
+        dispatch({ type: ActionType.RESET });
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };

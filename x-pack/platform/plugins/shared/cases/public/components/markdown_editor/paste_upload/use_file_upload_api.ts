@@ -11,6 +11,10 @@ import type { Subscription } from 'rxjs';
 import type { FileState, UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { type PasteUploadState, UploadPhase, ActionType, type Action } from './types';
 
+const canUpload = (files: FileState[], uiState: PasteUploadState) => {
+  return files.length && files[0].status !== 'uploaded' && uiState.phase === UploadPhase.IDLE;
+};
+
 export function useFileUploadApi(
   uploadState: UploadState,
   uiState: PasteUploadState,
@@ -19,7 +23,7 @@ export function useFileUploadApi(
   useEffect(() => {
     const subs: Subscription[] = [
       uploadState.files$.subscribe((files: FileState[]) => {
-        if (files.length && files[0].status !== 'uploaded' && uiState.phase === UploadPhase.IDLE) {
+        if (canUpload(files, uiState)) {
           dispatch({
             type: ActionType.START_UPLOAD,
             filename: files[0].file.name,
