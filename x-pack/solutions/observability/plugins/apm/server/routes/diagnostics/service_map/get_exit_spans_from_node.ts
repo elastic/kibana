@@ -7,7 +7,12 @@
 
 import { termQuery, rangeQuery, existsQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_ID, PARENT_ID } from '@kbn/apm-types';
+import {
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_ID,
+  PARENT_ID,
+  SERVICE_NAME,
+} from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
 /**
@@ -144,7 +149,7 @@ export async function getSourceSpanIds({
       span_ids: {
         terms: {
           field: SPAN_ID,
-          size: 100,
+          size: 1000,
         },
       },
     },
@@ -174,14 +179,21 @@ export async function getDestinationParentIds({
       events: [ProcessorEvent.span],
     },
     track_total_hits: false,
-    size: 2,
+    size: 1,
     terminate_after: 1,
     query: {
       bool: {
         filter: [
           ...rangeQuery(start, end),
-          ...termQuery(destinationNode.field, destinationNode.value),
           ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
+          {
+            bool: {
+              should: [
+                ...termQuery(SERVICE_NAME, destinationNode.value),
+                ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, destinationNode.value),
+              ],
+            },
+          },
         ],
       },
     },
