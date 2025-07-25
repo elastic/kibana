@@ -21,19 +21,22 @@ import { fetchSnapshot, takeSnapshot, assertValidUpdates } from '../src/snapshot
  */
 export function checkSavedObjectTypes(gitRev: string) {
   run(async ({ log }) => {
-    const baseline = await fetchSnapshot({ log, gitRev }).catch(() => {
+    const baseline = await fetchSnapshot({ log, gitRev }).catch((err) => {
+      log.error(err);
       log.error('⚠️ Failed to download the baseline snapshot. Skipping Saved Objects checks.');
       exit(1);
     });
 
-    const current = await takeSnapshot({ log }).catch(() => {
+    const current = await takeSnapshot({ log }).catch((err) => {
+      log.error(err);
       log.error(
         '⚠️ Failed to obtain snapshot for current working tree. Skipping Saved Objects checks.'
       );
       exit(1);
     });
 
-    await assertValidUpdates({ log, from: baseline, to: current }).catch(() => {
+    await assertValidUpdates({ log, from: baseline, to: current }).catch((err) => {
+      log.error(err);
       log.error('❌ Found some violations in the current Saved Object definitions.');
       exit(1);
     });
