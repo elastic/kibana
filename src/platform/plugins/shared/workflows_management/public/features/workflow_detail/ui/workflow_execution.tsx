@@ -45,7 +45,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
-  const { data: workflow } = useWorkflowDetail(workflowExecution?.workflowId ?? '');
+  const { data: workflow } = useWorkflowDetail(workflowExecution?.workflowId ?? null);
 
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
