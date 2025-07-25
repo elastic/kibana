@@ -367,6 +367,9 @@ $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 $$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration` {applies_to}`stack: preview 9.0, removed 9.1`
 :   Enables the Profiling view in Host details within Infrastructure.
 
+$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards` {applies_to}`stack: preview 9.0, removed 9.1`
+:   Enables option to link custom dashboards in the Asset Details view.
+
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
 
