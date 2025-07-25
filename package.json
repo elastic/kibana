@@ -107,7 +107,7 @@
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^11.9.1",
+    "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
     "@aws-crypto/sha256-js": "^5.2.0",
