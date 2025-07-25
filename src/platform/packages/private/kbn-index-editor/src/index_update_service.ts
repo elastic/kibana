@@ -138,7 +138,7 @@ export class IndexUpdateService {
         case 'edit-column':
           // if a column name has changed, we need to update the values added with the previous name.
           return acc.map((docUpdate) => {
-            if (docUpdate.value[action.payload.previousName]) {
+            if (action.payload.previousName && docUpdate.value[action.payload.previousName]) {
               const newValue = {
                 ...docUpdate.value,
                 [action.payload.name]: docUpdate.value[action.payload.previousName],
