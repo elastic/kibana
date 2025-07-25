@@ -61,7 +61,13 @@ export const createTreeNodesFromPipelines = (
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      createTreeNodesFromPipelines(node, selectedPipeline, clickTreeNode, clickMorePipelines,level + 1)
+      createTreeNodesFromPipelines(
+        node,
+        selectedPipeline,
+        clickTreeNode,
+        clickMorePipelines,
+        level + 1
+      )
     );
   });
   return currentNode;

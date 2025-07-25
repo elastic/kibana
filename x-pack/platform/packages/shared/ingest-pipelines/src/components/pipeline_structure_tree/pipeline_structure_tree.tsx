@@ -47,7 +47,7 @@ export const PipelineStructureTree = React.memo(
       pipelineTree,
       selectedPipeline,
       clickTreeNode,
-      clickMorePipelines,
+      clickMorePipelines
     );
 
     return (
