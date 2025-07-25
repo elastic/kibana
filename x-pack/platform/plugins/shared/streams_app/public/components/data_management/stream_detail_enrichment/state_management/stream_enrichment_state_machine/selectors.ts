@@ -8,12 +8,17 @@
 import { createSelector } from 'reselect';
 import { StreamEnrichmentContextType } from './types';
 import { StreamEnrichmentActorSnapshot } from './stream_enrichment_state_machine';
+import { isProcessorUnderEdit } from '../processor_state_machine';
 
 /**
  * Selects the processor marked as the draft processor.
  */
 export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
-  const draft = context.processorsRefs.find((p) => p.getSnapshot().matches('draft'));
+  const draft = context.processorsRefs.find((processorRef) => {
+    const snapshot = processorRef.getSnapshot();
+    return isProcessorUnderEdit(snapshot) && snapshot.context.isNew;
+  });
+
   const snapshot = draft?.getSnapshot();
   return {
     processor: snapshot?.context.processor,
