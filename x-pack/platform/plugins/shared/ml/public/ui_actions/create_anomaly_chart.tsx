@@ -16,6 +16,7 @@ import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app'
 import type { AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
+import { EmbeddableAnomalyChartsUserInput } from '../embeddables/anomaly_charts/anomaly_charts_setup_flyout';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
@@ -70,9 +71,6 @@ export function createAddAnomalyChartsPanelAction(
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
-          const { EmbeddableAnomalyChartsUserInput } = await import(
-            '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
-          );
           return (
             <EmbeddableAnomalyChartsUserInput
               coreStart={coreStart}

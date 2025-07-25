@@ -38,6 +38,7 @@ import {
 import { LazyAnomalyChartsContainer } from './lazy_anomaly_charts_container';
 import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
+import { EmbeddableAnomalyChartsUserInput } from './anomaly_charts_setup_flyout';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -116,9 +117,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
-              const { EmbeddableAnomalyChartsUserInput } = await import(
-                './anomaly_charts_setup_flyout'
-              );
               return (
                 <EmbeddableAnomalyChartsUserInput
                   coreStart={coreStartServices}
