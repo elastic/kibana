@@ -67,7 +67,7 @@ export const monitoringEntitySourceRoute = (
           const body = await client.init(request.body);
 
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          privMonDataClient.scheduleNow();
+          await privMonDataClient.scheduleNow();
 
           return response.ok({ body });
         } catch (e) {
@@ -148,7 +148,7 @@ export const monitoringEntitySourceRoute = (
           const body = await client.update({ ...request.body, id: request.params.id });
 
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          privMonDataClient.scheduleNow();
+          await privMonDataClient.scheduleNow();
 
           return response.ok({ body });
         } catch (e) {
