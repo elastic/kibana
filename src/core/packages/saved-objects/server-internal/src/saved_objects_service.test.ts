@@ -815,28 +815,25 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getUnsafeInternalClient, createInternalRepository } = await soService.start(
-          createStartDeps()
-        );
+        const startContract = await soService.start(createStartDeps());
 
-        const createInternalRespositorySpy = jest.spyOn(
-          { createInternalRepository },
-          'createInternalRepository'
-        );
         const includedHiddenTypes = ['hidden-type-1', 'hidden-type-2'];
 
         // Test that the method accepts the parameter without throwing
-        expect(() => getUnsafeInternalClient({ includedHiddenTypes })).not.toThrow();
-        const client = getUnsafeInternalClient({ includedHiddenTypes });
+        expect(() => startContract.getUnsafeInternalClient({ includedHiddenTypes })).not.toThrow();
+        const client = startContract.getUnsafeInternalClient({ includedHiddenTypes });
         expect(client).toBeInstanceOf(SavedObjectsClient);
-        expect(createInternalRespositorySpy).toHaveBeenCalledWith(includedHiddenTypes);
+
+        // Verify that SavedObjectsRepository.createRepository was called with the correct includedHiddenTypes
+        const calls = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [, , , , , lastCallIncludedHiddenTypes] = calls[calls.length - 1];
+        expect(lastCallIncludedHiddenTypes).toEqual(includedHiddenTypes);
       });
 
       it('passes excludedExtensions to getInternalExtensions', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
 
-        // Spy on the private getInternalExtensions method
         const getInternalExtensionsSpy = jest.spyOn(soService as any, 'getInternalExtensions');
 
         await soService.setup(createSetupDeps());
@@ -852,23 +849,18 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getUnsafeInternalClient, createInternalRepository, createScopedRepository } =
-          await soService.start(createStartDeps());
+        const startContract = await soService.start(createStartDeps());
 
-        const createInternalRepositorySpy = jest.spyOn(
-          { createInternalRepository },
-          'createInternalRepository'
-        );
-        const createScopedRepositorySpy = jest.spyOn(
-          { createScopedRepository },
-          'createScopedRepository'
-        );
+        (SavedObjectsRepository.createRepository as jest.Mock).mockClear();
 
-        const client = getUnsafeInternalClient();
+        const client = startContract.getUnsafeInternalClient();
         expect(client).toBeInstanceOf(SavedObjectsClient);
 
-        expect(createInternalRepositorySpy).toHaveBeenCalledWith(undefined, expect.any(Object));
-        expect(createScopedRepositorySpy).not.toHaveBeenCalled();
+        expect(SavedObjectsRepository.createRepository).toHaveBeenCalledTimes(1);
+        const [[, , , esClient]] = (SavedObjectsRepository.createRepository as jest.Mocked<any>)
+          .mock.calls;
+
+        expect(esClient).toBeDefined();
       });
 
       it('handles invalid options gracefully', async () => {
@@ -985,7 +977,7 @@ describe('SavedObjectsService', () => {
         setup.setSpacesExtension(spacesFactory);
 
         await soService.start(createStartDeps());
-        const excludedExtensions = ['encryptionExtension'];
+        const excludedExtensions = ['encryptedSavedObjects'];
 
         const extensions = (soService as any).getInternalExtensions(excludedExtensions);
 
