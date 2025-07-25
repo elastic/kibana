@@ -28,7 +28,7 @@ import { startServers, stopServers } from '../servers';
 export async function takeSnapshot({ log }: { log: ToolingLog }): Promise<MigrationSnapshot> {
   let serverHandles: ServerHandles | undefined;
   try {
-    log.debug('Starting servers');
+    log.info(`Starting ES + Kibana to capture current SO type definitions`);
     serverHandles = await startServers();
     const { coreStart } = serverHandles;
     const typeRegistry = coreStart.savedObjects.getTypeRegistry();

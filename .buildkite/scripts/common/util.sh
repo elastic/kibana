@@ -140,6 +140,26 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
+set_serverless_release_sha() {
+  GITHUB_SERVERLESS_RELEASE_SHA="$(buildkite-agent meta-data get current-serverless-release-sha --default '')"
+
+  if [[ ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
+    GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
+    if [$? -ne 0]; then
+      echo "Failed to obtain current serverless release SHA."
+      return 1
+    fi
+    GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse GITHUB_SERVERLESS_RELEASE_REV)"
+    if [$? -ne 0]; then
+      echo "Failed to expand current serverless release SHA (may be an emergency release branch?)."
+      return 1
+    fi
+    buildkite-agent meta-data set current-serverless-release-sha "$GITHUB_SERVERLESS_RELEASE_SHA"
+  fi
+
+  export GITHUB_SERVERLESS_RELEASE_SHA
+}
+
 # If npm install is terminated early, e.g. because the build was cancelled in buildkite,
 # a package directory is left behind in a bad state that can cause all subsequent installs to fail
 # So this function contains some cleanup/retry logic to try to recover from this kind of situation

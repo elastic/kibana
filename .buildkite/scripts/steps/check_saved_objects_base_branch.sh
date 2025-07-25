@@ -6,5 +6,5 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-echo --- Check Saved Object types
+echo "Check Saved Object types (base branch)"
 node scripts/check_saved_object_types $GITHUB_PR_MERGE_BASE

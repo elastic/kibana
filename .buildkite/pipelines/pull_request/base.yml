@@ -101,17 +101,23 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_saved_objects.sh
-    label: 'Check Saved Object types'
+  - command: .buildkite/scripts/steps/check_saved_objects_serverless.sh
+    label: 'Check Saved Object types (serverless)'
     agents:
       machineType: n2-standard-2
       preemptible: true
       diskSizeGb: 85
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
+    timeout_in_minutes: 10
+    soft_fail: true
+
+  - command: .buildkite/scripts/steps/check_saved_objects_base_branch.sh
+    label: 'Check Saved Object types (base branch)'
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+      diskSizeGb: 85
+    timeout_in_minutes: 10
+    soft_fail: true
 
   - wait
 
