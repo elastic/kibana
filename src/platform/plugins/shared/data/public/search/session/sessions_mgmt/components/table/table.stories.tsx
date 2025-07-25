@@ -199,6 +199,7 @@ export const FilteredActions = {
           searchUsageCollector,
           kibanaVersion,
         }: GetColumnsParams) => [
+          columns.appIdColumn,
           columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
           columns.statusColumn('BROWSER'),
           columns.actionsColumn({
@@ -207,6 +208,66 @@ export const FilteredActions = {
             onActionComplete,
             allowedActions: ['inspect', 'delete'],
           }),
+        ],
+      }}
+    />
+  ),
+};
+
+export const NoAppFilter = {
+  name: 'No app filter',
+  render: () => (
+    <Component
+      props={{
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+          columns.statusColumn('BROWSER'),
+        ],
+      }}
+    />
+  ),
+};
+
+export const NoStatusFilter = {
+  name: 'No status filter',
+  render: () => (
+    <Component
+      props={{
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.appIdColumn,
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        ],
+      }}
+    />
+  ),
+};
+
+export const NoFilters = {
+  name: 'No filters',
+  render: () => (
+    <Component
+      props={{
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
+        ],
+      }}
+    />
+  ),
+};
+
+export const NoRefreshButton = {
+  name: 'No refresh button',
+  render: () => <Component props={{ hideRefreshButton: true }} />,
+};
+
+export const NoFiltersAndRefreshButton = {
+  name: 'No filters and refresh button',
+  render: () => (
+    <Component
+      props={{
+        hideRefreshButton: true,
+        getColumns: ({ core, searchUsageCollector, kibanaVersion }: GetColumnsParams) => [
+          columns.nameColumn({ core, searchUsageCollector, kibanaVersion }),
         ],
       }}
     />

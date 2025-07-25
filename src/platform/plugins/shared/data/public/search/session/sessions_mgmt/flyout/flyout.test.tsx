@@ -75,10 +75,25 @@ describe('<Flyout />', () => {
     expect(screen.getByTestId('searchSessionsMgmtUiTable')).toBeVisible();
   });
 
-  describe('when the close button is clicked', () => {
+  it('renders the expected columns', () => {
+    setup();
+    expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
+  });
+
+  describe('when the header close button is clicked', () => {
     it('calls the onClose callback', async () => {
       const { onClose, user } = setup();
       const closeButton = screen.getByLabelText('Close this dialog');
+      await user.click(closeButton);
+      expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('when the footer close button is clicked', () => {
+    it('calls the onClose callback', async () => {
+      const { onClose, user } = setup();
+      const closeButton = screen.getByText('Close');
       await user.click(closeButton);
       expect(onClose).toHaveBeenCalled();
     });

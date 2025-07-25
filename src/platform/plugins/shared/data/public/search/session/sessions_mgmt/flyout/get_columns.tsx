@@ -16,14 +16,15 @@ export const getColumns: GetColumnsFn = ({
   kibanaVersion,
   searchUsageCollector,
   api,
+  timezone,
   onActionComplete,
 }) => [
-  columns.appIdColumn,
   columns.nameColumn({
     core,
     kibanaVersion,
     searchUsageCollector,
   }),
+  columns.statusColumn(timezone),
   columns.actionsColumn({
     core,
     api,

@@ -8,8 +8,10 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   useGeneratedHtmlId,
@@ -44,10 +46,12 @@ export const Flyout = ({
   const flyoutId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout aria-labelledby={flyoutId} onClose={onClose}>
+    <EuiFlyout size="s" aria-labelledby={flyoutId} onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle id={flyoutId} size="s">
-          <FormattedMessage id="data.session_mgmt.flyout" defaultMessage="Background searches" />
+        <EuiTitle id={flyoutId} size="m">
+          <h1>
+            <FormattedMessage id="data.session_mgmt.flyout" defaultMessage="Background searches" />
+          </h1>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -59,9 +63,15 @@ export const Flyout = ({
           kibanaVersion={kibanaVersion}
           searchUsageCollector={usageCollector}
           locators={locators}
+          hideRefreshButton
           getColumns={getColumns}
         />
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty onClick={onClose}>
+          <FormattedMessage id="data.session_mgmt.close_flyout" defaultMessage="Close" />
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
