@@ -151,7 +151,7 @@ $$$action-config-email-domain-allowlist$$$
 
     Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
-`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     ::::{warning}
@@ -161,7 +161,7 @@ $$$action-config-email-domain-allowlist$$$
     Data type: `string`
     Default: `email-smtp.us-east-1.amazonaws.com`
 
-`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
 :   The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     Data type: `int`
