@@ -2848,10 +2848,10 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-9.7.0.tgz#1cf1fecfcad5e2da2332140bf3b5f23cc1c2a7f4"
   integrity sha512-aozo5vqjCmDoXLNUJarFZx2IN/GgGaogY4TMJ6so/WLZOWpSV7fvj2dmrV6sEAnUm1O7aCrhTibjpzeDFgNqbg==
 
-"@fast-check/jest@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.0.tgz#67585ede285267dc9efc3ac3e05c41879887980a"
-  integrity sha512-9ZVvFnngR0EpfxWoGrq/e9ERrDv3qqE4RXVnn/mGv5Rn33LoDcIfg7xjqVREsyhGcwegEKeL0KJlrWzWiOBV8A==
+"@fast-check/jest@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.1.tgz#0c0959f8f37f4155c5de7a19888c398542240be9"
+  integrity sha512-t9m3u3tikj/+Ph+gRLGb7fFS/aqnIafsAc6qhXIFJytkqOFRSF70Y5yUUyTtR0idcb6Ald7AnC0AChLCLxv2Tg==
   dependencies:
     fast-check "^3.0.0 || ^4.0.0"
 
