@@ -83,6 +83,7 @@ export interface ISearchStart {
    */
   sessionsClient: ISessionsClient;
   renderBackgroundSearchButton: any;
+  renderToolbarBackgroundSearchButton: any;
 }
 
 /** @internal */

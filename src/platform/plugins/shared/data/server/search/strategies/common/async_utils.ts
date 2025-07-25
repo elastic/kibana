@@ -12,6 +12,7 @@ import {
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
+import { BACKGROUND_SEARCH_ENABLED } from '../../../../common/constants';
 import { SearchConfigSchema } from '../../../config';
 
 /**
@@ -41,10 +42,10 @@ export function getCommonDefaultAsyncSubmitParams(
     // Wait up to the timeout for the response to return
     wait_for_completion_timeout: `${config.asyncSearch.waitForCompletion.asMilliseconds()}ms`,
     // If search sessions are used, store and get an async ID even for short running requests.
-    keep_on_completion: useSearchSessions,
+    keep_on_completion: BACKGROUND_SEARCH_ENABLED ? undefined : useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
     // just for debugging purposes!
-    keep_alive: `60m`,
+    keep_alive: BACKGROUND_SEARCH_ENABLED ? `60m` : keepAlive,
   };
 }
 

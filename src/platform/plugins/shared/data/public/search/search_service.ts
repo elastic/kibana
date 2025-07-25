@@ -78,6 +78,7 @@ import {
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import { createConnectedBackgroundSessionButton } from './session/button/search_session_indicator/connected_background_search_button';
 import { ISearchSetup, ISearchStart } from './types';
+import { BACKGROUND_SEARCH_ENABLED } from '../../common/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -299,6 +300,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const config = this.initializerContext.config.get();
     let renderBackgroundSearchButton;
+    let toolbarBackgroundSearchButton;
+    let onSendToBackgroundFn = () => Promise.resolve();
     if (config.search.sessions.enabled) {
       const searchsessionBtnProps = {
         sessionService: this.sessionService,
@@ -311,15 +314,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         onOpenFlyout: () => {
           this.openBackgroundSearchFlyout()();
         },
+        onSendToBackground: () => onSendToBackgroundFn(),
       };
       renderBackgroundSearchButton = createConnectedBackgroundSessionButton(searchsessionBtnProps);
 
-      chrome.setBreadcrumbsAppendExtension({
-        content: toMountPoint(
-          React.createElement(createConnectedSearchSessionIndicator(searchsessionBtnProps)),
-          startServices
-        ),
-      });
+      if (!BACKGROUND_SEARCH_ENABLED) {
+        chrome.setBreadcrumbsAppendExtension({
+          content: toMountPoint(
+            React.createElement(createConnectedSearchSessionIndicator(searchsessionBtnProps)),
+            startServices
+          ),
+        });
+      } else {
+        toolbarBackgroundSearchButton =
+          createConnectedSearchSessionIndicator(searchsessionBtnProps);
+      }
     }
 
     return {
@@ -328,8 +337,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
-      renderBackgroundSearchButton: () => {
+      renderBackgroundSearchButton: ({ onSendToBackground }: { onSendToBackground: any }) => {
+        onSendToBackgroundFn = onSendToBackground;
         return renderBackgroundSearchButton();
+      },
+      renderToolbarBackgroundSearchButton: () => {
+        return toolbarBackgroundSearchButton();
       },
       showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {

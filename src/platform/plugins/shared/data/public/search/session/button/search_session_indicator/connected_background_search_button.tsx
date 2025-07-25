@@ -63,6 +63,8 @@ export const createConnectedBackgroundSessionButton = ({
   sessionService,
   basePath,
   onOpenFlyout,
+  onSendToBackground,
+  coreStart,
 }: SearchSessionIndicatorDeps): React.FC => {
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
@@ -121,10 +123,21 @@ export const createConnectedBackgroundSessionButton = ({
       await sessionService.renameCurrentSession(newName);
     }, []);
 
+    const onSaveResults = useCallback(() => {
+      const onSaveResultsAsync = async () => {
+        if (saveDisabled) return;
+        await sessionService.save();
+        await onSendToBackground();
+        coreStart.notifications.toasts.addSuccess('Search sent to background');
+      };
+      return onSaveResultsAsync();
+    }, [saveDisabled]);
+
     if (!sessionService.isSessionStorageReady()) return null;
     return (
       <SearchSessionIndicator
         state={state}
+        onSaveResults={onSaveResults}
         saveDisabled={saveDisabled}
         saveDisabledReasonText={saveDisabledReasonText}
         managementDisabled={managementDisabled}
