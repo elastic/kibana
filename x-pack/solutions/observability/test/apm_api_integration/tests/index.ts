@@ -32,6 +32,7 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   // Failing: See https://github.com/elastic/kibana/issues/176948
   // Failing: See https://github.com/elastic/kibana/issues/228131
   // Failing: See https://github.com/elastic/kibana/issues/228130
+  // Failing: See https://github.com/elastic/kibana/issues/228130
   describe.skip('APM API tests', function () {
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
