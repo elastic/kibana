@@ -140,6 +140,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                 )}
               >
                 <EuiSelect
+                  isInvalid={retentionPolicyField.errorMessages.length > 0}
                   aria-label={i18n.translate(
                     'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel',
                     {

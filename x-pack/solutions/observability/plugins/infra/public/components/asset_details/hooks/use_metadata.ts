@@ -13,8 +13,8 @@ import { InfraMetadataRT } from '../../../../common/http_api/metadata_api';
 import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
 
 interface UseMetadataProps {
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   requiredMetrics?: InventoryMetric[];
   sourceId: string;
   timeRange: {
@@ -24,8 +24,8 @@ interface UseMetadataProps {
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>;
 }
 export function useMetadata({
-  assetId,
-  assetType,
+  entityId,
+  entityType,
   sourceId,
   timeRange,
   requiredMetrics = [],
@@ -36,15 +36,15 @@ export function useMetadata({
       const response = await callApi('/api/infra/metadata', {
         method: 'POST',
         body: JSON.stringify({
-          nodeId: assetId,
-          nodeType: assetType,
+          nodeId: entityId,
+          nodeType: entityType,
           sourceId,
           timeRange,
         }),
       });
       return decodeOrThrow(InfraMetadataRT)(response);
     },
-    [assetId, assetType, sourceId, timeRange],
+    [entityId, entityType, sourceId, timeRange],
     {
       requestObservable$: request$,
     }

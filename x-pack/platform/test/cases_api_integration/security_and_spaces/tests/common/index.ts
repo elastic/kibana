@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Common', function () {
     /**
@@ -69,5 +68,12 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
+
+    /**
+     * Cases analytics
+     */
+    loadTestFile(require.resolve('./cases/analytics_index/creation'));
+    loadTestFile(require.resolve('./cases/analytics_index/backfill'));
+    loadTestFile(require.resolve('./cases/analytics_index/synchronization'));
   });
 };

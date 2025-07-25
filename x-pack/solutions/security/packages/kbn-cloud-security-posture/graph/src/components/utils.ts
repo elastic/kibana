@@ -14,6 +14,9 @@ export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'diamond' ||
   node.shape === 'hexagon';
 
+export const isStackedLabel = (node: NodeViewModel): boolean =>
+  !(node.shape === 'label' && Boolean(node.parentId));
+
 /**
  * Returns the node document mode, or 'na' if documentsData is missing or empty.
  * When this function returns a value other than 'na', documentsData is guaranteed to be a non-empty array.

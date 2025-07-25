@@ -88,7 +88,7 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   }
 
   return (
-    <EuiToolTip content={BUTTON_ICON_LABEL}>
+    <EuiToolTip content={BUTTON_ICON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={BUTTON_ICON_LABEL}
         iconType="timeline"

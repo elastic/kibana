@@ -124,8 +124,9 @@ describe('UnifiedFieldListItem', function () {
       selected: true,
       field,
     });
-    const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
-    expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+
+    const fieldInfoIcon = findTestSubject(comp, 'kbnFieldButton_fieldInfoIcon');
+    expect(fieldInfoIcon.exists()).toBe(true);
   });
   it('should not enable the popover if onAddFilter is not provided', async function () {
     const field = new DataViewField({

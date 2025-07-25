@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
-import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize } from 'lodash';
 import {
   SEMRESATTRS_PROJECT_NAME,
@@ -61,7 +61,7 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
     };
   }
 
-  processInferenceSpan(span: ReadableSpan): ReadableSpan {
+  processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
     const operationName = span.attributes[GenAISemanticConventions.GenAIOperationName];
     span.resource.attributes[SEMRESATTRS_PROJECT_NAME] = this.config.project_name ?? 'default';
     span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] =

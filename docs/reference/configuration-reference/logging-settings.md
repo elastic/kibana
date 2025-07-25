@@ -1,7 +1,7 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/logging-settings.html
-  - https://github.com/elastic/cloud/blob/master/docs/cloud-enterprise/ce-kibana-logging-settings.asciidoc
+  - https://www.elastic.co/guide/en/cloud-enterprise/current/ece-kibana-logging-settings.html
 applies_to:
   deployment:
     self: all
@@ -52,29 +52,4 @@ The following table serves as a quick reference for different logging configurat
 | `logging.loggers[].<logger>.appenders` | Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the `root` logger if not specified. |
 | $$$enable-http-debug-logs$$$ `deprecation.enable_http_debug_logs` | Optional boolean to log debug messages when a deprecated API is called. Default is `false`. |
 
-## Logging and audit settings [logging-and-audit-settings]
-
-To update these settings, refer to [APM settings](/reference/configuration-reference/apm-settings.md).
-
-
-`logging.verbose`
-:   If set to _true_, all events are logged, including system usage information and all requests. Defaults to _false_.
-
-`logging.quiet`
-:   If set to _true_, all logging output other than error messages is suppressed. Defaults to _false_.
-
-`elasticsearch.logQueries`
-:   When set to _true_, queries sent to Elasticsearch are logged (requires `logging.verbose` set to _true_). Defaults to _false_.
-
-`xpack.security.audit.enabled`
-:   When set to _true_, audit logging is enabled for security events. Defaults to _false_.
-
-`xpack.security.audit.appender.type`
-:   When set to _"rolling-file"_ and `xpack.security.audit.enabled` is set to _true_, Kibana ECS audit logs are enabled.
-Beginning with version 8.0, this setting is no longer necessary for ECS audit log output; it's only necessary to set `xpack.security.audit.enabled` to `true`
-
-`xpack.security.audit.ignore_filters`
-:   List of filters that determine which audit events should be excluded from the ECS audit log.
-
-`xpack.security.audit.appender.kind`
-:   When set to _"rolling-file"_ and `xpack.security.audit.enabled` is set to _true_, Kibana ECS audit logs are enabled.
+For details on audit logging settings, refer to the [{{kib}} security settings](./security-settings.md#audit-logging-settings).

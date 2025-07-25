@@ -160,7 +160,7 @@ function FieldListItemComponent(
       <EuiFlexGroup gutterSize="s" css={styles.actions}>
         {canHaveMultiFields && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={addMultiFieldButtonLabel}>
+            <EuiToolTip content={addMultiFieldButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="documents"
                 onClick={addField}
@@ -173,7 +173,7 @@ function FieldListItemComponent(
 
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={addPropertyButtonLabel}>
+            <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 onClick={addField}
@@ -185,7 +185,7 @@ function FieldListItemComponent(
         )}
 
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={editButtonLabel}>
+          <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="pencil"
               onClick={editField}
@@ -198,7 +198,7 @@ function FieldListItemComponent(
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {(deleteField) => (
-              <EuiToolTip content={deleteButtonLabel}>
+              <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"

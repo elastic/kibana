@@ -10,6 +10,7 @@ import type { DependencyList } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { HttpFetchOptions, HttpSetup } from '@kbn/core-http-browser';
 import type { BehaviorSubject } from 'rxjs';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { InfraHttpError } from '../types';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useReloadRequestTimeContext } from './use_reload_request_time';
@@ -95,8 +96,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
   options: FetcherOptions = {}
 ): FetcherResult<InferApiCallReturnType<Fn>> & { refetch: () => void } {
   const {
-    notifications,
-    services: { http },
+    services: { http, notifications, rendering },
   } = useKibanaContextForPlugin();
   const {
     autoFetch = true,
@@ -159,12 +159,12 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
           : err.body?.message ?? err.message;
 
         if (showToastOnError) {
-          notifications.toasts.danger({
+          notifications.toasts.addDanger({
             toastLifeTimeMs: 3000,
             title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
               defaultMessage: `Error while fetching resource`,
             }),
-            body: (
+            text: toMountPoint(
               <div>
                 <h5>
                   {i18n.translate('xpack.infra.fetcher.error.status', {
@@ -173,7 +173,8 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
                 </h5>
 
                 {errorDetails}
-              </div>
+              </div>,
+              rendering
             ),
           });
         }

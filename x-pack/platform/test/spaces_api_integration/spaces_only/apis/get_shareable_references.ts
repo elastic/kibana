@@ -39,7 +39,6 @@ const createTestCases = (spaceId: string): GetShareableReferencesTestCase[] => {
   throw new Error(`Unexpected test case for space '${spaceId}'!`);
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

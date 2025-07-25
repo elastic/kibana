@@ -22,11 +22,11 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
   const sufficientDays = Math.ceil(moment.duration(config.management.expiresSoonWarning).asDays());
 
   let toolTipContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInDays', {
-    defaultMessage: 'Expires in {numDays} days',
+    defaultMessage: 'Expires in {numDays, plural, one {# day} other {# days}}',
     values: { numDays: expiresInDays },
   });
   let statusContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInDaysTooltip', {
-    defaultMessage: '{numDays} days',
+    defaultMessage: '{numDays, plural, one {# day} other {# days}}',
     values: { numDays: expiresInDays },
   });
 
@@ -35,11 +35,11 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     const expiresInHours = Math.floor(durationToExpire.asHours());
 
     toolTipContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHours', {
-      defaultMessage: 'This session expires in {numHours} hours',
+      defaultMessage: 'This session expires in {numHours, plural, one {# hour} other {# hours}}',
       values: { numHours: expiresInHours },
     });
     statusContent = i18n.translate('data.mgmt.searchSessions.status.expiresSoonInHoursTooltip', {
-      defaultMessage: '{numHours} hours',
+      defaultMessage: '{numHours, plural, one {# hour} other {# hours}}',
       values: { numHours: expiresInHours },
     });
   }

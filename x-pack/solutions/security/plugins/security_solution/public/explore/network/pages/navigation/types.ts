@@ -7,8 +7,6 @@
 
 import type { Optional } from 'utility-types';
 
-import type { DataViewBase } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -30,7 +28,6 @@ export type NetworkComponentQueryProps = QueryTabBodyProps;
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
   flowTarget: FlowTargetSourceDest;
-  indexPattern: DataViewBase;
 };
 
 export type FTQueryTabBodyProps = QueryTabBodyProps & {
@@ -46,7 +43,6 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps;
 export type NetworkRoutesProps = GlobalTimeArgs & {
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
-  dataViewSpec: DataViewSpec;
   indexNames: string[];
 };
 

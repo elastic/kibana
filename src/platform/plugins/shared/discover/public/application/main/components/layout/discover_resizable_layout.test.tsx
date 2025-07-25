@@ -69,7 +69,6 @@ describe('DiscoverResizableLayout', () => {
   it('should render sidebarPanel and mainPanel', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -87,7 +86,6 @@ describe('DiscoverResizableLayout', () => {
   it('should use the default sidebar width when no value is stored in local storage', () => {
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -105,7 +103,6 @@ describe('DiscoverResizableLayout', () => {
     mockSidebarWidth = 400;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -123,7 +120,6 @@ describe('DiscoverResizableLayout', () => {
     mockSidebarWidth = 400;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -144,7 +140,6 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
@@ -162,7 +157,6 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = true;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
@@ -180,7 +174,6 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: true,
@@ -198,7 +191,6 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = false;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,
@@ -218,7 +210,6 @@ describe('DiscoverResizableLayout', () => {
     mockIsMobile = true;
     const wrapper = mount(
       <DiscoverResizableLayout
-        container={null}
         sidebarToggleState$={
           new BehaviorSubject<SidebarToggleState>({
             isCollapsed: false,

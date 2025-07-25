@@ -36,29 +36,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Content', () => {
+    describe('Index Management', () => {
       before(async () => {
-        await common.navigateToApp('elasticsearch/content/search_indices');
+        await common.navigateToApp('elasticsearch/index_management/indices');
       });
 
       it('loads the indices page', async function () {
         await retry.waitFor(
           'create index button visible',
-          async () => await testSubjects.exists('entSearchContent-searchIndices-createButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Elasticsearch', () => {
-      before(async () => {
-        await common.navigateToApp('elasticsearch/elasticsearch');
-      });
-
-      it('loads a setup guide', async function () {
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('elasticsearchGuide')
+          async () => await testSubjects.exists('createIndexButton')
         );
         await a11y.testAppSnapshot();
       });
@@ -104,28 +90,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
-    describe('Vector Search', () => {
+
+    describe('Search Synonyms', () => {
       before(async () => {
-        await common.navigateToApp('elasticsearch/vector_search');
+        await common.navigateToApp('elasticsearch/synonyms');
       });
 
-      it('loads Vector Search page', async function () {
+      it('loads Synonyms page', async function () {
         await retry.waitFor(
-          'vector search documentation link',
-          async () => await testSubjects.exists('vector-search-documentation-link')
+          'synonyms docs link',
+          async () => await testSubjects.exists('searchSynonymsEmptyPromptFooterLink')
         );
         await a11y.testAppSnapshot();
       });
     });
-    describe('AI Search', () => {
+
+    describe('Search Inference endpoints', () => {
       before(async () => {
-        await common.navigateToApp('elasticsearch/ai_search');
+        await common.navigateToApp('elasticsearch/relevance/inference_endpoints');
       });
 
-      it('loads AI Search page', async function () {
+      it('loads Inference endpoints page', async function () {
         await retry.waitFor(
-          'ai search page header description',
-          async () => await testSubjects.exists('ai-search-description-text')
+          'Inference endpoints page header',
+          async () => await testSubjects.exists('allInferenceEndpointsPage')
         );
         await a11y.testAppSnapshot();
       });

@@ -34,7 +34,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
       <>
         <EuiPanel hasShadow={false} hasBorder>
           <EuiFlexGroup
-            style={{ height: '100%' }}
+            css={{ height: '100%' }}
             direction="column"
             justifyContent="center"
             alignItems="center"

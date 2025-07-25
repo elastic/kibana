@@ -39,7 +39,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
   const { isAssistantEnabled, httpFetch, toasts } = payload.context;
 
   const QUERY = {
-    connector_id: payload.params.connector_id,
+    ...(payload.params.connector_id ? { connector_id: payload.params.connector_id } : {}),
     prompt_ids: payload.params.prompt_ids,
     prompt_group_id: payload.params.prompt_group_id,
   };

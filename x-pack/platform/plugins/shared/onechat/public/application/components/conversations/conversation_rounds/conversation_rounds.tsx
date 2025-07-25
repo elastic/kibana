@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { ConversationRound } from '@kbn/onechat-common';
+import { EuiFlexGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Round } from './round';
+import { ConversationContent } from '../conversation_grid';
 
 interface ConversationRoundsProps {
   conversationRounds: ConversationRound[];
@@ -15,10 +18,18 @@ interface ConversationRoundsProps {
 
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({ conversationRounds }) => {
   return (
-    <>
-      {conversationRounds.map((round, index) => {
-        return <Round key={index} round={round} />;
-      })}
-    </>
+    <ConversationContent>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="l"
+        aria-label={i18n.translate('xpack.onechat.conversationRounds', {
+          defaultMessage: 'Conversation messages',
+        })}
+      >
+        {conversationRounds.map((round, index) => {
+          return <Round key={index} round={round} />;
+        })}
+      </EuiFlexGroup>
+    </ConversationContent>
   );
 };

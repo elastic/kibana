@@ -15,10 +15,10 @@ export const MIGRATION_RULES_SELECTOR_TOUR_STEP_TITLE = i18n.translate(
 );
 
 export const MIGRATION_RULES_SELECTOR_TOUR_STEP_CONTENT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.translationRuleGuide.content',
+  'xpack.securitySolution.siemMigrations.rules.tour.translationRuleGuide.automaticMigrationGuideContent',
   {
     defaultMessage:
-      'Each migration’s translated rules appear on its SIEM rule translations page. Switch between your migrations using this dropdown. Start a new migration by clicking “Upload more rules for translation”.',
+      'Each migration’s translated rules appear on its Automatic rule translations page. Switch between your migrations using this dropdown. Start a new migration by clicking “Upload more rules for translation”.',
   }
 );
 
@@ -30,9 +30,9 @@ export const TRANSLATION_STATUS_TOUR_STEP_TITLE = i18n.translate(
 );
 
 export const MIGRATION_GUIDE_TOUR_STEP_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.translationRuleGuide.migrationGuideStepTitle',
+  'xpack.securitySolution.siemMigrations.rules.tour.translationRuleGuide.automaticMigrationGuideStepTitle',
   {
-    defaultMessage: 'SIEM Rule Migration guide',
+    defaultMessage: 'Automatic Rule Migration guide',
   }
 );
 

@@ -50,7 +50,7 @@ import {
   LENS_SHARE_STATE_ACTION,
   MainHistoryLocationState,
 } from '../../common/locator/locator';
-import { SavedObjectIndexStore } from '../persistence';
+import { LensDocumentService } from '../persistence';
 import { LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
@@ -118,7 +118,7 @@ export async function getLensServices(
     attributeService,
     eventAnnotationService,
     uiActions: startDependencies.uiActions,
-    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
+    lensDocumentService: new LensDocumentService(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -165,7 +165,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data, savedObjectStore, share } = lensServices;
+  const { stateTransfer, data, share } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -375,7 +375,6 @@ export async function mountApp(
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
             coreStart={coreStart}
-            savedObjectStore={savedObjectStore}
           />
         </Provider>
       );

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openImageEditor } from './open_image_editor';
+export { getImageEditor } from './get_image_editor';

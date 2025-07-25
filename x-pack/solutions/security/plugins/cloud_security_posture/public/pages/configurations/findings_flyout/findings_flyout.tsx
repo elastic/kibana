@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  useEuiTheme,
   EuiFlexItem,
   EuiFlexGroup,
   PropsOf,
@@ -15,18 +14,14 @@ import {
   EuiMarkdownFormat,
   EuiIcon,
   EuiToolTip,
-  EuiCallOut,
   EuiLink,
   EuiIconProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { createMisconfigurationFindingsQuery } from '@kbn/cloud-security-posture';
-import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
+import type { BenchmarkId } from '@kbn/cloud-security-posture-common';
 import { BenchmarkName } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
-import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -84,37 +79,6 @@ export const RuleNameLink = ({
     </EuiToolTip>
   ) : (
     <>{ruleName}</>
-  );
-};
-
-export const MissingFieldsCallout = ({
-  finding,
-}: {
-  finding: CspFinding | CspVulnerabilityFinding;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const vendor = getVendorName(finding);
-
-  return (
-    <EuiCallOut
-      style={{
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
-      size="s"
-      iconType="info"
-      title={
-        <span style={{ color: euiTheme.colors.text }}>
-          <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {vendor}"
-            values={{
-              vendor: vendor || 'the vendor',
-            }}
-          />
-        </span>
-      }
-    />
   );
 };
 

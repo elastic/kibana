@@ -36,7 +36,7 @@ interface DeleteTestDefinition {
 export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
@@ -182,14 +182,17 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       size: 100,
       query: { terms: { type: ['index-pattern'] } },
     });
-    const docs = multiNamespaceResponse.hits.hits;
+    const docs = multiNamespaceResponse.hits.hits as Array<{
+      _id: string;
+      _source?: { namespaces: string[] };
+    }>;
     // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
     expect(docs).length(21);
-    docs.forEach((doc) => () => {
-      const containsSpace2 = doc?._source?.namespaces.includes('space_2');
+    docs.forEach((doc: { _id: string; _source?: { namespaces: string[] } }) => {
+      const containsSpace2 = doc._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
     });
-    const space2OnlyObjExists = docs.some((x) => x._id === CASES.SPACE_2_ONLY.id);
+    const space2OnlyObjExists = docs.some((x: { _id: string }) => x._id === CASES.SPACE_2_ONLY.id);
     expect(space2OnlyObjExists).to.eql(false);
   };
 
@@ -224,7 +227,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
         after(async () => {
           await supertest.destroy();

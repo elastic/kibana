@@ -8,7 +8,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
-import { last, merge, repeat } from 'lodash';
+import { isEmpty, last, merge, repeat, size } from 'lodash';
 import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
@@ -31,7 +31,6 @@ import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { AnonymizationService } from '../anonymization';
 
 interface ChunkDelta {
   content?: string | undefined;
@@ -140,6 +139,7 @@ describe('Observability AI Assistant client', () => {
 
     // uncomment this line for debugging
     // const consoleOrPassThrough = console.log.bind(console);
+
     const consoleOrPassThrough = () => {};
 
     loggerMock = {
@@ -189,13 +189,6 @@ describe('Observability AI Assistant client', () => {
       },
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
-      anonymizationService: new AnonymizationService({
-        esClient: {
-          asCurrentUser: currentUserEsClientMock,
-        },
-        anonymizationRules: [],
-        logger: loggerMock,
-      }),
       logger: loggerMock,
       namespace: 'default',
       user: {
@@ -296,6 +289,8 @@ describe('Observability AI Assistant client', () => {
             system:
               'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
             }),
@@ -333,6 +328,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: undefined,
             tools: undefined,
             metadata: {
@@ -859,6 +856,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
             metadata: {
@@ -1018,6 +1017,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
             metadata: {
@@ -1280,12 +1281,14 @@ describe('Observability AI Assistant client', () => {
       ]);
 
       functionClientMock.hasFunction.mockImplementation((name) => name === 'get_top_alerts');
-      functionClientMock.executeFunction.mockImplementation(async () => ({
-        content: 'Call this function again',
-      }));
+      functionClientMock.executeFunction.mockImplementation(async () => {
+        return {
+          content: 'Call this function again',
+        };
+      });
 
       stream = observableIntoStream(
-        await client.complete({
+        client.complete({
           connectorId: 'foo',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1303,7 +1306,7 @@ describe('Observability AI Assistant client', () => {
         const body = inferenceClientMock.chatComplete.mock.lastCall![0];
         let nextLlmCallPromise: Promise<void>;
 
-        if (Object.keys(body.tools ?? {}).length) {
+        if (!isEmpty(body.tools) && body.tools.exit_loop === undefined) {
           nextLlmCallPromise = waitForNextLlmCall();
           await llmSimulator.chunk({ function_call: { name: 'get_top_alerts', arguments: '{}' } });
         } else {
@@ -1333,9 +1336,19 @@ describe('Observability AI Assistant client', () => {
       const firstBody = inferenceClientMock.chatComplete.mock.calls[0][0] as any;
       const body = inferenceClientMock.chatComplete.mock.lastCall![0] as any;
 
-      expect(Object.keys(firstBody.tools ?? {}).length).toEqual(1);
+      expect(size(firstBody.tools)).toEqual(1);
 
-      expect(body.tools).toEqual(undefined);
+      expect(body.tools).toEqual({
+        exit_loop: {
+          description:
+            "You've run out of tool calls. Call this tool, and explain to the user you've run out of budget.",
+          schema: {
+            properties: { response: { description: 'Your textual response', type: 'string' } },
+            required: ['response'],
+            type: 'object',
+          },
+        },
+      });
     });
   });
 

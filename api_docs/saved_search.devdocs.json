@@ -315,6 +315,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-public.SortOrder",
+        "type": "Type",
+        "tags": [],
+        "label": "SortOrder",
+        "description": [],
+        "signature": [
+          "[string, string]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],

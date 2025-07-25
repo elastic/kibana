@@ -26,7 +26,7 @@ export const ConfirmButtonIcon: FunctionComponent<Props> = ({
   const [showConfirm, setShowConfirm] = useState(false);
 
   return showConfirm ? (
-    <EuiToolTip content={confirmationText}>
+    <EuiToolTip content={confirmationText} disableScreenReaderOutput>
       <EuiButtonIcon
         disabled={disabled}
         aria-label={confirmationText}

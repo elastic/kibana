@@ -10,9 +10,9 @@ import type {
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 
+import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
-import { getAlertsIndex } from '../../utils/get_alerts_index';
 
 export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
@@ -30,6 +30,7 @@ export const getDefaultRiskEngineConfiguration = ({
   interval: '1h',
   pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
+  excludeAlertStatuses: ['closed'],
   _meta: {
     // Upgrade this property when changing mappings
     mappingsVersion: 4,
@@ -59,7 +60,7 @@ export const updateSavedObjectAttribute = async ({
     throw new Error('Risk engine configuration not found');
   }
 
-  const result = await savedObjectsClient.update(
+  return savedObjectsClient.update(
     riskEngineConfigurationTypeName,
     savedObjectConfiguration.id,
     {
@@ -69,8 +70,6 @@ export const updateSavedObjectAttribute = async ({
       refresh: 'wait_for',
     }
   );
-
-  return result;
 };
 
 export const initSavedObjects = async ({
@@ -81,12 +80,11 @@ export const initSavedObjects = async ({
   if (configuration) {
     return configuration;
   }
-  const result = await savedObjectsClient.create(
+  return savedObjectsClient.create(
     riskEngineConfigurationTypeName,
     getDefaultRiskEngineConfiguration({ namespace }),
     {}
   );
-  return result;
 };
 
 export const deleteSavedObjects = async ({

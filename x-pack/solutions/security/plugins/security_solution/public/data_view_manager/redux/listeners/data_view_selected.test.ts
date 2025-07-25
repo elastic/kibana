@@ -40,6 +40,10 @@ const mockedState: RootState = {
       dataViewId: null,
       status: 'pristine',
     },
+    explore: {
+      dataViewId: null,
+      status: 'pristine',
+    },
     shared: {
       adhocDataViews: [
         {

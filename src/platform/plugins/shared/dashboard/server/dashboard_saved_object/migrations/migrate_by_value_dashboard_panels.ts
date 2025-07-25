@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   controlGroupSavedObjectStateToSerializableRuntimeState,
   serializableRuntimeStateToControlGroupSavedObjectState,
@@ -39,7 +39,7 @@ export const migrateByValueDashboardPanels =
       );
       const migratedControlGroupInput = migrate({
         ...controlGroupState,
-        type: CONTROL_GROUP_TYPE,
+        type: CONTROLS_GROUP_TYPE,
       } as SerializableRecord);
       attributes.controlGroupInput =
         serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);

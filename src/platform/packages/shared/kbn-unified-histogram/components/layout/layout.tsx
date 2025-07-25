@@ -20,10 +20,6 @@ import { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../..
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
-   * The parent container element, used to calculate the layout size
-   */
-  container: HTMLElement | null;
-  /**
    * The rendered UnifiedHistogramChart component
    */
   unifiedHistogramChart: ReactNode;
@@ -50,7 +46,6 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
 }>;
 
 export const UnifiedHistogramLayout = ({
-  container,
   unifiedHistogramChart,
   chart,
   isChartAvailable,
@@ -101,7 +96,6 @@ export const UnifiedHistogramLayout = ({
       <ResizableLayout
         mode={panelsMode}
         direction={ResizableLayoutDirection.Vertical}
-        container={container}
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}

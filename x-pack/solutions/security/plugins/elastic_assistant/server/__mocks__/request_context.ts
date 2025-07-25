@@ -77,7 +77,7 @@ export const createMockClients = () => {
 type MockClients = ReturnType<typeof createMockClients>;
 
 export type ElasticAssistantRequestHandlerContextMock = MockedKeys<
-  AwaitedProperties<Omit<ElasticAssistantRequestHandlerContext, 'resolve'>>
+  AwaitedProperties<ElasticAssistantRequestHandlerContext>
 > & {
   core: MockClients['core'];
 };
@@ -94,6 +94,7 @@ const createRequestContextMock = (
     core: clients.core,
     elasticAssistant: createElasticAssistantRequestContextMock(clients),
     licensing: licensingMock.createRequestHandlerContext({ license }),
+    resolve: jest.fn(),
   };
 };
 
@@ -171,6 +172,7 @@ const createElasticAssistantRequestContextMock = (
     core: clients.core,
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
+    checkPrivileges: jest.fn(),
   };
 };
 

@@ -64,14 +64,7 @@ export const RadioGroup = ({
           >
             <EuiButton
               disabled={option.disabled || disabled}
-              style={{
-                border: `1px solid ${
-                  isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
-                }`,
-              }}
-              // Use empty string to fallback to no color
-              // @ts-ignore
-              color={isChecked ? 'primary' : ''}
+              color={isChecked ? 'primary' : 'text'}
               onClick={() => onChange(option.id)}
               iconType={option.icon}
               iconSide="right"
@@ -88,10 +81,6 @@ export const RadioGroup = ({
                   margin-left: auto;
                 }
 
-                &&,
-                &&:hover {
-                  text-decoration: none;
-                }
                 &:disabled {
                   svg,
                   img {

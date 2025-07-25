@@ -67,7 +67,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
         onClick={onButtonClick}
         size="xs"
         flush="both"
-        style={{ fontWeight: 'normal' }}
+        css={{ fontWeight: 'normal' }}
       >
         {viewSelected === 'gridView' ? gridView : eventRenderedView}
       </EuiButtonEmpty>

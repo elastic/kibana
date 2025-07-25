@@ -19,6 +19,7 @@ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { createTelemetryClientMock } from '../services/telemetry/telemetry_client.mock';
 import { createMemoryHistory } from 'history';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useAppRoutes } from '../routes/routes';
@@ -114,6 +115,7 @@ describe('renderApp', () => {
           reportUiCounter: jest.fn(),
         },
         kibanaVersion: '8.8.0',
+        telemetryClient: createTelemetryClientMock(),
       });
       unmount();
     }).not.toThrowError();
@@ -134,6 +136,7 @@ describe('renderApp', () => {
         reportUiCounter: jest.fn(),
       },
       kibanaVersion: '8.8.0',
+      telemetryClient: createTelemetryClientMock(),
     });
     unmount();
 

@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/data-service-server",
+  "owner": "@elastic/kibana-data-discovery",
+  "group": "platform",
+  "visibility": "shared"
+}
