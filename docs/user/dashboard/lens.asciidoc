@@ -375,19 +375,114 @@ In the legend, click the field, then choose one of the following options:
 
 [float]
 [[configure-the-visualization-components]]
-==== Configure the visualization components
+==== Customize the visualization display
 
 Each visualization type comes with a set of components that you access from the editor toolbar.
 
 The following component menus are available:
 
-* *Visual options* &mdash; Specifies how to display area, line, and bar chart options. For example, you can specify how to display the labels in bar charts.
+* *Appearance* &mdash; Specifies how to display area, line, and bar chart options. For example, you can specify how to display the labels in bar charts.
 
 * *Labels* &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps. 
 
 * *Legend* &mdash; Specifies how to display the legend. You can choose to display the legend inside or outside the visualization, truncate the legend values when they're too long, and <<customize-visualization-legend,select additional statistics to show>>.
 
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
+
+[float]
+[[customize-visualization-appearance]]
+===== Visualization appearance options
+
+When creating or editing a visualization, you can customize several appearance options. To do that, look for the `brush` appearance icon.
+
+These options can vary depending on the type of chart.
+
+[float]
+====== Area, Bar, and Line charts
+
+**Area fill opacity**::
+For **Area** charts. Opacity of the area fill. Defaults to `0.3`.
+
+**Bar orientation**::
+For **Bar** charts. Choose between **Horizontal** and **Vertical**.
+
+**Line interpolation**::
+For **Line** charts. Choose how to interpolate the line between data points from the available options: **Straight** (default), **Smooth**, and **Step**.
+
+**Missing values**::
+For **Area** and **Line** charts. Choose between **Hide**, **Zero**, **Linear**, **Last**, and **Next**. This option controls how gaps in data appear on the chart. By default, gaps are hidden.
++
+* **Hide**: Don't show gaps in data.
++
+image::images/charts-gaps-fill-hide.png["Hide missing values", width=50%]
++
+* **Zero**: Fill gaps by connecting starting and ending data points to zero.
++
+image::images/charts-gaps-fill-zero.png["Fill gaps to zero", width=50%]
++
+* **Linear**: Fill gaps by connecting related starting and ending data points together with a direct line.
++
+image::images/charts-gaps-fill-linear.png["Fill gaps with a direct line", width=50%]
++
+* **Last**: Fill gaps between data points with a horizontal or vertical line that uses the last ending point value, when available, to determine its position.
++
+image::images/charts-gaps-fill-last.png["Fill gaps with a straight line from last known data point", width=50%]
++
+* **Next**: Fill gaps between data points with a horizontal or vertical line that uses the next starting point value, when available, to determine its position.
++
+image::images/charts-gaps-fill-next.png["Fill gaps with a straight line from next known data point", width=50%]
+
+**End values**::
+If you've chosen to show missing values, you can also decide to extend data series to the edge of the chart. By default, end values are hidden.
++
+* **Hide**: Don't extend series to the edge of the chart.
+* **Zero**: Extend series as zero to the edge of the chart.
+* **Nearest**: Extend series with their first or last value to the edge of the chart.
+
+**Show as dotted line**::
+If you've chosen to show missing values, you can turn on this option to show gaps as a dotted line.
+
+**Point visibility**::
+For **Area** and **Line** charts. Use this option to show or hide data points. They're hidden by default.
+
+[float]
+====== Tables
+
+**Density**::
+Make the table more or less compact. Choose between **Compact**, **Normal** (default), and **Expanded**.
+
+**Max header cell lines**::
+The maximum number of lines that header cells can span over. If the content exceeds this limit and is truncated, an ellipsis indicates it.
+
+**Body cell lines**::
+The fixed number of lines that body cells span over. If the content exceeds this limit and is truncated, an ellipsis indicates it.
+
+**Paginate table**::
+Turn on this option to paginate the table. Pagination shows when the table contains at least 10 items, and lets you define how many items to display per page. When turned off, you can scroll through all items.
+
+[float]
+====== Pie charts
+
+**Donut hole**::
+Display a **Small**, **Medium**, or **Large** hole at the center of the pie chart. Defaults to **None**.
+
+[float]
+====== Gauge charts
+
+**Gauge shape**::
+Define the shape of the gauge. Choose between **Linear**, **Minor arc**, **Major arc**, and **Circle**. When set to **Linear**, you can choose to display the chart horizontally or vertically.
+
+[float]
+====== Tag clouds
+
+**Font size**::
+Define the range of font sizes used in the tag cloud. The font size is based on the number of times a tag appears in the data.
+
+**Orientation**::
+Define the orientation of the tags. Choose **Single**, **Right angled**, and **Multiple**.
+
+**Show label**::
+Turn on this option to show a label for the tag cloud. You can define this label when defining the tags to show for the visualization, by customizing the **Name** field.
 
 [float]
 [[customize-visualization-legend]]
