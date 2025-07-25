@@ -34,10 +34,13 @@ export function AiAssistantSelectionPage() {
     kibanaBranch,
     securityAIAssistantEnabled,
   } = useAppContext();
+  const aiAssistantManagementSelection =
+    capabilities.management.kibana.aiAssistantManagementSelection;
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
+  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && aiAssistantManagementSelection;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -154,7 +157,7 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
-                {!securityAIAssistantEnabled ? (
+                {!isSecurityAIAssistantEnabled ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
@@ -200,7 +203,7 @@ export function AiAssistantSelectionPage() {
                     onClick={() =>
                       navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
                     }
-                    disabled={!securityAIAssistantEnabled}
+                    disabled={!isSecurityAIAssistantEnabled}
                   >
                     {i18n.translate(
                       'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
@@ -213,7 +216,7 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={<EuiIcon size="xxl" type="logoSecurity" />}
-            isDisabled={!securityAIAssistantEnabled}
+            isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
               { defaultMessage: 'Elastic AI Assistant for Security' }
