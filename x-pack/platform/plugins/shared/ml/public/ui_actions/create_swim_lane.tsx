@@ -16,6 +16,7 @@ import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app'
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
+import { ResolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -69,9 +70,6 @@ export function createAddSwimlanePanelAction(
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
-          const { ResolveAnomalySwimlaneUserInput } = await import(
-            '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-          );
           return (
             <ResolveAnomalySwimlaneUserInput
               coreStart={coreStart}
