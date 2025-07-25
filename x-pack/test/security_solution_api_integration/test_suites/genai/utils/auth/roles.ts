@@ -14,6 +14,14 @@ export const noKibanaPrivileges: Role = {
     elasticsearch: {
       indices: [],
     },
+    kibana: [
+      {
+        feature: {
+          siem: ['none'],
+        },
+        spaces: ['*'],
+      },
+    ],
   },
 };
 
