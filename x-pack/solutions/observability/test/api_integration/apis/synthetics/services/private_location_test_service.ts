@@ -41,7 +41,7 @@ export class PrivateLocationTestService {
   }
 
   async addFleetPolicy(name?: string) {
-    return this.supertest
+    const apiRes = await this.supertest
       .post('/api/fleet/agent_policies?sys_monitoring=true')
       .set('kbn-xsrf', 'true')
       .send({
@@ -49,8 +49,9 @@ export class PrivateLocationTestService {
         description: '',
         namespace: 'default',
         monitoring_enabled: [],
-      })
-      .expect(200);
+      });
+    expect(apiRes.status).to.eql(200, JSON.stringify(apiRes.body));
+    return apiRes;
   }
 
   async addPrivateLocation({ policyId, label }: { policyId?: string; label?: string } = {}) {

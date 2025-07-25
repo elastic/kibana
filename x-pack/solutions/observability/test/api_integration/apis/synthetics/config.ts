@@ -27,6 +27,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
         '--xpack.uptime.service.devUrl=mockDevUrl',
         '--xpack.uptime.service.manifestUrl=mockDevUrl',
+        `--xpack.fleet.enableExperimental=${JSON.stringify([
+          'useSpaceAwareness',
+          'subfeaturePrivileges',
+        ])}`,
       ],
     },
     testFiles: [require.resolve('.')],

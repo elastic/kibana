@@ -17,7 +17,7 @@ import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test
 
 export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/229295
-  describe.skip('AddProjectMonitors', function () {
+  describe('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
