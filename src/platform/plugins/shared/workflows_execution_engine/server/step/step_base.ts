@@ -85,7 +85,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       // });
 
       this.contextManager.logStepComplete(stepName, stepName, true);
-      this.workflowState.setStepResult(stepId, result);
+      await this.workflowState.setStepResult(stepId, result);
     } catch (error) {
       // Log failure
       // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
@@ -100,7 +100,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       this.contextManager.logStepComplete(stepName, stepName, false);
 
       const result = await this.handleFailure(error);
-      this.workflowState.setStepResult(stepId, result);
+      await this.workflowState.setStepResult(stepId, result);
     } finally {
       // Clear step context
       this.contextManager.clearCurrentStep();
