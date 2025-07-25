@@ -34,6 +34,7 @@ interface Props {
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
+  hideRefreshButton?: boolean;
   getColumns?: (params: {
     core: CoreStart;
     api: SearchSessionsMgmtAPI;
@@ -45,6 +46,8 @@ interface Props {
   }) => Array<EuiBasicTableColumn<UISession>>;
 }
 
+export type GetColumnsFn = Props['getColumns'];
+
 export function SearchSessionsMgmtTable({
   core,
   locators,
@@ -53,6 +56,7 @@ export function SearchSessionsMgmtTable({
   config,
   kibanaVersion,
   searchUsageCollector,
+  hideRefreshButton = false,
   getColumns = getDefaultColumns,
   ...props
 }: Props) {
@@ -130,11 +134,35 @@ export function SearchSessionsMgmtTable({
     doRefresh();
   };
 
+  const columns = getColumns({
+    core,
+    api,
+    config,
+    timezone,
+    onActionComplete,
+    kibanaVersion,
+    searchUsageCollector,
+  });
+
+  const filters = useMemo(() => {
+    const _filters = [];
+
+    const hasAppColumn = columns.some((column) => 'field' in column && column.field === 'appId');
+    if (hasAppColumn) _filters.push(getAppFilter(tableData));
+
+    const hasStatusColumn = columns.some(
+      (column) => 'field' in column && column.field === 'status'
+    );
+    if (hasStatusColumn) _filters.push(getStatusFilter(tableData));
+
+    return _filters;
+  }, [columns, tableData]);
+
   // table config: search / filters
   const search: EuiSearchBarProps = {
     box: { incremental: true },
-    filters: [getStatusFilter(tableData), getAppFilter(tableData)],
-    toolsRight: (
+    filters,
+    toolsRight: hideRefreshButton ? undefined : (
       <TableText>
         <EuiButton
           fill
@@ -162,15 +190,7 @@ export function SearchSessionsMgmtTable({
         'data-test-subj': `searchSessionsRow`,
         'data-test-search-session-id': `id-${searchSession.id}`,
       })}
-      columns={getColumns({
-        core,
-        api,
-        config,
-        timezone,
-        onActionComplete,
-        kibanaVersion,
-        searchUsageCollector,
-      })}
+      columns={columns}
       items={tableData}
       pagination={{
         pageSize,
