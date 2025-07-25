@@ -23,9 +23,21 @@ import { i18n } from '@kbn/i18n';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useCreateToolFlyout } from '../../../hooks/tools/use_create_tools';
-import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
-import { useEditToolFlyout } from '../../../hooks/tools/use_edit_tools';
+import {
+  CreateToolErrorCallback,
+  CreateToolSuccessCallback,
+  useCreateToolFlyout,
+} from '../../../hooks/tools/use_create_tools';
+import {
+  DeleteToolErrorCallback,
+  DeleteToolSuccessCallback,
+  useDeleteToolModal,
+} from '../../../hooks/tools/use_delete_tools';
+import {
+  EditToolErrorCallback,
+  EditToolSuccessCallback,
+  useEditToolFlyout,
+} from '../../../hooks/tools/use_edit_tools';
 import { useEsqlTools } from '../../../hooks/tools/use_tools';
 import { useToasts } from '../../../hooks/use_toasts';
 import {
@@ -34,7 +46,7 @@ import {
 } from '../../../utils/transform_esql_form_data';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { OnechatToolTags } from '../tags/tool_tags';
-import { OnechatEsqlToolFlyout } from './esql_tool_flyout';
+import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql_tool_flyout';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 
 const getColumns = ({
@@ -42,7 +54,7 @@ const getColumns = ({
   editTool,
 }: {
   deleteTool: (toolId: string) => void;
-  editTool: (tool: EsqlToolDefinitionWithSchema) => void;
+  editTool: (toolId: string) => void;
 }): Array<EuiBasicTableColumn<EsqlToolDefinitionWithSchema>> => [
   {
     field: 'id',
@@ -78,13 +90,13 @@ const getColumns = ({
     }),
     width: '100px',
     align: 'center',
-    render: (tool: EsqlToolDefinitionWithSchema) => {
+    render: ({ id }: EsqlToolDefinitionWithSchema) => {
       return (
         <EuiFlexGroup gutterSize="s" justifyContent="center">
           <EuiButtonIcon
             iconType="documentEdit"
             onClick={() => {
-              editTool(tool);
+              editTool(id);
             }}
             aria-label={i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
               defaultMessage: 'Edit tool',
@@ -94,7 +106,7 @@ const getColumns = ({
             iconType="trash"
             color="danger"
             onClick={() => {
-              deleteTool(tool.id);
+              deleteTool(id);
             }}
             aria-label={i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
               defaultMessage: 'Delete tool',
@@ -111,8 +123,8 @@ export const OnechatEsqlTools: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const { addSuccessToast, addErrorToast } = useToasts();
 
-  const onDeleteSuccess = useCallback(
-    (toolId: string) => {
+  const onDeleteSuccess = useCallback<DeleteToolSuccessCallback>(
+    (toolId) => {
       addSuccessToast({
         title: i18n.translate('xpack.onechat.tools.deleteToolSuccessToast', {
           defaultMessage: 'Tool "{toolId}" deleted',
@@ -125,8 +137,8 @@ export const OnechatEsqlTools: React.FC = () => {
     [addSuccessToast]
   );
 
-  const onDeleteError = useCallback(
-    (error: Error, toolId: string) => {
+  const onDeleteError = useCallback<DeleteToolErrorCallback>(
+    (error, { toolId }) => {
       addErrorToast({
         title: i18n.translate('xpack.onechat.tools.deleteToolErrorToast', {
           defaultMessage: 'Unable to delete tool "{toolId}"',
@@ -149,19 +161,25 @@ export const OnechatEsqlTools: React.FC = () => {
     cancelDelete,
   } = useDeleteToolModal({ onSuccess: onDeleteSuccess, onError: onDeleteError });
 
-  const handleCreateSuccess = useCallback(() => {
-    addSuccessToast({
-      title: i18n.translate('xpack.onechat.tools.createEsqlToolSuccessToast', {
-        defaultMessage: 'ES|QL tool created',
-      }),
-    });
-  }, [addSuccessToast]);
+  const handleCreateSuccess = useCallback<CreateToolSuccessCallback>(
+    (tool) => {
+      addSuccessToast({
+        title: i18n.translate('xpack.onechat.tools.createEsqlToolSuccessToast', {
+          defaultMessage: 'Tool "{toolId}" created',
+          values: {
+            toolId: tool.id,
+          },
+        }),
+      });
+    },
+    [addSuccessToast]
+  );
 
-  const handleCreateError = useCallback(
-    (error: Error) => {
+  const handleCreateError = useCallback<CreateToolErrorCallback>(
+    (error) => {
       addErrorToast({
         title: i18n.translate('xpack.onechat.tools.createEsqlToolErrorToast', {
-          defaultMessage: 'Unable to create ES|QL tool',
+          defaultMessage: 'Unable to create tool',
         }),
         text: formatOnechatErrorMessage(error),
       });
@@ -173,8 +191,8 @@ export const OnechatEsqlTools: React.FC = () => {
     isOpen: isCreateToolFlyoutOpen,
     openFlyout: openCreateToolFlyout,
     closeFlyout: closeCreateToolFlyout,
-    saveTool: createTool,
-    isLoading: isCreatingTool,
+    submit: createTool,
+    isSubmitting: isCreatingTool,
   } = useCreateToolFlyout({
     onSuccess: handleCreateSuccess,
     onError: handleCreateError,
@@ -187,19 +205,28 @@ export const OnechatEsqlTools: React.FC = () => {
     [createTool]
   );
 
-  const handleEditSuccess = useCallback(() => {
-    addSuccessToast({
-      title: i18n.translate('xpack.onechat.tools.editEsqlToolSuccessToast', {
-        defaultMessage: 'ES|QL tool updated',
-      }),
-    });
-  }, [addSuccessToast]);
+  const handleEditSuccess = useCallback<EditToolSuccessCallback>(
+    (tool) => {
+      addSuccessToast({
+        title: i18n.translate('xpack.onechat.tools.editEsqlToolSuccessToast', {
+          defaultMessage: 'Tool "{toolId}" updated',
+          values: {
+            toolId: tool.id,
+          },
+        }),
+      });
+    },
+    [addSuccessToast]
+  );
 
-  const handleEditError = useCallback(
-    (error: Error) => {
+  const handleEditError = useCallback<EditToolErrorCallback>(
+    (error, { toolId }) => {
       addErrorToast({
         title: i18n.translate('xpack.onechat.tools.editEsqlToolErrorToast', {
-          defaultMessage: 'Unable to update ES|QL tool',
+          defaultMessage: 'Unable to update tool "{toolId}"',
+          values: {
+            toolId,
+          },
         }),
         text: formatOnechatErrorMessage(error),
       });
@@ -212,8 +239,9 @@ export const OnechatEsqlTools: React.FC = () => {
     tool: editingTool,
     openFlyout: openEditToolFlyout,
     closeFlyout: closeEditToolFlyout,
-    saveTool: updateTool,
-    isLoading: isUpdatingTool,
+    submit: updateTool,
+    isLoading: isLoadingEditTool,
+    isSubmitting: isUpdatingTool,
   } = useEditToolFlyout({
     onSuccess: handleEditSuccess,
     onError: handleEditError,
@@ -226,7 +254,7 @@ export const OnechatEsqlTools: React.FC = () => {
     [updateTool]
   );
 
-  const isEditingTool = !!editingTool && isEditToolFlyoutOpen;
+  const isEditingTool = isEditToolFlyoutOpen;
 
   const columns = useMemo(
     () => getColumns({ deleteTool, editTool: openEditToolFlyout }),
@@ -313,28 +341,15 @@ export const OnechatEsqlTools: React.FC = () => {
           }
         />
       </EuiFlexGroup>
-      {isEditingTool ? (
-        <OnechatEsqlToolFlyout
-          isOpen={isEditToolFlyoutOpen}
-          onClose={closeEditToolFlyout}
-          title={i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
-            defaultMessage: 'Edit ES|QL tool',
-          })}
-          tool={editingTool}
-          saveTool={handleUpdateTool}
-          isSaving={isUpdatingTool}
-        />
-      ) : (
-        <OnechatEsqlToolFlyout
-          isOpen={isCreateToolFlyoutOpen}
-          onClose={closeCreateToolFlyout}
-          title={i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
-            defaultMessage: 'New ES|QL tool',
-          })}
-          saveTool={handleCreateTool}
-          isSaving={isCreatingTool}
-        />
-      )}
+      <OnechatEsqlToolFlyout
+        isOpen={isEditToolFlyoutOpen || isCreateToolFlyoutOpen}
+        onClose={isEditingTool ? closeEditToolFlyout : closeCreateToolFlyout}
+        mode={isEditingTool ? OnechatEsqlToolFlyoutMode.Edit : OnechatEsqlToolFlyoutMode.Create}
+        tool={editingTool}
+        submit={isEditingTool ? handleUpdateTool : handleCreateTool}
+        isSubmitting={isEditingTool ? isUpdatingTool : isCreatingTool}
+        isLoading={isEditingTool ? isLoadingEditTool : false}
+      />
       {isDeleteModalOpen && (
         <EuiConfirmModal
           title={i18n.translate('xpack.onechat.tools.deleteEsqlToolTitle', {

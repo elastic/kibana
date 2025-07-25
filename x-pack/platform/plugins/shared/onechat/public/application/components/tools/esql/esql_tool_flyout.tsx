@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiThemeComputed,
   EuiTitle,
   EuiToolTip,
@@ -62,13 +63,19 @@ const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>
     }
   `;
 
-interface OnechatEsqlToolFlyoutProps {
+export enum OnechatEsqlToolFlyoutMode {
+  Create = 'create',
+  Edit = 'edit',
+}
+
+export interface OnechatEsqlToolFlyoutProps {
+  mode: OnechatEsqlToolFlyoutMode;
   isOpen: boolean;
-  isSaving: boolean;
-  title: string;
+  isSubmitting: boolean;
+  isLoading?: boolean;
   tool?: EsqlToolDefinitionWithSchema;
   onClose: () => void;
-  saveTool: (data: OnechatEsqlToolFormData) => Promise<void>;
+  submit: (data: OnechatEsqlToolFormData) => Promise<void>;
 }
 
 const getDefaultValues = (): OnechatEsqlToolFormData => ({
@@ -80,12 +87,13 @@ const getDefaultValues = (): OnechatEsqlToolFormData => ({
 });
 
 export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
-  title,
+  mode,
   isOpen,
-  isSaving,
+  isLoading,
+  isSubmitting,
   tool,
   onClose,
-  saveTool,
+  submit: saveTool,
 }) => {
   const resolver = useEsqlToolFormValidationResolver();
   const form = useForm<OnechatEsqlToolFormData>({
@@ -113,8 +121,6 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
   const esqlToolFormId = useGeneratedHtmlId({
     prefix: 'esqlToolForm',
   });
-
-  const isSubmitting = isSaving;
 
   const handleClear = useCallback(() => {
     reset(getDefaultValues());
@@ -156,11 +162,25 @@ export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={esqlToolFlyoutTitleId}>{title}</h2>
+            <h2 id={esqlToolFlyoutTitleId}>
+              {mode === OnechatEsqlToolFlyoutMode.Create
+                ? i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
+                    defaultMessage: 'New ES|QL tool',
+                  })
+                : i18n.translate('xpack.onechat.tools.editEsqlTool.title', {
+                    defaultMessage: 'Edit ES|QL tool',
+                  })}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody css={flyoutBodyClass(euiTheme)}>
-          <OnechatEsqlToolForm formId={esqlToolFormId} saveTool={saveTool} />
+          {isLoading ? (
+            <EuiFlexGroup justifyContent="center" alignItems="center">
+              <EuiLoadingSpinner size="xxl" />
+            </EuiFlexGroup>
+          ) : (
+            <OnechatEsqlToolForm formId={esqlToolFormId} saveTool={saveTool} />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup>

@@ -5,26 +5,43 @@
  * 2.0.
  */
 
-import { EsqlToolDefinitionWithSchema, ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
+import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';
+import { useOnechatTool } from './use_tools';
+
+interface EditToolMutationVariables {
+  toolId: string;
+  tool: UpdateToolPayload;
+}
+
+type EditToolMutationOptions = UseMutationOptions<
+  UpdateToolResponse,
+  Error,
+  EditToolMutationVariables
+>;
+type EditToolMutationSuccessCallback = NonNullable<EditToolMutationOptions['onSuccess']>;
+type EditToolMutationErrorCallback = NonNullable<EditToolMutationOptions['onError']>;
 
 export const useEditTool = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (tool: UpdateToolResponse) => void;
-  onError?: (error: Error) => void;
+  onSuccess?: EditToolMutationSuccessCallback;
+  onError?: EditToolMutationErrorCallback;
 }) => {
   const queryClient = useQueryClient();
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: ({ toolId, tool }: { toolId: string; tool: UpdateToolPayload }) =>
-      toolsService.update(toolId, tool),
+  const { mutateAsync, isLoading } = useMutation<
+    UpdateToolResponse,
+    Error,
+    EditToolMutationVariables
+  >({
+    mutationFn: ({ toolId, tool }) => toolsService.update(toolId, tool),
     onSuccess,
     onError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
@@ -33,32 +50,54 @@ export const useEditTool = ({
   return { updateTool: mutateAsync, isLoading };
 };
 
+export type EditToolSuccessCallback = (tool: UpdateToolResponse) => void;
+export type EditToolErrorCallback = (error: Error, variables: EditToolMutationVariables) => void;
+
 export const useEditToolFlyout = ({
   onSuccess,
   onError,
 }: {
-  onSuccess?: (tool: EsqlToolDefinitionWithSchema) => void;
-  onError?: (error: Error) => void;
+  onSuccess?: EditToolSuccessCallback;
+  onError?: EditToolErrorCallback;
 }) => {
-  const [editingTool, setEditingTool] = useState<EsqlToolDefinitionWithSchema | null>(null);
+  const { isOpen, openFlyout, closeFlyout } = useFlyoutState();
+  const [editingToolId, setEditingToolId] = useState<string | null>(null);
+  const { tool: editingTool, isLoading: isLoadingTool } = useOnechatTool(
+    editingToolId ?? undefined
+  );
 
-  const handleSuccess = (tool: ToolDefinitionWithSchema) => {
-    setEditingTool(null);
-    onSuccess?.(tool as EsqlToolDefinitionWithSchema);
-  };
+  const handleOpenFlyout = useCallback(
+    (toolId: string) => {
+      setEditingToolId(toolId);
+      openFlyout();
+    },
+    [openFlyout]
+  );
 
-  const { updateTool, isLoading } = useEditTool({
+  const handleCloseFlyout = useCallback(() => {
+    setEditingToolId(null);
+    closeFlyout();
+  }, [closeFlyout]);
+
+  const handleSuccess = useCallback<EditToolMutationSuccessCallback>(
+    (tool) => {
+      closeFlyout();
+      onSuccess?.(tool);
+    },
+    [closeFlyout, onSuccess]
+  );
+
+  const handleError = useCallback<EditToolMutationErrorCallback>(
+    (error, variables) => {
+      onError?.(error, variables);
+    },
+    [onError]
+  );
+
+  const { updateTool, isLoading: isSubmitting } = useEditTool({
     onSuccess: handleSuccess,
-    onError,
+    onError: handleError,
   });
-
-  const openFlyout = useCallback((tool: EsqlToolDefinitionWithSchema) => {
-    setEditingTool(tool);
-  }, []);
-
-  const closeFlyout = useCallback(() => {
-    setEditingTool(null);
-  }, []);
 
   const saveTool = useCallback(
     async (toolData: UpdateToolPayload) => {
@@ -69,11 +108,12 @@ export const useEditToolFlyout = ({
   );
 
   return {
-    isOpen: !!editingTool,
+    isOpen,
     tool: editingTool,
-    isLoading,
-    openFlyout,
-    closeFlyout,
-    saveTool,
+    isLoading: isLoadingTool,
+    isSubmitting,
+    openFlyout: handleOpenFlyout,
+    closeFlyout: handleCloseFlyout,
+    submit: saveTool,
   };
 };

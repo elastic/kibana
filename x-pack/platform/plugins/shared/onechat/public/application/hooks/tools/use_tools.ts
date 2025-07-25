@@ -44,3 +44,20 @@ export const useEsqlTools = () => {
   );
   return { tools: esqlTools, ...rest };
 };
+
+export const useOnechatTool = (toolId?: string) => {
+  const { toolsService } = useOnechatServices();
+
+  const {
+    data: tool,
+    isLoading,
+    error,
+  } = useQuery({
+    enabled: !!toolId,
+    queryKey: queryKeys.tools.byId(toolId),
+    // toolId! is safe because of the enabled check above
+    queryFn: () => toolsService.get({ toolId: toolId! }),
+  });
+
+  return { tool: tool as EsqlToolDefinitionWithSchema | undefined, isLoading, error };
+};
