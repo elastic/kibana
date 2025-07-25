@@ -21,6 +21,7 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
 } from '../../common/types/saved_objects';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -811,6 +812,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
@@ -838,6 +840,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
