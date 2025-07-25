@@ -10,6 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -42,7 +43,7 @@ export function createIndexDocRecordsStream(
           ops.set(body, {
             [op]: {
               _index: index,
-              _id: doc.id,
+              _id: doc.id ?? uuidv4(),
             },
           });
           return body;
