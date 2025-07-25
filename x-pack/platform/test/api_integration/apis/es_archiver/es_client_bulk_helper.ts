@@ -16,6 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ES_CLIENT_HEADERS = {
     'x-elastic-product-origin': 'kibana',
   };
+  const DATASET = [{ message: 'hello world 3', '@timestamp': '2020-12-16T15:16:18.570Z' }];
 
   describe('es client bulk helper', function () {
     beforeEach(async () => {
@@ -59,10 +60,10 @@ export default function ({ getService }: FtrProviderContext) {
         {
           retries: 0,
           concurrency: 1,
-          datasource: [{ message: 'hello world 3', '@timestamp': '2020-12-16T15:16:18.570Z' }],
+          datasource: DATASET,
           onDocument(doc) {
             return {
-              index: { _index: INDEX_NAME },
+              index: { _index: INDEX_NAME, _id: 'some-static-id' },
             };
           },
           onDrop(dropped) {
