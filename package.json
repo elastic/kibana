@@ -1164,7 +1164,7 @@
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
     "joi": "^17.13.3",
-    "joi-to-json": "^4.3.0",
+    "joi-to-json": "^4.3.2",
     "jquery": "^3.7.1",
     "js-search": "^1.4.3",
     "js-sha256": "^0.11.0",
