@@ -11,7 +11,7 @@ import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/se
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import type { CasesRouter } from '../../types';
+import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 import { createCasesRoute } from './create_cases_route';
 import { registerRoutes } from './register_routes';
 import type { CaseRoute } from './types';
@@ -80,12 +80,12 @@ describe('registerRoutes', () => {
     const simulateRequest = async ({
       method,
       path,
-      context = { cases: {} },
+      context = { cases: {} } as CasesRequestHandlerContext,
       headers = {},
     }: {
       method: keyof Pick<CasesRouter, 'get' | 'post'>;
       path: string;
-      context?: Record<string, unknown>;
+      context?: CasesRequestHandlerContext;
       headers?: Record<string, unknown>;
     }) => {
       const [, registeredRouteHandler] =
@@ -94,10 +94,11 @@ describe('registerRoutes', () => {
           return call[0].path === path;
         }) ?? [];
 
-      // @ts-expect-error upgrade typescript v5.4.5
+      if (!registeredRouteHandler) return;
+
       const result = await registeredRouteHandler(
-        // @ts-expect-error upgrade typescript v5.4.5
         context,
+        // @ts-ignore we don't need to pass a real request object here
         { headers },
         { customError, badRequest }
       );
@@ -321,7 +322,7 @@ describe('registerRoutes', () => {
       await simulateRequest({
         method: 'get',
         path: '/foo/{case_id}',
-        context: {},
+        context: {} as CasesRequestHandlerContext,
       });
 
       expect(badRequest).toBeCalledWith({
