@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
