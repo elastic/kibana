@@ -337,6 +337,9 @@ $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServi
 $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironment`
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
 
+$$$observability-apm-enable-profiling$$$`observability:apmEnableProfilingIntegration` {applies_to}`stack: removed 9.1`
+:   Enable the Universal Profiling integration in APM.
+
 $$$observability-profiling-show-error-frames$$$`observability:profilingShowErrorFrames`
 :   Show error frames in the Universal Profiling views to indicate stack unwinding failures.
 
@@ -358,8 +361,11 @@ $$$observability-apm-enable-transaction-profiling$$$`observability:apmEnableTran
 $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueries`
 :   When enabled, allows you to inspect {{es}} queries in API responses.
 
-$$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
-:   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
+$$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups` {applies_to}`stack: preview 9.0`
+:   When enabled, allows users to create Service Groups from the APM Service Inventory page.
+
+$$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration` {applies_to}`stack: preview 9.0, removed 9.1`
+:   Enables the Profiling view in Host details within Infrastructure.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
