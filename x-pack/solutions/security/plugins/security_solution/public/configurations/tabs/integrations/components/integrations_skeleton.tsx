@@ -52,6 +52,7 @@ export const IntegrationsSkeleton: React.FC = () => (
         <EuiFlexGroup gutterSize="m">
           <EuiSkeletonRectangle width={CARD_LOADING_WIDTH} height={CARD_LOADING_HEIGHT} />
           <EuiSkeletonRectangle width={CARD_LOADING_WIDTH} height={CARD_LOADING_HEIGHT} />
+          <EuiSkeletonRectangle width={CARD_LOADING_WIDTH} height={CARD_LOADING_HEIGHT} />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiFlexGroup>

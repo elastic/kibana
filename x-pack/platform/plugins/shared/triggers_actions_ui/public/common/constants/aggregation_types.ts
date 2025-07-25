@@ -7,7 +7,7 @@
 
 import type { AggregationType } from '../types';
 
-export enum AGGREGATION_TYPES {
+enum AGGREGATION_TYPES {
   COUNT = 'count',
   AVERAGE = 'avg',
   SUM = 'sum',

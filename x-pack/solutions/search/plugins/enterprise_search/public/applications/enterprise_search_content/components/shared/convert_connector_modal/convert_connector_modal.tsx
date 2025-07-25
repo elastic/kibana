@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,14 +20,18 @@ import { ConvertConnectorLogic } from '../../search_index/connector/native_conne
 export const ConvertConnectorModal: React.FC = () => {
   const { convertConnector, hideModal } = useActions(ConvertConnectorLogic);
   const { isLoading } = useValues(ConvertConnectorLogic);
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
-      onCancel={() => hideModal()}
-      onConfirm={() => convertConnector()}
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.enterpriseSearch.searchApplications.searchApplication.indices.convertInfexConfirm.title',
         { defaultMessage: 'Sure you want to convert your connector?' }
       )}
+      titleProps={{ id: modalTitleId }}
+      onCancel={() => hideModal()}
+      onConfirm={() => convertConnector()}
       buttonColor="danger"
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={i18n.translate(

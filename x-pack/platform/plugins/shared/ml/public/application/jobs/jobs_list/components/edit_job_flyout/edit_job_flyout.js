@@ -24,6 +24,7 @@ import {
   EuiTabbedContent,
   EuiConfirmModal,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { EditJobDetailsTab, EditDetectorsTab, EditDatafeedTab } from './tabs';
@@ -305,6 +306,8 @@ export class EditJobFlyoutUI extends Component {
   };
 
   render() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     let flyout;
     let confirmationModal;
 
@@ -479,9 +482,11 @@ export class EditJobFlyoutUI extends Component {
     if (this.state.isConfirmationModalVisible) {
       confirmationModal = (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.ml.jobsList.editJobFlyout.unsavedChangesDialogTitle', {
             defaultMessage: 'Save changes before leaving?',
           })}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={() => this.closeFlyout(true)}
           onConfirm={() => this.save()}
           cancelButtonText={i18n.translate(

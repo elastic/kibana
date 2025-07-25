@@ -138,6 +138,18 @@ describe('Dependencies with high volume of data', () => {
     cy.contains('nav', 'Page 1 of 60');
   });
 
+  it('shows empty message when no dependencies are present', () => {
+    cy.visitKibana(
+      `/app/apm/dependencies/inventory?${new URLSearchParams({
+        rangeFrom: new Date().toISOString(),
+        rangeTo: new Date().toISOString(),
+      })}`
+    );
+    cy.getByTestSubj('dependenciesTable');
+    cy.contains('No dependencies found');
+    cy.contains('Try another time range or reset the search filter');
+  });
+
   it('shows service dependencies', () => {
     cy.visitKibana(
       `/app/apm/services/synth-java-0/dependencies?${new URLSearchParams({

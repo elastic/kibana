@@ -378,6 +378,61 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.createRequestAbortedError",
+        "type": "Function",
+        "tags": [],
+        "label": "createRequestAbortedError",
+        "description": [],
+        "signature": [
+          "(message: string, meta?: Record<string, any> | undefined) => ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatRequestAbortedError",
+            "text": "OnechatRequestAbortedError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.createRequestAbortedError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.createRequestAbortedError.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.createToolNotFoundError",
         "type": "Function",
         "tags": [],
@@ -1155,6 +1210,48 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isRequestAbortedError",
+        "type": "Function",
+        "tags": [],
+        "label": "isRequestAbortedError",
+        "description": [
+          "\nChecks if the given error is a {@link OnechatRequestAbortedError}"
+        ],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatRequestAbortedError",
+            "text": "OnechatRequestAbortedError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isRequestAbortedError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3524,6 +3621,38 @@
             "text": "OnechatErrorCode"
           },
           ".internalError, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.OnechatRequestAbortedError",
+        "type": "Type",
+        "tags": [],
+        "label": "OnechatRequestAbortedError",
+        "description": [
+          "\nRepresents an internal error"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatErrorCode",
+            "text": "OnechatErrorCode"
+          },
+          ".requestAborted, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
         "deprecated": false,
