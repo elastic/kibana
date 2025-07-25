@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-
+import type { SchemaTypes } from '../../../../../common/http_api/shared/schema_type';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { isRate } from './is_rate';
@@ -18,11 +18,12 @@ export const calculateFromBasedOnMetric = async (
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
-  customMetric?: SnapshotCustomMetricInput
+  customMetric?: SnapshotCustomMetricInput,
+  schema?: SchemaTypes
 ) => {
   const inventoryModel = findInventoryModel(nodeType);
 
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations({ schema });
 
   const metricAgg = aggregations.get(metric);
 

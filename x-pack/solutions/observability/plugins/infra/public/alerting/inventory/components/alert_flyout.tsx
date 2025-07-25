@@ -8,7 +8,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { InfraClientStartDeps } from '../../../types';
@@ -22,10 +22,11 @@ interface Props {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  schema?: DataSchemaFormat;
   setVisible(val: boolean): void;
 }
 
-export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
+export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVisible }: Props) => {
   const { services } = useKibana<CoreStart & InfraClientStartDeps>();
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
@@ -50,6 +51,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
             filter,
             customMetrics,
             region,
+            schema,
           }}
           shouldUseRuleProducer
         />

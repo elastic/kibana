@@ -51,6 +51,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
   timelineOpen: false,
+  preferredSchema: 'ecs',
 };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
@@ -175,6 +176,7 @@ export const useWaffleOptions = () => {
   );
 
   const { inventoryPrefill } = useAlertPrefillContext();
+
   useEffect(() => {
     const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
     setNodeType(urlState.nodeType);

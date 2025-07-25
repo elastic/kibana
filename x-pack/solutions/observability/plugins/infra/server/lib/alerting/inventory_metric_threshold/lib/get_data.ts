@@ -9,7 +9,11 @@ import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsear
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  DataSchemaFormat,
+  InventoryItemType,
+  SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type {
@@ -76,21 +80,37 @@ const createContainerList = (containerContext: ContainerContext) => {
   return containerList;
 };
 
-export const getData = async (
-  esClient: ElasticsearchClient,
-  nodeType: InventoryItemType,
-  metric: SnapshotMetricType,
-  timerange: InfraTimerangeInput,
-  source: InfraSource,
-  logQueryFields: LogQueryFields | undefined,
-  compositeSize: number,
-  condition: InventoryMetricConditions,
-  logger: Logger,
-  filterQuery?: string,
-  customMetric?: SnapshotCustomMetricInput,
-  afterKey?: BucketKey,
-  previousNodes: Response = {}
-): Promise<Response> => {
+export const getData = async ({
+  esClient,
+  nodeType,
+  metric,
+  timerange,
+  source,
+  logQueryFields,
+  compositeSize,
+  condition,
+  logger,
+  filterQuery,
+  customMetric,
+  afterKey,
+  previousNodes = {},
+  schema,
+}: {
+  esClient: ElasticsearchClient;
+  nodeType: InventoryItemType;
+  metric: SnapshotMetricType;
+  timerange: InfraTimerangeInput;
+  source: InfraSource;
+  logQueryFields: LogQueryFields | undefined;
+  compositeSize: number;
+  condition: InventoryMetricConditions;
+  logger: Logger;
+  filterQuery?: string;
+  customMetric?: SnapshotCustomMetricInput;
+  afterKey?: BucketKey;
+  previousNodes?: Response;
+  schema?: DataSchemaFormat;
+}): Promise<Response> => {
   const handleResponse = (aggs: ResponseAggregations, previous: Response) => {
     const { nodes } = aggs;
     const nextAfterKey = nodes.after_key;
@@ -114,7 +134,7 @@ export const getData = async (
       };
     }
     if (nextAfterKey) {
-      return getData(
+      return getData({
         esClient,
         nodeType,
         metric,
@@ -126,9 +146,10 @@ export const getData = async (
         logger,
         filterQuery,
         customMetric,
-        nextAfterKey,
-        previous
-      );
+        afterKey: nextAfterKey,
+        previousNodes: previous,
+        schema,
+      });
     }
     return previous;
   };
@@ -153,7 +174,8 @@ export const getData = async (
     condition,
     filterQuery,
     customMetric,
-    fieldsExisted
+    fieldsExisted,
+    schema
   );
   logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);

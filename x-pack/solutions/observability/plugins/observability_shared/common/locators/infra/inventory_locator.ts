@@ -40,6 +40,8 @@ export interface InventoryLocatorParams extends SerializableRecord {
   metric: string; // encoded value
   nodeType: string;
   region?: string;
+
+  preferredSchema: string;
   sort?: {
     by: string;
     direction: 'desc' | 'async';
@@ -78,6 +80,7 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       ),
       metric: params.metric,
       nodeType: rison.encodeUnknown(params.nodeType),
+      preferredSchema: rison.encodeUnknown(params.preferredSchema),
       region: rison.encodeUnknown(params.region ?? ''),
       sort: rison.encodeUnknown(params.sort ?? { by: 'name', direction: 'desc' }),
       timelineOpen: rison.encodeUnknown(params.timelineOpen ?? false),

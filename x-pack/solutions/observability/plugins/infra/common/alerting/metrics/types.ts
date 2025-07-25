@@ -10,6 +10,7 @@ import type { COMPARATORS } from '@kbn/alerting-comparators';
 import type { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { SnapshotCustomMetricInput } from '../../http_api';
+import type { SchemaTypes } from '../../http_api/shared/schema_type';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
@@ -54,6 +55,7 @@ export interface InventoryMetricThresholdParams {
   filterQuery?: string;
   filterQueryText?: string;
   nodeType: InventoryItemType;
+  schema?: SchemaTypes;
   sourceId?: string;
   alertOnNoData?: boolean;
 }

@@ -7,6 +7,7 @@
 import type { ESSearchRequest } from '@kbn/es-types';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { SchemaTypes } from '../../../../../common/http_api/shared/schema_type';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
@@ -27,7 +28,8 @@ export const createRequest = async (
   condition: InventoryMetricConditions,
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput,
-  fieldsExisted?: Record<string, boolean> | null
+  fieldsExisted?: Record<string, boolean> | null,
+  schema?: SchemaTypes
 ) => {
   const filters: any[] = [
     {
@@ -58,7 +60,8 @@ export const createRequest = async (
     timerange,
     nodeType,
     metric,
-    customMetric
+    customMetric,
+    schema
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 

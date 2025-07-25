@@ -30,8 +30,12 @@ import { debounce, omit } from 'lodash';
 import type { ChangeEvent, FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import {
+  findInventoryModel,
+  SnapshotMetricTypeRT,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
@@ -51,6 +55,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
+import { SchemaExpression } from './schemas_dropdown';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -61,6 +66,7 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
+  schema?: DataSchemaFormat;
 }
 
 type Criteria = InventoryMetricConditions[];
@@ -75,6 +81,7 @@ type Props = Omit<
       alertOnNoData?: boolean;
       accountId?: string;
       region?: string;
+      schema?: DataSchemaFormat;
     },
     AlertContextMeta
   >,
@@ -193,6 +200,13 @@ export const Expressions: React.FC<Props> = (props) => {
     [setRuleParams]
   );
 
+  const updateSchema = useCallback(
+    (nt: any) => {
+      setRuleParams('schema', nt);
+    },
+    [setRuleParams]
+  );
+
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
     [onFilterChange]
@@ -236,6 +250,10 @@ export const Expressions: React.FC<Props> = (props) => {
       }
     }
 
+    if (!ruleParams.schema) {
+      setRuleParams('schema', DataSchemaFormat.ECS);
+    }
+
     if (ruleParams.criteria && ruleParams.criteria.length) {
       setTimeSize(ruleParams.criteria[0].timeSize);
       setTimeUnit(ruleParams.criteria[0].timeUnit);
@@ -274,6 +292,26 @@ export const Expressions: React.FC<Props> = (props) => {
           </div>
         </EuiFlexGroup>
       </div>
+      <div css={StyledExpressionCss}>
+        <EuiFlexGroup css={StyledExpressionRowCss}>
+          <div css={NonCollapsibleExpressionCss}>
+            <SchemaExpression
+              options={{
+                ecs: {
+                  text: 'ECS',
+                  value: 'ecs',
+                },
+                semconv: {
+                  text: 'SemConv',
+                  value: 'semconv',
+                },
+              }}
+              value={ruleParams.schema || 'ecs'}
+              onChange={updateSchema}
+            />
+          </div>
+        </EuiFlexGroup>
+      </div>
       <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
@@ -296,6 +334,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
                 region={ruleParams.region}
+                schema={ruleParams.schema}
                 data-test-subj="preview-chart"
               />
             </ExpressionRow>
@@ -707,7 +746,7 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const nodeTypes: { [key: string]: any } = {
+const nodeTypes: { [key: string]: any } = {
   host: {
     text: getDisplayNameForType('host'),
     value: 'host',
