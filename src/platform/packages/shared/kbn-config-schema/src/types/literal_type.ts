@@ -11,26 +11,18 @@ import { internals } from '../internals';
 import { Type } from './type';
 
 export class LiteralType<T> extends Type<T> {
-  private expectedValue: any;
+  private expectedValue: T;
 
   constructor(value: T) {
     super(internals.any().valid(value));
     this.expectedValue = value;
   }
 
-  protected handleError(
-    type: string,
-    { value, valids: [expectedValue = this.expectedValue] = [] }: Record<string, any>
-  ) {
-    const formatter = (v: any) =>
-      typeof v === 'object' && v != null ? JSON.stringify(v) : String(v);
-
+  protected handleError(type: string) {
     switch (type) {
       case 'any.required':
       case 'any.only':
-        return `expected value to equal [${formatter(expectedValue)}] but got [${formatter(
-          value
-        )}]`;
+        return `expected value to equal [${this.expectedValue}]`;
     }
   }
 }
