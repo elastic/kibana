@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type {
-  ChartType,
-  LensBaseLayer,
-  LensConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type {
+  AggregationConfigMap,
+  FormulasConfigMap,
+  InventoryMetricsConfig,
+  LensMetricChartConfig,
+} from './shared/metrics/types';
+export type { BaseMetricsCatalog } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -269,26 +271,15 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics {
-  tsvb?: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation | undefined };
-  defaultSnapshot: SnapshotMetricType;
-  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/
-  defaultTimeRangeInSeconds: number;
-}
-
-export interface InventoryMetricsWithCharts<
-  TFormula extends Record<string, LensBaseLayer>,
-  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
-> extends InventoryMetrics {
-  getFormulas: () => Promise<TFormula>;
-  getCharts: () => Promise<TChart>;
-}
-
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
-export interface InventoryModel<TMetrics = InventoryMetrics> {
-  id: string;
+export interface InventoryModel<
+  TEntityType extends InventoryItemType,
+  TAggregations extends AggregationConfigMap,
+  TFormulas extends FormulasConfigMap | undefined = undefined,
+  TCharts extends LensMetricChartConfig | undefined = undefined
+> {
+  id: TEntityType;
   displayName: string;
   singularDisplayName: string;
   requiredModule: Modules;
@@ -305,7 +296,7 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
     apm: boolean;
     uptime: boolean;
   };
-  metrics: TMetrics;
+  metrics: InventoryMetricsConfig<TAggregations, TFormulas, TCharts>;
   requiredMetrics: InventoryMetric[];
   legacyMetrics?: SnapshotMetricType[];
   tooltipMetrics: SnapshotMetricType[];

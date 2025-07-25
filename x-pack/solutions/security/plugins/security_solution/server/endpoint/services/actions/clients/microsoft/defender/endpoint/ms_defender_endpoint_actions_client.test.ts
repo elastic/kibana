@@ -750,7 +750,9 @@ describe('MS Defender response actions client', () => {
       responseActionsClientMock.setConnectorActionsClientExecuteResponse(
         connectorActionsMock,
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
-        { data: undefined }
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: undefined,
+        })
       );
 
       // Mock the connector to throw an error
@@ -1048,7 +1050,22 @@ describe('MS Defender response actions client', () => {
         msMachineActionsApiResponse.value[0] = {
           ...msMachineActionsApiResponse.value[0],
           type: 'LiveResponse',
-          commands: ['RunScript'],
+          commands: [
+            {
+              index: 0,
+              startTime: '2025-07-07T18:50:10.186354Z',
+              endTime: '2025-07-07T18:50:21.811356Z',
+              commandStatus: 'Completed',
+              errors: [],
+              command: {
+                type: 'RunScript',
+                params: [
+                  { key: 'ScriptName', value: 'hello.sh' },
+                  { key: 'Args', value: '--noargs' },
+                ],
+              },
+            },
+          ],
         };
 
         responseActionsClientMock.setConnectorActionsClientExecuteResponse(
@@ -1137,6 +1154,35 @@ describe('MS Defender response actions client', () => {
           expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
         }
       );
+
+      it('should set error.message to all command errors joined by newline if present', async () => {
+        // Arrange: set up a completed runscript machine action with command errors
+        msMachineActionsApiResponse.value[0].status = 'Failed';
+        msMachineActionsApiResponse.value[0].commands = [
+          {
+            command: { type: 'RunScript', params: [] },
+            errors: [
+              'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.',
+              'Another error',
+            ],
+            index: 0,
+            startTime: '2025-07-07T14:07:27.570687Z',
+            endTime: '2025-07-07T14:07:48.936317Z',
+            commandStatus: 'Completed',
+          },
+        ];
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              message:
+                'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.\nAnother error',
+            },
+          })
+        );
+      });
     });
 
     describe('telemetry events', () => {
@@ -1253,7 +1299,22 @@ describe('MS Defender response actions client', () => {
           msMachineActionsApiResponse.value[0] = {
             ...msMachineActionsApiResponse.value[0],
             type: 'LiveResponse',
-            commands: ['RunScript'],
+            commands: [
+              {
+                index: 0,
+                startTime: '2025-07-07T18:50:10.186354Z',
+                endTime: '2025-07-07T18:50:21.811356Z',
+                commandStatus: 'Completed',
+                errors: [],
+                command: {
+                  type: 'RunScript',
+                  params: [
+                    { key: 'ScriptName', value: 'hello.sh' },
+                    { key: 'Args', value: '--noargs' },
+                  ],
+                },
+              },
+            ],
           };
 
           responseActionsClientMock.setConnectorActionsClientExecuteResponse(

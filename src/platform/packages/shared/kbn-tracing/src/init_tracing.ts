@@ -10,16 +10,17 @@ import { core, node, resources, tracing } from '@elastic/opentelemetry-node/sdk'
 import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
 import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
+import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 import { fromExternalVariant } from '@kbn/std';
 import { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import type { AgentConfigOptions } from 'elastic-apm-node';
-import { castArray, once } from 'lodash';
-import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { Metadata } from '@grpc/grpc-js';
+import type { AgentConfigOptions } from 'elastic-apm-node';
+import { castArray } from 'lodash';
 import { LateBindingSpanProcessor } from '..';
+import { installShutdownHandlers } from './on_exit_cleanup';
 
 export function initTracing({
   tracingConfig,
@@ -103,11 +104,9 @@ export function initTracing({
     })
   );
 
-  const shutdown = once(async () => {
+  const shutdown = async () => {
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
-  });
+  };
 
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
+  installShutdownHandlers(shutdown);
 }
