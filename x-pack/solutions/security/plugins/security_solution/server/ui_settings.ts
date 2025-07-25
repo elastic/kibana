@@ -425,7 +425,7 @@ export const initUiSettings = (
             category: [APP_ID],
             requiresPageReload: true,
             schema: schema.boolean(),
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
         }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
