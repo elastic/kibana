@@ -24,5 +24,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }

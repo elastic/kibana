@@ -25,6 +25,7 @@ import { SvlApiKeysProvider } from './svl_api_keys';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 import { SvlDataUsagePageProvider } from './svl_data_usage';
+import { SvlCustomRolesPageProvider } from './svl_custom_roles_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -47,4 +48,5 @@ export const pageObjects = {
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
+  svlCustomRolesPage: SvlCustomRolesPageProvider,
 };
