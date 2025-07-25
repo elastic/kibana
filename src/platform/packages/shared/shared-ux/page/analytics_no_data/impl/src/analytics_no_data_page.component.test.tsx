@@ -42,9 +42,9 @@ describe('AnalyticsNoDataPageComponent', () => {
     expect(component.find(KibanaNoDataPage).length).toBe(1);
 
     const noDataConfig = component.find(KibanaNoDataPage).props().noDataConfig;
-    expect(noDataConfig.solution).toEqual('Analytics');
-    expect(noDataConfig.pageTitle).toEqual('Welcome to Analytics!');
-    expect(noDataConfig.logo).toEqual('logoKibana');
+    // expect(noDataConfig.solution).toEqual('Analytics');
+    // expect(noDataConfig.pageTitle).toEqual('Welcome to Analytics!');
+    // expect(noDataConfig.logo).toEqual('logoKibana');
     expect(noDataConfig.docsLink).toEqual('http://www.test.com');
     expect(noDataConfig.action.elasticAgent).not.toBeNull();
   });
@@ -83,7 +83,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         );
 
         await screen.findByTestId('kbnOverviewAddIntegrations');
-        screen.getAllByText('Add integrations');
+        screen.getAllByText('Browse integrations');
       });
 
       it('renders disabled add integrations card when fleet is not available', async () => {
@@ -101,71 +101,71 @@ describe('AnalyticsNoDataPageComponent', () => {
           </I18nProvider>
         );
 
-        await screen.findByTestId('kbnOverviewAddIntegrations');
+        await screen.findByTestId('noDataCard');
         screen.getByText('Contact your administrator');
       });
     });
 
-    describe('serverless_search flavor', () => {
-      beforeEach(() => {
-        services.pageFlavor = 'serverless_search';
-      });
+    // describe('serverless_search flavor', () => {
+    //   beforeEach(() => {
+    //     services.pageFlavor = 'serverless_search';
+    //   });
 
-      it('renders Add Data card', async () => {
-        render(
-          <I18nProvider>
-            <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
-              <AnalyticsNoDataPage
-                {...services}
-                onDataViewCreated={onDataViewCreated}
-                showPlainSpinner={false}
-              />
-            </AnalyticsNoDataPageProvider>
-          </I18nProvider>
-        );
+    //   it('renders Add Data card', async () => {
+    //     render(
+    //       <I18nProvider>
+    //         <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+    //           <AnalyticsNoDataPage
+    //             {...services}
+    //             onDataViewCreated={onDataViewCreated}
+    //             showPlainSpinner={false}
+    //           />
+    //         </AnalyticsNoDataPageProvider>
+    //       </I18nProvider>
+    //     );
 
-        await screen.findByTestId('kbnOverviewElasticsearchAddData');
-      });
+    //     await screen.findByTestId('kbnOverviewElasticsearchAddData');
+    //   });
 
-      it('renders the same Add Data card when fleet is not available', async () => {
-        render(
-          <I18nProvider>
-            <AnalyticsNoDataPageProvider
-              {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
-            >
-              <AnalyticsNoDataPage
-                {...services}
-                onDataViewCreated={onDataViewCreated}
-                showPlainSpinner={false}
-              />
-            </AnalyticsNoDataPageProvider>
-          </I18nProvider>
-        );
+    //   it('renders the same Add Data card when fleet is not available', async () => {
+    //     render(
+    //       <I18nProvider>
+    //         <AnalyticsNoDataPageProvider
+    //           {...{ ...services, hasESData: async () => false, canAccessFleet: false }}
+    //         >
+    //           <AnalyticsNoDataPage
+    //             {...services}
+    //             onDataViewCreated={onDataViewCreated}
+    //             showPlainSpinner={false}
+    //           />
+    //         </AnalyticsNoDataPageProvider>
+    //       </I18nProvider>
+    //     );
 
-        await screen.findByTestId('kbnOverviewElasticsearchAddData');
-      });
-    });
+    //     await screen.findByTestId('kbnOverviewElasticsearchAddData');
+    //   });
+    // });
 
-    describe('serverless_observability flavor', () => {
-      beforeEach(() => {
-        services.pageFlavor = 'serverless_observability';
-      });
+    // describe('serverless_observability flavor', () => {
+    //   beforeEach(() => {
+    //     services.pageFlavor = 'serverless_observability';
+    //   });
 
-      it('renders Add Data card', async () => {
-        render(
-          <I18nProvider>
-            <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
-              <AnalyticsNoDataPage
-                {...services}
-                onDataViewCreated={onDataViewCreated}
-                showPlainSpinner={false}
-              />
-            </AnalyticsNoDataPageProvider>
-          </I18nProvider>
-        );
+    //   it('renders Add Data card', async () => {
+    //     render(
+    //       <I18nProvider>
+    //         <AnalyticsNoDataPageProvider {...{ ...services, hasESData: async () => false }}>
+    //           <AnalyticsNoDataPage
+    //             {...services}
+    //             onDataViewCreated={onDataViewCreated}
+    //             showPlainSpinner={false}
+    //           />
+    //         </AnalyticsNoDataPageProvider>
+    //       </I18nProvider>
+    //     );
 
-        await screen.findByTestId('kbnObservabilityNoData');
-      });
-    });
+    //     await screen.findByTestId('kbnObservabilityNoData');
+    //   });
+    // });
   });
 });

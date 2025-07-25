@@ -21,12 +21,10 @@ import { KibanaNoDataPageProvider } from './services';
 
 describe('Kibana No Data Page', () => {
   const noDataConfig = {
-    solution: 'Analytics',
     pageTitle: 'Analytics',
-    logo: 'logoKibana',
     action: {
       elasticAgent: {
-        title: 'Add Integrations',
+        title: <h2>Add integration</h2>,
       },
     },
     docsLink: 'http://www.docs.com',

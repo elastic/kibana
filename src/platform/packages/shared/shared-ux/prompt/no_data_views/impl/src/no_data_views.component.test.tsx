@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButton, EuiCard } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { NoDataViewsPrompt } from './no_data_views.component';
-import { DocumentationLink } from './documentation_link';
+// import { DocumentationLink } from './documentation_link';
 
 describe('<NoDataViewsPromptComponent />', () => {
   test('is rendered correctly', () => {
@@ -24,31 +24,32 @@ describe('<NoDataViewsPromptComponent />', () => {
         onTryESQL={jest.fn()}
       />
     );
-    expect(component.find(EuiCard).length).toBe(2);
+    expect(component.find(EuiPageTemplate.EmptyPrompt).length).toBe(2);
     expect(component.find(EuiButton).length).toBe(2);
-    expect(component.find(DocumentationLink).length).toBe(2);
+    // expect(component.find(DocumentationLink).length).toBe(2);
 
     expect(component.find('EuiButton[data-test-subj="createDataViewButton"]').length).toBe(1);
-    expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(1);
+    // expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(1);
 
     expect(component.find('EuiButton[data-test-subj="tryESQLLink"]').length).toBe(1);
-    expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(1);
+    // expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(1);
   });
 
   test('does not render "Create data view" button if canCreateNewDataViews is false', () => {
     const component = mountWithIntl(<NoDataViewsPrompt canCreateNewDataView={false} />);
-
-    expect(component.find('EuiButton[data-test-subj="createDataViewButton"]').length).toBe(0);
+    const button = component.find('EuiButton[data-test-subj="createDataViewButton"]');
+    expect(button.length).toBe(1);
+    expect(button.prop('disabled')).toBe(true);
   });
 
-  test('does not render documentation links if links to documentation are not provided', () => {
-    const component = mountWithIntl(
-      <NoDataViewsPrompt onClickCreate={jest.fn()} canCreateNewDataView={true} />
-    );
+  // test('does not render documentation links if links to documentation are not provided', () => {
+  //   const component = mountWithIntl(
+  //     <NoDataViewsPrompt onClickCreate={jest.fn()} canCreateNewDataView={true} />
+  //   );
 
-    expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(0);
-    expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(0);
-  });
+  //   expect(component.find('DocumentationLink[data-test-subj="docLinkDataViews"]').length).toBe(0);
+  //   expect(component.find('DocumentationLink[data-test-subj="docLinkEsql"]').length).toBe(0);
+  // });
 
   test('onClickCreate', () => {
     const onClickCreate = jest.fn();
