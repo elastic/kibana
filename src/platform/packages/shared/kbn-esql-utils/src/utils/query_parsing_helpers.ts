@@ -133,7 +133,7 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
 
 export const prettifyQuery = (src: string): string => {
   const query = EsqlQuery.fromSrc(src);
-  return query.print({ multiline: true, indent: '  ' });
+  return query.print({ multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
