@@ -12,7 +12,7 @@ import * as i18n from './translations';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 interface Props {
-  colorFamily: 'default' | 'bright';
+  colorFamily?: 'default' | 'bright';
   currentCount: number;
   description?: string;
   previousCount: number;

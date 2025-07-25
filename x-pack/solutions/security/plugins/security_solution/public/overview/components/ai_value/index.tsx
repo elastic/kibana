@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
@@ -44,13 +43,14 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
       />
       <EuiSpacer size="l" />
 
-      <EuiFlexGrid
-        columns={2}
-        gutterSize="l"
-        css={css`
-          grid-template-columns: 30% 68%;
-        `}
-      >
+      <EuiFlexGrid columns={2} gutterSize="l">
+        <AlertProcessing
+          attackAlertIds={attackAlertIds}
+          valueMetrics={valueMetrics}
+          valueMetricsCompare={valueMetricsCompare}
+          from={from}
+          to={to}
+        />
         <CostSavingsTrend
           analystHourlyRate={analystHourlyRate}
           attackAlertIds={attackAlertIds}
@@ -60,15 +60,6 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
         />
       </EuiFlexGrid>
       <EuiSpacer size="l" />
-      <AlertProcessing
-        attackAlertIds={attackAlertIds}
-        escalatedAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
-        escalatedAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
-        filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
-        filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
-        from={from}
-        to={to}
-      />
     </>
   );
 };

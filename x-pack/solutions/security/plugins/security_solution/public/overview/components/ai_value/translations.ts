@@ -86,7 +86,18 @@ export const COMPARED = i18n.translate('xpack.securitySolution.aiValue.compared'
 });
 
 export const NON_SUSPICIOUS = i18n.translate('xpack.securitySolution.aiValue.falsePositives', {
-  defaultMessage: 'non-suspicious alerts',
+  defaultMessage: 'Non-suspicious alerts',
+});
+
+export const TOTAL_ALERTS_PROCESSED = i18n.translate(
+  'xpack.securitySolution.aiValue.totalAlertsProcessed',
+  {
+    defaultMessage: 'Total alerts processed',
+  }
+);
+
+export const ESCALATED = i18n.translate('xpack.securitySolution.aiValue.escalated', {
+  defaultMessage: 'Escalated',
 });
 
 export const ESCALATED_ALERTS = i18n.translate('xpack.securitySolution.aiValue.escalatedAlerts', {
@@ -224,3 +235,7 @@ export const EXECUTIVE_THREATS_DETECTED_DESC = (isIncrease: boolean) =>
     defaultMessage: '{creaseType} in real threats detected, improving detection coverage',
     values: { creaseType: isIncrease ? EXECUTIVE_INCREASE : EXECUTIVE_DECREASE },
   });
+
+export const AI_FILTERED = i18n.translate('xpack.securitySolution.aiValue.aiFiltered', {
+  defaultMessage: 'AI filtered',
+});

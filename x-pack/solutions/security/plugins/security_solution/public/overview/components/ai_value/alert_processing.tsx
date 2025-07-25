@@ -6,28 +6,25 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ComparePercentageBadge } from './compare_percentage_badge';
-import { formatPercent } from './metrics';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { AlertsProcessingTable } from './alert_processing_table';
+import { formatPercent, type ValueMetrics } from './metrics';
 import * as i18n from './translations';
 import { AlertProcessingDonut } from './alert_processing_donut';
+import { AlertProcessingCompare } from './alert_processing_compare';
 
 interface Props {
   attackAlertIds: string[];
-  escalatedAlertsCountPerc: number;
-  escalatedAlertsCountPercCompare: number;
   from: string;
   to: string;
-  filteredAlertsPerc: number;
-  filteredAlertsPercCompare: number;
+  valueMetrics: ValueMetrics;
+  valueMetricsCompare: ValueMetrics;
 }
 
 export const AlertProcessing: React.FC<Props> = ({
   attackAlertIds,
-  escalatedAlertsCountPerc,
-  escalatedAlertsCountPercCompare,
-  filteredAlertsPerc,
-  filteredAlertsPercCompare,
+  valueMetrics,
+  valueMetricsCompare,
   from,
   to,
 }) => {
@@ -39,50 +36,27 @@ export const AlertProcessing: React.FC<Props> = ({
       <EuiText size="s">
         <p>{i18n.ALERT_PROCESSING_DESC}</p>
       </EuiText>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="xs" direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <p>{i18n.COMPARED}</p>
-          </EuiText>
+      <EuiSpacer size="l" />{' '}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <AlertProcessingDonut valueMetrics={valueMetrics} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <ComparePercentageBadge
-                currentCount={filteredAlertsPerc}
-                previousCount={filteredAlertsPercCompare}
-                stat={formatPercent(filteredAlertsPercCompare)}
-                statType={i18n.FILTERING_RATE}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <p>{i18n.NON_SUSPICIOUS}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <ComparePercentageBadge
-                currentCount={escalatedAlertsCountPerc}
-                previousCount={escalatedAlertsCountPercCompare}
-                stat={formatPercent(escalatedAlertsCountPercCompare)}
-                statType={i18n.ESCALATED_RATE}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <p>{i18n.ESCALATED_ALERTS}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiFlexItem>
+          <AlertsProcessingTable
+            totalAlerts={valueMetrics.totalAlerts}
+            filteredAlerts={valueMetrics.filteredAlerts}
+            escalatedAlerts={valueMetrics.totalAlerts - valueMetrics.filteredAlerts}
+            filteredAlertsPerc={formatPercent(valueMetrics.filteredAlertsPerc)}
+            escalatedAlertsPerc={formatPercent(valueMetrics.escalatedAlertsPerc)}
+          />
+          <EuiSpacer size="m" />
+          <AlertProcessingCompare
+            valueMetrics={valueMetrics}
+            valueMetricsCompare={valueMetricsCompare}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <AlertProcessingDonut attackAlertIds={attackAlertIds} from={from} to={to} />
     </EuiPanel>
   );
 };
