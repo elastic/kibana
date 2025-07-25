@@ -106,7 +106,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {isModelEvaluationEnabled && apmTraceLink != null && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE}>
+          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.VIEW_APM_TRACE}
               color="primary"
@@ -128,7 +128,11 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
+        <EuiToolTip
+          position="top"
+          content={i18n.ADD_TO_CASE_EXISTING_CASE}
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             aria-label={i18n.ADD_TO_CASE_EXISTING_CASE}
             color="primary"

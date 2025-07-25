@@ -580,6 +580,22 @@
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.formLabel",
+            "type": "string",
+            "tags": [],
+            "label": "formLabel",
+            "description": [
+              "Optional form field label to show above the query editor"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

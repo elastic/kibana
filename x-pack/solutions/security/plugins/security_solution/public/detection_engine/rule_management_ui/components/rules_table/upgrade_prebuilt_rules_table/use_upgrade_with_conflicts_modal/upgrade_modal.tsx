@@ -13,19 +13,13 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiText,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import { ConfirmRulesUpgrade } from './use_upgrade_modal';
 import * as i18n from './translations';
+import { ConflictsDescription, type RulesConflictStats } from './conflicts_description';
 
-export interface RulesConflictStats {
-  numOfRulesWithoutConflicts: number;
-  numOfRulesWithSolvableConflicts: number;
-  numOfRulesWithNonSolvableConflicts: number;
-}
-
-interface UpgradeWithConflictsModalProps extends RulesConflictStats {
+export interface UpgradeWithConflictsModalProps extends RulesConflictStats {
   onCancel: () => void;
   onConfirm: (result: ConfirmRulesUpgrade) => void;
 }
@@ -53,13 +47,11 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText>
-          {getModalBodyText({
-            numOfRulesWithoutConflicts,
-            numOfRulesWithSolvableConflicts,
-            numOfRulesWithNonSolvableConflicts,
-          })}
-        </EuiText>
+        <ConflictsDescription
+          numOfRulesWithoutConflicts={numOfRulesWithoutConflicts}
+          numOfRulesWithSolvableConflicts={numOfRulesWithSolvableConflicts}
+          numOfRulesWithNonSolvableConflicts={numOfRulesWithNonSolvableConflicts}
+        />
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -80,49 +72,3 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
     </EuiModal>
   );
 });
-
-function getModalBodyText({
-  numOfRulesWithoutConflicts,
-  numOfRulesWithSolvableConflicts,
-  numOfRulesWithNonSolvableConflicts,
-}: RulesConflictStats): JSX.Element {
-  // Only solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_SOLVABLE_CONFLICTS(numOfRulesWithSolvableConflicts);
-  }
-
-  // Only non-solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithSolvableConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_NON_SOLVABLE_CONFLICTS(numOfRulesWithNonSolvableConflicts);
-  }
-
-  // Only conflicts
-  if (numOfRulesWithoutConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_CONFLICTS({
-      numOfRulesWithSolvableConflicts,
-      numOfRulesWithNonSolvableConflicts,
-    });
-  }
-
-  // Rules without conflicts + rules with solvable conflicts
-  if (numOfRulesWithNonSolvableConflicts === 0) {
-    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_SOLVABLE_CONFLICTS({
-      numOfRulesWithoutConflicts,
-      numOfRulesWithSolvableConflicts,
-    });
-  }
-
-  // Rules without conflicts + rules with non-solvable conflicts
-  if (numOfRulesWithSolvableConflicts === 0) {
-    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_NON_SOLVABLE_CONFLICTS({
-      numOfRulesWithoutConflicts,
-      numOfRulesWithNonSolvableConflicts,
-    });
-  }
-
-  return i18n.ALL_KINDS_OF_RULES({
-    numOfRulesWithoutConflicts,
-    numOfRulesWithSolvableConflicts,
-    numOfRulesWithNonSolvableConflicts,
-  });
-}

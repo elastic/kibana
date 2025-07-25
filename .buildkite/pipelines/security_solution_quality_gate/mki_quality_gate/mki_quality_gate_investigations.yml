@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:all
     key: test_investigations
     label: 'Cypress MKI - Investigations'
     env:

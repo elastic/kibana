@@ -62,8 +62,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   }
 
   describe('Custom threshold rule - consumers', function () {
-    // custom roles are not yet supported in MKI
-    this.tags(['skipMKI']);
+    // Custom roles not yet supported in MKI
+    this.tags(['failsOnMKI']);
+
     const ruleIdList: string[] = [];
 
     before(async () => {

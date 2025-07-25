@@ -6,7 +6,11 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
+import {
+  type UserIdAndName,
+  type Conversation,
+  ConversationWithoutRounds,
+} from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -15,35 +19,50 @@ import { ConversationProperties } from './storage';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
-export const fromEs = (
+const convertBaseFromEs = (
   document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-): Conversation => {
+) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
 
   return {
     id: document._id,
-    agentId: document._source.agent_id,
+    agent_id: document._source.agent_id,
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
     },
     title: document._source.title,
-    createdAt: document._source.created_at,
-    updatedAt: document._source.updated_at,
-    rounds: document._source.rounds,
+    created_at: document._source.created_at,
+    updated_at: document._source.updated_at,
   };
+};
+
+export const fromEs = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): Conversation => {
+  const base = convertBaseFromEs(document);
+  return {
+    ...base,
+    rounds: document._source!.rounds,
+  };
+};
+
+export const fromEsWithoutRounds = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): ConversationWithoutRounds => {
+  return convertBaseFromEs(document);
 };
 
 export const toEs = (conversation: Conversation): ConversationProperties => {
   return {
-    agent_id: conversation.agentId,
+    agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
     title: conversation.title,
-    created_at: conversation.createdAt,
-    updated_at: conversation.updatedAt,
+    created_at: conversation.created_at,
+    updated_at: conversation.updated_at,
     rounds: conversation.rounds,
   };
 };
@@ -76,7 +95,7 @@ export const createRequestToEs = ({
   creationDate: Date;
 }): ConversationProperties => {
   return {
-    agent_id: conversation.agentId,
+    agent_id: conversation.agent_id,
     user_id: currentUser.id,
     user_name: currentUser.username,
     title: conversation.title,

@@ -78,6 +78,7 @@ export const ApiKeyField: React.FunctionComponent<{
                   defaultMessage: 'Show token',
                 })
           }
+          disableScreenReaderOutput
         >
           <EuiButtonIcon
             aria-label={

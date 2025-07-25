@@ -21,6 +21,8 @@ import {
   MockedAgent,
   AgentClientMock,
   createMockedAgentClient,
+  ToolRegistryMock,
+  createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
@@ -38,11 +40,14 @@ describe('Onechat runner', () => {
 
   describe('runTool', () => {
     let tool: MockedTool;
+    let registry: ToolRegistryMock;
 
     beforeEach(() => {
+      registry = createToolRegistryMock();
       const {
-        toolsService: { registry },
+        toolsService: { getRegistry },
       } = runnerDeps;
+      getRegistry.mockResolvedValue(registry);
 
       tool = createMockedTool({
         schema: z.object({

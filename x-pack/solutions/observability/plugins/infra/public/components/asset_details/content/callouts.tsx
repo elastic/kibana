@@ -27,15 +27,15 @@ const isSnapshotMetricType = <T extends InventoryItemType>(
 };
 
 export const Callouts = () => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const [state] = useAssetDetailsUrlState();
 
-  const assetConfig = findInventoryModel(asset.type);
-  const alertMetric = isSnapshotMetricType(assetConfig, state?.alertMetric)
+  const entityConfig = findInventoryModel(entity.type);
+  const alertMetric = isSnapshotMetricType(entityConfig, state?.alertMetric)
     ? state?.alertMetric
     : undefined;
 
-  if (asset.type === 'host' && alertMetric && assetConfig.legacyMetrics?.includes(alertMetric)) {
+  if (entity.type === 'host' && alertMetric && entityConfig.legacyMetrics?.includes(alertMetric)) {
     return (
       <LegacyAlertMetricCallout
         visibleFor={INCOMING_ALERT_CALLOUT_VISIBLE_FOR}

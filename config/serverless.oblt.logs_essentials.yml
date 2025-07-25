@@ -47,6 +47,7 @@ xpack.fleet.internal.registry.excludePackages: [
   'profiler_agent',
   'synthetics_dashboards',
 ]
+xpack.fleet.internal.excludeDataStreamTypes: ['metrics']
 
 xpack.actions.enabledActionTypes: [
   '.email',

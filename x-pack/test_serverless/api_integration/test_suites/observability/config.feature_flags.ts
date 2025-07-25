@@ -20,9 +20,7 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
   // add feature flags
-  kbnServerArgs: [
-    '--xpack.security.roleManagementEnabled=true', // needed to check composite feautures in /observability/platform_security/authorization.ts
-  ],
+  kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 

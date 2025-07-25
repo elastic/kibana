@@ -10,10 +10,12 @@
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type {
-  SerializedTimeRange,
-  SerializedTitles,
-  SerializedPanelState,
+import {
+  type SerializedTimeRange,
+  type SerializedTitles,
+  type SerializedPanelState,
+  findSavedObjectRef,
+  SAVED_OBJECT_REF_NAME,
 } from '@kbn/presentation-publishing';
 import {
   toSavedSearchAttributes,
@@ -39,7 +41,8 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
-  const savedObjectId = serializedState.rawState.savedObjectId;
+  const savedObjectRef = findSavedObjectRef(SEARCH_EMBEDDABLE_TYPE, serializedState.references);
+  const savedObjectId = savedObjectRef ? savedObjectRef.id : serializedState.rawState.savedObjectId;
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
@@ -114,14 +117,20 @@ export const serializeState = ({
 
     return {
       rawState: {
-        savedObjectId,
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
         ...dynamicActionsState,
         ...overwriteState,
       },
-      references: dynamicActionsReferences ?? [],
+      references: [
+        ...(dynamicActionsReferences ?? []),
+        {
+          name: SAVED_OBJECT_REF_NAME,
+          type: SEARCH_EMBEDDABLE_TYPE,
+          id: savedObjectId,
+        },
+      ],
     };
   }
 

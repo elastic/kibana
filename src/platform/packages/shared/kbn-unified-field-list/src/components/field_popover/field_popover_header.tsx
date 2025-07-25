@@ -119,7 +119,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         )}
         {onAddBreakdownField && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
-            <EuiToolTip content={addBreakdownFieldTooltip}>
+            <EuiToolTip content={addBreakdownFieldTooltip} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}

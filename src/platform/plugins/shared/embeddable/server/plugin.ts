@@ -31,14 +31,19 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
+import { EmbeddableTransforms } from '../common';
+import { getTransforms, registerTransforms } from './transforms_registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+};
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
@@ -49,6 +54,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory, this.getEnhancement);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      registerTransforms,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
       extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
@@ -64,6 +70,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
+      getTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory, this.getEnhancement),
       extract: getExtractFunction(this.getEmbeddableFactory, this.getEnhancement),
       inject: getInjectFunction(this.getEmbeddableFactory, this.getEnhancement),

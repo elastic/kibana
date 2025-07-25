@@ -129,6 +129,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             error={indexNameError}
           >
             <EuiFieldText
+              isInvalid={indexNameError !== undefined}
               fullWidth
               name="indexName"
               value={indexName}

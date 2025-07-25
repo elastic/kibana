@@ -49,6 +49,7 @@ import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
+import { visualizeClassName, visContainerStyle } from '../../vis.styles';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -433,7 +434,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     const div = document.createElement('div');
-    div.className = `visualize panel-content panel-content--fullWidth`;
+    div.className = `visualize panel-content panel-content--fullWidth ${visualizeClassName}`;
     domNode.appendChild(div);
 
     const warningDiv = document.createElement('div');
@@ -446,7 +447,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="visChart__spinner">
+        <div className="visChart__spinner" css={visContainerStyle}>
           <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,

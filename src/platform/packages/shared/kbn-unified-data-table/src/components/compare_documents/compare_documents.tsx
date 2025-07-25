@@ -21,7 +21,6 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
@@ -50,7 +49,6 @@ export interface CompareDocumentsProps {
   getDocById: (id: string) => DataTableRecord | undefined;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
-  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 const COMPARISON_ROW_HEIGHT: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
@@ -72,7 +70,6 @@ const CompareDocuments = ({
   dataView,
   isPlainRecord,
   selectedFieldNames,
-  additionalFieldGroups,
   selectedDocIds,
   schemaDetectors,
   forceShowAllFields,
@@ -115,7 +112,6 @@ const CompareDocuments = ({
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
     selectedFieldNames,
-    additionalFieldGroups,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
@@ -200,7 +196,6 @@ const CompareDocuments = ({
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById: memoizedGetDocById,
-    additionalFieldGroups,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,

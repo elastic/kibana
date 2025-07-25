@@ -9,7 +9,7 @@ import type { Conversation } from '@kbn/onechat-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'createdAt' | 'updatedAt' | 'user'
+  'id' | 'created_at' | 'updated_at' | 'user'
 > & {
   id?: string;
 };

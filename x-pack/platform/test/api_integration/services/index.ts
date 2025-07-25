@@ -19,7 +19,7 @@ import { TransformProvider } from './transform';
 import { IndexManagementProvider } from './index_management';
 import { AlertingApiProvider } from './alerting_api';
 import { MachineLearningProvider } from './ml';
-import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
+import { SynthtraceClientProvider } from './synthtrace';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -35,5 +35,5 @@ export const services = {
   spaces: SpacesServiceProvider,
   transform: TransformProvider,
   usageAPI: UsageAPIProvider,
-  apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
+  synthtrace: SynthtraceClientProvider,
 };
