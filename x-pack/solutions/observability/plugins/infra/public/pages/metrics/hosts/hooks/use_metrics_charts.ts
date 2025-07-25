@@ -8,12 +8,17 @@
 import useAsync from 'react-use/lib/useAsync';
 import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
+  const config = usePluginConfig();
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, disk, memory, network } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network } = await model.metrics.getCharts({
+      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+    });
 
     return [
       cpu.xy.cpuUsage,
@@ -47,7 +52,7 @@ export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
         },
       }),
     }));
-  }, [dataViewId]);
+  }, [dataViewId, config.featureFlags.hostOtelEnabled]);
 
   return charts;
 };

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import type { SchemaTypes } from '../../../../common/http_api/shared/schema_type';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
 
@@ -21,8 +22,15 @@ export const useHostCharts = ({
   dataViewId?: string;
   overview?: boolean;
 }) => {
+  const config = usePluginConfig();
+
   const { value: charts = [], error } = useAsync(async () => {
-    const hostCharts = await getHostsCharts({ metric, overview });
+    const hostCharts = await getHostsCharts({
+      metric,
+      overview,
+      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+    });
+
     return hostCharts.map((chart) => ({
       ...chart,
       ...(dataViewId && {
@@ -31,7 +39,7 @@ export const useHostCharts = ({
         },
       }),
     }));
-  }, [dataViewId, metric, overview]);
+  }, [config.featureFlags.hostOtelEnabled, dataViewId, metric, overview]);
 
   return { charts, error };
 };
@@ -43,18 +51,25 @@ export const useKubernetesCharts = ({
   dataViewId?: string;
   overview?: boolean;
 }) => {
-  const model = useMemo(() => findInventoryModel('host'), []);
+  const model = findInventoryModel('host');
+  const config = usePluginConfig();
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts();
+    const { kubernetesNode } = await model.metrics.getCharts({
+      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+    });
+
+    if (!kubernetesNode) {
+      return [];
+    }
 
     const items = overview
-      ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
+      ? [kubernetesNode.xy.nodeCpuCapacity, kubernetesNode.xy.nodeMemoryCapacity]
       : [
-          kibernetesNode.xy.nodeCpuCapacity,
-          kibernetesNode.xy.nodeMemoryCapacity,
-          kibernetesNode.xy.nodeDiskCapacity,
-          kibernetesNode.xy.nodePodCapacity,
+          kubernetesNode.xy.nodeCpuCapacity,
+          kubernetesNode.xy.nodeMemoryCapacity,
+          kubernetesNode.xy.nodeDiskCapacity,
+          kubernetesNode.xy.nodePodCapacity,
         ];
 
     return items.map((chart) => {
@@ -67,7 +82,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [dataViewId, overview, model.metrics]);
+  }, [model.metrics, config.featureFlags.hostOtelEnabled, overview, dataViewId]);
 
   return { charts, error };
 };
@@ -89,10 +104,12 @@ export const useHostKpiCharts = ({
   getSubtitle?: (formulaValue: string) => string;
 }) => {
   seriesColor = useChartSeriesColor(seriesColor);
-
+  const config = usePluginConfig();
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, memory, disk } = await model.metrics.getCharts();
+    const { cpu, memory, disk } = await model.metrics.getCharts({
+      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+    });
 
     return [
       cpu.metric.cpuUsage,
@@ -110,7 +127,7 @@ export const useHostKpiCharts = ({
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle]);
+  }, [dataViewId, seriesColor, getSubtitle, config.featureFlags.hostOtelEnabled]);
 
   return charts;
 };
@@ -118,12 +135,15 @@ export const useHostKpiCharts = ({
 const getHostsCharts = async ({
   metric,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
   overview?: boolean;
+  schema: SchemaTypes;
 }) => {
   const model = findInventoryModel('host');
-  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
+
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({ schema });
 
   switch (metric) {
     case 'cpu':
