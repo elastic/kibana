@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import equal from 'fast-deep-equal';
 import { MigrationInfoRecord, MigrationSnapshot } from '../types';
 
-export function assertValidUpdates({
+export async function assertValidUpdates({
   log,
   from,
   to,
@@ -20,6 +20,7 @@ export function assertValidUpdates({
   from: MigrationSnapshot;
   to: MigrationSnapshot;
 }) {
+  log.info(`Checking SO type updates between base branch and current branch`);
   Object.entries(to.typeDefinitions).forEach(([name, infoAfter]) => {
     const infoBefore = from.typeDefinitions[name];
     if (!infoBefore) {
@@ -68,6 +69,7 @@ export function assertValidUpdates({
       }
     }
   });
+  log.info('✅ Current SO type definitions are compatible with the baseline');
 }
 
 function getMutatedModelVersions(

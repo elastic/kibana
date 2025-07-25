@@ -9,36 +9,35 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { exit } from 'process';
-import {
-  fetchLatestBaseBranchSnapshot as fetchBaseBranchSnapshot,
-  fetchLatestServerlessSnapshot,
-  takeSnapshot,
-  assertValidUpdates,
-} from '../src/snapshots';
+import { fetchSnapshot, takeSnapshot, assertValidUpdates } from '../src/snapshots';
 
-export function checkSavedObjectTypes(baseBranchSha?: string) {
+/**
+ * Perform a series of sanity checks on the definitions of the saved object types for the current code level.
+ * It attempts to download a couple of snapshots, to compare how these definitions have evolved:
+ * - The current (latest) serverless release snapshot
+ * - The base branch snapshot (if SHA provided and snapshot available)
+ * @param gitRev The identifier of the reference commit SHA, aka the baseline for the comparison
+ * @private
+ */
+export function checkSavedObjectTypes(gitRev: string) {
   run(async ({ log }) => {
-    try {
-      log.info(`Fetching snapshot for base branch '${baseBranchSha}'`);
-      const baseBranchSnapshot = await fetchBaseBranchSnapshot({ log, gitRev: baseBranchSha });
-      log.info(`Fetching snapshot for current serverless release`);
-      const latestServerlessSnapshot = await fetchLatestServerlessSnapshot({ log });
-      log.info(`Starting ES + Kibana to capture current SO type definitions`);
-      const currentSnapshot = await takeSnapshot({ log });
-
-      if (baseBranchSnapshot) {
-        log.info(`Checking SO type updates between base branch and current branch`);
-        assertValidUpdates({ log, from: baseBranchSnapshot, to: currentSnapshot });
-        log.info('✅ Current SO type definitions are compatible with the base branch');
-      }
-
-      log.info(`Checking SO type updates between current serverless release and current branch`);
-      assertValidUpdates({ log, from: latestServerlessSnapshot, to: currentSnapshot });
-      log.info('✅ Current SO type definitions are compatible with the current serverless release');
-    } catch (err) {
-      log.error(err);
+    const baseline = await fetchSnapshot({ log, gitRev }).catch(() => {
+      log.error('⚠️ Failed to download the baseline snapshot. Skipping Saved Objects checks.');
       exit(1);
-    }
+    });
+
+    const current = await takeSnapshot({ log }).catch(() => {
+      log.error(
+        '⚠️ Failed to obtain snapshot for current working tree. Skipping Saved Objects checks.'
+      );
+      exit(1);
+    });
+
+    await assertValidUpdates({ log, from: baseline, to: current }).catch(() => {
+      log.error('❌ Found some violations in the current Saved Object definitions.');
+      exit(1);
+    });
+
     exit(0);
   });
 }

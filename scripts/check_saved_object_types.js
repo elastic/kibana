@@ -9,20 +9,17 @@
 
 require('../src/setup_node_env');
 
-if (process.argv.length !== 2) {
+if (process.argv.length !== 3) {
   var scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
 
   console.log(`
-    Usage: node ${scriptName}
+    Usage: node ${scriptName} <baselineGitRev>
 
-    Compares the saved object type definitions from the current branch (current working tree) against:
-    - A snapshot from the base branch of the PR (based on the merge-base commit, if available).
-    - The latest Serverless release snapshot.
-
+    Compares the saved object type definitions from the current branch (current working tree) against a snapshot from the specified <gitRev>.
     It performs various sanity checks to ensure that current changes (if any) are not breaking the Saved Object migrations.
   `);
 
-  process.exit(0);
+  process.exit(1);
 }
 
-require('@kbn/saved-object-types').checkSavedObjectTypes(process.env.GITHUB_PR_MERGE_BASE);
+require('@kbn/saved-object-types').checkSavedObjectTypes(process.argv[2]);

@@ -8,5 +8,5 @@
  */
 
 export { takeSnapshot } from './take';
-export { fetchLatestBaseBranchSnapshot, fetchLatestServerlessSnapshot } from './fetch';
+export { fetchSnapshot } from './fetch';
 export { assertValidUpdates } from './compare';
