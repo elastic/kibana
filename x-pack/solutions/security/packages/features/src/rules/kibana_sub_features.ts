@@ -7,7 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { APP_ID, EXCEPTIONS_FEATURE_ID } from '../../constants';
+import {
+  APP_ID,
+  EXCEPTIONS_SUBFEATURE_ID,
+  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ID_READ,
+} from '../../constants';
+import type { SecurityFeatureParams } from '../security/types';
 
 const TRANSLATIONS = Object.freeze({
   all: i18n.translate(
@@ -28,7 +34,9 @@ const TRANSLATIONS = Object.freeze({
  * Defines all the Security Solution Cases subFeatures available.
  * The order of the subFeatures is the order they will be displayed
  */
-export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
+export const getExceptionsSubFeaturesMap = (
+  savedObjects: SecurityFeatureParams['savedObjects']
+) => {
   const exceptionsSubFeature: SubFeatureConfig = {
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.exceptionsSubFeatureName',
@@ -41,7 +49,7 @@ export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
         groupType: 'mutually_exclusive',
         privileges: [
           {
-            id: `${EXCEPTIONS_FEATURE_ID}_all`,
+            id: EXCEPTIONS_SUBFEATURE_ID_ALL,
             includeIn: 'all',
             name: TRANSLATIONS.all,
             savedObject: {
@@ -49,10 +57,10 @@ export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
               read: savedObjects,
             },
             ui: ['read', 'crud'],
-            api: ['exceptions_read', 'exceptions_write', 'lists-all', 'lists-read'],
+            api: ['exceptions-read', 'exceptions-write', 'lists-all', 'lists-read'],
           },
           {
-            id: `${EXCEPTIONS_FEATURE_ID}_read`,
+            id: EXCEPTIONS_SUBFEATURE_ID_READ,
             includeIn: 'read',
             name: TRANSLATIONS.read,
             catalogue: [APP_ID],
@@ -61,14 +69,14 @@ export const getExceptionsSubFeaturesMapV3 = (savedObjects) => {
               read: savedObjects,
             },
             ui: ['read'],
-            api: ['exceptions_read', 'lists-read'],
+            api: ['exceptions-read', 'lists-read'],
           },
         ],
       },
     ],
   };
 
-  return new Map<typeof EXCEPTIONS_FEATURE_ID, SubFeatureConfig>([
-    [EXCEPTIONS_FEATURE_ID, exceptionsSubFeature],
+  return new Map<typeof EXCEPTIONS_SUBFEATURE_ID, SubFeatureConfig>([
+    [EXCEPTIONS_SUBFEATURE_ID, exceptionsSubFeature],
   ]);
 };

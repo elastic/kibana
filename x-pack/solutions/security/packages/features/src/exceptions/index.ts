@@ -8,10 +8,10 @@
 import { getExceptionsBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
 import type { SecurityFeatureParams } from '../security/types';
-import { EXCEPTIONS_FEATURE_ID } from '../../constants';
+import { EXCEPTIONS_SUBFEATURE_ID } from '../../constants';
 
 export const getExceptionsFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
   baseKibanaFeature: getExceptionsBaseKibanaFeature(params),
-  baseKibanaSubFeatureIds: [`${EXCEPTIONS_FEATURE_ID}_all`, `${EXCEPTIONS_FEATURE_ID}_read`],
+  baseKibanaSubFeatureIds: [EXCEPTIONS_SUBFEATURE_ID],
   subFeaturesMap: new Map(),
 });

@@ -69,7 +69,7 @@ export const getRulesBaseKibanaFeature = (
         alert: { all: alertingFeatures },
       },
       ui: ['read', 'crud'],
-      api: ['exceptions_read', 'exceptions_write'],
+      api: ['security-rules-all', 'security-rules-read', 'exceptions_read', 'exceptions_write'],
     },
     read: {
       app: [RULES_FEATURE_ID, 'kibana'],
@@ -87,7 +87,7 @@ export const getRulesBaseKibanaFeature = (
         },
       },
       ui: ['read'],
-      api: ['exceptions_read'],
+      api: ['security-rules-all', 'security-rules-read', 'exceptions_read'],
     },
   },
 });

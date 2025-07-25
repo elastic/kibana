@@ -29,6 +29,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
+          // requiredPrivileges: [{ allRequired: ['securitySolution'] }, { allRequired: [] }],
         },
       },
     })
@@ -47,6 +48,8 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       async (context, request, response): Promise<IKibanaResponse<PatchRuleResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validatePatchRuleRequestBody(request.body);
+        // const authcUser = await (await context.core).
+        // check authc user for exceptions write privileges and read for rules?
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
