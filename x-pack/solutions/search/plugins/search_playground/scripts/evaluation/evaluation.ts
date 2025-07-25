@@ -27,7 +27,7 @@ import { selectConnector } from './select_connector';
 
 function runEvaluations() {
   yargs(process.argv.slice(2))
-    .command('*', 'Run AI Assistant evaluations', options, (argv) => {
+    .command('*', 'Run evaluations for playground', options, (argv) => {
       run(
         async ({ log }) => {
           const serviceUrls = await getServiceUrls({
