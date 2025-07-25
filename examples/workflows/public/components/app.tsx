@@ -61,40 +61,31 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   // Use React hooks to manage state.
   const [workflowYaml, setWorkflowYaml] = useState<string>(
     `
-id: example-workflow-1
-name: Example Workflow 1
-status: active
-triggers:
-  - id: detection-rule
-    type: detection-rule
-    enabled: true
-    config: {}
-steps:
-  - id: root-step-1
-    type: console.log
-    with:
-      message: Step 1 executed "{{event.ruleName}}"
-  - name: if-else-step
-    type: if
-    condition: false
-    steps:
-      - id: step-with-slack-connector-IF
-        type: slack-connector
-        connector-id: slack_keep
-        with:
-          message: IF TRUE
-    else:
-      - id: step-with-slack-connector-ELSE
-        type: slack-connector
-        connector-id: slack_keep
-        with:
-          message: IF FALSE
-  
-  - id: step-with-slack-connector-FINAL
-    type: slack-connector
-    connector-id: slack_keep
-    with:
-      message: FINAL STEP
+workflow:
+  name: New workflow
+  enabled: false
+  triggers:
+    - type: triggers.elastic.manual
+  steps:
+    - name: step-with-console-log-1
+      type: console
+      connector-id: console
+      with:
+        message: Step 1 executed for rule"{{event.ruleName}}"
+    
+    - name: slack-connector-step
+      type: slack.sendMessage
+      connector-id: keep-playground
+      with:
+        message: |
+          Hello from Kibana!
+          The user name from event is {{event.additionalData.userName}} and email is {{event.additionalData.user}}
+
+    - name: step-with-5-seconds-delay
+      type: delay
+      connector-id: delay
+      with:
+        delay: 5000
     `
   );
 
