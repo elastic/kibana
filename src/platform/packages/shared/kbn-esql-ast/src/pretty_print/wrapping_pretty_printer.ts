@@ -25,12 +25,6 @@ import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } fr
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
-/**
- * @todo
- *
- * 1. Implement list literal pretty printing.
- */
-
 interface Input {
   indent: string;
   remaining: number;
@@ -480,6 +474,7 @@ export class WrappingPrettyPrinter {
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
       const txt = ctx.node.text ?? '<EXPRESSION>';
+      // TODO: decorate with comments
       return { txt };
     })
 
@@ -634,6 +629,8 @@ export class WrappingPrettyPrinter {
         }
       }
 
+      txt = this.decorateWithComments({ ...inp, suffix: '' }, ctx.node, txt).txt;
+
       return { txt };
     })
 
@@ -646,6 +643,8 @@ export class WrappingPrettyPrinter {
       const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
       const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
       const txt = `${option}${separator}${argsFormatted}`;
+
+      // TODO: decorate with comments
 
       return { txt, lines: args.lines };
     })
