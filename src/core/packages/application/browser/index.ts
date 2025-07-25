@@ -13,6 +13,7 @@ export type {
   AppLeaveActionFactory,
   AppLeaveConfirmAction,
   AppLeaveDefaultAction,
+  AppLeaveCancelAction,
   AppLeaveHandler,
 } from './src/app_leave';
 export type { AppMount, AppMountParameters, AppUnmount } from './src/app_mount';

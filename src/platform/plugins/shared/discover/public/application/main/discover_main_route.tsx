@@ -13,6 +13,8 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { AppMountParameters } from '@kbn/core/public';
+import { EuiConfirmModal } from '@elastic/eui';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -40,6 +42,7 @@ export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
+  onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
 type InitializeMainRoute = (
@@ -52,10 +55,12 @@ export const DiscoverMainRoute = ({
   customizationContext,
   customizationCallbacks = defaultCustomizationCallbacks,
   stateStorageContainer,
+  onAppLeave,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
   const rootProfileState = useRootProfile();
   const history = useHistory();
+  const [leaveModal, setLeaveModal] = useState<React.ReactNode>(null);
   const [urlStateStorage] = useState(
     () =>
       stateStorageContainer ??
@@ -105,6 +110,45 @@ export const DiscoverMainRoute = ({
     }
   }, [initializeMainRoute, rootProfileState]);
 
+  useEffect(() => {
+    onAppLeave?.((actions, next) => {
+      const tabs = runtimeStateManager.tabs.byId;
+      const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
+        const stateContainer = tab.stateContainer$.getValue();
+        if (!stateContainer) {
+          return false;
+        }
+
+        const isSaved = !!stateContainer.savedSearchState.getId();
+        const hasChanged = stateContainer.savedSearchState.getHasChanged$().getValue();
+
+        return isSaved && hasChanged;
+      });
+
+      if (!hasAnyUnsavedTab) return actions.default();
+      setLeaveModal(
+        <EuiConfirmModal
+          style={{ width: 600 }}
+          title="You have unsaved changes"
+          onCancel={() => setLeaveModal(null)}
+          onConfirm={() => {
+            // Do our thing an save
+            services.application.navigateToApp(next.nextAppId, {
+              ...next.options,
+              skipAppLeave: true,
+            });
+          }}
+          cancelButtonText="Leave anyway"
+          confirmButtonText="Save and leave"
+          defaultFocusedButton="confirm"
+        >
+          <p>Do you want to leave without saving?</p>
+        </EuiConfirmModal>
+      );
+      return actions.cancel();
+    });
+  }, [onAppLeave, runtimeStateManager, services.application]);
+
   useUnmount(() => {
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
@@ -144,6 +188,7 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
+        {leaveModal}
         <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
           {TABS_ENABLED ? (
             <TabsView {...sessionViewProps} />
