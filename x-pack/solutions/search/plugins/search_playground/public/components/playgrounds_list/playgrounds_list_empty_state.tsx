@@ -8,56 +8,91 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiDescriptionList,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
   EuiImage,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
+import { PLUGIN_NAME } from '../../../common';
+import { docLinks } from '../../../common/doc_links';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export interface PlaygroundsListEmptyStateProps {
   onNewPlayground: () => void;
 }
 
-const PlaygroundListItems = [
-  {
-    title: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.title',
-      { defaultMessage: 'A/B test LLMs' }
-    ),
-    description: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.description',
-      { defaultMessage: 'Playground allow you to A/B test different LLMs from model providers' }
-    ),
-  },
-  {
-    title: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.queryRetrievers.title',
-      { defaultMessage: 'Experiment with query retrievers' }
-    ),
-    description: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.queryRetrievers.description',
-      {
-        defaultMessage:
-          "We're helping you simplify query construction with newly introduced query retrievers",
-      }
-    ),
-  },
-  {
-    title: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.lowCode.title',
-      { defaultMessage: 'Low-code interaction' }
-    ),
-    description: i18n.translate(
-      'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.lowCode.description',
-      { defaultMessage: "Elastic's playground experience is a low-code interface" }
-    ),
-  },
-];
+const DescriptionListColumn = ({
+  title,
+  description,
+}: {
+  title: React.ReactNode;
+  description: React.ReactNode;
+}) => {
+  return (
+    <EuiFlexItem>
+      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs" css={{ textAlign: 'left' }}>
+            <h5>{title}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued" textAlign="left">
+            <p>{description}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
+
+const DescriptionListColumns = () => {
+  return (
+    <EuiFlexGrid columns={3} direction="row">
+      <DescriptionListColumn
+        title={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.title',
+          { defaultMessage: 'A/B test LLMs' }
+        )}
+        description={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.abTest.description',
+          { defaultMessage: 'Playground allow you to A/B test different LLMs from model providers' }
+        )}
+      />
+      <DescriptionListColumn
+        title={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.queryRetrievers.title',
+          { defaultMessage: 'Experiment with query retrievers' }
+        )}
+        description={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.queryRetrievers.description',
+          {
+            defaultMessage:
+              "We're helping you simplify query construction with newly introduced query retrievers",
+          }
+        )}
+      />
+      <DescriptionListColumn
+        title={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.lowCode.title',
+          { defaultMessage: 'Low-code interaction' }
+        )}
+        description={i18n.translate(
+          'xpack.searchPlayground.playgroundsList.emptyPrompt.listItems.lowCode.description',
+          { defaultMessage: "Elastic's playground experience is a low-code interface" }
+        )}
+      />
+    </EuiFlexGrid>
+  );
+};
 
 const PlaygroundsListEmptyStateBody = ({ onNewPlayground }: PlaygroundsListEmptyStateProps) => {
   return (
@@ -66,7 +101,7 @@ const PlaygroundsListEmptyStateBody = ({ onNewPlayground }: PlaygroundsListEmpty
         <p>
           <FormattedMessage
             id="xpack.searchPlayground.playgroundsList.emptyPrompt.subTitle"
-            defaultMessage="Experiment with RAG applications with Elasticsearch in minutes"
+            defaultMessage="Try out RAG applications with your Elasticsearch data in a low-code environment."
           />
         </p>
       </EuiText>
@@ -86,34 +121,52 @@ const PlaygroundsListEmptyStateBody = ({ onNewPlayground }: PlaygroundsListEmpty
           </EuiButton>
         </span>
       </EuiFlexItem>
-      <EuiDescriptionList listItems={PlaygroundListItems} rowGutterSize="m" />
+      <EuiHorizontalRule />
+      <EuiFlexItem>
+        <DescriptionListColumns />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
+const EmptyStateFooter = () => (
+  <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <span>
+          <FormattedMessage
+            id="xpack.searchPlayground.playgroundsList.emptyPrompt.footer"
+            defaultMessage="Questions on how to get started?"
+          />
+        </span>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiLink
+        data-test-subj="searchPlaygroundsEmptyPromptFooterLink"
+        href={docLinks.chatPlayground}
+        target="_blank"
+        external
+      >
+        <FormattedMessage
+          id="xpack.searchPlayground.playgroundsList.emptyPrompt.footerLink"
+          defaultMessage="View the documentation"
+        />
+      </EuiLink>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const PlaygroundsListEmptyState = (props: PlaygroundsListEmptyStateProps) => {
   const assetBasePath = useAssetBasePath();
+
   return (
     <KibanaPageTemplate.EmptyPrompt
-      alignment="center"
-      icon={
-        <EuiImage
-          size="fullWidth"
-          src={`${assetBasePath}/placeholder_playground_hero.png`}
-          alt=""
-        />
-      }
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.searchPlayground.playgroundsList.emptyPrompt.title"
-            defaultMessage="Playground"
-          />
-        </h2>
-      }
-      layout="horizontal"
       color="plain"
+      icon={<EuiImage size="xxl" src={`${assetBasePath}/search_lake.svg`} alt="" />}
+      title={<h2>{PLUGIN_NAME}</h2>}
       body={<PlaygroundsListEmptyStateBody {...props} />}
+      footer={<EmptyStateFooter />}
     />
   );
 };
