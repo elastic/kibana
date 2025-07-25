@@ -14,7 +14,7 @@ import { getStyles } from './styles';
 
 export interface PipelineStructureTreeProps {
   pipelineTree: PipelineTreeNode;
-  selectedPipeline: string;
+  selectedPipeline: string | undefined;
   /**
    * Specifies whether the tree is an extension of the main tree; i.e. displayed
    * when the user clicks on the last "+X more pipelines" tree node.

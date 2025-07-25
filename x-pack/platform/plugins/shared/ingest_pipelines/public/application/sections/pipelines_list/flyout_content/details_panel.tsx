@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiSplitPanel,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../../common/types';
@@ -31,11 +32,28 @@ import { stringifyJson } from '../../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;
+  isTreeDisplayed: boolean;
+  backToTree: () => void;
 }
 
-export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
+export const DetailsPanel: FunctionComponent<Props> = ({
+  pipeline,
+  isTreeDisplayed,
+  backToTree,
+}) => {
   return (
     <EuiSplitPanel.Inner>
+      {!isTreeDisplayed && (
+        <>
+          <EuiButtonEmpty iconType="arrowLeft" onClick={backToTree}>
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.pipelineDetails.backToTreeButton"
+              defaultMessage="Back to ingest pipeline structure"
+            />
+          </EuiButtonEmpty>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
         <h2>{pipeline.name}</h2>
       </EuiTitle>

@@ -7,7 +7,7 @@
 import React, { FunctionComponent, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyout, EuiSplitPanel } from '@elastic/eui';
+import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
 import { FlyoutFooter, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import { Pipeline } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
@@ -41,6 +41,9 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   const { data: pipeline, isLoading, error } = api.useLoadPipeline(pipelineName);
   const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1) ?? '');
 
+  const isSinglePanelDisplayed = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const [isTreeInSinglePanel, setIsTreeInSinglePanel] = useState(true);
+
   const pipelineTree =
     treeData?.pipelineStructureTree?.children && treeData.pipelineStructureTree.children.length > 0
       ? treeData.pipelineStructureTree
@@ -65,11 +68,14 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
         maxWidth={pipelineTree ? 1100 : 550}
       >
         <EuiSplitPanel.Outer direction="row" grow={true} responsive={false}>
-          {pipelineTree && (
+          {pipelineTree && (!isSinglePanelDisplayed || isTreeInSinglePanel) && (
             <TreePanel
               pipelineTree={pipelineTree}
-              selectedPipeline={pipelineName}
-              clickTreeNode={setPipelineName}
+              selectedPipeline={isSinglePanelDisplayed ? undefined : pipelineName}
+              clickTreeNode={(name) => {
+                setPipelineName(name);
+                setIsTreeInSinglePanel(false);
+              }}
               setTreeRootStack={setTreeRootStack}
               isExtension={treeRootStack.length > 1}
             />
@@ -83,11 +89,18 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
               displayWarning={pipelineName !== pipelineNameFromLocation}
             />
           ) : (
-            pipeline && <DetailsPanel pipeline={pipeline} />
+            pipeline &&
+            (!isSinglePanelDisplayed || !isTreeInSinglePanel) && (
+              <DetailsPanel
+                pipeline={pipeline}
+                isTreeDisplayed={!isSinglePanelDisplayed}
+                backToTree={() => setIsTreeInSinglePanel(true)}
+              />
+            )
           )}
         </EuiSplitPanel.Outer>
 
-        {pipeline && (
+        {pipeline && (!isSinglePanelDisplayed || !isTreeInSinglePanel) && (
           <FlyoutFooter
             pipeline={pipeline}
             onEditClick={onEditClick}

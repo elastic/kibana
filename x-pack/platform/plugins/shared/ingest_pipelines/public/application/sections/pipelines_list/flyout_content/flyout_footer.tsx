@@ -85,7 +85,7 @@ export const FlyoutFooter = ({
 
   return (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="cross"
@@ -98,7 +98,12 @@ export const FlyoutFooter = ({
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="flexEnd"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="editPipelineButton"

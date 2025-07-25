@@ -15,7 +15,7 @@ import { useKibana } from '../../../../shared_imports';
 interface Props {
   pipelineTree: PipelineTreeNode;
   setTreeRootStack: (newStack: string[]) => void;
-  selectedPipeline: string;
+  selectedPipeline: string | undefined;
   clickTreeNode: (name: string) => void;
   isExtension: boolean;
 }

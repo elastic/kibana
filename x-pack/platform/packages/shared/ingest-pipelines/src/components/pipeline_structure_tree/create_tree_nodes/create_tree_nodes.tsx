@@ -17,7 +17,7 @@ import { PipelineTreeNodeLabel, MorePipelinesLabel } from '../tree_node_labels';
  */
 export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
-  selectedPipeline: string,
+  selectedPipeline: string | undefined,
   clickTreeNode: (pipelineName: string) => void,
   clickMorePipelines: (name: string) => void,
   level: number = 1
