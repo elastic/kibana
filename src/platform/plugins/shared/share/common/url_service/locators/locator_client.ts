@@ -63,7 +63,9 @@ export class LocatorClient implements ILocatorClient {
   ): string | undefined => {
     const { id, params: locatorParams } = params();
     const locator = this.get<P>(id);
-    return useLocatorUrl(locator, locatorParams, getUrlParams, deps);
+    // if useLocatorUrl returns an empty string, we return undefined. This is done to make sure the consumer
+    // checks whether the url has been resolved or not.
+    return useLocatorUrl(locator, locatorParams, getUrlParams, deps) || undefined;
   };
 
   protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
