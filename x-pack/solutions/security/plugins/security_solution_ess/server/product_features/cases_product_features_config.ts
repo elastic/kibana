@@ -5,14 +5,9 @@
  * 2.0.
  */
 import type {
-  ProductFeatureKibanaConfig,
   CasesProductFeaturesConfigMap,
   ProductFeatureKeys,
 } from '@kbn/security-solution-features';
-import type {
-  ProductFeatureCasesKey,
-  CasesSubFeatureId,
-} from '@kbn/security-solution-features/keys';
 import {
   getCasesDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
@@ -23,6 +18,11 @@ import {
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 
+const casesProductFeaturesConfig = getCasesDefaultProductFeaturesConfig({
+  apiTags: { connectors: GET_CONNECTORS_CONFIGURE_API_TAG },
+  uiCapabilities: { connectors: CASES_CONNECTORS_CAPABILITY },
+});
+
 export const getCasesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): CasesProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
@@ -30,23 +30,3 @@ export const getCasesProductFeaturesConfigurator =
       enabledProductFeatureKeys
     );
   };
-
-/**
- * Maps the ProductFeatures keys to Kibana privileges that will be merged
- * into the base privileges config for the Security Cases app.
- *
- * Privileges can be added in different ways:
- * - `privileges`: the privileges that will be added directly into the main Security Cases feature.
- * - `subFeatureIds`: the ids of the sub-features that will be added into the Cases subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Cases subFeature with the privilege `id` specified.
- */
-const casesProductFeaturesConfig: Record<
-  ProductFeatureCasesKey,
-  ProductFeatureKibanaConfig<CasesSubFeatureId>
-> = {
-  ...getCasesDefaultProductFeaturesConfig({
-    apiTags: { connectors: GET_CONNECTORS_CONFIGURE_API_TAG },
-    uiCapabilities: { connectors: CASES_CONNECTORS_CAPABILITY },
-  }),
-  // ess-specific app features configs here
-};
