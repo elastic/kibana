@@ -144,7 +144,7 @@ set_serverless_release_sha() {
   GITHUB_SERVERLESS_RELEASE_SHA="$(buildkite-agent meta-data get current-serverless-release-sha --default '')"
 
   if [[ ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
-    GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha.mjs)"
+    GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
     if [$? -ne 0]; then
       echo "Failed to obtain current serverless release SHA."
       return 1
