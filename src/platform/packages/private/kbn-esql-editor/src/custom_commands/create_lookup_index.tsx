@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
 
 /**
- * Replace the index referenced by the JOIN that the user created.
+ * Replace the index name in a join command.
  *
  * @param query             - full ES|QL query
  * @param initialIndexOrPos - either the index name we want to replace OR a Monaco
@@ -44,7 +44,7 @@ export function appendIndexToJoinCommand(
     targetName = initialIndexOrPos.trim();
   }
 
-  // If we came through name-path and it equals new name – nothing to do
+  // If we came through name-path, and it equals new name – nothing to do
   if (typeof initialIndexOrPos === 'string' && targetName === createdIndexName) {
     return query;
   }
