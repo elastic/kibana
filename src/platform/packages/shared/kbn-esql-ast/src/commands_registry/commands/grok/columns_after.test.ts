@@ -25,6 +25,18 @@ describe('GROK', () => {
       const pattern3 = 'Some plain text without grok patterns';
       const columns3 = extractSemanticsFromGrok(pattern3);
       expect(columns3).toStrictEqual([]);
+
+      const pattern4 = '(sometext) (?<foo>\\S+)';
+      const columns4 = extractSemanticsFromGrok(pattern4);
+      expect(columns4).toStrictEqual(['foo']);
+
+      const pattern5 = '%{IP:clientip} (?<user>\\w+)';
+      const columns5 = extractSemanticsFromGrok(pattern5);
+      expect(columns5).toStrictEqual(['clientip', 'user']);
+
+      const pattern6 = '(?<queue_id>[0-9A-F]{10,11})';
+      const columns6 = extractSemanticsFromGrok(pattern6);
+      expect(columns6).toStrictEqual(['queue_id']);
     });
   });
   describe('columnsAfter', () => {
