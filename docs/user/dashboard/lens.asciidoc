@@ -129,6 +129,54 @@ For term-based metrics, assign a color to each term with color mapping.
 . Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
 
 [float]
+[[metric-trends]]
+==== Show trends in Metric charts
+
+When creating **Metric** visualizations with numeric data, you can add trend indicators that compare your primary metric to a secondary value. This feature displays colored badges with directional arrows to help you quickly identify whether values are increasing, decreasing, or staying the same.
+
+Example of a metric with a secondary metric that's **not** using trend indicators:
+
+image::images/secondary_metric_before_compare.png["Secondary metric before comparison", width=30%]
+
+The same metric, now using a trend indicator for its secondary metric:
+
+image::images/secondary_metric_after_compare.png["Secondary metric after comparison", width=30%]
+
+To add trend indicators to your metric visualization:
+
+1. Create a **Metric** visualization with a numeric primary metric.
+2. Add a secondary metric that represents the comparison value. +
++
+TIP: Use the `shift` parameter in formulas to compare current values against historical data. For example, if your primary metric is counting orders (based on an `order_id` field) for the current week, you can use the `count(order_id, shift='1w')` formula to compare this week's count of orders to last week's count.
+
+3. In the secondary metric configuration, look for the **Color by value** option. The possible choices are:
+   * **None** — No trend indicators (default)
+   * **Static** — Shows the secondary metric as a badge with a single color that you select
+   * **Dynamic** — Enables both color coding and directional icons based on the comparison
+
+4. Select **Dynamic** coloring. More options appear.
+
+5. Choose a **Color palette** that matches how you'd like to represent the comparison.
+
+6. Configure the **Display** option:
+   * **Icon** — Shows only directional arrows: ↑ for increase, ↓ for decrease, = for no change
+   * **Value** — Shows only the secondary metric value
+   * **Both** — Shows both the icon and value (default)
+
+7. The secondary metric does not automatically compare with the primary metric. Define the value to **Compare to**:
+   ** **Static value** — Compares against a fixed baseline value that you specify
+   ** **Primary metric** — Compares the secondary metric directly against the primary metric. This option is only available when the primary metric is numeric. +
+   When you select this option, the secondary metric is automatically updated:
+
+       *** The secondary metric label changes to **Difference**. You can change this by editing the **Prefix** option of the metric.
+       *** If you chose a **Display** option that shows a value, the secondary metric value is automatically updated to show the difference compared to the primary metric.
+
+8. Apply your changes. 
+
+The metric visualization is updated and now shows the secondary metric as a comparison with a trend indicator.
+
+
+[float]
 [[drag-and-drop-keyboard-navigation]]
 ==== Create visualizations with keyboard navigation
 
