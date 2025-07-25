@@ -74,8 +74,7 @@ type Action =
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-changes' }
-  | { type: 'new-row-added'; payload: Record<string, any> }
-  | { type: 'refetch-field-types' };
+  | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -113,6 +112,9 @@ export class IndexUpdateService {
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
+
+  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
+  public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
@@ -192,9 +194,16 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
-    this._actions$.pipe(
-      filter((action) => action.type === 'refetch-field-types'),
-      startWith(null)
+    this.pendingColumnsToBeSaved$.pipe(
+      startWith([]),
+      // Refetch the dataView to look for new field types when there are new columns saved
+      // (when pendingColumnsToBeSaved$ length decreases)
+      scan((prev, curr) => ({ prevLength: prev.currLength ?? 0, currLength: curr.length }), {
+        prevLength: 0,
+        currLength: 0,
+      }),
+      filter(({ prevLength, currLength }) => currLength < prevLength || prevLength === 0),
+      startWith({ prevLength: 0, currLength: 0 })
     ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
@@ -205,9 +214,6 @@ export class IndexUpdateService {
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
-
-  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
-  public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
@@ -423,16 +429,10 @@ export class IndexUpdateService {
               return acc.filter((column) => column.name !== action.payload.name);
             }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
-              const unsavedColumns = acc.filter((column) =>
+              // Filter out columns that were saved with a value.
+              return acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
               );
-
-              // if there were saved columns, refresh the data view
-              if (unsavedColumns.length < acc.length) {
-                this._actions$.next({ type: 'refetch-field-types' });
-              }
-              return unsavedColumns;
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row
