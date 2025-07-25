@@ -88,6 +88,7 @@ import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generato
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
 import { pick } from 'lodash';
 import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
+import type { ExperimentalFeatures } from '../../common';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -127,6 +128,7 @@ describe('Fleet integrations', () => {
   let productFeaturesService: ProductFeaturesService;
   let endpointMetadataService: EndpointMetadataService;
   let logger: Logger;
+  let experimentalFeatures: ExperimentalFeatures;
 
   beforeEach(() => {
     endpointAppContextStartContract = createMockEndpointAppContextServiceStartContract();
@@ -135,6 +137,9 @@ describe('Fleet integrations', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+    experimentalFeatures = {
+      trustedDevicesEnabled: true,
+    } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
     const metadataMocks = createEndpointMetadataServiceTestContextMock();
@@ -197,7 +202,8 @@ describe('Fleet integrations', () => {
         licenseService,
         cloudService,
         productFeaturesService,
-        telemetryConfigProviderMock
+        telemetryConfigProviderMock,
+        experimentalFeatures
       );
 
       return callback(
@@ -662,7 +668,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -678,7 +685,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -708,7 +716,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
@@ -726,7 +735,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.windows.popup.ransomware.message = 'foo';
@@ -778,7 +788,8 @@ describe('Fleet integrations', () => {
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
-            productFeaturesService
+            productFeaturesService,
+            experimentalFeatures
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -839,7 +850,8 @@ describe('Fleet integrations', () => {
           const callback = getPackagePolicyUpdateCallback(
             endpointAppContextServiceMock,
             cloudService,
-            productFeaturesService
+            productFeaturesService,
+            experimentalFeatures
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -878,7 +890,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -899,7 +912,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
 
         const updatedPolicy = await callback(
@@ -974,7 +988,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -1008,7 +1023,8 @@ describe('Fleet integrations', () => {
         const callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         // values should be updated
@@ -1030,6 +1046,128 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('when device control features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should remove device control when endpointTrustedDevices product feature is disabled', async () => {
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointTrustedDevices
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        // Add some device control settings to test removal
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'block';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).toHaveBeenCalledWith(mockPolicy);
+      });
+
+      it('should remove device control when trustedDevicesEnabled experimental feature is disabled', async () => {
+        // @ts-expect-error
+        experimentalFeatures.trustedDevicesEnabled = false;
+
+        const mockPolicy = policyFactory();
+        // Add some device control settings to test removal
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'block';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).toHaveBeenCalledWith(mockPolicy);
+      });
+
+      it('should not remove device control when both features are enabled', async () => {
+        // Reset to enabled states
+        // @ts-expect-error
+        experimentalFeatures.trustedDevicesEnabled = true;
+        // @ts-expect-error
+        productFeaturesService = createProductFeaturesServiceMock(ALL_PRODUCT_FEATURE_KEYS);
+
+        const mockPolicy = policyFactory();
+        if (!mockPolicy.windows.device_control) {
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+        } else {
+          mockPolicy.windows.device_control.enabled = true;
+          mockPolicy.windows.device_control.usb_storage = 'block';
+        }
+
+        const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(removeDeviceControlSpy).not.toHaveBeenCalled();
+      });
+    });
+
     describe('when `antivirus_registration.mode` is changed', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1046,7 +1184,8 @@ describe('Fleet integrations', () => {
         callback = getPackagePolicyUpdateCallback(
           endpointAppContextServiceMock,
           cloudService,
-          productFeaturesService
+          productFeaturesService,
+          experimentalFeatures
         );
 
         inputPolicyConfig = generator.generatePolicyPackagePolicy();
@@ -1141,7 +1280,8 @@ describe('Fleet integrations', () => {
       const callback = getPackagePolicyUpdateCallback(
         endpointAppContextServiceMock,
         cloudService,
-        productFeaturesService
+        productFeaturesService,
+        experimentalFeatures
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 

@@ -63,7 +63,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
         {DeviceControlUpSellingComponent ? (
           <DeviceControlUpSellingComponent />
         ) : (
-          <DeviceControlCard {...props} data-test-subj={getTestId('trustedDevices')} />
+          <DeviceControlCard {...props} data-test-subj={getTestId('deviceControl')} />
         )}
         <EuiSpacer size="l" />
       </>

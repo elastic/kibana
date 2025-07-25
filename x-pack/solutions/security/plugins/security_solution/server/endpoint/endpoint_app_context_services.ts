@@ -163,6 +163,7 @@ export class EndpointAppContextService {
       licenseService,
       telemetryConfigProvider,
       productFeaturesService,
+      experimentalFeatures,
     } = this.startDependencies;
     const logger = this.createLogger('endpointFleetExtension');
 
@@ -187,7 +188,8 @@ export class EndpointAppContextService {
         licenseService,
         this.setupDependencies.cloud,
         productFeaturesService,
-        telemetryConfigProvider
+        telemetryConfigProvider,
+        experimentalFeatures
       )
     );
 
@@ -195,7 +197,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
+      getPackagePolicyUpdateCallback(
+        this,
+        this.setupDependencies.cloud,
+        productFeaturesService,
+        experimentalFeatures
+      )
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));

@@ -14,14 +14,16 @@ import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generato
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import { SettingCard } from '../setting_card';
-import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
+import { DeviceControlSettingCardSwitch } from '../device_control_setting_card_switch';
+import { DeviceControlProtectionLevel } from '../device_control_protection_level';
+import { DeviceControlNotifyUserOption } from '../device_control_notify_user_option';
 import {
   PolicyOperatingSystem,
   type Immutable,
 } from '../../../../../../../../common/endpoint/types';
-import type { RansomwareProtectionOSes } from '../../../../types';
+import type { DeviceControlOSes } from '../../../../types';
 
-export type UsbDeviceProtectionProps = PolicyFormComponentCommonProps;
+export type DeviceControlProps = PolicyFormComponentCommonProps;
 
 export const DEVICE_CONTROL_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl',
@@ -30,36 +32,34 @@ export const DEVICE_CONTROL_CARD_TITLE = i18n.translate(
   }
 );
 
-const protectionLabel = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.protections.deviceControl',
-  {
-    defaultMessage: 'Device Control',
-  }
-);
-
-const DEVICE_CONTROL_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
+const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
   PolicyOperatingSystem.windows,
-  // PolicyOperatingSystem.mac,
+  PolicyOperatingSystem.mac,
 ];
 
 /**
  * The Malware Protections form for policy details
  * which will configure for all relevant OSes.
  */
-export const DeviceControlCard = React.memo<UsbDeviceProtectionProps>(
+export const DeviceControlCard = React.memo<DeviceControlProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isEnterprise = useLicense().isEnterprise();
 
-    // const shouldRenderComponent = isProtectionsAllowed && isTrustedDevicesAllowed && isEnterprise;
-    // const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
+    // Check if device_control exists in policy (backward compatibility)
+    const deviceControlExists =
+      policy.windows.device_control !== undefined && policy.mac.device_control !== undefined;
+    const selected = Boolean(
+      deviceControlExists &&
+        (policy.windows.device_control?.enabled || policy.mac.device_control?.enabled)
+    );
 
-    // const protectionLabel = i18n.translate(
-    //   'xpack.securitySolution.endpoint.policy.protections.malware',
-    //   {
-    //     defaultMessage: 'Malware protections',
-    //   }
-    // );
+    const protectionLabel = i18n.translate(
+      'xpack.securitySolution.endpoint.policy.protections.deviceControl',
+      {
+        defaultMessage: 'Device Control',
+      }
+    );
 
     if (!isEnterprise) {
       return (
@@ -78,40 +78,34 @@ export const DeviceControlCard = React.memo<UsbDeviceProtectionProps>(
         })}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC]}
         dataTestSubj={getTestId()}
-        // selected={selected}
-        selected
+        selected={selected}
         mode={mode}
         rightCorner={
-          <ProtectionSettingCardSwitch
-            // selected={selected}
-            selected
+          <DeviceControlSettingCardSwitch
+            selected={selected}
             policy={policy}
             onChange={onChange}
             mode={mode}
-            protection={'malware'}
             protectionLabel={protectionLabel}
             osList={DEVICE_CONTROL_OS_VALUES}
             data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
-        {/* <DetectPreventProtectionLevel
-          protection={protection}
-          osList={RANSOMEWARE_OS_VALUES}
+        <DeviceControlProtectionLevel
+          osList={DEVICE_CONTROL_OS_VALUES}
           onChange={onChange}
           policy={policy}
           mode={mode}
           data-test-subj={getTestId('protectionLevel')}
         />
 
-        <NotifyUserOption
-          policy={policy}
+        <DeviceControlNotifyUserOption
           onChange={onChange}
+          policy={policy}
           mode={mode}
-          protection={protection}
-          osList={RANSOMEWARE_OS_VALUES}
           data-test-subj={getTestId('notifyUser')}
-        /> */}
+        />
 
         <EuiSpacer size="m" />
       </SettingCard>
