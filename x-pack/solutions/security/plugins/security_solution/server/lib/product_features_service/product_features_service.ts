@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { AuthzEnabled, HttpServiceSetup, Logger, RouteAuthz } from '@kbn/core/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type {
+  ProductFeatureGroup,
   ProductFeatureKeyType,
   ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
@@ -26,258 +25,89 @@ import {
   getSiemMigrationsFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
 import { ProductFeatures } from './product_features';
+import { casesProductFeatureParams } from './cases_product_feature_params';
 import {
   securityDefaultSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
   securityV1SavedObjects,
 } from './security_saved_objects';
-import { casesApiTags, casesUiCapabilities } from './cases_privileges';
+import { registerApiAccessControl } from './product_features_api_access_control';
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginSetupDependencies,
+} from '../../plugin_contract';
 
 export class ProductFeaturesService {
-  private securityProductFeatures: ProductFeatures;
-  private securityV2ProductFeatures: ProductFeatures;
-  private securityV3ProductFeatures: ProductFeatures;
-  private casesProductFeatures: ProductFeatures;
-  private casesProductV2Features: ProductFeatures;
-  private casesProductFeaturesV3: ProductFeatures;
-  private securityAssistantProductFeatures: ProductFeatures;
-  private attackDiscoveryProductFeatures: ProductFeatures;
-  private timelineProductFeatures: ProductFeatures;
-  private notesProductFeatures: ProductFeatures;
-  private siemMigrationsProductFeatures: ProductFeatures;
+  public readonly logger: Logger;
+  private productFeaturesRegistry: ProductFeatures;
+  private enabledProductFeatures?: Set<ProductFeatureKeyType>;
 
-  private productFeatures?: Set<ProductFeatureKeyType>;
+  constructor(loggerFactory: Logger, private readonly experimentalFeatures: ExperimentalFeatures) {
+    this.logger = loggerFactory.get('productFeaturesService');
+    this.productFeaturesRegistry = new ProductFeatures(this.logger);
 
-  constructor(
-    private readonly logger: Logger,
-    private readonly experimentalFeatures: ExperimentalFeatures
+    const securityFeatureParams = { experimentalFeatures };
+    this.productFeaturesRegistry.create('security', [
+      getSecurityFeature({ ...securityFeatureParams, savedObjects: securityV1SavedObjects }),
+      getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
+      getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
+    ]);
+    this.productFeaturesRegistry.create('cases', [
+      getCasesFeature(casesProductFeatureParams),
+      getCasesV2Feature(casesProductFeatureParams),
+      getCasesV3Feature(casesProductFeatureParams),
+    ]);
+    this.productFeaturesRegistry.create('securityAssistant', [
+      getAssistantFeature(this.experimentalFeatures),
+    ]);
+    this.productFeaturesRegistry.create('attackDiscovery', [getAttackDiscoveryFeature()]);
+    this.productFeaturesRegistry.create('timeline', [
+      getTimelineFeature({ ...securityFeatureParams, savedObjects: securityTimelineSavedObjects }),
+    ]);
+    this.productFeaturesRegistry.create('notes', [
+      getNotesFeature({ ...securityFeatureParams, savedObjects: securityNotesSavedObjects }),
+    ]);
+    this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);
+  }
+
+  /** Initializes the features plugin setup */
+  public setup(
+    core: SecuritySolutionPluginCoreSetupDependencies,
+    plugins: SecuritySolutionPluginSetupDependencies
   ) {
-    const securityFeature = getSecurityFeature({
-      savedObjects: securityV1SavedObjects,
-      experimentalFeatures,
-    });
-    this.securityProductFeatures = new ProductFeatures(this.logger, securityFeature);
-
-    const securityV2Feature = getSecurityV2Feature({
-      savedObjects: securityDefaultSavedObjects,
-      experimentalFeatures,
-    });
-    this.securityV2ProductFeatures = new ProductFeatures(this.logger, securityV2Feature);
-
-    const securityV3Feature = getSecurityV3Feature({
-      savedObjects: securityDefaultSavedObjects,
-      experimentalFeatures,
-    });
-    this.securityV3ProductFeatures = new ProductFeatures(this.logger, securityV3Feature);
-
-    const casesFeature = getCasesFeature({
-      uiCapabilities: casesUiCapabilities,
-      apiTags: casesApiTags,
-      savedObjects: { files: filesSavedObjectTypes },
-    });
-    this.casesProductFeatures = new ProductFeatures(this.logger, casesFeature);
-
-    const casesV2Feature = getCasesV2Feature({
-      uiCapabilities: casesUiCapabilities,
-      apiTags: casesApiTags,
-      savedObjects: { files: filesSavedObjectTypes },
-    });
-    this.casesProductV2Features = new ProductFeatures(this.logger, casesV2Feature);
-
-    const casesV3Feature = getCasesV3Feature({
-      uiCapabilities: casesUiCapabilities,
-      apiTags: casesApiTags,
-      savedObjects: { files: filesSavedObjectTypes },
-    });
-    this.casesProductFeaturesV3 = new ProductFeatures(this.logger, casesV3Feature);
-
-    const assistantFeature = getAssistantFeature(experimentalFeatures);
-    this.securityAssistantProductFeatures = new ProductFeatures(this.logger, assistantFeature);
-
-    const attackDiscoveryFeature = getAttackDiscoveryFeature();
-    this.attackDiscoveryProductFeatures = new ProductFeatures(this.logger, attackDiscoveryFeature);
-
-    const timelineFeature = getTimelineFeature({
-      savedObjects: securityTimelineSavedObjects,
-      experimentalFeatures,
-    });
-    this.timelineProductFeatures = new ProductFeatures(this.logger, timelineFeature);
-
-    const notesFeature = getNotesFeature({
-      savedObjects: securityNotesSavedObjects,
-      experimentalFeatures,
-    });
-    this.notesProductFeatures = new ProductFeatures(this.logger, notesFeature);
-
-    const siemMigrationsFeature = getSiemMigrationsFeature();
-    this.siemMigrationsProductFeatures = new ProductFeatures(this.logger, siemMigrationsFeature);
+    this.productFeaturesRegistry.init(plugins.features);
+    registerApiAccessControl(this, core.http);
   }
 
-  public init(featuresSetup: FeaturesPluginSetup) {
-    this.securityProductFeatures.init(featuresSetup);
-    this.securityV2ProductFeatures.init(featuresSetup);
-    this.securityV3ProductFeatures.init(featuresSetup);
-    this.casesProductFeatures.init(featuresSetup);
-    this.casesProductV2Features.init(featuresSetup);
-    this.casesProductFeaturesV3.init(featuresSetup);
-    this.securityAssistantProductFeatures.init(featuresSetup);
-    this.attackDiscoveryProductFeatures.init(featuresSetup);
-    this.timelineProductFeatures.init(featuresSetup);
-    this.notesProductFeatures.init(featuresSetup);
-    this.siemMigrationsProductFeatures.init(featuresSetup);
-  }
-
+  /** Merges configurations of all the product features and registers them as Kibana features */
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
-    const securityProductFeaturesConfig = configurator.security();
-    this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
-    this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
-    this.securityV3ProductFeatures.setConfig(securityProductFeaturesConfig);
+    const enabledProductFeatures: ProductFeatureKeyType[] = [];
 
-    const casesProductFeaturesConfig = configurator.cases();
-    this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
-    this.casesProductV2Features.setConfig(casesProductFeaturesConfig);
-    this.casesProductFeaturesV3.setConfig(casesProductFeaturesConfig);
-
-    const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
-    this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
-
-    const attackDiscoveryProductFeaturesConfig = configurator.attackDiscovery();
-    this.attackDiscoveryProductFeatures.setConfig(attackDiscoveryProductFeaturesConfig);
-
-    const timelineProductFeaturesConfig = configurator.timeline();
-    this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
-
-    const notesProductFeaturesConfig = configurator.notes();
-    this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
-
-    let siemMigrationsProductFeaturesConfig = new Map();
-    if (!this.experimentalFeatures.siemMigrationsDisabled) {
-      siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
-      this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
+    for (const featureGroup of Object.keys(configurator) as ProductFeatureGroup[]) {
+      const productFeatureConfig = configurator[featureGroup]();
+      this.productFeaturesRegistry.register(featureGroup, productFeatureConfig);
+      enabledProductFeatures.push(...productFeatureConfig.keys());
     }
 
-    this.productFeatures = new Set<ProductFeatureKeyType>(
-      Object.freeze([
-        ...securityProductFeaturesConfig.keys(),
-        ...casesProductFeaturesConfig.keys(),
-        ...securityAssistantProductFeaturesConfig.keys(),
-        ...attackDiscoveryProductFeaturesConfig.keys(),
-        ...timelineProductFeaturesConfig.keys(),
-        ...notesProductFeaturesConfig.keys(),
-        ...siemMigrationsProductFeaturesConfig.keys(),
-      ]) as readonly ProductFeatureKeyType[]
-    );
+    this.enabledProductFeatures = new Set<ProductFeatureKeyType>(enabledProductFeatures);
   }
 
+  /** Function to check if a specific product feature key is enabled */
   public isEnabled(productFeatureKey: ProductFeatureKeyType): boolean {
-    if (!this.productFeatures) {
+    if (!this.enabledProductFeatures) {
       throw new Error('ProductFeatures has not yet been configured');
     }
-    return this.productFeatures.has(productFeatureKey);
+    return this.enabledProductFeatures.has(productFeatureKey);
   }
 
+  /** Function to check if a specific privilege action has been registered in the Kibana features */
   public isActionRegistered(action: string) {
-    return (
-      this.securityProductFeatures.isActionRegistered(action) ||
-      this.securityV2ProductFeatures.isActionRegistered(action) ||
-      this.securityV3ProductFeatures.isActionRegistered(action) ||
-      this.casesProductFeatures.isActionRegistered(action) ||
-      this.casesProductV2Features.isActionRegistered(action) ||
-      this.securityAssistantProductFeatures.isActionRegistered(action) ||
-      this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
-      this.timelineProductFeatures.isActionRegistered(action) ||
-      this.notesProductFeatures.isActionRegistered(action) ||
-      this.siemMigrationsProductFeatures.isActionRegistered(action)
-    );
+    return this.productFeaturesRegistry.isActionRegistered(action);
   }
 
+  /** Function to get the correct API action name for a specific api privilege */
   public getApiActionName = (apiPrivilege: string) => `api:${API_ACTION_PREFIX}${apiPrivilege}`;
-
-  /** @deprecated Use security.authz.requiredPrivileges instead */
-  public isApiPrivilegeEnabled(apiPrivilege: string) {
-    return this.isActionRegistered(this.getApiActionName(apiPrivilege));
-  }
-
-  public registerApiAccessControl(http: HttpServiceSetup) {
-    // The `securitySolutionProductFeature:` prefix is used for ProductFeature based control.
-    // Should be used only by routes that do not need RBAC, only direct productFeature control.
-    const APP_FEATURE_TAG_PREFIX = 'securitySolutionProductFeature:';
-
-    const isAuthzEnabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzEnabled => {
-      return Boolean((authz as AuthzEnabled)?.requiredPrivileges);
-    };
-
-    /** Returns true only if the API privilege is a security action and is disabled */
-    const isApiPrivilegeSecurityAndDisabled = (apiPrivilege: string): boolean => {
-      if (apiPrivilege.startsWith(API_ACTION_PREFIX)) {
-        return !this.isActionRegistered(`api:${apiPrivilege}`);
-      }
-      return false;
-    };
-
-    http.registerOnPostAuth((request, response, toolkit) => {
-      for (const tag of request.route.options.tags ?? []) {
-        let isEnabled = true;
-        if (tag.startsWith(APP_FEATURE_TAG_PREFIX)) {
-          isEnabled = this.isEnabled(
-            tag.substring(APP_FEATURE_TAG_PREFIX.length) as ProductFeatureKeyType
-          );
-        }
-
-        if (!isEnabled) {
-          this.logger.warn(
-            `Accessing disabled route "${request.url.pathname}${request.url.search}": responding with 404`
-          );
-          return response.notFound();
-        }
-      }
-
-      // This control ensures the action privileges have been registered by the productFeature service,
-      // preventing full access (`*`) roles, such as superuser, from bypassing productFeature controls.
-      const authz = request.route.options.security?.authz;
-      if (isAuthzEnabled(authz)) {
-        const disabled = authz.requiredPrivileges.some((privilegeEntry) => {
-          if (typeof privilegeEntry === 'object') {
-            if (privilegeEntry.allRequired) {
-              if (
-                privilegeEntry.allRequired.some((entry) =>
-                  typeof entry === 'string'
-                    ? isApiPrivilegeSecurityAndDisabled(entry)
-                    : entry.anyOf.every(isApiPrivilegeSecurityAndDisabled)
-                )
-              ) {
-                return true;
-              }
-            }
-            if (privilegeEntry.anyRequired) {
-              if (
-                privilegeEntry.anyRequired.every((entry) =>
-                  typeof entry === 'string'
-                    ? isApiPrivilegeSecurityAndDisabled(entry)
-                    : entry.allOf.some(isApiPrivilegeSecurityAndDisabled)
-                )
-              ) {
-                return true;
-              }
-            }
-            return false;
-          } else {
-            return isApiPrivilegeSecurityAndDisabled(privilegeEntry);
-          }
-        });
-        if (disabled) {
-          this.logger.warn(
-            `Accessing disabled route "${request.url.pathname}${request.url.search}": responding with 404`
-          );
-          return response.notFound();
-        }
-      }
-
-      return toolkit.next();
-    });
-  }
 }

@@ -13,13 +13,14 @@ import {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 
 import { APP_ID } from '../../../common/constants';
 
 const originalCasesUiCapabilities = createCasesUICapabilities();
 const originalCasesApiTags = getCasesApiTags(APP_ID);
 
-export const casesUiCapabilities = {
+const casesUiCapabilities = {
   ...originalCasesUiCapabilities,
   all: originalCasesUiCapabilities.all.filter(
     (capability) => capability !== CASES_CONNECTORS_CAPABILITY
@@ -29,7 +30,7 @@ export const casesUiCapabilities = {
   ),
 };
 
-export const casesApiTags = {
+const casesApiTags = {
   ...originalCasesApiTags,
   all: originalCasesApiTags.all.filter(
     (capability) => capability !== GET_CONNECTORS_CONFIGURE_API_TAG
@@ -37,4 +38,10 @@ export const casesApiTags = {
   read: originalCasesApiTags.read.filter(
     (capability) => capability !== GET_CONNECTORS_CONFIGURE_API_TAG
   ),
+};
+
+export const casesProductFeatureParams = {
+  uiCapabilities: casesUiCapabilities,
+  apiTags: casesApiTags,
+  savedObjects: { files: filesSavedObjectTypes },
 };

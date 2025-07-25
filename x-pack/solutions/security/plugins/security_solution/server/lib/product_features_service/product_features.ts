@@ -14,39 +14,58 @@ import type {
 import type {
   ProductFeaturesConfigMap,
   ProductFeatureParams,
+  ProductFeatureGroup,
 } from '@kbn/security-solution-features';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
-export class ProductFeatures<S extends string = string> {
-  private featureConfigMerger: ProductFeaturesConfigMerger;
+export class ProductFeatures {
   private featuresSetup?: FeaturesPluginSetup;
+  private readonly productFeatures: Map<ProductFeatureGroup, ProductFeatureParams[]>;
   private readonly registeredActions: Set<string>;
 
-  constructor(private readonly logger: Logger, private readonly params: ProductFeatureParams<S>) {
-    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, params.subFeaturesMap);
+  constructor(private readonly logger: Logger) {
+    this.productFeatures = new Map();
     this.registeredActions = new Set();
+  }
+
+  public create<S extends string = string>(
+    featureGroup: ProductFeatureGroup,
+    params: Array<ProductFeatureParams<S>>
+  ) {
+    this.productFeatures.set(featureGroup, params);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(productFeatureConfig: ProductFeaturesConfigMap<S>) {
+  public register<S extends string = string>(
+    featureGroup: ProductFeatureGroup,
+    productFeatureConfig: ProductFeaturesConfigMap<S>
+  ) {
     if (this.featuresSetup == null) {
-      throw new Error(
-        'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
-      );
+      throw new Error('Cannot register product features. Service not initialized.');
+    }
+    const productFeaturesGroup = this.productFeatures.get(featureGroup);
+    if (!productFeaturesGroup) {
+      throw new Error(`No product feature found for group: ${featureGroup}`);
     }
 
-    const completeProductFeatureConfig = this.featureConfigMerger.mergeProductFeatureConfigs(
-      this.params.baseKibanaFeature,
-      this.params.baseKibanaSubFeatureIds,
-      Array.from(productFeatureConfig.values())
-    );
+    for (const params of productFeaturesGroup) {
+      const { baseKibanaFeature, baseKibanaSubFeatureIds, subFeaturesMap } = params;
 
-    this.logger.debug(() => JSON.stringify(completeProductFeatureConfig));
-    this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
-    this.addRegisteredActions(completeProductFeatureConfig);
+      const featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
+
+      const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
+        baseKibanaFeature,
+        baseKibanaSubFeatureIds,
+        Array.from(productFeatureConfig.values())
+      );
+
+      this.logger.debug(() => JSON.stringify(completeProductFeatureConfig));
+      this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
+      this.addRegisteredActions(completeProductFeatureConfig);
+    }
   }
 
   private addRegisteredActions(config: KibanaFeatureConfig) {

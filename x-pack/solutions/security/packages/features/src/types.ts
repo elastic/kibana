@@ -118,3 +118,5 @@ export interface ProductFeaturesConfigurator {
   notes: () => NotesProductFeaturesConfigMap;
   siemMigrations: () => SiemMigrationsProductFeaturesConfigMap;
 }
+
+export type ProductFeatureGroup = keyof ProductFeaturesConfigurator;

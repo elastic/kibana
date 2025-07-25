@@ -12,6 +12,8 @@ import type {
   ProductFeatureKeyType,
   ProductFeatureKibanaConfig,
   BaseKibanaFeatureConfig,
+  ProductFeatureParams,
+  ProductFeatureGroup,
 } from '@kbn/security-solution-features';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 
@@ -144,22 +146,27 @@ const expectedBaseWithTestConfigPrivileges = {
   },
 };
 
+const testFeatureParams: ProductFeatureParams = {
+  subFeaturesMap,
+  baseKibanaFeature,
+  baseKibanaSubFeatureIds: [],
+};
+const logger = loggingSystemMock.create().get('mock');
+const featureGroup = 'test-feature' as ProductFeatureGroup;
+
+const featuresSetup = {
+  registerKibanaFeature: jest.fn(),
+  getKibanaFeatures: jest.fn(),
+} as unknown as FeaturesPluginSetup;
+
 describe('ProductFeatures', () => {
   describe('setConfig', () => {
     it('should register base kibana features', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-        getKibanaFeatures: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
+      const productFeatures = new ProductFeatures(logger);
 
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(new Map());
+      productFeatures.register(featureGroup, new Map());
 
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
         ...baseKibanaFeature,
@@ -168,19 +175,12 @@ describe('ProductFeatures', () => {
     });
 
     it('should register enabled kibana features', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-        getKibanaFeatures: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
+      const productFeatures = new ProductFeatures(logger);
 
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig]])
       );
 
@@ -192,19 +192,12 @@ describe('ProductFeatures', () => {
     });
 
     it('should register enabled kibana features and sub features', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-        getKibanaFeatures: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
+      const productFeatures = new ProductFeatures(logger);
 
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([
           ['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig],
           ['test-sub-feature' as ProductFeatureKeyType, testSubFeaturePrivilegeConfig],
@@ -219,19 +212,14 @@ describe('ProductFeatures', () => {
     });
 
     it('should register enabled kibana features and default sub features', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-        getKibanaFeatures: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
+      const productFeatures = new ProductFeatures(logger);
 
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        [SUB_FEATURE_2.name]
-      );
+      productFeatures.create(featureGroup, [
+        { ...testFeatureParams, baseKibanaSubFeatureIds: [SUB_FEATURE_2.name] },
+      ]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([
           ['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig],
           ['test-sub-feature' as ProductFeatureKeyType, testSubFeaturePrivilegeConfig],
@@ -248,18 +236,10 @@ describe('ProductFeatures', () => {
 
   describe('isActionRegistered', () => {
     it('should register base privilege actions', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
-
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      const productFeatures = new ProductFeatures(logger);
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(new Map());
+      productFeatures.register(featureGroup, new Map());
 
       expect(productFeatures.isActionRegistered('api:api-read')).toEqual(true);
       expect(productFeatures.isActionRegistered('ui:read')).toEqual(true);
@@ -274,18 +254,11 @@ describe('ProductFeatures', () => {
     });
 
     it('should register config privilege actions', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
-
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      const productFeatures = new ProductFeatures(logger);
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig]])
       );
 
@@ -302,18 +275,12 @@ describe('ProductFeatures', () => {
     });
 
     it('should register config sub-feature privilege actions', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
+      const productFeatures = new ProductFeatures(logger);
 
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        []
-      );
+      productFeatures.create(featureGroup, [testFeatureParams]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([
           ['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig],
           ['test-sub-feature' as ProductFeatureKeyType, testSubFeaturePrivilegeConfig],
@@ -333,18 +300,13 @@ describe('ProductFeatures', () => {
     });
 
     it('should register default and config sub-feature privilege actions', () => {
-      const featuresSetup = {
-        registerKibanaFeature: jest.fn(),
-      } as unknown as FeaturesPluginSetup;
-
-      const productFeatures = new ProductFeatures(
-        loggingSystemMock.create().get('mock'),
-        subFeaturesMap,
-        baseKibanaFeature,
-        [SUB_FEATURE_2.name]
-      );
+      const productFeatures = new ProductFeatures(logger);
+      productFeatures.create(featureGroup, [
+        { ...testFeatureParams, baseKibanaSubFeatureIds: [SUB_FEATURE_2.name] },
+      ]);
       productFeatures.init(featuresSetup);
-      productFeatures.setConfig(
+      productFeatures.register(
+        featureGroup,
         new Map([
           ['test-feature' as ProductFeatureKeyType, testFeaturePrivilegeConfig],
           ['test-sub-feature' as ProductFeatureKeyType, testSubFeaturePrivilegeConfig],

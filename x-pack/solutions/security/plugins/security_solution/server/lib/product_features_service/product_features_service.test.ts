@@ -8,18 +8,19 @@
 import { ProductFeaturesService } from './product_features_service';
 import { ProductFeatures } from './product_features';
 import type {
-  ProductFeaturesConfigMap,
   BaseKibanaFeatureConfig,
   ProductFeaturesConfigurator,
+  AssistantProductFeaturesConfigMap,
+  AttackDiscoveryProductFeaturesConfigMap,
+  CasesProductFeaturesConfigMap,
+  NotesProductFeaturesConfigMap,
+  SecurityProductFeaturesConfigMap,
+  SiemMigrationsProductFeaturesConfigMap,
+  TimelineProductFeaturesConfigMap,
 } from '@kbn/security-solution-features';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type {
-  AssistantSubFeatureId,
-  CasesSubFeatureId,
-  SecuritySubFeatureId,
-} from '@kbn/security-solution-features/keys';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
@@ -28,6 +29,8 @@ import type {
   LifecycleResponseFactory,
   OnPostAuthHandler,
 } from '@kbn/core-http-server';
+import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contract';
+import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 jest.mock('./product_features');
 const MockedProductFeatures = ProductFeatures as unknown as jest.MockedClass<
@@ -54,6 +57,12 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
   getSiemMigrationsFeature: () => mockGetFeature(),
 }));
 
+const coreSetup = coreLifecycleMock.createCoreSetup();
+const featuresSetup = featuresPluginMock.createSetup();
+const pluginsSetup = {
+  features: featuresSetup,
+} as unknown as SecuritySolutionPluginSetupDependencies;
+
 describe('ProductFeaturesService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,8 +72,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(11);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(11);
+    expect(mockGetFeature).toHaveBeenCalled();
+    expect(MockedProductFeatures).toHaveBeenCalled();
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -74,12 +83,8 @@ describe('ProductFeaturesService', () => {
       experimentalFeatures
     );
 
-    const featuresSetup = featuresPluginMock.createSetup();
-    productFeaturesService.init(featuresSetup);
-
+    productFeaturesService.setup(coreSetup, pluginsSetup);
     expect(MockedProductFeatures.mock.instances[0].init).toHaveBeenCalledWith(featuresSetup);
-    expect(MockedProductFeatures.mock.instances[1].init).toHaveBeenCalledWith(featuresSetup);
-    expect(MockedProductFeatures.mock.instances[2].init).toHaveBeenCalledWith(featuresSetup);
   });
 
   it('should configure ProductFeatures', () => {
@@ -89,16 +94,15 @@ describe('ProductFeaturesService', () => {
       experimentalFeatures
     );
 
-    const featuresSetup = featuresPluginMock.createSetup();
-    productFeaturesService.init(featuresSetup);
+    productFeaturesService.setup(coreSetup, pluginsSetup);
 
-    const mockSecurityConfig = new Map() as ProductFeaturesConfigMap<SecuritySubFeatureId>;
-    const mockCasesConfig = new Map() as ProductFeaturesConfigMap<CasesSubFeatureId>;
-    const mockAssistantConfig = new Map() as ProductFeaturesConfigMap<AssistantSubFeatureId>;
-    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfigMap;
-    const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfigMap;
-    const mockTimelineConfig = new Map() as ProductFeaturesConfigMap;
-    const mockNotesConfig = new Map() as ProductFeaturesConfigMap;
+    const mockSecurityConfig = new Map() as SecurityProductFeaturesConfigMap;
+    const mockCasesConfig = new Map() as CasesProductFeaturesConfigMap;
+    const mockAssistantConfig = new Map() as AssistantProductFeaturesConfigMap;
+    const mockAttackDiscoveryConfig = new Map() as AttackDiscoveryProductFeaturesConfigMap;
+    const mockSiemMigrationsConfig = new Map() as SiemMigrationsProductFeaturesConfigMap;
+    const mockTimelineConfig = new Map() as TimelineProductFeaturesConfigMap;
+    const mockNotesConfig = new Map() as NotesProductFeaturesConfigMap;
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),
@@ -117,19 +121,14 @@ describe('ProductFeaturesService', () => {
     expect(configurator.attackDiscovery).toHaveBeenCalled();
     expect(configurator.siemMigrations).toHaveBeenCalled();
 
-    expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
-      mockSecurityConfig
-    );
-    expect(MockedProductFeatures.mock.instances[1].setConfig).toHaveBeenCalledWith(mockCasesConfig);
-    expect(MockedProductFeatures.mock.instances[2].setConfig).toHaveBeenCalledWith(
-      mockAssistantConfig
-    );
-    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
-      mockAttackDiscoveryConfig
-    );
-    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
-      mockSiemMigrationsConfig
-    );
+    const { register } = MockedProductFeatures.mock.instances[0];
+    expect(register).toHaveBeenCalledWith('security', mockSecurityConfig);
+    expect(register).toHaveBeenCalledWith('cases', mockCasesConfig);
+    expect(register).toHaveBeenCalledWith('securityAssistant', mockAssistantConfig);
+    expect(register).toHaveBeenCalledWith('attackDiscovery', mockAttackDiscoveryConfig);
+    expect(register).toHaveBeenCalledWith('siemMigrations', mockSiemMigrationsConfig);
+    expect(register).toHaveBeenCalledWith('timeline', mockTimelineConfig);
+    expect(register).toHaveBeenCalledWith('notes', mockNotesConfig);
   });
 
   it('should return isEnabled for enabled features', () => {
@@ -139,27 +138,30 @@ describe('ProductFeaturesService', () => {
       experimentalFeatures
     );
 
-    const featuresSetup = featuresPluginMock.createSetup();
-    productFeaturesService.init(featuresSetup);
+    productFeaturesService.setup(coreSetup, pluginsSetup);
 
     const mockSecurityConfig = new Map([
       [ProductFeatureKey.advancedInsights, {}],
       [ProductFeatureKey.endpointExceptions, {}],
-    ]) as ProductFeaturesConfigMap<SecuritySubFeatureId>;
+    ]) as SecurityProductFeaturesConfigMap;
     const mockCasesConfig = new Map([
       [ProductFeatureKey.casesConnectors, {}],
-    ]) as ProductFeaturesConfigMap<CasesSubFeatureId>;
+    ]) as CasesProductFeaturesConfigMap;
     const mockAssistantConfig = new Map([
       [ProductFeatureKey.assistant, {}],
-    ]) as ProductFeaturesConfigMap<AssistantSubFeatureId>;
+    ]) as AssistantProductFeaturesConfigMap;
     const mockAttackDiscoveryConfig = new Map([
       [ProductFeatureKey.attackDiscovery, {}],
-    ]) as ProductFeaturesConfigMap;
+    ]) as AttackDiscoveryProductFeaturesConfigMap;
     const mockSiemMigrationsConfig = new Map([
       [ProductFeatureKey.siemMigrations, {}],
-    ]) as ProductFeaturesConfigMap;
-    const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfigMap;
-    const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfigMap;
+    ]) as SiemMigrationsProductFeaturesConfigMap;
+    const mockTimelineConfig = new Map([
+      [ProductFeatureKey.timeline, {}],
+    ]) as TimelineProductFeaturesConfigMap;
+    const mockNotesConfig = new Map([
+      [ProductFeatureKey.notes, {}],
+    ]) as NotesProductFeaturesConfigMap;
 
     const configurator: ProductFeaturesConfigurator = {
       security: jest.fn(() => mockSecurityConfig),
@@ -181,30 +183,9 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 
-  it('should call isApiPrivilegeEnabled for api actions', () => {
-    const experimentalFeatures = {} as ExperimentalFeatures;
-    const productFeaturesService = new ProductFeaturesService(
-      loggerMock.create(),
-      experimentalFeatures
-    );
-
-    productFeaturesService.isApiPrivilegeEnabled('writeEndpointExceptions');
-
-    expect(MockedProductFeatures.mock.instances[0].isActionRegistered).toHaveBeenCalledWith(
-      'api:securitySolution-writeEndpointExceptions'
-    );
-    expect(MockedProductFeatures.mock.instances[1].isActionRegistered).toHaveBeenCalledWith(
-      'api:securitySolution-writeEndpointExceptions'
-    );
-    expect(MockedProductFeatures.mock.instances[2].isActionRegistered).toHaveBeenCalledWith(
-      'api:securitySolution-writeEndpointExceptions'
-    );
-  });
-
   describe('registerApiAccessControl', () => {
-    const mockHttpSetup = httpServiceMock.createSetupContract();
     let lastRegisteredFn: OnPostAuthHandler;
-    mockHttpSetup.registerOnPostAuth.mockImplementation((fn) => {
+    coreSetup.http.registerOnPostAuth.mockImplementation((fn) => {
       lastRegisteredFn = fn;
     });
 
@@ -221,9 +202,9 @@ describe('ProductFeaturesService', () => {
         loggerMock.create(),
         experimentalFeatures
       );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+      productFeaturesService.setup(coreSetup, pluginsSetup);
 
-      expect(mockHttpSetup.registerOnPostAuth).toHaveBeenCalledTimes(1);
+      expect(coreSetup.http.registerOnPostAuth).toHaveBeenCalledTimes(1);
     });
 
     describe('when using productFeature tag', () => {
@@ -239,7 +220,7 @@ describe('ProductFeaturesService', () => {
           loggerMock.create(),
           experimentalFeatures
         );
-        productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        productFeaturesService.setup(coreSetup, pluginsSetup);
 
         productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(false);
 
@@ -256,7 +237,7 @@ describe('ProductFeaturesService', () => {
           loggerMock.create(),
           experimentalFeatures
         );
-        productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        productFeaturesService.setup(coreSetup, pluginsSetup);
 
         productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(true);
 
@@ -279,7 +260,7 @@ describe('ProductFeaturesService', () => {
           loggerMock.create(),
           experimentalFeatures
         );
-        productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        productFeaturesService.setup(coreSetup, pluginsSetup);
         mockIsActionRegistered = MockedProductFeatures.mock.instances[0]
           .isActionRegistered as jest.Mock;
       });
