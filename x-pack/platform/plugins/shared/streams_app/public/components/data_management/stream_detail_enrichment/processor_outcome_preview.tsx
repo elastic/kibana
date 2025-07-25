@@ -19,7 +19,7 @@ import { Sample } from '@kbn/grok-ui';
 import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, uniq } from 'lodash';
+import { isEmpty } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
 import {

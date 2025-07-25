@@ -50,8 +50,8 @@ export const ProcessorStatusIndicator = ({
       )
     )
   );
-  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector(
-    selectWhetherAnyProcessorBeforePersisted
+  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector((snapshot) =>
+    selectWhetherAnyProcessorBeforePersisted(snapshot.context)
   );
 
   let variant:

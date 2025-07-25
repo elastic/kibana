@@ -7,7 +7,6 @@
 
 import { createSelector } from 'reselect';
 import { StreamEnrichmentContextType } from './types';
-import { StreamEnrichmentActorSnapshot } from './stream_enrichment_state_machine';
 import { isProcessorUnderEdit } from '../processor_state_machine';
 
 /**
@@ -30,7 +29,7 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
  * Selects whether there are any new processors before the persisted ones.
  */
 export const selectWhetherAnyProcessorBeforePersisted = createSelector(
-  [(snapshot: StreamEnrichmentActorSnapshot) => snapshot.context.processorsRefs],
+  [(context: StreamEnrichmentContextType) => context.processorsRefs],
   (processorsRefs) => {
     return processorsRefs
       .map((ref) => ref.getSnapshot())

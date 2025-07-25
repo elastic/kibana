@@ -7,6 +7,7 @@
 import {
   MachineImplementationsFrom,
   assign,
+  enqueueActions,
   forwardTo,
   setup,
   sendTo,
@@ -58,6 +59,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { moveArrayItem } from '../../../../../util/move_array_item';
+import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -145,12 +147,23 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
-    sendProcessorsEventToSimulator: sendTo(
-      'simulator',
-      ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
-        type: params.type,
-        processors: getProcessorsForSimulation({ processorsRefs: context.processorsRefs }),
-      })
+    /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
+    sendProcessorsEventToSimulator: enqueueActions(
+      ({ context, enqueue }, params: { type: StreamEnrichmentEvent['type'] }) => {
+        /**
+         * When any processor is before persisted, we need to reset the simulator
+         * because the processors are not in a valid order.
+         * If the order allows it, notify the simulator to run the simulation based on the received event.
+         */
+        if (selectWhetherAnyProcessorBeforePersisted(context)) {
+          enqueue('sendResetEventToSimulator');
+        } else {
+          enqueue.sendTo('simulator', {
+            type: params.type,
+            processors: getProcessorsForSimulation({ processorsRefs: context.processorsRefs }),
+          });
+        }
+      }
     ),
     sendDataSourcesSamplesToSimulator: sendTo(
       'simulator',
