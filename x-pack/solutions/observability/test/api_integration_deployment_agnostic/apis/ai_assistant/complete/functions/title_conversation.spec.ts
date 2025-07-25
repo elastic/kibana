@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('sends the correct system message to the LLM for the title', () => {
-        const systemMessage = getTitleSystemMessage(['observability'] as AssistantScope[]);
+        const systemMessage = getTitleSystemMessage(['observability' as const]);
         expect(
           titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
         ).to.be(systemMessage);
