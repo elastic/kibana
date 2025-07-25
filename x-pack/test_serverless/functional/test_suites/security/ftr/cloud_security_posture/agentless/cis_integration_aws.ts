@@ -21,7 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('Serverless - Agentless CIS Integration Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/191017
+  describe.skip('Serverless - Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
