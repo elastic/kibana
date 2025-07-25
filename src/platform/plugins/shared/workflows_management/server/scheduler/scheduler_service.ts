@@ -10,8 +10,8 @@
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { v4 as generateUuid } from 'uuid';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
 import { convertToWorkflowGraph, convertToSerializableGraph } from '../../common';
@@ -23,17 +23,15 @@ const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineMod
 export class SchedulerService {
   private readonly logger: Logger;
   private readonly actionsClient: IUnsecuredActionsClient;
-  private readonly workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
 
   constructor(
     logger: Logger,
     workflowsService: WorkflowsService,
     actionsClient: IUnsecuredActionsClient,
-    workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart
+    private readonly taskManager: TaskManagerStartContract
   ) {
     this.logger = logger;
     this.actionsClient = actionsClient;
-    this.workflowsExecutionEngine = workflowsExecutionEngine;
   }
 
   public async start() {
@@ -64,13 +62,31 @@ export class SchedulerService {
     const connectorCredentials = await extractConnectorIds(executionGraph, this.actionsClient);
 
     const workflowRunId = generateUuid();
-    await this.workflowsExecutionEngine.executeWorkflow(workflow, {
+    const context = {
       workflowRunId,
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
       connectorCredentials,
       triggeredBy: 'manual', // <-- mark as manual
-    });
+    };
+
+    const taskInstance = {
+      id: `workflow:${workflowRunId}:${context.triggeredBy}`,
+      taskType: 'workflow:run',
+      params: {
+        workflow,
+        context,
+      },
+      state: {
+        lastRunAt: null,
+        lastRunStatus: null,
+        lastRunError: null,
+      },
+      scope: ['workflows'],
+      enabled: true,
+    };
+
+    await this.taskManager.schedule(taskInstance);
 
     return workflowRunId;
   }

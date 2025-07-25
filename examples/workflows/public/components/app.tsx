@@ -16,7 +16,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
@@ -55,12 +55,13 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
     } catch (error) {
       setIsValidWorkflow(false);
     }
-    setWorkflow(workflow);
+    setWorkflowYaml(workflow);
   };
 
   // Use React hooks to manage state.
-  const [stringWorkflow, setWorkflow] = useState<string>(
-    `id: example-workflow-1
+  const [workflowYaml, setWorkflowYaml] = useState<string>(
+    `
+id: example-workflow-1
 name: Example Workflow 1
 status: active
 triggers:
@@ -98,7 +99,7 @@ steps:
   );
 
   // Update workflow inputs with current user email
-  const getWorkflowInputs = useCallback(() => {
+  const getWorkflowInputs = React.useCallback(() => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
     return yaml.dump({
@@ -111,6 +112,7 @@ steps:
       },
     });
   }, [currentUser]);
+
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
   const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
 
@@ -124,9 +126,9 @@ steps:
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
     http
-      .post('/api/workflows/run', {
+      .post('/api/workflows/test', {
         body: JSON.stringify({
-          workflow: yaml.load(stringWorkflow),
+          workflowYaml,
           inputs: yaml.load(workflowInputs),
         }),
       })
@@ -218,7 +220,7 @@ steps:
                       >
                         <CodeEditor
                           languageId="yaml"
-                          value={stringWorkflow}
+                          value={workflowYaml}
                           height={500}
                           editorDidMount={() => {}}
                           onChange={validateAndSetWorkflow}
@@ -246,7 +248,10 @@ steps:
                     />
                   </EuiButton>
                   {workflowExecutionId && (
-                    <WorkflowExecution workflowExecutionId={workflowExecutionId} />
+                    <WorkflowExecution
+                      workflowExecutionId={workflowExecutionId}
+                      workflowYaml={workflowYaml}
+                    />
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
