@@ -63,6 +63,9 @@ stack: ga 9.2
 :    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
 
 ### Version 9.1+ [ec_version_9_1]
+```{applies_to}
+stack: ga 9.1
+```
 
 `xpack.actions.email.services.enabled`
 :   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
