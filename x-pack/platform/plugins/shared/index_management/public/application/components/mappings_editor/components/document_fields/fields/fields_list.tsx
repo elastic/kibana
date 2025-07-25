@@ -40,7 +40,6 @@ export const FieldsList = React.memo(function FieldsListComponent({
     >
       {fields.map((field, index) => (
         <FieldsListItemContainer
-          aria-label={`Field ${field.source.name}`}
           key={field.id}
           fieldId={field.id}
           treeDepth={treeDepth === undefined ? 0 : treeDepth}

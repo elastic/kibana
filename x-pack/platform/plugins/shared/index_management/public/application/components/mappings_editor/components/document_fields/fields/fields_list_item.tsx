@@ -286,11 +286,7 @@ function FieldListItemComponent(
               {source.name}
             </EuiFlexItem>
 
-            <EuiFlexGroup
-              aria-label={i18nTexts.fieldListTypesLabel}
-              id="fieldDescriptors"
-              alignItems="flexStart"
-            >
+            <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>
               <EuiFlexItem grow={false}>
                 <EuiBadge
                   color="hollow"
