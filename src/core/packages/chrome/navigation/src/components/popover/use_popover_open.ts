@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import { useState, useCallback } from 'react';
 
-import { EmotionFn } from '../types';
+/**
+ * Hook for managing popover open state
+ */
+export const usePopoverOpen = (initialState = false) => {
+  const [isOpen, setIsOpen] = useState(initialState);
 
-const root: EmotionFn = ({ euiTheme }) => css`
-  position: sticky;
-  z-index: ${euiTheme.levels.navigation};
-  grid-area: navigationPanel;
-  align-self: start;
-  height: 100%;
-`;
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-export const styles = {
-  root,
+  return { isOpen, open, close, toggle };
 };

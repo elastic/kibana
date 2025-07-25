@@ -48,7 +48,6 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
-
 import { Logger } from '@kbn/logging';
 import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
@@ -61,6 +60,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
+import { Navigation as SideNavV2Navigation } from './ui/sidenav_v2/navigation';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -525,6 +525,7 @@ export class ChromeService {
         prependBasePath={http.basePath.prepend}
         isSideNavCollapsed$={this.isSideNavCollapsed$}
         toggleSideNav={setIsSideNavCollapsed}
+        includeSideNavCollapseButton={!includeSideNavigation}
       >
         {includeSideNavigation ? getProjectSideNavComponent() : null}
       </ProjectHeader>
@@ -597,7 +598,11 @@ export class ChromeService {
       return getClassicHeader({ isFixed: false, includeBanner: false, as: 'div' });
     };
 
-    const getProjectHeaderComponentForGridLayout = () => {
+    const getProjectHeaderComponentForGridLayout = ({
+      includeSideNavigation,
+    }: {
+      includeSideNavigation: boolean;
+    }) => {
       return getProjectHeader({
         // in grid layout the header is not fixed, but is inside grid's layout header cell
         isFixed: false,
@@ -606,10 +611,19 @@ export class ChromeService {
         // in grid layout the layout is responsible for rendering the banner
         includeBanner: false,
         // TODO: flip to false when we have a new solution navigation that is part of the grid layout
-        includeSideNavigation: true,
+        includeSideNavigation,
         // in grid layout the application subheader is rendered by the layout service as part of the application slot
         includeAppMenu: false,
       });
+    };
+
+    const getProjectSideNavV2Component = () => {
+      return (
+        <SideNavV2Navigation
+          isSideNavCollapsed$={this.isSideNavCollapsed$}
+          history={application.history}
+        />
+      );
     };
 
     return {
@@ -618,6 +632,7 @@ export class ChromeService {
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
+      getProjectSideNavV2Component,
       getHeaderBanner: () => {
         return (
           <HeaderTopBanner
