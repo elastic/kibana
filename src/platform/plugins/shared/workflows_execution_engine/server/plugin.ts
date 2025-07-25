@@ -105,6 +105,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
         workflowExecutionGraph,
+        workflowState,
       });
 
       // Log workflow execution start

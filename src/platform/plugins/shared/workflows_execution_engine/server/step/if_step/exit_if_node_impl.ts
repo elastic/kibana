@@ -14,7 +14,8 @@ import { WorkflowState } from '../../workflow_context_manager/workflow_state';
 export class ExitIfNodeImpl implements StepImplementation {
   constructor(private step: ExitIfNode, private workflowState: WorkflowState) {}
 
-  public run(): Promise<void> {
-    return this.workflowState.finishStep(this.step.startNodeId);
+  public async run(): Promise<void> {
+    await this.workflowState.finishStep(this.step.startNodeId);
+    this.workflowState.goToNextStep();
   }
 }
