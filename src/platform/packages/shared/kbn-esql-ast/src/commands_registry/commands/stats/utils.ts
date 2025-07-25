@@ -66,10 +66,8 @@ function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
 export type CaretPosition =
   | 'expression_without_assignment'
   | 'expression_after_assignment'
-  | 'expression_complete'
   | 'grouping_expression_without_assignment'
   | 'grouping_expression_after_assignment'
-  | 'grouping_expression_complete'
   | 'after_where';
 
 export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
@@ -90,15 +88,11 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     return 'expression_after_assignment';
   }
 
-  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+\S*$/i.test(innerText)) {
-    return 'expression_without_assignment';
-  }
-
   if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
     return 'after_where';
   }
 
-  return 'expression_complete';
+  return 'expression_without_assignment';
 };
 
 export const byCompleteItem: ISuggestionItem = {

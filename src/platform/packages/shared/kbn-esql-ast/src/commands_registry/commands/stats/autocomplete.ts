@@ -28,12 +28,11 @@ import {
 } from '../../complete_items';
 import {
   columnExists,
-  handleFragment,
   getControlSuggestionIfSupported,
   suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
+import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, getSuggestionsAfterCompleteExpression } from './utils';
 // import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isMarkerNode } from '../../../definitions/utils/ast';
@@ -48,45 +47,6 @@ function alreadyUsedColumns(command: ESQLCommand) {
   ) ?? []) as ESQLColumn[];
 
   return columnNodes.map((node) => node.parts.join('.'));
-}
-
-function suggestColumns(
-  columnSuggestions: ISuggestionItem[],
-  otherSuggestions: ISuggestionItem[],
-  innerText: string,
-  context?: ICommandContext
-) {
-  return handleFragment(
-    innerText,
-    (fragment) => columnExists(fragment, context),
-    async (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      // fie<suggest>
-      return [
-        ...columnSuggestions.map((suggestion) => {
-          return {
-            ...suggestion,
-            text: suggestion.text,
-            rangeToReplace,
-          };
-        }),
-        ...otherSuggestions,
-      ];
-    },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      // field<suggest>
-      const finalSuggestions = [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-      ];
-      return finalSuggestions.map<ISuggestionItem>((s) => ({
-        ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        command: TRIGGER_SUGGESTION_COMMAND,
-        rangeToReplace,
-      }));
-    }
-  );
 }
 
 export async function autocomplete(
@@ -122,7 +82,41 @@ export async function autocomplete(
   // }
 
   switch (pos) {
-    case 'expression_without_assignment':
+    case 'expression_without_assignment': {
+      const expressionRoot = /,\s*$/.test(innerText)
+        ? undefined // we're in a new expression, but there isn't an AST node for it yet
+        : command.args[command.args.length - 1];
+
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions = await suggestForExpression({
+        innerText,
+        expressionRoot,
+        location: Location.STATS,
+        context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+      });
+
+      if (!expressionRoot) {
+        suggestions.push(
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+        );
+      }
+
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
+        suggestions.push(
+          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists),
+          whereCompleteItem,
+          byCompleteItem
+        );
+      }
+
+      return suggestions;
+
+      // TODO: control suggestions
+
       return [
         ...controlSuggestions,
         ...getFunctionSuggestions(
@@ -131,8 +125,52 @@ export async function autocomplete(
         ),
         getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
+    }
 
-    case 'expression_after_assignment':
+    case 'expression_after_assignment': {
+      // Find expression root
+      const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
+      const assignment = byNode.args[byNode.args.length - 1];
+      const rightHandAssignment = isAssignment(assignment)
+        ? assignment.args[assignment.args.length - 1]
+        : undefined;
+      let expressionRoot = Array.isArray(rightHandAssignment) ? rightHandAssignment[0] : undefined;
+
+      // @TODO the marker shouldn't be leaking through here
+      if (isMarkerNode(expressionRoot)) {
+        expressionRoot = undefined;
+      }
+
+      if (Array.isArray(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions = await suggestForExpression({
+        innerText,
+        expressionRoot,
+        location: Location.STATS,
+        context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+      });
+
+      if (!expressionRoot) {
+        suggestions.push(
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+        );
+      }
+
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
+        suggestions.push(
+          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists),
+          whereCompleteItem,
+          byCompleteItem
+        );
+      }
+
+      return suggestions;
+
+      // TODO reinstate control suggestions
+
       return [
         ...controlSuggestions,
         ...getFunctionSuggestions(
@@ -140,14 +178,7 @@ export async function autocomplete(
           callbacks?.hasMinimumLicenseRequired
         ),
       ];
-
-    case 'expression_complete':
-      return [
-        whereCompleteItem,
-        byCompleteItem,
-        pipeCompleteItem,
-        { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
-      ];
+    }
 
     case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
@@ -189,7 +220,6 @@ export async function autocomplete(
       const ignored = alreadyUsedColumns(command);
 
       // Find expression root
-
       const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
       const assignment = byNode.args[byNode.args.length - 1];
       const rightHandAssignment = isAssignment(assignment)

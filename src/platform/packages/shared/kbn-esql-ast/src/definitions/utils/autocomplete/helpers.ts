@@ -344,7 +344,7 @@ export const getExpressionPosition = (
 export async function suggestForExpression({
   expressionRoot,
   innerText,
-  getColumnsByType,
+  getColumnsByType: _getColumnsByType,
   location,
   preferredExpressionType,
   context,
@@ -355,12 +355,15 @@ export async function suggestForExpression({
   location: Location;
   preferredExpressionType?: SupportedDataType;
   innerText: string;
-  getColumnsByType: GetColumnsByTypeFn;
+  getColumnsByType?: GetColumnsByTypeFn;
   context?: ICommandContext;
   advanceCursorAfterInitialField?: boolean;
   // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  suggestColumns?: boolean;
 }): Promise<ISuggestionItem[]> {
+  const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
+
   const suggestions: ISuggestionItem[] = [];
 
   const position = getExpressionPosition(innerText, expressionRoot);
