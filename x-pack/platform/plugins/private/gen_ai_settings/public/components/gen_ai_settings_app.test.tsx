@@ -24,6 +24,15 @@ describe('GenAiSettingsApp', () => {
     coreStart = coreMock.createStart();
     setBreadcrumbs = jest.fn();
 
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      management: {
+        kibana: {
+          spaces: true,
+        },
+      },
+    };
+
     // Default mock for enabled features
     mockUseEnabledFeatures.mockReturnValue({
       showSpacesIntegration: true,
@@ -108,19 +117,84 @@ describe('GenAiSettingsApp', () => {
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
     });
+
+    it('should not render ai feature visibility section when canManageSpaces is false', () => {
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        management: {
+          kibana: {
+            spaces: false,
+          },
+        },
+      };
+
+      renderComponent();
+
+      expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
+    });
+
+    it('should render ai feature visibility section when both showSpacesIntegration and canManageSpaces are true', () => {
+      mockUseEnabledFeatures.mockReturnValue({
+        showSpacesIntegration: true,
+        isPermissionsBased: false,
+        showAiBreadcrumb: true,
+      });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        management: {
+          kibana: {
+            spaces: true,
+          },
+        },
+      };
+
+      renderComponent();
+
+      expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
+      expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
+    });
   });
 
   describe('permissions-based view', () => {
-    it('should handle permissions-based view correctly', () => {
+    it('should handle permissions-based view correctly when canManageSpaces is true', () => {
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: true,
         isPermissionsBased: true,
         showAiBreadcrumb: true,
       });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        management: {
+          kibana: {
+            spaces: true,
+          },
+        },
+      };
 
       renderComponent();
 
       expect(screen.getByTestId('goToPermissionsTabButton')).toBeInTheDocument();
+    });
+
+    it('should not render permissions section when canManageSpaces is false', () => {
+      mockUseEnabledFeatures.mockReturnValue({
+        showSpacesIntegration: true,
+        isPermissionsBased: true,
+        showAiBreadcrumb: true,
+      });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        management: {
+          kibana: {
+            spaces: false,
+          },
+        },
+      };
+
+      renderComponent();
+
+      expect(screen.queryByTestId('goToPermissionsTabButton')).not.toBeInTheDocument();
     });
   });
 });
