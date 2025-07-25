@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { createRouter } from '@kbn/typed-react-router-config';
-import { SpaceAwareRoute } from './components/space_aware_route';
+import { AiAssistantSelectionPage } from './components/ai_assistant_selection_page';
 
 /**
  * The array of route definitions to be used when the application
@@ -17,7 +17,7 @@ import { SpaceAwareRoute } from './components/space_aware_route';
  */
 const aIAssistantManagementSelectionRoutes = {
   '/': {
-    element: <SpaceAwareRoute />,
+    element: <AiAssistantSelectionPage />,
   },
 };
 
