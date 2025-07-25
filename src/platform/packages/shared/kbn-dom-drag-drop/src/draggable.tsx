@@ -23,8 +23,7 @@ import {
   useDragDropContext,
 } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';
-import { domDragAndDrop } from './shared_styles';
-import './sass/draggable.scss';
+import { domDragAndDrop, DRAG_DROP_Z_LEVEL_2 } from './shared_styles';
 
 type DragEvent = React.DragEvent<HTMLElement>;
 
@@ -164,7 +163,7 @@ const DraggableImpl = memo(function DraggableImpl({
   extraKeyboardHandler,
   ariaDescribedBy,
 }: DraggableImplProps) {
-  const styles = useMemoCss(componentStyles);
+  const styles = useMemoCss(draggableStyles);
 
   const { keyboardMode, hoveredDropTarget, dropTargetsByOrder } = draggedItemProps || {};
 
@@ -356,6 +355,7 @@ const DraggableImpl = memo(function DraggableImpl({
           aria-label={value.humanData.label}
           aria-describedby={ariaDescribedBy || `${dataTestSubjPrefix}-keyboardInstructions`}
           className="domDraggable__keyboardHandler"
+          css={styles.keyboardHandler}
           data-test-subj={`${dataTestSubjPrefix}-keyboardHandler`}
           onBlur={(e) => {
             if (draggedItemProps) {
@@ -423,6 +423,8 @@ const ReorderableDraggableImpl = memo(function ReorderableDraggableImpl(
     dragging?: DragDropIdentifier;
   }
 ) {
+  const styles = useMemoCss(reorderableStyles);
+
   const [{ isReorderOn, reorderedItems, direction }, reorderDispatch] = useContext(ReorderContext);
 
   const { value, draggedItemProps, reorderableGroup, dndDispatch, dataTestSubjPrefix } = props;
@@ -533,6 +535,7 @@ const ReorderableDraggableImpl = memo(function ReorderableDraggableImpl(
         ['domDraggable--reorderable']: isDragging,
         ['domDraggable_active_keyboard--reorderable']: keyboardMode && isDragging,
       })}
+      css={styles.reorderable}
       style={
         areItemsReordered
           ? {
@@ -555,7 +558,7 @@ const ReorderableDraggableImpl = memo(function ReorderableDraggableImpl(
   );
 });
 
-const componentStyles = {
+const draggableStyles = {
   domDraggable: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
 
@@ -574,7 +577,38 @@ const componentStyles = {
         },
 
         '&:focus': euiFocusRing(themeContext),
+
+        '.domDraggable_active--move, .domDraggable_dragover_keyboard--move': {
+          opacity: 0,
+        },
       },
     ]);
   },
+  keyboardHandler: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const focusRing = euiFocusRing(themeContext); // returns a string
+
+    return css({
+      top: 0,
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      borderRadius: euiTheme.border.radius.medium,
+
+      '&:focus, &:focus-within': {
+        pointerEvents: 'none',
+        zIndex: DRAG_DROP_Z_LEVEL_2,
+        focusRing,
+      },
+    });
+  },
+};
+
+const reorderableStyles = {
+  reorderable: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      transform: 'translateY(0)',
+      transition: `transform ${euiTheme.animation.fast} ease-in-out`,
+      position: 'relative',
+    }),
 };
