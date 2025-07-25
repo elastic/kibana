@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCustomRolesPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const comboBox = getService('comboBox');
 
   return {
