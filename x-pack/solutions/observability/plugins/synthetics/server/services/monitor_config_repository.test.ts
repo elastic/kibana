@@ -603,11 +603,12 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         ...options,
+        perPage: 10000,
       });
 
       expect(soClient.find).toHaveBeenLastCalledWith({
         type: legacySyntheticsMonitorTypeSingle,
-        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true' },
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10000 },
       });
 
       expect(result).toStrictEqual(mockFindResult);
@@ -632,7 +633,8 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         search: 'test',
-        perPage: 5000,
+        perPage: 10000,
+        page: 1,
       });
     });
   });
