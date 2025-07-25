@@ -123,7 +123,7 @@ export function ParentRelationshipAnalysis({
                 }
               )}
             </p>
-            <ul>
+            <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
               <li>
                 {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundReason1', {
                   defaultMessage: 'An instrumentation issue preventing proper trace correlation',

@@ -184,7 +184,8 @@ export function DiagnosticConfigurationForm({
         <>
           <EuiText size="s" color="subdued">
             {i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.description', {
-              defaultMessage: 'Enter a trace ID',
+              defaultMessage:
+                'Enter a trace ID that you expect to contain a connection between the selected source and destination nodes. This will help analyze if the trace properly flows through both services.',
             })}
           </EuiText>
           <EuiSpacer size="m" />

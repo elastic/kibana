@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { ExitSpansAnalysis } from './exit_spans_analysis';
 import { ParentRelationshipAnalysis } from './parent_relationship_analysis';
+import { TraceCorrelationAnalysis } from './trace_correlation_analysis';
 import { DiagnosticInformationalMessage } from './diagnostic_informational_message';
 
 interface DiagnosticResultsProps {
@@ -25,21 +26,31 @@ interface DiagnosticResultsProps {
         documentCount: number;
         sourceSpanIds: string[];
       };
+      traceCorrelation: {
+        found: boolean;
+        foundInSourceNode: boolean;
+        foundInDestinationNode: boolean;
+        sourceNodeDocumentCount: number;
+        destinationNodeDocumentCount: number;
+      };
     };
     elasticsearchResponses: {
       exitSpansQuery?: any;
       sourceSpanIdsQuery?: any;
       destinationParentIdsQuery?: any;
+      traceCorrelationQuery?: any;
     };
   };
   sourceNodeName: string | undefined;
   destinationNodeName: string | undefined;
+  traceId: string;
 }
 
 export function DiagnosticResults({
   data,
   sourceNodeName,
   destinationNodeName,
+  traceId,
 }: DiagnosticResultsProps) {
   const exitSpansList = data?.analysis?.exitSpans?.spans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
@@ -47,6 +58,14 @@ export function DiagnosticResults({
     data?.analysis?.exitSpans?.hasMatchingDestinationResources || false;
   const destinationHits = data?.elasticsearchResponses?.destinationParentIdsQuery?.hits?.hits || [];
   const hasParent = data?.analysis?.parentRelationships?.found || false;
+  const traceCorrelation = data?.analysis?.traceCorrelation || {
+    found: false,
+    foundInSourceNode: false,
+    foundInDestinationNode: false,
+    sourceNodeDocumentCount: 0,
+    destinationNodeDocumentCount: 0,
+  };
+  const traceCorrelationResponse = data?.elasticsearchResponses?.traceCorrelationQuery;
 
   if (!sourceNodeName || !destinationNodeName) {
     return null;
@@ -69,6 +88,16 @@ export function DiagnosticResults({
         destinationHits={destinationHits}
         sourceNodeName={sourceNodeName}
         destinationNodeName={destinationNodeName}
+      />
+
+      <EuiSpacer size="m" />
+
+      <TraceCorrelationAnalysis
+        traceCorrelation={traceCorrelation}
+        traceId={traceId}
+        sourceNodeName={sourceNodeName}
+        destinationNodeName={destinationNodeName}
+        traceCorrelationResponse={traceCorrelationResponse}
       />
 
       <EuiSpacer size="m" />
