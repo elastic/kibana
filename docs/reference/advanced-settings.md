@@ -349,6 +349,9 @@ $$$observability-profiling-show-error-frames$$$`observability:profilingShowError
 $$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar`
 :   [beta] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
 
+$$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics` {applies_to}`stack: preview 9.0, removed 9.1`
+:   Display Amazon Lambda metrics in the service metrics tab.
+
 $$$observability-enable-legacy-uptime-app$$$`observability:enableLegacyUptimeApp`
 :   Shows the Uptime app even if there is no recent Heartbeat data.
 
