@@ -7,18 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-
-import { EmotionFn } from '../types';
-
-const root: EmotionFn = ({ euiTheme }) => css`
-  position: sticky;
-  z-index: ${euiTheme.levels.navigation};
-  grid-area: navigationPanel;
-  align-self: start;
-  height: 100%;
-`;
-
-export const styles = {
-  root,
-};
+export { createTracesAPMDataSourceProfileProvider } from './apm';
+export { createTracesOtelDataSourceProfileProvider } from './otel';
