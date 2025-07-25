@@ -2,6 +2,18 @@
 
 exports[`Alert as data fields checks detect AAD fields changes for: .es-query 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "kibana.alert.evaluation.conditions": Object {
       "array": false,
@@ -17,6 +29,12 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "kibana.alert.title": Object {
       "array": false,
@@ -29,6 +47,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: .geo-containment 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "kibana.alert.evaluation.conditions": Object {
       "array": false,
@@ -44,6 +74,12 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "kibana.alert.title": Object {
       "array": false,
@@ -56,6 +92,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: .index-threshold 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "kibana.alert.evaluation.conditions": Object {
       "array": false,
@@ -71,6 +119,12 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.grouping": Object {
+      "array": false,
+      "dynamic": true,
+      "required": false,
+      "type": "object",
     },
     "kibana.alert.title": Object {
       "array": false,
