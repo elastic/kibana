@@ -282,24 +282,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'saved-query-management-save-button',
           'disabled'
         );
-        if (!isSaveButtonDisabled) {
-          throw new Error('Save button should be disabled directly after saving a query');
-        }
+        expect(isSaveButtonDisabled).to.equal(
+          'true',
+          'Save button should be disabled directly after saving a query'
+        );
         await filterBar.addFilter({ field: '@message', operation: 'exists' });
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         isSaveButtonDisabled = await testSubjects.getAttribute(
           'saved-query-management-save-button',
           'disabled'
         );
-        if (isSaveButtonDisabled) {
-          throw new Error('Save button should be enabled after adding a filter');
-        }
+        expect(isSaveButtonDisabled).to.equal(
+          null,
+          'Save button should be enabled after adding a filter'
+        );
         const updateQueryButtonExists = await testSubjects.exists(
           'saved-query-management-save-changes-button'
         );
-        if (!updateQueryButtonExists) {
-          throw new Error('Update query button does not exist');
-        }
+        expect(updateQueryButtonExists).to.equal(true, 'Update query button does not exist');
       });
     });
   });
