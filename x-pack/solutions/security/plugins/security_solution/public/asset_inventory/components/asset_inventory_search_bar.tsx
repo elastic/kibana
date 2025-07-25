@@ -13,7 +13,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { FiltersGlobal } from '../../common/components/filters_global/filters_global';
 import { useDataViewContext } from '../hooks/data_view_context';
 import type { AssetsURLQuery } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { QUERY_KEY_GRID_DATA } from '../constants';
+import { QUERY_KEY_ASSET_INVENTORY } from '../constants';
 
 interface AssetInventorySearchBarProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
@@ -45,12 +45,12 @@ export const AssetInventorySearchBar = ({
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY_GRID_DATA],
+      queryKey: [QUERY_KEY_ASSET_INVENTORY],
     });
   };
 
   const isFetchingData = useIsFetching({
-    queryKey: [QUERY_KEY_GRID_DATA],
+    queryKey: [QUERY_KEY_ASSET_INVENTORY],
   });
 
   return (
@@ -63,7 +63,9 @@ export const AssetInventorySearchBar = ({
           showDatePicker={false}
           indexPatterns={[dataView]}
           onQuerySubmit={(payload, isUpdated) => {
-            if (isUpdated) setQuery(payload);
+            if (isUpdated) {
+              setQuery(payload);
+            }
             if (!isUpdated) {
               handleRefresh();
             }
