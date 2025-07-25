@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { DataSchemaFormat } from '../../../../../common/http_api/shared';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
@@ -33,7 +34,12 @@ export function useSnapshot(
     () =>
       // TODO: Replace this with the schema selector value
       JSON.stringify(
-        buildPayload({ ...props, schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs' })
+        buildPayload({
+          ...props,
+          schema: config.featureFlags.hostOtelEnabled
+            ? DataSchemaFormat.SEMCONV
+            : DataSchemaFormat.ECS,
+        })
       ),
     [props, config.featureFlags.hostOtelEnabled]
   );

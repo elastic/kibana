@@ -6,9 +6,12 @@
  */
 import * as rt from 'io-ts';
 
-export const SchemaTypesRT = rt.keyof({
-  ecs: null,
-  semconv: null,
-});
+export enum DataSchemaFormat {
+  ECS = 'ecs',
+  SEMCONV = 'semconv',
+}
 
-export type SchemaTypes = rt.TypeOf<typeof SchemaTypesRT>;
+export const DataSchemaFormatRT = rt.keyof({
+  [DataSchemaFormat.ECS]: null,
+  [DataSchemaFormat.SEMCONV]: null,
+});

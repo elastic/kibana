@@ -21,8 +21,7 @@ import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../../hooks/use_fetcher';
-import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
-import type { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
+import { DataSchemaFormat } from '../../../../../../common/http_api/shared';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -38,7 +37,7 @@ export const UnifiedSearchBar = () => {
 
   const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
 
-  const schemas: SchemaTypes[] = useMemo(
+  const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata]
   );
@@ -49,7 +48,9 @@ export const UnifiedSearchBar = () => {
     const current = searchCriteria.preferredSchema;
 
     if (current === null) {
-      const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
+      const next = schemas.includes(DataSchemaFormat.SEMCONV)
+        ? DataSchemaFormat.SEMCONV
+        : schemas[0];
       onPreferredSchemaChange(next);
     }
   }, [

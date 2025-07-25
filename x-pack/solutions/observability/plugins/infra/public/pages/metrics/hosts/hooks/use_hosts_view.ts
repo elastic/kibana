@@ -15,8 +15,7 @@
 import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
-import type { SchemaTypes } from '../../../../../common/http_api/shared/schema_type';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
+import { DataSchemaFormat } from '../../../../../common/http_api/shared';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -44,7 +43,6 @@ export const useHostsView = () => {
     services: { telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const config = usePluginConfig();
 
   const payload = useMemo(
     () =>
@@ -53,11 +51,10 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          // TODO: Replace this with the schema selector value
-          schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+          schema: searchCriteria?.preferredSchema || DataSchemaFormat.ECS,
         })
       ),
-    [buildQuery, config.featureFlags.hostOtelEnabled, parsedDateRange, searchCriteria.limit]
+    [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
   );
 
   const { data, error, status } = useFetcher(
@@ -105,7 +102,7 @@ const createInfraMetricsRequest = ({
   esQuery: { bool: BoolQuery };
   dateRange: StringDateRange;
   limit: number;
-  schema?: SchemaTypes;
+  schema?: DataSchemaFormat;
 }): GetInfraMetricsRequestBodyPayloadClient => ({
   query: esQuery,
   from: dateRange.from,

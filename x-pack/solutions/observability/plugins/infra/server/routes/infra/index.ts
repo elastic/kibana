@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import { DataSchemaFormat } from '../../../common/http_api/shared';
 import {
   GetInfraMetricsRequestBodyPayloadRT,
   GetInfraMetricsRequestParamsRT,
@@ -21,7 +22,6 @@ import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
-import { METRIC_SCHEMA_ECS } from '../../../common/constants';
 
 export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -93,7 +93,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     async (context, request, response) => {
       const { body, params } = request;
       const { entityType } = params;
-      const { query, from, to, schema = METRIC_SCHEMA_ECS } = body;
+      const { query, from, to, schema = DataSchemaFormat.ECS } = body;
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
