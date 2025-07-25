@@ -14,8 +14,8 @@ import { AlertProcessingDonut } from './alert_processing_donut';
 
 interface Props {
   attackAlertIds: string[];
-  attackAlertsCountPerc: number;
-  attackAlertsCountPercCompare: number;
+  escalatedAlertsCountPerc: number;
+  escalatedAlertsCountPercCompare: number;
   from: string;
   to: string;
   filteredAlertsPerc: number;
@@ -24,8 +24,8 @@ interface Props {
 
 export const AlertProcessing: React.FC<Props> = ({
   attackAlertIds,
-  attackAlertsCountPerc,
-  attackAlertsCountPercCompare,
+  escalatedAlertsCountPerc,
+  escalatedAlertsCountPercCompare,
   filteredAlertsPerc,
   filteredAlertsPercCompare,
   from,
@@ -67,9 +67,9 @@ export const AlertProcessing: React.FC<Props> = ({
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
               <ComparePercentageBadge
-                currentCount={attackAlertsCountPerc}
-                previousCount={attackAlertsCountPercCompare}
-                stat={formatPercent(attackAlertsCountPercCompare)}
+                currentCount={escalatedAlertsCountPerc}
+                previousCount={escalatedAlertsCountPercCompare}
+                stat={formatPercent(escalatedAlertsCountPercCompare)}
                 statType={i18n.ESCALATED_RATE}
               />
             </EuiFlexItem>

@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CostSavings } from './cost_savings';
+import { CostSavingsTrend } from './cost_savings_trend';
 import { TimeSaved } from './time_saved';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
@@ -20,23 +21,22 @@ interface Props {
 }
 
 export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
+  // TODO: make these configurable
   const minutesPerAlert = 8;
   const analystHourlyRate = 75;
+
   const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
     minutesPerAlert,
+    analystHourlyRate,
   });
 
   // TODO loading state UI
   return isLoading ? null : (
     <>
       <ExecutiveSummary
-        analystHourlyRate={analystHourlyRate}
-        filteredAlerts={valueMetrics.filteredAlerts}
-        filteredAlertsCompare={valueMetricsCompare.filteredAlerts}
         from={from}
-        minutesPerAlert={minutesPerAlert}
         to={to}
         valueMetrics={valueMetrics}
         valueMetricsCompare={valueMetricsCompare}
@@ -51,11 +51,12 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
         `}
       >
         <EuiFlexGrid columns={1} gutterSize="l" responsive={false}>
-          <TimeSaved
-            minutesPerAlert={minutesPerAlert}
+          <CostSavings
+            analystHourlyRate={analystHourlyRate}
             attackAlertIds={attackAlertIds}
-            hoursSaved={valueMetrics.hoursSaved}
-            hoursSavedCompare={valueMetricsCompare.hoursSaved}
+            costSavings={valueMetrics.costSavings}
+            costSavingsCompare={valueMetricsCompare.costSavings}
+            minutesPerAlert={minutesPerAlert}
             from={from}
             to={to}
           />
@@ -68,13 +69,19 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
             to={to}
           />
         </EuiFlexGrid>
-        <CostSavings attackAlertIds={attackAlertIds} from={from} to={to} />
+        <CostSavingsTrend
+          analystHourlyRate={analystHourlyRate}
+          attackAlertIds={attackAlertIds}
+          minutesPerAlert={minutesPerAlert}
+          from={from}
+          to={to}
+        />
       </EuiFlexGrid>
       <EuiSpacer size="l" />
       <AlertProcessing
         attackAlertIds={attackAlertIds}
-        attackAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
-        attackAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
+        escalatedAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
+        escalatedAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
         filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
         filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
         from={from}

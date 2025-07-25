@@ -7,12 +7,13 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import * as i18n from './translations';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
+import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 
 interface Props {
   from: string;
@@ -21,14 +22,17 @@ interface Props {
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
-const ID = 'CostSavingsTrendQuery';
-const CostSavingsTrendComponent: React.FC<Props> = ({
+const ID = 'CostSavingsMetricQuery';
+const CostSavingsMetricComponent: React.FC<Props> = ({
   attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   from,
   to,
 }) => {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
   const extraVisualizationOptions = useMemo(
     () => ({
       filters: [
@@ -53,24 +57,38 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
-      <EuiTitle size="s">
-        <h3>{i18n.COST_SAVINGS_TREND}</h3>
-      </EuiTitle>
-      <EuiText size="s">
-        <p>{i18n.COST_SAVINGS_SOC}</p>
-      </EuiText>
-      <EuiSpacer size="l" />
+    <div
+      css={css`
+        height: 100%;
+        > * {
+          height: 100% !important;
+        }
+        .echMetricText__icon .euiIcon {
+          fill: ${colors.success};
+        }
+        .echMetricText {
+          padding: 8px 20px 60px;
+        }
+        p.echMetricText__value {
+          color: ${colors.success};
+        }
+        .euiPanel,
+        .embPanel__hoverActions > span {
+          background: ${colors.backgroundBaseSuccess};
+        }
+        .embPanel__hoverActionsAnchor {
+          --internalBorderStyle: 1px solid ${colors.success}!important;
+        }
+      `}
+    >
       <VisualizationEmbeddable
-        data-test-subj="embeddable-area-chart"
+        data-test-subj="cost-savings-metric"
         extraOptions={extraVisualizationOptions}
         getLensAttributes={(args) =>
-          getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
+          getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
         }
         timerange={{ from, to }}
-        id={`${ID}-area-embeddable`}
-        height={300}
-        width={'95%'}
+        id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
         scopeId={SourcererScopeName.detections}
         withActions={[
@@ -79,8 +97,8 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
           VisualizationContextMenuActions.inspect,
         ]}
       />
-    </EuiPanel>
+    </div>
   );
 };
 
-export const CostSavingsTrend = React.memo(CostSavingsTrendComponent);
+export const CostSavingsMetric = React.memo(CostSavingsMetricComponent);

@@ -12,6 +12,7 @@ import * as i18n from './translations';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 interface Props {
+  colorFamily: 'default' | 'bright';
   currentCount: number;
   description?: string;
   previousCount: number;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export const ComparePercentageBadge = ({
+  colorFamily = 'default',
   currentCount,
   description,
   previousCount,
@@ -43,7 +45,11 @@ export const ComparePercentageBadge = ({
     color: isZero
       ? 'hollow'
       : isNegative
-      ? colors.backgroundBaseDanger
+      ? colorFamily === 'bright'
+        ? 'danger'
+        : colors.backgroundBaseDanger
+      : colorFamily === 'bright'
+      ? 'success'
       : colors.backgroundBaseSuccess,
     note: isZero
       ? i18n.NO_CHANGE('cost savings')

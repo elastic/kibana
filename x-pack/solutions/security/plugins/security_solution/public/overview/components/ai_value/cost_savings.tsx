@@ -6,27 +6,62 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { formatDollars } from './metrics';
+import { ComparePercentageBadge } from './compare_percentage_badge';
+import { getTimeRangeAsDays } from './utils';
+import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
-import { CostSavingsTrend } from './cost_savings_trend';
 
 interface Props {
   attackAlertIds: string[];
+  minutesPerAlert: number;
+  analystHourlyRate: number;
   from: string;
   to: string;
+  costSavings: number;
+  costSavingsCompare: number;
 }
 
-export const CostSavings: React.FC<Props> = ({ attackAlertIds, from, to }) => {
+export const CostSavings: React.FC<Props> = ({
+  attackAlertIds,
+  minutesPerAlert,
+  analystHourlyRate,
+  from,
+  to,
+  costSavings,
+  costSavingsCompare,
+}) => {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
   return (
-    <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
-      <EuiTitle size="s">
-        <h3>{i18n.COST_SAVINGS_TREND}</h3>
-      </EuiTitle>
-      <EuiText size="s">
-        <p>{i18n.COST_SAVINGS_SOC}</p>
-      </EuiText>
-      <EuiSpacer size="l" />
-      <CostSavingsTrend from={from} to={to} attackAlertIds={attackAlertIds} />
+    <EuiPanel
+      css={css`
+        min-height: 140px;
+        border: 1px solid ${colors.success};
+      `}
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+    >
+      <CostSavingsMetric
+        from={from}
+        to={to}
+        attackAlertIds={attackAlertIds}
+        analystHourlyRate={analystHourlyRate}
+        minutesPerAlert={minutesPerAlert}
+      />
+      <ComparePercentageBadge
+        positionForLens
+        colorFamily="bright"
+        currentCount={costSavings}
+        previousCount={costSavingsCompare}
+        stat={formatDollars(costSavingsCompare)}
+        statType={i18n.TIME_SAVED_DESC.toLowerCase()}
+        timeRange={getTimeRangeAsDays({ from, to })}
+      />
     </EuiPanel>
   );
 };

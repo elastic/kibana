@@ -11,23 +11,13 @@ import { css } from '@emotion/react';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
-import {
-  formatDollars,
-  formatPercent,
-  formatThousands,
-  getCostSavings,
-  getFormattedPercChange,
-} from './metrics';
+import { formatDollars, formatPercent, formatThousands, getFormattedPercChange } from './metrics';
 import * as i18n from './translations';
 import type { ValueMetrics } from './metrics';
 import logo from './logo.svg';
 import { useGetCurrentUserProfile } from '../../../common/components/user_profiles/use_get_current_user_profile';
 interface Props {
-  analystHourlyRate: number;
-  filteredAlerts: number;
-  filteredAlertsCompare: number;
   from: string;
-  minutesPerAlert: number;
   to: string;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
@@ -42,11 +32,7 @@ const ICON_PADDING = css`
 `;
 
 export const ExecutiveSummary: React.FC<Props> = ({
-  analystHourlyRate,
-  filteredAlerts,
-  filteredAlertsCompare,
   from,
-  minutesPerAlert,
   to,
   valueMetrics,
   valueMetricsCompare,
@@ -54,16 +40,12 @@ export const ExecutiveSummary: React.FC<Props> = ({
   const { data: currentUserProfile } = useGetCurrentUserProfile();
 
   const costSavings = useMemo(
-    () =>
-      formatDollars(getCostSavings({ alerts: filteredAlerts, analystHourlyRate, minutesPerAlert })),
-    [filteredAlerts, minutesPerAlert, analystHourlyRate]
+    () => formatDollars(valueMetrics.costSavings),
+    [valueMetrics.costSavings]
   );
   const costSavingsCompare = useMemo(
-    () =>
-      formatDollars(
-        getCostSavings({ alerts: filteredAlertsCompare, analystHourlyRate, minutesPerAlert })
-      ),
-    [filteredAlertsCompare, minutesPerAlert, analystHourlyRate]
+    () => formatDollars(valueMetricsCompare.costSavings),
+    [valueMetricsCompare.costSavings]
   );
 
   return (

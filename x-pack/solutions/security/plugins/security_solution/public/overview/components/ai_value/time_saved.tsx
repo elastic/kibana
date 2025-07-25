@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { formatThousands } from './metrics';
 import { ComparePercentageBadge } from './compare_percentage_badge';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
-import { TimeSavedTrend } from './time_saved_trend';
+import { TimeSavedMetric } from './time_saved_metric';
 
 interface Props {
   attackAlertIds: string[];
@@ -31,8 +32,15 @@ export const TimeSaved: React.FC<Props> = ({
   to,
 }) => {
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-      <TimeSavedTrend
+    <EuiPanel
+      css={css`
+        min-height: 140px;
+      `}
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+    >
+      <TimeSavedMetric
         attackAlertIds={attackAlertIds}
         minutesPerAlert={minutesPerAlert}
         from={from}

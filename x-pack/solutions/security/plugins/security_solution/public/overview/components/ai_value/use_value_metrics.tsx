@@ -19,6 +19,7 @@ import { getPreviousTimeRange } from '../../../common/utils/get_time_range';
 import { useAlertCountQuery } from '../../pages/use_alert_count_query';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 interface Props {
+  analystHourlyRate: number;
   from: string;
   to: string;
   minutesPerAlert: number;
@@ -30,7 +31,12 @@ interface UseValueMetrics {
   valueMetricsCompare: ValueMetrics;
 }
 
-export const useValueMetrics = ({ from, to, minutesPerAlert }: Props): UseValueMetrics => {
+export const useValueMetrics = ({
+  analystHourlyRate,
+  from,
+  to,
+  minutesPerAlert,
+}: Props): UseValueMetrics => {
   const { http } = useKibana().services;
   const { assistantAvailability } = useAssistantContext();
   const { signalIndexName } = useSignalIndex();
@@ -136,22 +142,30 @@ export const useValueMetrics = ({ from, to, minutesPerAlert }: Props): UseValueM
   const valueMetrics = useMemo(
     () =>
       getValueMetrics({
+        analystHourlyRate,
         attackDiscoveryCount: data?.total ?? 0,
         totalAlerts: alertCount,
-        attackAlertsCount: alertCount - filteredAlertsCount ?? 0,
+        escalatedAlertsCount: alertCount - filteredAlertsCount ?? 0,
         minutesPerAlert,
       }),
-    [alertCount, filteredAlertsCount, data?.total, minutesPerAlert]
+    [analystHourlyRate, data?.total, alertCount, filteredAlertsCount, minutesPerAlert]
   );
   const valueMetricsCompare = useMemo(
     () =>
       getValueMetrics({
+        analystHourlyRate,
         attackDiscoveryCount: compareAdData?.total ?? 0,
         totalAlerts: alertCountCompare,
-        attackAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
+        escalatedAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
         minutesPerAlert,
       }),
-    [alertCountCompare, compareAdData?.total, filteredAlertsCountCompare, minutesPerAlert]
+    [
+      alertCountCompare,
+      analystHourlyRate,
+      compareAdData?.total,
+      filteredAlertsCountCompare,
+      minutesPerAlert,
+    ]
   );
 
   return {

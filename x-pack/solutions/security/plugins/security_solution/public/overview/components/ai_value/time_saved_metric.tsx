@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { getTimeSavedTrendLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_trend';
+import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
@@ -21,8 +21,8 @@ interface Props {
   to: string;
   minutesPerAlert: number;
 }
-const ID = 'TimeSavedTrendQuery';
-const TimeSavedTrendComponent: React.FC<Props> = ({
+const ID = 'TimeSavedMetricQuery';
+const TimeSavedMetricComponent: React.FC<Props> = ({
   attackAlertIds,
   from,
   to,
@@ -70,11 +70,11 @@ const TimeSavedTrendComponent: React.FC<Props> = ({
       `}
     >
       <VisualizationEmbeddable
-        data-test-subj="embeddable-metric-trend"
+        data-test-subj="time-saved-metric"
         extraOptions={extraVisualizationOptions}
-        getLensAttributes={(args) => getTimeSavedTrendLensAttributes({ ...args, minutesPerAlert })}
+        getLensAttributes={(args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert })}
         timerange={{ from, to }}
-        id={`${ID}-area-embeddable`}
+        id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
         scopeId={SourcererScopeName.detections}
         withActions={[
@@ -87,4 +87,4 @@ const TimeSavedTrendComponent: React.FC<Props> = ({
   );
 };
 
-export const TimeSavedTrend = React.memo(TimeSavedTrendComponent);
+export const TimeSavedMetric = React.memo(TimeSavedMetricComponent);

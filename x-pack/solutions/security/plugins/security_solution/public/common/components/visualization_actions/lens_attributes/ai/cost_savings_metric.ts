@@ -8,11 +8,6 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
-const xColumn0 = 'cost_columnX0';
-const xColumn1 = 'cost_columnX1';
-const dateColumn = 'date_column';
-const costColumn = 'cost_column';
-
 export type MyGetLensAttributes = (params: {
   stackByField?: string;
   euiTheme: EuiThemeComputed;
@@ -22,7 +17,7 @@ export type MyGetLensAttributes = (params: {
   analystHourlyRate: number;
 }) => LensAttributes;
 
-export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
+export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
   analystHourlyRate,
   extraOptions,
   minutesPerAlert,
@@ -35,92 +30,64 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
         formBased: {
           layers: {
             unifiedHistogram: {
-              columnOrder: [dateColumn, costColumn, xColumn0, xColumn1],
+              columnOrder: ['countColumn', 'countColumnX0', 'countColumnX1'],
               columns: {
-                [costColumn]: {
+                countColumn: {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
                   label: 'Cost Savings',
                   operationType: 'formula',
                   params: {
-                    format: {
-                      id: 'custom',
-                      params: {
-                        decimals: 0,
-                        pattern: '$0,0.[000]',
-                      },
-                    },
+                    format: { id: 'custom', params: { decimals: 0, pattern: '$0,0.[000]' } },
                     formula: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                     isFormulaBroken: false,
                   },
-                  references: [xColumn1],
+                  references: ['countColumnX1'],
                 },
-                [xColumn0]: {
+                countColumnX0: {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of count() * ((8/60)*75)',
+                  label: 'Part of Cost Savings',
                   operationType: 'count',
-                  params: {
-                    emptyAsNull: false,
-                  },
+                  params: { emptyAsNull: false },
                   sourceField: '___records___',
                 },
-                [xColumn1]: {
+                countColumnX1: {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of count() * ((8/60)*75)',
+                  label: 'Part of Cost Savings',
                   operationType: 'math',
                   params: {
                     tinymathAst: {
                       args: [
-                        xColumn0,
+                        'countColumnX0',
                         {
                           args: [
                             {
                               args: [8, 60],
-                              location: {
-                                max: 16,
-                                min: 12,
-                              },
+                              location: { max: 16, min: 12 },
                               name: 'divide',
                               text: '8/60',
                               type: 'function',
                             },
                             75,
                           ],
-                          location: {
-                            max: 20,
-                            min: 11,
-                          },
+                          location: { max: 20, min: 11 },
                           name: 'multiply',
                           text: '(8/60)*75',
                           type: 'function',
                         },
                       ],
-                      location: {
-                        max: 21,
-                        min: 0,
-                      },
+                      location: { max: 21, min: 0 },
                       name: 'multiply',
                       text: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                       type: 'function',
                     },
                   },
-                  references: [xColumn0],
-                },
-                [dateColumn]: {
-                  dataType: 'date',
-                  isBucketed: true,
-                  label: '@timestamp',
-                  operationType: 'date_histogram',
-                  params: {
-                    interval: 'auto',
-                  },
-                  scale: 'interval',
-                  sourceField: '@timestamp',
+                  references: ['countColumnX0'],
                 },
               },
               incompleteColumns: {},
@@ -130,55 +97,20 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
       },
       filters: extraOptions?.filters ?? [],
       internalReferences: [],
-      query: {
-        language: 'kuery',
-        query: '',
-      },
+      query: { language: 'kuery', query: '' },
       visualization: {
-        axisTitlesVisibilitySettings: {
-          x: false,
-          yLeft: false,
-          yRight: false,
-        },
-        fittingFunction: 'None',
-        gridlinesVisibilitySettings: {
-          x: true,
-          yLeft: true,
-          yRight: false,
-        },
-        layers: [
-          {
-            accessors: [costColumn],
-            layerId: 'unifiedHistogram',
-            layerType: 'data',
-            seriesType: 'line',
-            xAccessor: dateColumn,
-            yConfig: [
-              {
-                forAccessor: costColumn,
-              },
-            ],
-          },
-        ],
-        legend: {
-          isVisible: true,
-          legendSize: 'xlarge',
-          position: 'right',
-          shouldTruncate: false,
-        },
-        minBarHeight: 2,
-        preferredSeriesType: 'line',
-        showCurrentTimeMarker: true,
-        tickLabelsVisibilitySettings: {
-          x: true,
-          yLeft: true,
-          yRight: false,
-        },
-        valueLabels: 'hide',
+        color: 'e8f9f3',
+        icon: 'launch',
+        iconAlign: 'right',
+        valuesTextAlign: 'left',
+        layerId: 'unifiedHistogram',
+        layerType: 'data',
+        metricAccessor: 'countColumn',
+        secondaryTrend: { type: 'none' },
       },
     },
-    title: 'Cost Savings Trend',
-    visualizationType: 'lnsXY',
+    title: 'Cost Savings Metric',
+    visualizationType: 'lnsMetric',
     references: [
       {
         id: '{dataViewId}',

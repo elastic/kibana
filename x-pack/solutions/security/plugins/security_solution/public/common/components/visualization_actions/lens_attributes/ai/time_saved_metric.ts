@@ -16,7 +16,7 @@ export type MyGetLensAttributes = (params: {
   minutesPerAlert: number;
 }) => LensAttributes;
 
-export const getTimeSavedTrendLensAttributes: MyGetLensAttributes = ({
+export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
   extraOptions,
   minutesPerAlert,
 }) => {

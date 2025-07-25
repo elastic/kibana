@@ -19,24 +19,32 @@ export interface ValueMetrics {
   escalatedAlertsPerc: number;
   hoursSaved: number;
   totalAlerts: number;
+  costSavings: number;
 }
 export const getValueMetrics = ({
+  analystHourlyRate,
   attackDiscoveryCount,
   totalAlerts,
-  attackAlertsCount,
+  escalatedAlertsCount,
   minutesPerAlert,
 }: {
   attackDiscoveryCount: number;
   totalAlerts: number;
-  attackAlertsCount: number;
+  escalatedAlertsCount: number;
   minutesPerAlert: number;
+  analystHourlyRate: number;
 }): ValueMetrics => ({
   attackDiscoveryCount,
-  filteredAlerts: totalAlerts - attackAlertsCount,
-  filteredAlertsPerc: ((totalAlerts - attackAlertsCount) / totalAlerts) * 100,
-  escalatedAlertsPerc: (attackAlertsCount / totalAlerts) * 100,
-  hoursSaved: getTimeSavedHours(totalAlerts - attackAlertsCount, minutesPerAlert),
+  filteredAlerts: totalAlerts - escalatedAlertsCount,
+  filteredAlertsPerc: ((totalAlerts - escalatedAlertsCount) / totalAlerts) * 100,
+  escalatedAlertsPerc: (escalatedAlertsCount / totalAlerts) * 100,
+  hoursSaved: getTimeSavedHours(totalAlerts - escalatedAlertsCount, minutesPerAlert),
   totalAlerts,
+  costSavings: getCostSavings({
+    alerts: totalAlerts - escalatedAlertsCount,
+    analystHourlyRate,
+    minutesPerAlert,
+  }),
 });
 
 export const getTimeSavedHours = (alerts: number, minutesPerAlert: number): number => {

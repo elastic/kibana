@@ -27,6 +27,7 @@ export const COST_SAVINGS_TREND = i18n.translate(
     defaultMessage: 'Cost savings trend',
   }
 );
+
 export const COST_SAVINGS_SOC = i18n.translate('xpack.securitySolution.aiValue.costSavingsSoc', {
   defaultMessage: 'Cumulative savings from AI-driven SOC operations',
 });

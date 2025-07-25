@@ -16,13 +16,18 @@ interface Props {
 const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
   const exportRef = useRef<HTMLDivElement>(null);
   const uiAdjuster = useCallback((eRef: HTMLDivElement) => {
-    const textEls = eRef.querySelectorAll('.euiBadge');
+    const badgeEls = eRef.querySelectorAll('.euiBadge');
+    const badgeTextEls = eRef.querySelectorAll('.euiBadge__text');
     const exportButton = eRef.querySelector('.exportPdfButton');
 
     const adjustUI = () => {
-      textEls.forEach((el) => {
+      badgeEls.forEach((el) => {
         el.setAttribute('data-original-style', el.getAttribute('style') || '');
         (el as HTMLElement).style.backgroundColor = 'transparent'; // force visible color
+      });
+      badgeTextEls.forEach((el) => {
+        el.setAttribute('data-original-style', el.getAttribute('style') || '');
+        (el as HTMLElement).style.color = 'black'; // force visible color
       });
       if (exportButton) {
         exportButton.setAttribute('data-original-style', exportButton.getAttribute('style') || '');
@@ -30,7 +35,15 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
       }
     };
     const restoreUI = () => {
-      textEls.forEach((el) => {
+      badgeEls.forEach((el) => {
+        const original = el.getAttribute('data-original-style');
+        if (original) {
+          el.setAttribute('style', original);
+        } else {
+          el.removeAttribute('style');
+        }
+      });
+      badgeTextEls.forEach((el) => {
         const original = el.getAttribute('data-original-style');
         if (original) {
           el.setAttribute('style', original);
