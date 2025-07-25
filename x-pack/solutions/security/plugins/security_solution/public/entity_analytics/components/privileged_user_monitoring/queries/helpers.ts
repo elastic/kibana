@@ -22,7 +22,11 @@ export const getPrivilegedMonitorUsersJoin = (
   | RENAME event_timestamp AS @timestamp
   | WHERE user.is_privileged == true`;
 
-export type EsqlQueryOrInvalidFields = E.Right<string> | E.Left<string[]>;
+export type EsqlQueryOrInvalidFields =
+  | E.Right<string>
+  | E.Left<
+      { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined }
+    >;
 export const getPrivilegeMonitrUsersJoinNoTimestamp = (
   namespace: string
 ) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
@@ -84,7 +88,7 @@ export function removeInvalidForkBranchesFromESQL(
       });
     });
 
-    return E.left(Array.from(invalidFields));
+    return E.left({ invalidFields: Array.from(invalidFields) });
   }
 
   // When FORK has only one valid branch we need to remove the fork command from query and add the valid branch back to the root
