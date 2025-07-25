@@ -72,22 +72,16 @@ export const IndicesConfigurationPanel = ({
   const {
     services: {
       share: {
-        url: {
-          locators: { useUrl },
-        },
+        url: { locators },
       },
     },
   } = useKibanaContextForPlugin();
 
-  const viewAffectedRulesLink = useUrl<RulesParams>(
-    () => ({
-      id: rulesLocatorID,
-      params: {
-        type: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
-      },
-    }),
-    []
-  );
+  const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
+  const viewAffectedRulesLink = rulesLocator?.useUrl({
+    type: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
+  });
+
   return (
     <EuiForm>
       <EuiTitle size="s">
