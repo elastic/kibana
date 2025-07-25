@@ -87,6 +87,20 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     [searchable, options, searchTermDebounced, optionMatcher]
   );
 
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+    _setSearchTerm(undefined);
+    _setSearchTermDebounced(undefined);
+  }, [setIsOpen, _setSearchTerm, _setSearchTermDebounced]);
+
+  const togglePopover = useCallback(() => {
+    if (isOpen) {
+      closePopover();
+    } else {
+      setIsOpen(true);
+    }
+  }, [isOpen, closePopover, setIsOpen]);
+
   const disableLabelPopover = useCallback(() => setLabelPopoverDisabled(true), []);
 
   const enableLabelPopover = useCallback(
@@ -103,10 +117,10 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       onChange?.(
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
       );
-      setIsOpen(false);
+      closePopover();
       disableLabelPopover();
     },
-    [disableLabelPopover, onChange]
+    [disableLabelPopover, onChange, closePopover]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
@@ -165,13 +179,13 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
             data-selected-value={dataSelectedValue}
             aria-label={popoverTitle}
             label={buttonLabel}
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={togglePopover}
             onBlur={enableLabelPopover}
           />
         </EuiToolTip>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
