@@ -13,12 +13,15 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGrid,
   EuiFormRow,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiStat,
   EuiText,
 } from '@elastic/eui';
+import { max, min } from 'lodash';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { ChooseColumnPopover } from './choose_column_popover';
 
@@ -46,6 +49,15 @@ export const InputValuesPreview: React.FC<{
 
   const multiColumnResult = useMemo(() => !!previewColumns.length, [previewColumns]);
 
+  const typeofPreviewValues = useMemo(
+    () =>
+      isEmpty
+        ? 'undefined'
+        : previewOptions.every((v: string) => !isNaN(Number(v)))
+        ? 'number'
+        : 'string',
+    [previewOptions, isEmpty]
+  );
   const options = useMemo(() => {
     const totalCardinality = previewOptions.length;
     const visibleOptions = previewOptions.slice(0, PREVIEW_VAL_MAX_CARDINALITY).map((value) => {
@@ -62,6 +74,11 @@ export const InputValuesPreview: React.FC<{
     }
     return visibleOptions;
   }, [previewOptions]);
+  const range = useMemo(() => {
+    if (typeofPreviewValues !== 'number') return null;
+    const optionsAsNumbers = previewOptions.map((v) => Number(v));
+    return { min: min(optionsAsNumbers), max: max(optionsAsNumbers) };
+  }, [previewOptions, typeofPreviewValues]);
 
   const body = previewError ? (
     <EuiCallOut
@@ -109,6 +126,19 @@ export const InputValuesPreview: React.FC<{
         {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getRunQueryButton()}
       </EuiButton>
     </>
+  ) : range ? (
+    <EuiFlexGrid columns={2}>
+      <EuiStat
+        titleSize="s"
+        title={range.min}
+        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMinText()}
+      />
+      <EuiStat
+        titleSize="s"
+        title={range.max}
+        description={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMaxText()}
+      />
+    </EuiFlexGrid>
   ) : (
     <EuiSelect options={options} />
   );

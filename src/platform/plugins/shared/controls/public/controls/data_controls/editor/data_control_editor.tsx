@@ -48,6 +48,7 @@ import {
   DEFAULT_CONTROL_INPUT,
   DEFAULT_CONTROL_OUTPUT,
   OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
 } from '../../../../common';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../../control_factory_registry';
@@ -352,20 +353,34 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   useEffect(() => {
     const newFieldName = editorState.fieldName;
 
-    // TODO remove this when range sliders can output ES|QL variables
+    // TODO remove this check when range sliders can output ES|QL variables
     if (isESQLOutputMode) {
       setSelectedControlType(OPTIONS_LIST_CONTROL);
-    } else if (newFieldName) {
+    } else if (newFieldName && fieldRegistry) {
       /**
        * make sure that the new field is compatible with the selected control type and, if it's not,
        * reset the selected control type to the **first** compatible control type
        */
-      const newCompatibleControlTypes = fieldRegistry?.[newFieldName]?.compatibleControlTypes ?? [];
-      if (!selectedControlType || !newCompatibleControlTypes.includes(selectedControlType!)) {
+      const newCompatibleControlTypes = fieldRegistry[newFieldName]?.compatibleControlTypes ?? [];
+      if (selectedControlType && !newCompatibleControlTypes.includes(selectedControlType)) {
         setSelectedControlType(newCompatibleControlTypes[0]);
+      } else {
+        /**
+         * Set number fields to range sliders by default, other controls to the first compatible type
+         */
+        if (
+          fieldRegistry[newFieldName].field.type === 'number' &&
+          newCompatibleControlTypes.includes(RANGE_SLIDER_CONTROL)
+        ) {
+          setSelectedControlType(RANGE_SLIDER_CONTROL);
+        } else {
+          setSelectedControlType(newCompatibleControlTypes[0]);
+        }
       }
     }
-  }, [editorState.fieldName, fieldRegistry, isESQLOutputMode, selectedControlType]);
+    // Intentionally only run this effect when the field name or the output mode changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editorState.fieldName, isESQLOutputMode]);
 
   const CustomSettingsComponent = useMemo(() => {
     if (!controlFactory || !fieldRegistry) return;
@@ -441,14 +456,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     if (!selectedControlType) return EditorComponentStatus.INCOMPLETE;
     if (!controlOptionsValid) return EditorComponentStatus.ERROR;
 
-    // For ES|QL only mode, selectedControlType is always true, so to reduce visual noise,
+    // For ES|QL output mode, selectedControlType is always true, so to reduce visual noise,
     // prevent the green checkbox from showing up until the rest of the form is complete
     // TODO remove this when range sliders can output ES|QL variables
-    if (showESQLOnly && outputStatus !== EditorComponentStatus.COMPLETE)
+    if (isESQLOutputMode && outputStatus !== EditorComponentStatus.COMPLETE)
       return EditorComponentStatus.INCOMPLETE;
 
     return EditorComponentStatus.COMPLETE;
-  }, [showESQLOnly, outputStatus, selectedControlType, controlOptionsValid]);
+  }, [isESQLOutputMode, outputStatus, selectedControlType, controlOptionsValid]);
 
   const steps: EuiContainedStepProps[] = [
     {

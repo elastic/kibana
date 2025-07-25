@@ -189,6 +189,14 @@ export const DataControlEditorStrings = {
               defaultMessage: 'Select a column',
             }
           ),
+        getMinText: () =>
+          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.minText', {
+            defaultMessage: 'Minimum value',
+          }),
+        getMaxText: () =>
+          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.maxText', {
+            defaultMessage: 'Maximum value',
+          }),
       },
     },
     displaySettings: {
