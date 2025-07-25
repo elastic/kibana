@@ -13,7 +13,7 @@ import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 
-export class WorkflowExecutionState {
+export class WorkflowExecutionRunTime {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private stepResults: Map<string, RunStepResult> = new Map();
   private stepStates: Map<string, Record<string, any> | undefined> = new Map();

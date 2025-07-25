@@ -9,10 +9,10 @@
 
 import { ExitIfNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRunTime } from '../../workflow_context_manager/workflow_execution_manager';
 
 export class ExitIfNodeImpl implements StepImplementation {
-  constructor(private step: ExitIfNode, private workflowState: WorkflowExecutionState) {}
+  constructor(private step: ExitIfNode, private workflowState: WorkflowExecutionRunTime) {}
 
   public async run(): Promise<void> {
     await this.workflowState.finishStep(this.step.startNodeId);

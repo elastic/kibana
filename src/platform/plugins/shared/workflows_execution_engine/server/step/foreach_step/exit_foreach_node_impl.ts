@@ -9,10 +9,10 @@
 
 import { ExitForeachNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRunTime } from '../../workflow_context_manager/workflow_execution_manager';
 
 export class ExitForeachNodeImpl implements StepImplementation {
-  constructor(private step: ExitForeachNode, private workflowState: WorkflowExecutionState) {}
+  constructor(private step: ExitForeachNode, private workflowState: WorkflowExecutionRunTime) {}
 
   public async run(): Promise<void> {
     const foreachState = this.workflowState.getStepState(this.step.startNodeId);

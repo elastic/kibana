@@ -12,7 +12,7 @@ import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { graphlib } from '@dagrejs/dagre';
 import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionState } from './workflow_execution_manager';
+import { WorkflowExecutionRunTime } from './workflow_execution_manager';
 
 export interface ContextManagerInit {
   workflowRunId: string;
@@ -27,14 +27,14 @@ export interface ContextManagerInit {
   workflowEventLoggerIndex?: string;
   esClient?: ElasticsearchClient;
   workflowExecutionGraph: graphlib.Graph;
-  workflowState: WorkflowExecutionState;
+  workflowState: WorkflowExecutionRunTime;
 }
 
 export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private esClient: IScopedClusterClient;
   private workflowExecutionGraph: graphlib.Graph;
-  private workflowState: WorkflowExecutionState;
+  private workflowState: WorkflowExecutionRunTime;
   // private workflowLogger: IWorkflowEventLogger | null = null;
   // private currentStepId: string | null = null;
   // // Store original parameters for recreating logger
