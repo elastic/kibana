@@ -62,7 +62,9 @@ const esqlRule = getEsqlRule({ rule_id: '6', name: 'ES|QL Rule', enabled: false 
 const thresholdRule = getNewThresholdRule({ rule_id: '7', name: 'Threshold Rule', enabled: false });
 
 // skipInServerlessMKI because of experiment feature flag
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/229353
+// Failing: See https://github.com/elastic/kibana/issues/229354
+describe.skip(
   'Bulk Edit - Alert Suppression',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

@@ -36,7 +36,8 @@ const FIRST_BLOCK_LIST_NEW_DESCRIPTION = 'the first description';
 const SECOND_BLOCK_LIST_NEW_NAME = 'second blocklist entry';
 const SECOND_BLOCK_LIST_NEW_DESCRIPTION = 'the second description';
 
-describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/209212
+describe.skip('Block list with invalid indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));
