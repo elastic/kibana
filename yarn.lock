@@ -96,12 +96,20 @@
     "@types/json-schema" "^7.0.15"
     js-yaml "^4.1.0"
 
-"@apidevtools/json-schema-ref-parser@^11.5.5", "@apidevtools/json-schema-ref-parser@^11.9.1":
+"@apidevtools/json-schema-ref-parser@^11.5.5":
   version "11.9.3"
   resolved "https://registry.yarnpkg.com/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-11.9.3.tgz#0e0c9061fc41cf03737d499a4e6a8299fdd2bfa7"
   integrity sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==
   dependencies:
     "@jsdevtools/ono" "^7.1.3"
+    "@types/json-schema" "^7.0.15"
+    js-yaml "^4.1.0"
+
+"@apidevtools/json-schema-ref-parser@^14.1.1":
+  version "14.1.1"
+  resolved "https://registry.yarnpkg.com/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-14.1.1.tgz#0bae59809b7848c7a89dc6bb2f3bb980b7c290b1"
+  integrity sha512-uGF1YGOzzD50L7HLNWclXmsEhQflw8/zZHIz0/AzkJrKL5r9PceUipZxR/cp/8veTk4TVfdDJLyIwXLjaP5ePg==
+  dependencies:
     "@types/json-schema" "^7.0.15"
     js-yaml "^4.1.0"
 
@@ -2908,10 +2916,10 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-9.7.0.tgz#1cf1fecfcad5e2da2332140bf3b5f23cc1c2a7f4"
   integrity sha512-aozo5vqjCmDoXLNUJarFZx2IN/GgGaogY4TMJ6so/WLZOWpSV7fvj2dmrV6sEAnUm1O7aCrhTibjpzeDFgNqbg==
 
-"@fast-check/jest@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.0.tgz#67585ede285267dc9efc3ac3e05c41879887980a"
-  integrity sha512-9ZVvFnngR0EpfxWoGrq/e9ERrDv3qqE4RXVnn/mGv5Rn33LoDcIfg7xjqVREsyhGcwegEKeL0KJlrWzWiOBV8A==
+"@fast-check/jest@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.1.tgz#0c0959f8f37f4155c5de7a19888c398542240be9"
+  integrity sha512-t9m3u3tikj/+Ph+gRLGb7fFS/aqnIafsAc6qhXIFJytkqOFRSF70Y5yUUyTtR0idcb6Ald7AnC0AChLCLxv2Tg==
   dependencies:
     fast-check "^3.0.0 || ^4.0.0"
 
@@ -23316,10 +23324,10 @@ jiti@^1.20.0:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.6.tgz#6c7f7398dd4b3142767f9a168af2f317a428d268"
   integrity sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==
 
-joi-to-json@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.0.tgz#c56131ecf8a772fce89fd98b7f81d7b0fac31dbc"
-  integrity sha512-j6wV/liW2CmPJBJCAsRHegS91JV2QQtg2J/Z/67VfdSvuE65njCx6DrYZY1cw0BXwlxHewpVtiDnY8W0aaNr+A==
+joi-to-json@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.2.tgz#b2fba0bd4a1073893238098165ba59207fabcb36"
+  integrity sha512-ZGfdMpCwM2NNgcddh3q2SGtwmIQ5dU5iJJkccUYxZDRMDCO8CJ8VCnND7SkbnvID4YF5dDTM55ElsTGuktUs6Q==
   dependencies:
     combinations "^1.0.0"
     lodash "^4.17.21"
