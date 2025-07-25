@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -119,6 +120,8 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
     return response.data;
   });
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiText grow={false}>
@@ -202,10 +205,12 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
 
       {isDeleteModalVisible && selectedPolicy && selectedPolicyId && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteModalTitle',
             { defaultMessage: 'Delete {policyName}', values: { policyName: selectedPolicy.name } }
           )}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsDeleteModalVisible(false)}
           onConfirm={() => deleteOnePolicyMutation.mutate(selectedPolicyId)}
           isLoading={deleteOnePolicyMutation.isLoading}
@@ -228,10 +233,12 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
 
       {isDeleteAllModalVisible && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'xpack.fleet.debug.orphanedIntegrationPolicyDebugger.deleteAllModalTitle',
             { defaultMessage: 'Delete all orphaned integration policies' }
           )}
+          titleProps={{ id: modalTitleId }}
           onCancel={() => setIsDeleteAllModalVisible(false)}
           onConfirm={() => deleteAllPoliciesMutation.mutate()}
           isLoading={deleteAllPoliciesMutation.isLoading}
