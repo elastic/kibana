@@ -6,14 +6,15 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
   getScheduleNotFoundError,
-} from '../utils/helpers';
-import { getAttackDiscoverySchedulesApis } from '../utils/apis';
-import { getSimpleAttackDiscoverySchedule } from '../mocks';
+} from '../../utils/helpers';
+import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
+import { getSimpleAttackDiscoverySchedule } from '../../mocks';
+import { checkIfScheduleDoesNotExist } from '../../utils/check_schedule_does_not_exist';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -37,8 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
         const deleteResult = await apis.delete({ id: createdSchedule.id });
         expect(deleteResult).toEqual({ id: createdSchedule.id });
 
-        const result = await apis.get({ id: createdSchedule.id, expectedHttpCode: 404 });
-        expect(result).toEqual(getScheduleNotFoundError(createdSchedule.id));
+        checkIfScheduleDoesNotExist({ getService, id: createdSchedule.id });
       });
     });
 

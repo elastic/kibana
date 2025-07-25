@@ -6,14 +6,15 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
   getScheduleNotFoundError,
-} from '../utils/helpers';
-import { getAttackDiscoverySchedulesApis } from '../utils/apis';
-import { getSimpleAttackDiscoverySchedule } from '../mocks';
+} from '../../utils/helpers';
+import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
+import { getSimpleAttackDiscoverySchedule } from '../../mocks';
+import { checkIfScheduleDisabled } from '../../utils/check_schedule_disabled';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -42,8 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
         await apis.disable({ id: createdSchedule.id });
 
         // Check that schedule is disabled
-        const enabledSchedule = await apis.get({ id: createdSchedule.id });
-        expect(enabledSchedule.enabled).toEqual(false);
+        checkIfScheduleDisabled({ getService, id: createdSchedule.id });
       });
     });
 
