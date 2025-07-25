@@ -32,21 +32,25 @@ interface DiagnosticResultsProps {
       destinationParentIdsQuery?: any;
     };
   };
-  sourceNodeName: string;
-  destinationNodeName: string;
+  sourceNodeName: string | undefined;
+  destinationNodeName: string | undefined;
 }
 
 export function DiagnosticResults({
   data,
-  sourceNodeName = 'source node',
-  destinationNodeName = 'destination node',
+  sourceNodeName,
+  destinationNodeName,
 }: DiagnosticResultsProps) {
   const exitSpansList = data?.analysis?.exitSpans?.spans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
-  const hasMatchingDestinationResources = data?.analysis?.exitSpans?.hasMatchingDestinationResources || false;
+  const hasMatchingDestinationResources =
+    data?.analysis?.exitSpans?.hasMatchingDestinationResources || false;
   const destinationHits = data?.elasticsearchResponses?.destinationParentIdsQuery?.hits?.hits || [];
-  const destinationResponse = data?.elasticsearchResponses?.destinationParentIdsQuery;
   const hasParent = data?.analysis?.parentRelationships?.found || false;
+
+  if (!sourceNodeName || !destinationNodeName) {
+    return null;
+  }
 
   return (
     <>
@@ -63,7 +67,6 @@ export function DiagnosticResults({
       <ParentRelationshipAnalysis
         hasParent={hasParent}
         destinationHits={destinationHits}
-        destinationResponse={destinationResponse}
         sourceNodeName={sourceNodeName}
         destinationNodeName={destinationNodeName}
       />

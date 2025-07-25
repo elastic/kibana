@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { downloadJson } from '../../../../utils/download_json';
 import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
@@ -45,6 +46,9 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const {
+    services: { notifications },
+  } = useKibana();
   const [data, setData] = useState<{
     analysis: {
       exitSpans: {
@@ -89,34 +93,49 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const handleRunDiagnostic = async () => {
     setIsLoading(true);
 
-    if (
-      start &&
-      end &&
-      selectedNode?.id &&
-      form.sourceNode &&
-      form.destinationNode &&
-      form.traceId
-    ) {
-      const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
-        params: {
-          body: {
-            start,
-            end,
-            destinationNode: form.destinationNode,
-            sourceNode: form.sourceNode,
-            traceId: form.traceId,
+    try {
+      if (
+        start &&
+        end &&
+        selectedNode?.id &&
+        form.sourceNode &&
+        form.destinationNode &&
+        form.traceId
+      ) {
+        const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
+          params: {
+            body: {
+              start,
+              end,
+              destinationNode: form.destinationNode,
+              sourceNode: form.sourceNode,
+              traceId: form.traceId,
+            },
           },
-        },
-        signal: null,
-      });
+          signal: null,
+        });
 
-      setData(response);
+        setData(response);
+      }
+    } catch (error) {
+      // Handle API errors gracefully
+      notifications?.toasts.addDanger({
+        title: i18n.translate('xpack.apm.diagnosticFlyout.errorTitle', {
+          defaultMessage: 'Failed to run diagnostic',
+        }),
+        text: i18n.translate('xpack.apm.diagnosticFlyout.errorMessage', {
+          defaultMessage: 'An error occurred while running the diagnostic. Please try again.',
+        }),
+      });
+      // Reset data on error to show clean state
+      setData(undefined);
+    } finally {
+      // Always reset loading state
       setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
-  // if (isEmpty(selectedNode)) return onClose();
 
   return (
     <EuiFlyoutResizable
