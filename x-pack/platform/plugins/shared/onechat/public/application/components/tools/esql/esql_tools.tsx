@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolDefinition } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
 import { useEsqlTools } from '../../../hooks/tools/use_tools';
@@ -232,7 +233,7 @@ export const OnechatEsqlTools: React.FC = () => {
             title: i18n.translate('xpack.onechat.tools.createEsqlToolErrorToast', {
               defaultMessage: 'Unable to create ES|QL tool',
             }),
-            text: error.message,
+            text: formatOnechatErrorMessage(error),
           });
         }}
       />
