@@ -142,6 +142,11 @@ export interface CodeEditorProps {
    */
   'aria-label'?: string;
 
+  /**
+   * ID of the element that describes the editor.
+   */
+  'aria-describedby'?: string;
+
   isCopyable?: boolean;
   allowFullScreen?: boolean;
   /**
@@ -185,6 +190,17 @@ export interface CodeEditorProps {
    * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
    */
   customContextMenuActions?: ContextMenuAction[];
+
+  /**
+   * Optional html id for accessibility labeling
+   */
+  htmlId?: string;
+
+  /**
+   * Callbacks for when editor is focused/blurred
+   */
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -208,6 +224,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
+  'aria-describedby': ariaDescribedBy,
   isCopyable = false,
   allowFullScreen = false,
   readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
@@ -220,6 +237,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   classNameCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
+  htmlId,
+  onFocus,
+  onBlur,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -251,7 +271,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const startEditing = useCallback(() => {
     setIsHintActive(false);
     _editor?.focus();
-  }, [_editor]);
+    onFocus?.();
+  }, [_editor, onFocus]);
 
   const stopEditing = useCallback(() => {
     setIsHintActive(true);
@@ -286,7 +307,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const onBlurMonaco = useCallback(() => {
     stopEditing();
-  }, [stopEditing]);
+    onBlur?.();
+  }, [stopEditing, onBlur]);
 
   const renderPrompt = useCallback(() => {
     const enterKey = (
@@ -356,12 +378,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 display: none;
               `,
           ]}
-          id={htmlIdGenerator('codeEditor')()}
+          id={htmlId ?? htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
           role="button"
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
+          onFocus={onFocus}
+          onBlur={onBlur}
           aria-label={i18n.translate('sharedUXPackages.codeEditor.codeEditorEditButton', {
             defaultMessage: '{codeEditorAriaLabel}, activate edit mode',
             values: {
@@ -372,7 +396,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         />
       </EuiToolTip>
     );
-  }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
+  }, [
+    isHintActive,
+    isReadOnly,
+    euiTheme,
+    startEditing,
+    onKeyDownHint,
+    ariaLabel,
+    htmlId,
+    onFocus,
+    onBlur,
+  ]);
 
   const _editorWillMount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillMount']>>(
     (__monaco) => {
@@ -519,6 +553,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       textboxMutationObserver.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    // apply aria described by on editor element
+    if (_editor && ariaDescribedBy) {
+      _editor
+        .getDomNode()
+        ?.querySelector('textarea[aria-roledescription="editor"]')
+        ?.setAttribute('aria-describedby', ariaDescribedBy);
+    }
+  }, [_editor, ariaDescribedBy]);
 
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
   usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
