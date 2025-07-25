@@ -22,7 +22,7 @@ export function SpaceAwareRoute() {
 
     const subscription = spaces.getActiveSpace$().subscribe((space) => {
       const solution = space?.solution;
-      
+
       if (solution === 'oblt' || solution === 'es') {
         navigateToApp('management', { path: 'ai/observabilityAiAssistantManagement' });
       } else if (solution === 'security') {
