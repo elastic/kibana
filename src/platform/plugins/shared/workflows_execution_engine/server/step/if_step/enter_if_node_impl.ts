@@ -10,12 +10,17 @@
 import { EnterIfNode } from '@kbn/workflows';
 import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { StepImplementation } from '../step_base';
+import { WorkflowState } from '../../workflow_context_manager/workflow_state';
 
 export class EnterIfNodeImpl implements StepImplementation {
-  constructor(private step: EnterIfNode, private contextManager: WorkflowContextManager) {}
+  constructor(
+    private step: EnterIfNode,
+    private contextManager: WorkflowContextManager, // TODO: Will be used later for condition evaluation
+    private workflowState: WorkflowState
+  ) {}
 
   public async run(): Promise<void> {
-    await this.contextManager.startStep(this.step.id);
+    await this.workflowState.startStep(this.step.id);
     const evaluatedConditionResult = this.step.configuration.condition; // must be real condition from step definition
 
     let runningBranch: string[];
@@ -29,7 +34,7 @@ export class EnterIfNodeImpl implements StepImplementation {
       notRunningBranch = this.step.trueNodeIds;
     }
 
-    await this.contextManager.skipSteps(notRunningBranch);
-    this.contextManager.setCurrentStep(runningBranch[0]);
+    await this.workflowState.skipSteps(notRunningBranch);
+    this.workflowState.goToStep(runningBranch[0]);
   }
 }

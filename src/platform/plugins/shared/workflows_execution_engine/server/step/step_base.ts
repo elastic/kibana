@@ -12,6 +12,7 @@
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import { WorkflowState } from '../workflow_context_manager/workflow_state';
 
 export interface RunStepResult {
   output: any;
@@ -38,17 +39,20 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
+  protected workflowState: WorkflowState;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor | undefined,
+    workflowState: WorkflowState,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     this.step = step;
     this.contextManager = contextManager;
     this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
     this.connectorExecutor = connectorExecutor as any;
+    this.workflowState = workflowState;
   }
 
   public getName(): string {
@@ -61,7 +65,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
     // Log step start
     this.contextManager.logStepStart(stepName);
-    await this.contextManager.startStep((this.step as any).id);
+    await this.workflowState.startStep(stepId);
 
     // const stepEvent = {
     //   event: { action: 'step-execution' },
@@ -81,7 +85,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       // });
 
       this.contextManager.logStepComplete(stepName, stepName, true);
-      this.contextManager.appendStepResult(stepId, result);
+      this.workflowState.setStepResult(stepId, result);
     } catch (error) {
       // Log failure
       // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
@@ -96,11 +100,11 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       this.contextManager.logStepComplete(stepName, stepName, false);
 
       const result = await this.handleFailure(error);
-      this.contextManager.appendStepResult(stepName, result);
+      this.workflowState.setStepResult(stepId, result);
     } finally {
       // Clear step context
       this.contextManager.clearCurrentStep();
-      await this.contextManager.finishStep((this.step as any).id);
+      await this.workflowState.finishStep(stepId);
     }
   }
 

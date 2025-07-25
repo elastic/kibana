@@ -8,13 +8,13 @@
  */
 
 import { ExitIfNode } from '@kbn/workflows';
-import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import { StepImplementation } from '../step_base';
+import { WorkflowState } from '../../workflow_context_manager/workflow_state';
 
 export class ExitIfNodeImpl implements StepImplementation {
-  constructor(private step: ExitIfNode, private contextManager: WorkflowContextManager) {}
+  constructor(private step: ExitIfNode, private workflowState: WorkflowState) {}
 
   public run(): Promise<void> {
-    return this.contextManager.finishStep(this.step.startNodeId);
+    return this.workflowState.finishStep(this.step.startNodeId);
   }
 }
