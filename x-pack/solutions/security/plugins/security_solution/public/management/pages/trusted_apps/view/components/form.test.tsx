@@ -422,7 +422,7 @@ describe('Trusted apps form', () => {
       afterEach(() => {
         cleanup();
       });
-      it('should update tags to include "form_mode:advanced"', async () => {
+      it('should update tags to include "form_mode:advanced" and show advanced mode warning', async () => {
         await userEvent.click(getAdvancedModeToggle());
 
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
@@ -430,11 +430,16 @@ describe('Trusted apps form', () => {
           entries: [],
         };
         const expected = createOnChangeArgs({
-          isValid: false,
-          confirmModalLabels: undefined,
           item: createItem(propsItem),
         });
         expect(formProps.onChange).toHaveBeenCalledWith(expected);
+
+        // update TA to show toggle change
+        formProps.item = formProps.onChange.mock.calls[0][0].item;
+        rerender();
+        expect(getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE)
+        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(USING_ADVANCED_MODE_DESCRIPTION)
       })
 
       it('when updating an existing trusted app, the previous form mode is enabled by default', async () => {
@@ -462,47 +467,35 @@ describe('Trusted apps form', () => {
         expect(getBasicModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(false);
       })
 
-      it.skip('retains previous user input when switching between advanced and simplified mode', async () => {
-        act(() => {
-          setTextFieldValue(getConditionValue(getCondition()), 'basic value');
-        });
-
-        rerenderWithLatestProps();
-        expect(formProps.onChange).toHaveBeenCalledTimes(1);
-        await userEvent.click(getAdvancedModeToggle());
-
-
-        rerenderWithLatestProps();
-        expect(formProps.onChange).toHaveBeenCalledTimes(2);
-        console.log('my props 2', formProps.item.entries)
-        await userEvent.click(getBasicModeToggle());
-        rerenderWithLatestProps();
-        console.log('my props 3', formProps.item.entries)
-        expect(getAdvancedModeToggle().classList.contains('euiButtonGroupButton-isSelected')).toEqual(false);
-
-        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-          tags: ["policy:all"],
-          entries: [{ field: ConditionEntryField.HASH, operator: 'included', type: 'match', value: 'basic value' }],
+      it('retains previous user input when switching from basic to advanced mode', async () => {
+        setTextFieldValue(getConditionValue(getCondition()), 'some value');
+        const propsItem1: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [{ field: ConditionEntryField.HASH, operator: 'included', type: 'match', value: 'some value' }],
         };
-        const expected = createOnChangeArgs({
-          isValid: false,
-          confirmModalLabels: undefined,
-          item: createItem(propsItem),
+        const expectedAfterBasicValueChange = createOnChangeArgs({
+          item: createItem(propsItem1),
         });
-        // expect(formProps.onChange).toHaveBeenCalledTimes(3);
-        // expect(formProps.onChange).toHaveBeenCalledWith(expected);
-      })
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterBasicValueChange);
 
-      it('should display warning text when user selects toggle for advanced mode', async () => {
         await userEvent.click(getAdvancedModeToggle());
-        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        const propsItem2: Partial<ArtifactFormComponentProps['item']> = {
           tags: ["policy:all", "form_mode:advanced"],
+          entries: [],
         };
-        // formProps.item = { ...formProps.item, ...propsItem };
-        latestUpdatedItem = { ...formProps.item, ...propsItem };
-        rerenderWithLatestProps();
-        expect(getAdvancedModeUsageWarningHeader().textContent).toEqual(USING_ADVANCED_MODE)
-        expect(getAdvancedModeUsageWarningBody().textContent).toEqual(USING_ADVANCED_MODE_DESCRIPTION)
+        const expectedAfterSwitchToAdvancedMode = createOnChangeArgs({
+          item: createItem(propsItem2),
+        });
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToAdvancedMode);
+
+        await userEvent.click(getBasicModeToggle());
+        const propsItem3: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [{ field: ConditionEntryField.HASH, operator: 'included', type: 'match', value: 'some value' }],
+        };
+        const expectedAfterSwitchToBasicMode = createOnChangeArgs({
+          item: createItem(propsItem3),
+        });
+        expect(formProps.onChange).toHaveBeenCalledTimes(3);
+        expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
       })
     });
   });
