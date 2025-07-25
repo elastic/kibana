@@ -14,7 +14,7 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
