@@ -30,7 +30,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import { WorkflowState } from './workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from './workflow_context_manager/workflow_state';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -83,7 +83,7 @@ export class WorkflowsExecutionEnginePlugin
         document: workflowExecution,
       });
       const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
-      const workflowState = new WorkflowState(
+      const workflowState = new WorkflowExecutionState(
         workflowExecution as EsWorkflowExecution,
         this.esClient,
         workflowExecutionGraph
