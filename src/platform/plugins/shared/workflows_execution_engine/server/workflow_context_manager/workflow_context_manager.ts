@@ -131,18 +131,6 @@ export class WorkflowContextManager {
     return this.context.stepResults;
   }
 
-  public setNodeState(nodeId: string, state: any): void {
-    if (!this.context.nodesState) {
-      this.context.nodesState = {};
-    }
-
-    this.context.nodesState[nodeId] = state;
-  }
-
-  public getNodeState(nodeId: string): any {
-    return this.context.nodesState?.[nodeId];
-  }
-
   // ======================
   // Workflow Event Logging Methods
   // ======================
