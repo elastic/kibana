@@ -263,7 +263,6 @@ export const useLookupIndexCommand = (
 
     const existingIndices = await getLookupIndices!();
 
-    // TODO extract aliases as well
     const lookupIndices: string[] = inQueryLookupIndices.current;
 
     for (let i = 0; i < lookupIndices.length; i++) {

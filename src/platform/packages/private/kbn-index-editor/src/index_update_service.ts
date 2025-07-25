@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy } from 'lodash';
+import { difference, groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -60,11 +60,18 @@ interface ColumnAddition {
   name: string;
 }
 
+interface ColumnUpdate {
+  name: string;
+  previousName?: string;
+}
+
 type Action =
   | { type: 'add'; payload: DocUpdate }
   | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column'; payload: ColumnAddition }
+  | { type: 'edit-column'; payload: ColumnUpdate }
+  | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> };
@@ -187,18 +194,19 @@ export class IndexUpdateService {
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
-      for (const column of pendingColumnsToBeSaved) {
-        if (!dataView.fields.getByName(column.name)) {
-          dataView.fields.add({
+      const unsavedFields = pendingColumnsToBeSaved
+        .filter((column) => !dataView.fields.getByName(column.name))
+        .map((column) => {
+          return dataView.fields.create({
             name: column.name,
             type: KBN_FIELD_TYPES.UNKNOWN,
             aggregatable: true,
             searchable: true,
           });
-        }
-      }
+        });
       return (
         dataView.fields
+          .concat(unsavedFields)
           // Exclude metadata fields. TODO check if this is the right way to do it
           // @ts-ignore
           .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
@@ -377,15 +385,39 @@ export class IndexUpdateService {
     this._subscription.add(
       this._actions$
         .pipe(
-          scan((acc: ColumnAddition[], action) => {
+          withLatestFrom(this.dataView$),
+          scan((acc: ColumnAddition[], [action, dataView]) => {
             if (action.type === 'add-column') {
               return [...acc, action.payload];
             }
+            if (action.type === 'edit-column') {
+              return acc.map((column) =>
+                column.name === action.payload.previousName
+                  ? { ...column, name: action.payload.name }
+                  : column
+              );
+            }
+            if (action.type === 'delete-column') {
+              return acc.filter((column) => column.name !== action.payload.name);
+            }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value
-              return acc.filter((column) =>
+              // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
+              const unsavedColumns = acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
               );
+
+              // Add saved columns to the data view
+              const savedColumns = difference(acc, unsavedColumns);
+              savedColumns.forEach((column) => {
+                dataView.fields.add({
+                  name: column.name,
+                  type: KBN_FIELD_TYPES.UNKNOWN,
+                  aggregatable: true,
+                  searchable: true,
+                });
+              });
+
+              return unsavedColumns;
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row
@@ -501,8 +533,16 @@ export class IndexUpdateService {
     this._actions$.next({ type: 'undo' });
   }
 
-  public addNewColumn(filedName: string) {
-    this._actions$.next({ type: 'add-column', payload: { name: filedName } });
+  public addNewColumn(name: string) {
+    this._actions$.next({ type: 'add-column', payload: { name } });
+  }
+
+  public editColumn(name: string, previousName: string) {
+    this._actions$.next({ type: 'edit-column', payload: { name, previousName } });
+  }
+
+  public deleteColumn(name: string) {
+    this._actions$.next({ type: 'delete-column', payload: { name } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -525,6 +565,7 @@ export class IndexUpdateService {
     this._rows$.complete();
     this._totalHits$.complete();
     this._actions$.complete();
+    this._pendingColumnsToBeSaved$.complete();
   }
 
   public async createIndex() {
