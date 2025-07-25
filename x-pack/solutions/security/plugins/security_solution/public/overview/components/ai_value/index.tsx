@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CostSavings } from './cost_savings';
+import { TimeSaved } from './time_saved';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { useValueMetrics } from './use_value_metrics';
@@ -40,18 +42,44 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
         valueMetricsCompare={valueMetricsCompare}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGrid columns={2} gutterSize="l">
+
+      <EuiFlexGrid
+        columns={2}
+        gutterSize="l"
+        css={css`
+          grid-template-columns: 30% 68%;
+        `}
+      >
+        <EuiFlexGrid columns={1} gutterSize="l" responsive={false}>
+          <TimeSaved
+            minutesPerAlert={minutesPerAlert}
+            attackAlertIds={attackAlertIds}
+            hoursSaved={valueMetrics.hoursSaved}
+            hoursSavedCompare={valueMetricsCompare.hoursSaved}
+            from={from}
+            to={to}
+          />
+          <TimeSaved
+            minutesPerAlert={minutesPerAlert}
+            attackAlertIds={attackAlertIds}
+            hoursSaved={valueMetrics.hoursSaved}
+            hoursSavedCompare={valueMetricsCompare.hoursSaved}
+            from={from}
+            to={to}
+          />
+        </EuiFlexGrid>
         <CostSavings attackAlertIds={attackAlertIds} from={from} to={to} />
-        <AlertProcessing
-          attackAlertIds={attackAlertIds}
-          attackAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
-          attackAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
-          filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
-          filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
-          from={from}
-          to={to}
-        />
       </EuiFlexGrid>
+      <EuiSpacer size="l" />
+      <AlertProcessing
+        attackAlertIds={attackAlertIds}
+        attackAlertsCountPerc={valueMetrics.escalatedAlertsPerc}
+        attackAlertsCountPercCompare={valueMetricsCompare.escalatedAlertsPerc}
+        filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
+        filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
+        from={from}
+        to={to}
+      />
     </>
   );
 };

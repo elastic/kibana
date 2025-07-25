@@ -96,6 +96,10 @@ export const ESCALATED_RATE = i18n.translate('xpack.securitySolution.aiValue.esc
   defaultMessage: 'Escalated alert rate',
 });
 
+export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
+  defaultMessage: 'Analyst time saved',
+});
+
 export const TIME_SAVED_DESC = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
   defaultMessage: 'Time saved in hours',
 });
