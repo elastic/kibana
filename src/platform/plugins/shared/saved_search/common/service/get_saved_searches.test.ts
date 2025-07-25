@@ -50,17 +50,23 @@ describe('getSavedSearch', () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
           title: 'test1',
-          sort: [['order_date', 'desc']],
-          columns: ['_source'],
           description: 'description',
-          grid: {},
-          hideChart: false,
-          sampleSize: 100,
+          tabs: [
+            {
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: false,
+                sampleSize: 100,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -160,17 +166,23 @@ describe('getSavedSearch', () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
           title: 'test2',
-          sort: [['order_date', 'desc']],
-          columns: ['_source'],
           description: 'description',
-          grid: {},
-          hideChart: true,
-          isTextBasedQuery: true,
+          tabs: [
+            {
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: true,
+                isTextBasedQuery: true,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -270,17 +282,23 @@ describe('getSavedSearch', () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
           title: 'test2',
-          sort: [['order_date', 'desc']],
-          columns: ['_source'],
           description: 'description',
-          grid: {},
-          hideChart: true,
-          isTextBasedQuery: true,
+          tabs: [
+            {
+              attributes: {
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+                sort: [['order_date', 'desc']],
+                columns: ['_source'],
+                grid: {},
+                hideChart: true,
+                isTextBasedQuery: true,
+              },
+            },
+          ],
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
