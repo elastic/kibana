@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   EuiBasicTable,
@@ -29,6 +30,8 @@ export interface IndexAliasesFlyoutProps {
 }
 
 export const IndexAliasesFlyout = ({ indexName, aliases, onClose }: IndexAliasesFlyoutProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const aliasItems = aliases.map((alias) => ({ name: alias }));
   const columns: Array<EuiBasicTableColumn<{ name: string }>> = [
     {
@@ -43,10 +46,10 @@ export const IndexAliasesFlyout = ({ indexName, aliases, onClose }: IndexAliases
     },
   ];
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={modalTitleId}>
             <FormattedMessage
               id="xpack.serverlessSearch.indexManagement.indexDetails.overview.aliasesFlyout.title"
               defaultMessage="{indexName} Aliases"
