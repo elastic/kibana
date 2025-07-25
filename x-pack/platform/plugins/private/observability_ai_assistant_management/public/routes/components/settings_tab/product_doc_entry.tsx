@@ -87,6 +87,19 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
         </EuiFlexGroup>
       );
     }
+    if (status === 'uninstalling') {
+      return (
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+          <EuiLoadingSpinner size="m" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.observabilityAiAssistantManagement.settingsPage.uninstallingText"
+              defaultMessage="Uninstalling..."
+            />
+          </EuiText>
+        </EuiFlexGroup>
+      );
+    }
     if (status === 'installed') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
