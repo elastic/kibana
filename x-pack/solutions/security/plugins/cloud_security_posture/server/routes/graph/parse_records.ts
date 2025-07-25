@@ -88,7 +88,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
+    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert, isAlert } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const targetIdsArraySafe: string[] = [];
@@ -134,7 +134,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         const labelNode: LabelNodeDataModel = {
           id: edgeId + `label(${action})`,
           label: action,
-          color: isOriginAlert ? 'danger' : 'primary',
+          color: isOriginAlert || isAlert ? 'danger' : 'primary',
           shape: 'label',
           documentsData: parseDocumentsData(docs),
         };
