@@ -16,6 +16,8 @@ import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 
+const DISMISSED_WARNINGS: Set<string> = new Set();
+
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallContext.warningMessage.genericFallbackWarning',
   {
@@ -25,6 +27,7 @@ const FALLBACK_WARNING = i18n.translate(
 );
 
 interface TraceWaterfallContextProps {
+  traceId: string;
   duration: number;
   traceWaterfall: TraceWaterfallItem[];
   rootItem?: TraceItem;
@@ -46,6 +49,7 @@ interface TraceWaterfallContextProps {
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
+  traceId: '',
   duration: 0,
   traceWaterfall: [],
   rootItem: undefined,
@@ -64,6 +68,7 @@ export type OnNodeClick = (id: string) => void;
 export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
 
 export function TraceWaterfallContextProvider({
+  traceId,
   children,
   traceItems,
   showAccordion,
@@ -76,6 +81,7 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
 }: {
+  traceId: string;
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
@@ -91,9 +97,16 @@ export function TraceWaterfallContextProvider({
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy } = useTraceWaterfall({
     traceItems,
   });
-  const [warningMessage, setWarningMessage] = useState(!rootItem ? FALLBACK_WARNING : undefined);
+  const [warningMessage, setWarningMessage] = useState(() => {
+    const hasBeenDismissed = DISMISSED_WARNINGS.has(traceId);
 
-  const dismissWarning = () => setWarningMessage(undefined);
+    return !(rootItem || hasBeenDismissed) ? FALLBACK_WARNING : undefined;
+  });
+
+  const dismissWarning = () => {
+    DISMISSED_WARNINGS.add(traceId);
+    setWarningMessage(undefined);
+  };
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
@@ -103,6 +116,7 @@ export function TraceWaterfallContextProvider({
   return (
     <TraceWaterfallContext.Provider
       value={{
+        traceId,
         duration,
         rootItem,
         traceWaterfall,

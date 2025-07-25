@@ -21,6 +21,7 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
+  traceId: string;
   traceItems: TraceItem[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
@@ -34,6 +35,7 @@ export interface Props {
 }
 
 export function TraceWaterfall({
+  traceId,
   traceItems,
   showAccordion = true,
   highlightedTraceId,
@@ -47,6 +49,7 @@ export function TraceWaterfall({
 }: Props) {
   return (
     <TraceWaterfallContextProvider
+      traceId={traceId}
       traceItems={traceItems}
       showAccordion={showAccordion}
       highlightedTraceId={highlightedTraceId}
