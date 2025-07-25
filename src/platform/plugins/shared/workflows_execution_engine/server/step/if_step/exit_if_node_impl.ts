@@ -9,7 +9,7 @@
 
 import { ExitIfNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 
 export class ExitIfNodeImpl implements StepImplementation {
   constructor(private step: ExitIfNode, private workflowState: WorkflowExecutionState) {}

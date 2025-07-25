@@ -30,7 +30,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionState } from './workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>

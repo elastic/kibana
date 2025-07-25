@@ -9,7 +9,7 @@
 
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionState } from '../workflow_context_manager/workflow_state';
+import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { RunStepResult, StepBase, BaseStep } from './step_base';
 
 // Extend BaseStep for connector-specific properties

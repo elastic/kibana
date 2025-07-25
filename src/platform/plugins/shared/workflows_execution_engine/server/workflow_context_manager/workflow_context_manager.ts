@@ -12,7 +12,7 @@ import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { graphlib } from '@dagrejs/dagre';
 import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionState } from './workflow_state';
+import { WorkflowExecutionState } from './workflow_execution_state';
 
 export interface ContextManagerInit {
   workflowRunId: string;
