@@ -181,15 +181,17 @@ export interface SavedObjectsServiceStart {
    * @example
    * ```typescript
    * // Basic usage
-   * const client = savedObjects.getInternalClient();
+   * const client = savedObjects.getUnsafeInternalClient();
    *
    * // With hidden types
-   * const client = savedObjects.getInternalClient({
+   * const client = savedObjects.getUnsafeInternalClient({
    *   includedHiddenTypes: ['fleet-agent-policies']
    * });
    * ```
    */
-  getInternalClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+  getUnsafeInternalClient: (
+    options?: SavedObjectsClientProviderOptions
+  ) => SavedObjectsClientContract;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with

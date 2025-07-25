@@ -767,14 +767,14 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('#getInternalClient', () => {
+    describe('#getUnsafeInternalClient', () => {
       it('returns a SavedObjectsClient instance', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient } = await soService.start(createStartDeps());
+        const { getUnsafeInternalClient } = await soService.start(createStartDeps());
 
-        const client = getInternalClient();
+        const client = getUnsafeInternalClient();
 
         expect(client).toBeInstanceOf(SavedObjectsClient);
       });
@@ -785,18 +785,18 @@ describe('SavedObjectsService', () => {
         await soService.setup(createSetupDeps());
         const startContract = await soService.start(createStartDeps());
 
-        expect(startContract).toHaveProperty('getInternalClient');
-        expect(typeof startContract.getInternalClient).toBe('function');
+        expect(startContract).toHaveProperty('getUnsafeInternalClient');
+        expect(typeof startContract.getUnsafeInternalClient).toBe('function');
       });
 
       it('works with no options parameter (default behavior)', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient } = await soService.start(createStartDeps());
+        const { getUnsafeInternalClient } = await soService.start(createStartDeps());
 
-        expect(() => getInternalClient()).not.toThrow();
-        const client = getInternalClient();
+        expect(() => getUnsafeInternalClient()).not.toThrow();
+        const client = getUnsafeInternalClient();
         expect(client).toBeInstanceOf(SavedObjectsClient);
       });
 
@@ -804,10 +804,10 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient } = await soService.start(createStartDeps());
+        const { getUnsafeInternalClient } = await soService.start(createStartDeps());
 
-        expect(() => getInternalClient({})).not.toThrow();
-        const client = getInternalClient({});
+        expect(() => getUnsafeInternalClient({})).not.toThrow();
+        const client = getUnsafeInternalClient({});
         expect(client).toBeInstanceOf(SavedObjectsClient);
       });
 
@@ -815,7 +815,7 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient, createInternalRepository } = await soService.start(
+        const { getUnsafeInternalClient, createInternalRepository } = await soService.start(
           createStartDeps()
         );
 
@@ -826,8 +826,8 @@ describe('SavedObjectsService', () => {
         const includedHiddenTypes = ['hidden-type-1', 'hidden-type-2'];
 
         // Test that the method accepts the parameter without throwing
-        expect(() => getInternalClient({ includedHiddenTypes })).not.toThrow();
-        const client = getInternalClient({ includedHiddenTypes });
+        expect(() => getUnsafeInternalClient({ includedHiddenTypes })).not.toThrow();
+        const client = getUnsafeInternalClient({ includedHiddenTypes });
         expect(client).toBeInstanceOf(SavedObjectsClient);
         expect(createInternalRespositorySpy).toHaveBeenCalledWith(includedHiddenTypes);
       });
@@ -840,10 +840,10 @@ describe('SavedObjectsService', () => {
         const getInternalExtensionsSpy = jest.spyOn(soService as any, 'getInternalExtensions');
 
         await soService.setup(createSetupDeps());
-        const { getInternalClient } = await soService.start(createStartDeps());
+        const { getUnsafeInternalClient } = await soService.start(createStartDeps());
         const excludedExtensions = ['test-extension'];
 
-        getInternalClient({ excludedExtensions });
+        getUnsafeInternalClient({ excludedExtensions });
 
         expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions);
       });
@@ -852,7 +852,7 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient, createInternalRepository, createScopedRepository } =
+        const { getUnsafeInternalClient, createInternalRepository, createScopedRepository } =
           await soService.start(createStartDeps());
 
         const createInternalRepositorySpy = jest.spyOn(
@@ -864,7 +864,7 @@ describe('SavedObjectsService', () => {
           'createScopedRepository'
         );
 
-        const client = getInternalClient();
+        const client = getUnsafeInternalClient();
         expect(client).toBeInstanceOf(SavedObjectsClient);
 
         expect(createInternalRepositorySpy).toHaveBeenCalledWith(undefined, expect.any(Object));
@@ -875,12 +875,12 @@ describe('SavedObjectsService', () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         await soService.setup(createSetupDeps());
-        const { getInternalClient } = await soService.start(createStartDeps());
+        const { getUnsafeInternalClient } = await soService.start(createStartDeps());
 
         // Test with various invalid options
-        expect(() => getInternalClient({ includedHiddenTypes: null as any })).not.toThrow();
-        expect(() => getInternalClient({ excludedExtensions: null as any })).not.toThrow();
-        expect(() => getInternalClient({ unknownOption: 'test' } as any)).not.toThrow();
+        expect(() => getUnsafeInternalClient({ includedHiddenTypes: null as any })).not.toThrow();
+        expect(() => getUnsafeInternalClient({ excludedExtensions: null as any })).not.toThrow();
+        expect(() => getUnsafeInternalClient({ unknownOption: 'test' } as any)).not.toThrow();
       });
     });
 

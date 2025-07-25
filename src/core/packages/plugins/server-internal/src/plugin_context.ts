@@ -366,7 +366,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
-      getInternalClient: deps.savedObjects.getInternalClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,

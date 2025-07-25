@@ -77,7 +77,7 @@ describe('SavedObjects Internal Client Integration', () => {
     });
 
     start = await root.start();
-    internalClient = start.savedObjects.getInternalClient();
+    internalClient = start.savedObjects.getUnsafeInternalClient();
   });
 
   afterAll(async () => {
@@ -188,7 +188,7 @@ describe('SavedObjects Internal Client Integration', () => {
         internal_data: 'system internal information',
       };
 
-      const clientWithHiddenTypes = start.savedObjects.getInternalClient({
+      const clientWithHiddenTypes = start.savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: [hiddenType],
       });
 
@@ -210,7 +210,7 @@ describe('SavedObjects Internal Client Integration', () => {
 
     it('works with multiple hidden types', async () => {
       const hiddenTypes = ['test_hidden_type', 'test_restricted_type'];
-      const clientWithMultipleHidden = start.savedObjects.getInternalClient({
+      const clientWithMultipleHidden = start.savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: hiddenTypes,
       });
 
@@ -243,7 +243,7 @@ describe('SavedObjects Internal Client Integration', () => {
     });
 
     it('respects custom extension exclusions', async () => {
-      const clientWithExclusions = start.savedObjects.getInternalClient({
+      const clientWithExclusions = start.savedObjects.getUnsafeInternalClient({
         excludedExtensions: ['customExtension'],
       });
 
@@ -293,7 +293,7 @@ describe('SavedObjects Internal Client Integration', () => {
       const restrictedType = 'test_restricted_type';
       const attributes = { restricted_field: 'internal access only' };
 
-      const clientWithRestricted = start.savedObjects.getInternalClient({
+      const clientWithRestricted = start.savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: [restrictedType],
       });
 
@@ -331,7 +331,7 @@ describe('SavedObjects Internal Client Integration', () => {
     });
 
     it('handles invalid parameters gracefully', async () => {
-      const clientWithInvalidOptions = start.savedObjects.getInternalClient({
+      const clientWithInvalidOptions = start.savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: null as any,
         excludedExtensions: undefined as any,
       });
