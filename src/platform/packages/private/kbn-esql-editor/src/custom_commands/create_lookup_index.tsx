@@ -179,13 +179,17 @@ export const useLookupIndexCommand = (
     const lineCount = editorModel.current?.getLineCount() || 1;
     for (let i = 1; i <= lineCount; i++) {
       const decorations = editorRef.current?.getLineDecorations(i) ?? [];
-      editorRef?.current?.removeDecorations(decorations.map((d) => d.id));
+
+      const lookupIndexDecorations = decorations.filter((decoration) =>
+        decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
+      );
+
+      editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
     }
 
     getLookupIndicesMemoized().then(({ indices: existingIndices }) => {
       // TODO extract aliases as well
       const lookupIndices: string[] = inQueryLookupIndices.current;
-
       for (let i = 0; i < lookupIndices.length; i++) {
         const lookupIndex = lookupIndices[i];
 
