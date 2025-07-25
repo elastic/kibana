@@ -14,7 +14,7 @@ import { StepImplementation } from './step_base';
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
 import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
-import { WorkflowExecutionRuntime } from '../workflow_context_manager/workflow_execution_runtime';
+import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
@@ -28,7 +28,7 @@ export class StepFactory {
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntime
+    workflowState: WorkflowExecutionRuntimeManager
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
