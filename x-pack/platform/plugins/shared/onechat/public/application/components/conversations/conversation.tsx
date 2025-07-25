@@ -9,6 +9,7 @@ import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useConversation } from '../../hooks/use_conversation';
+import { useSendMessageMutation } from '../../hooks/use_send_message_mutation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -23,7 +24,9 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
-  const { conversation, conversationId, hasActiveConversation } = useConversation();
+  const { conversationId, hasActiveConversation } = useConversation();
+  const { sendMessage, isResponseLoading, isResponseError, responseError } =
+    useSendMessageMutation();
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -40,9 +43,16 @@ export const Conversation: React.FC<{}> = () => {
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(() => {
-    setStickToBottom(true);
-  }, [setStickToBottom]);
+  const onSubmit = useCallback(
+    (message: string) => {
+      if (isResponseLoading) {
+        return;
+      }
+      sendMessage({ message });
+      setStickToBottom(true);
+    },
+    [isResponseLoading, sendMessage, setStickToBottom]
+  );
 
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
@@ -53,7 +63,11 @@ export const Conversation: React.FC<{}> = () => {
               <EuiResizablePanel initialSize={80}>
                 <div css={scrollContainerStyles}>
                   <div ref={scrollContainerRef}>
-                    <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+                    <ConversationRounds
+                      isResponseLoading={isResponseLoading}
+                      isResponseError={isResponseError}
+                      responseError={responseError}
+                    />
                   </div>
                 </div>
               </EuiResizablePanel>

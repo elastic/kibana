@@ -16,6 +16,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,12 +45,13 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
   const [tab, setTab] = useState<'request' | 'response'>('request');
 
   const contents = JSON.stringify(lastAPICall[tab], null, 2);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.apiCallFlyout.title"
               defaultMessage="API Call"
