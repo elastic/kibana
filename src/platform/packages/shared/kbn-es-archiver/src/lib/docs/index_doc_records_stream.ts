@@ -40,10 +40,12 @@ export function createIndexDocRecordsStream(
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
           const index = doc.data_stream || doc.index;
+          // generate id for non-data-streams if it doesn't exist yet
+          const id = doc.data_stream ? doc.id : doc.id ?? uuidv4();
           ops.set(body, {
             [op]: {
               _index: index,
-              _id: doc.id ?? uuidv4(),
+              _id: id,
             },
           });
           return body;
