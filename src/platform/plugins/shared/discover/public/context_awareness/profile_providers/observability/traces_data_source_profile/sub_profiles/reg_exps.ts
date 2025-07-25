@@ -6,5 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export { createObservabilityTracesDataSourceProfileProviders } from './create_profile_providers';
+export const reContainsTracesOtel = /^(?=.*\btraces\b)(?=.*\botel\b).+/i;
+export const reContainsTracesApm = /^(?=.*\btraces\b)(?=.*\bapm\b).+/i;
