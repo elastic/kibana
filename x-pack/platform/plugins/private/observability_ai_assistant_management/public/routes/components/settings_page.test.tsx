@@ -68,7 +68,7 @@ describe('Settings Page', () => {
         onClick: expect.any(Function),
       },
       {
-        text: 'Observability',
+        text: 'Observability and Search',
       },
     ]);
   });
