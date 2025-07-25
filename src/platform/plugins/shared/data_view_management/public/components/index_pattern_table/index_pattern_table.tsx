@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import React, { useMemo, useState } from 'react';
-import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -176,10 +176,6 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   setBreadcrumbs(getListBreadcrumbs());
 
   chrome.docTitle.change(title);
-
-  const isRollup =
-    new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
-    dataViews.getRollupsEnabled();
 
   const ContextWrapper = useMemo(
     () => (spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent),
