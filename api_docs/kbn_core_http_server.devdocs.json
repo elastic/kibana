@@ -4501,6 +4501,22 @@
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/get_allowed_types.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/functions.ts"
               },
@@ -7181,6 +7197,18 @@
                 "path": "src/platform/plugins/shared/saved_objects_management/server/routes/scroll_count.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "visTypeTimelion",
                 "path": "src/platform/plugins/private/vis_types/timelion/server/routes/run.ts"
               },
@@ -8553,6 +8581,10 @@
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/update.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-internal/src/router.ts"
               },
@@ -9271,6 +9303,14 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/delete.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/workflows_management_routes.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16731,6 +16771,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/migrations/routes/run_migrations.ts"
               },
               {
@@ -17306,6 +17350,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",
