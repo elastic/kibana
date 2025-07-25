@@ -14,8 +14,15 @@ import { monaco } from '@kbn/monaco';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { mutate, type ESQLSource, BasicPrettyPrinter } from '@kbn/esql-ast';
-import { Parser } from '@kbn/esql-ast';
+import {
+  BasicPrettyPrinter,
+  type ESQLAstItem,
+  type ESQLAstJoinCommand,
+  type ESQLSingleAstItem,
+  type ESQLSource,
+  mutate,
+  Parser,
+} from '@kbn/esql-ast';
 import { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
@@ -67,17 +74,20 @@ export function appendIndexToJoinCommand(
       : undefined;
 
   // Pick the JOIN command to modify
-  let selectedJoin: any | undefined;
+  let selectedJoin:
+    | { joinCmd: ESQLAstJoinCommand; src: ESQLSource | undefined; firstArg: ESQLAstItem }
+    | undefined;
   let smallestDistance = Number.MAX_SAFE_INTEGER;
 
   for (const joinCmd of mutate.commands.join.list(root)) {
-    const firstArg = joinCmd.args[0] as any | undefined; // may be undefined
+    const firstArg = joinCmd.args[0]; // may be undefined
     let src: ESQLSource | undefined;
 
-    if (firstArg?.type === 'source') {
+    if (isESQLSourceItem(firstArg)) {
       src = firstArg;
-    } else if (firstArg?.type === 'as') {
-      src = firstArg.args[0] as ESQLSource; // AS (<source>, <alias>)
+    } else if (!Array.isArray(firstArg) && firstArg.type === 'option' && firstArg.name === 'as') {
+      // "AS" clause: first argument is the underlying source
+      src = firstArg.args[0] as unknown as ESQLSource; // AS (<source>, <alias>)
     }
 
     const matchesByName = targetName !== undefined && src?.name === targetName;
@@ -121,7 +131,8 @@ export function appendIndexToJoinCommand(
 
   if (src) {
     const idx = joinCmd.args.indexOf(firstArg);
-    mutate.generic.commands.args.remove(root as any, firstArg);
+    // remove the original argument (source or AS option) from the JOIN command
+    mutate.generic.commands.args.remove(root, firstArg as unknown as ESQLSingleAstItem);
     mutate.generic.commands.args.insert(joinCmd, newSource, idx);
   } else {
     mutate.generic.commands.args.insert(joinCmd, newSource, 0);
