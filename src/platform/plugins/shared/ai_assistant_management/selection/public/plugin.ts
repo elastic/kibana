@@ -98,7 +98,7 @@ export class AIAssistantManagementPlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, { spaces }: StartDependencies) {
+  public start(coreStart: CoreStart) {
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
