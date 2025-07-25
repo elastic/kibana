@@ -343,6 +343,9 @@ $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoadi
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
 :   Limit the number of services in a given service group.
 
+$$$observability-apm-optimized-sort$$$`observability:apmServiceInventoryOptimizedSorting` {applies_to}`stack: preview 9.0, removed 9.1`
+:   Sort services without anomaly detection rules on the APM Service inventory page by service name.
+
 $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironment`
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
 
