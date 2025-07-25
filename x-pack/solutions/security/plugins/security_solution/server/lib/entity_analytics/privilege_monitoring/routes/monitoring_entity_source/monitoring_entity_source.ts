@@ -66,6 +66,9 @@ export const monitoringEntitySourceRoute = (
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.init(request.body);
 
+          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
+          privMonDataClient.scheduleNow();
+
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
@@ -143,6 +146,9 @@ export const monitoringEntitySourceRoute = (
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.update({ ...request.body, id: request.params.id });
+
+          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
+          privMonDataClient.scheduleNow();
 
           return response.ok({ body });
         } catch (e) {
