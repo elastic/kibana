@@ -30,7 +30,7 @@ import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRunTime } from './workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRuntime } from './workflow_context_manager/workflow_execution_runtime';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 
@@ -82,7 +82,7 @@ export class WorkflowsExecutionEnginePlugin
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
-      const workflowState = new WorkflowExecutionRunTime(
+      const workflowState = new WorkflowExecutionRuntime(
         workflowExecution as EsWorkflowExecution,
         workflowExecutionRepository,
         stepExecutionRepository,

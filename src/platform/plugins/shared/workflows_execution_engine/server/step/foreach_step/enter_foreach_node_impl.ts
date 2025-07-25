@@ -9,10 +9,10 @@
 
 import { EnterForeachNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRunTime } from '../../workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRuntime } from '../../workflow_context_manager/workflow_execution_runtime';
 
 export class EnterForeachNodeImpl implements StepImplementation {
-  constructor(private step: EnterForeachNode, private workflowState: WorkflowExecutionRunTime) {}
+  constructor(private step: EnterForeachNode, private workflowState: WorkflowExecutionRuntime) {}
 
   public async run(): Promise<void> {
     const evaluatedItems = this.step.configuration.foreach; // must be real items from step definition

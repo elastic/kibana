@@ -12,7 +12,7 @@
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRunTime } from '../workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRuntime } from '../workflow_context_manager/workflow_execution_runtime';
 
 export interface RunStepResult {
   output: any;
@@ -39,13 +39,13 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
-  protected workflowState: WorkflowExecutionRunTime;
+  protected workflowState: WorkflowExecutionRuntime;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor | undefined,
-    workflowState: WorkflowExecutionRunTime,
+    workflowState: WorkflowExecutionRuntime,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     this.step = step;

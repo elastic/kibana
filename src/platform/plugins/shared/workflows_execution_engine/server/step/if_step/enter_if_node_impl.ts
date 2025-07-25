@@ -9,10 +9,10 @@
 
 import { EnterIfNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRunTime } from '../../workflow_context_manager/workflow_execution_manager';
+import { WorkflowExecutionRuntime } from '../../workflow_context_manager/workflow_execution_runtime';
 
 export class EnterIfNodeImpl implements StepImplementation {
-  constructor(private step: EnterIfNode, private workflowState: WorkflowExecutionRunTime) {}
+  constructor(private step: EnterIfNode, private workflowState: WorkflowExecutionRuntime) {}
 
   public async run(): Promise<void> {
     await this.workflowState.startStep(this.step.id);
