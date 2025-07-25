@@ -6,7 +6,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { AGENT_ACTIONS_INDEX } from '../../../common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { invalidateAPIKeys } from '../api_keys';
@@ -147,25 +147,25 @@ describe('unenroll', () => {
     it('force unenroll updates in progress unenroll actions', async () => {
       const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
       esClient.search.mockReset();
-
       esClient.search.mockImplementation(async (request) => {
-        if (request?.index === AGENT_ACTIONS_INDEX) {
+        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } } as any;
+      });
+      esClient.esql.query.mockImplementation(({ query }) => {
+        if (query.includes(AGENT_ACTIONS_INDEX) && !query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
           return {
-            hits: {
-              hits: [
+            values: [
+              [
+                '',
                 {
-                  _source: {
-                    agents: ['agent-in-regular-policy'],
-                    action_id: 'other-action',
-                  },
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action',
                 },
               ],
-            },
+            ],
           } as any;
         }
-        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+        return { values: [] } as any;
       });
-      esClient.esql.query.mockResolvedValue({ values: [] } as any);
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
       await unenrollAgents(soClient, esClient, {
@@ -184,23 +184,24 @@ describe('unenroll', () => {
       const { soClient, esClient, agentInRegularDoc, agentInRegularDoc2 } = createClientMock();
       esClient.search.mockReset();
       esClient.search.mockImplementation(async (request) => {
-        if (request?.index === AGENT_ACTIONS_INDEX) {
+        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } } as any;
+      });
+      esClient.esql.query.mockImplementation(({ query }) => {
+        if (query.includes(AGENT_ACTIONS_INDEX) && !query.includes(AGENT_ACTIONS_RESULTS_INDEX)) {
           return {
-            hits: {
-              hits: [
+            values: [
+              [
+                '',
                 {
-                  _source: {
-                    agents: ['agent-in-regular-policy'],
-                    action_id: 'other-action1',
-                  },
+                  agents: ['agent-in-regular-policy'],
+                  action_id: 'other-action1',
                 },
               ],
-            },
+            ],
           } as any;
         }
-        return { hits: { hits: [agentInRegularDoc, agentInRegularDoc2] } };
+        return { values: [['agent-in-regular-policy']] } as any;
       });
-      esClient.esql.query.mockResolvedValue({ values: [['agent-in-regular-policy']] } as any);
 
       const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
       await unenrollAgents(soClient, esClient, {

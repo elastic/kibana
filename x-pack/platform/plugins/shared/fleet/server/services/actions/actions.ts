@@ -238,33 +238,15 @@ export const getActionResultsByIds = async (
   actionIds: string[]
 ): Promise<{ items: FleetActionResult[]; total: number }> => {
   try {
-    const getActionsResultsResponse = await esClient.search(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        from: 0,
-        size: ES_SEARCH_LIMIT,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  action_id: actionIds,
-                },
-              },
-            ],
-          },
-        },
-      },
-      queryOptions
-    );
-    const actionsResults = getActionsResultsResponse.hits.hits.reduce<FleetActionResult[]>(
-      (acc, hit) => {
-        if (hit._source) {
-          acc.push(hit._source as FleetActionResult);
-        }
-        return acc;
-      },
-      []
+    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX} METADATA _source
+  | WHERE action_id IN (${actionIds.map((id) => `"${id}"`).join(', ')})
+  | KEEP _source`;
+
+    const getActionsResultsResponse = await esClient.esql.query({
+      query: esqlQuery,
+    });
+    const actionsResults = getActionsResultsResponse.values.map(
+      (value: any) => value[0] as FleetActionResult
     );
 
     return {
@@ -272,10 +254,17 @@ export const getActionResultsByIds = async (
       total: actionsResults.length,
     };
   } catch (getActionByIdError) {
-    throw new FleetActionsError(
-      `Error getting action results: ${getActionByIdError.message}`,
-      getActionByIdError
-    );
+    if (
+      getActionByIdError.statusCode === 400 &&
+      getActionByIdError.message.includes('Unknown index')
+    ) {
+      return { items: [], total: 0 };
+    } else {
+      throw new FleetActionsError(
+        `Error getting action results: ${getActionByIdError.message}`,
+        getActionByIdError
+      );
+    }
   }
 };
 
