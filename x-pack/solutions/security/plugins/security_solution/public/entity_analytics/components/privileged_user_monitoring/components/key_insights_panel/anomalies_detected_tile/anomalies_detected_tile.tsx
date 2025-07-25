@@ -16,10 +16,10 @@ export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.anomaliesDetected.title', {
-        defaultMessage: 'Anomalies Detected',
+        defaultMessage: 'Anomalies detected',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.anomaliesDetected.label', {
-        defaultMessage: 'Anomalies Detected',
+        defaultMessage: 'Anomalies detected',
       })}
       getEsqlQuery={(namespace) => right(getAnomaliesDetectedEsqlQuery(namespace))}
       id="privileged-user-monitoring-anomalies-detected"
