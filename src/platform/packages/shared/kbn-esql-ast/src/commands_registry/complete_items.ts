@@ -219,7 +219,7 @@ export const browseDataSourcesSuggestion: ISuggestionItem = {
   detail: i18n.translate('kbn-esql-ast.esql.autocomplete.clickToBrowseDataSourcesLabel', {
     defaultMessage: 'Click to browse',
   }),
-  sortText: '1A',
+  sortText: '1',
   command: {
     id: 'esql.resources.open',
     title: i18n.translate('kbn-esql-ast.esql.autocomplete.clickToBrowseDataSourcesLabel', {
