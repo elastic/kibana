@@ -196,8 +196,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                   pluginStart={pluginsStartServices}
                   onConfirm={(result) => {
                     swimlaneManager.api.updateUserInput(result);
+                    closeFlyout();
                   }}
-                  onClose={closeFlyout}
+                  onCancel={closeFlyout}
                   input={{ ...titleManager.getLatestState(), ...swimlaneManager.getLatestState() }}
                 />
               );

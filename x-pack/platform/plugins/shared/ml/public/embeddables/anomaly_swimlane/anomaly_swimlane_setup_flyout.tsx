@@ -20,13 +20,13 @@ export function ResolveAnomalySwimlaneUserInput({
   coreStart,
   pluginStart,
   onConfirm,
-  onClose,
+  onCancel,
   input,
 }: {
   coreStart: CoreStart;
   pluginStart: MlDependencies | MlStartDependencies;
   onConfirm: (state: AnomalySwimlaneEmbeddableUserInput) => void;
-  onClose: () => void;
+  onCancel: () => void;
   input?: Partial<AnomalySwimLaneEmbeddableState>;
 }) {
   const { http } = coreStart;
@@ -39,9 +39,8 @@ export function ResolveAnomalySwimlaneUserInput({
         initialInput={input}
         onCreate={(explicitInput) => {
           onConfirm(explicitInput);
-          onClose();
         }}
-        onCancel={onClose}
+        onCancel={onCancel}
       />
     </KibanaContextProvider>
   );
