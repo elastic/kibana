@@ -7,9 +7,9 @@
 
 import type * as rt from 'io-ts';
 import { badRequest } from '@hapi/boom';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils/src/exact_check';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';

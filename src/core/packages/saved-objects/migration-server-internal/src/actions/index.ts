@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Either } from 'fp-ts/lib/Either';
-import { right } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
+import { right } from 'fp-ts/Either';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 

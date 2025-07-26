@@ -18,8 +18,8 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { Option, map, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, map, getOrElse } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';

@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/Either';
 import { v4 as uuidv4 } from 'uuid';
 import { NonEmptyString } from '../non_empty_string';
 

@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { selectedFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
 import { setSearchTextAction } from '../../../../state/actions';

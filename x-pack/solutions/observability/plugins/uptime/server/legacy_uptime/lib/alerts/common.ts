@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';

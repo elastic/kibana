@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import type { NonEmptyArray } from 'fp-ts/NonEmptyArray';
 import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { getMissingRiskEnginePrivileges } from '../../../common/entity_analytics/risk_engine';
 import type {

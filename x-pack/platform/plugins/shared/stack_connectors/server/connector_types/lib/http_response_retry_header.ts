@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Option } from 'fp-ts/lib/Option';
-import { fromNullable, map, filter } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import type { Option } from 'fp-ts/Option';
+import { fromNullable, map, filter } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 
 export function getRetryAfterIntervalFromHeaders(headers: Record<string, unknown>): Option<number> {
   return pipe(
