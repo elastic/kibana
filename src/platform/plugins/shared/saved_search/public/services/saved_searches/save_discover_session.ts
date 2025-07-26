@@ -18,6 +18,12 @@ import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import type { DiscoverSession } from '../../../common';
 
+export type SaveDiscoverSessionParams = Pick<
+  DiscoverSession,
+  'title' | 'description' | 'tabs' | 'tags'
+> &
+  Partial<Pick<DiscoverSession, 'id'>>;
+
 export interface SaveDiscoverSessionOptions {
   onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed?: boolean;
@@ -56,9 +62,8 @@ export const saveDiscoverSessionSavedObject = async (
   return resp.item.id;
 };
 
-/** @internal **/
 export const saveDiscoverSession = async (
-  discoverSession: Omit<DiscoverSession, 'id'> & Partial<Pick<DiscoverSession, 'id'>>,
+  discoverSession: SaveDiscoverSessionParams,
   options: SaveDiscoverSessionOptions,
   contentManagement: ContentManagementPublicStart['client'],
   savedObjectsTagging: SavedObjectsTaggingApi | undefined

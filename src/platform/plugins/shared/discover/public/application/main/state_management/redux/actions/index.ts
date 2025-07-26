@@ -10,3 +10,4 @@
 export * from './data_views';
 export * from './initialize_single_tab';
 export * from './tabs';
+export * from './save_discover_session';
