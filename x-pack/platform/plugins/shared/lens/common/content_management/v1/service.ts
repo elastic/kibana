@@ -16,14 +16,21 @@ import {
   lensCMUpdateResultSchema,
   lensCMSearchResultSchema,
   lensCMUpdateOptionsSchema,
-  lensCMMSearchResultSchema,
 } from './schema';
+import { transformToV1LensSavedObject, transformToV1LensItemAttributes } from './transforms';
+import { LensAttributes, LensGetOut, LensSavedObject } from './types';
 
 export const serviceDefinition = {
   get: {
     out: {
       result: {
         schema: lensCMGetResultSchema,
+        up: (result: LensGetOut) => {
+          return {
+            ...result,
+            item: transformToV1LensSavedObject(result.item),
+          } satisfies LensGetOut;
+        },
       },
     },
   },
@@ -31,6 +38,9 @@ export const serviceDefinition = {
     in: {
       data: {
         schema: lensItemAttributesSchema,
+        up: (attributes: LensAttributes) => {
+          return transformToV1LensItemAttributes(attributes);
+        },
       },
       options: {
         schema: lensCMCreateOptionsSchema,
@@ -46,6 +56,9 @@ export const serviceDefinition = {
     in: {
       data: {
         schema: lensItemAttributesSchema,
+        up: (attributes: LensAttributes) => {
+          return transformToV1LensItemAttributes(attributes);
+        },
       },
       options: {
         schema: lensCMUpdateOptionsSchema,
@@ -66,13 +79,10 @@ export const serviceDefinition = {
     out: {
       result: {
         schema: lensCMSearchResultSchema,
-      },
-    },
-  },
-  mSearch: {
-    out: {
-      result: {
-        schema: lensCMMSearchResultSchema,
+        up: (item: LensSavedObject) => {
+          // apply v1 transform per item, items may have different versions
+          return transformToV1LensSavedObject(item);
+        },
       },
     },
   },
