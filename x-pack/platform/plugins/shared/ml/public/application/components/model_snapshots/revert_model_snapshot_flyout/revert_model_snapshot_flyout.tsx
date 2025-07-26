@@ -6,8 +6,6 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
   EuiFlyout,
