@@ -8,6 +8,8 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
@@ -16,17 +18,23 @@ import { toGroupByOpt } from './toolbar_wrapper';
 import type { ToolbarProps } from './types';
 
 interface Props extends ToolbarProps {
-  metricTypes: SnapshotMetricType[];
   groupByFields: string[];
 }
 
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
+  const inventoryModel = findInventoryModel(props.nodeType);
+
+  const { value: aggregations } = useAsync(
+    () => inventoryModel.metrics.getAggregations(),
+    [inventoryModel]
+  );
+
   const metricOptions = useMemo(
     () =>
-      props.metricTypes
+      (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[])
         .map((metric) => toMetricOpt(metric, props.nodeType))
         .filter((v) => v) as Array<{ text: string; value: string }>,
-    [props.metricTypes, props.nodeType]
+    [aggregations, props.nodeType]
   );
 
   const groupByOptions = useMemo(
