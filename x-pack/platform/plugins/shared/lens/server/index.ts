@@ -13,6 +13,6 @@ export const plugin = async (initContext: PluginInitializerContext) => {
   return new LensServerPlugin(initContext);
 };
 
-export { PUBLIC_API_PATH, PUBLIC_API_VERSION } from './api/constants';
+export * from './api/schema'
 
 export type { LensDocShape715 } from './migrations/types';
