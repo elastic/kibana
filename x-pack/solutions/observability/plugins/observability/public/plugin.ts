@@ -78,6 +78,7 @@ import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -181,6 +182,7 @@ export interface ObservabilityPublicPluginsStart {
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
