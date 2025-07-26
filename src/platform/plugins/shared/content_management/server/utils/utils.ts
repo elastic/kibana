@@ -8,6 +8,7 @@
  */
 
 import { Type, ValidationError } from '@kbn/config-schema';
+import { KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
@@ -47,10 +48,12 @@ const validateRequestVersion = (
 };
 
 export const getStorageContext = ({
+  request,
   contentTypeId,
   version: _version,
   ctx: { contentRegistry, requestHandlerContext, getTransformsFactory },
 }: {
+  request: KibanaRequest;
   contentTypeId: string;
   version?: number;
   ctx: {
@@ -62,6 +65,7 @@ export const getStorageContext = ({
   const contentDefinition = contentRegistry.getDefinition(contentTypeId);
   const version = validateRequestVersion(_version, contentDefinition.version.latest);
   const storageContext: StorageContext = {
+    request,
     requestHandlerContext,
     version: {
       request: version,

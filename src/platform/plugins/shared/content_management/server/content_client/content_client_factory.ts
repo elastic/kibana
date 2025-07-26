@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Version } from '@kbn/object-versioning';
@@ -21,17 +22,19 @@ export const getContentClientFactory =
   ({ contentRegistry }: { contentRegistry: ContentRegistry }) =>
   (contentTypeId: string) => {
     const getForRequest = <T = unknown>({
+      request,
       requestHandlerContext,
       version,
     }: {
-      requestHandlerContext: RequestHandlerContext;
       request: KibanaRequest;
+      requestHandlerContext: RequestHandlerContext;
       version?: Version;
     }) => {
       const contentDefinition = contentRegistry.getDefinition(contentTypeId);
 
       const storageContext = getStorageContext({
         contentTypeId,
+        request,
         version: version ?? contentDefinition.version.latest,
         ctx: {
           contentRegistry,
@@ -66,6 +69,7 @@ export const getMSearchClientFactory =
   }) =>
   ({
     requestHandlerContext,
+    request,
   }: {
     requestHandlerContext: RequestHandlerContext;
     request: KibanaRequest;
@@ -75,6 +79,7 @@ export const getMSearchClientFactory =
         const contentDefinition = contentRegistry.getDefinition(contentTypeId);
 
         const storageContext = getStorageContext({
+            request,
           contentTypeId,
           version: version ?? contentDefinition.version.latest,
           ctx: {
