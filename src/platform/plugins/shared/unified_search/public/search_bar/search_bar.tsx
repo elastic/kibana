@@ -500,7 +500,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       isScreenshotMode && styles.hidden,
     ];
 
-    const classes = classNames('uniSearchBar', {
+    const classes = classNames('uniSearchBar', 'hide-for-sharing', {
       [`uniSearchBar--hidden`]: isScreenshotMode,
       [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
     });
