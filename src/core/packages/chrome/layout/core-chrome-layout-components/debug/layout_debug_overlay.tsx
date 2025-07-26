@@ -69,15 +69,6 @@ const slots: Array<{ name: string; style: React.CSSProperties }> = [
     },
   },
   {
-    name: 'navigationPanel',
-    style: {
-      top: 'var(--kbn-layout--navigation-top, 0)',
-      left: 'var(--kbn-layout--navigation-width, 0)',
-      width: 'var(--kbn-layout--navigation-panel-width, 0)',
-      height: 'var(--kbn-layout--navigation-height, 0)',
-    },
-  },
-  {
     name: 'sidebar',
     style: {
       top: 'var(--kbn-layout--sidebar-top, 0)',
@@ -154,7 +145,6 @@ const defaultColors: Record<string, string> = {
   banner: '#0099ff',
   header: '#00bfae',
   navigation: '#c837ab',
-  navigationPanel: '#ff9800',
   sidebar: '#ffd600',
   sidebarPanel: '#ff3d00',
   application: '#4caf50',
