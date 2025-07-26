@@ -134,7 +134,7 @@ export async function getEditLensConfiguration(
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,
-    getLensAttributeService(startDependencies)
+    getLensAttributeService(coreStart.http)
   );
 
   return ({
@@ -172,7 +172,7 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: LensDocument) => {
-        const lensDocumentService = new LensDocumentService(lensServices.contentManagement);
+        const lensDocumentService = new LensDocumentService(lensServices.http);
         await lensDocumentService.save({
           ...attrs,
           savedObjectId,

@@ -363,7 +363,7 @@ export class LensPlugin {
 
       return {
         ...plugins,
-        attributeService: getLensAttributeService(plugins),
+        attributeService: getLensAttributeService(coreStart.http),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         coreStart,
@@ -516,7 +516,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
-          attributeService: getLensAttributeService(deps),
+          attributeService: getLensAttributeService(coreStart.http),
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });
