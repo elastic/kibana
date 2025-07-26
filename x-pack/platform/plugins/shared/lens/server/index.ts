@@ -16,3 +16,5 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 export * from './api/schema'
 
 export type { LensDocShape715 } from './migrations/types';
+
+export type * from './types';

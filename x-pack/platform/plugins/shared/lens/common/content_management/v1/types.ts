@@ -5,67 +5,84 @@
  * 2.0.
  */
 
-import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
-import type { Reference } from '@kbn/content-management-utils';
-import type { UpdateIn } from '@kbn/content-management-plugin/common';
+import type { TypeOf } from '@kbn/config-schema';
+import type {
+  GetResultSO,
+  SOWithMetadata,
+  SOWithMetadataPartial,
+} from '@kbn/content-management-utils';
+import type {
+  CreateIn,
+  CreateResult,
+  DeleteIn,
+  DeleteResult,
+  GetIn,
+  SearchIn,
+  SearchResult,
+  UpdateIn,
+  UpdateResult,
+} from '@kbn/content-management-plugin/common';
 
-import type { LensContentType } from '../types';
+import {
+  lensItemAttributesSchema,
+  lensCMCreateOptionsSchema,
+  lensCMUpdateOptionsSchema,
+  lensCMSearchOptionsSchema,
+  lensItemSchema,
+  lensItemMetaSchema,
+  lensResponseItemSchema,
+  lensAPIAttributesSchema,
+  lensAPIConfigSchema,
+} from './schema';
+import type { LENS_CONTENT_TYPE } from '../constants';
 
-export interface CreateOptions {
-  /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
-  overwrite?: boolean;
-  /** Array of referenced saved objects. */
-  references?: Reference[];
+export type LensAttributes = TypeOf<typeof lensItemAttributesSchema>;
+export type LensAPIAttributes = TypeOf<typeof lensAPIAttributesSchema>;
+
+export type LensItem = TypeOf<typeof lensItemSchema>;
+export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
+
+export type LensAPIConfig = TypeOf<typeof lensAPIConfigSchema>;
+export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
+
+export type LensCreateOptions = TypeOf<typeof lensCMCreateOptionsSchema>;
+export type LensUpdateOptions = TypeOf<typeof lensCMUpdateOptionsSchema>;
+export type LensSearchOptions = TypeOf<typeof lensCMSearchOptionsSchema>;
+
+export type LensSavedObject = SOWithMetadata<LensAttributes>;
+export type LensPartialSavedObject = SOWithMetadataPartial<LensAttributes>;
+
+export type LensGetIn = GetIn<LENS_CONTENT_TYPE>;
+export type LensGetOut = GetResultSO<LensSavedObject>;
+
+export type LensCreateIn = CreateIn<LENS_CONTENT_TYPE, LensAttributes, LensCreateOptions>;
+export type LensCreateOut = CreateResult<LensSavedObject>;
+
+// Need to handle Lens UpdateIn a bit differently
+export type LensUpdateIn = UpdateIn<LENS_CONTENT_TYPE, LensAttributes, LensUpdateOptions>;
+export type LensUpdateOut = UpdateResult<LensPartialSavedObject>;
+
+export type LensDeleteIn = DeleteIn<LENS_CONTENT_TYPE>;
+export type LensDeleteOut = DeleteResult;
+
+export type LensSearchIn = SearchIn<LENS_CONTENT_TYPE, LensSearchOptions>;
+export type LensSearchOut = SearchResult<LensSavedObject>;
+
+export interface LensCrud {
+  Attributes: LensAttributes;
+  Item: LensSavedObject;
+  PartialItem: LensPartialSavedObject;
+  GetIn: LensGetIn;
+  GetOut: LensGetOut;
+  CreateIn: LensCreateIn;
+  CreateOut: LensCreateOut;
+  CreateOptions: LensCreateOptions;
+  SearchIn: LensSearchIn;
+  SearchOut: LensSearchOut;
+  SearchOptions: LensSearchOptions;
+  UpdateIn: LensUpdateIn;
+  UpdateOut: LensUpdateOut;
+  UpdateOptions: LensUpdateOptions;
+  DeleteIn: LensDeleteIn;
+  DeleteOut: LensDeleteOut;
 }
-
-export interface UpdateOptions {
-  /** Array of referenced saved objects. */
-  references?: Reference[];
-}
-
-export interface LensSearchQuery {
-  searchFields?: string[];
-}
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type LensSavedObjectAttributes = {
-  title: string;
-  description?: string;
-  visualizationType: string | null;
-  state?: unknown;
-};
-
-// Need to handle update in Lens in a bit different way
-export type LensCrudTypes = Omit<
-  ContentManagementCrudTypes<
-    LensContentType,
-    LensSavedObjectAttributes,
-    CreateOptions,
-    UpdateOptions,
-    LensSearchQuery
-  >,
-  'UpdateIn'
-> & { UpdateIn: UpdateIn<LensContentType, LensSavedObjectAttributes, UpdateOptions> };
-
-export type LensSavedObject = LensCrudTypes['Item'];
-export type PartialLensSavedObject = LensCrudTypes['PartialItem'];
-
-// ----------- GET --------------
-export type LensGetIn = LensCrudTypes['GetIn'];
-export type LensGetOut = LensCrudTypes['GetOut'];
-
-// ----------- CREATE --------------
-export type LensCreateIn = LensCrudTypes['CreateIn'];
-export type LensCreateOut = LensCrudTypes['CreateOut'];
-
-// ----------- UPDATE --------------
-export type LensUpdateIn = LensCrudTypes['UpdateIn'];
-export type LensUpdateOut = LensCrudTypes['UpdateOut'];
-
-// ----------- DELETE --------------
-export type LensDeleteIn = LensCrudTypes['DeleteIn'];
-export type LensDeleteOut = LensCrudTypes['DeleteOut'];
-
-// ----------- SEARCH --------------
-export type LensSearchIn = LensCrudTypes['SearchIn'];
-export type LensSearchOut = LensCrudTypes['SearchOut'];
