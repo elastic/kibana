@@ -100,11 +100,7 @@ export function useImagePasteUpload({
       const items = Array.from(clipboardItems)
         .map((item) => item?.getAsFile())
         .filter((item) => !!item);
-      if (items.length === 0) {
-        // Not a file paste – clear any previous errors and allow default behaviour.
-        dispatch({ type: ActionType.RESET });
-        return;
-      }
+
       // NOTE: In Firefox, there will always be only 1 or 0 items,
       // see: https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
       if (items.length > 1) {
@@ -113,12 +109,13 @@ export function useImagePasteUpload({
         return;
       }
 
-      const fileToUpload = items[0];
-      if (!fileToUpload) {
-        // this is a non-file paste, so bubble and clear errors
+      if (items.length === 0 || !items[0]) {
+        // Not a file paste – clear any previous errors and allow default behaviour.
         dispatch({ type: ActionType.RESET });
         return;
       }
+
+      const fileToUpload = items[0];
 
       if (
         !SUPPORTED_PASTE_MIME_TYPES.includes(
