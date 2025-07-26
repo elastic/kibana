@@ -126,7 +126,7 @@ export const initTransform =
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
-              error: new Error(`Unvalid version to up transform from [${requestVersion}].`),
+              error: new Error(`Invalid version to up transform from [${requestVersion}].`),
               value: null,
             };
           }
@@ -142,7 +142,7 @@ export const initTransform =
 
           if (!migrationDefinition[targetVersion]) {
             return {
-              error: new Error(`Unvalid version to up transform to [${to}].`),
+              error: new Error(`Invalid version to up transform to [${to}].`),
               value: null,
             };
           }
@@ -170,7 +170,7 @@ export const initTransform =
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
-              error: new Error(`Unvalid version to down transform to [${requestVersion}].`),
+              error: new Error(`Invalid version to down transform to [${requestVersion}].`),
               value: null,
             };
           }
@@ -179,7 +179,7 @@ export const initTransform =
 
           if (!migrationDefinition[fromVersion]) {
             return {
-              error: new Error(`Unvalid version to down transform from [${from}].`),
+              error: new Error(`Invalid version to down transform from [${from}].`),
               value: null,
             };
           }
