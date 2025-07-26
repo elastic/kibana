@@ -11,5 +11,5 @@ import { defaultConfig, StorybookConfig } from './src/lib/default_config';
 export { defaultConfig };
 export type { StorybookConfig };
 export { runStorybookCli } from './src/lib/run_storybook_cli';
-export { default as WebpackConfig } from './src/webpack.config';
+export { webpackConfig } from './src/webpack.config';
 export { DEFAULT_THEME, THEMES } from './src/lib/themes';

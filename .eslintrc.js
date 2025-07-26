@@ -767,6 +767,7 @@ module.exports = {
     {
       files: [
         '**/*.stories.tsx',
+        '**/.storybook/**/*',
         '**/*.test.js',
         'src/platform/test/*/config.ts',
         'src/platform/test/*/config_open.ts',

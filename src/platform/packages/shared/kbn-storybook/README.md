@@ -8,11 +8,13 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 
 ## Setup Instructions
 
-- Add a `.storybook/main.js` configuration file to your plugin. For example, create a file at
-  `src/plugins/<plugin>/.storybook/main.js`, with the following contents:
+- Add a `.storybook/main.ts` configuration file to your plugin. For example, create a file at
+  `src/plugins/<plugin>/.storybook/main.ts`, with the following contents:
 
-  ```js
-  module.exports = require('@kbn/storybook').defaultConfig;
+  ```ts
+  /* LICENSE HEADER */
+  import { defaultConfig } from '@kbn/storybook';
+  export default defaultConfig;
   ```
 
 - Add a reference to `@kbn/storybook` to the `kbn_references` of the package's tsconfig.json.

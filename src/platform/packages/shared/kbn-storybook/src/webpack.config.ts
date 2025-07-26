@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
 import { resolve } from 'path';
 import { Configuration } from 'webpack';
@@ -17,7 +16,7 @@ import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
-export default ({ config: storybookConfig }: { config: Configuration }) => {
+export function webpackConfig({ config: storybookConfig }: { config: Configuration }) {
   const config: Configuration = {
     devServer: {
       devMiddleware: {
@@ -67,4 +66,4 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
   };
 
   return webpackMerge(storybookConfig, config);
-};
+}

@@ -17,7 +17,7 @@ import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { REPO_ROOT } from './constants';
-import { default as WebpackConfig } from '../webpack.config';
+import { webpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js', '.tsx'];
@@ -43,12 +43,11 @@ const IGNORE_GLOBS = [
 
 export const defaultConfig: StorybookConfig = {
   addons: [
-    '@kbn/storybook/preset',
+    //    '@kbn/storybook/preset',
     '@storybook/addon-a11y',
     '@storybook/addon-webpack5-compiler-babel',
-    // https://storybook.js.org/docs/essentials
-    '@storybook/addon-essentials',
     '@storybook/addon-jest',
+    '@storybook/addon-docs',
     {
       /**
        * This addon replaces rules in the default SB webpack config
@@ -90,7 +89,7 @@ export const defaultConfig: StorybookConfig = {
                   },
                   implementation: require('sass-embedded'),
                   sassOptions: {
-                    includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                    includePaths: [REPO_ROOT, resolve(REPO_ROOT, 'node_modules')],
                     quietDeps: true,
                     silenceDeprecations: ['import', 'legacy-js-api'],
                   },
@@ -153,22 +152,22 @@ export const defaultConfig: StorybookConfig = {
     // exists in the __storybook_mocks__ folder. If it does, use that import instead.
     // This allows you to mock hooks and functions when rendering components in Storybook.
     // It is akin to Jest's manual mocks (__mocks__).
-    config.plugins?.push(
-      new webpack.NormalModuleReplacementPlugin(/^\.\//, async (resource: any) => {
-        if (!resource.contextInfo.issuer?.includes('node_modules')) {
-          const mockedPath = path.resolve(resource.context, MOCKS_DIRECTORY, resource.request);
+    // config.plugins?.push(
+    //   new webpack.NormalModuleReplacementPlugin(/^\.\//, async (resource: any) => {
+    //     if (!resource.contextInfo.issuer?.includes('node_modules')) {
+    //       const mockedPath = path.resolve(resource.context, MOCKS_DIRECTORY, resource.request);
 
-          EXTENSIONS.forEach((ext) => {
-            const isReplacementPathExists = fs.existsSync(mockedPath + ext);
+    //       EXTENSIONS.forEach((ext) => {
+    //         const isReplacementPathExists = fs.existsSync(mockedPath + ext);
 
-            if (isReplacementPathExists) {
-              const newImportPath = './' + path.join(MOCKS_DIRECTORY, resource.request);
-              resource.request = newImportPath;
-            }
-          });
-        }
-      })
-    );
+    //         if (isReplacementPathExists) {
+    //           const newImportPath = './' + path.join(MOCKS_DIRECTORY, resource.request);
+    //           resource.request = newImportPath;
+    //         }
+    //       });
+    //     }
+    //   })
+    // );
 
     // Same, but for imports statements which import modules outside of the directory (../)
     config.plugins?.push(
@@ -211,7 +210,7 @@ export const defaultConfig: StorybookConfig = {
       ignored: IGNORE_GLOBS,
     };
 
-    return WebpackConfig({ config });
+    return webpackConfig({ config });
   },
   previewHead: (head) => `
   ${head}
