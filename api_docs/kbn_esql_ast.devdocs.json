@@ -7312,6 +7312,70 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ElasticsearchCommandDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchCommandDefinition",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ElasticsearchCommandDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ElasticsearchCommandDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ElasticsearchCommandDefinition.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "\"PLATINUM\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ElasticsearchCommandDefinition.observability_tier",
+            "type": "string",
+            "tags": [],
+            "label": "observability_tier",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLAstBaseItem",
         "type": "Interface",
         "tags": [],
