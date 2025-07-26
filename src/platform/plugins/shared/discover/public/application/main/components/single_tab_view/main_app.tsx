@@ -11,7 +11,6 @@ import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
-import { setBreadcrumbs } from '../../../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
@@ -36,24 +35,6 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
    * Adhoc data views functionality
    */
   useAdHocDataViews();
-
-  /**
-   * SavedSearch dependent initializing
-   */
-  useEffect(() => {
-    // TODO: This can be moved to Discover session initialization, some of the logic is already duplicated
-    if (stateContainer.customizationContext.displayMode === 'standalone') {
-      const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-      chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbs({ titleBreadcrumbText: savedSearch.title, services });
-    }
-  }, [
-    chrome.docTitle,
-    savedSearch.id,
-    savedSearch.title,
-    services,
-    stateContainer.customizationContext.displayMode,
-  ]);
 
   // TODO: Move this higher up in the component tree
   useEffect(() => {
