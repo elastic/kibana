@@ -39,6 +39,7 @@ import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -89,7 +90,8 @@ export const DiscoverMainRoute = ({
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
-  const { core, dataViews } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { core, dataViews, chrome } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -161,6 +163,25 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     page: 'app',
     id: currentDiscoverSessionId || 'new',
   });
+
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+
+  useEffect(() => {
+    if (props.customizationContext.displayMode === 'standalone') {
+      const pageTitleSuffix = persistedDiscoverSession?.title
+        ? `: ${persistedDiscoverSession.title}`
+        : '';
+      chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+      setBreadcrumbs({ titleBreadcrumbText: persistedDiscoverSession?.title, services });
+    }
+  }, [
+    chrome.docTitle,
+    persistedDiscoverSession?.title,
+    props.customizationContext.displayMode,
+    services,
+  ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
   const isLoading =
