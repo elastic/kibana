@@ -13,6 +13,7 @@ export type { SortOrder } from '../common/types';
 export type {
   SavedSearch,
   SaveSavedSearchOptions,
+  SaveDiscoverSessionParams,
   SaveDiscoverSessionOptions,
   SavedSearchByValueAttributes,
   SavedSearchUnwrapMetaInfo,

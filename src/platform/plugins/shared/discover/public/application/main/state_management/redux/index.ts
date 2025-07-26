@@ -24,6 +24,7 @@ import {
   restoreTab,
   clearAllTabs,
   initializeTabs,
+  saveDiscoverSession,
 } from './actions';
 
 export type {
@@ -56,6 +57,7 @@ export const internalStateActions = {
   restoreTab,
   clearAllTabs,
   initializeTabs,
+  saveDiscoverSession,
 };
 
 export {
