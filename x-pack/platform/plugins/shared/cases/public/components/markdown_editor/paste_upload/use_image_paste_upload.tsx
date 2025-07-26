@@ -111,7 +111,9 @@ export function useImagePasteUpload({
 
       if (items.length === 0 || !items[0]) {
         // Not a file paste – clear any previous errors and allow default behaviour.
-        dispatch({ type: ActionType.RESET });
+        if (uiState.phase === UploadPhase.ERROR) {
+          dispatch({ type: ActionType.RESET });
+        }
         return;
       }
 
@@ -143,7 +145,7 @@ export function useImagePasteUpload({
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };
-  }, [caseId, owner, uploadState]);
+  }, [caseId, owner, uiState.phase, uploadState]);
 
   // Attach the listener once for the lifetime of the textarea element.
   useLayoutEffect(() => {

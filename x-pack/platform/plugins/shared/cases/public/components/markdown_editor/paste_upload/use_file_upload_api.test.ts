@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   FileState,
   DoneNotification,
@@ -50,10 +50,8 @@ describe('useFileUploadApi', () => {
 
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
 
-    act(() => {
-      // @ts-ignore partial implementation for testing
-      uploadState.setFiles([mockFileState('uploading')]);
-    });
+    // @ts-ignore partial implementation for testing
+    uploadState.setFiles([mockFileState('uploading')]);
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: ActionType.START_UPLOAD, filename: 'image.png' })
@@ -89,10 +87,8 @@ describe('useFileUploadApi', () => {
       },
     };
 
-    act(() => {
-      // @ts-ignore partial implementation for testing
-      uploadState.done$.next([doneNotification]);
-    });
+    // @ts-ignore partial implementation for testing
+    uploadState.done$.next([doneNotification]);
 
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({ type: ActionType.UPLOAD_FINISHED, file: doneNotification })
@@ -106,12 +102,10 @@ describe('useFileUploadApi', () => {
 
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
 
-    act(() => {
-      uploadState.done$.next([
-        // @ts-ignore partial implementation for testing
-        { id: 'x', kind: 'file', fileJSON: { name: 'x', extension: 'png' } },
-      ]);
-    });
+    uploadState.done$.next([
+      // @ts-ignore partial implementation for testing
+      { id: 'x', kind: 'file', fileJSON: { name: 'x', extension: 'png' } },
+    ]);
 
     expect(dispatch).toHaveBeenCalledWith({ type: ActionType.RESET });
   });
@@ -124,9 +118,7 @@ describe('useFileUploadApi', () => {
     renderHook(() => useFileUploadApi(uploadState, uiState, dispatch));
 
     const err = new Error('boom');
-    act(() => {
-      uploadState.error$.next(err);
-    });
+    uploadState.error$.next(err);
 
     expect(dispatch).toHaveBeenCalledWith({ type: ActionType.UPLOAD_ERROR, errors: [err] });
   });
@@ -145,15 +137,13 @@ describe('useFileUploadApi', () => {
     unmount();
 
     // Emit after unmount – should not increase call count
-    act(() => {
+    // @ts-ignore partial implementation for testing
+    uploadState.setFiles([mockFileState('uploading')]);
+    uploadState.error$.next(new Error('later'));
+    uploadState.done$.next([
       // @ts-ignore partial implementation for testing
-      uploadState.setFiles([mockFileState('uploading')]);
-      uploadState.error$.next(new Error('later'));
-      uploadState.done$.next([
-        // @ts-ignore partial implementation for testing
-        { id: 'z', fileJSON: { name: 'z', extension: 'png' } },
-      ]);
-    });
+      { id: 'z', fileJSON: { name: 'z', extension: 'png' } },
+    ]);
 
     expect(dispatch.mock.calls.length).toBe(initialCalls);
   });
