@@ -25,11 +25,12 @@ import type {
   LensSerializedState,
   StructuredDatasourceStates,
 } from './types';
-import { loadESQLAttributes } from './esql';
+import { ESQLStartServices, loadESQLAttributes } from './esql';
 import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
 import { FormBasedPersistedState } from '../datasources/form_based/types';
 import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -41,6 +42,7 @@ export function createEmptyLensState(
   const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
+      version: LENS_ITEM_LATEST_VERSION,
       title: title ?? '',
       description: description ?? '',
       visualizationType,
@@ -56,29 +58,23 @@ export function createEmptyLensState(
   };
 }
 
-// Shared logic to ensure the attributes are correctly loaded
-// Make sure to inject references from the container down to the runtime state
-// this ensure migrations/copy to spaces works correctly
+/**
+ * Shared logic to ensure the attributes are correctly loaded
+ * Make sure to inject references from the container down to the runtime state
+ * this ensure migrations/copy to spaces works correctly
+ **/
 export async function deserializeState(
   {
     attributeService,
     ...services
-  }: Pick<
-    LensEmbeddableStartServices,
-    | 'attributeService'
-    | 'data'
-    | 'dataViews'
-    | 'data'
-    | 'visualizationMap'
-    | 'datasourceMap'
-    | 'uiSettings'
-  >,
+  }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
   rawState: LensSerializedState,
   references?: Reference[]
 ) {
   const fallbackAttributes = createEmptyLensState().attributes;
   const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
   const savedObjectId = savedObjectRef?.id ?? rawState.savedObjectId;
+
   if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
@@ -89,11 +85,13 @@ export async function deserializeState(
       return { ...rawState, attributes: fallbackAttributes };
     }
   }
+
   // Inject applied only to by-value SOs
   const newState = attributeService.injectReferences(
     ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState,
     references?.length ? references : undefined
   );
+
   if (newState.isNewPanel) {
     try {
       const newAttributes = await loadESQLAttributes(services);
@@ -107,6 +105,7 @@ export async function deserializeState(
       return { ...newState, attributes: fallbackAttributes };
     }
   }
+
   return newState;
 }
 

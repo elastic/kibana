@@ -136,9 +136,9 @@ import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { LensDocument } from './persistence';
 import {
-  CONTENT_ID,
-  LATEST_VERSION,
-  LensSavedObjectAttributes,
+  LENS_CONTENT_TYPE,
+  LENS_ITEM_LATEST_VERSION,
+  LensAttributes,
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
@@ -398,7 +398,7 @@ export class LensPlugin {
       });
 
       // Let Dashboard know about the Lens panel type
-      embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
+      embeddable.registerAddFromLibraryType<LensAttributes>({
         onAdd: async (container, savedObject) => {
           const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
           container.addNewPanel(
@@ -460,9 +460,9 @@ export class LensPlugin {
     );
 
     contentManagement.registry.register({
-      id: CONTENT_ID,
+      id: LENS_CONTENT_TYPE,
       version: {
-        latest: LATEST_VERSION,
+        latest: LENS_ITEM_LATEST_VERSION,
       },
       name: i18n.translate('xpack.lens.content.name', {
         defaultMessage: 'Lens Visualization',

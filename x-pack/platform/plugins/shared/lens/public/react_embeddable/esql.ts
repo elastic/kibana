@@ -15,16 +15,18 @@ import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
 
+export type ESQLStartServices = Pick<
+  LensEmbeddableStartServices,
+  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings'
+>;
+
 export async function loadESQLAttributes({
   dataViews,
   data,
   visualizationMap,
   datasourceMap,
   uiSettings,
-}: Pick<
-  LensEmbeddableStartServices,
-  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings'
->) {
+}: ESQLStartServices) {
   // Early exit if ESQL is not supported
   if (!isESQLModeEnabled({ uiSettings })) {
     return;

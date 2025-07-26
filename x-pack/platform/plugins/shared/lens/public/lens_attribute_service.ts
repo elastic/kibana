@@ -10,8 +10,7 @@ import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensPluginStartDependencies } from './plugin';
-import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
+import type { LensAttributes } from '../common/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
@@ -32,7 +31,7 @@ export interface LensAttributesService {
     managed: boolean;
   }>;
   saveToLibrary: (
-    attributes: LensSavedObjectAttributesWithoutReferences,
+    attributes: LensAttributes,
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
@@ -48,7 +47,7 @@ export interface LensAttributesService {
 }
 
 export const savedObjectToEmbeddableAttributes = (
-  savedObject: SavedObjectCommon<LensSavedObjectAttributesWithoutReferences>
+  savedObject: SavedObjectCommon<LensAttributes>
 ): LensSavedObjectAttributes => {
   return {
     ...savedObject.attributes,
@@ -87,7 +86,7 @@ export function getLensAttributeService({
       };
     },
     saveToLibrary: async (
-      attributes: LensSavedObjectAttributesWithoutReferences,
+      attributes: LensAttributes,
       references: Reference[],
       savedObjectId?: string
     ) => {
