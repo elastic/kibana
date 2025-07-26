@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { naturalLanguageSearch, NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
+import { naturalLanguageSearch } from '@kbn/onechat-genai-utils';
+import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
 
 const searchDslSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
@@ -24,10 +25,7 @@ const searchDslSchema = z.object({
     .describe('(optional) Additional context that could be useful to perform the search'),
 });
 
-export const naturalLanguageSearchTool = (): BuiltinToolDefinition<
-  typeof searchDslSchema,
-  NaturalLanguageSearchResponse
-> => {
+export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof searchDslSchema> => {
   return {
     id: builtinToolIds.naturalLanguageSearch,
     description: 'Run a DSL search query on one index and return matching documents.',
@@ -41,8 +39,30 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<
         model,
         esClient: esClient.asCurrentUser,
       });
+
+      if (!result.result) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                reason: result.reason,
+                original_query: query,
+                index,
+                context,
+              },
+            },
+          ],
+        };
+      }
+
       return {
-        result,
+        results: [
+          {
+            type: ToolResultType.tabularData,
+            data: result.result,
+          },
+        ],
       };
     },
     tags: [builtinTags.retrieval],

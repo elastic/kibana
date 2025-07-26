@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { indexExplorer, IndexExplorerResponse } from '@kbn/onechat-genai-utils';
+import { indexExplorer } from '@kbn/onechat-genai-utils';
+import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
 
 const indexExplorerSchema = z.object({
   query: z.string().describe('A natural language query to infer which indices to use.'),
@@ -22,10 +23,7 @@ const indexExplorerSchema = z.object({
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
 });
 
-export const indexExplorerTool = (): BuiltinToolDefinition<
-  typeof indexExplorerSchema,
-  IndexExplorerResponse
-> => {
+export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
     id: builtinToolIds.indexExplorer,
     description: `List relevant indices and corresponding mappings based on a natural language query.
@@ -49,8 +47,20 @@ export const indexExplorerTool = (): BuiltinToolDefinition<
         esClient: esClient.asCurrentUser,
         model,
       });
+
       return {
-        result,
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              type: 'index_explorer_response',
+              indices: result,
+              original_query: query,
+              index_pattern: indexPattern,
+              limit,
+            },
+          },
+        ],
       };
     },
     tags: [builtinTags.retrieval],

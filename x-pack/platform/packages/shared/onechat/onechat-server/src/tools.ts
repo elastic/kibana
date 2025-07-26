@@ -14,16 +14,15 @@ import type { ToolDefinition } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
+import { ToolResult } from './tool_result';
 
 export type BuiltinToolId = `.${string}`;
 
 /**
  * Onechat tool, as registered by built-in tool providers.
  */
-export interface BuiltinToolDefinition<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
-> extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
+export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
+  extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
   /**
    * Built-in tool ID following the {@link BuiltinToolId} pattern
    */
@@ -35,7 +34,7 @@ export interface BuiltinToolDefinition<
   /**
    * Handler to call to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
+  handler: ToolHandlerFn<z.infer<RunInput>>;
 }
 
 /**
@@ -74,17 +73,17 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn<T = unknown> {
-  result: T;
+export interface ToolHandlerReturn {
+  results: ToolResult[];
 }
 
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
-export type ToolHandlerFn<
-  TParams extends Record<string, unknown> = Record<string, unknown>,
-  RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
+export type ToolHandlerFn<TParams extends Record<string, unknown> = Record<string, unknown>> = (
+  args: TParams,
+  context: ToolHandlerContext
+) => MaybePromise<ToolHandlerReturn>;
 
 /**
  * Scoped context which can be used during tool execution to access

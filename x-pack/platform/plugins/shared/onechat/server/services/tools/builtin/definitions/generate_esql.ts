@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { generateEsql, GenerateEsqlResponse } from '@kbn/onechat-genai-utils';
+import { generateEsql } from '@kbn/onechat-genai-utils';
+import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ToolResult, ToolResultType } from '@kbn/onechat-server/src/tool_result';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('The query to generate an ES|QL query from.'),
@@ -24,10 +25,7 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<
-  typeof nlToEsqlToolSchema,
-  GenerateEsqlResponse
-> => {
+export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
     id: builtinToolIds.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
@@ -41,8 +39,29 @@ export const generateEsqlTool = (): BuiltinToolDefinition<
         model,
         esClient: esClient.asCurrentUser,
       });
+
+      const structuredToolResults: ToolResult[] = result.queries.map((esqlQuery) => ({
+        type: ToolResultType.query,
+        data: {
+          esql: esqlQuery,
+        },
+      }));
+
+      if (result.answer) {
+        structuredToolResults.push({
+          type: ToolResultType.other,
+          data: {
+            type: 'esql_generation_response',
+            answer: result.answer,
+            original_query: query,
+            context,
+            index,
+          },
+        });
+      }
+
       return {
-        result,
+        results: structuredToolResults,
       };
     },
     tags: [builtinTags.retrieval],
