@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
+import type { AccessControl } from '../dashboard_app/access_control';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
@@ -123,6 +124,11 @@ export function getDashboardApi({
     };
   }
 
+  const accessControl = new BehaviorSubject<AccessControl>({
+    owner: '',
+    accessMode: undefined,
+  });
+
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
 
   const dashboardApi = {
@@ -214,6 +220,7 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
+    accessControl$: accessControl,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {

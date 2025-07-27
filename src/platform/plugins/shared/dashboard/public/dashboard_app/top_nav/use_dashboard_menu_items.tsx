@@ -9,11 +9,10 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
-
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useAccessControl } from '../hooks/use_access_control';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -42,46 +41,33 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
+  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
       dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardApi.accessControl$
     );
+
   const disableTopNav = isSaveInProgress || hasOverlays;
+  const { isCurrentUserAuthor, isInEditAccessMode } = useAccessControl({
+    accessControl,
+    createdBy: 'TODO',
+  });
 
-  /**
-   * Show the Dashboard app's share menu
-   */
-  const showShare = useCallback(
-    (anchorElement: HTMLElement, asExport?: boolean) => {
-      ShowShareModal({
-        asExport,
-        dashboardTitle,
-        anchorElement,
-        savedObjectId: lastSavedId,
-        isDirty: Boolean(hasUnsavedChanges),
-      });
-    },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
-  );
+  const isEditButtonDisabled = useMemo(() => {
+    if (disableTopNav) return true;
+    if (isCurrentUserAuthor) return false;
+    return !isInEditAccessMode;
+  }, [disableTopNav, isInEditAccessMode, isCurrentUserAuthor]);
 
-  /**
-   * Save the dashboard without any UI or popups.
-   */
-  const quickSaveDashboard = useCallback(() => {
-    setIsSaveInProgress(true);
-    dashboardApi.runQuickSave().then(() => setTimeout(() => setIsSaveInProgress(false), 100));
-  }, [dashboardApi]);
-
-  /**
-   * initiate interactive dashboard copy action
-   */
-  const dashboardInteractiveSave = useCallback(() => {
-    dashboardApi.runInteractiveSave().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboardApi]);
+  const isQuickSaveButtonDisabled = useMemo(() => {
+    if (disableTopNav || !hasUnsavedChanges) return true;
+    if (isCurrentUserAuthor) return false;
+    return !isInEditAccessMode;
+  }, [disableTopNav, hasUnsavedChanges, isCurrentUserAuthor, isInEditAccessMode]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -112,6 +98,64 @@ export const useDashboardMenuItems = ({
       }, viewMode);
     },
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
+  );
+
+  /**
+   * initiate interactive dashboard copy action
+   */
+  const dashboardInteractiveSave = useCallback(async () => {
+    const result = await dashboardApi.runInteractiveSave();
+    maybeRedirect(result);
+    if (result && !result.error) {
+      return result;
+    }
+  }, [maybeRedirect, dashboardApi]);
+
+  /**
+   * Save the dashboard without any UI or popups.
+   */
+  const quickSaveDashboard = useCallback(() => {
+    setIsSaveInProgress(true);
+    dashboardApi.runQuickSave().then(() =>
+      setTimeout(() => {
+        setIsSaveInProgress(false);
+      }, 100)
+    );
+  }, [dashboardApi]);
+
+  const saveFromShareModal = useCallback(async () => {
+    // TODO: Add toast
+    if (lastSavedId) {
+      quickSaveDashboard();
+      return Promise.resolve({});
+    } else {
+      return dashboardInteractiveSave();
+    }
+  }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
+
+  /**
+   * Show the Dashboard app's share menu
+   */
+  const showShare = useCallback(
+    (anchorElement: HTMLElement, asExport?: boolean) => {
+      ShowShareModal({
+        asExport,
+        dashboardTitle,
+        anchorElement,
+        savedObjectId: lastSavedId,
+        isDirty: Boolean(hasUnsavedChanges),
+        canSave: (isCurrentUserAuthor || isInEditAccessMode) && Boolean(hasUnsavedChanges),
+        saveDashboard: saveFromShareModal,
+      });
+    },
+    [
+      dashboardTitle,
+      hasUnsavedChanges,
+      lastSavedId,
+      isInEditAccessMode,
+      isCurrentUserAuthor,
+      saveFromShareModal,
+    ]
   );
 
   /**
@@ -147,7 +191,8 @@ export const useDashboardMenuItems = ({
           dashboardApi.setViewMode('edit');
           dashboardApi.clearOverlays();
         },
-        disableButton: disableTopNav,
+        disableButton: isEditButtonDisabled,
+        tooltip: isInEditAccessMode ? undefined : topNavStrings.edit.readOnlyTooltip,
       } as TopNavMenuData,
 
       quickSave: {
@@ -157,7 +202,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: disableTopNav || !hasUnsavedChanges,
+        disableButton: isQuickSaveButtonDisabled,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -196,6 +241,9 @@ export const useDashboardMenuItems = ({
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
+        tooltip: isInEditAccessMode
+          ? topNavStrings.share.editModeTooltipContent
+          : topNavStrings.share.readOnlyModeTooltipContent,
       } as TopNavMenuData,
 
       export: {
@@ -220,7 +268,6 @@ export const useDashboardMenuItems = ({
   }, [
     disableTopNav,
     isSaveInProgress,
-    hasUnsavedChanges,
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
@@ -231,6 +278,9 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     resetChanges,
     isResetting,
+    isEditButtonDisabled,
+    isInEditAccessMode,
+    isQuickSaveButtonDisabled,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

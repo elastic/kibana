@@ -38,6 +38,7 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
       entityName,
     },
   }),
+  // TODO: Remove and replace with normal X button in header
   cancelButtonLabel: i18n.translate('contentManagement.contentEditor.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
@@ -159,6 +160,12 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
           form={{ ...form, isSubmitted }}
           isReadonly={isReadonly}
           readonlyReason={
+            /*
+              TODO: Replace this with a warning callout:
+              managed: You don’t have permissions to edit this dashboard. Contact your admin to change your role.
+              role no-edit: You don’t have permissions to edit this dashboard. Contact your admin to change your role.
+              Readonly: You don’t have permissions to edit this dashboard. Contact [Creator name] to change it.
+            */
             readonlyReason ||
             i18n.translate('contentManagement.contentEditor.metadataForm.readOnlyToolTip', {
               defaultMessage: 'To edit these details, contact your administrator for access.',

@@ -110,6 +110,7 @@ export const DashboardListingEmptyPrompt = ({
   ]);
 
   if (!getDashboardCapabilities().showWriteControls) {
+    // TODO: Add tooltip: You don’t have permissions to edit this dashboard. Contact your admin to change your role.
     return (
       <EuiEmptyPrompt
         iconType="glasses"
