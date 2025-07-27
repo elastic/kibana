@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { changeAccessMode } from './lib/change_access_mode';
 import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashboard_title';
 import { deleteDashboards } from './lib/delete_dashboards';
@@ -41,5 +42,6 @@ export const getDashboardContentManagementService = () => {
     checkForDuplicateDashboardTitle,
     deleteDashboards,
     updateDashboardMeta,
+    changeAccessMode,
   };
 };
