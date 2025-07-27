@@ -7,13 +7,12 @@
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-// Define the schema for the job creation payload
-export const autoFillJobSchema = schema.object({
+// Define the schema for the auto fill creation payload
+export const autoFillSchema = schema.object({
   // name: schema.string(),
   // enabled: schema.boolean({ defaultValue: true }),
   // schedule: schema.object({
@@ -41,16 +40,16 @@ export const autoFillJobSchema = schema.object({
   // ),
 });
 
-export type AutoFillJobPayload = TypeOf<typeof autoFillJobSchema>;
+export type AutoFillPayload = TypeOf<typeof autoFillSchema>;
 
-export const createAutoFillJobRoute = (
+export const createAutoFillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: '/api/alerting/gaps/auto_fill/jobs',
-      validate: { body: autoFillJobSchema },
+      path: '/api/alerting/gaps/auto_fill',
+      validate: { body: autoFillSchema },
       options: { access: 'internal' },
       security: {
         authz: {
@@ -61,45 +60,49 @@ export const createAutoFillJobRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        console.log('createAutoFillJobRoute');
         const alertingContext = await context.alerting;
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
-        console.log('taskManager', JSON.stringify(taskManager, null, 2));
-        const job = {
+        const autoFill = {
           schedule: {
             interval: '1m',
           },
-          name: 'gap-fill-job-name',
+          name: 'gap-fill-auto-fill-name',
         };
-        console.log('TaskManagerStartContract', JSON.stringify(taskManager));
-        // Generate a unique job/task ID (could use uuid or a simple timestamp-based id)
-        const jobId = `gap-fill-job-${Date.now()}`;
-        // Schedule the task in Task Manager
+        // Generate a unique auto fill/task ID (could use uuid or a simple timestamp-based id)
+        const autoFillId = `gap-fill-auto-fill-${Date.now()}`;
+        // Schedule the task in Task Manager with user context
         try {
-          await taskManager.schedule({
-            id: 'default',
-            taskType: 'gap-fill-processor', // This task type must be registered elsewhere
-            schedule: job.schedule,
-            scope: ['securitySolution'],
-            params: {},
-            state: {
-              name: 'gap-fill-job-name',
-              amountOfGapsToProcessPerRun: 100,
-              amountOfRetries: 3,
-              lastRun: null,
-              processedRules: 0,
+          await taskManager.schedule(
+            {
+              id: 'default',
+              taskType: 'gap-fill-processor', // This task type must be registered elsewhere
+              schedule: autoFill.schedule,
+              scope: ['securitySolution'],
+              params: {},
+              state: {
+                config: {
+                  name: 'gap-fill-auto-fill-name',
+                  amountOfGapsToProcessPerRun: 100,
+                  amountOfRetries: 3,
+                  excludeRuleIds: [],
+                },
+                lastRun: null,
+              },
             },
-          });
+            {
+              request: req, // This is the key! Pass the request to get user context
+            }
+          );
         } catch (error) {
-          console.error('Error scheduling task:', JSON.stringify(error, null, 2), error);
+          throw error;
         }
         return res.ok({
           body: {
-            id: jobId,
-            message: 'Gap fill job created and scheduled',
+            id: autoFillId,
+            message: 'Gap fill auto fill created and scheduled',
           },
         });
       })
     )
   );
-};
+}; 

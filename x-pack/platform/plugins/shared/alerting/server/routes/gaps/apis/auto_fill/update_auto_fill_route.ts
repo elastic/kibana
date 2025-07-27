@@ -10,8 +10,8 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-// Define the schema for the job update payload
-export const updateAutoFillJobSchema = schema.object({
+// Define the schema for the auto fill update payload
+export const updateAutoFillSchema = schema.object({
   schedule: schema.maybe(
     schema.object({
       interval: schema.string(),
@@ -20,23 +20,24 @@ export const updateAutoFillJobSchema = schema.object({
   name: schema.maybe(schema.string()),
   amountOfGapsToProcessPerRun: schema.maybe(schema.number()),
   amountOfRetries: schema.maybe(schema.number()),
+  excludeRuleIds: schema.maybe(schema.arrayOf(schema.string())),
   enabled: schema.maybe(schema.boolean()), // <-- Added enabled field
 });
 
-export type UpdateAutoFillJobPayload = schema.TypeOf<typeof updateAutoFillJobSchema>;
+export type UpdateAutoFillPayload = schema.TypeOf<typeof updateAutoFillSchema>;
 
-export const updateAutoFillJobRoute = (
+export const updateAutoFillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.put(
     {
-      path: '/api/alerting/gaps/auto_fill/jobs/{id}',
+      path: '/api/alerting/gaps/auto_fill/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
         }),
-        body: updateAutoFillJobSchema,
+        body: updateAutoFillSchema,
       },
       options: { access: 'internal' },
       security: {
@@ -49,7 +50,7 @@ export const updateAutoFillJobRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { id } = req.params;
-        const { schedule, name, amountOfGapsToProcessPerRun, amountOfRetries, enabled } = req.body;
+        const { schedule, name, amountOfGapsToProcessPerRun, amountOfRetries, excludeRuleIds, enabled } = req.body;
 
         const alertingContext = await context.alerting;
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
@@ -78,19 +79,26 @@ export const updateAutoFillJobRoute = (
             await taskManager.bulkUpdateSchedules([id], schedule);
           }
 
-          // Update state fields if provided
+          // Update config fields if provided
           if (
             name !== undefined ||
             amountOfGapsToProcessPerRun !== undefined ||
-            amountOfRetries !== undefined
+            amountOfRetries !== undefined ||
+            excludeRuleIds !== undefined ||
+            schedule !== undefined
           ) {
             await taskManager.bulkUpdateState(
               [id],
               (currentState) => ({
                 ...currentState, // Preserve existing state fields
-                ...(name !== undefined && { name }),
-                ...(amountOfGapsToProcessPerRun !== undefined && { amountOfGapsToProcessPerRun }),
-                ...(amountOfRetries !== undefined && { amountOfRetries }),
+                config: {
+                  ...currentState.config, // Preserve existing config
+                  ...(name !== undefined && { name }),
+                  ...(amountOfGapsToProcessPerRun !== undefined && { amountOfGapsToProcessPerRun }),
+                  ...(amountOfRetries !== undefined && { amountOfRetries }),
+                  ...(excludeRuleIds !== undefined && { excludeRuleIds }),
+                  ...(schedule !== undefined && { schedule }),
+                },
               }),
               (currentParams) => ({
                 ...currentParams,
@@ -114,7 +122,7 @@ export const updateAutoFillJobRoute = (
               params: updatedTask.params,
               state: updatedTask.state,
               schedule: updatedTask.schedule,
-              message: 'Gap fill job updated successfully',
+              message: 'Gap fill auto fill updated successfully',
             },
           });
         } catch (error) {
@@ -129,4 +137,4 @@ export const updateAutoFillJobRoute = (
       })
     )
   );
-};
+}; 

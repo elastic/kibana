@@ -139,6 +139,50 @@ export const EventSchema = schema.maybe(
             ),
           })
         ),
+        auto_gap_fill: schema.maybe(
+          schema.object({
+            execution: schema.maybe(
+              schema.object({
+                uuid: ecsString(),
+                status: ecsString(),
+                start: ecsDate(),
+                end: ecsDate(),
+                duration_ms: ecsStringOrNumber(),
+                config: schema.maybe(
+                  schema.object({
+                    name: ecsString(),
+                    amountOfGapsToProcessPerRun: ecsStringOrNumber(),
+                    amountOfRetries: ecsStringOrNumber(),
+                    excludeRuleIds: ecsStringMulti(),
+                    schedule: schema.maybe(
+                      schema.object({
+                        interval: ecsString(),
+                      })
+                    ),
+                  })
+                ),
+                results: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      ruleId: ecsString(),
+                      processedGaps: ecsStringOrNumber(),
+                      status: ecsString(),
+                      error: ecsString(),
+                    })
+                  )
+                ),
+                summary: schema.maybe(
+                  schema.object({
+                    totalRules: ecsStringOrNumber(),
+                    successfulRules: ecsStringOrNumber(),
+                    failedRules: ecsStringOrNumber(),
+                    totalGapsProcessed: ecsStringOrNumber(),
+                  })
+                ),
+              })
+            ),
+          })
+        ),
         alert: schema.maybe(
           schema.object({
             flapping: ecsBoolean(),

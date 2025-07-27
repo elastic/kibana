@@ -13,6 +13,7 @@ import type { FindGapsParams, FindGapsSearchAfterParams } from './types';
 import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
+
 export const findGaps = async ({
   eventLogClient,
   logger,
@@ -20,21 +21,23 @@ export const findGaps = async ({
 }: {
   eventLogClient: IEventLogClient;
   logger: Logger;
-  params: FindGapsParams;
+  params: FindGapsParams & { ruleIds?: string[]; ruleId?: string };
 }): Promise<{
   total: number;
   data: Gap[];
   page: number;
   perPage: number;
 }> => {
-  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder } = params;
+  // Support both ruleId and ruleIds for backward compatibility
+  const ruleIds = params.ruleIds ?? (params.ruleId ? [params.ruleId] : []);
+  const { start, end, page, perPage, statuses, sortField, sortOrder } = params;
 
   try {
     const filter = buildGapsFilter({ start, end, statuses });
 
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
-      [ruleId],
+      ruleIds,
       {
         filter,
         sort: [

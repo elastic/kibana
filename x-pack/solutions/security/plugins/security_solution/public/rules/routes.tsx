@@ -34,7 +34,7 @@ import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_d
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { hasCapabilities } from '../common/lib/capabilities';
 import { useKibana } from '../common/lib/kibana/kibana_react';
-import { GapAutoFillSettingsPage } from './GapAutoFillSettingsPage';
+import { GapAutoFillSettings } from './gap_auto_fill_settings';
 
 const getRulesSubRoutes = (capabilities: Capabilities) => [
   ...(hasCapabilities(capabilities, `${SECURITY_FEATURE_ID}.detections`) // regular detection rules are enabled
@@ -79,7 +79,7 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
   },
   {
     path: '/rules/settings',
-    main: withSecurityRoutePageWrapper(GapAutoFillSettingsPage, SecurityPageName.rules, {
+          main: withSecurityRoutePageWrapper(GapAutoFillSettings, SecurityPageName.rules, {
       omitSpyRoute: true,
     }),
     exact: true,
