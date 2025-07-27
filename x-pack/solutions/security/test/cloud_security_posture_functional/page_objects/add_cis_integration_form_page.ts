@@ -378,12 +378,15 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickSaveButton = async (includeSystemPackage: boolean = false) => {
-    const includeSystemPackageCheckbox = (await findOptionInPage(
+    const isIncludeSystemPackageCheckboxExists = await testSubjects.exists(
       TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
-    )) as unknown as HTMLInputElement;
+    );
 
     // If the checkbox is not found, it means the system package option is not available (e.g., when using agentless setup)
-    if (includeSystemPackageCheckbox) {
+    if (isIncludeSystemPackageCheckboxExists) {
+      const includeSystemPackageCheckbox = (await findOptionInPage(
+        TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
+      )) as unknown as HTMLInputElement;
       includeSystemPackageCheckbox.checked = includeSystemPackage;
     }
 
