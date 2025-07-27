@@ -12,8 +12,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy, isBelowMinVersion } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { NewPackagePolicyPostureInput } from '../types';
-import { AzureAccountType } from './azure_types';
+import { AzureAccountType, NewPackagePolicyPostureInput } from '../types';
 import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_ORGANIZATION_ACCOUNT,

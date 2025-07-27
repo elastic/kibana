@@ -15,7 +15,6 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
-import { AzureCredentialsType, SetupFormat } from './azure_types';
 import { useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
@@ -26,7 +25,7 @@ import {
 } from './azure_test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import { NewPackagePolicyPostureInput } from '../types';
+import { AzureCredentialsType, AzureSetupFormat, NewPackagePolicyPostureInput } from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -275,7 +274,7 @@ export const AzureCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={(idSelected: SetupFormat) =>
+        onChange={(idSelected: AzureSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
       />

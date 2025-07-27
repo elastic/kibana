@@ -19,8 +19,7 @@ import {
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import { NewPackagePolicyPostureInput } from '../types';
-import { AwsCredentialsType, SetupFormat } from './aws_types';
+import { NewPackagePolicyPostureInput, AwsCredentialsType, AwsSetupFormat } from '../types';
 import { getAwsCredentialsType, getCspmCloudFormationDefaultValue } from './aws_utils';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
@@ -30,7 +29,7 @@ import { getAwsCredentialsType, getCspmCloudFormationDefaultValue } from './aws_
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>,
   hasCloudFormationTemplate: boolean
-): SetupFormat => {
+): AwsSetupFormat => {
   const credentialsType = getAwsCredentialsType(input);
   // CloudFormation is the default setup format if the integration has a CloudFormation template
   if (!credentialsType && hasCloudFormationTemplate) {
@@ -106,7 +105,7 @@ export const useAwsCredentialsForm = ({
     setupFormat,
   });
 
-  const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
+  const onSetupFormatChange = (newSetupFormat: AwsSetupFormat) => {
     if (newSetupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
@@ -187,7 +186,7 @@ const useCloudFormationTemplate = ({
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
   updatePolicy: (policy: NewPackagePolicy) => void;
-  setupFormat: SetupFormat;
+  setupFormat: AwsSetupFormat;
 }) => {
   useEffect(() => {
     const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy);

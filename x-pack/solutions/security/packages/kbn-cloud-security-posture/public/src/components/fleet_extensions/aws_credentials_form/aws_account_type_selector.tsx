@@ -15,9 +15,8 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { NewPackagePolicyPostureInput } from '../types';
+import { AwsAccountType, NewPackagePolicyPostureInput } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
-import { AwsAccountType } from './aws_types';
 
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
 const getAwsAccountType = (

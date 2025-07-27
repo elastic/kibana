@@ -30,11 +30,10 @@ import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from './gcp_test_subjects';
-import { NewPackagePolicyPostureInput } from '../types';
+import { GcpFields, GcpInputFields, NewPackagePolicyPostureInput } from '../types';
 import { gcpField, getGcpCredentialsType, getInputVarsFields } from './gcp_utils';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
-import { GcpFields, GcpInputFields } from './gcp_types';
 
 type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
 

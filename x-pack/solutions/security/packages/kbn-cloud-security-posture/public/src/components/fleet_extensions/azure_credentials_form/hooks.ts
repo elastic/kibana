@@ -18,14 +18,13 @@ import {
   AZURE_CREDENTIALS_TYPE,
   CLOUDBEAT_AZURE,
 } from '../constants';
-import { NewPackagePolicyPostureInput } from '../types';
-import { SetupFormat, AzureCredentialsType } from './azure_types';
+import { AzureCredentialsType, AzureSetupFormat, NewPackagePolicyPostureInput } from '../types';
 import { getArmTemplateUrlFromCspmPackage } from './azure_utils';
 
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
   hasArmTemplateUrl: boolean
-): SetupFormat => {
+): AzureSetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
   if (!credentialsType && hasArmTemplateUrl) {
     return AZURE_SETUP_FORMAT.ARM_TEMPLATE;
@@ -76,7 +75,7 @@ const useUpdateAzureArmTemplate = ({
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
   updatePolicy: (policy: NewPackagePolicy) => void;
-  setupFormat: SetupFormat;
+  setupFormat: AzureSetupFormat;
 }) => {
   useEffect(() => {
     const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
@@ -146,7 +145,7 @@ export const useAzureCredentialsForm = ({
 
   const defaultAzureManualCredentialType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
 
-  const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
+  const onSetupFormatChange = (newSetupFormat: AzureSetupFormat) => {
     if (newSetupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE) {
       fieldsSnapshot.current = Object.fromEntries(
         fields?.map((field) => [field.id, { value: field.value }])

@@ -21,8 +21,7 @@ import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { SetupFormat } from './aws_types';
-import { NewPackagePolicyPostureInput } from '../types';
+import { AwsSetupFormat, NewPackagePolicyPostureInput } from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -169,7 +168,7 @@ export const AwsCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={(idSelected: SetupFormat) =>
+        onChange={(idSelected: AwsSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
       />

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
-import { AzureCredentialsType } from './azure_types';
+import { AzureCredentialsType } from '../types';
 import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from './azure_test_subjects';
 
 export type AzureCredentialsFields = Record<

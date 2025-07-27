@@ -8,7 +8,6 @@
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import { AwsCredentialsType } from './aws_types';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
@@ -17,7 +16,7 @@ import {
 } from './get_aws_credentials_form_options';
 import { hasPolicyTemplateInputs } from '../utils';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
-import { NewPackagePolicyPostureInput } from '../types';
+import { NewPackagePolicyPostureInput, AwsCredentialsType } from '../types';
 
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
