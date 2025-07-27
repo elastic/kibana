@@ -378,6 +378,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickSaveButton = async (includeSystemPackage: boolean = false) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
     const isIncludeSystemPackageCheckboxExists = await testSubjects.exists(
       TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
     );
