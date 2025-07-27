@@ -22,10 +22,10 @@ image::/explore-analyze/images/dashboards-alert-panel.png[An alerts panel on a d
 
 There are several actions you can take on alerts in the alerts panel. Under *Actions*, click the three dots next to an alert to open a menu with the following options:
 
-* *View rule details* -- Open the details page for the rule that created the alert.
-* *View alert details* -- Open the alert details flyout.
-* (*Active* rules only) *Mark as untracked* -- Change the alert's status from *Active* to *Untracked*.
-* (*Active* rules only) *Mute* -- Mute alerts from the associated rule.
+* *View rule details*: Open the details page for the rule that created the alert.
+* *View alert details*: Open the alert details flyout.
+* (*Active* rules only) *Mark as untracked*: Change the alert's status from *Active* to *Untracked*.
+* (*Active* rules only) *Mute*: Mute alerts from the associated rule.
 
 [[edit-alerts-panel]]
 [discrete]
@@ -33,6 +33,6 @@ There are several actions you can take on alerts in the alerts panel. Under *Act
 
 To edit an existing alerts panel, hover over the panel. Three buttons appear:
 
-* *Edit* icon:pencil[] -- Update which alerts appear in the panel.
-* *Settings* icon:gear[] -- Update the panel's title or description, or add a custom time range.
-* *More actions* icon:boxes-vertical[] -- Duplicate, maximize, copy to another dashboard, or remove the panel.
+* *Edit* (pencil): Update which alerts appear in the panel.
+* *Settings* (gear): Update the panel's title or description, or add a custom time range.
+* *More actions* (three boxes): Duplicate, maximize, copy to another dashboard, or remove the panel.
