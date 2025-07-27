@@ -68,7 +68,8 @@ export class ReindexWorker {
     clusterClient: IClusterClient,
     log: Logger,
     licensing: LicensingPluginSetup,
-    security: SecurityPluginStart
+    security: SecurityPluginStart,
+    version: Version
   ): ReindexWorker {
     if (ReindexWorker.workerSingleton) {
       log.debug(`More than one ReindexWorker cannot be created, returning existing worker.`);
@@ -80,7 +81,7 @@ export class ReindexWorker {
         log,
         licensing,
         security,
-        this.version
+        version
       );
     }
 

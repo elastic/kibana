@@ -49,6 +49,7 @@ export class ReindexServiceServerPlugin
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
+    console.log('reindex constructor', env.packageInfo.version);
     this.logger = logger.get();
     // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
@@ -57,6 +58,7 @@ export class ReindexServiceServerPlugin
   }
 
   public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
+    console.log('reindex setup', this.version.getCurrentVersion());
     this.licensing = licensing;
     const router = http.createRouter();
 
@@ -96,6 +98,7 @@ export class ReindexServiceServerPlugin
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
+    /*
     this.reindexWorker = createReindexWorker({
       credentialStore: this.credentialStore,
       licensing: this.licensing!,
@@ -105,7 +108,23 @@ export class ReindexServiceServerPlugin
         savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
       ),
       security: this.securityPluginStart,
+      version: this.version,
     });
+    */
+
+    const soClient = new SavedObjectsClient(
+      savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
+    );
+
+    this.reindexWorker = ReindexWorker.create(
+      soClient,
+      this.credentialStore,
+      elasticsearch.client,
+      this.logger,
+      this.licensing!,
+      security,
+      this.version
+    );
 
     this.reindexWorker?.start();
 

@@ -13,6 +13,7 @@
       "reindex_service"
     ],
     "requiredPlugins": [
+      "licensing",
     ],
     "optionalPlugins": [
     ],
