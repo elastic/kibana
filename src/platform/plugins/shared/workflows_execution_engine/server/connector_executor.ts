@@ -43,7 +43,7 @@ export class ConnectorExecutor {
       id: connectorId,
       params: connectorParams,
       spaceId: 'default', // Should be space aware
-      requesterId: 'workflows', // This is a custom ID for testing purposes
+      requesterId: 'background_task', // This is a custom ID for testing purposes
     });
   }
 }
