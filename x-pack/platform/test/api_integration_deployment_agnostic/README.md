@@ -19,7 +19,7 @@ A deployment-agnostic test should be loaded in stateful and at least 1 serverles
 
 ## Tests Design Requirements
 
-A deployment-agnostic test is contained within a single test file and always utilizes the [DeploymentAgnosticFtrProviderContext](https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts) to load compatible FTR services. A compatible FTR service must support:
+A deployment-agnostic test is contained within a single test file and always utilizes the [DeploymentAgnosticFtrProviderContext](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts) to load compatible FTR services. A compatible FTR service must support:
 
 - **Serverless**: Both local environments and MKI (Managed Kubernetes Infrastructure).
 - **Stateful**: Both local environments and Cloud deployments.
@@ -47,8 +47,8 @@ While the deployment-agnostic testing approach is beneficial, it should not comp
 We recommend following this structure to simplify maintenance and allow other teams to reuse code (e.g., FTR services) created by different teams:
 
 ```
-x-pack/test/<my_own_api_integration_folder>
-├─ deployment_agnostic
+x-pack/solutions/<solution>/test/
+├─ api_integration_deployment_agnostic
 │  ├─ apis
 │  │  ├─ <api_1>
 │  │  │  ├─ <test_1_1>
@@ -58,59 +58,42 @@ x-pack/test/<my_own_api_integration_folder>
 │  │  │  ├─ <test_2_2>
 │  ├─ configs
 │  │  ├─ stateful
-│  │  │  ├─ <stateful>.index.ts  // e.g., oblt.index.ts
-│  │  │  ├─ <stateful>.config.ts // e.g., oblt.stateful.config.ts
+│  │  │  ├─ <stateful>.index.ts  // e.g., oblt_feature_A.index.ts
+│  │  │  ├─ <stateful>.config.ts // e.g., oblt_feature_A.stateful.config.ts
 │  │  ├─ serverless
-│  │     ├─ <serverless_project>.index.ts             // e.g., oblt.index.ts
-│  │     ├─ <serverless_project>.serverless.config.ts // e.g., oblt.serverless.config.ts
+│  │     ├─ <serverless_project>.index.ts             // e.g., oblt_feature_A.index.ts
+│  │     ├─ <serverless_project>.serverless.config.ts // e.g., oblt_feature_A.serverless.config.ts
 │  ├─ ftr_provider_context.d.ts  // with types of services from './services'
 │  ├─ services
-│     ├─ index.ts // only services from 'x-pack/test/api_integration/deployment_agnostic/services'
+│     ├─ index.ts // only services from 'x-pack/solutions/<solution>/test/api_integration_deployment_agnostic/services'
 │     ├─ <deployment_agnostic_service_1>.ts
 │     ├─ <deployment_agnostic_service_2>.ts
 ```
 
 ## Loading Your Tests Properly
 
-When Platform teams add deployment-agnostic tests, it is expected that these tests are loaded in `configs/stateful/platform.index.ts` and at least one of the `<serverless_project>.serverless.config` files under `configs/serverless` folder.
+When Platform teams add deployment-agnostic tests, it is expected that these tests are put in `x-pack/platform/test/api_integration_deployment_agnostic` directory and be loaded in `configs/stateful/platform.index.ts` and at least one of the `<serverless_project>.serverless.config` files under `configs/serverless` folder in the same directory.
 
-When a Solution team (e.g., one of the Oblt teams) adds deployment-agnostic tests, it is expected that these tests are loaded in both `configs/stateful/oblt.index.ts` and `configs/serverless/oblt.index.ts`.
+When a Solution team (e.g., one of the Oblt teams) adds deployment-agnostic tests, it is expected that these tests are put in `x-pack/solutions/observability/test/api_integration_deployment_agnostic` directory and loaded in both `configs/stateful/oblt_feature_A.index.ts` and `configs/serverless/oblt_feature_A.index.ts` in the same directory.
 
 ## Step-by-Step Guide
 
 1. Define Deployment-Agnostic Services
 
-Under `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/services`, create `index.ts` and load base services from `x-pack/test/api_integration/deployment_agnostic/services`:
+Add a new service either in `x-pack/platform/test/api_integration_deployment_agnostic` or `x-pack/solutions/<solution>/test/api_integration_deployment_agnostic/services`, and make sure to load it in the related `index.ts` file:
 
 ```ts
-import { services as deploymentAgnosticServices } from './../../api_integration/deployment_agnostic/services';
-
-export type {
-  InternalRequestHeader,
-  RoleCredentials,
-  SupertestWithoutAuthProviderType,
-} from '@kbn/ftr-common-functional-services';
+import { NewServiceProvider } from './new_service';
 
 export const services = {
-  ...deploymentAgnosticServices,
   // create a new deployment-agnostic service and load here
+  newService: NewServiceProvider,
 };
 ```
 
-We suggest adding new services to `x-pack/test/api_integration/deployment_agnostic/services` so other teams can benefit from them.
+We suggest adding new platform-wide services to `x-pack/platform/test/api_integration_deployment_agnostic` so other teams can benefit from them.
 
-2. Create `DeploymentAgnosticFtrProviderContext` with Services Defined in Step 2
-
-Create `ftr_provider_context.d.ts` and export `DeploymentAgnosticFtrProviderContext`:
-
-```ts
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './services';
-
-export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
-```
-
-3. Add Tests
+2. Add Tests
 
 API Authentication in Kibana: Public vs. Internal APIs
 
@@ -127,7 +110,7 @@ Recommendations:
 - pass `useCookieHeader: true` to use Cookie header for requests authentication
 - don't forget to invalidate API key using `destroy()` on supertest scoped instance in `after` hook
 
-Add test files to `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/apis/<my_api>`:
+Add test files to `x-pack/solutions/<solution>/test/api_integration_deployment_agnostic/apis/<my_api>`:
 
 test example
 
@@ -173,7 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
 Load all test files in `index.ts` under the same folder.
 
-4. Add Tests Entry File and FTR Config File for **Stateful** Deployment
+3. Add Tests Entry File and FTR Config File for **Stateful** Deployment
 
 Create `configs/stateful/plaform.index.ts` tests entry file and load tests:
 
@@ -190,7 +173,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 Create `configs/stateful/platform.stateful.config.ts` and link tests entry file:
 
 ```ts
-import { createStatefulTestConfig } from './../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { createStatefulTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
 import { services } from './services';
 
 export default createStatefulTestConfig({
@@ -221,7 +204,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 oblt.serverless.config.ts
 
 ```ts
-import { createServerlessTestConfig } from './../../api_integration/deployment_agnostic/default_configs/serverless.config.base';
+import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
 import { services } from './services';
 
 export default createServerlessTestConfig({
@@ -247,20 +230,20 @@ We do not recommend use of custom server arguments because it may lead to unexpe
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt_feature_A.stateful.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts --grep=$
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt_feature_A.stateful.config.ts --grep=$
 ```
 
 ### Serverless
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt_feature_A.serverless.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts --grep=$
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt_feature_A.serverless.config.ts --grep=$
 ```
 
 ## Tagging and Skipping the Tests
@@ -294,7 +277,7 @@ describe('test suite', function () {
 
 If your tests align with the outlined criteria and requirements, you can migrate them to deployment-agnostic by following these steps:
 
-1. Move your tests to the `x-pack/test/api_integration/deployment_agnostic/apis/<plugin>` directory.
+1. Move your tests to the `x-pack/solutions/<solution>/test/api_integration_deployment_agnostic/apis/<plugin>` directory.
 2. Update each test file to use the `DeploymentAgnosticFtrProviderContext` context and load the required FTR services it provides.
 3. Ensure the `roleScopedSupertest` or `samlAuth` service is used instead for `supertest` for authentication and test API calls.
 4. Remove all usage of the `supertest` service. It is authenticated as system index superuser and often causes test failures on Cloud, where priveleges are more strict.
