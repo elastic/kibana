@@ -109,7 +109,7 @@ export class WorkflowsExecutionEnginePlugin
       });
 
       // Log workflow execution start
-      contextManager.logWorkflowStart();
+      await contextManager.logWorkflowStart();
 
       await workflowRuntime.start();
 
@@ -129,7 +129,7 @@ export class WorkflowsExecutionEnginePlugin
 
         contextManager.logWorkflowComplete(true);
       } catch (error) {
-        workflowRuntime.fail(error);
+        await workflowRuntime.fail(error);
         contextManager.logWorkflowComplete(false);
       }
     };

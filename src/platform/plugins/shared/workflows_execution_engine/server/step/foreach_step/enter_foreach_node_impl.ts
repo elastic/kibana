@@ -24,7 +24,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
     if (!foreachState) {
       await this.workflowState.startStep(this.step.id);
       // Initialize foreach state
-      this.workflowState.setStepState(this.step.id, {
+      void this.workflowState.setStepState(this.step.id, {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
@@ -36,7 +36,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
       const index = foreachState.index + 1;
       const item = evaluatedItems[index];
       const total = foreachState.total;
-      this.workflowState.setStepState(this.step.id, {
+      void this.workflowState.setStepState(this.step.id, {
         items,
         index,
         item,
@@ -44,6 +44,6 @@ export class EnterForeachNodeImpl implements StepImplementation {
       });
     }
 
-    this.workflowState.goToNextStep();
+    void this.workflowState.goToNextStep();
   }
 }
