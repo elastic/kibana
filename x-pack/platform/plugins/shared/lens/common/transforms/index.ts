@@ -6,3 +6,5 @@
  */
 
 export { ConfigBuilderStub } from './config_builder_stub';
+export { getCurrentLensItem } from './versioning';
+export type * from './types';

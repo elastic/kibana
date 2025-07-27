@@ -70,7 +70,7 @@ export async function deserializeState(
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
   rawState: LensSerializedState,
   references?: Reference[]
-) {
+): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
   const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
   const savedObjectId = savedObjectRef?.id ?? rawState.savedObjectId;

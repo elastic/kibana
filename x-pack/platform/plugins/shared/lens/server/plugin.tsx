@@ -31,6 +31,8 @@ import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
+import { lensTransforms } from '../common/transforms/transforms';
+import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -100,6 +102,7 @@ export class LensServerPlugin
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+    plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, lensTransforms);
 
     registerLensAPIRoutes({
       http: core.http,

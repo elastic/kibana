@@ -7,8 +7,9 @@
 
 export * from './constants';
 
+export * from './transforms';
 export * from './service';
 export * from './schema';
 export type * from './types';
 
-export type { LensSavedObjectV0 as LensItemV0 } from './transforms';
+export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

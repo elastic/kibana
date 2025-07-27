@@ -15,6 +15,7 @@ import { v4 as generateId } from 'uuid';
 import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
+import { getTransforms } from '../transforms_registry';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -63,6 +64,7 @@ export const EmbeddableRenderer = <
 
         const buildEmbeddable = async () => {
           const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
+          const transforms = await getTransforms(type);
 
           const finalizeApi = (
             apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
@@ -84,8 +86,14 @@ export const EmbeddableRenderer = <
           const initialState = parentApi.getSerializedStateForChild(uuid) ?? {
             rawState: {} as SerializedState,
           };
+          const transformedInitialState =
+            transforms?.transformOut?.(initialState.rawState, initialState.references) ??
+            initialState.rawState;
           const { api, Component } = await factory.buildEmbeddable({
-            initialState,
+            initialState: {
+              ...initialState,
+              rawState: transformedInitialState,
+            },
             finalizeApi,
             uuid,
             parentApi,
