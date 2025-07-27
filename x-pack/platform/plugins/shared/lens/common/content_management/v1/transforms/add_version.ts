@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { LENS_ITEM_VERSION } from '../constants';
 import { LensAttributes } from '../types';
 
 export function addVersion(attributes: LensAttributes): LensAttributes {
   return {
     ...attributes,
-    version: 1,
+    version: LENS_ITEM_VERSION,
   };
 }

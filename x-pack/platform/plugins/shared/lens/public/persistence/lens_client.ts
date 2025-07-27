@@ -62,9 +62,6 @@ export class LensClient {
 
     const { data, meta } = await this.http.post<LensCreateResponseBody>(LENS_VIS_API_PATH, {
       body: JSON.stringify(body),
-      // headers: {
-      //   'elastic-api-version': API_VERSIONS.public.v1,
-      // },
       version: LENS_API_VERSION,
     });
 
