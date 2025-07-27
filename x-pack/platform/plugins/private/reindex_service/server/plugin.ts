@@ -49,7 +49,6 @@ export class ReindexServiceServerPlugin
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
-    console.log('reindex constructor', env.packageInfo.version);
     this.logger = logger.get();
     // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
@@ -58,7 +57,6 @@ export class ReindexServiceServerPlugin
   }
 
   public setup({ http, savedObjects }: CoreSetup, { licensing }: PluginsSetup) {
-    console.log('reindex setup', this.version.getCurrentVersion());
     this.licensing = licensing;
     const router = http.createRouter();
 
@@ -89,6 +87,10 @@ export class ReindexServiceServerPlugin
   ) {
     this.securityPluginStart = security;
 
+    const soClient = new SavedObjectsClient(
+      savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
+    );
+
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
     // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
     // want to expose these credentials to any unauthenticated users. We also want to avoid any need
@@ -97,24 +99,6 @@ export class ReindexServiceServerPlugin
     // a paused state if no Kibana nodes have the required credentials.
 
     // The ReindexWorker will use the credentials stored in the cache to reindex the data
-
-    /*
-    this.reindexWorker = createReindexWorker({
-      credentialStore: this.credentialStore,
-      licensing: this.licensing!,
-      elasticsearchService: elasticsearch,
-      logger: this.logger,
-      savedObjects: new SavedObjectsClient(
-        savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
-      ),
-      security: this.securityPluginStart,
-      version: this.version,
-    });
-    */
-
-    const soClient = new SavedObjectsClient(
-      savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
-    );
 
     this.reindexWorker = ReindexWorker.create(
       soClient,
