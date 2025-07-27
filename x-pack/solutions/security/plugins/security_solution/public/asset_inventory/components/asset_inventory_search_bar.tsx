@@ -8,7 +8,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
 import { useKibana } from '../../common/lib/kibana';
 import { FiltersGlobal } from '../../common/components/filters_global/filters_global';
 import { useDataViewContext } from '../hooks/data_view_context';
@@ -41,17 +41,7 @@ export const AssetInventorySearchBar = ({
     },
   } = useKibana().services;
 
-  const queryClient = useQueryClient();
-
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({
-      queryKey: [QUERY_KEY_ASSET_INVENTORY],
-    });
-  };
-
-  const isFetchingData = useIsFetching({
-    queryKey: [QUERY_KEY_ASSET_INVENTORY],
-  });
+  const { refresh, isRefreshing } = useRefresh(QUERY_KEY_ASSET_INVENTORY);
 
   return (
     <FiltersGlobal>
@@ -62,21 +52,14 @@ export const AssetInventorySearchBar = ({
           showQueryInput={true}
           showDatePicker={false}
           indexPatterns={[dataView]}
-          onQuerySubmit={(payload, isUpdated) => {
-            if (isUpdated) {
-              setQuery(payload);
-            }
-            if (!isUpdated) {
-              handleRefresh();
-            }
-          }}
+          onQuerySubmit={(payload, isUpdated) => (isUpdated ? setQuery(payload) : refresh())}
           onFiltersUpdated={(newFilters: Filter[]) => setQuery({ filters: newFilters })}
           placeholder={placeholder}
           query={{
             query: query?.query?.query || '',
             language: query?.query?.language || 'kuery',
           }}
-          isLoading={isLoading || isFetchingData > 0}
+          isLoading={isLoading || isRefreshing}
         />
       </div>
     </FiltersGlobal>
