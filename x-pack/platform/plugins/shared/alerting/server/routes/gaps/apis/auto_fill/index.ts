@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { createAutoFillJobRoute } from './create_auto_fill_job_route';
-export { getAutoFillJobStatusRoute } from './get_auto_fill_job_status_route';
-export { listAutoFillJobsRoute } from './list_auto_fill_jobs_route';
-export { updateAutoFillJobRoute } from './update_auto_fill_job_route'; 
+export { createAutoFillRoute } from './create_auto_fill_route';
+export { getAutoFillStatusRoute } from './get_auto_fill_status_route';
+export { listAutoFillsRoute } from './list_auto_fills_route';
+export { updateAutoFillRoute } from './update_auto_fill_route';
+export { getGapFillEventLogsRoute } from './get_gap_fill_event_logs_route';

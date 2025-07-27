@@ -117,6 +117,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { registerGapFillTask } from './lib/rule_gaps/gap_fill_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -241,6 +242,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi> = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -426,36 +428,12 @@ export class AlertingPlugin {
     );
 
     // Register the gap-fill-processor task definition
-    plugins.taskManager.registerTaskDefinitions({
-      'gap-fill-processor': {
-        title: 'Gap Fill Processor',
-        timeout: '1h',
-        // Optionally add paramsSchema and stateSchemaByVersion here
-        createTaskRunner: ({ taskInstance }) => ({
-          async run() {
-            // Placeholder: implement gap fill logic here
-            try {
-              console.log('gap-fill-processor - ------------------------------- - -- - -  - - ----');
-              return {
-                state: {
-                  ...taskInstance.state,
-                  lastRun: new Date().toISOString(),
-                  status: 'success',
-                },
-              };
-            } catch (error) {
-              console.log('error', JSON.stringify(error, null, 2));
-              return {
-                state: {
-                  ...taskInstance.state,
-                  lastRun: new Date().toISOString(),
-                  status: 'error',
-                },
-              };
-            }
-          },
-        }),
-      },
+    registerGapFillTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      coreStartServices: core.getStartServices(),
+      getRulesClientContext: (request: KibanaRequest) => this.getRulesClientWithRequest(request),
+      eventLogger: this.eventLogger!,
     });
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
@@ -698,6 +676,8 @@ export class AlertingPlugin {
       }
       return rulesClientFactory!.create(request, core.savedObjects);
     };
+
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
 
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);

@@ -10,13 +10,13 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-export const getAutoFillJobStatusRoute = (
+export const getAutoFillStatusRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: '/api/alerting/gaps/auto_fill/jobs/{id}',
+      path: '/api/alerting/gaps/auto_fill/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -43,17 +43,8 @@ export const getAutoFillJobStatusRoute = (
           // Return relevant task info
           return res.ok({
             body: {
-              id: task.id,
-              enabled: task.enabled,
-              status: task.status,
-              lastRun: task.state?.lastRun || task.startedAt,
-              runAt: task.runAt,
-              scheduledAt: task.scheduledAt,
-              attempts: task.attempts,
-              taskType: task.taskType,
-              params: task.params,
-              state: task.state,
               ...task,
+              lastRun: task.state?.lastRun || task.startedAt,
             },
           });
         } catch (error) {

@@ -595,6 +595,95 @@
                             "type": "keyword"
                         }
                     }
+                },
+                "auto_gap_fill": {
+                    "properties": {
+                        "execution": {
+                            "properties": {
+                                "uuid": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024
+                                },
+                                "status": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024
+                                },
+                                "start": {
+                                    "type": "date"
+                                },
+                                "end": {
+                                    "type": "date"
+                                },
+                                "duration_ms": {
+                                    "type": "long"
+                                },
+                                "config": {
+                                    "properties": {
+                                        "name": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "amountOfGapsToProcessPerRun": {
+                                            "type": "long"
+                                        },
+                                        "amountOfRetries": {
+                                            "type": "long"
+                                        },
+                                        "excludeRuleIds": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024,
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
+                                        },
+                                        "schedule": {
+                                            "properties": {
+                                                "interval": {
+                                                    "type": "keyword",
+                                                    "ignore_above": 1024
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "results": {
+                                    "properties": {
+                                        "ruleId": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "processedGaps": {
+                                            "type": "long"
+                                        },
+                                        "status": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
+                                        "error": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        }
+                                    }
+                                },
+                                "summary": {
+                                    "properties": {
+                                        "totalRules": {
+                                            "type": "long"
+                                        },
+                                        "successfulRules": {
+                                            "type": "long"
+                                        },
+                                        "failedRules": {
+                                            "type": "long"
+                                        },
+                                        "totalGapsProcessed": {
+                                            "type": "long"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

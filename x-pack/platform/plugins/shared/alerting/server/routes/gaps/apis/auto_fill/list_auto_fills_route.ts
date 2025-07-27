@@ -10,13 +10,13 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-export const listAutoFillJobsRoute = (
+export const listAutoFillsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: '/api/alerting/gaps/auto_fill/jobs',
+      path: '/api/alerting/gaps/auto_fill',
       validate: {
         query: schema.object({
           scope: schema.maybe(schema.string()),
@@ -47,7 +47,7 @@ export const listAutoFillJobsRoute = (
         } catch (error) {
           return res.customError({
             statusCode: 500,
-            body: { message: error.message || 'Error fetching gap fill jobs' },
+            body: { message: error.message || 'Error fetching gap fill auto fills' },
           });
         }
       })
