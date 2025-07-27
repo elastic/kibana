@@ -27,6 +27,16 @@ const connectors = [
       },
     ],
   },
+  // TODO: this should be fetched from the action type registry
+  {
+    type: 'slack.sendMessage',
+    params: [
+      {
+        name: 'message',
+        type: 'string' as const,
+      },
+    ],
+  },
   {
     type: 'delay',
     params: [
