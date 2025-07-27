@@ -10,6 +10,7 @@
 import type { PropsWithChildren } from 'react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;
@@ -28,4 +29,7 @@ export interface DashboardSavedObjectUserContent extends UserContentCommonSchema
     description?: string;
     timeRestore: boolean;
   };
+  canManageAccessControl?: boolean;
+  accessMode?: SavedObjectAccessControl['accessMode'];
+  authorName?: string;
 }

@@ -17,6 +17,7 @@ import React, {
   type ComponentProps,
   type FC,
   type ReactElement,
+  type ReactNode,
 } from 'react';
 import {
   EuiButton,
@@ -65,6 +66,7 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
+  aboveTabsContent?: ReactNode;
   'data-test-subj'?: string;
 }
 
@@ -73,6 +75,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  aboveTabsContent: AboveTabsContent,
   ...props
 }) => {
   const { tabs, state, dispatch } =
@@ -177,6 +180,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
         <EuiModalHeaderTitle id={tabbedModalHeadingHTMLId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        {AboveTabsContent}
         <Fragment>
           <Fragment>{renderTabs()}</Fragment>
           <EuiSpacer size="m" />

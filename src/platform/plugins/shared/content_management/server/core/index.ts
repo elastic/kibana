@@ -24,3 +24,5 @@ export type {
 export type { ContentRegistry } from './registry';
 
 export type { ContentCrud } from './crud';
+
+export { ChangeAccessModeService } from './change_access_mode';

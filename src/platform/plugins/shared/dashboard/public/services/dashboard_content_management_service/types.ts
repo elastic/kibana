@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import type { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import type {
@@ -28,6 +29,7 @@ export interface DashboardContentManagementService {
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
   updateDashboardMeta: (props: UpdateDashboardMetaProps) => Promise<void>;
+  changeAccessMode: (props: ChangeAccessModeProps) => Promise<void>;
 }
 
 /**
@@ -50,6 +52,8 @@ export interface LoadDashboardReturn {
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: DashboardState;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  createdBy?: string;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
@@ -70,6 +74,7 @@ export interface SaveDashboardProps {
   panelReferences?: Reference[];
   searchSourceReferences?: Reference[];
   lastSavedId?: string;
+  accessMode?: SavedObjectAccessControl['accessMode']; // Only used for new dashboard creation
 }
 
 export interface GetDashboardStateReturn {
@@ -97,4 +102,12 @@ export interface FindDashboardsService {
   findById: (id: string) => Promise<FindDashboardsByIdResponse>;
   findByIds: (ids: string[]) => Promise<FindDashboardsByIdResponse[]>;
   findByTitle: (title: string) => Promise<{ id: string } | undefined>;
+}
+
+/**
+ * Types for changing access mode of dashboards
+ */
+export interface ChangeAccessModeProps {
+  ids: string[];
+  accessMode: SavedObjectAccessControl['accessMode'];
 }

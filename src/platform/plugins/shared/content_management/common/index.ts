@@ -29,4 +29,6 @@ export type {
   MSearchQuery,
   MSearchResult,
   MSearchOut,
+  ChangeAccessModeIn,
+  ChangeAccessModeResult,
 } from './rpc';

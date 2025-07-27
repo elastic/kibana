@@ -274,6 +274,9 @@
     "metadata.version"
   ],
   "dashboard": [
+    "accessControl",
+    "accessControl.accessMode",
+    "accessControl.owner",
     "controlGroupInput",
     "controlGroupInput.chainingSystem",
     "controlGroupInput.controlStyle",
@@ -1294,6 +1297,7 @@
     "lastUpdatedBy",
     "name",
     "tags",
+    "valid",
     "yaml"
   ],
   "workplace_search_telemetry": []

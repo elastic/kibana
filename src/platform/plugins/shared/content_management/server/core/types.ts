@@ -16,6 +16,7 @@ import type {
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 import type {
   GetResult,
   BulkGetResult,
@@ -24,6 +25,7 @@ import type {
   DeleteResult,
   SearchQuery,
   SearchResult,
+  ChangeAccessModeResult,
 } from '../../common';
 
 export type StorageContextGetTransformFn = (
@@ -85,6 +87,13 @@ export interface ContentStorage<
 
   /** Search items */
   search(ctx: StorageContext, query: SearchQuery, options?: object): Promise<SearchResult<T>>;
+
+  /** Change access mode for items */
+  changeAccessMode?(
+    ctx: StorageContext,
+    ids: string[],
+    options: { accessMode: SavedObjectAccessControl['accessMode'] }
+  ): Promise<ChangeAccessModeResult>;
 
   /**
    * Opt-in to multi-type search.

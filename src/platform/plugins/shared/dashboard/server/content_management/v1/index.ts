@@ -27,6 +27,8 @@ export type {
   DashboardOptions,
   DashboardFilter,
   DashboardQuery,
+  DashboardChangeAccessModeOptions,
+  DashboardChangeAccessModeOut,
 } from './types';
 export {
   serviceDefinition,

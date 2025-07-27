@@ -16,6 +16,10 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
+import { contentManagementFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
+import { getBulkAuthorNames } from '../../dashboard_app/access_control/get_bulk_author_names';
+import { checkUserAccessControl } from '../../dashboard_app/access_control/check_user_access_control';
+import { checkGlobalManageControlPrivilege } from '../../dashboard_app/access_control/check_global_manage_control_privilege';
 import type { DashboardSearchOut } from '../../../server/content_management';
 import {
   DASHBOARD_CONTENT_ID,
@@ -44,7 +48,9 @@ const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 const toTableListViewSavedObject = (
-  hit: DashboardSearchOut['hits'][number]
+  hit: DashboardSearchOut['hits'][number],
+  canManageAccessControl: boolean,
+  authorName?: string
 ): DashboardSavedObjectUserContent => {
   const { title, description, timeRestore } = hit.attributes;
   return {
@@ -61,6 +67,9 @@ const toTableListViewSavedObject = (
       description,
       timeRestore,
     },
+    canManageAccessControl,
+    accessMode: hit?.accessControl?.accessMode,
+    authorName,
   };
 };
 
@@ -196,7 +205,7 @@ export const useDashboardListingTable = ({
   );
 
   const findItems = useCallback(
-    (
+    async (
       searchTerm: string,
       {
         references,
@@ -207,34 +216,58 @@ export const useDashboardListingTable = ({
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
+      const { total, hits } = await dashboardContentManagementService.findDashboards.search({
+        search: searchTerm,
+        size: listingLimit,
+        hasReference: references,
+        hasNoReference: referencesToExclude,
+        options: {
+          // include only tags references in the response to save bandwidth
+          includeReferences: ['tag'],
+          fields: ['title', 'description', 'timeRestore'],
+        },
+      });
 
-      return dashboardContentManagementService.findDashboards
-        .search({
-          search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRestore'],
-          },
-        })
-        .then(({ total, hits }) => {
-          const searchEndTime = window.performance.now();
-          const searchDuration = searchEndTime - searchStartTime;
-          reportPerformanceMetricEvent(coreServices.analytics, {
-            eventName: SAVED_OBJECT_LOADED_TIME,
-            duration: searchDuration,
-            meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
-            },
-          });
-          return {
-            total,
-            hits: hits.map(toTableListViewSavedObject),
-          };
-        });
+      const [userRes, globalAuthRes, authorRes] = await Promise.allSettled([
+        coreServices.security.authc.getCurrentUser(),
+        checkGlobalManageControlPrivilege(),
+        getBulkAuthorNames(hits.map((hit) => hit.accessControl?.owner || hit.createdBy)),
+      ]);
+
+      const user = userRes.status === 'fulfilled' ? userRes.value : undefined;
+      const isGloballyAuthorized =
+        globalAuthRes.status === 'fulfilled' ? globalAuthRes.value : false;
+      const authorNames = authorRes.status === 'fulfilled' ? authorRes.value : [];
+
+      const searchEndTime = window.performance.now();
+      const searchDuration = searchEndTime - searchStartTime;
+      reportPerformanceMetricEvent(coreServices.analytics, {
+        eventName: SAVED_OBJECT_LOADED_TIME,
+        duration: searchDuration,
+        meta: {
+          saved_object_type: DASHBOARD_CONTENT_ID,
+        },
+      });
+
+      const results = hits.map((hit) => {
+        const canManageAccessControl =
+          isGloballyAuthorized ||
+          (user &&
+            checkUserAccessControl({
+              accessControl: hit.accessControl,
+              createdBy: hit.createdBy,
+              userId: user.profile_uid,
+            })) ||
+          false;
+
+        const authorName = authorNames.find(
+          (author) => hit.accessControl?.owner === author.id || hit.createdBy === author.id
+        );
+
+        return toTableListViewSavedObject(hit, canManageAccessControl, authorName?.username);
+      });
+
+      return { total, hits: results };
     },
     [listingLimit, dashboardContentManagementService]
   );
@@ -272,7 +305,9 @@ export const useDashboardListingTable = ({
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => goToDashboard(id, 'edit'),
+    ({ id }: { id: string | undefined }) => {
+      return goToDashboard(id, 'edit');
+    },
     [goToDashboard]
   );
 
@@ -291,7 +326,6 @@ export const useDashboardListingTable = ({
     const { showWriteControls } = getDashboardCapabilities();
     return {
       contentEditor: {
-        isReadonly: !showWriteControls,
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
       },
@@ -314,6 +348,40 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
+      rowItemActions: (item) => {
+        const isDisabled = () => {
+          if (!showWriteControls) return true;
+          if (item?.managed === true) return true;
+          if (item?.canManageAccessControl === false && item?.accessMode === 'read_only')
+            return true;
+          return false;
+        };
+
+        const getReason = () => {
+          if (!showWriteControls) {
+            return contentManagementFlyoutStrings.contentEditor.readonlyReason.noPrivilege;
+          }
+          if (item?.managed) {
+            return contentManagementFlyoutStrings.contentEditor.readonlyReason.managed;
+          }
+          if (item?.canManageAccessControl === false) {
+            return contentManagementFlyoutStrings.contentEditor.readonlyReason.accessControl(
+              item.authorName
+            );
+          }
+        };
+
+        return {
+          edit: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+          delete: {
+            enabled: !isDisabled(),
+            reason: getReason(),
+          },
+        };
+      },
     };
   }, [
     contentEditorValidators,

@@ -19,6 +19,7 @@ import { update } from './update';
 import { deleteProc } from './delete';
 import { search } from './search';
 import { getMSearch } from './msearch';
+import { getChangeAccessMode } from './change_access_mode';
 
 export const getProcedures = (
   logger: Logger
@@ -32,4 +33,5 @@ export const getProcedures = (
   delete: deleteProc,
   search,
   mSearch: getMSearch(logger),
+  changeAccessMode: getChangeAccessMode(logger),
 });

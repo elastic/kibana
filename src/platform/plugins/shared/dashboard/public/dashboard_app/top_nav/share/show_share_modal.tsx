@@ -11,8 +11,15 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
-
-import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFormFieldset,
+  EuiText,
+} from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -21,13 +28,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 import type { DashboardLocatorParams } from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { dataService, shareService } from '../../../services/kibana_services';
+import { dataService, shareService, coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
+import type { SaveDashboardReturn } from '../../../services/dashboard_content_management_service/types';
+import { AccessModeContainer } from '../../access_control/access_mode_container';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -37,6 +47,11 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  canSave: boolean;
+  accessControl?: SavedObjectAccessControl;
+  createdBy?: string;
+  saveDashboard: () => Promise<SaveDashboardReturn | undefined>;
+  changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -53,8 +68,28 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  canSave,
+  accessControl,
+  createdBy,
+  saveDashboard,
+  changeAccessMode,
 }: ShowShareModalProps) {
   if (!shareService) return;
+
+  const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
+    if (!savedObjectId) return;
+
+    try {
+      await changeAccessMode(accessMode);
+      coreServices.notifications.toasts.addSuccess({
+        title: shareModalStrings.accessModeUpdateSuccess,
+      });
+    } catch (error) {
+      coreServices.notifications.toasts.addError(error?.message, {
+        title: shareModalStrings.accessModeUpdateError,
+      });
+    }
+  };
 
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -71,13 +106,14 @@ export function ShowShareModal({
         label: shareModalStrings.getTopMenuCheckbox(),
       },
       {
-        id: dashboardUrlParams.showQueryInput,
-        label: shareModalStrings.getQueryCheckbox(),
-      },
-      {
         id: dashboardUrlParams.showTimeFilter,
         label: shareModalStrings.getTimeFilterCheckbox(),
       },
+      {
+        id: dashboardUrlParams.showQueryInput,
+        label: shareModalStrings.getQueryCheckbox(),
+      },
+
       {
         id: showFilterBarId,
         label: shareModalStrings.getFilterBarCheckbox(),
@@ -101,15 +137,20 @@ export function ShowShareModal({
     };
 
     return (
-      <EuiCheckboxGroup
-        options={checkboxes}
-        idToSelectedMap={urlParamsSelectedMap}
-        onChange={handleChange}
-        legend={{
-          children: shareModalStrings.getCheckboxLegend(),
-        }}
-        data-test-subj="embedUrlParamExtension"
-      />
+      <EuiFormFieldset legend={{ children: shareModalStrings.getCheckboxLegend() }}>
+        <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="embedUrlParamExtension">
+          {checkboxes.map(({ id, label }) => (
+            <EuiFlexItem key={id}>
+              <EuiCheckbox
+                id={id}
+                label={label}
+                checked={!!urlParamsSelectedMap[id]}
+                onChange={() => handleChange(id)}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFormFieldset>
     );
   };
 
@@ -150,6 +191,60 @@ export function ShowShareModal({
 
   const allowShortUrl = getDashboardCapabilities().createShortUrl;
 
+  const LinkCalloutBody = () => (
+    <EuiText component="p" size="s">
+      {hasPanelChanges
+        ? allowShortUrl
+          ? shareModalStrings.getDraftSharePanelChangesWarning()
+          : shareModalStrings.getSnapshotShareWarning()
+        : shareModalStrings.getDraftShareWarning('link')}
+    </EuiText>
+  );
+
+  const EmbedCalloutBody = () => (
+    <EuiText component="p" size="s">
+      {hasPanelChanges
+        ? shareModalStrings.getEmbedSharePanelChangesWarning()
+        : shareModalStrings.getDraftShareWarning('embed')}
+    </EuiText>
+  );
+
+  const DraftModalCallout = ({ type }: { type: string }) => {
+    const [hasBeenSaved, setHasBeenSaved] = useState<boolean>(!isDirty);
+
+    const handleSaveDashboard = async () => {
+      const result = await saveDashboard();
+      if (result && !result.error) {
+        setHasBeenSaved(true);
+      }
+    };
+
+    if (hasBeenSaved) {
+      return null;
+    }
+
+    return (
+      <EuiCallOut
+        color="warning"
+        iconType="info"
+        data-test-subj="DashboardDraftModeCopyLinkCallOut"
+        title={shareModalStrings.draftModeCalloutTitle}
+      >
+        {type === 'embed' ? <EmbedCalloutBody /> : <LinkCalloutBody />}
+        <EuiButton
+          color="warning"
+          fill
+          size="s"
+          iconType="save"
+          data-test-subj="DashboardDraftModeSaveButton"
+          onClick={handleSaveDashboard}
+        >
+          {shareModalStrings.draftModeSaveButtonLabel}
+        </EuiButton>
+      </EuiCallOut>
+    );
+  };
+
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
@@ -160,46 +255,14 @@ export function ShowShareModal({
     objectType: 'dashboard',
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
-        defaultMessage: 'Share this dashboard',
+        defaultMessage: 'Share dashboard',
       }),
       config: {
         link: {
-          draftModeCallOut: (
-            <EuiCallOut
-              color="warning"
-              data-test-subj="DashboardDraftModeCopyLinkCallOut"
-              title={
-                <FormattedMessage
-                  id="dashboard.share.shareModal.draftModeCallout.title"
-                  defaultMessage="Unsaved changes"
-                />
-              }
-            >
-              {hasPanelChanges
-                ? allowShortUrl
-                  ? shareModalStrings.getDraftSharePanelChangesWarning()
-                  : shareModalStrings.getSnapshotShareWarning()
-                : shareModalStrings.getDraftShareWarning('link')}
-            </EuiCallOut>
-          ),
+          draftModeCallOut: canSave && <DraftModalCallout type="link" />,
         },
         embed: {
-          draftModeCallOut: (
-            <EuiCallOut
-              color="warning"
-              data-test-subj="DashboardDraftModeEmbedCallOut"
-              title={
-                <FormattedMessage
-                  id="dashboard.share.shareModal.draftModeCallout.title"
-                  defaultMessage="Unsaved changes"
-                />
-              }
-            >
-              {hasPanelChanges
-                ? shareModalStrings.getEmbedSharePanelChangesWarning()
-                : shareModalStrings.getDraftShareWarning('embed')}
-            </EuiCallOut>
-          ),
+          draftModeCallOut: canSave && <DraftModalCallout type="embed" />,
           embedUrlParamExtensions: [
             {
               paramName: 'embed',
@@ -263,6 +326,13 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
+      accessModeContainer: (
+        <AccessModeContainer
+          accessControl={accessControl}
+          createdBy={createdBy}
+          onChangeAccessMode={handleChangeAccessMode}
+        />
+      ),
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(

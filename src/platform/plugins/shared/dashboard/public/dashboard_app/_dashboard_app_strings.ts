@@ -22,7 +22,8 @@ export const dashboardReadonlyBadge = {
     }),
   getTooltip: () =>
     i18n.translate('dashboard.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save dashboards',
+      defaultMessage:
+        "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
     }),
 };
 
@@ -146,6 +147,21 @@ export const shareModalStrings = {
         'This dashboard has unsaved changes. Consider saving your dashboard before generating the {shareType}.',
       values: { shareType: shareType === 'embed' ? 'embed code' : 'link' },
     }),
+  accessModeUpdateSuccess: i18n.translate('dashboard.share.changeAccessMode.success.title', {
+    defaultMessage: 'Permissions updated.',
+  }),
+  accessModeUpdateError: i18n.translate('dashboard.share.changeAccessMode.error.title', {
+    defaultMessage: 'Failed to update permissions.',
+  }),
+  draftModeCalloutTitle: i18n.translate('dashboard.share.shareModal.draftModeCallout.title', {
+    defaultMessage: '"Dashboard has unsaved changes',
+  }),
+  draftModeSaveButtonLabel: i18n.translate(
+    'dashboard.share.shareModal.draftModeCallout.saveButton',
+    {
+      defaultMessage: 'Save',
+    }
+  ),
 };
 
 /*
@@ -180,6 +196,15 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
+    }),
+    readOnlyTooltip: (authorName: string | null) =>
+      i18n.translate('dashboard.topNave.editButtonTooltip.readOnly', {
+        defaultMessage:
+          "You don't have permission to edit this dashboard. Contact {authorName} or an admin to change it.",
+        values: { authorName: authorName || 'the author' },
+      }),
+    managedDashboardTooltip: i18n.translate('dashboard.editButtonTooltip.managed', {
+      defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
     }),
   },
   quickSave: {
@@ -229,6 +254,18 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
       defaultMessage: 'Share Dashboard',
     }),
+    tooltipTitle: i18n.translate('dashboard.topNave.shareTooltipTitle', {
+      defaultMessage: 'Share',
+    }),
+    readOnlyModeTooltipContent: i18n.translate('dashboard.topNave.shareTooltipContent.readOnly', {
+      defaultMessage: 'Everybody in this space can view',
+    }),
+    editModeTooltipContent: i18n.translate(
+      'dashboard.topNave.shareButtonEditModeTooltipContent.editable',
+      {
+        defaultMessage: 'Everybody in this space can edit',
+      }
+    ),
   },
   settings: {
     label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
@@ -277,3 +314,26 @@ export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
     defaultMessage: 'Add time slider control',
   });
+
+export const contentManagementFlyoutStrings = {
+  contentEditor: {
+    readonlyReason: {
+      managed: i18n.translate('dashboard.contentManagement.contentEditor.readonlyReason.managed', {
+        defaultMessage: 'This dashboard is managed by Elastic. Duplicate it to make changes.',
+      }),
+      accessControl: (authorName?: string) =>
+        i18n.translate('dashboard.contentManagement.contentEditor.readonlyReason.accessControl', {
+          defaultMessage:
+            "You don't have permissions to edit this dashboard. Contact {authorName} or an admin to change it.",
+          values: { authorName: authorName || 'the author' },
+        }),
+      noPrivilege: i18n.translate(
+        'dashboard.contentManagement.contentEditor.readonlyReason.noPrivilege',
+        {
+          defaultMessage:
+            "You don't have permissions to edit this dashboard. Contact your admin to change your role.",
+        }
+      ),
+    },
+  },
+};

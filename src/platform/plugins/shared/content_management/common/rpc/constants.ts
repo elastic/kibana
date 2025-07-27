@@ -18,6 +18,7 @@ export const procedureNames = [
   'delete',
   'search',
   'mSearch',
+  'changeAccessMode',
 ] as const;
 
 export type ProcedureName = (typeof procedureNames)[number];

@@ -27,6 +27,7 @@ export const createDashboardSavedObjectType = ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
+  supportsAccessControl: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
@@ -77,6 +78,17 @@ export const createDashboardSavedObjectType = ({
             sections: { properties: {}, dynamic: false },
           },
         },
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            accessControl: {
+              properties: {
+                accessMode: { type: 'keyword', index: false, doc_values: false },
+                owner: { type: 'keyword', index: false, doc_values: false },
+              },
+            },
+          },
+        },
       ],
       schemas: {
         forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
@@ -87,6 +99,13 @@ export const createDashboardSavedObjectType = ({
   mappings: {
     dynamic: false,
     properties: {
+      accessControl: {
+        dynamic: false,
+        properties: {
+          accessMode: { type: 'keyword', index: false, doc_values: false },
+          owner: { type: 'keyword', index: false, doc_values: false },
+        },
+      },
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {

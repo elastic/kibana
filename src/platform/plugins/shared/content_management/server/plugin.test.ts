@@ -39,6 +39,7 @@ const mockUpdate = jest.fn().mockResolvedValue('updateMocked');
 const mockDelete = jest.fn().mockResolvedValue('deleteMocked');
 const mockSearch = jest.fn().mockResolvedValue('searchMocked');
 const mockMSearch = jest.fn().mockResolvedValue('mSearchMocked');
+const mockChangeAccessMode = jest.fn().mockResolvedValue('changeAccessModeMocked');
 
 jest.mock('./rpc/procedures/all_procedures', () => {
   const mockedProcedure = (spyGetter: () => jest.Mock) => ({
@@ -58,6 +59,7 @@ jest.mock('./rpc/procedures/all_procedures', () => {
     delete: mockedProcedure(() => mockDelete),
     search: mockedProcedure(() => mockSearch),
     mSearch: mockedProcedure(() => mockMSearch),
+    changeAccessMode: mockedProcedure(() => mockChangeAccessMode),
   };
 
   return {
@@ -149,6 +151,7 @@ describe('ContentManagementPlugin', () => {
         expect(mockDelete).toHaveBeenCalledWith(context, input);
         expect(mockSearch).toHaveBeenCalledWith(context, input);
         expect(mockMSearch).toHaveBeenCalledWith(context, input);
+        expect(mockChangeAccessMode).toHaveBeenCalledWith(context, input);
       });
 
       test('should return error in custom error format', async () => {

@@ -28,6 +28,7 @@ import type {
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -58,6 +59,7 @@ export interface StartDeps {
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -139,6 +141,7 @@ export class DashboardPlugin
       http: core.http,
       contentManagement: plugins.contentManagement,
       logger: this.logger,
+      getStartServices: core.getStartServices,
     });
 
     return {};

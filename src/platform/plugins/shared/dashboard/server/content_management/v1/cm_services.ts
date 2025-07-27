@@ -317,6 +317,14 @@ export const dashboardItemSchema = schema.object(
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
+    accessControl: schema.maybe(
+      schema.object({
+        owner: schema.maybe(schema.string()),
+        accessMode: schema.maybe(
+          schema.oneOf([schema.literal('default'), schema.literal('read_only')])
+        ),
+      })
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -352,6 +360,13 @@ export const dashboardCreateOptionsSchema = schema.object({
   overwrite: schema.maybe(createOptionsSchemas.overwrite),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
+  accessControl: schema.maybe(
+    schema.object({
+      accessMode: schema.maybe(
+        schema.oneOf([schema.literal('default'), schema.literal('read_only')])
+      ),
+    })
+  ),
 });
 
 export const dashboardUpdateOptionsSchema = schema.object({
@@ -386,6 +401,29 @@ export const dashboardGetResultSchema = schema.object(
 export const dashboardCreateResultSchema = schema.object(
   {
     item: dashboardItemSchema,
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardChangeAccessModeOptionsSchema = schema.object(
+  {
+    accessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardChangeAccessModeResultSchema = schema.object(
+  {
+    objects: schema.arrayOf(
+      schema.object(
+        {
+          type: schema.string(),
+          id: schema.string(),
+          error: schema.maybe(apiError),
+        },
+        { unknowns: 'forbid' }
+      )
+    ),
   },
   { unknowns: 'forbid' }
 );

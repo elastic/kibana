@@ -925,6 +925,21 @@
   "dashboard": {
     "dynamic": false,
     "properties": {
+      "accessControl": {
+        "dynamic": false,
+        "properties": {
+          "accessMode": {
+            "doc_values": false,
+            "index": false,
+            "type": "keyword"
+          },
+          "owner": {
+            "doc_values": false,
+            "index": false,
+            "type": "keyword"
+          }
+        }
+      },
       "controlGroupInput": {
         "properties": {
           "chainingSystem": {
@@ -4270,6 +4285,9 @@
         },
         "type": "text"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "lastUpdatedBy": {
         "type": "keyword"
       },
@@ -4282,11 +4300,11 @@
         },
         "type": "text"
       },
-      "enabled": {
-        "type": "boolean"
-      },
       "tags": {
         "type": "keyword"
+      },
+      "valid": {
+        "type": "boolean"
       },
       "yaml": {
         "index": false,

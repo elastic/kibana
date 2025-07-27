@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getContentClientFactory, getMSearchClientFactory } from './content_client_factory';
+export {
+  getContentClientFactory,
+  getMSearchClientFactory,
+  getChangeAccessModeClientFactory,
+} from './content_client_factory';
 
 export type { IContentClient } from './types';
