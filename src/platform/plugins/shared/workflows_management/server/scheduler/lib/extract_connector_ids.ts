@@ -8,10 +8,8 @@
  */
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 export const extractConnectorIds = async (
-  workflow: WorkflowExecutionEngineModel,
   actionsClient: IUnsecuredActionsClient
 ): Promise<Record<string, Record<string, any>>> => {
   const allConnectors = await actionsClient.getAll('default');
