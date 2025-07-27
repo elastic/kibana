@@ -43,11 +43,12 @@ export default ({ getService }: FtrProviderContext): void => {
         disabled: 0,
       };
 
-      /**
-       * Clean up all prebuilt rule assets and rules before each test
-       * to ensure a clean testing environment.
-       */
       beforeEach(async () => {
+        await deleteAllPrebuiltRuleAssets(es, log);
+        await deleteAllRules(supertest, log);
+      });
+
+      afterEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
         await deleteAllRules(supertest, log);
       });
