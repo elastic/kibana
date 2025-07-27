@@ -286,6 +286,7 @@ describe('parseRecords', () => {
         isOriginAlert: false,
         targetIds: ['target1', 'target2'],
         users: ['user1'],
+        isAlert: false,
       },
     ];
     const result = parseRecords(mockLogger, records);

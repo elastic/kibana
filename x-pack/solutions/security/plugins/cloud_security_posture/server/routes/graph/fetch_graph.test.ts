@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
+import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../../../common/constants';
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -118,6 +119,56 @@ describe('fetchGraph', () => {
 
     expect(ogIdKeys).toEqual(['og_id0', 'og_id1']);
     expect(ogAlertKeys).toEqual(['og_alrt_id0']);
+    expect(result).toEqual([{ id: 'dummy' }]);
+  });
+
+  it('should include entity enrichment when isAssetInventoryEnabled is true', async () => {
+    const validIndexPatterns = ['valid_index'];
+    const params = {
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: validIndexPatterns,
+      esQuery: undefined as EsQuery | undefined,
+      isAssetInventoryEnabled: true,
+    };
+
+    const result = await fetchGraph(params);
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = esqlCallArgs[0].query;
+
+    // 1. Check for ENRICH policy statements
+    expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).toContain(
+      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
+    );
+
+    expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).toContain(
+      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
+    );
+
+    // 2. Check for actor and target document data evaluation and STATS with individual assertions
+    // This approach is more resilient to formatting differences
+    expect(query).toContain('EVAL actorDocData = CONCAT');
+    expect(query).toContain('actor.entity.id');
+    expect(query).toContain('actorEntityName');
+    expect(query).toContain('actorEntityType');
+    expect(query).toContain('actorSourceIndex');
+
+    expect(query).toContain('EVAL targetDocData = CONCAT');
+    expect(query).toContain('target.entity.id');
+    expect(query).toContain('targetEntityName');
+    expect(query).toContain('targetEntityType');
+    expect(query).toContain('targetSourceIndex');
+
+    expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
+    expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 });

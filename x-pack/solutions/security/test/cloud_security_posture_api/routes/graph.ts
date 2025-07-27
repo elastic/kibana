@@ -36,7 +36,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
   const kibanaServer = getService('kibanaServer');
-  const es = getService('es');
 
   const postGraph = (
     agent: Agent,
