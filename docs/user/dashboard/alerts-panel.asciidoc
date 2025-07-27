@@ -9,7 +9,7 @@ To view alerts in a dashboard, add *Alerts* panels that show selected alerts. Ea
 
 . From your dashboard, select *Add panel*.
 . In the *Add panel* flyout, select *Alerts*. The configuration flyout appears.
-. ({{stack}} deployments only) Under *Solution*, select either *Observability* or *Security* to specify the type of alerts you want to display.
+. ({stack} deployments only) Under *Solution*, select either *Observability* or *Security* to specify the type of alerts you want to display.
 . Under *Filter by*, select either *Rule tags* or *Rule types*.
 . (Optional) To use both types of filters, first define one filter, then use the boolean *+ OR* or *+ AND* options that appear to define the second filter.
 . Click *Save*. Your panel appears on the dashboard.
