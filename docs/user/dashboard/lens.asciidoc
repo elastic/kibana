@@ -106,27 +106,82 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 [float]
 [[assign-colors-to-terms]]
-===== Assign colors to terms
+==== Assign colors to terms
 
-preview::[]
+You can assign specific colors to terms in your visualizations. This color mapping can be useful in several situations:
 
-For term-based metrics, assign a color to each term with color mapping. 
+* **Visual recognition and recall**: Keep colors consistent for each term regardless of filters or sorting.
+* **Semantic meaning**: Use colors to convey meaning or categorization.
+* **Consistency**: Align with brand colors and improve overall aesthetic consistency.
 
-. Create a custom table.
- 
-. In the layer pane, select a *Rows* or *Metrics* field. 
+image::images/color_mapping.png[A bar chart with terms mapped to specific colors]
 
-. In the *Color by value* option, select *Cell* or *Text*.
+[float]
+===== Supported visualization types
 
-. Click the *Edit colors* icon.
+Color mapping is available for the following **Lens** visualization types:
 
-. Toggle the button to use the Color Mapping feature.
+* **Data tables**: Assign colors to terms in **Rows** or **Metrics** fields. You can apply colors to cell backgrounds or text.
+* **XY charts (Area, Bar, Line)**: Assign colors to breakdown dimensions that split your data into multiple series.
+* **Partition charts (Donut, Pie, Treemap, Waffle)**: Assign colors to the main slice or group-by dimension that defines the chart segments.
+* **Tag clouds**: Assign colors to the tags dimension that determines the terms displayed in the cloud.
 
-. Select a color palette and mode.
+[float]
+===== Configure color mapping in a chart
 
-. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. Assigning colors to dates is unsupported.
+To assign colors to terms in your visualization:
 
-. Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
+1. Create a visualization using one of the supported types.
+2. Add a categorical field that contains the terms you want to color.
+3. In the field configuration, look for the **Color by value** option:
+   ** For data tables: Select **Cell** or **Text**
+   ** For other chart types: This option appears when you have a categorical breakdown
+4. Click the **Edit colors** icon. In the menu that opens, keep **Use legacy palettes** turned off to be able to assign colors to specific terms
+5. Select a color palette from the available options:
+   ** **Elastic**: The default and most recent palette. It is intentionally built from a color spectrum designed for flexibility and consistency, while being suited for future accessibility improvements.
+   ** **Kibana 7.0**: A palette that matches the Kibana 7.0 color theme for visualizations
+   ** **Kibana 4.0**: A palette that matches the Kibana 4.0 color theme for visualizations
+   ** **Elastic classic**: A palette made of classic Elastic brand colors
+6. Select the color mode you'd like to use with this palette:
+   ** **Categorical**: Assign a distinct color to each term
+   ** **Gradient**: Assign gradients of the same color to each term
+7. Choose which terms to color. You can assign colors manually or select **Add all unassigned terms** for automatic assignment. +
++
+TIP: You can assign several terms to the same color.
+8. Choose how to handle unassigned terms: Use the selected color palette or assign a single color.
+
+[float]
+===== Color options and accessibility
+
+**Discrete colors and gradients**
+
+Choose from discrete color sets or generate sequential or divergent gradients. Gradients work well for Likert scales and other term scales.
+
+**Theme-aware neutral colors**
+
+Use neutral gray colors that adjust automatically between light and dark themes. These help de-emphasize less important data.
+
+**Accessibility warnings**
+
+The system warns you when colors don't have enough contrast for accessibility.
+
+[float]
+===== Best practices
+
+**Maintain consistency**
+
+Use color mapping to create consistent color schemes when the same categorical data appears across multiple visualizations in your dashboards.
+
+**Use semantic colors**
+
+Leverage color associations that users already understand (such as red for errors, green for success) to make your visualizations more intuitive.
+
+**Consider performance**
+
+Color mapping works best with fields that have a reasonable number of distinct values. Fields with hundreds or thousands of unique terms may impact visualization performance.
+
+**Plan for themes**
+When choosing colors, consider how they will appear in both light and dark themes. Use theme-aware neutral colors when you want to de-emphasize data.
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
