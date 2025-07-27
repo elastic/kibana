@@ -288,7 +288,7 @@ export const useDashboardListingTable = ({
   );
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
-    const { showWriteControls } = getDashboardCapabilities();
+    const { showWriteControls } = getDashboardCapabilities(); // TODO: Add access control check here
     return {
       contentEditor: {
         isReadonly: !showWriteControls,
