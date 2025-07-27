@@ -9,10 +9,18 @@
 
 import React, { Fragment, useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import { AccessModeContainer } from '../../dashboard_app/access_control';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
 
@@ -126,6 +134,10 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        <Fragment>
+          <EuiSpacer size="l" />
+          <AccessModeContainer onChangeAccessMode={(value) => {}} />
+        </Fragment>
       </Fragment>
     );
   }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);

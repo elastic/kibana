@@ -181,6 +181,11 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.editConfigDescription', {
       defaultMessage: 'Switch to edit mode',
     }),
+    // TODO: Replace author with creator name using UserProfileService.bulkGet
+    readOnlyTooltip: i18n.translate('dashboard.topNave.editButtonTooltip', {
+      defaultMessage: "You don't have permission to edit this dashboard",
+    }),
+    // TODO: Add managed tooltip - This dashboard is managed by Elastic. Duplicate it to make changes.
   },
   quickSave: {
     label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
@@ -228,6 +233,18 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
       defaultMessage: 'Share Dashboard',
+    }),
+    tooltipTitle: i18n.translate('dashboard.topNave.shareTooltipTitle', {
+      defaultMessage: 'Share',
+    }),
+    readOnlyModeTooltipContent: i18n.translate(
+      'dashboard.topNave.shareButtonReadOnlyModeTooltipContent',
+      {
+        defaultMessage: 'Everybody in this space can view',
+      }
+    ),
+    editModeTooltipContent: i18n.translate('dashboard.topNave.shareButtonEditModeTooltipContent', {
+      defaultMessage: 'Everybody in this space can edit',
     }),
   },
   settings: {

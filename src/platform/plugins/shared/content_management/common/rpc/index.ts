@@ -19,3 +19,4 @@ export type { SearchIn, SearchQuery, SearchResult } from './search';
 export type { MSearchIn, MSearchQuery, MSearchOut, MSearchResult } from './msearch';
 export type { ProcedureSchemas } from './types';
 export type { ProcedureName } from './constants';
+export type { ChangeAccessModeIn, ChangeAccessModeResult } from './change_access_mode';

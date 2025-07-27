@@ -101,14 +101,16 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
+  const showFragment = props.disableButton || props.tooltip;
+
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
       // icon only buttons are not supported by EuiHeaderLink
       React.createElement(
-        props.disableButton ? React.Fragment : EuiToolTip,
+        showFragment ? React.Fragment : EuiToolTip,
         // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
         {
-          ...(props.disableButton
+          ...(showFragment
             ? { key: props.label || props.id! }
             : {
                 content: upperFirst(props.label || props.id!),
@@ -142,7 +144,11 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   const tooltip = getTooltip();
   if (tooltip) {
-    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
+    return (
+      <EuiToolTip title={props.tooltipTitle} content={tooltip}>
+        {btn}
+      </EuiToolTip>
+    );
   }
   return btn;
 }

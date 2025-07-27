@@ -175,7 +175,7 @@ export async function mountApp({
       },
     ],
   });
-
+  // TODO: Add tooltip: You don’t have permissions to edit this dashboard. Contact your admin to change your role.
   if (!getDashboardCapabilities().showWriteControls) {
     coreServices.chrome.setBadge({
       text: dashboardReadonlyBadge.getText(),
