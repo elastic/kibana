@@ -55,8 +55,6 @@ export let inferenceService: InferencePublicStart | undefined;
 const servicesReady$ = new BehaviorSubject(false);
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
-  // @TODO: remove
-  console.log(`--@@deps`, deps);
   coreServices = kibanaCore;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;

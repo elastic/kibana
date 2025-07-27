@@ -29,6 +29,7 @@ import { DashboardApi } from '../../dashboard_api/types';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 
 const chartTypes = [
+  'bar',
   'xy',
   'pie',
   'heatmap',
@@ -65,8 +66,9 @@ export function useObservabilityAIAssistantContext({
             createScreenContextAction(
               {
                 name: 'add_to_dashboard',
-                description:
-                  'Add an ES|QL visualization to the current dashboard. Pick a single chart type, and based on the chart type, the corresponding key for `layers`. E.g., when you select type:metric, fill in only layers.metric.',
+                description: `Add an ES|QL visualization to the current dashboard. Pick a single chart type, and based on the chart type, the corresponding key for \`layers\`. E.g., when you select type:metric, fill in only layers.metric. The available chart types are: [${chartTypes.join(
+                  ', '
+                )}]`,
                 parameters: {
                   type: 'object',
                   properties: {
@@ -353,13 +355,16 @@ export function useObservabilityAIAssistantContext({
                 const embeddableInput = (await configBuilder.build(config, {
                   embeddable: true,
                   query: dataset,
+                  filters: [],
                 })) as LensEmbeddableInput;
 
+                // @TODO: remove
+                console.log(`--@@embeddableInput`, embeddableInput);
                 return dashboardApi
                   .addNewPanel({
                     panelType: 'lens',
                     serializedState: {
-                      rawState: { embeddableInput },
+                      rawState: { embeddableInput, filters: [] },
                     },
                   })
                   .then(() => {
