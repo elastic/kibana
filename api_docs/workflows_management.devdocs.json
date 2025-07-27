@@ -11,7 +11,7 @@
         "label": "WorkflowExecution",
         "description": [],
         "signature": [
-          "({ workflowExecutionId, fields, }: WorkflowExecutionProps) => React.JSX.Element"
+          "({ workflowExecutionId, workflowYaml, fields, }: WorkflowExecutionProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_detail/ui/workflow_execution.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.WorkflowExecution.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  workflowExecutionId,\n  fields = ['stepId', 'workflowId', 'status', 'executionTimeMs'],\n}",
+            "label": "{\n  workflowExecutionId,\n  workflowYaml,\n  fields = ['stepId', 'workflowId', 'status', 'executionTimeMs'],\n}",
             "description": [],
             "signature": [
               "WorkflowExecutionProps"
