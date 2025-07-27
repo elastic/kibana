@@ -9,7 +9,7 @@
 
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { RunStepResult, StepBase, BaseStep } from './step_base';
+import { BaseStep, RunStepResult, StepBase } from './step_base';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -70,12 +70,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
-        // this.contextManager.logDebug(`Console output: ${step.with?.message}`);
-        return { output: step.with?.message, error: undefined };
-      } else if (step.type === 'console.sleep') {
-        const sleepTime = step.with?.sleepTime ?? 1000;
-        // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, sleepTime));
+        // eslint-disable-next-line no-console
+        console.log(step.with?.message);
         return { output: step.with?.message, error: undefined };
       } else if (step.type === 'delay') {
         const delayTime = step.with?.delay ?? 1000;

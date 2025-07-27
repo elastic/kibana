@@ -16,6 +16,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
 export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
 
+// TODO: remove this...
 const connectors = [
   {
     type: 'console',
@@ -25,17 +26,6 @@ const connectors = [
         type: 'string' as const,
       },
     ],
-  },
-  {
-    type: 'slack.sendMessage',
-    params: [
-      {
-        name: 'message',
-        type: 'string' as const,
-      },
-    ],
-    // TODO: fetch from ActionsClient.getAll()
-    availableConnectorIds: ['keep-playground', 'keep-demo'],
   },
   {
     type: 'delay',
