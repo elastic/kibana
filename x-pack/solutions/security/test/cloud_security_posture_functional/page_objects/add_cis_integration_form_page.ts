@@ -382,7 +382,11 @@ export function AddCisIntegrationFormPageProvider({
       TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
     )) as unknown as HTMLInputElement;
 
-    includeSystemPackageCheckbox.checked = includeSystemPackage;
+    // If the checkbox is not found, it means the system package option is not available (e.g., when using agentless setup)
+    if (includeSystemPackageCheckbox) {
+      includeSystemPackageCheckbox.checked = includeSystemPackage;
+    }
+
     const optionToBeClicked = await findOptionInPage(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
     await optionToBeClicked.click();
   };
