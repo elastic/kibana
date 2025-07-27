@@ -254,6 +254,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                 }
               >
                 <EuiFieldText
+                  isInvalid={isInvalid}
                   data-test-subj="inference-endpoint-input-field"
                   fullWidth
                   disabled={isEdit}

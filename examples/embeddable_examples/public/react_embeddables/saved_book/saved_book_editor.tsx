@@ -26,65 +26,66 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useState } from 'react';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { i18n } from '@kbn/i18n';
-import { BookApi, BookAttributes } from './types';
-import { saveBookAttributes } from './saved_book_library';
+import type { BookState } from '../../../server';
+import { BookApi } from './types';
+import { saveBook } from './library_utils';
 
 export const getSavedBookEditor = ({
-  attributesManager,
+  stateManager,
   isCreate,
   api,
   closeFlyout,
   onSubmit,
 }: {
-  attributesManager: StateManager<BookAttributes>;
+  stateManager: StateManager<BookState>;
   isCreate: boolean;
   api?: BookApi;
   closeFlyout: () => void;
-  onSubmit: (result: { savedBookId?: string }) => void;
+  onSubmit: (result: { savedObjectId?: string }) => void;
 }) => {
-  const initialState = attributesManager.getLatestState();
+  const initialState = stateManager.getLatestState();
   return (
     <SavedBookEditor
       api={api}
       isCreate={isCreate}
-      attributesManager={attributesManager}
+      stateManager={stateManager}
       onCancel={() => {
         // set the state back to the initial state and reject
-        attributesManager.reinitializeState(initialState);
+        stateManager.reinitializeState(initialState);
         closeFlyout();
       }}
       onSubmit={async (addToLibrary: boolean) => {
-        const savedBookId = addToLibrary
-          ? await saveBookAttributes(api?.getSavedBookId(), attributesManager.getLatestState())
+        const savedObjectId = addToLibrary
+          ? await saveBook(api?.getSavedObjectId(), stateManager.getLatestState())
           : undefined;
 
         closeFlyout();
-        onSubmit({ savedBookId });
+        onSubmit({ savedObjectId });
       }}
     />
   );
 };
 
 export const SavedBookEditor = ({
-  attributesManager,
+  stateManager,
   isCreate,
   onSubmit,
   onCancel,
   api,
 }: {
-  attributesManager: StateManager<BookAttributes>;
+  stateManager: StateManager<BookState>;
   isCreate: boolean;
   onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;
   api?: BookApi;
 }) => {
   const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedPublishingSubjects(
-    attributesManager.api.authorName$,
-    attributesManager.api.bookSynopsis$,
-    attributesManager.api.bookTitle$,
-    attributesManager.api.numberOfPages$
+    stateManager.api.authorName$,
+    stateManager.api.bookSynopsis$,
+    stateManager.api.bookTitle$,
+    stateManager.api.numberOfPages$
   );
-  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
+  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedObjectId()));
   const [saving, setSaving] = useState(false);
 
   return (
@@ -111,7 +112,7 @@ export const SavedBookEditor = ({
           <EuiFieldText
             disabled={saving}
             value={authorName ?? ''}
-            onChange={(e) => attributesManager.api.setAuthorName(e.target.value)}
+            onChange={(e) => stateManager.api.setAuthorName(e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -122,7 +123,7 @@ export const SavedBookEditor = ({
           <EuiFieldText
             disabled={saving}
             value={bookTitle ?? ''}
-            onChange={(e) => attributesManager.api.setBookTitle(e.target.value)}
+            onChange={(e) => stateManager.api.setBookTitle(e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -133,7 +134,7 @@ export const SavedBookEditor = ({
           <EuiFieldNumber
             disabled={saving}
             value={numberOfPages ?? ''}
-            onChange={(e) => attributesManager.api.setNumberOfPages(+e.target.value)}
+            onChange={(e) => stateManager.api.setNumberOfPages(+e.target.value)}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -144,7 +145,7 @@ export const SavedBookEditor = ({
           <EuiTextArea
             disabled={saving}
             value={synopsis ?? ''}
-            onChange={(e) => attributesManager.api.setBookSynopsis(e.target.value)}
+            onChange={(e) => stateManager.api.setBookSynopsis(e.target.value)}
           />
         </EuiFormRow>
       </EuiFlyoutBody>

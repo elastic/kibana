@@ -10,6 +10,7 @@ import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {
+  const es = getService('es');
   const retry = getService('retry');
   const logger = getService('log');
   const supertest = getService('supertest');
@@ -42,9 +43,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
-      );
+      // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+      // Instead we delete all alerts from the index
+      await es.deleteByQuery({
+        index: '.internal.alerts-*',
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );

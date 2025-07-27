@@ -28,6 +28,7 @@ import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
+  const es = getService('es');
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -195,6 +196,13 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
+        // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+        // Instead we delete all alerts from the index
+        await es.deleteByQuery({
+          index: '.internal.alerts-*',
+          query: { match_all: {} },
+          conflicts: 'proceed',
+        });
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
         );

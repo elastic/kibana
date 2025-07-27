@@ -164,6 +164,7 @@ export const IndexParamsFields = ({
         }
       >
         <EuiFieldText
+          isInvalid={errors.indexOverride !== undefined && Number(errors.indexOverride.length) > 0}
           fullWidth
           data-test-subj="preconfiguredIndexToUse"
           prepend={ALERT_HISTORY_PREFIX}

@@ -9,6 +9,8 @@ import * as esKuery from '@kbn/es-query';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   AGENT_POLICY_MAPPINGS,
@@ -25,228 +27,248 @@ jest.mock('../../services/app_context');
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
-    it('Search by data_output_id', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: AGENT_POLICY_MAPPINGS,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.data_output_id',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by data_output_id',
+      async (agentPolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(`${agentPolicyType}.data_output_id: test_id`);
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [agentPolicyType],
+          indexMapping: AGENT_POLICY_MAPPINGS,
+          storeValue: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.data_output_id`,
+            type: agentPolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('Search by inactivity timeout', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: AGENT_POLICY_MAPPINGS,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.inactivity_timeout',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by inactivity timeout',
+      async (agentPolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(`${agentPolicyType}.inactivity_timeout:*`);
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [agentPolicyType],
+          indexMapping: AGENT_POLICY_MAPPINGS,
+          storeValue: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.inactivity_timeout`,
+            type: agentPolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('Complex query', async () => {
-      const validationObject = validateFilterKueryNode({
-        astFilter: esKuery.fromKueryExpression(
-          `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:some_id or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`
-        ),
-        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: AGENT_POLICY_MAPPINGS,
-        storeValue: true,
-      });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Complex query',
+      async (agentPolicyType) => {
+        const validationObject = validateFilterKueryNode({
+          astFilter: esKuery.fromKueryExpression(
+            `${agentPolicyType}.download_source_id:some_id or (not ${agentPolicyType}.download_source_id:*)`
+          ),
+          types: [agentPolicyType],
+          indexMapping: AGENT_POLICY_MAPPINGS,
+          storeValue: true,
+        });
 
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.download_source_id',
-          type: 'ingest-agent-policies',
-        },
-        {
-          astPath: 'arguments.1.arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.download_source_id',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.download_source_id`,
+            type: agentPolicyType,
+          },
+          {
+            astPath: 'arguments.1.arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.download_source_id`,
+            type: agentPolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('Test another complex query', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id: test_id  or (not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: AGENT_POLICY_MAPPINGS,
-        storeValue: true,
-      });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Test another complex query',
+      async (agentPolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(
+          `${agentPolicyType}.data_output_id: test_id or ${agentPolicyType}.monitoring_output_id: test_id  or (not ${agentPolicyType}.data_output_id:*)`
+        );
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [agentPolicyType],
+          indexMapping: AGENT_POLICY_MAPPINGS,
+          storeValue: true,
+        });
 
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.data_output_id',
-          type: 'ingest-agent-policies',
-        },
-        {
-          astPath: 'arguments.1',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.monitoring_output_id',
-          type: 'ingest-agent-policies',
-        },
-        {
-          astPath: 'arguments.2.arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.data_output_id',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.data_output_id`,
+            type: agentPolicyType,
+          },
+          {
+            astPath: 'arguments.1',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.monitoring_output_id`,
+            type: agentPolicyType,
+          },
+          {
+            astPath: 'arguments.2.arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: `${agentPolicyType}.data_output_id`,
+            type: agentPolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('Returns error if the attribute does not exist', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_1 or ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_2`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: AGENT_POLICY_MAPPINGS,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error:
-            "This key 'ingest-agent-policies.package_policies' does NOT exist in ingest-agent-policies saved object index patterns",
-          isSavedObjectAttr: false,
-          key: 'ingest-agent-policies.package_policies',
-          type: 'ingest-agent-policies',
-        },
-        {
-          astPath: 'arguments.1',
-          error:
-            "This key 'ingest-agent-policies.package_policies' does NOT exist in ingest-agent-policies saved object index patterns",
-          isSavedObjectAttr: false,
-          key: 'ingest-agent-policies.package_policies',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Returns error if the attribute does not exist',
+      async (agentPolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(
+          `${agentPolicyType}.package_policies:test_id_1 or ${agentPolicyType}.package_policies:test_id_2`
+        );
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [agentPolicyType],
+          indexMapping: AGENT_POLICY_MAPPINGS,
+          storeValue: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: `This key '${agentPolicyType}.package_policies' does NOT exist in ${agentPolicyType} saved object index patterns`,
+            isSavedObjectAttr: false,
+            key: `${agentPolicyType}.package_policies`,
+            type: agentPolicyType,
+          },
+          {
+            astPath: 'arguments.1',
+            error: `This key '${agentPolicyType}.package_policies' does NOT exist in ${agentPolicyType} saved object index patterns`,
+            isSavedObjectAttr: false,
+            key: `${agentPolicyType}.package_policies`,
+            type: agentPolicyType,
+          },
+        ]);
+      }
+    );
   });
 
   describe('Package policies', () => {
-    it('Search by package name', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: PACKAGE_POLICIES_MAPPINGS,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: false,
-          key: 'ingest-package-policies.attributes.package.name',
-          type: 'ingest-package-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by package name',
+      async (packagePolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(
+          `${packagePolicyType}.attributes.package.name:packageName`
+        );
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [packagePolicyType],
+          indexMapping: PACKAGE_POLICIES_MAPPINGS,
+          storeValue: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: false,
+            key: `${packagePolicyType}.attributes.package.name`,
+            type: packagePolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('It fails if the kuery is not normalized', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: PACKAGE_POLICIES_MAPPINGS,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error:
-            "This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key",
-          isSavedObjectAttr: false,
-          key: 'ingest-package-policies.package.name',
-          type: 'ingest-package-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'It fails if the kuery is not normalized',
+      async (packagePolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(
+          `${packagePolicyType}.package.name:packageName`
+        );
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [packagePolicyType],
+          indexMapping: PACKAGE_POLICIES_MAPPINGS,
+          storeValue: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: `This key '${packagePolicyType}.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`,
+            isSavedObjectAttr: false,
+            key: `${packagePolicyType}.package.name`,
+            type: packagePolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('It does not check attributes if skipNormalization is passed', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: PACKAGE_POLICIES_MAPPINGS,
-        storeValue: true,
-        skipNormalization: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: false,
-          key: 'ingest-package-policies.package.name',
-          type: 'ingest-package-policies',
-        },
-      ]);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'It does not check attributes if skipNormalization is passed',
+      async (packagePolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(
+          `${packagePolicyType}.package.name:packageName`
+        );
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [packagePolicyType],
+          indexMapping: PACKAGE_POLICIES_MAPPINGS,
+          storeValue: true,
+          skipNormalization: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: false,
+            key: `${packagePolicyType}.package.name`,
+            type: packagePolicyType,
+          },
+        ]);
+      }
+    );
 
-    it('Allows passing query without SO', async () => {
-      const astFilter = esKuery.fromKueryExpression(`package.name:packageName`);
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: PACKAGE_POLICIES_MAPPINGS,
-        storeValue: true,
-        skipNormalization: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'package.name',
-          type: 'package',
-        },
-      ]);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Allows passing query without SO',
+      async (packagePolicyType) => {
+        const astFilter = esKuery.fromKueryExpression(`package.name:packageName`);
+        const validationObject = validateFilterKueryNode({
+          astFilter,
+          types: [packagePolicyType],
+          indexMapping: PACKAGE_POLICIES_MAPPINGS,
+          storeValue: true,
+          skipNormalization: true,
+        });
+        expect(validationObject).toEqual([
+          {
+            astPath: 'arguments.0',
+            error: null,
+            isSavedObjectAttr: true,
+            key: 'package.name',
+            type: 'package',
+          },
+        ]);
+      }
+    );
   });
 
   describe('Agents', () => {
@@ -510,61 +532,76 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
 
 describe('validateKuery validates real kueries', () => {
   describe('Agent policies', () => {
-    it('Search by data_output_id', async () => {
-      const validationObj = validateKuery(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by data_output_id',
+      async (agentPolicyType) => {
+        const validationObj = validateKuery(
+          `${agentPolicyType}.data_output_id: test_id`,
+          [agentPolicyType],
+          AGENT_POLICY_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Search by data_output_id without SO wrapping', async () => {
-      const validationObj = validateKuery(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by data_output_id without SO wrapping',
+      async (agentPolicyType) => {
+        const validationObj = validateKuery(
+          `${agentPolicyType}.data_output_id: test_id`,
+          [agentPolicyType],
+          AGENT_POLICY_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Search by name', async () => {
-      const validationObj = validateKuery(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: test_id`,
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by name',
+      async (agentPolicyType) => {
+        const validationObj = validateKuery(
+          `${agentPolicyType}.name: test_id`,
+          [agentPolicyType],
+          AGENT_POLICY_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Kuery with non existent parameter wrapped by SO', async () => {
-      const validationObj = validateKuery(
-        `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(
-        `KQLSyntaxError: This key 'ingest-agent-policies.non_existent_parameter' does NOT exist in ingest-agent-policies saved object index patterns`
-      );
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Kuery with non existent parameter wrapped by SO',
+      async (agentPolicyType) => {
+        const validationObj = validateKuery(
+          `${agentPolicyType}.non_existent_parameter: 'test_id'`,
+          [agentPolicyType],
+          AGENT_POLICY_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(false);
+        expect(validationObj?.error).toContain(
+          `KQLSyntaxError: This key '${agentPolicyType}.non_existent_parameter' does NOT exist in ${agentPolicyType} saved object index patterns`
+        );
+      }
+    );
 
-    it('Invalid search by non existent parameter', async () => {
-      const validationObj = validateKuery(
-        `non_existent_parameter: 'test_id'`,
-        [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(
-        `KQLSyntaxError: This type 'non_existent_parameter' is not allowed`
-      );
-    });
+    test.each([LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE])(
+      'Invalid search by non existent parameter',
+      async (agentPolicyType) => {
+        const validationObj = validateKuery(
+          `non_existent_parameter: 'test_id'`,
+          [agentPolicyType],
+          AGENT_POLICY_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(false);
+        expect(validationObj?.error).toContain(
+          `KQLSyntaxError: This type 'non_existent_parameter' is not allowed`
+        );
+      }
+    );
   });
 
   describe('Agents', () => {
@@ -713,82 +750,103 @@ describe('validateKuery validates real kueries', () => {
   });
 
   describe('Package policies', () => {
-    it('Search by package name without SO', async () => {
-      const validationObj = validateKuery(
-        `package.name:fleet_server`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by package name without SO',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `package.name:fleet_server`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Search by package name', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by package name',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `${packagePolicyType}.package.name:fleet_server`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Search by package name works with attributes if skipNormalization is not passed', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by package name works with attributes if skipNormalization is not passed',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `${packagePolicyType}.attributes.package.name:packageName`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Search by name and version', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "TestName" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version: "8.8.0"`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(true);
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Search by name and version',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `${packagePolicyType}.package.name: "TestName" AND ${packagePolicyType}.package.version: "8.8.0"`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(true);
+      }
+    );
 
-    it('Invalid search by nested wrong parameter', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.is_managed:packageName`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'ingest-package-policies.package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
-      );
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Invalid search by nested wrong parameter',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `${packagePolicyType}.package.is_managed:packageName`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(false);
+        expect(validationObj?.error).toEqual(
+          `KQLSyntaxError: This key '${packagePolicyType}.package.is_managed' does NOT exist in ${packagePolicyType} saved object index patterns`
+        );
+      }
+    );
 
-    it('invalid search by nested wrong parameter - without wrapped SO', async () => {
-      const validationObj = validateKuery(
-        `package.is_managed:packageName`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'package.is_managed' does NOT exist in ingest-package-policies saved object index patterns`
-      );
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'invalid search by nested wrong parameter - without wrapped SO',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `package.is_managed:packageName`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS,
+          true
+        );
+        expect(validationObj?.isValid).toEqual(false);
+        expect(validationObj?.error).toEqual(
+          `KQLSyntaxError: This key 'package.is_managed' does NOT exist in ${packagePolicyType} saved object index patterns`
+        );
+      }
+    );
 
-    it('Invalid search by non existent parameter', async () => {
-      const validationObj = validateKuery(
-        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter:packageName`,
-        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        PACKAGE_POLICIES_MAPPINGS
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(
-        `KQLSyntaxError: This key 'ingest-package-policies.non_existent_parameter' does NOT exist in ingest-package-policies saved object index patterns`
-      );
-    });
+    test.each([LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE])(
+      'Invalid search by non existent parameter',
+      async (packagePolicyType) => {
+        const validationObj = validateKuery(
+          `${packagePolicyType}.non_existent_parameter:packageName`,
+          [packagePolicyType],
+          PACKAGE_POLICIES_MAPPINGS
+        );
+        expect(validationObj?.isValid).toEqual(false);
+        expect(validationObj?.error).toEqual(
+          `KQLSyntaxError: This key '${packagePolicyType}.non_existent_parameter' does NOT exist in ${packagePolicyType} saved object index patterns`
+        );
+      }
+    );
   });
 
   describe('Enrollment keys', () => {

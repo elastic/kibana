@@ -5,19 +5,20 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -28,6 +29,8 @@ export interface Props {
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable?: boolean;
+  showLegend?: boolean;
+  serviceName?: string;
 }
 
 export function TraceWaterfall({
@@ -39,6 +42,8 @@ export function TraceWaterfall({
   scrollElement,
   getRelatedErrorsHref,
   isEmbeddable = false,
+  showLegend = false,
+  serviceName,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -50,6 +55,8 @@ export function TraceWaterfall({
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
       isEmbeddable={isEmbeddable}
+      showLegend={showLegend}
+      serviceName={serviceName}
     >
       <TraceWaterfallComponent />
     </TraceWaterfallContextProvider>
@@ -63,6 +70,10 @@ function TraceWaterfallComponent() {
     rootItem,
     margin: { left, right },
     isEmbeddable,
+    legends,
+    colorBy,
+    showLegend,
+    serviceName,
   } = useTraceWaterfallContext();
 
   if (!rootItem) {
@@ -70,45 +81,54 @@ function TraceWaterfallComponent() {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div
-        css={css`
-          display: flex;
-          position: sticky;
-          top: ${isEmbeddable ? '0px' : 'var(--euiFixedHeadersOffset, 0)'};
-          z-index: ${euiTheme.levels.menu};
-          background-color: ${euiTheme.colors.emptyShade};
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <TimelineAxisContainer
-          xMax={duration}
-          margins={{
-            top: 40,
-            left,
-            right,
-            bottom: 0,
-          }}
-          numberOfTicks={3}
-        />
-      </div>
-      <VerticalLinesContainer
-        xMax={duration}
-        margins={{
-          top: 40,
-          left,
-          right,
-          bottom: 0,
-        }}
-      />
-      <div
-        css={css`
-          position: relative;
-        `}
-      >
-        <TraceTree />
-      </div>
-    </div>
+    <EuiFlexGroup direction="column">
+      {showLegend && serviceName && (
+        <EuiFlexItem>
+          <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
+        <div style={{ position: 'relative' }}>
+          <div
+            css={css`
+              display: flex;
+              position: sticky;
+              top: ${isEmbeddable ? '0px' : 'var(--euiFixedHeadersOffset, 0)'};
+              z-index: ${euiTheme.levels.menu};
+              background-color: ${euiTheme.colors.emptyShade};
+              border-bottom: ${euiTheme.border.thin};
+            `}
+          >
+            <TimelineAxisContainer
+              xMax={duration}
+              margins={{
+                top: 40,
+                left,
+                right,
+                bottom: 0,
+              }}
+              numberOfTicks={3}
+            />
+          </div>
+          <VerticalLinesContainer
+            xMax={duration}
+            margins={{
+              top: 40,
+              left,
+              right,
+              bottom: 0,
+            }}
+          />
+          <div
+            css={css`
+              position: relative;
+            `}
+          >
+            <TraceTree />
+          </div>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

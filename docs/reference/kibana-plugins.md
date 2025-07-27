@@ -135,7 +135,7 @@ It also respects the `no_proxy` environment variable to exclude specific URLs fr
 You can specify the environment variable directly when installing plugins:
 
 ```shell
-$ http_proxy="http://proxy.local:4242" bin/kibana-plugin install <package name or URL>
+$ http_proxy="<LOCAL_PROXY_URL>:4242" bin/kibana-plugin install <package name or URL>
 ```
 
 

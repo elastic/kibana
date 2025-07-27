@@ -637,7 +637,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('multiple agents', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/215025
+    describe.skip('multiple agents', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {

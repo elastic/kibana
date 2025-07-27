@@ -102,8 +102,7 @@ describe('SynchronizationTaskRunner', () => {
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
-      timeout: '300ms',
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });

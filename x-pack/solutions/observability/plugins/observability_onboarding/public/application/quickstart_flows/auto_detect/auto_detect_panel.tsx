@@ -46,16 +46,25 @@ export const AutoDetectPanel: FunctionComponent = () => {
     ),
   });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
-  const command = data ? getAutoDetectCommand(data) : undefined;
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+  const command = data
+    ? getAutoDetectCommand({
+        scriptDownloadUrl: data.scriptDownloadUrl,
+        onboardingId: data.onboardingFlow.id,
+        kibanaUrl: data.kibanaUrl,
+        installApiKey: data.installApiKey,
+        ingestApiKey: data.ingestApiKey,
+        elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
+        metricsEnabled: metricsOnboardingEnabled,
+      })
+    : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
-
-  const metricsOnboardingEnabled = usePricingFeature(
-    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
-  );
 
   useEffect(() => {
     if (data) {
@@ -206,8 +215,8 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                         }
                                       ),
                                       href: assetDetailsLocator.getRedirectUrl({
-                                        assetType: 'host',
-                                        assetId: integration.metadata?.hostname,
+                                        entityType: 'host',
+                                        entityId: integration.metadata?.hostname,
                                         assetDetails: {
                                           dateRange: {
                                             from: 'now-15m',
