@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, MSearchIn } from '../../common';
+import type {
+  GetIn,
+  CreateIn,
+  UpdateIn,
+  DeleteIn,
+  SearchIn,
+  MSearchIn,
+  ChangeAccessModeIn,
+} from '../../common';
 
 export interface CrudClient {
   get(input: GetIn): Promise<unknown>;
@@ -16,4 +24,5 @@ export interface CrudClient {
   delete(input: DeleteIn): Promise<unknown>;
   search(input: SearchIn): Promise<unknown>;
   mSearch?(input: MSearchIn): Promise<unknown>;
+  changeAccessMode?(input: ChangeAccessModeIn): Promise<unknown>;
 }

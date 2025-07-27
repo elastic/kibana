@@ -20,6 +20,8 @@ import type {
   SearchIn,
   MSearchIn,
   MSearchResult,
+  ChangeAccessModeIn,
+  ChangeAccessModeResult,
 } from '../../common';
 import type { ContentTypeRegistry } from '../registry';
 
@@ -155,5 +157,13 @@ export class ContentClient {
         addVersion(contentType, this.contentTypeRegistry)
       ),
     }) as Promise<MSearchResult<T>>;
+  }
+
+  changeAccessMode(input: ChangeAccessModeIn): Promise<ChangeAccessModeResult> {
+    const crudClient = this.crudClientProvider();
+    if (!crudClient.changeAccessMode) {
+      throw new Error('changeAccessMode is not supported by provided crud client');
+    }
+    return crudClient.changeAccessMode(input) as Promise<ChangeAccessModeResult>;
   }
 }

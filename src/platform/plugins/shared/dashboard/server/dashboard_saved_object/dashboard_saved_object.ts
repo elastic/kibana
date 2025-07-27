@@ -13,6 +13,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV4 } from './schema/v4';
 
 import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
 import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
@@ -27,6 +28,7 @@ export const createDashboardSavedObjectType = ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
+  // supportsAccessControl: true, TODO: Revisit this when access control is implemented
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
@@ -83,6 +85,25 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV3,
       },
     },
+    4: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            accessControl: {
+              properties: {
+                accessMode: { type: 'keyword', index: false, doc_values: false },
+                owner: { type: 'keyword', index: false, doc_values: false },
+              },
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+        create: dashboardAttributesSchemaV4,
+      },
+    },
   },
   mappings: {
     dynamic: false,
@@ -97,6 +118,13 @@ export const createDashboardSavedObjectType = ({
       sections: {
         properties: {},
         dynamic: false,
+      },
+      accessControl: {
+        dynamic: false,
+        properties: {
+          accessMode: { type: 'keyword', index: false, doc_values: false },
+          owner: { type: 'keyword', index: false, doc_values: false },
+        },
       },
       refreshInterval: {
         properties: {

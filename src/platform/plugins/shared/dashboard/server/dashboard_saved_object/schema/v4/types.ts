@@ -7,28 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
+import { TypeOf } from '@kbn/config-schema';
+import { dashboardAttributesSchema, accessControlSchema } from './v4';
 
-export type {
-  ProcedureSchemas,
-  ProcedureName,
-  GetIn,
-  GetResult,
-  BulkGetIn,
-  BulkGetResult,
-  CreateIn,
-  CreateResult,
-  UpdateIn,
-  UpdateResult,
-  DeleteIn,
-  DeleteResult,
-  SearchIn,
-  SearchQuery,
-  SearchResult,
-  MSearchIn,
-  MSearchQuery,
-  MSearchResult,
-  MSearchOut,
-  ChangeAccessModeIn,
-  ChangeAccessModeResult,
-} from './rpc';
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+
+export type DashboardAccessControl = TypeOf<typeof accessControlSchema>;

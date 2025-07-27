@@ -271,6 +271,11 @@ export const useDashboardListingTable = ({
     [dashboardBackupService, dashboardContentManagementService]
   );
 
+  /* TODO: Add tooltip:
+    Normal: Edit
+    Role no-edit: You don’t have permissions to edit this dashboard. Contact creator to change it.
+    Managed: This dashboard is managed by Elastic. Duplicate it to make changes.
+  */
   const editItem = useCallback(
     ({ id }: { id: string | undefined }) => goToDashboard(id, 'edit'),
     [goToDashboard]
@@ -288,7 +293,7 @@ export const useDashboardListingTable = ({
   );
 
   const tableListViewTableProps: DashboardListingViewTableProps = useMemo(() => {
-    const { showWriteControls } = getDashboardCapabilities();
+    const { showWriteControls } = getDashboardCapabilities(); // TODO: Add access control check here
     return {
       contentEditor: {
         isReadonly: !showWriteControls,

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { type ReactNode, type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-
 import { ShareProvider, useShareContext, type IShareContext } from './context';
 import { linkTab, embedTab } from './tabs';
 
@@ -25,7 +24,8 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareContext();
 
-  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, objectType, sharingData } =
+    shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
@@ -42,6 +42,9 @@ export const ShareMenuTabs = () => {
     tabs.push(embedTab);
   }
 
+  const showAccessModeContainer =
+    objectType === 'dashboard' && Boolean(sharingData?.accessModeContainer);
+
   return Boolean(tabs.length) ? (
     <TabbedModal
       tabs={tabs}
@@ -51,6 +54,9 @@ export const ShareMenuTabs = () => {
       defaultSelectedTabId={tabs[0].id}
       anchorElement={anchorElement}
       data-test-subj="shareContextModal"
+      aboveTabsContent={
+        showAccessModeContainer ? (sharingData?.accessModeContainer as ReactNode) : null
+      }
     />
   ) : null;
 };

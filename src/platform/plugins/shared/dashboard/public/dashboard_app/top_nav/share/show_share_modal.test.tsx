@@ -68,6 +68,8 @@ describe('ShowShareModal', () => {
   const defaultShareModalProps = {
     isDirty: true,
     anchorElement: document.createElement('div'),
+    canSave: true,
+    saveDashboard: jest.fn(),
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {
