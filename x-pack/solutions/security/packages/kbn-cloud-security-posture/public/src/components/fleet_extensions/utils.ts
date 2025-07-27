@@ -27,6 +27,13 @@ import {
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   CLOUD_SECURITY_POSTURE_INTEGRATIONS,
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_GCP,
+  AWS_SINGLE_ACCOUNT,
+  AWS_CREDENTIALS_TYPE,
+  AZURE_CREDENTIALS_TYPE,
+  GCP_CREDENTIALS_TYPE,
 } from './constants';
 import type {
   PostureInput,
@@ -36,15 +43,8 @@ import type {
   GetAwsCredentialTypeConfigParams,
   GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
-import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
 import { getCloudDefaultAwsCredentialConfig } from './aws_credentials_form/aws_utils';
 import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
-import {
-  AWS_CREDENTIALS_TYPE,
-  AWS_SINGLE_ACCOUNT,
-  CLOUDBEAT_AWS,
-} from './aws_credentials_form/aws_constants';
-import { CLOUDBEAT_GCP, GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_constants';
 import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
 
 export const isPostureInput = (

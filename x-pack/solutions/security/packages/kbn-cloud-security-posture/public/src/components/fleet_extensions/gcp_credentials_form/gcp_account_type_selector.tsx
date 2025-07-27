@@ -17,7 +17,7 @@ import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { gcpField, getInputVarsFields } from './gcp_utils';
 import { NewPackagePolicyPostureInput } from '../types';
-import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from './gcp_constants';
+import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -80,14 +80,13 @@ export const GcpAccountTypeSelect = ({
   const fieldsSnapshot = useRef({});
   const lastSetupAccessType = useRef<string | undefined>(undefined);
   const onSetupFormatChange = (newSetupFormat: string) => {
-    if (newSetupFormat === 'single-account') {
+    if (newSetupFormat === GCP_SINGLE_ACCOUNT) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
       lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
-
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {

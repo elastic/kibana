@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AWS_CREDENTIALS_TYPE } from './aws_constants';
+import { AWS_CREDENTIALS_TYPE } from '../constants';
 
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';

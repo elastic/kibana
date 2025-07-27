@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { useState, useCallback, useEffect } from 'react';
-import { NewPackagePolicy, NewPackagePolicyInput, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -94,9 +99,9 @@ interface UseLoadFleetExtensionProps {
   }) => void;
   validationResults: any; // Replace with actual type if available
   isEditPage: boolean;
-  packageInfo: { name: string };
+  packageInfo: PackageInfo;
   integrationToEnable?: CloudSecurityPolicyTemplate;
-  setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
+  // setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
   isSubscriptionLoading: boolean;
   isSubscriptionValid: boolean;
 }
@@ -116,8 +121,8 @@ export const useLoadFleetExtension = ({
   isSubscriptionValid,
   packageInfo,
   integrationToEnable,
-  setIntegrationToEnable,
-}: UseLoadFleetExtensionProps) => {
+}: // setIntegrationToEnable,
+UseLoadFleetExtensionProps) => {
   const { cloud } = useKibana().services;
   const isServerless = !!cloud.serverless.projectType;
   const integration =
@@ -179,46 +184,32 @@ export const useLoadFleetExtension = ({
   // delaying component rendering due to a race condition issue from Fleet
   // TODO: remove this workaround when the following issue is resolved:
   // https://github.com/elastic/kibana/issues/153246
-  useEffect(() => {
-    // using validation?.vars to know if the newPolicy state was reset due to race condition
-    if (validationResultsNonNullFields.length > 0) {
-      // Forcing rerender to recover from the validation errors state
-      setIsLoading(true);
-    }
-    setTimeout(() => setIsLoading(false), 200);
-  }, [validationResultsNonNullFields]);
+  // useEffect(() => {
+  //   // using validation?.vars to know if the newPolicy state was reset due to race condition
+  //   if (validationResultsNonNullFields.length > 0) {
+  //     // Forcing rerender to recover from the validation errors state
+  //     setIsLoading(true);
+  //   }
+  //   setTimeout(() => setIsLoading(false), 200);
+  // }, [validationResultsNonNullFields]);
 
-  useEffect(() => {
-    setIsLoading(isSubscriptionLoading);
-  }, [isSubscriptionLoading]);
+  if (!isSubscriptionLoading && isLoading) {
+    setIsLoading(false);
+  }
 
-  useEffect(() => {
-    if (!isServerless) {
-      setIsValid(isSubscriptionValid);
-    }
-  }, [isServerless, isSubscriptionValid]);
+  if ((isSubscriptionValid && !isValid) || (!isValid && isServerless)) {
+    setIsValid(true);
+  }
 
-  useEffect(() => {
-    if (isEditPage) return;
-    if (isLoading) return;
-    // Pick default input type for policy template.
-    // Only 1 enabled input is supported when all inputs are initially enabled.
-    // Required for mount only to ensure a single input type is selected
-    // This will remove errors in validationResults.vars
+  if (
+    !isEditPage &&
+    !isLoading &&
+    !isSubscriptionLoading &&
+    !newPolicy.inputs.some((i) => i.enabled)
+  ) {
     setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
     refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, input.policy_template, isEditPage]);
-
-  useEffect(() => {
-    if (isEditPage) {
-      return;
-    }
-
-    setEnabledPolicyInput(input.type);
-    setIntegrationToEnable?.(input.policy_template);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input.policy_template]);
+  }
 
   return {
     isLoading,

@@ -12,7 +12,7 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { GcpFields, GcpInputFields, GcpCredentialsType } from './gcp_types';
 import { NewPackagePolicyPostureInput } from '../types';
 import { getCspmCloudShellDefaultValue } from '../utils';
-import { GCP_CREDENTIALS_TYPE } from './gcp_constants';
+import { GCP_CREDENTIALS_TYPE } from '../constants';
 
 export const gcpField: GcpInputFields = {
   fields: {

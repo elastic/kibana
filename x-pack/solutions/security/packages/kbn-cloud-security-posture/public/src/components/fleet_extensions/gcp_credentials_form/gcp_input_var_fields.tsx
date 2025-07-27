@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { fieldIsInvalid, findVariableDef } from '../utils';
 import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_test_subjects';
 import { gcpField } from './gcp_utils';
-import { GCP_CREDENTIALS_TYPE } from './gcp_constants';
+import { GCP_CREDENTIALS_TYPE } from '../constants';
 import { GcpFields, GcpInputFields } from './gcp_types';
 
 const credentialOptionsList = [

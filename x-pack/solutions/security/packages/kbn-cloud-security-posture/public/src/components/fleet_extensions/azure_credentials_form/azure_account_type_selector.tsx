@@ -11,15 +11,14 @@ import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy, isBelowMinVersion } from '../utils';
-import {} from '../constants';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
+import { NewPackagePolicyPostureInput } from '../types';
+import { AzureAccountType } from './azure_types';
 import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
-} from './azure_constants';
-import { NewPackagePolicyPostureInput } from '../types';
-import { AzureAccountType } from './azure_types';
+} from '../constants';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean

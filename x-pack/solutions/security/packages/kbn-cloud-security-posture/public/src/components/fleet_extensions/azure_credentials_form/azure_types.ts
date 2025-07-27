@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SETUP_FORMAT,
-  AZURE_SINGLE_ACCOUNT,
-} from './azure_constants';
+import { AZURE_ORGANIZATION_ACCOUNT, AZURE_SETUP_FORMAT, AZURE_SINGLE_ACCOUNT } from '../constants';
 
 export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
 

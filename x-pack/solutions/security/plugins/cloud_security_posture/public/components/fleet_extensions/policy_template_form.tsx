@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useRef } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -70,7 +70,18 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     setIntegrationToEnable,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
+
     const isParentSecurityPosture = !integrationParam;
+    const isInitiallyLoadingDefaultPolicyTemplateRef = useRef(!isParentSecurityPosture);
+
+    if (
+      isParentSecurityPosture &&
+      !isInitiallyLoadingDefaultPolicyTemplateRef.current &&
+      setIntegrationToEnable
+    ) {
+      isInitiallyLoadingDefaultPolicyTemplateRef.current = true;
+      setIntegrationToEnable(CSPM_POLICY_TEMPLATE);
+    }
 
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
@@ -143,8 +154,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             onChange={onChange}
             packageInfo={packageInfo}
             isEditPage={isEditPage}
-            // setIntegrationToEnable={setIntegrationToEnable}
-            setEnabledPolicyInput={setEnabledPolicyInput}
             validationResults={validationResults}
             defaultSetupTechnology={defaultSetupTechnology}
             isAgentlessEnabled={isAgentlessEnabled}

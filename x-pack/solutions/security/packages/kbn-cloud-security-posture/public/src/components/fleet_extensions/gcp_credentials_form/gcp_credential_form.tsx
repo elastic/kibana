@@ -15,16 +15,16 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { fieldIsInvalid, getCspmCloudShellDefaultValue, getPosturePolicy } from '../utils';
 import {
+  cspIntegrationDocsNavigation,
   CLOUDBEAT_GCP,
   GCP_CREDENTIALS_TYPE,
   GCP_ORGANIZATION_ACCOUNT,
   GCP_SETUP_ACCESS,
   MIN_VERSION_GCP_CIS,
-} from './gcp_constants';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { fieldIsInvalid, getCspmCloudShellDefaultValue, getPosturePolicy } from '../utils';
-import { cspIntegrationDocsNavigation } from '../constants';
+} from '../constants';
 import { ReadDocumentation } from '../common';
 import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,

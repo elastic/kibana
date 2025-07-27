@@ -6,7 +6,7 @@
  */
 
 import { CloudConnectorType } from '../types';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT, AWS_SETUP_FORMAT } from './aws_constants';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
 
 export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
 

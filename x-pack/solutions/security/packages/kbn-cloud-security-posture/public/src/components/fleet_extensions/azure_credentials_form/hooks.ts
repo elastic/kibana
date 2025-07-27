@@ -12,9 +12,13 @@ import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { cspIntegrationDocsNavigation } from '../constants';
+import {
+  cspIntegrationDocsNavigation,
+  AZURE_SETUP_FORMAT,
+  AZURE_CREDENTIALS_TYPE,
+  CLOUDBEAT_AZURE,
+} from '../constants';
 import { NewPackagePolicyPostureInput } from '../types';
-import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_constants';
 import { SetupFormat, AzureCredentialsType } from './azure_types';
 import { getArmTemplateUrlFromCspmPackage } from './azure_utils';
 

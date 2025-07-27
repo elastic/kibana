@@ -16,7 +16,7 @@ import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './get_aws_credentials_form_options';
 import { hasPolicyTemplateInputs } from '../utils';
-import { AWS_CREDENTIALS_TYPE } from './aws_constants';
+import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { NewPackagePolicyPostureInput } from '../types';
 
 export const getDefaultAwsCredentialsType = (

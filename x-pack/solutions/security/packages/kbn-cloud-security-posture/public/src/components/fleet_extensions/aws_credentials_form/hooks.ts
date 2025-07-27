@@ -7,7 +7,12 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { cspIntegrationDocsNavigation } from '../constants';
+import {
+  cspIntegrationDocsNavigation,
+  AWS_CREDENTIALS_TYPE,
+  AWS_SETUP_FORMAT,
+  CLOUDBEAT_AWS,
+} from '../constants';
 import { getPosturePolicy } from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
@@ -15,7 +20,6 @@ import {
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import { NewPackagePolicyPostureInput } from '../types';
-import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT, CLOUDBEAT_AWS } from './aws_constants';
 import { AwsCredentialsType, SetupFormat } from './aws_types';
 import { getAwsCredentialsType, getCspmCloudFormationDefaultValue } from './aws_utils';
 /**

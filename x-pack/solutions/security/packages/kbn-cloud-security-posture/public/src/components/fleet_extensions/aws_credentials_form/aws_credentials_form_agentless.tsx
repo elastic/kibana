@@ -24,6 +24,7 @@ import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   cspIntegrationDocsNavigation,
+  AWS_CREDENTIALS_TYPE,
 } from '../constants';
 import {
   getAgentlessCredentialsType,
@@ -46,9 +47,8 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
-import { NewPackagePolicyPostureInput } from '../types';
-import { AWS_CREDENTIALS_TYPE } from './aws_constants';
 import { getAwsCredentialsType } from './aws_utils';
+import { NewPackagePolicyPostureInput } from '../types';
 
 interface AwsAgentlessFormProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;

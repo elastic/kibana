@@ -19,7 +19,7 @@ import { AzureCredentialsType, SetupFormat } from './azure_types';
 import { useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from './azure_constants';
+import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
   CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,

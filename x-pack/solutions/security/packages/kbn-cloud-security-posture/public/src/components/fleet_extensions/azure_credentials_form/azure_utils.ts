@@ -9,7 +9,7 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { hasPolicyTemplateInputs } from '../utils';
-import { AZURE_CREDENTIALS_TYPE } from './azure_constants';
+import { AZURE_CREDENTIALS_TYPE } from '../constants';
 
 export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
