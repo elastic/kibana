@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PipelineStructureTree, PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
@@ -23,7 +23,7 @@ interface Props {
 export const TreePanel = React.memo(
   ({ pipelineTree, selectedPipeline, clickTreeNode, setTreeRootStack, isExtension }: Props) => {
     const {
-      services: { history, api },
+      services: { history, api, documentation },
     } = useKibana();
 
     const pushTreeStack = useCallback(
@@ -57,7 +57,7 @@ export const TreePanel = React.memo(
     }, [history, clickTreeNode, setTreeRootStack]);
 
     return (
-      <EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner color="subdued">
         <EuiTitle id="pipelineTreeTitle" data-test-subj="pipelineTreeTitle">
           <h2>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.title', {
@@ -70,7 +70,19 @@ export const TreePanel = React.memo(
 
         <FormattedMessage
           id="xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description"
-          defaultMessage="Explore the full ingest process of a pipeline and its children."
+          defaultMessage="A tree visualization of your ingest pipeline, showing how {pipelineProcessorsLink} are invoking other pipelines"
+          values={{
+            pipelineProcessorsLink: (
+              <EuiLink href={documentation.getDocLinks()?.links.ingest.pipeline} target="_blank">
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.pipelineTree.pipelineProcessorsDocsLink',
+                  {
+                    defaultMessage: 'pipeline processors',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
         />
 
         <EuiSpacer size="s" />

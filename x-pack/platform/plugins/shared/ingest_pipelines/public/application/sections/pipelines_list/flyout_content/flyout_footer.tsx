@@ -26,15 +26,19 @@ export interface Props {
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;
-  onClose: () => void;
+  renderActions: boolean;
+  renderViewTreeButton: boolean;
+  onViewTreeClick: () => void;
 }
 
 export const FlyoutFooter = ({
   pipeline,
-  onClose,
   onEditClick,
   onCloneClick,
   onDeleteClick,
+  renderActions,
+  renderViewTreeButton,
+  onViewTreeClick,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
@@ -86,64 +90,63 @@ export const FlyoutFooter = ({
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-            data-test-subj="closeDetailsFlyout"
+        {renderViewTreeButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onViewTreeClick} flush="left" data-test-subj="viewTreeButton">
+              {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.viewTreeLabel', {
+                defaultMessage: 'View full hierarchy',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {renderActions && (
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="flexEnd"
+            responsive={false}
           >
-            {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="flexEnd"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="editPipelineButton"
-              aria-label={i18n.translate(
-                'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
-                {
-                  defaultMessage: 'Edit pipeline',
-                }
-              )}
-              onClick={() => onEditClick(pipeline.name)}
-            >
-              {i18n.translate(
-                'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
-                {
-                  defaultMessage: 'Edit pipeline',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              isOpen={showPopover}
-              closePopover={() => setShowPopover(false)}
-              button={actionsPopoverButton}
-              panelPaddingSize="none"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                initialPanelId={0}
-                panels={[
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="editPipelineButton"
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.editPipelineActionsAriaLabel',
                   {
-                    id: 0,
-                    items: popoverActions,
-                  },
-                ]}
-                css={{ width: '150px' }}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                    defaultMessage: 'Edit pipeline',
+                  }
+                )}
+                onClick={() => onEditClick(pipeline.name)}
+              >
+                {i18n.translate(
+                  'xpack.ingestPipelines.list.pipelineDetails.editPipelineButtonLabel',
+                  {
+                    defaultMessage: 'Edit pipeline',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                isOpen={showPopover}
+                closePopover={() => setShowPopover(false)}
+                button={actionsPopoverButton}
+                panelPaddingSize="none"
+                repositionOnScroll
+              >
+                <EuiContextMenu
+                  initialPanelId={0}
+                  panels={[
+                    {
+                      id: 0,
+                      items: popoverActions,
+                    },
+                  ]}
+                  css={{ width: '150px' }}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );

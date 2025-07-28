@@ -29,6 +29,7 @@ export const PipelineTreeNodeLabel = ({
       css={{ width: '350px' }}
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
+      responsive={false}
     >
       <EuiFlexItem grow={8 + (!isDeprecated + !isManaged)}>
         <EuiLink
