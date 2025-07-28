@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "flat_settings": "__flag__",
+      "settings_filter": [],
       "include_defaults": "__flag__",
       "local": "__flag__",
       "master_timeout": [

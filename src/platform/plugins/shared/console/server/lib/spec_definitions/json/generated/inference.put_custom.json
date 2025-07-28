@@ -1,29 +1,26 @@
 {
-  "inference.put_voyageai": {
+  "inference.put_custom": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__",
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ]
+      "pretty": "__flag__"
     },
     "url_components": {
       "task_type": [
         "text_embedding",
-        "rerank"
+        "sparse_embedding",
+        "rerank",
+        "completion"
       ]
     },
     "methods": [
       "PUT"
     ],
     "patterns": [
-      "_inference/{task_type}/{voyageai_inference_id}"
+      "_inference/{task_type}/{custom_inference_id}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-voyageai",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-custom",
     "availability": {
       "stack": true,
       "serverless": true
