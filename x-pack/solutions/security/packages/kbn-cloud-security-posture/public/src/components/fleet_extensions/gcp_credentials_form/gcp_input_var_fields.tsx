@@ -25,14 +25,14 @@ import { GcpFields, GcpInputFields } from '../types';
 
 const credentialOptionsList = [
   {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
+    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsFileOption', {
       defaultMessage: 'Credentials File',
     }),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
+    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
@@ -74,7 +74,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialFilesError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -92,7 +92,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialJSONError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {

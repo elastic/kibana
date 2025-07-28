@@ -35,7 +35,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
+    label: i18n.translate('securitySolutionPackages.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
     testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
@@ -64,7 +64,7 @@ const ArmTemplateSetup = ({
     return (
       <EuiCallOut color="warning">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.armTemplateSetupStep.notSupported"
+          id="securitySolutionPackages.azureIntegration.armTemplateSetupStep.notSupported"
           defaultMessage="ARM Template is not supported on the current Integration version, please upgrade your integration to the latest version to use ARM Template"
         />
       </EuiCallOut>
@@ -81,25 +81,25 @@ const ArmTemplateSetup = ({
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.hostRequirement"
+              id="securitySolutionPackages.azureIntegration.armTemplateSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.login"
+              id="securitySolutionPackages.azureIntegration.armTemplateSetupStep.login"
               defaultMessage="Log in to your Azure portal."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.save"
+              id="securitySolutionPackages.azureIntegration.armTemplateSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.launch"
+              id="securitySolutionPackages.azureIntegration.armTemplateSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, copy the relevant Bash command, then click on the Launch ARM Template button."
             />
           </li>
@@ -108,7 +108,7 @@ const ArmTemplateSetup = ({
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.armTemplateSetupNote"
+          id="securitySolutionPackages.azureIntegration.armTemplateSetupNote"
           defaultMessage="Read the {documentation} for more details"
           values={{
             documentation: (
@@ -118,7 +118,7 @@ const ArmTemplateSetup = ({
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
               >
-                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
+                {i18n.translate('securitySolutionPackages.azureIntegration.documentationLinkText', {
                   defaultMessage: 'documentation',
                 })}
               </EuiLink>
@@ -139,9 +139,12 @@ const AzureCredentialTypeSelector = ({
 }) => (
   <EuiFormRow
     fullWidth
-    label={i18n.translate('xpack.csp.azureIntegration.azureCredentialTypeSelectorLabel', {
-      defaultMessage: 'Preferred manual method',
-    })}
+    label={i18n.translate(
+      'securitySolutionPackages.azureIntegration.azureCredentialTypeSelectorLabel',
+      {
+        defaultMessage: 'Preferred manual method',
+      }
+    )}
   >
     <EuiSelect
       fullWidth
@@ -160,13 +163,13 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.manualCredentialType.instructions"
+          id="securitySolutionPackages.azureIntegration.manualCredentialType.instructions"
           defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
@@ -177,7 +180,7 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
       <EuiSpacer />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+          id="securitySolutionPackages.azureIntegration.manualCredentialType.documentaion"
           defaultMessage="Read the {documentation} for more details"
           values={{
             documentation: (
@@ -187,7 +190,7 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
               >
-                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
+                {i18n.translate('securitySolutionPackages.azureIntegration.documentationLinkText', {
                   defaultMessage: 'documentation',
                 })}
               </EuiLink>
@@ -256,7 +259,7 @@ export const AzureCredentialsForm = ({
         <EuiSpacer size="l" />
         <EuiCallOut color="warning">
           <FormattedMessage
-            id="xpack.csp.azureIntegration.azureNotSupportedMessage"
+            id="securitySolutionPackages.azureIntegration.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"
           />
         </EuiCallOut>
@@ -310,7 +313,7 @@ export const AzureCredentialsForm = ({
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.azureIntegration.manualCredentialType.documentation"
+              id="securitySolutionPackages.azureIntegration.manualCredentialType.documentation"
               defaultMessage="Read the {documentation} for more details"
               values={{
                 documentation: (
@@ -320,9 +323,12 @@ export const AzureCredentialsForm = ({
                     rel="noopener nofollow noreferrer"
                     data-test-subj="externalLink"
                   >
-                    {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
-                      defaultMessage: 'documentation',
-                    })}
+                    {i18n.translate(
+                      'securitySolutionPackages.azureIntegration.documentationLinkText',
+                      {
+                        defaultMessage: 'documentation',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}

@@ -15,7 +15,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
     <EuiTitle size="xs">
       <h2>
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContentTitle"
+          id="securitySolutionPackages.gcpIntegration.setupInfoContentTitle"
           defaultMessage="Setup Access"
         />
       </h2>
@@ -24,14 +24,14 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
     <EuiText color={'subdued'} size="s">
       {isAgentless ? (
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.agentlessSetupInfoContent"
+          id="securitySolutionPackages.gcpIntegration.agentlessSetupInfoContent"
           defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
     step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
+                  id="securitySolutionPackages.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
@@ -40,7 +40,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
         />
       ) : (
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContent"
+          id="securitySolutionPackages.gcpIntegration.setupInfoContent"
           defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
 method of providing the GCP credentials this integration will use. You can follow these
 step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
@@ -48,7 +48,7 @@ step-by-step instructions to generate the necessary credentials. Refer to our {g
             gettingStartedLink: (
               <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>

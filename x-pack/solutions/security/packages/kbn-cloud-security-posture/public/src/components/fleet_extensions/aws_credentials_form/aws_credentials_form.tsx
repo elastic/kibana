@@ -31,7 +31,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
   {
     id: AWS_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
     testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
@@ -59,7 +59,7 @@ const CloudFormationSetup = ({
     return (
       <EuiCallOut color="warning">
         <FormattedMessage
-          id="xpack.csp.awsIntegration.cloudFormationSetupStep.notSupported"
+          id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.notSupported"
           defaultMessage="CloudFormation is not supported on the current Integration version, please upgrade your integration to the latest version to use CloudFormation"
         />
       </EuiCallOut>
@@ -78,34 +78,34 @@ const CloudFormationSetup = ({
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="xpack.csp.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.organizationLogin"
                 defaultMessage="Log in as an admin in your organization's AWS management account"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
+                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.login"
                 defaultMessage="Log in as an admin to the AWS Account you want to onboard"
               />
             </li>
           )}
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.save"
+              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page"
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.launch"
+              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, click the Launch CloudFormation button."
             />
           </li>
@@ -150,13 +150,13 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent
         info={
           <FormattedMessage
-            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
+            id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContent"
             defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
-                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -183,9 +183,12 @@ export const AwsCredentialsForm = ({
         <>
           <AwsCredentialTypeSelector
             disabled={disabled}
-            label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
-              defaultMessage: 'Preferred manual method',
-            })}
+            label={i18n.translate(
+              'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabel',
+              {
+                defaultMessage: 'Preferred manual method',
+              }
+            )}
             options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
             onChange={(optionId) => {

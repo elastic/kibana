@@ -24,14 +24,17 @@ const getAzureAccountTypeOptions = (
 ): CspRadioGroupProps['options'] => [
   {
     id: AZURE_ORGANIZATION_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
-      defaultMessage: 'Azure Organization',
-    }),
+    label: i18n.translate(
+      'securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationLabel',
+      {
+        defaultMessage: 'Azure Organization',
+      }
+    ),
     testId: 'azureOrganizationAccountTestId',
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
-          'xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+          'securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
           {
             defaultMessage: 'Coming Soon',
           }
@@ -40,9 +43,12 @@ const getAzureAccountTypeOptions = (
   },
   {
     id: AZURE_SINGLE_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.singleAccountLabel', {
-      defaultMessage: 'Single Subscription',
-    }),
+    label: i18n.translate(
+      'securitySolutionPackages.fleetIntegration.azureAccountType.singleAccountLabel',
+      {
+        defaultMessage: 'Single Subscription',
+      }
+    ),
     testId: 'azureSingleAccountTestId',
   },
 ];
@@ -99,7 +105,7 @@ export const AzureAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.azureAccountTypeDescriptionLabel"
+          id="securitySolutionPackages.fleetIntegration.azureAccountTypeDescriptionLabel"
           defaultMessage="Select between onboarding an Azure Organization (tenant root group) or a single Azure subscription, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -125,7 +131,7 @@ export const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.azureAccountType.azureOrganizationDescription"
+              id="securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationDescription"
               defaultMessage="Connect Elastic to every Azure Subscription (current and future) in your environment by providing Elastic with read-only (configuration) access to your Azure Organization (tenant root group)."
             />
           </EuiText>
@@ -136,7 +142,7 @@ export const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.azureAccountType.singleAccountDescription"
+              id="securitySolutionPackages.fleetIntegration.azureAccountType.singleAccountDescription"
               defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
             />
           </EuiText>

@@ -167,13 +167,13 @@ export const AwsCredentialsFormAgentless = ({
         info={
           showCloudConnectors ? (
             <FormattedMessage
-              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
+              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={documentationLink} target="_blank">
                     <FormattedMessage
-                      id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -182,13 +182,13 @@ export const AwsCredentialsFormAgentless = ({
             />
           ) : (
             <FormattedMessage
-              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentless"
               defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={documentationLink} target="_blank">
                     <FormattedMessage
-                      id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -200,9 +200,12 @@ export const AwsCredentialsFormAgentless = ({
       />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
-        label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabelAgentless', {
-          defaultMessage: 'Preferred method',
-        })}
+        label={i18n.translate(
+          'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabelAgentless',
+          {
+            defaultMessage: 'Preferred method',
+          }
+        )}
         type={awsCredentialsType}
         options={selectorOptions()}
         disabled={!!disabled}
@@ -226,7 +229,7 @@ export const AwsCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
             />
           </EuiCallOut>
@@ -256,7 +259,7 @@ export const AwsCredentialsFormAgentless = ({
             href={templateUrl}
           >
             <FormattedMessage
-              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="securitySolutionPackages.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>

@@ -40,7 +40,7 @@ export const PolicyTemplateSelector = ({
     <div>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.selectIntegrationTypeTitle"
+          id="securitySolutionPackages.fleetIntegration.selectIntegrationTypeTitle"
           defaultMessage="Select the type of security posture management integration you want to configure"
         />
       </EuiText>

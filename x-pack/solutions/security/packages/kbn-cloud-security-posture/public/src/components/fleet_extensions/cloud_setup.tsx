@@ -37,7 +37,7 @@ const EditScreenStepTitle = () => (
     <EuiTitle size="s">
       <h4>
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.integrationSettingsTitle"
+          id="securitySolutionPackages.fleetIntegration.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
@@ -178,15 +178,18 @@ export const CloudSetup = memo<CloudSetupProps>(
         {isEditPage && (
           <>
             <EuiCallOut
-              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                defaultMessage: 'Modifying Integration Details',
-              })}
+              title={i18n.translate(
+                'securitySolutionPackages.fleetIntegration.editWarning.calloutTitle',
+                {
+                  defaultMessage: 'Modifying Integration Details',
+                }
+              )}
               color="warning"
               iconType="warning"
             >
               <p>
                 <FormattedMessage
-                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
+                  id="securitySolutionPackages.fleetIntegration.editWarning.calloutDescription"
                   defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
                 />
               </p>
@@ -197,7 +200,7 @@ export const CloudSetup = memo<CloudSetupProps>(
 
         {/* Shows info on the active policy template */}
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
+          id="securitySolutionPackages.fleetIntegration.configureCspmIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
         <EuiSpacer size="l" />
@@ -264,7 +267,7 @@ export const CloudSetup = memo<CloudSetupProps>(
                   }}
                 >
                   <FormattedMessage
-                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                    id="securitySolutionPackages.fleetIntegration.advancedOptionsLabel"
                     defaultMessage="Advanced options"
                   />
                 </EuiText>
@@ -281,8 +284,8 @@ export const CloudSetup = memo<CloudSetupProps>(
                   updatePolicy({ ...newPolicy, namespace });
                 }}
                 data-test-subj="namespaceInput"
-                labelId="xpack.csp.fleetIntegration.namespaceLabel"
-                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
+                helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
               />
             </EuiAccordion>
           </>

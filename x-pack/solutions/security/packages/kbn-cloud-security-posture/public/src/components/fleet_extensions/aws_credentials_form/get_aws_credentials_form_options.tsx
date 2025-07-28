@@ -18,7 +18,7 @@ const AssumeRoleDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.assumeRoleDescription"
+        id="securitySolutionPackages.awsIntegration.assumeRoleDescription"
         defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS
       account. When creating an IAM role, users can define the role’s permissions. Roles do not have
       standard long-term credentials such as passwords or access keys."
@@ -31,7 +31,7 @@ const DirectAccessKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.directAccessKeysDescription"
+        id="securitySolutionPackages.awsIntegration.directAccessKeysDescription"
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
@@ -42,7 +42,7 @@ const TemporaryKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.temporaryKeysDescription"
+        id="securitySolutionPackages.awsIntegration.temporaryKeysDescription"
         defaultMessage="You can configure temporary security credentials in AWS to last for a specified duration. They
       consist of an access key ID, a secret access key, and a security token, which is typically
       found using GetSessionToken."
@@ -55,7 +55,7 @@ const SharedCredentialsDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.sharedCredentialsDescription"
+        id="securitySolutionPackages.awsIntegration.sharedCredentialsDescription"
         defaultMessage="If you use different AWS credentials for different tools or applications, you can use profiles
       to define multiple access keys in the same configuration file."
       />
@@ -64,12 +64,15 @@ const SharedCredentialsDescription = (
 );
 
 const AWS_FIELD_LABEL = {
-  access_key_id: i18n.translate('xpack.csp.awsIntegration.accessKeyIdLabel', {
+  access_key_id: i18n.translate('securitySolutionPackages.awsIntegration.accessKeyIdLabel', {
     defaultMessage: 'Access Key ID',
   }),
-  secret_access_key: i18n.translate('xpack.csp.awsIntegration.secretAccessKeyLabel', {
-    defaultMessage: 'Secret Access Key',
-  }),
+  secret_access_key: i18n.translate(
+    'securitySolutionPackages.awsIntegration.secretAccessKeyLabel',
+    {
+      defaultMessage: 'Secret Access Key',
+    }
+  ),
 };
 
 export type AwsCredentialsFields = Record<
@@ -164,13 +167,13 @@ export const DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE =
 
 export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connectors'> => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
-    label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.assumeRoleLabel', {
       defaultMessage: 'Assume role',
     }),
     info: AssumeRoleDescription,
     fields: {
       role_arn: {
-        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
         dataTestSubj: 'awsRoleArnInput',
@@ -178,7 +181,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     },
   },
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
     info: DirectAccessKeysDescription,
@@ -194,7 +197,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
   },
   [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
     info: TemporaryKeysDescription,
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
     fields: {
@@ -209,7 +212,7 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
         isSecret: true,
       },
       session_token: {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
         dataTestSubj: 'awsTemporaryKeysSessionToken',
@@ -217,21 +220,24 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
     },
   },
   [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.sharedCredentialLabel', {
       defaultMessage: 'Shared credentials',
     }),
     info: SharedCredentialsDescription,
     fields: {
       shared_credential_file: {
-        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
         dataTestSubj: 'awsSharedCredentialFile',
       },
       credential_profile_name: {
-        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
-          defaultMessage: 'Credential Profile Name',
-        }),
+        label: i18n.translate(
+          'securitySolutionPackages.awsIntegration.credentialProfileNameLabel',
+          {
+            defaultMessage: 'Credential Profile Name',
+          }
+        ),
         dataTestSubj: 'awsCredentialProfileName',
       },
     },
@@ -248,20 +254,20 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
   'assume_role' | 'cloud_formation' | 'shared_credentials'
 > => ({
   [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.cloudConnectorsRoleLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.cloudConnectorsRoleLabel', {
       defaultMessage: 'Cloud Connectors (recommended)',
     }),
     info: AssumeRoleDescription,
     fields: {
       role_arn: {
-        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
         type: 'text',
         dataTestSubj: 'awsRoleArnInput',
       },
       'aws.credentials.external_id': {
-        label: i18n.translate('xpack.csp.awsIntegration.externalId', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.externalId', {
           defaultMessage: 'External ID',
         }),
         type: 'password',
@@ -271,7 +277,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
     },
   },
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
     info: DirectAccessKeysDescription,
@@ -287,7 +293,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
   },
   [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
     info: TemporaryKeysDescription,
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
     fields: {
@@ -302,7 +308,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
         isSecret: true,
       },
       session_token: {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
         dataTestSubj: 'awsTemporaryKeysSessionToken',
@@ -316,7 +322,7 @@ export const getAwsAgentlessFormOptions = (): Omit<
   'assume_role' | 'cloud_formation' | 'cloud_connectors' | 'shared_credentials'
 > => ({
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
     info: DirectAccessKeysDescription,
@@ -332,7 +338,7 @@ export const getAwsAgentlessFormOptions = (): Omit<
   },
   [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
     info: TemporaryKeysDescription,
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('securitySolutionPackages.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
     fields: {
@@ -347,7 +353,7 @@ export const getAwsAgentlessFormOptions = (): Omit<
         isSecret: true,
       },
       session_token: {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('securitySolutionPackages.awsIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
         dataTestSubj: 'awsTemporaryKeysSessionToken',

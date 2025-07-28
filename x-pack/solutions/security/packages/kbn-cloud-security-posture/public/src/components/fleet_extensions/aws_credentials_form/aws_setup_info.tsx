@@ -19,7 +19,7 @@ export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="xpack.csp.awsIntegration.setupInfoContentTitle"
+            id="securitySolutionPackages.awsIntegration.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>

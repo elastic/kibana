@@ -29,7 +29,7 @@ export const IntegrationSettings = ({
         error: validationResults?.name || null,
         label: (
           <FormattedMessage
-            id="xpack.csp.fleetIntegration.integrationNameLabel"
+            id="securitySolutionPackages.fleetIntegration.integrationNameLabel"
             defaultMessage="Name"
           />
         ),
@@ -40,7 +40,7 @@ export const IntegrationSettings = ({
         error: validationResults?.description || null,
         label: (
           <FormattedMessage
-            id="xpack.csp.fleetIntegration.integrationDescriptionLabel"
+            id="securitySolutionPackages.fleetIntegration.integrationDescriptionLabel"
             defaultMessage="Description"
           />
         ),

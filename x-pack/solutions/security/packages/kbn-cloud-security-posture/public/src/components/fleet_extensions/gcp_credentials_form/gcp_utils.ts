@@ -21,33 +21,39 @@ import { GCP_CREDENTIALS_TYPE } from '../constants';
 export const gcpField: GcpInputFields = {
   fields: {
     'gcp.organization_id': {
-      label: i18n.translate('xpack.csp.gcpIntegration.organizationIdFieldLabel', {
+      label: i18n.translate('securitySolutionPackages.gcpIntegration.organizationIdFieldLabel', {
         defaultMessage: 'Organization ID',
       }),
       type: 'text',
     },
     'gcp.project_id': {
-      label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
+      label: i18n.translate('securitySolutionPackages.gcpIntegration.projectidFieldLabel', {
         defaultMessage: 'Project ID',
       }),
       type: 'text',
     },
     'gcp.credentials.file': {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
-        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialFileText',
+        {
+          defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.json': {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
-        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialJSONText',
+        {
+          defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+        }
+      ),
       type: 'password',
       isSecret: true,
     },
     'gcp.credentials.type': {
       label: i18n.translate(
-        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
         {
           defaultMessage: 'Credential',
         }

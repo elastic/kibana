@@ -96,43 +96,55 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
 export const CLOUD_SECURITY_POSTURE_INTEGRATIONS: CloudPostureIntegrations = {
   cspm: {
     policyTemplate: CSPM_POLICY_TEMPLATE,
-    name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
+    name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
       defaultMessage: 'Cloud Security Posture Management',
     }),
-    shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
-      defaultMessage: 'CSPM',
-    }),
+    shortName: i18n.translate(
+      'securitySolutionPackages.cspmIntegration.integration.shortNameTitle',
+      {
+        defaultMessage: 'CSPM',
+      }
+    ),
     options: [
       {
         type: CLOUDBEAT_AWS,
-        name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.cspmIntegration.awsOption.nameTitle', {
           defaultMessage: 'AWS',
         }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
-          defaultMessage: 'CIS AWS',
-        }),
+        benchmark: i18n.translate(
+          'securitySolutionPackages.cspmIntegration.awsOption.benchmarkTitle',
+          {
+            defaultMessage: 'CIS AWS',
+          }
+        ),
         icon: 'logoAWS',
         testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
-        name: i18n.translate('xpack.csp.cspmIntegration.gcpOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.cspmIntegration.gcpOption.nameTitle', {
           defaultMessage: 'GCP',
         }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
-          defaultMessage: 'CIS GCP',
-        }),
+        benchmark: i18n.translate(
+          'securitySolutionPackages.cspmIntegration.gcpOption.benchmarkTitle',
+          {
+            defaultMessage: 'CIS GCP',
+          }
+        ),
         icon: googleCloudLogo,
         testId: 'cisGcpTestId',
       },
       {
         type: CLOUDBEAT_AZURE,
-        name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
+        name: i18n.translate('securitySolutionPackages.cspmIntegration.azureOption.nameTitle', {
           defaultMessage: 'Azure',
         }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
-          defaultMessage: 'CIS Azure',
-        }),
+        benchmark: i18n.translate(
+          'securitySolutionPackages.cspmIntegration.azureOption.benchmarkTitle',
+          {
+            defaultMessage: 'CIS Azure',
+          }
+        ),
         icon: 'logoAzure',
         testId: 'cisAzureTestId',
       },

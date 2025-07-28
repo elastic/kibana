@@ -83,7 +83,7 @@ export const GcpCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="xpack.csp.cspIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.cspIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
             />
           </EuiCallOut>
@@ -113,7 +113,7 @@ export const GcpCredentialsFormAgentless = ({
             href={cloudShellUrl}
           >
             <FormattedMessage
-              id="xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.button"
+              id="securitySolutionPackages.agentlessForm.googleCloudShell.cloudCredentials.button"
               defaultMessage="Launch Google Cloud Shell"
             />
           </EuiButton>
