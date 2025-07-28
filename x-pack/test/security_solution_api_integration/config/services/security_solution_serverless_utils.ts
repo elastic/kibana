@@ -12,7 +12,7 @@ import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface, User } from './types';
+import type { SecuritySolutionUtilsInterface, Role, User } from './types';
 import { roles } from '../privileges/roles';
 
 export function SecuritySolutionServerlessUtils({
@@ -61,6 +61,16 @@ export function SecuritySolutionServerlessUtils({
     return agentWithCommonHeaders.set(credentials.apiKeyHeader);
   };
 
+  const createSuperTestWithCustomRole = async (roleDefinition: Role) => {
+    await svlUserManager.setCustomRole(roleDefinition.privileges);
+    const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
+    const superTest = supertest
+      .agent(kbnUrl)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(roleAuthc.apiKeyHeader);
+    return superTest;
+  };
+
   return {
     getUsername: async (role = 'admin') => {
       const { username } = await svlUserManager.getUserData(role);
@@ -71,6 +81,8 @@ export function SecuritySolutionServerlessUtils({
      * Only one API key for each role can be active at a time.
      */
     createSuperTest,
+
+    createSuperTestWithCustomRole,
 
     createSuperTestWithUser: async (user: User) => {
       if (user.roles.length > 1) {
@@ -85,13 +97,7 @@ export function SecuritySolutionServerlessUtils({
       if (!roleDefinition) {
         throw new Error(`Could not find a role definition for ${userRoleName}`);
       }
-      await svlUserManager.setCustomRole(roleDefinition.privileges);
-      const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
-      const superTest = supertest
-        .agent(kbnUrl)
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader);
-      return superTest;
+      return await createSuperTestWithCustomRole(roleDefinition);
     },
 
     cleanUpCustomRole: async () => {
