@@ -73,7 +73,7 @@ export const getCustomScriptsRouteHandler = (
   const logger = endpointContext.logFactory.get('customScriptsRouteHandler');
 
   return async (context, request, response) => {
-    const { agentType = 'endpoint' } = request.query;
+    const { agentType = 'endpoint', ...otherQueryOptions } = request.query;
 
     logger.debug(`Retrieving custom scripts for: agentType ${agentType}`);
 
@@ -106,7 +106,7 @@ export const getCustomScriptsRouteHandler = (
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       });
 
-      const data = await responseActionsClient.getCustomScripts();
+      const data = await responseActionsClient.getCustomScripts(otherQueryOptions);
 
       return response.ok({ body: data });
     } catch (e) {

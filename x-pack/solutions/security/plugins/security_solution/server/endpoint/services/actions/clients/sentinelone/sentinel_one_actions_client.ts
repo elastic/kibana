@@ -36,6 +36,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
@@ -1018,7 +1019,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
-  async getCustomScripts(): Promise<CustomScriptsResponse> {
+  async getCustomScripts({
+    osType,
+  }: Omit<CustomScriptsRequestQueryParams, 'agentType'>): Promise<CustomScriptsResponse> {
     if (
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
     ) {
@@ -1034,6 +1037,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       sortOrder: 'asc',
       limit: 1000,
     };
+
+    if (osType) {
+      s1ScriptQueryOptions.osTypes = osType;
+    }
 
     const { data: scriptSearchResults } =
       await this.sendAction<SentinelOneGetRemoteScriptsResponse>(

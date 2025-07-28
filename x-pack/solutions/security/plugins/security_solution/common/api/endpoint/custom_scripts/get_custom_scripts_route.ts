@@ -19,8 +19,14 @@ export const CustomScriptsRequestSchema = {
         }
       )
     ),
-    // @ts-expect-error TS2769: No overload matches this call
-    osType: schema.maybe(schema.oneOf(HostOsTypeSchemaLiteral)),
+    /**
+     * Filter for `osType`. Valid values are `'macos', 'windows', 'linux'`.
+     * Currently only supported for SentinelOne EDR
+     */
+    osType: schema.maybe(
+      // @ts-expect-error TS2769: No overload matches this call
+      schema.oneOf(HostOsTypeSchemaLiteral)
+    ),
   }),
 };
 
