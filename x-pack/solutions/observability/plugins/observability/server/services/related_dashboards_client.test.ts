@@ -367,9 +367,10 @@ describe('RelatedDashboardsClient', () => {
       await client.fetchDashboards({ page: 1 });
       expect(soClientMock.get).toHaveBeenCalledWith(PANEL_TYPE, PANEL_SO_ID);
       // @ts-ignore next-line
-      expect(client.referencedPanelsSOAttributesByPanelIndex.get(PANEL_INDEX)).toBe(
-        PANEL_SO_ATTRIBUTES
-      );
+      expect(client.referencedPanelsSOAttributesByPanelIndex.get(PANEL_INDEX)).toStrictEqual({
+        ...PANEL_SO_ATTRIBUTES,
+        references: [],
+      });
     });
   });
 
@@ -429,6 +430,39 @@ describe('RelatedDashboardsClient', () => {
       const result = client.getDashboardsByIndex('index1');
       expect(result.dashboards).toEqual([]);
     });
+
+    it('should use referencedPanelsSOAttributesByPanelIndex when panelConfig.attributes is missing', () => {
+      const PANEL_INDEX = '123';
+      const INDEX_ID = 'index1';
+
+      // dashboard panel without attributes
+      client.dashboardsById.set('dashboardWithMissingAttributes', {
+        id: 'dashboardWithMissingAttributes',
+        attributes: {
+          title: 'Dashboard missing attributes',
+          panels: [
+            {
+              type: 'lens',
+              panelIndex: PANEL_INDEX,
+              panelConfig: {},
+            },
+          ],
+        },
+      } as any);
+
+      // populate fallback map with references for the panelIndex
+      // @ts-ignore private field access for testing only
+      client.referencedPanelsSOAttributesByPanelIndex.set(PANEL_INDEX, {
+        // minimal shape needed for getPanelIndicesMap logic
+        references: [{ name: 'indexpattern', id: INDEX_ID, type: 'type' }],
+      });
+
+      // @ts-ignore private method access for testing only
+      const { dashboards } = client.getDashboardsByIndex(INDEX_ID);
+
+      expect(dashboards).toHaveLength(1);
+      expect(dashboards[0]).toMatchObject({ id: 'dashboardWithMissingAttributes' });
+    });
   });
 
   describe('getPanelsByField', () => {
@@ -451,6 +485,51 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       const result = client.getDashboardsByField(['field1']);
       expect(result.dashboards).toEqual([]);
+    });
+
+    it('should use referencedPanelsSOAttributesByPanelIndex when panelConfig.attributes is missing', () => {
+      const PANEL_INDEX = '456';
+      const FIELD_NAME = 'field1';
+
+      client.dashboardsById.set('dashboardMissingState', {
+        id: 'dashboardMissingState',
+        attributes: {
+          title: 'Dashboard missing state',
+          panels: [
+            {
+              type: 'lens',
+              panelIndex: PANEL_INDEX,
+              panelConfig: {},
+            },
+          ],
+        },
+      } as any);
+
+      // populate fallback state for the panel index
+      // @ts-ignore testing private field
+      client.referencedPanelsSOAttributesByPanelIndex.set(PANEL_INDEX, {
+        state: {
+          datasourceStates: {
+            formBased: {
+              layers: {
+                layer1: {
+                  columns: {
+                    col1: {
+                      sourceField: FIELD_NAME,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // @ts-ignore private method access for testing only
+      const { dashboards } = client.getDashboardsByField([FIELD_NAME]);
+
+      expect(dashboards).toHaveLength(1);
+      expect(dashboards[0]).toMatchObject({ id: 'dashboardMissingState' });
     });
   });
 

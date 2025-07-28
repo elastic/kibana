@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   CONTENT_ID as LENS_CONTENT,
   LensSavedObjectAttributes,
@@ -42,4 +43,6 @@ const PANEL_TYPE_TO_ATTR = {
 } satisfies Record<SuggestedDashboardsValidPanelType, unknown>;
 
 export type ReferencedPanelAttributes =
-  (typeof PANEL_TYPE_TO_ATTR)[keyof typeof PANEL_TYPE_TO_ATTR];
+  (typeof PANEL_TYPE_TO_ATTR)[keyof typeof PANEL_TYPE_TO_ATTR] & {
+    references: SavedObjectReference[];
+  };

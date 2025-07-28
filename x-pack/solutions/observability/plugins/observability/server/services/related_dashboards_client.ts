@@ -29,6 +29,7 @@ import {
 } from './helpers';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
+
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();
   private alert: AlertData | null = null;
@@ -47,19 +48,18 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      if (this.isLensVizAttributes(panel.panelConfig.attributes)) {
-        return new Set(
-          panel.panelConfig.attributes.references
-            .filter((r) => r.name.match(`indexpattern`))
-            .map((reference) => reference.id)
-        );
+      let references = this.isLensVizAttributes(panel.panelConfig.attributes)
+        ? panel.panelConfig.attributes.references
+        : undefined;
+      if (!references && panel.panelIndex) {
+        references = this.referencedPanelsSOAttributesByPanelIndex.get(
+          panel.panelIndex
+        )?.references;
       }
-      if (panel.panelIndex) {
-        const referencedPanel = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex);
-        if (referencedPanel) {
-          // TODO: how to extract the panel indices from the referenced panel saved object attributes?
-          return;
-        }
+      if (references?.length) {
+        return new Set(
+          references.filter((r) => r.name.match(`indexpattern`)).map((reference) => reference.id)
+        );
       }
     },
   };
@@ -69,33 +69,35 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      if (this.isLensVizAttributes(panel.panelConfig.attributes)) {
+      let state: unknown = this.isLensVizAttributes(panel.panelConfig.attributes)
+        ? panel.panelConfig.attributes.state
+        : undefined;
+      if (!state && panel.panelIndex) {
+        state = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex)?.state;
+      }
+      if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
-        const dataSourceLayers =
-          panel.panelConfig.attributes.state.datasourceStates.formBased?.layers || {};
+        const dataSourceLayers = state.datasourceStates.formBased?.layers || {};
         Object.values(dataSourceLayers).forEach((ds) => {
           const columns = ds.columns;
           Object.values(columns).forEach((col) => {
-            const hasSourceField = (
-              c: FieldBasedIndexPatternColumn | GenericIndexPatternColumn
-            ): c is FieldBasedIndexPatternColumn =>
-              (c as FieldBasedIndexPatternColumn).sourceField !== undefined;
-            if (hasSourceField(col)) {
+            if (this.hasSourceField(col)) {
               fields.add(col.sourceField);
             }
           });
         });
         return fields;
       }
-      if (panel.panelIndex) {
-        const referencedPanel = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex);
-        if (referencedPanel) {
-          // TODO: how to extract the panel fields from the referenced panel saved object attributes?
-          return;
-        }
-      }
     },
   };
+
+  private hasSourceField(c: GenericIndexPatternColumn): c is FieldBasedIndexPatternColumn {
+    return 'sourceField' in c;
+  }
+
+  private isLensAttributesState(state: unknown): state is LensAttributes['state'] {
+    return typeof state === 'object' && state !== null && 'datasourceStates' in state;
+  }
 
   public async fetchRelatedDashboards(): Promise<{
     suggestedDashboards: SuggestedDashboard[];
@@ -188,7 +190,10 @@ export class RelatedDashboardsClient {
 
     try {
       const so = await this.soClient.get<ReferencedPanelAttributes>(type, panelReference.id);
-      this.referencedPanelsSOAttributesByPanelIndex.set(panelIndex, so.attributes);
+      this.referencedPanelsSOAttributesByPanelIndex.set(panelIndex, {
+        ...so.attributes,
+        references: so.references,
+      });
     } catch (error) {
       // There was an error fetching the referenced saved object
       this.logger.error(
