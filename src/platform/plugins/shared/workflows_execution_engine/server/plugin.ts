@@ -33,6 +33,7 @@ import { WorkflowContextManager } from './workflow_context_manager/workflow_cont
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { getWorkflowConnectorType } from './connector';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -52,6 +53,8 @@ export class WorkflowsExecutionEnginePlugin
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
+
+    plugins.actions.registerType(getWorkflowConnectorType());
 
     return {};
   }

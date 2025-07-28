@@ -11,10 +11,7 @@ import type {
   ServiceParams,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import {
-  workflowFeature,
-  AlertingConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+import { workflowFeature } from '@kbn/actions-plugin/common/connector_feature_config';
 import { providers } from '../../../common/keep/providers';
 import type { Config, Secrets } from '../../../common/inference/types';
 
@@ -29,30 +26,17 @@ export class KeepConnector extends SubActionConnector<Config, Secrets> {
 }
 
 export const getConnectorTypes = (): Array<SubActionConnectorType<Config, Secrets>> => {
-  return [
-    {
-      id: 'workflow',
-      name: 'Workflow',
+  return providers.map((provider) => {
+    return {
+      id: provider.title,
+      name: provider.title,
       minimumLicenseRequired: 'enterprise' as const,
-      supportedFeatureIds: [AlertingConnectorFeatureId],
+      supportedFeatureIds: [workflowFeature.id],
       getService: (params) => new KeepConnector(params),
       schema: {
         config: schema.any(),
         secrets: schema.any(),
       },
-    },
-    ...providers.map((provider) => {
-      return {
-        id: provider.title,
-        name: provider.title,
-        minimumLicenseRequired: 'enterprise' as const,
-        supportedFeatureIds: [workflowFeature.id],
-        getService: (params) => new KeepConnector(params),
-        schema: {
-          config: schema.any(),
-          secrets: schema.any(),
-        },
-      };
-    })
-  ];
+    };
+  });
 };
