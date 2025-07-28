@@ -60,12 +60,12 @@ export type NoDataCardComponentProps = Partial<EuiEmptyPromptProps> & {
    * Title for the card;
    * If not provided, the default will be used
    */
-  cardTitle?: string;
+  title?: string;
   /**
    * Description for the card;
    * If not provided, the default will be used
    */
-  cardDescription?: string;
+  description?: string;
   /** True if the person has permission to access Fleet, false otherwise */
   canAccessFleet?: boolean;
   /**

@@ -18,8 +18,8 @@ import { useServices } from './services';
 
 export const NoDataCard = ({
   href: srcHref,
-  cardDescription,
-  cardTitle,
+  description,
+  title,
   buttonLabel,
   docsLink,
   ...props
@@ -43,8 +43,8 @@ export const NoDataCard = ({
         {...{
           ...props,
           href,
-          cardDescription,
-          cardTitle,
+          description,
+          title,
           buttonLabel,
           docsLink,
           canAccessFleet: props.canAccessFleet ?? canAccessFleet,

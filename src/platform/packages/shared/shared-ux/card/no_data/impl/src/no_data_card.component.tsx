@@ -38,8 +38,8 @@ const noPermissionDescription = i18n.translate(
 );
 
 export const NoDataCard = ({
-  cardTitle,
-  cardDescription,
+  title,
+  description,
   canAccessFleet,
   href,
   buttonLabel,
@@ -56,13 +56,11 @@ export const NoDataCard = ({
       style={{ maxWidth: 400 }} // Adjust max width as needed
       title={
         <EuiTitle size="m">
-          <h2>{canAccessFleet ? cardTitle || defaultTitle : noPermissionTitle}</h2>
+          <h2>{canAccessFleet ? title || defaultTitle : noPermissionTitle}</h2>
         </EuiTitle>
       }
       icon={cardIcon}
-      body={
-        <p>{canAccessFleet ? cardDescription || defaultDescription : noPermissionDescription}</p>
-      }
+      body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
       actions={
         canAccessFleet && href ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
