@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiSelect,
   EuiFormRow,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -36,6 +37,8 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 
@@ -126,6 +129,8 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         />
       }
       buttonColor="primary"
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <p>
         <FormattedMessage
