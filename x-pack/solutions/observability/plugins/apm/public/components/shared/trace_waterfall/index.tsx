@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
@@ -18,10 +18,10 @@ import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_r
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import TraceWarning from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
-  waterfallId: string;
   traceItems: TraceItem[];
   showAccordion?: boolean;
   highlightedTraceId?: string;
@@ -35,7 +35,6 @@ export interface Props {
 }
 
 export function TraceWaterfall({
-  waterfallId,
   traceItems,
   showAccordion = true,
   highlightedTraceId,
@@ -49,7 +48,6 @@ export function TraceWaterfall({
 }: Props) {
   return (
     <TraceWaterfallContextProvider
-      waterfallId={waterfallId}
       traceItems={traceItems}
       showAccordion={showAccordion}
       highlightedTraceId={highlightedTraceId}
@@ -61,7 +59,9 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
     >
-      <TraceWaterfallComponent />
+      <TraceWarning>
+        <TraceWaterfallComponent />
+      </TraceWarning>
     </TraceWaterfallContextProvider>
   );
 }
@@ -77,15 +77,7 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
-    warningMessage,
-    dismissWarning,
   } = useTraceWaterfallContext();
-
-  if (!rootItem) {
-    return warningMessage ? (
-      <EuiCallOut color="warning" size="s" onDismiss={dismissWarning} title={warningMessage} />
-    ) : null;
-  }
 
   return (
     <EuiFlexGroup direction="column">

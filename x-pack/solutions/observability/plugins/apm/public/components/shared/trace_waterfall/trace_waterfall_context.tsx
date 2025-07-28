@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -16,18 +15,7 @@ import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
 
-const DISMISSED_WARNINGS: Set<string> = new Set();
-
-const FALLBACK_WARNING = i18n.translate(
-  'xpack.apm.traceWaterfallContext.warningMessage.genericFallbackWarning',
-  {
-    defaultMessage:
-      'The waterfall visual may be incomplete or missing until processing finishes. Try refreshing the page or adjusting the time range.',
-  }
-);
-
 interface TraceWaterfallContextProps {
-  waterfallId: string;
   duration: number;
   traceWaterfall: TraceWaterfallItem[];
   rootItem?: TraceItem;
@@ -44,12 +32,9 @@ interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
-  warningMessage?: string;
-  dismissWarning: () => void;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
-  waterfallId: '',
   duration: 0,
   traceWaterfall: [],
   rootItem: undefined,
@@ -61,14 +46,12 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
-  dismissWarning: () => {},
 });
 
 export type OnNodeClick = (id: string) => void;
 export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
 
 export function TraceWaterfallContextProvider({
-  waterfallId,
   children,
   traceItems,
   showAccordion,
@@ -81,7 +64,6 @@ export function TraceWaterfallContextProvider({
   showLegend,
   serviceName,
 }: {
-  waterfallId: string;
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
@@ -97,16 +79,6 @@ export function TraceWaterfallContextProvider({
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy } = useTraceWaterfall({
     traceItems,
   });
-  const [warningMessage, setWarningMessage] = useState(() => {
-    const hasBeenDismissed = DISMISSED_WARNINGS.has(waterfallId);
-
-    return !(rootItem || hasBeenDismissed) ? FALLBACK_WARNING : undefined;
-  });
-
-  const dismissWarning = () => {
-    DISMISSED_WARNINGS.add(waterfallId);
-    setWarningMessage(undefined);
-  };
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
@@ -116,7 +88,6 @@ export function TraceWaterfallContextProvider({
   return (
     <TraceWaterfallContext.Provider
       value={{
-        waterfallId,
         duration,
         rootItem,
         traceWaterfall,
@@ -133,8 +104,6 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
-        warningMessage,
-        dismissWarning,
       }}
     >
       {children}
