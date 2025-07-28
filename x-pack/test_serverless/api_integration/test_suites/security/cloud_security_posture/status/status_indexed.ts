@@ -11,12 +11,9 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
-import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
-import {
-  findingsMockData,
-  vulnerabilityMockData,
-} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
+import { createPackagePolicy } from '../helper';
+import { EsIndexDataProvider } from '../utils';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 
