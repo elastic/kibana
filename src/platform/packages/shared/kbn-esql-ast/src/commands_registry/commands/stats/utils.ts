@@ -186,11 +186,10 @@ export const rightAfterColumn = (
   columnExists: (name: string) => boolean
 ): boolean => {
   return (
-    isColumn(expressionRoot) &&
-    columnExists(expressionRoot.parts.join('.')) &&
-    // this prevents the branch from being entered for something like "SORT column NULLS LA/"
+    isColumn(expressionRoot) && columnExists(expressionRoot.parts.join('.'))
+    // this prevents the branch from being entered for something like "BY column"
     // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
-    /(?:sort|,)\s+\S+$/i.test(innerText)
+    // /(?:by|,)\s+\S+$/i.test(innerText)
   );
 };
 

@@ -30,7 +30,7 @@ import {
   getDateHistogramCompletionItem,
 } from '../../complete_items';
 import {
-  columnExists,
+  columnExists as _columnExists,
   getControlSuggestionIfSupported,
   suggestForExpression,
   within,
@@ -62,6 +62,8 @@ export async function autocomplete(
   if (!callbacks?.getByType) {
     return [];
   }
+  const columnExists = (name: string) => _columnExists(name, context);
+
   const innerText = query.substring(0, cursorPosition);
   const pos = getPosition(command);
 
@@ -111,6 +113,7 @@ export async function autocomplete(
           byCompleteItem,
           ...getCommaAndPipe(innerText, expressionRoot, columnExists),
         ],
+        suggestColumns: false,
       });
 
       return [...expressionSuggestions, ...controlSuggestions];
@@ -145,6 +148,7 @@ export async function autocomplete(
           byCompleteItem,
           ...getCommaAndPipe(innerText, expressionRoot, columnExists),
         ],
+        suggestColumns: false,
       });
 
       return [...expressionSuggestions, ...controlSuggestions];
@@ -242,6 +246,7 @@ export async function autocomplete(
           getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
+        advanceCursorAfterInitialField: false,
       });
     }
 
@@ -258,6 +263,8 @@ async function getExpressionSuggestions({
   callbacks,
   emptySuggestions = [],
   afterCompleteSuggestions = [],
+  advanceCursorAfterInitialField,
+  suggestColumns = true,
 }: {
   innerText: string;
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -266,20 +273,29 @@ async function getExpressionSuggestions({
   callbacks?: ICommandCallbacks;
   emptySuggestions?: ISuggestionItem[];
   afterCompleteSuggestions?: ISuggestionItem[];
+  advanceCursorAfterInitialField?: boolean;
+  suggestColumns?: boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions = await suggestForExpression({
     innerText,
     expressionRoot,
     location,
     context,
+    getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+    advanceCursorAfterInitialField,
   });
 
   if (!expressionRoot) {
     suggestions.push(...emptySuggestions);
   }
 
-  if (isExpressionComplete(getExpressionType(expressionRoot, context?.fields), innerText)) {
+  if (
+    isExpressionComplete(
+      getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
+      innerText
+    )
+  ) {
     suggestions.push(...afterCompleteSuggestions);
   }
 
