@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SAVED_BOOK_ID = 'book';
 export const ADD_SAVED_BOOK_ACTION_ID = 'create_saved_book';

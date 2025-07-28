@@ -8,7 +8,7 @@
 import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
@@ -42,12 +42,7 @@ const createActions = ({
   const isNewConversation = conversationId === newConversationId;
   return {
     invalidateConversation: () => {
-      if (isNewConversation) {
-        // Purge the query cache since we never fetch for conversation id "new"
-        queryClient.removeQueries({ queryKey });
-      } else {
-        queryClient.invalidateQueries({ queryKey });
-      }
+      queryClient.invalidateQueries({ queryKey });
     },
     addConversation: () => {
       setConversation(() => createNewConversation());
@@ -72,7 +67,7 @@ const createActions = ({
       setConversation(
         produce((draft) => {
           if (draft) {
-            draft.agentId = agentId;
+            draft.agent_id = agentId;
           }
         })
       );
@@ -108,21 +103,27 @@ const createActions = ({
       title: string;
     }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
-      if (current) {
-        queryClient.setQueryData<Conversation>(
-          queryKeys.conversations.byId(id),
-          produce(current, (draft) => {
-            draft.id = id;
-            draft.title = title;
-          })
-        );
+      if (!current) {
+        throw new Error('Conversation not created');
       }
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(id),
+        produce(current, (draft) => {
+          draft.id = id;
+          draft.title = title;
+        })
+      );
       navigateToConversation({ nextConversationId: id });
+      // Purge the query cache since we never fetch for conversation id "new"
+      queryClient.removeQueries({ queryKey });
+      // Invalidate all conversations to refresh conversation history
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
 
 export const useConversation = () => {
+  const shouldAllowConversationRedirectRef = useRef(true);
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
@@ -139,16 +140,28 @@ export const useConversation = () => {
   });
   const { navigateToOnechatUrl } = useNavigation();
 
+  useEffect(() => {
+    return () => {
+      // On unmount disable conversation redirect
+      shouldAllowConversationRedirectRef.current = false;
+    };
+  }, []);
+
   const actions = useMemo(
     () =>
       createActions({
         queryClient,
         queryKey,
         navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
-          navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+          // Navigate to the new conversation if user is still on the "new" conversation page
+          if (!conversationId && shouldAllowConversationRedirectRef.current) {
+            navigateToOnechatUrl(
+              appPaths.chat.conversation({ conversationId: nextConversationId })
+            );
+          }
         },
       }),
-    [queryClient, queryKey, navigateToOnechatUrl]
+    [queryClient, queryKey, conversationId, navigateToOnechatUrl]
   );
 
   useEffect(() => {

@@ -4,29 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+
 import { InheritedFtrProviderContext } from '../ftr_provider_context';
 
-export async function getApmSynthtraceEsClient(
-  context: InheritedFtrProviderContext,
-  kibanaClient: ApmSynthtraceKibanaClient
-) {
-  const es = context.getService('es');
+export async function getApmSynthtraceEsClient(context: InheritedFtrProviderContext) {
+  const synthtraceClient = context.getService('synthtrace');
 
-  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-  await kibanaClient.installApmPackage(kibanaVersion);
+  const { apmEsClient } = await synthtraceClient.getClients(['apmEsClient']);
 
-  const esClient = new ApmSynthtraceEsClient({
-    client: es,
-    logger: createLogger(LogLevel.info),
-    version: kibanaVersion,
-    refreshAfterIndex: true,
-  });
+  await apmEsClient.initializePackage({ skipInstallation: false });
 
-  return esClient;
+  return apmEsClient;
 }

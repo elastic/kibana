@@ -19,7 +19,7 @@ describe('extractReferences', () => {
             bar: true,
           })
         ),
-      },
+      } as any,
       references: [],
     };
     const updatedDoc = extractReferences(doc);
@@ -51,7 +51,7 @@ Object {
         ),
       },
       references: [],
-    };
+    } as any;
     expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
       `"indexPattern attribute is missing in \\"wsState\\""`
     );

@@ -14,7 +14,7 @@ describe('config validation', () => {
         Object {
           "analytics": Object {
             "index": Object {
-              "enabled": true,
+              "enabled": false,
             },
           },
           "enabled": true,
@@ -108,11 +108,6 @@ describe('config validation', () => {
               "application/x-tar",
               "application/pdf",
             ],
-          },
-          "incrementalId": Object {
-            "enabled": false,
-            "taskIntervalMinutes": 10,
-            "taskStartDelayMinutes": 10,
           },
           "markdownPlugins": Object {
             "lens": true,

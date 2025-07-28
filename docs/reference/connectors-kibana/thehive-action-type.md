@@ -100,7 +100,7 @@ Body
       "observables": [
         {
           "dataType": "url",
-          "data": "http://example.org"
+          "data": "<EXAMPLE_URL>"
         }
       ],
       "procedures": [

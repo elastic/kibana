@@ -59,7 +59,7 @@ export const WorkpadTable = ({
       render: (workpad: FoundWorkpad) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={strings.getExportToolTip()}>
+            <EuiToolTip content={strings.getExportToolTip()} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="exportAction"
                 onClick={() => onExport(workpad.id)}

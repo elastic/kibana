@@ -304,7 +304,6 @@ export const ConfigSchema = schema.object({
     ),
   }),
 
-  // config/serverless.oblt.yml contains an override to false for OBLT projects
   roleManagementEnabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
   }),

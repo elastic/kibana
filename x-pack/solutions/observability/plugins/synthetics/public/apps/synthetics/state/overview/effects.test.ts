@@ -14,7 +14,7 @@ import { fetchOverviewTrendStats as trendsApi } from './api';
 import { selectOverviewTrends } from '.';
 import { selectOverviewStatus } from '../overview_status';
 
-const TEST_TRENDS_LENGTH = 80;
+const TEST_TRENDS_LENGTH = 300;
 
 const generateTrendRequests = () => {
   const ar: TrendRequest[] = [];

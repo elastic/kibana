@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -21,6 +22,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
+import { isFailureOrError } from './utils/is_failure_or_error';
 
 export function BarDetails({
   item,
@@ -33,10 +35,16 @@ export function BarDetails({
 }) {
   const theme = useEuiTheme();
   const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
-    { defaultMessage: 'View related errors' }
+    {
+      defaultMessage: '{count, plural, one {View related error} other {View # related errors}}',
+      values: {
+        count: item.errorCount,
+      },
+    }
   );
 
   return (
@@ -77,14 +85,26 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.hasError ? (
+        {item.status && itemStatusIsFailureOrError && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              data-test-subj="apmBarDetailsFailureTooltip"
+              content={`${item.status.fieldName} = ${item.status.value}`}
+            >
+              <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+                {item.status.value}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {item.errorCount > 0 ? (
           <EuiFlexItem grow={false}>
             {onErrorClick ? (
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
                   defaultMessage: 'View error details',
                 })}
-                data-test-subj="apmBarDetailsButton"
+                data-test-subj="apmBarDetailsErrorButton"
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"
@@ -110,11 +130,17 @@ export function BarDetails({
                 role="button"
                 aria-label={viewRelatedErrorsLabel}
                 onClickAriaLabel={viewRelatedErrorsLabel}
+                data-test-subj="apmBarDetailsErrorBadge"
               >
                 {viewRelatedErrorsLabel}
               </EuiBadge>
             ) : (
-              <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+              <EuiIcon
+                type="errorFilled"
+                color={theme.euiTheme.colors.danger}
+                size="s"
+                data-test-subj="apmBarDetailsErrorIcon"
+              />
             )}
           </EuiFlexItem>
         ) : null}

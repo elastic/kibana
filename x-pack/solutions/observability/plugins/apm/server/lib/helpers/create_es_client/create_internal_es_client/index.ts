@@ -9,10 +9,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchRequestLoggingOptions } from '@kbn/core/server';
 import {
   callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
   cancelEsRequestOnAbort,
 } from '@kbn/apm-data-access-plugin/server/utils';
 import {
@@ -53,10 +52,8 @@ export async function createInternalESClient({
     operationName: string,
     {
       makeRequestWithSignal,
-      requestType,
       params,
     }: {
-      requestType: string;
       makeRequestWithSignal: (signal: AbortSignal) => Promise<T>;
       params: Record<string, any>;
     }
@@ -66,12 +63,6 @@ export async function createInternalESClient({
         const controller = new AbortController();
         const res = makeRequestWithSignal(controller.signal);
         return unwrapEsResponse(request ? cancelEsRequestOnAbort(res, request, controller) : res);
-      },
-      getDebugMessage: () => {
-        return {
-          title: request ? getDebugTitle(request) : 'Internal request',
-          body: getDebugBody({ params, requestType, operationName }),
-        };
       },
       debug,
       isCalledWithInternalUser: true,
@@ -88,38 +79,61 @@ export async function createInternalESClient({
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
-        requestType: 'search',
         makeRequestWithSignal: (signal) =>
           elasticsearchClient.search(params, {
             signal,
             meta: true,
+            context: {
+              loggingOptions: getElasticsearchRequestLoggingOptions(),
+            },
           }) as Promise<{ body: any }>,
         params,
       });
     },
     index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
       return callEs(operationName, {
-        requestType: 'index',
         makeRequestWithSignal: (signal) =>
-          elasticsearchClient.index(params, { signal, meta: true }),
+          elasticsearchClient.index(params, {
+            signal,
+            meta: true,
+            context: {
+              loggingOptions: getElasticsearchRequestLoggingOptions(),
+            },
+          }),
         params,
       });
     },
     delete: (operationName: string, params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs(operationName, {
-        requestType: 'delete',
         makeRequestWithSignal: (signal) =>
-          elasticsearchClient.delete(params, { signal, meta: true }),
+          elasticsearchClient.delete(params, {
+            signal,
+            meta: true,
+            context: {
+              loggingOptions: getElasticsearchRequestLoggingOptions(),
+            },
+          }),
         params,
       });
     },
     indicesCreate: (operationName: string, params: estypes.IndicesCreateRequest) => {
       return callEs(operationName, {
-        requestType: 'indices.create',
         makeRequestWithSignal: (signal) =>
-          elasticsearchClient.indices.create(params, { signal, meta: true }),
+          elasticsearchClient.indices.create(params, {
+            signal,
+            meta: true,
+            context: {
+              loggingOptions: getElasticsearchRequestLoggingOptions(),
+            },
+          }),
         params,
       });
     },
+  };
+}
+
+function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
+  return {
+    loggerName: 'apm',
   };
 }

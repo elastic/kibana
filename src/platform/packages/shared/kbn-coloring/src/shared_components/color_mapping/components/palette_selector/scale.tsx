@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { EuiButtonGroup, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
+import { EuiButtonGroup, EuiConfirmModal, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KbnPalettes } from '@kbn/palettes';
@@ -58,9 +58,13 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
     null
   );
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const colorScaleModal =
     colorScaleModalId !== null ? (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={i18n.translate('coloring.colorMapping.colorChangesModal.modalTitle', {
           defaultMessage: 'Color changes detected',
         })}

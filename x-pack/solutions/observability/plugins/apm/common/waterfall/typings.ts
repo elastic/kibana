@@ -89,3 +89,5 @@ export interface WaterfallError {
     name: string;
   };
 }
+
+export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
