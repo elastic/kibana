@@ -55735,12 +55735,12 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            dashboards:
+                            streams:
                               items:
                                 type: string
                               type: array
                           required:
-                            - dashboards
+                            - streams
                       required:
                         - objects
                     - additionalProperties: false
@@ -55754,17 +55754,12 @@ paths:
                         - all
                 name:
                   type: string
-                replaced_patterns:
-                  items:
-                    type: string
-                  type: array
                 version:
                   type: string
               required:
                 - name
                 - description
                 - version
-                - replaced_patterns
                 - include
       responses: {}
       summary: Export stream content
@@ -66850,6 +66845,35 @@ components:
               type: object
               properties:
                 elasticsearch:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: Service status levels as human and machine readable values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: An unstructured set of extra metadata about this service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
+                http:
                   additionalProperties: false
                   type: object
                   properties:
