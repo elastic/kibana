@@ -471,7 +471,7 @@ export class AutomaticAgentUpgradeTask {
         await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
           agents: agentsReadyForRetry,
           version,
-          spaceId: agentPolicy.space_ids?.[0],
+          spaceIds: agentPolicy.space_ids,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
         });
       }
@@ -534,7 +534,7 @@ export class AutomaticAgentUpgradeTask {
       await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
         agents: agentsForUpgrade,
         version,
-        spaceId: agentPolicy.space_ids?.[0],
+        spaceIds: agentPolicy.space_ids,
         ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
       });
     }
