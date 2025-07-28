@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Verify initial telemetry state is clean
         const initialStats = await getStats(supertest, log);
-        expect(initialStats?.detection_rules.detection_rule_upgrade_status).toEqual(
+        expect(initialStats?.detection_rules.elastic_detection_rule_upgrade_status).toEqual(
           INITIAL_TELEMETRY_STATE
         );
 
@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
         disabled: number;
       }) => {
         const telemetryStats = await getStats(supertest, log);
-        expect(telemetryStats?.detection_rules.detection_rule_upgrade_status).toEqual(
+        expect(telemetryStats?.detection_rules.elastic_detection_rule_upgrade_status).toEqual(
           expectedStats
         );
       };

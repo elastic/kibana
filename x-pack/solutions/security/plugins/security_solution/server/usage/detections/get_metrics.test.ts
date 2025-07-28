@@ -184,7 +184,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 1,
             customized: 0,
             enabled: 0,
@@ -306,7 +306,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 1,
             customized: 0,
             enabled: 1,
@@ -428,7 +428,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 1,
             customized: 1,
             enabled: 0,
@@ -550,7 +550,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 1,
             customized: 1,
             enabled: 1,
@@ -672,7 +672,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 0,
             customized: 0,
             enabled: 0,
@@ -794,7 +794,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 0,
             customized: 0,
             enabled: 0,
@@ -916,7 +916,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 0,
             customized: 0,
             enabled: 0,
@@ -1038,7 +1038,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: {
+          elastic_detection_rule_upgrade_status: {
             total: 0,
             customized: 0,
             enabled: 0,
@@ -1124,7 +1124,7 @@ describe('Detections Usage and Metrics', () => {
               has_exceptions: 0,
             },
           },
-          detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         },
       });
     });
@@ -1244,7 +1244,7 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
           },
-          detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         },
       });
     });

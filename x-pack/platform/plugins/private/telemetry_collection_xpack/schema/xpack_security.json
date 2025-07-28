@@ -7215,7 +7215,7 @@
                     }
                   }
                 },
-                "detection_rule_upgrade_status": {
+                "elastic_detection_rule_upgrade_status": {
                   "properties": {
                     "total": {
                       "type": "long",

@@ -80,7 +80,7 @@ export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
-  detection_rule_upgrade_status: UpgradeableRulesSummary;
+  elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
   spaces_usage: SpacesUsage;
 }
 

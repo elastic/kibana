@@ -61,7 +61,7 @@ export const getRuleMetrics = async ({
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
-        detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -144,7 +144,7 @@ export const getRuleMetrics = async ({
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
-      detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -156,7 +156,7 @@ export const getRuleMetrics = async ({
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
-      detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }

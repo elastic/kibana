@@ -32,5 +32,5 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
     items: ruleMetricsSchema,
   },
   detection_rule_status: ruleStatusMetricsSchema,
-  detection_rule_upgrade_status: ruleUpgradeStatusSchema,
+  elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
 };
