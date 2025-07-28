@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // temporary workaround for registry promotion
-  describe.skip('Synthetics API Tests', () => {
+  describe('Synthetics API Tests', () => {
     before(async () => {
       await esDeleteAllIndices('heartbeat*');
       await esDeleteAllIndices('synthetics*');
