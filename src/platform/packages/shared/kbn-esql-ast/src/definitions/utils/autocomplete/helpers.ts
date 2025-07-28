@@ -9,7 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
+import type {
+  ESQLSingleAstItem,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLLiteral,
+  ESQLLocation,
+} from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
@@ -51,6 +57,9 @@ import {
   isTimeInterval,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 export const shouldBeQuotedText = (
   text: string,

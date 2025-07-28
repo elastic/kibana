@@ -503,6 +503,7 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 
+// TODO: merge this into suggestForExpression
 export const getInsideFunctionsSuggestions = async (
   query: string,
   cursorPosition?: number,

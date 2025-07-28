@@ -8,6 +8,8 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 // import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { Walker } from '../../../walker';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isAssignment } from '../../../ast/is';
 import { ICommandCallbacks, Location } from '../../types';
 import type {
@@ -32,6 +34,7 @@ import {
   columnExists,
   getControlSuggestionIfSupported,
   suggestForExpression,
+  within,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
@@ -71,16 +74,19 @@ export async function autocomplete(
     lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
-  // TODO: reenable
-  // const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-  //   query,
-  //   cursorPosition,
-  //   callbacks,
-  //   context
-  // );
-  // if (functionsSpecificSuggestions) {
-  //   return functionsSpecificSuggestions;
-  // }
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    query,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (
+    functionsSpecificSuggestions &&
+    cursorPosition &&
+    Walker.findFunction(command, (fn) => within(cursorPosition, fn.location))
+  ) {
+    return functionsSpecificSuggestions;
+  }
 
   switch (pos) {
     case 'expression_without_assignment': {
