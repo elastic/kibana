@@ -7,19 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
-import { DocViewerError } from './doc_viewer_error';
-
-test('DocViewerError should wrap error in boundary', () => {
-  const props = {
-    error: new Error('my error'),
-  };
-
-  expect(() => {
-    const wrapper = mount(<DocViewerError {...props} />);
-    const html = wrapper.html();
-    expect(html).toContain('euiErrorBoundary');
-    expect(html).toContain('my error');
-  }).not.toThrowError();
-});
+export { EnterForeachNodeImpl } from './enter_foreach_node_impl';
+export { ExitForeachNodeImpl } from './exit_foreach_node_impl';
