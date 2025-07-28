@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
 import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -18,7 +18,7 @@ import { DATES } from './utils/constants';
 const { min, max } = DATES['8.0.0'].pods_only;
 
 interface NodeDetailsRequest {
-  metrics: InventoryMetric[];
+  metrics: InventoryTsvbType[];
   nodeId: string;
   nodeType: string;
   sourceId: string;
