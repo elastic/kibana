@@ -12,7 +12,11 @@ import type {
 import { createEndpointFleetServicesFactoryMock } from './endpoint_fleet_services_factory.mocks';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { NotFoundError } from '../../errors';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  type AgentPolicy,
+  type PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -369,7 +373,7 @@ describe('EndpointServiceFactory', () => {
           fleetServicesFactoryMock.dependencies.fleetDependencies.packagePolicyService.list
         ).toHaveBeenCalledWith(expect.anything(), {
           perPage: 10_000,
-          kuery: 'ingest-package-policies.package.name: (packageOne OR packageTwo)',
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (packageOne OR packageTwo)`,
         });
       });
 

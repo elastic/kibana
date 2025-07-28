@@ -22,7 +22,7 @@ import { AlertStatus } from '../../../model/alert.gen';
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
 export const SetAlertsStatusByIds = z.object({
   /**
-   * List of alert `id`s.
+   * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
    */
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: AlertStatus,

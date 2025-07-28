@@ -56,6 +56,10 @@ export const ThrottlingDownloadField = ({
       }
     >
       <EuiFieldNumber
+        isInvalid={
+          (validate ? !!validate?.[ConfigKey.THROTTLING_CONFIG]?.(throttling) : false) ||
+          exceedsDownloadLimits
+        }
         fullWidth
         min={0}
         step={0.001}

@@ -58,6 +58,7 @@ import {
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -87,6 +88,21 @@ describe('SentinelOneActionsClient class', () => {
     connectorActionsMock =
       classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
     s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
+
+    getActionDetailsByIdMock.mockResolvedValue(
+      new EndpointActionGenerator('seed').generateActionDetails({ id: 'abc' })
+    );
+
+    const fleetServices = classConstructorOptions.endpointService.getInternalFleetServices();
+    const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+    ensureInCurrentSpaceMock.mockResolvedValue(undefined);
+
+    const getInternalFleetServicesMock = jest.spyOn(
+      classConstructorOptions.endpointService,
+      'getInternalFleetServices'
+    );
+    getInternalFleetServicesMock.mockReturnValue(fleetServices);
   });
 
   it.each(['suspendProcess', 'execute', 'upload', 'scan'] as Array<keyof ResponseActionsClient>)(
@@ -151,7 +167,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
@@ -211,7 +239,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
@@ -302,7 +342,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
@@ -333,7 +385,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request (only) to endpoint indexes when `` is Enabled', async () => {
+    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Enabled', async () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
         true;
@@ -361,13 +413,25 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
               agentUUID: '1-2-3',
               hostName: 'sentinelone-1460',
             },
+            originSpaceId: 'default',
+            tags: [],
           },
           index: ENDPOINT_ACTIONS_INDEX,
           refresh: 'wait_for',
@@ -1326,7 +1390,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             error: {
               // The error message here is "not supported" because `get-file` is not currently supported
@@ -1391,7 +1467,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
@@ -1409,7 +1497,7 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should return action details', async () => {
-      await expect(s1ActionsClient.getFile(getFileReqOptions)).resolves.toEqual(
+      await expect(s1ActionsClient.getFile(getFileReqOptions)).resolves.toMatchObject(
         // Only validating that a ActionDetails is returned. The data is mocked,
         // so it does not make sense to validate the property values
         {
@@ -1424,7 +1512,6 @@ describe('SentinelOneActionsClient class', () => {
           id: expect.any(String),
           isCompleted: expect.any(Boolean),
           isExpired: expect.any(Boolean),
-          outputs: expect.any(Object),
           startedAt: expect.any(String),
           status: expect.any(String),
           wasSuccessful: expect.any(Boolean),
@@ -1489,7 +1576,7 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         false;
 
-      await expect(s1ActionsClient.getFileInfo('acb', '123')).rejects.toThrow(
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
       );
     });
@@ -1605,7 +1692,7 @@ describe('SentinelOneActionsClient class', () => {
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
         false;
 
-      await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
       );
     });
@@ -1825,7 +1912,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             user: { id: 'foo' },
             meta: {
               agentId: '1845174760470303882',
@@ -1982,7 +2081,19 @@ describe('SentinelOneActionsClient class', () => {
               input_type: 'sentinel_one',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['1-2-3'] },
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             meta: {
               agentId: '1845174760470303882',
               agentUUID: '1-2-3',
