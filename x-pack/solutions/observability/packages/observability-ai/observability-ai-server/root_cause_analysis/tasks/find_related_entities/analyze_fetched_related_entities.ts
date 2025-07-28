@@ -7,7 +7,7 @@
 
 import type { DocumentAnalysis, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { kqlQuery, rangeQuery } from '@kbn/es-query';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
 import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
@@ -309,7 +309,7 @@ export async function analyzeFetchedRelatedEntities({
       index,
       index_filter: {
         bool: {
-          filter: [...rangeQuery(start, end)],
+          filter: [...dateRangeQuery(start, end)],
         },
       },
     });
@@ -325,7 +325,7 @@ export async function analyzeFetchedRelatedEntities({
         index,
         query: {
           bool: {
-            must: [...rangeQuery(start, end), ...kqlQuery(excludeQuery)],
+            must: [...dateRangeQuery(start, end), ...kqlQuery(excludeQuery)],
             should: [
               {
                 multi_match: {
