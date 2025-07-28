@@ -17,7 +17,7 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/inference-common",
-    "@kbn/zod",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

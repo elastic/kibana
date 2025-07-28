@@ -9,7 +9,7 @@
       "server": true,
       "browser": true,
       "configPath": [
-        "conext_registry_example"
+        "context_registry_example"
       ],
       "requiredPlugins": [
         "developerExamples",

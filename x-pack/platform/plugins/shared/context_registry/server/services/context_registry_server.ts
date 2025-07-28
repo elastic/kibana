@@ -19,7 +19,7 @@ export interface ContextDefinitionServer<TPayload = {}> {
   owner: ContextOwner;
   // Tools available for fetching, keyed by tool name
   tools: Record<string, ToolDefinition>;
-  // Handlers. Can be called programtically or used with tool calling, keyed to match the tool name
+  // Handlers. Can be called programmatically or used with tool calling, keyed to match the tool name
   handlers: Record<string, ContextHandler<TPayload>>;
 }
 
