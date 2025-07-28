@@ -190,9 +190,9 @@ function FilterForm(props: {
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
       <EuiFieldText
-        data-test-subj="streamsAppFilterFormFieldText"
+        data-test-subj="streamsAppConditionEditorFieldText"
         aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
         compressed
         placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
@@ -207,7 +207,7 @@ function FilterForm(props: {
         aria-label={i18n.translate('xpack.streams.filter.operator', {
           defaultMessage: 'Operator',
         })}
-        data-test-subj="streamsAppFilterFormSelect"
+        data-test-subj="streamsAppConditionEditorOperator"
         options={operatorOptions}
         value={props.condition.operator}
         compressed
@@ -221,7 +221,7 @@ function FilterForm(props: {
           })}
           compressed
           value={String(props.condition.value)}
-          data-test-subj="streamsAppFilterFormValueText"
+          data-test-subj="streamsAppConditionEditorValueText"
           onChange={(e) => {
             handleConditionChange({ value: e.target.value });
           }}

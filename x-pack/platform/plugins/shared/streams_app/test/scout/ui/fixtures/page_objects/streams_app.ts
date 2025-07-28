@@ -14,44 +14,134 @@ export class StreamsApp {
     await expect(this.page.getByText('StreamsTechnical Preview')).toBeVisible();
   }
 
-  async gotoStreamsFromBreadcrumb() {
-    await this.page
-      .getByTestId('breadcrumbs')
-      .getByRole('link', { name: 'Streams', exact: true })
-      .click();
+  async gotoStreamManagementTab(streamName: string, tabName: string) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
   }
 
-  async gotoStream(stream: string) {
-    const last = await this.page.getByTestId('breadcrumb last').textContent();
-    if (last !== 'Streams') {
-      await this.gotoStreamsFromBreadcrumb();
+  async gotoPartitioningTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'route');
+  }
+
+  async gotoDataRetentionTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'lifecycle');
+  }
+
+  async gotoProcessingTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'enrich');
+  }
+
+  async gotoSchemaEditorTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'schemaEditor');
+  }
+
+  async gotoSignificantEventsTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'significantEvents');
+  }
+
+  async gotoAdvancedTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'advanced');
+  }
+
+  // Routing-specific utility methods
+  async clickCreateRoutingRule() {
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton').click();
+  }
+
+  async fillRoutingRuleName(name: string) {
+    await this.page.testSubj.locator('streamsAppRoutingStreamEntryNameField').fill(name);
+  }
+
+  async clickEditRoutingRule(streamName: string) {
+    await this.page.testSubj.locator(`routingRuleEditButton-${streamName}`).click();
+  }
+
+  async saveRoutingRule() {
+    await this.page.getByRole('button', { name: 'Save' }).click();
+  }
+
+  async updateRoutingRule() {
+    await this.page.getByRole('button', { name: 'Change routing' }).click();
+  }
+
+  async cancelRoutingRule() {
+    await this.page.getByRole('button', { name: 'Cancel' }).click();
+  }
+
+  async removeRoutingRule() {
+    await this.page.getByRole('button', { name: 'Remove' }).click();
+  }
+
+  getDeleteModal() {
+    return this.page.getByRole('dialog');
+  }
+
+  async confirmDeleteInModal() {
+    await this.getDeleteModal().getByRole('button', { name: 'Delete' }).click();
+  }
+
+  async cancelDeleteInModal() {
+    await this.getDeleteModal().getByRole('button', { name: 'Cancel' }).click();
+  }
+
+  async closeToast() {
+    await this.page.testSubj.locator('toastCloseButton').click();
+  }
+
+  // Condition editor utility methods
+  async fillConditionEditor({
+    field,
+    value,
+    operator,
+  }: {
+    field?: string;
+    value?: string;
+    operator?: string;
+  }) {
+    if (field) {
+      await this.page.testSubj.locator('streamsAppConditionEditorFieldText').fill(field);
     }
-    await this.page.getByRole('link', { name: stream, exact: true }).click();
+    if (value) {
+      await this.page.testSubj.locator('streamsAppConditionEditorValueText').fill(value);
+    }
+    if (operator) {
+      await this.page.testSubj.locator('streamsAppConditionEditorOperator').selectOption(operator);
+    }
   }
 
-  async gotoStreamDashboard(stream: string) {
-    await this.gotoStream(stream);
-    await this.page.getByRole('tab', { name: 'Dashboards' }).click();
+  // Drag and drop utility methods
+  async dragRoutingRule(sourceStream: string, targetStream: string) {
+    await this.page.testSubj.locator(`routingRuleDragHandle-${sourceStream}`).hover();
+    await this.page.mouse.down();
+    await this.page.testSubj.locator(`routingRule-${targetStream}`).hover();
+    await this.page.mouse.up();
   }
 
-  async gotoCreateChildStream(stream: string) {
-    await this.gotoStream(stream);
-    await this.page.getByRole('tab', { name: 'Partitioning' }).click();
-    await this.page.getByRole('button', { name: 'Create child stream' }).click();
+  // Expectation utility methods
+  async expectRoutingRuleVisible(streamName: string) {
+    await expect(this.page.testSubj.locator(`routingRule-${streamName}`)).toBeVisible();
   }
 
-  async gotoDataRetentionTab(stream: string) {
-    await this.gotoStream(stream);
-    await this.page.getByRole('tab', { name: 'Data retention' }).click();
+  async expectRoutingRuleHidden(streamName: string) {
+    await expect(this.page.testSubj.locator(`routingRule-${streamName}`)).toBeHidden();
   }
 
-  async gotoProcessingTab(stream: string) {
-    await this.gotoStream(stream);
-    await this.page.getByRole('tab', { name: 'Processing' }).click();
+  async expectStreamNameFieldVisible() {
+    await expect(this.page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
   }
 
-  async gotoSchemaEditorTab(stream: string) {
-    await this.gotoStream(stream);
-    await this.page.getByRole('tab', { name: 'Schema editor' }).click();
+  async expectPreviewPanelVisible() {
+    await expect(this.page.testSubj.locator('routingPreviewPanel')).toBeVisible();
+  }
+
+  async expectToastVisible() {
+    await expect(this.page.testSubj.locator('toastCloseButton')).toBeVisible();
+  }
+
+  async saveRuleOrder() {
+    await this.page.getByRole('button', { name: 'Save order' }).click();
+  }
+
+  async cancelRuleOrder() {
+    await this.page.getByRole('button', { name: 'Cancel' }).click();
   }
 }
