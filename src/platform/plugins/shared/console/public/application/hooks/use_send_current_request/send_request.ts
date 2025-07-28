@@ -183,6 +183,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           value = 'Request failed to get to the server (status code: ' + statusCode + ')';
         }
 
+        // Check for warning headers in error responses
+        const warnings = response?.headers.get('warning');
+        if (warnings) {
+          const warningMessages = extractWarningMessages(warnings);
+          value = warningMessages.join('\n') + '\n' + value;
+        }
+
         if (isMultiRequest) {
           const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
           value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;

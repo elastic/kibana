@@ -160,12 +160,21 @@ export const createHandler =
     } catch (e) {
       log.error(e);
       log.warn(`Could not connect to ES node [${host}]`);
-      return response.customError({
+
+      const hasMultipleHosts = hosts.length > 1;
+      const errorMessage =
+        'Could not connect to Elasticsearch node. Try selecting a different host from Console > Config > General settings > Elasticsearch host.';
+
+      return response.custom({
         statusCode: 502,
-        body: e,
+        body: {
+          message: 'An internal server error occurred. Check Kibana server logs for details.',
+        },
         headers: {
           'x-console-proxy-status-code': '502',
           'x-console-proxy-status-text': 'Bad Gateway',
+          'content-type': 'application/json',
+          ...(hasMultipleHosts && { warning: errorMessage }),
         },
       });
     }
