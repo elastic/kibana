@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { AgentTypeSchemaLiteral } from '..';
+import { AgentTypeSchemaLiteral, HostOsTypeSchemaLiteral } from '..';
 
 export const CustomScriptsRequestSchema = {
   query: schema.object({
@@ -19,6 +19,8 @@ export const CustomScriptsRequestSchema = {
         }
       )
     ),
+    // @ts-expect-error TS2769: No overload matches this call
+    osType: schema.maybe(schema.oneOf(HostOsTypeSchemaLiteral)),
   }),
 };
 
