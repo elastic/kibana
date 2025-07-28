@@ -13,10 +13,12 @@ import {
   attackDiscoveryDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
+import { ProductFeatureAttackDiscoveryKey } from '@kbn/security-solution-features/keys';
 
 export const getAttackDiscoveryProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): AttackDiscoveryProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
+      ProductFeatureAttackDiscoveryKey,
       attackDiscoveryDefaultProductFeaturesConfig,
       enabledProductFeatureKeys
     );

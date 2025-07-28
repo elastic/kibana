@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProductFeatureTimelineFeatureKey } from '../product_features_keys';
+import { ProductFeatureTimelineKey } from '../product_features_keys';
 import type { ProductFeaturesConfig } from '../types';
 
 /**
@@ -18,9 +18,9 @@ import type { ProductFeaturesConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const timelineDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureTimelineFeatureKey> =
+export const timelineDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureTimelineKey> =
   {
-    [ProductFeatureTimelineFeatureKey.timeline]: {
+    [ProductFeatureTimelineKey.timeline]: {
       privileges: {
         all: {
           api: ['timeline_read', 'timeline_write'],

@@ -13,10 +13,12 @@ import {
   siemMigrationsDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
+import { ProductFeatureSiemMigrationsKey } from '@kbn/security-solution-features/keys';
 
 export const getSiemMigrationsProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): SiemMigrationsProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
+      ProductFeatureSiemMigrationsKey,
       siemMigrationsDefaultProductFeaturesConfig,
       enabledProductFeatureKeys
     );

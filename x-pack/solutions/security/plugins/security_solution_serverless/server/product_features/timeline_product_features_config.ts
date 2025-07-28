@@ -12,10 +12,12 @@ import {
   timelineDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
+import { ProductFeatureTimelineKey } from '@kbn/security-solution-features/keys';
 
 export const getTimelineProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): TimelineProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
+      ProductFeatureTimelineKey,
       timelineDefaultProductFeaturesConfig,
       enabledProductFeatureKeys
     );

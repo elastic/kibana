@@ -12,10 +12,12 @@ import {
   notesDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
+import { ProductFeatureNotesKey } from '@kbn/security-solution-features/keys';
 
 export const getNotesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): NotesProductFeaturesConfigMap =>
     createEnabledProductFeaturesConfigMap(
+      ProductFeatureNotesKey,
       notesDefaultProductFeaturesConfig,
       enabledProductFeatureKeys
     );

@@ -16,6 +16,7 @@ import {
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
+import { ProductFeatureCasesKey } from '@kbn/security-solution-features/keys';
 
 const casesProductFeaturesConfig = getCasesDefaultProductFeaturesConfig({
   apiTags: { connectors: GET_CONNECTORS_CONFIGURE_API_TAG },
@@ -25,6 +26,7 @@ const casesProductFeaturesConfig = getCasesDefaultProductFeaturesConfig({
 export const getCasesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): CasesProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
+      ProductFeatureCasesKey,
       casesProductFeaturesConfig,
       enabledProductFeatureKeys
     );

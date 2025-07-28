@@ -12,10 +12,12 @@ import {
   assistantDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/keys';
 
 export const getSecurityAssistantProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): AssistantProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
+      ProductFeatureAssistantKey,
       assistantDefaultProductFeaturesConfig,
       enabledProductFeatureKeys
     );

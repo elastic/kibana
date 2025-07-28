@@ -91,6 +91,7 @@ export class ProductFeaturesService {
       this.productFeaturesRegistry.register(featureGroup, productFeatureConfig);
       enabledProductFeatures.push(...productFeatureConfig.keys());
     }
+    this.logger.debug(`Enabled product features: ${enabledProductFeatures.join(', ')}`);
 
     this.enabledProductFeatures = new Set<ProductFeatureKeyType>(enabledProductFeatures);
   }

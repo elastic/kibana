@@ -23,6 +23,7 @@ import type { SecurityProductFeaturesConfig } from '@kbn/security-solution-featu
 export const getSecurityProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): SecurityProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
+      ProductFeatureSecurityKey,
       securityEssProductFeaturesConfig,
       enabledProductFeatureKeys
     );

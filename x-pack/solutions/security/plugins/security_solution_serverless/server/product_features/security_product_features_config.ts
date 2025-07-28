@@ -28,6 +28,7 @@ export const getSecurityProductFeaturesConfigurator =
   ) =>
   (): SecurityProductFeaturesConfigMap => {
     return createEnabledProductFeaturesConfigMap(
+      ProductFeatureSecurityKey,
       securityProductFeaturesConfig,
       enabledProductFeatureKeys
     );

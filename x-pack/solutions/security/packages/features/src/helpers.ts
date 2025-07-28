@@ -13,22 +13,27 @@ import type {
 
 /**
  * Creates the ProductFeaturesConfig Map from the given productFeatures object and a set of enabled productFeatures keys.
+ *
+ * @param productFeatureKeys - The specific ProductFeatureKey enum e.g. ProductFeatureSecurityKey
+ * @param productFeaturesConfigs - The product features configs object, no need to include all keys, only the ones that have a config
+ * @param enabledProductFeaturesKeys - The enabled product features keys
+ * @returns A Map of all the enabled product features configs
  */
 export const createEnabledProductFeaturesConfigMap = <
   K extends ProductFeatureKeyType,
   T extends string = string
 >(
-  productFeatures: Partial<Record<K, ProductFeatureKibanaConfig<T>>>,
+  productFeatureKeys: Record<string, K>,
+  productFeaturesConfigs: Partial<Record<K, ProductFeatureKibanaConfig<T>>>,
   enabledProductFeaturesKeys: ProductFeatureKeys
-) =>
-  new Map(
-    Object.entries(productFeatures).reduce<Array<[K, ProductFeatureKibanaConfig<T>]>>(
-      (acc, [key, value]) => {
-        if (enabledProductFeaturesKeys.includes(key as K)) {
-          acc.push([key as K, value as ProductFeatureKibanaConfig<T>]);
-        }
-        return acc;
-      },
-      []
-    )
+) => {
+  const allProductFeatureKeys = Object.values(productFeatureKeys) as K[];
+  return new Map(
+    allProductFeatureKeys.reduce<Array<[K, ProductFeatureKibanaConfig<T>]>>((acc, key) => {
+      if (enabledProductFeaturesKeys.includes(key)) {
+        acc.push([key, productFeaturesConfigs[key] ?? {}]);
+      }
+      return acc;
+    }, [])
   );
+};

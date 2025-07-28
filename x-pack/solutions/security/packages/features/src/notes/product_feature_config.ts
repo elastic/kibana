@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProductFeatureNotesFeatureKey } from '../product_features_keys';
+import { ProductFeatureNotesKey } from '../product_features_keys';
 import type { ProductFeaturesConfig } from '../types';
 
 /**
@@ -18,9 +18,9 @@ import type { ProductFeaturesConfig } from '../types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const notesDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureNotesFeatureKey> =
+export const notesDefaultProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureNotesKey> =
   {
-    [ProductFeatureNotesFeatureKey.notes]: {
+    [ProductFeatureNotesKey.notes]: {
       privileges: {
         all: {
           api: ['notes_read', 'notes_write'],
