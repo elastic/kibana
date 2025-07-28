@@ -58,7 +58,7 @@ export function SecondaryMetric({
       color={secondaryMetricInfo.badgeColor}
       aria-label={secondaryMetricInfo.description}
       css={badgeCss}
-      data-test-subj='expressionMetricVis-secondaryMetric-badge'
+      data-test-subj="expressionMetricVis-secondaryMetric-badge"
     >
       {secondaryMetricInfo.value}
     </EuiBadge>
