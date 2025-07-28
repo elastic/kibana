@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { Streams } from '@kbn/streams-schema';
-import {
-  ContentPackIncludedObjects,
-  ContentPackManifest,
-  isIncludeAll,
-} from '@kbn/content-packs-schema';
+import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,

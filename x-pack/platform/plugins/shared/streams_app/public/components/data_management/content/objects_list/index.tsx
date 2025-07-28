@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiPanel,
-  EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
