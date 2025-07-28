@@ -95,6 +95,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 children: [
                   {
+                    link: 'apm:service-map',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
+                    },
+                  },
+                  {
                     link: 'apm:services',
                     getIsActive: ({ pathNameSerialized }) => {
                       const regex = /app\/apm\/.*service.*/;
