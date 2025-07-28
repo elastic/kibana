@@ -262,7 +262,7 @@ To create a rule with the threshold pre-specified:
 To create a rule without the threshold pre-specified:
 
 * Open the *More actions* (three dots) menu in the upper right of the panel and select *Add alert rule*. This opens the *Create rule* flyout. The generated query will define a threshold that corresponds to the data point you selected.
-* {observability-guide}/create-an-elasticsearch-query-rule.html[Configure] your {es} rule.
+* {kib-ref}/rule-type-es-query.html[Configure] your {es} rule.
 
 include::alerts-panel.asciidoc[][leveloffset=-1]
 
