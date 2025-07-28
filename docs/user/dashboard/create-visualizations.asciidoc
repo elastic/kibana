@@ -219,6 +219,9 @@ TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar wi
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt69dcceb4f1e12bc1/66c752d6aff77d384dc44209/edit-esql-visualization.gif[Previewing an ESQL visualization]
++
+TIP: When you edit the query and run it again, the visualization configuration persists as long as it is compatible with the query changes. 
+
 . You can bind controls to your ES|QL visualizations in dashboards by creating <<esql-controls,ES|QL controls>>.
 . Select **Apply and close** to save the visualization to the dashboard.
 

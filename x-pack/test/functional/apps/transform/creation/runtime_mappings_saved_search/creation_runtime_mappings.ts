@@ -7,9 +7,8 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
+import type { HistogramCharts } from '@kbn/test-suites-xpack-platform/functional/services/transform/wizard';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-
-import type { HistogramCharts } from '../../../../services/transform/wizard';
 
 import {
   GroupByEntry,

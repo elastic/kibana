@@ -20,7 +20,8 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('GetProjectMonitors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228157
+  describe.skip('GetProjectMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
 

@@ -14,13 +14,13 @@ import { convertToRRule } from './convert_to_rrule';
 describe('convertToRRule', () => {
   const timezone = 'UTC';
   const today = '2023-03-22';
-  const startDate = moment(today);
+  const startDate = moment(today).toISOString();
 
   test('should convert a recurring schedule that is not recurring', () => {
     const rRule = convertToRRule({ startDate, timezone });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       count: 1,
@@ -39,7 +39,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -61,7 +61,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -83,7 +83,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -103,7 +103,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.WEEKLY,
       interval: 1,
@@ -122,7 +122,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -141,7 +141,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       interval: 1,
@@ -163,7 +163,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.DAILY,
       interval: 1,
@@ -184,7 +184,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.WEEKLY,
       interval: 1,
@@ -206,7 +206,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -228,7 +228,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.MONTHLY,
       interval: 1,
@@ -249,7 +249,7 @@ describe('convertToRRule', () => {
     });
 
     expect(rRule).toEqual({
-      dtstart: startDate.toISOString(),
+      dtstart: startDate,
       tzid: 'UTC',
       freq: Frequency.YEARLY,
       interval: 3,

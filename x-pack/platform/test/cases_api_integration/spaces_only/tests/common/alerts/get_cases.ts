@@ -18,7 +18,6 @@ import {
 } from '../../../../common/lib/api';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');

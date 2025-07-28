@@ -14,7 +14,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
-// eslint-disable-next-line import/no-default-export
 export default function bulkUntrackByQueryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

@@ -21,8 +21,6 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group10.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group11.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group12.ts
-  # serverless config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/search.serverless.config.ts
 
 # Serverless tests only run on main
 defaultQueue: 'n2-4-spot'

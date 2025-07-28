@@ -42,7 +42,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
-  inferenceChatModelEnabled = false,
+  inferenceChatModelDisabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -76,7 +76,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
   const createLlmInstance = async () =>
-    inferenceChatModelEnabled
+    !inferenceChatModelDisabled
       ? inference.getChatModel({
           request,
           connectorId,
@@ -231,7 +231,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llm,
     llmType,
     tools,
-    inferenceChatModelEnabled,
+    inferenceChatModelDisabled,
     isOpenAI,
     isStream,
     prompt: chatPromptTemplate,
@@ -306,7 +306,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
-      inferenceChatModelEnabled,
+      inferenceChatModelDisabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
 
       logger,
