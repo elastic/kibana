@@ -5,52 +5,25 @@
  * 2.0.
  */
 
-import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { asTree, mergeTrees } from './tree';
-
-const contentPackEntry = ({
-  name,
-  fields = {},
-  routing = [],
-  queries = [],
-}: {
-  name: string;
-  fields?: FieldDefinition;
-  routing?: RoutingDefinition[];
-  queries?: StreamQuery[];
-}) => ({
-  type: 'stream' as const,
-  name,
-  request: {
-    queries,
-    dashboards: [],
-    stream: {
-      description: '',
-      ingest: {
-        processing: [],
-        lifecycle: { inherit: {} },
-        wired: { routing, fields },
-      },
-    },
-  },
-});
+import { test_contentPackEntry } from './test.utils';
 
 describe('content pack stream helpers', () => {
   describe('asTree', () => {
     it('builds a complete tree when includeAll is provided', () => {
-      const root = contentPackEntry({
+      const root = test_contentPackEntry({
         name: 'root',
         routing: [
           { destination: 'root.child1', if: { always: {} } },
           { destination: 'root.child2', if: { always: {} } },
         ],
       });
-      const child1 = contentPackEntry({
+      const child1 = test_contentPackEntry({
         name: 'root.child1',
         routing: [{ destination: 'root.child1.nested', if: { always: {} } }],
       });
-      const child2 = contentPackEntry({ name: 'root.child2' });
-      const child1Nested = contentPackEntry({ name: 'root.child1.nested' });
+      const child2 = test_contentPackEntry({ name: 'root.child2' });
+      const child1Nested = test_contentPackEntry({ name: 'root.child1.nested' });
 
       const tree = asTree({
         root: 'root',
@@ -66,19 +39,19 @@ describe('content pack stream helpers', () => {
     });
 
     it('allows nested includeAll', () => {
-      const root = contentPackEntry({
+      const root = test_contentPackEntry({
         name: 'root',
         routing: [
           { destination: 'root.child1', if: { always: {} } },
           { destination: 'root.child2', if: { always: {} } },
         ],
       });
-      const child1 = contentPackEntry({
+      const child1 = test_contentPackEntry({
         name: 'root.child1',
         routing: [{ destination: 'root.child1.nested', if: { always: {} } }],
       });
-      const child2 = contentPackEntry({ name: 'root.child2' });
-      const child1Nested = contentPackEntry({
+      const child2 = test_contentPackEntry({ name: 'root.child2' });
+      const child1Nested = test_contentPackEntry({
         name: 'root.child1.nested',
         queries: [{ id: 'keep', title: 'keep query', kql: { query: 'keep' } }],
       });
@@ -110,7 +83,7 @@ describe('content pack stream helpers', () => {
     });
 
     it('filters streams and queries according to include spec', () => {
-      const root = contentPackEntry({
+      const root = test_contentPackEntry({
         name: 'root',
         queries: [
           { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
@@ -135,11 +108,11 @@ describe('content pack stream helpers', () => {
     });
 
     it('throws when included stream or query do not exist', () => {
-      const root = contentPackEntry({
+      const root = test_contentPackEntry({
         name: 'root',
         routing: [{ destination: 'root.child1', if: { always: {} } }],
       });
-      const child1 = contentPackEntry({ name: 'root.child1' });
+      const child1 = test_contentPackEntry({ name: 'root.child1' });
 
       expect(() =>
         asTree({
@@ -179,12 +152,12 @@ describe('content pack stream helpers', () => {
       const existing = asTree({
         root: 'root',
         streams: [
-          contentPackEntry({
+          test_contentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
             fields: { existing: { type: 'keyword' } },
           }),
-          contentPackEntry({ name: 'root.a' }),
+          test_contentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -192,12 +165,12 @@ describe('content pack stream helpers', () => {
       const incoming = asTree({
         root: 'root',
         streams: [
-          contentPackEntry({
+          test_contentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.b', if: { always: {} } }],
             fields: { custom: { type: 'keyword' } },
           }),
-          contentPackEntry({ name: 'root.b' }),
+          test_contentPackEntry({ name: 'root.b' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -217,22 +190,22 @@ describe('content pack stream helpers', () => {
       const existing = asTree({
         root: 'root',
         streams: [
-          contentPackEntry({
+          test_contentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
           }),
-          contentPackEntry({ name: 'root.a' }),
+          test_contentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
       const incoming = asTree({
         root: 'root',
         streams: [
-          contentPackEntry({
+          test_contentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
           }),
-          contentPackEntry({ name: 'root.a' }),
+          test_contentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -245,12 +218,12 @@ describe('content pack stream helpers', () => {
     it('throws on conflicting field mapping', () => {
       const existing = asTree({
         root: 'root',
-        streams: [contentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
+        streams: [test_contentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
         include: { objects: { all: {} } },
       });
       const incoming = asTree({
         root: 'root',
-        streams: [contentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
+        streams: [test_contentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
         include: { objects: { all: {} } },
       });
 
