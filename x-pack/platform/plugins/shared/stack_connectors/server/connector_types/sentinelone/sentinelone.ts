@@ -440,7 +440,7 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async getRemoteScripts(
-    payload: SentinelOneGetRemoteScriptsParams,
+    payload: Partial<SentinelOneGetRemoteScriptsParams>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
     return this.sentinelOneApiRequest(
