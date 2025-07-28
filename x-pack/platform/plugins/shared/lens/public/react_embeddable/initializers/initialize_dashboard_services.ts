@@ -51,6 +51,7 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
   style: 'skip',
   className: 'skip',
   forceDSL: 'skip',
+  esqlVariables: 'referenceEquality',
 };
 
 export interface DashboardServicesConfig {

@@ -85,7 +85,7 @@ export function fetchAll(
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const { query, sort, esqlVariables } = appStateContainer.getState();
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
@@ -122,6 +122,7 @@ export function fetchAll(
           expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          esqlVariables,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

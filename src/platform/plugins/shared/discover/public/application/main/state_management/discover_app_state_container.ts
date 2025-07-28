@@ -13,6 +13,7 @@ import {
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
@@ -158,6 +159,10 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * ESQL query variables
+   */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {

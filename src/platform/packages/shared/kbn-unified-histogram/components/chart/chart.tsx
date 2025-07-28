@@ -28,6 +28,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import { IKibanaSearchResponse } from '@kbn/search-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
 import {
@@ -89,6 +90,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;

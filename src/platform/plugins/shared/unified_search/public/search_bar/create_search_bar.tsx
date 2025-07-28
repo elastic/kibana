@@ -278,6 +278,7 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            esqLVariablesConfig={props.esqLVariablesConfig}
           />
         </core.i18n.Context>
       </KibanaContextProvider>
