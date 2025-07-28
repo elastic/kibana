@@ -142,7 +142,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
             wired: {
               fields: {},
               routing: [
@@ -171,7 +171,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: { steps: [] },
                 wired: {
                   fields: {},
                   routing: [],

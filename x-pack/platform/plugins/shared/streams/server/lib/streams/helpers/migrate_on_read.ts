@@ -6,6 +6,12 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
+import { BaseStream } from '@kbn/streams-schema/src/models/base';
+import {
+  migrateRoutingIfConditionToStreamlang,
+  migrateOldProcessingArrayToStreamlang,
+  isLegacyCondition,
+} from './migrate_to_streamlang_on_read';
 
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
@@ -34,5 +40,32 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     };
     delete (migratedDefinition.ingest as { unwired?: {} }).unwired;
   }
+
+  // Migrate routing "if" Condition to Streamlang
+  if (
+    migratedDefinition.ingest &&
+    typeof migratedDefinition.ingest === 'object' &&
+    'wired' in migratedDefinition.ingest &&
+    (migratedDefinition.ingest as { wired?: unknown }).wired &&
+    typeof (migratedDefinition.ingest as { wired?: any }).wired === 'object' &&
+    Array.isArray((migratedDefinition.ingest as { wired?: any }).wired.routing) &&
+    (migratedDefinition.ingest as { wired?: any }).wired.routing.some((route: any) =>
+      isLegacyCondition(route.if)
+    )
+  ) {
+    migratedDefinition = migrateRoutingIfConditionToStreamlang(migratedDefinition);
+  }
+
+  // Migrate old flat processing array to Streamlang DSL
+  if (
+    migratedDefinition.ingest &&
+    typeof migratedDefinition.ingest === 'object' &&
+    Array.isArray((migratedDefinition.ingest as { processing?: unknown }).processing)
+  ) {
+    migratedDefinition = migrateOldProcessingArrayToStreamlang(migratedDefinition);
+  }
+
+  Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
+
   return migratedDefinition as unknown as Streams.all.Definition;
 }

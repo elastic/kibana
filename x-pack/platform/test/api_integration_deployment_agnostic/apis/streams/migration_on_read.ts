@@ -70,17 +70,18 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
         policy: 'logs-default',
       },
     },
-    processing: [
-      {
-        grok: {
-          field: 'message',
+    processing: {
+      steps: [
+        {
+          action: 'grok',
+          from: 'message',
           patterns: [
             '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
           ],
-          if: { always: {} },
+          where: { always: {} },
         },
-      },
-    ],
+      ],
+    },
     classic: {},
   },
 };

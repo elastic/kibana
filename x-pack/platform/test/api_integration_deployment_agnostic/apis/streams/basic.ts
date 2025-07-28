@@ -434,7 +434,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -479,7 +481,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {
                   'attributes.myfield': {
@@ -603,7 +607,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields, routing: [] },
             },
           },
@@ -616,7 +622,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields: {}, routing: [] },
             },
           },
@@ -648,7 +656,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [],
+                processing: {
+                  steps: [],
+                },
                 wired: { fields: {}, routing: [] },
               },
             },
@@ -665,9 +675,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: 'Should cause a failure due to invalid ingest pipeline',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  manual_ingest_pipeline: {
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
                     processors: [
                       {
                         set: {
@@ -678,8 +689,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     ],
                   },
-                },
-              ],
+                ],
+              },
               wired: {
                 fields: {},
                 routing: [],
@@ -704,7 +715,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: { fields: {}, routing: [] },
             },
           },

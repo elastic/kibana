@@ -32,7 +32,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
-      processing: [],
+      processing: {
+        steps: [],
+      },
       wired: {
         routing: [],
         fields: {

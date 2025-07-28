@@ -33,7 +33,7 @@ export const ProcessorStatusIndicator = ({
 
   const hasSimulation = useSimulatorSelector((snapshot) => Boolean(snapshot.context.simulation));
   const isParticipatingInSimulation = useSimulatorSelector((snapshot) =>
-    snapshot.context.processors.find((p) => p.id === processorRef.id)
+    snapshot.context.processors.find((p) => p.customIdentifier === processorRef.id)
   );
   const isSimulationRunning = useSimulatorSelector((snapshot) =>
     snapshot.matches('runningSimulation')

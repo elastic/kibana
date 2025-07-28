@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
+import { isDescendantOf } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
+import { isNeverCondition } from '@kbn/streamlang';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';

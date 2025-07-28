@@ -118,19 +118,18 @@ async function simulateGrokProcessor(stream: string, documents: any[], grokProce
     headers: getKibanaAuthHeaders(),
     body: JSON.stringify({
       documents,
-      processing: [
-        {
-          id: 'eval-grok',
-          grok: {
-            field: grokProcessor.field,
+      processing: {
+        steps: [
+          {
+            customIdentifier: 'eval-grok',
+            from: grokProcessor.field,
             patterns: grokProcessor.patterns,
-            pattern_definitions: grokProcessor.pattern_definitions,
             ignore_failure: true,
             ignore_missing: true,
-            if: { always: {} },
+            where: { always: {} },
           },
-        },
-      ],
+        ],
+      },
     }),
   }).then((res) => {
     if (res.ok) {

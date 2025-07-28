@@ -59,8 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         if: {
           field: 'host.name',
-          operator: 'eq' as const,
-          value: 'test-host',
+          eq: 'test-host',
         },
       });
     });

@@ -8,9 +8,10 @@
  */
 
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { Condition, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { Readable, Transform, pipeline } from 'stream';
 import { Required } from 'utility-types';
+import { Condition } from '@kbn/streamlang';
 import {
   SynthtraceEsClientBase,
   SynthtraceEsClient,

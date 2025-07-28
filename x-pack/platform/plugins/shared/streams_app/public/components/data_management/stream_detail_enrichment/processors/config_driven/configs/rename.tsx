@@ -9,25 +9,25 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { RenameProcessorConfig, RenameProcessorDefinition } from '@kbn/streams-schema';
 import { DocLinksStart } from '@kbn/core/public';
-import { ALWAYS_CONDITION } from '../../../../../../util/condition';
+import { ALWAYS_CONDITION, RenameProcessor } from '@kbn/streamlang';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
-export type RenameProcessorFormState = RenameProcessorConfig & { type: 'rename' };
+export type RenameProcessorFormState = RenameProcessor;
 
 const defaultFormState: RenameProcessorFormState = {
-  type: 'rename' as const,
-  field: '',
-  target_field: '',
+  action: 'rename' as const,
+  from: '',
+  to: '',
   ignore_missing: false,
   override: false,
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
   ignore_failure: false,
 };
 
 const fieldOptions: FieldOptions = {
+  fieldKey: 'from',
   fieldHelpText: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.renameFieldHelpText',
     { defaultMessage: 'The field to be renamed.' }
@@ -39,7 +39,7 @@ const fieldOptions: FieldOptions = {
 
 const fieldConfigurations: FieldConfiguration[] = [
   {
-    field: 'target_field',
+    field: 'to',
     type: 'string',
     required: true,
     label: i18n.translate(
@@ -72,7 +72,7 @@ const fieldConfigurations: FieldConfiguration[] = [
 
 export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
   RenameProcessorFormState,
-  RenameProcessorDefinition
+  RenameProcessor
 > = {
   type: 'rename' as const,
   inputDisplay: i18n.translate(
@@ -85,7 +85,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.renameHelpText"
-        defaultMessage="{renameLink} If the field doesn’t exist or the new name is already used, an exception will be thrown."
+        defaultMessage="{renameLink} If the field doesn't exist or the new name is already used, an exception will be thrown."
         values={{
           renameLink: (
             <EuiLink
@@ -104,14 +104,14 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
     );
   },
   defaultFormState,
-  convertFormStateToConfig: getConvertFormStateToConfig<
-    RenameProcessorFormState,
-    RenameProcessorDefinition
-  >('rename', fieldConfigurations, fieldOptions),
+  convertFormStateToConfig: getConvertFormStateToConfig<RenameProcessorFormState, RenameProcessor>(
+    fieldConfigurations,
+    fieldOptions
+  ),
   convertProcessorToFormState: getConvertProcessorToFormState<
-    RenameProcessorDefinition,
+    RenameProcessor,
     RenameProcessorFormState
-  >('rename', defaultFormState),
+  >(defaultFormState),
   fieldConfigurations,
   fieldOptions,
 };

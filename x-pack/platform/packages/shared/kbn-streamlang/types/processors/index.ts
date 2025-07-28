@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
+import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import {
   ElasticsearchProcessorType,
   elasticsearchProcessorTypes,
@@ -18,11 +18,17 @@ import { Condition, conditionSchema } from '../conditions';
  * Base processor
  */
 export interface ProcessorBase {
+  /* Optional property that can be used to identify / relate the processor block in transpilation targets.
+  This will be mapped as a tag for ingest pipelines. 
+  This can then be used to relate transpilation output back to the DSL definition, 
+  useful for things like simulation handling, debugging, or gathering of metrics. */
+  customIdentifier?: string;
   description?: string;
   ignore_failure?: boolean;
 }
 
 const processorBaseSchema = z.object({
+  customIdentifier: z.optional(NonEmptyString),
   description: z.optional(z.string()),
   ignore_failure: z.optional(z.boolean()),
 });
@@ -162,16 +168,14 @@ export const setProcessorSchema = processorBaseWithWhereSchema.extend({
 export interface AppendProcessor extends ProcessorBaseWithWhere {
   action: 'append';
   to: string;
-  // Value is actually required, but due to 'any' values being allowed here we need to mark this as optional
-  // to "satisfy" the Zod schema.
-  value?: any | any[];
+  value: unknown[];
   allow_duplicates?: boolean;
 }
 
 export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('append'),
   to: NonEmptyString,
-  value: z.union([z.any(), z.array(z.any())]),
+  value: z.array(z.unknown()).nonempty(),
   allow_duplicates: z.optional(z.boolean()),
 }) satisfies z.Schema<AppendProcessor>;
 
@@ -192,6 +196,7 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   dateProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
+  appendProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 

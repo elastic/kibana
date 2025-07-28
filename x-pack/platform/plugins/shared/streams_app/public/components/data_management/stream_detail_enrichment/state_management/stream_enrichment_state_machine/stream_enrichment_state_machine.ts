@@ -20,8 +20,9 @@ import {
   SnapshotFrom,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
+import { StreamlangProcessorDefinition, isActionBlock } from '@kbn/streamlang';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import {
   StreamEnrichmentContextType,
@@ -29,7 +30,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { getDefaultGrokProcessor, isGrokProcessor } from '../../utils';
+import { getDefaultGrokProcessor } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -95,28 +96,37 @@ export const streamEnrichmentMachine = setup({
       // Clean-up pre-existing processors
       context.processorsRefs.forEach(stopChild);
       // Setup processors from the stream definition
-      const processorsRefs = context.definition.stream.ingest.processing.map((processor) =>
-        spawnProcessor(processor, { self, spawn })
-      );
+      const processorsRefs = context.definition.stream.ingest.processing.steps
+        .map((step) => {
+          // NOTE / TODO: The UI only supports flat action blocks for now.
+          // Nested where blocks / conditionals are not supported yet.
+          if (isActionBlock(step)) {
+            return spawnProcessor(step, { self, spawn });
+          }
+          return undefined;
+        })
+        .filter((ref): ref is NonNullable<typeof ref> => !!ref);
 
       return {
         initialProcessorsRefs: processorsRefs,
         processorsRefs,
       };
     }),
-    addProcessor: assign((assignArgs, { processor }: { processor?: ProcessorDefinition }) => {
-      if (!processor) {
-        processor = getDefaultGrokProcessor({
-          sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef.getSnapshot().context),
-        });
+    addProcessor: assign(
+      (assignArgs, { processor }: { processor?: StreamlangProcessorDefinition }) => {
+        if (!processor) {
+          processor = getDefaultGrokProcessor({
+            sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef.getSnapshot().context),
+          });
+        }
+
+        const newProcessorRef = spawnProcessor(processor, assignArgs, { isNew: true });
+
+        return {
+          processorsRefs: assignArgs.context.processorsRefs.concat(newProcessorRef),
+        };
       }
-
-      const newProcessorRef = spawnProcessor(processor, assignArgs, { isNew: true });
-
-      return {
-        processorsRefs: assignArgs.context.processorsRefs.concat(newProcessorRef),
-      };
-    }),
+    ),
     deleteProcessor: assign(({ context }, params: { id: string }) => ({
       processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
     })),
@@ -174,17 +184,6 @@ export const streamEnrichmentMachine = setup({
       { delay: 800, id: 'send-samples-to-simulator' }
     ),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
-    updateGrokCollectionCustomPatterns: assign(({ context }, params: { id: string }) => {
-      const processorRefContext = context.processorsRefs
-        .find((p) => p.id === params.id)
-        ?.getSnapshot().context;
-      if (processorRefContext && isGrokProcessor(processorRefContext.processor)) {
-        context.grokCollection.setCustomPatterns(
-          processorRefContext.processor.grok.pattern_definitions ?? {}
-        );
-      }
-      return { grokCollection: context.grokCollection };
-    }),
   },
   guards: {
     canReorderProcessors: and([
@@ -433,10 +432,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'processor.change': {
                       actions: [
-                        {
-                          type: 'updateGrokCollectionCustomPatterns',
-                          params: ({ event }) => event,
-                        },
+                        { type: 'reassignProcessors' },
                         { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },

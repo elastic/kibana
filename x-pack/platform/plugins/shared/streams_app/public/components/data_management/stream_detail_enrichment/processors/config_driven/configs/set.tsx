@@ -9,26 +9,24 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { SetProcessorConfig, SetProcessorDefinition } from '@kbn/streams-schema';
 import { DocLinksStart } from '@kbn/core/public';
-import { ALWAYS_CONDITION } from '../../../../../../util/condition';
+import { ALWAYS_CONDITION, SetProcessor } from '@kbn/streamlang';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
-export type SetProcessorFormState = SetProcessorConfig & { type: 'set' };
+export type SetProcessorFormState = SetProcessor;
 
 const defaultFormState: SetProcessorFormState = {
-  type: 'set' as const,
-  field: '',
+  action: 'set' as const,
+  to: '',
   value: '',
   ignore_failure: false,
   override: true,
-  ignore_empty_value: false,
-  media_type: '',
-  if: ALWAYS_CONDITION,
+  where: ALWAYS_CONDITION,
 };
 
 const fieldOptions: FieldOptions = {
+  fieldKey: 'to',
   fieldHelpText: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.setFieldHelpText',
     { defaultMessage: 'The field to insert, upsert, or update.' }
@@ -105,7 +103,7 @@ const fieldConfigurations: FieldConfiguration[] = [
 
 export const setProcessorConfig: ConfigDrivenProcessorConfiguration<
   SetProcessorFormState,
-  SetProcessorDefinition
+  SetProcessor
 > = {
   type: 'set' as const,
   inputDisplay: i18n.translate(
@@ -137,14 +135,13 @@ export const setProcessorConfig: ConfigDrivenProcessorConfiguration<
     );
   },
   defaultFormState,
-  convertFormStateToConfig: getConvertFormStateToConfig<
-    SetProcessorFormState,
-    SetProcessorDefinition
-  >('set', fieldConfigurations, fieldOptions),
-  convertProcessorToFormState: getConvertProcessorToFormState<
-    SetProcessorDefinition,
-    SetProcessorFormState
-  >('set', defaultFormState),
+  convertFormStateToConfig: getConvertFormStateToConfig<SetProcessorFormState, SetProcessor>(
+    fieldConfigurations,
+    fieldOptions
+  ),
+  convertProcessorToFormState: getConvertProcessorToFormState<SetProcessor, SetProcessorFormState>(
+    defaultFormState
+  ),
   fieldConfigurations,
   fieldOptions,
 };

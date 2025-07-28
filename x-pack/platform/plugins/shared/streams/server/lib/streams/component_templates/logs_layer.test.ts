@@ -199,7 +199,7 @@ describe('logs_layer', () => {
               routing: [],
             },
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [] },
           },
         },
         conflictingFields

@@ -6,8 +6,8 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
+import { conditionToPainless } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {

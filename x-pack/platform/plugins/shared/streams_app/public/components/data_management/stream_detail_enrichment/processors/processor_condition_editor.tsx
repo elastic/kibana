@@ -11,7 +11,7 @@ import { ConditionEditor } from '../../condition_editor';
 import { ProcessorFormState } from '../types';
 
 export const ProcessorConditionEditor = () => {
-  const { field } = useController<ProcessorFormState, 'if'>({ name: 'if' });
+  const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });
 
   if (field.value === undefined) {
     return null;

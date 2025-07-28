@@ -39,7 +39,9 @@ const upsertRequest = ({
   stream: {
     description: 'Test stream',
     ingest: {
-      processing: [],
+      processing: {
+        steps: [],
+      },
       wired: { fields, routing },
       lifecycle: { inherit: {} },
     },
@@ -76,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1.nested',
-              if: { field: 'resource.attributes.hello', operator: 'eq', value: 'yes' },
+              if: { field: 'resource.attributes.hello', eq: 'yes' },
             },
           ],
         })
@@ -94,11 +96,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_a.child1',
-              if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
+              if: { field: 'resource.attributes.foo', eq: 'bar' },
             },
             {
               destination: 'logs.branch_a.child2',
-              if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
+              if: { field: 'resource.attributes.bar', eq: 'foo' },
             },
           ],
         })
@@ -110,11 +112,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           routing: [
             {
               destination: 'logs.branch_b.child1',
-              if: { field: 'resource.attributes.foo', operator: 'eq', value: 'bar' },
+              if: { field: 'resource.attributes.foo', eq: 'bar' },
             },
             {
               destination: 'logs.branch_b.child2',
-              if: { field: 'resource.attributes.bar', operator: 'eq', value: 'foo' },
+              if: { field: 'resource.attributes.bar', eq: 'foo' },
             },
           ],
         })
@@ -282,7 +284,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'ok',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -298,7 +302,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'a'.repeat(twoMB),
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -454,7 +460,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: '',
                     ingest: {
-                      processing: [],
+                      processing: {
+                        steps: [],
+                      },
                       wired: {
                         fields,
                         routing: [],
@@ -546,7 +554,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: {
                       fields: {},
                       routing: [
@@ -570,7 +580,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -613,7 +625,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: [],
+                    processing: {
+                      steps: [],
+                    },
                     wired: {
                       fields: {},
                       routing: [],

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Condition, RoutingDefinition, Streams } from '@kbn/streams-schema';
+import { RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Condition } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamRoutingServiceDependencies } from './types';
 

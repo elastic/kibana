@@ -24,7 +24,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
     },
   });
 
-  const fieldName = useWatch<DateFormState, 'field'>({ name: 'field' });
+  const fieldName = useWatch<DateFormState, 'from'>({ name: 'from' });
 
   const handleChange = (options: EuiComboBoxOptionOption[]) => {
     field.onChange(options.map((option) => option.label));

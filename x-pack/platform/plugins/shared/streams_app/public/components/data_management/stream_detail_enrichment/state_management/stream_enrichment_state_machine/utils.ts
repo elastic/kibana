@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { FieldDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang/types/processors';
 import { StreamEnrichmentContextType } from './types';
 import {
   SampleDocumentWithUIAttributes,
@@ -145,18 +146,18 @@ export function getUpsertWiredFields(
 export const spawnProcessor = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
-  processor: ProcessorDefinition,
+  processor: StreamlangProcessorDefinition,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;
-  const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
+  const convertedProcessor = processorConverter.toUIDefinition(processor);
 
   return spawn('processorMachine', {
-    id: processorWithUIAttributes.id,
+    id: convertedProcessor.customIdentifier,
     input: {
       parentRef: self,
-      processor: processorWithUIAttributes,
+      processor: convertedProcessor,
       isNew: options?.isNew ?? false,
     },
   });

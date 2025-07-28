@@ -102,10 +102,10 @@ export const DateProcessorForm = () => {
    * We also check if the formats field is touched to avoid overwriting user input.
    */
   useMount(() => {
-    const { field, formats } = form.getValues();
+    const { from, formats } = form.getValues();
     const isTouched = form.formState.touchedFields.formats;
-    if (areSuggestionsAvailable && field && isEmpty(formats) && !isTouched) {
-      applySuggestions({ field });
+    if (areSuggestionsAvailable && from && isEmpty(formats) && !isTouched) {
+      applySuggestions({ field: from });
     }
   });
 
@@ -135,14 +135,14 @@ export const DateProcessorForm = () => {
    */
   const handleGenerateSuggestionClick = areSuggestionsAvailable
     ? () => {
-        const field = form.getValues('field');
+        const field = form.getValues('from');
         applySuggestions({ field });
       }
     : undefined;
 
   return (
     <>
-      <ProcessorFieldSelector onChange={handleProcessorFieldChange} />
+      <ProcessorFieldSelector onChange={handleProcessorFieldChange} fieldKey={'from'} />
       <DateFormatsField onGenerate={handleGenerateSuggestionClick} />
       <EuiSpacer size="m" />
       <FieldsAccordion>

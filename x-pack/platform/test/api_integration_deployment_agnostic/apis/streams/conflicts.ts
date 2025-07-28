@@ -144,9 +144,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lifecycle: {
                   dsl: {},
                 },
-                processing: [
-                  {
-                    manual_ingest_pipeline: {
+                processing: {
+                  steps: [
+                    {
+                      action: 'manual_ingest_pipeline',
                       processors: [
                         {
                           set: {
@@ -157,8 +158,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
                 wired: {
                   routing: [],
                   fields: {},
@@ -184,9 +185,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lifecycle: {
                   dsl: {},
                 },
-                processing: [
-                  {
-                    manual_ingest_pipeline: {
+                processing: {
+                  steps: [
+                    {
+                      action: 'manual_ingest_pipeline',
                       processors: [
                         {
                           set: {
@@ -196,8 +198,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
                 wired: {
                   routing: [],
                   fields: {},

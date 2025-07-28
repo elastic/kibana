@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { conditionSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { conditionSchema } from '@kbn/streamlang';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';

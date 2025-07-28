@@ -13,7 +13,7 @@ describe('generateLayer', () => {
     name: 'logs.abc',
     description: '',
     ingest: {
-      processing: [],
+      processing: { steps: [] },
       wired: {
         routing: [],
         fields: {

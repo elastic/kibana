@@ -13,8 +13,9 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import { LockManagerService } from '@kbn/lock-manager';
+import { Condition } from '@kbn/streamlang';
 import { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import { QueryClient } from './assets/query/query_client';
@@ -333,7 +334,9 @@ export class StreamsClient {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {},
                 routing: [],
@@ -530,7 +533,9 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         classic: {},
       },
     };
@@ -605,7 +610,7 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         classic: {},
       },
     }));

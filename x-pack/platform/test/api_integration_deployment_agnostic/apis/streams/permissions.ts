@@ -88,7 +88,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     data_retention: '5d',
                   },
                 },
-                processing: [],
+                processing: {
+                  steps: [],
+                },
                 wired: {
                   fields: {},
                   routing: [],

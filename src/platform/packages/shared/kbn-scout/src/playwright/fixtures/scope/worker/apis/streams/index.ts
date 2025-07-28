@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Condition } from '@kbn/streams-schema';
+import { Condition } from '@kbn/streamlang';
 import { IngestStream } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';

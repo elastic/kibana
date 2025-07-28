@@ -14,7 +14,7 @@ import {
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import {
   StreamRoutingContext,
   StreamRoutingEvent,

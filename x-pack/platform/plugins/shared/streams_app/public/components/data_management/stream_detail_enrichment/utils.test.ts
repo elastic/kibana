@@ -7,9 +7,9 @@
 
 import { FlattenRecord } from '@kbn/streams-schema';
 import { getDefaultFormStateByType } from './utils';
-import { ALWAYS_CONDITION } from '../../../util/condition';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { omit } from 'lodash';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 
 let grokCollection: GrokCollection;
 
