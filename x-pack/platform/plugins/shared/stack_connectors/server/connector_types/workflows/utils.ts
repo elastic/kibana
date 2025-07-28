@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isAxiosError } from 'axios';
+
+export const createServiceError = (error: Error, message: string) => {
+  if (isAxiosError(error)) {
+    const responseData = error.response?.data;
+    const errorMessage = responseData?.message || error.message;
+    return new Error(`${message}. Error: ${errorMessage}`);
+  }
+
+  return new Error(`${message}. Error: ${error.message}`);
+};
+
+export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);

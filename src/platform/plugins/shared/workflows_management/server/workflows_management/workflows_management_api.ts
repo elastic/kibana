@@ -9,19 +9,19 @@
 
 import {
   CreateWorkflowCommand,
-  WorkflowListDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowDetailDto,
   EsWorkflow,
-  WorkflowExecutionEngineModel,
   UpdatedWorkflowResponseDto,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+  WorkflowExecutionListDto,
+  WorkflowListDto,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import { WorkflowsService } from './workflows_management_service';
-import { SchedulerService } from '../scheduler/scheduler_service';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { SchedulerService } from '../scheduler/scheduler_service';
+import { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -73,6 +73,20 @@ export class WorkflowsManagementApi {
 
   public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
     return await this.workflowsService.getWorkflow(id);
+  }
+
+  public async getAllWorkflowsMap(): Promise<{ [workflowId: string]: string }> {
+    const workflows = await this.workflowsService.searchWorkflows({
+      limit: 10000,
+      offset: 0,
+    });
+
+    const workflowMap: { [workflowId: string]: string } = {};
+    workflows.results.forEach((workflow) => {
+      workflowMap[workflow.id] = workflow.name;
+    });
+
+    return workflowMap;
   }
 
   public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
