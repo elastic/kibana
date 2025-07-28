@@ -47,7 +47,6 @@ export const getColumnInputRenderer = (
           ]
         : [],
     },
-    isExpandable: false,
   });
 };
 
@@ -103,6 +102,11 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
               if (e.key === 'Escape') {
                 setIsEditing(false);
               }
+            }}
+            css={{
+              '&:focus-within': {
+                outline: 'none',
+              },
             }}
           />
         </EuiToolTip>

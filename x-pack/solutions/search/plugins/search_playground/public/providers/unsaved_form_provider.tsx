@@ -74,7 +74,6 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
       search_query: '',
     },
     resolver: playgroundFormResolver,
-    mode: 'onChange',
     reValidateMode: 'onChange',
   });
   const { isValidated: isValidatedIndices, validIndices } = useIndicesValidation(
@@ -100,9 +99,7 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
     const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
     if (defaultModel && (!currentModel || !models.find((model) => currentModel.id === model.id))) {
-      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel, {
-        shouldValidate: true,
-      });
+      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel);
     }
   }, [form, models]);
 

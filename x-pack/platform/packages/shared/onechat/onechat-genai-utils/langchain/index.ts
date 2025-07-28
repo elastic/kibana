@@ -24,7 +24,6 @@ export {
   toolToLangchain,
   toolIdentifierFromToolCall,
   sanitizeToolId,
-  createToolIdMappings,
   type ToolIdMapping,
   type ToolsAndMappings,
 } from './tools';

@@ -584,7 +584,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const onIndexCreated = useCallback(
     async (resultQueryString: string) => {
-      onQueryUpdate(resultQueryString);
+      // onQueryUpdate(resultQueryString); //HD
       await esqlCallbacks.getJoinIndices?.();
     },
     [esqlCallbacks, onQueryUpdate]

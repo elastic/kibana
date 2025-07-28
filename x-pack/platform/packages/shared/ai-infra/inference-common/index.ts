@@ -131,11 +131,7 @@ export {
   getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
-  getModelDefinition,
-  getContextWindowSize,
-  contextWindowFromModelName,
   type InferenceConnector,
-  type InferenceConnectorCapabilities,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,

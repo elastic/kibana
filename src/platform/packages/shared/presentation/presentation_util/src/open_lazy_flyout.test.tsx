@@ -62,7 +62,7 @@ describe('openLazyFlyout', () => {
 
   it('calls overlayTracker.openOverlay when parentApi supports it', () => {
     const parentApi = { openOverlay: jest.fn(), clearOverlays: jest.fn() };
-    openLazyFlyout({ core, parentApi, loadContent, flyoutProps: { focusedPanelId: 'abc' } });
+    openLazyFlyout({ core, parentApi, loadContent, uuid: 'abc' });
     expect(parentApi.openOverlay).toHaveBeenCalledWith(overlayRef, { focusedPanelId: 'abc' });
   });
 

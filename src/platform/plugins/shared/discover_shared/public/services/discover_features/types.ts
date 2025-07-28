@@ -24,14 +24,13 @@ import { FeaturesRegistry } from '../../../common';
  * will be shown on the logs-overview preset tab of the UnifiedDocViewer.
  */
 
-export interface ObservabilityStreamsFeatureRenderDeps {
+export interface StreamsFeatureRenderDeps {
   doc: DataTableRecord;
 }
 
-export interface ObservabilityStreamsFeature {
+export interface StreamsFeature {
   id: 'streams';
-  renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
-  renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderStreamsField: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 }
 
 export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
@@ -72,7 +71,7 @@ export type SecuritySolutionFeature =
 
 // This should be a union of all the available client features.
 export type DiscoverFeature =
-  | ObservabilityStreamsFeature
+  | StreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
   | SecuritySolutionFeature;

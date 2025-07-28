@@ -17,12 +17,13 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
+  getLogger,
+  ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
   ElasticsearchRoleDescriptor,
   KibanaRole,
 } from '../../../common/services';
-import { ScoutLogger } from '../../../common/services/logger';
 import type { ScoutTestOptions } from '../../types';
 import type { ScoutTestConfig } from '.';
 
@@ -64,9 +65,7 @@ export const coreWorkerFixtures = base.extend<
       const workersCount = workerInfo.config.workers;
       const loggerContext =
         workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
-      // The log level is resolved inside the ScoutLogger constructor, which checks the argument,
-      // then SCOUT_LOG_LEVEL, then LOG_LEVEL, and finally defaults to 'info'.
-      use(new ScoutLogger(loggerContext));
+      use(getLogger(loggerContext));
     },
     { scope: 'worker' },
   ],

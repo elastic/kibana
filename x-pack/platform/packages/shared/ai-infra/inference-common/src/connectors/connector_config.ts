@@ -8,8 +8,6 @@
 import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
-
 /**
  * Returns the default model as defined in the connector's config, if available.
  *
@@ -19,14 +17,6 @@ const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 export const getConnectorDefaultModel = (connector: InferenceConnector): string | undefined => {
   switch (connector.type) {
     case InferenceConnectorType.OpenAI:
-      if (connector.config?.defaultModel) {
-        return connector.config.defaultModel;
-      }
-      // openAI provider has an implicitly defaults in the connector schema...
-      if (connector.config?.apiProvider === 'OpenAI') {
-        return DEFAULT_OPENAI_MODEL;
-      }
-      return undefined;
     case InferenceConnectorType.Gemini:
     case InferenceConnectorType.Bedrock:
       return connector.config?.defaultModel ?? undefined;

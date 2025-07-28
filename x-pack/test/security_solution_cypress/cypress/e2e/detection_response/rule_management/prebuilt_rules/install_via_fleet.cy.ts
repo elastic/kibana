@@ -17,8 +17,7 @@ import { expectManagementTableRules } from '../../../../tasks/alerts_detection_r
 
 const PREBUILT_RULES_PACKAGE_INSTALLATION_TIMEOUT_MS = 120000; // 2 minutes
 
-// Failing: See https://github.com/elastic/kibana/issues/228945
-describe.skip(
+describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
   { tags: ['@ess', '@serverless'] },
   () => {

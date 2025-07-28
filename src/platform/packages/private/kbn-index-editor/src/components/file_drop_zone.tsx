@@ -11,12 +11,17 @@ import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@el
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, type FC } from 'react';
+import React, { type FC, PropsWithChildren, useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { DismissableElement, useDontShowMeAgain } from '../hooks/use_dont_show_me_again';
+import { OverrideWarningModal } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
+import { KibanaContextExtra } from '../types';
 
-const acceptedFiles = ['.csv'];
+const acceptedFileFormats = ['.csv'];
 
 export interface FileSelectorContextType {
   onFileSelectorClick: () => void;
@@ -38,7 +43,16 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   children,
   noResults,
 }) => {
+  const {
+    services: { indexUpdateService },
+  } = useKibana<KibanaContextExtra>();
+  const [showOverrideWarning, setShowOverrideWarning] = useState(false);
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
+
+  const { isElementDismissed } = useDontShowMeAgain();
+
+  const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
+  const columnsPendingToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
   const isAnalyzing =
     uploadStatus.analysisStatus === STATUS.STARTED &&
@@ -49,20 +63,46 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
-      if (files && files.length > 0) {
-        await fileUploadManager.addFiles(files);
+      if (!files?.length) {
+        return;
       }
+
+      const dontAskMeAgainFlag = isElementDismissed(DismissableElement.OVERRIDE_WARNING_MODAL);
+      const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
+
+      if (hasPendingChanges && !dontAskMeAgainFlag) {
+        setShowOverrideWarning(true);
+        return;
+      }
+
+      indexUpdateService.discardUnsavedChanges();
+
+      await fileUploadManager.addFiles(files);
     },
-    [fileUploadManager]
+    [
+      isElementDismissed,
+      docsPendingToBeSaved.size,
+      columnsPendingToBeSaved.length,
+      indexUpdateService,
+      fileUploadManager,
+    ]
   );
 
-  const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, inputRef, acceptedFiles } = useDropzone({
     onDrop: onFilesSelected,
-    accept: acceptedFiles,
+    accept: acceptedFileFormats,
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
   });
+
+  const overrideDataAndLoadFiles = useCallback(async () => {
+    setShowOverrideWarning(false);
+
+    indexUpdateService.discardUnsavedChanges();
+
+    await fileUploadManager.addFiles(acceptedFiles);
+  }, [acceptedFiles, fileUploadManager, indexUpdateService]);
 
   const onFileSelectorClick = useCallback(() => {
     // Clear the input value to allow re-selecting the same file
@@ -155,11 +195,17 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   return (
     <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
-      <div {...getRootProps({ css: { height: '100%' } })}>
+      <div {...getRootProps()}>
         {isDragActive ? <div css={overlayDraggingFile} /> : null}
         {showLoadingOverlay ? loadingIndicator : null}
         <input {...getInputProps()} />
         {content}
+        {showOverrideWarning ? (
+          <OverrideWarningModal
+            onCancel={() => setShowOverrideWarning(false)}
+            onContinue={overrideDataAndLoadFiles}
+          />
+        ) : null}
       </div>
     </FileSelectorContext.Provider>
   );

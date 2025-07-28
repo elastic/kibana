@@ -45,7 +45,7 @@ export const createKeyInsightsPanelLensAttributes = ({
               columns: [
                 {
                   columnId: 'count',
-                  fieldName: 'count',
+                  fieldName: 'COUNT(*)',
                   label,
                   customLabel: true,
                   params: {

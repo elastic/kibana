@@ -19,5 +19,3 @@ export type Entity = StreamEntity;
 export interface EntityTypeDefinition {
   displayName: string;
 }
-
-export type { StreamsAppLocatorParams } from './locators';

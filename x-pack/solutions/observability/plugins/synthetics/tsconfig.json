@@ -117,8 +117,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/shared-ux-error-boundary",
     "@kbn/field-formats-plugin",
-    "@kbn/core-ui-settings-browser",
-    "@kbn/page-attachment-schema"
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }

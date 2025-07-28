@@ -21,7 +21,6 @@ import {
   secretTokenHint,
   apiKeyHint,
 } from './shared_hints';
-import type { LineNumbers } from '../../../../tutorial/config_agent/commands/get_apm_agent_commands';
 
 const apmAgentCommandsMap: Record<string, string> = {
   java,
@@ -52,6 +51,10 @@ const apmAgentVariablesMap: (secretToken?: string) => Record<string, Variables> 
   dotnet: dotnetVariables(secretToken),
   php: phpVariables(secretToken),
 });
+
+interface LineNumbers {
+  [key: string]: string | number | object;
+}
 
 const apmAgentLineNumbersMap: (apiKey?: string | null) => Record<string, LineNumbers> = (
   apiKey?: string | null

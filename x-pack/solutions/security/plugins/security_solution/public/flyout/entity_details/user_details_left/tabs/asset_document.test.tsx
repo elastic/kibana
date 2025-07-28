@@ -18,7 +18,9 @@ import {
   TABLE_TAB_CONTENT_TEST_ID,
 } from '../../../document_details/right/tabs/test_ids';
 
-describe('AssetDocumentTab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/216735
+// FLAKY: https://github.com/elastic/kibana/issues/216815
+describe.skip('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>

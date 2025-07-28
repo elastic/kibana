@@ -288,11 +288,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const dataStreamActions: EuiContextMenuPanelItemDescriptor[] = [];
 
   if (
-    selection.every(
-      (dataStream: DataStream) =>
-        dataStream.privileges.manage_data_stream_lifecycle &&
-        !isDataStreamFullyManagedByILM(dataStream)
-    )
+    selection.every((dataStream: DataStream) => dataStream.privileges.manage_data_stream_lifecycle)
   ) {
     dataStreamActions.push({
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.bulkEditDataRetentionButtonLabel', {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getPrivilegeMonitrUsersJoinNoTimestamp } from '../../../queries/helpers';
+import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
 
 export const getAlertsTriggeredEsqlCount = (namespace: string, alertsIndexName: string | null) => {
   if (!alertsIndexName) return '';
-  return `FROM ${alertsIndexName}
-    ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
-    | STATS count = COUNT(*)`;
+  return `FROM ${alertsIndexName} METADATA _id, _index
+    ${getPrivilegedMonitorUsersJoin(namespace)}
+    | STATS COUNT(*)`;
 };

@@ -311,7 +311,8 @@ function buildEuiGridColumn({
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
 
-  if (disableCellActions) {
+  // if (disableCellActions) {
+  if (true) {
     column.isExpandable = false;
   }
 

@@ -7556,9 +7556,7 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; config: ",
-              "ObservabilitySharedBrowserConfig",
-              "; }"
+              "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8287,9 +8285,7 @@
               "AppUpdater",
               ">; pricing: ",
               "PricingServiceStart",
-              "; }) => void; config: ",
-              "ObservabilitySharedBrowserConfig",
-              "; }"
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -20227,7 +20223,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/index.ts",
         "deprecated": false,

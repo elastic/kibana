@@ -47,7 +47,7 @@ const apmAgentVariablesMap: Record<string, Variables> = {
   js: rumVariables,
 };
 
-export interface LineNumbers {
+interface LineNumbers {
   [key: string]: string | number | object;
 }
 
@@ -93,7 +93,6 @@ export function getApmAgentCommands({
   };
 }) {
   const commands = apmAgentCommandsMap[variantId];
-
   if (!commands) {
     return '';
   }
@@ -112,15 +111,3 @@ export function getApmAgentLineNumbers(variantId: string) {
 export function getApmAgentHighlightLang(variantId: string) {
   return apmAgentHighlightLangMap[variantId];
 }
-
-export const secretTokenKeys = [
-  djangoVariables.secretToken,
-  dotnetVariables.secretToken,
-  flaskVariables.secretToken,
-  goVariables.secretToken,
-  javaVariables.secretToken,
-  nodeVariables.secretToken,
-  phpVariables.secretToken,
-  rackVariables.secretToken,
-  railsVariables.secretToken,
-];

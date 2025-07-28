@@ -33,6 +33,11 @@ import {
   SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
 
+import {
+  databaseSearchGuideId,
+  databaseSearchGuideConfig,
+} from '../common/guided_onboarding/search_guide_config';
+
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import {
@@ -89,6 +94,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       customIntegrations,
       ml,
       licensing,
+      guidedOnboarding,
       cloud,
       contentConnectors,
     }: PluginsSetup
@@ -287,6 +293,13 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       },
       name: 'Enterprise Search Behavioral Analytics Logs',
     });
+
+    /**
+     * Register a config for the search guide
+     */
+    if (config.hasConnectors) {
+      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+    }
 
     /**
      * Register our integrations in the global search bar

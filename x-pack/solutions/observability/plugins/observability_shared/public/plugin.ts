@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
@@ -43,7 +42,6 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import { ObservabilitySharedBrowserConfig } from '../common/config';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   DependencyOverviewLocator,
@@ -87,11 +85,9 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private config: ObservabilitySharedBrowserConfig;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
@@ -107,7 +103,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      config: this.config,
     };
   }
 
@@ -130,7 +125,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      config: this.config,
     };
   }
 

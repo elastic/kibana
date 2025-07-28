@@ -34,6 +34,7 @@ export function appendIndexToJoinCommand(
   cursorPosition: monaco.Position,
   indexName: string
 ): string {
+  return query; // //HD
   const cursorColumn = cursorPosition?.column ?? 1;
   const cursorLine = cursorPosition?.lineNumber ?? 1;
 
@@ -179,24 +180,20 @@ export const useLookupIndexCommand = (
     const lineCount = editorModel.current?.getLineCount() || 1;
     for (let i = 1; i <= lineCount; i++) {
       const decorations = editorRef.current?.getLineDecorations(i) ?? [];
-
-      const lookupIndexDecorations = decorations.filter((decoration) =>
-        decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
-      );
-
-      editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
+      editorRef?.current?.removeDecorations(decorations.map((d) => d.id));
     }
 
     getLookupIndicesMemoized().then(({ indices: existingIndices }) => {
       // TODO extract aliases as well
       const lookupIndices: string[] = inQueryLookupIndices.current;
+
       for (let i = 0; i < lookupIndices.length; i++) {
         const lookupIndex = lookupIndices[i];
 
         const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
 
         const matches =
-          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+          editorModel.current?.findMatches(lookupIndex, true, false, true, null, true) || [];
 
         matches.forEach((match) => {
           const range = new monaco.Range(

@@ -17,7 +17,7 @@
     "@kbn/std",
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
-    "@kbn/presentation-util"
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",

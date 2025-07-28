@@ -8,7 +8,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
-import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -68,12 +67,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             const registry = await toolService.getRegistry({ request });
             const tools = await registry.list({});
 
-            const idMapping = createToolIdMappings(tools);
-
             // Expose tools scoped to the request
             for (const tool of tools) {
               server.tool(
-                idMapping.get(tool.id) ?? tool.id,
+                tool.id,
                 tool.description,
                 tool.schema.shape,
                 async (args: { [x: string]: any }) => {

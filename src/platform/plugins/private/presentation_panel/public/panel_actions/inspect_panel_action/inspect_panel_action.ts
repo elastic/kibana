@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { tracksOverlays } from '@kbn/presentation-util';
 import {
   EmbeddableApiContext,
   getTitle,
@@ -38,7 +39,9 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
     });
   }
 
-  public getIconType = () => 'inspect';
+  public getIconType() {
+    return 'inspect';
+  }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
@@ -58,20 +61,24 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
       i18n.translate('presentationPanel.action.inspectPanel.untitledEmbeddableFilename', {
         defaultMessage: '[No Title]',
       });
-
-    inspector.open(
-      adapters,
-      {
-        title: panelTitle,
-        options: {
-          fileName: panelTitle,
-        },
-        flyoutProps: {
-          type: 'push',
-          focusedPanelId: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
-        },
+    const session = inspector.open(adapters, {
+      title: panelTitle,
+      flyoutType: 'push',
+      options: {
+        fileName: panelTitle,
       },
-      embeddable.parentApi
-    );
+    });
+    session.onClose.finally(() => {
+      if (tracksOverlays(embeddable.parentApi)) embeddable.parentApi.clearOverlays();
+    });
+
+    // send the overlay ref to the parent API if it is capable of tracking overlays
+    if (tracksOverlays(embeddable.parentApi)) {
+      const openOverlayOptions = apiHasUniqueId(embeddable)
+        ? { focusedPanelId: embeddable.uuid }
+        : undefined;
+
+      embeddable.parentApi?.openOverlay(session, openOverlayOptions);
+    }
   }
 }

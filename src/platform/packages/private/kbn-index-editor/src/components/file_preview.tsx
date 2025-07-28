@@ -21,7 +21,6 @@ import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -69,11 +68,7 @@ export const FilesPreview: FC = () => {
       const previewResults = await Promise.allSettled(
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
-            return previewDocs(
-              fileStatus.data,
-              fileStatus.results?.ingest_pipeline!,
-              FILE_PREVIEW_LIMIT
-            );
+            return previewDocs(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
           }
         })
       );
@@ -152,23 +147,21 @@ export const FilesPreview: FC = () => {
     }
   }, [data.dataViews, filesStatus, isMounted, previewDocs]);
 
-  useEffect(
-    function fetchFilePreviewAfterAnalysis() {
-      // don't fetch preview if importing is in progress
-      if (uploadStatus.overallImportStatus === STATUS.STARTED) {
-        return;
-      }
+  useEffect(() => {
+    // don't fetch preview if importing is in progress
+    if (uploadStatus.overallImportStatus === STATUS.STARTED) {
+      return;
+    }
 
-      // wait for all files to be analyzed before fetching previews
-      if (
-        filesStatus.length > 0 &&
-        filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)
-      ) {
-        fetchFilePreview();
-      }
-    },
-    [fetchFilePreview, filesStatus, uploadStatus.overallImportStatus]
-  );
+    // wait for all files to be analyzed before fetching previews
+    if (filesStatus.length > 0 && filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)) {
+      fetchFilePreview();
+    }
+
+    return () => {
+      // clean up ad hoc data views
+    };
+  }, [fetchFilePreview, filesStatus, uploadStatus.overallImportStatus]);
 
   if (!filePreviewItems.length) return null;
 
@@ -266,11 +259,18 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
   columnNames,
 }) => {
   const {
-    services: { data, theme, uiSettings, notifications, dataViewFieldEditor, fieldFormats },
+    services: {
+      data,
+      theme,
+      uiSettings,
+      notifications,
+      dataViewFieldEditor,
+      fieldFormats,
+      storage,
+    },
   } = useKibana<KibanaContextExtra>();
 
   const services = useMemo(() => {
-    const storage = new Storage(localStorage);
     return {
       data,
       theme,
@@ -280,7 +280,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
       fieldFormats,
       storage,
     };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
+  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const columnsMeta = useMemo(() => {
     return columnNames.reduce((acc, columnName) => {

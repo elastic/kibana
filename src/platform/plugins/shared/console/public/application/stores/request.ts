@@ -8,7 +8,8 @@
  */
 
 import { Reducer } from 'react';
-import { cloneDeep } from 'lodash';
+import { produce } from 'immer';
+import { identity } from 'fp-ts/function';
 import { BaseResponseType } from '../../types/common';
 import { RequestResult } from '../hooks/use_send_current_request/send_request';
 
@@ -31,37 +32,37 @@ const initialResultValue = {
   type: 'unknown' as BaseResponseType,
 };
 
-export const initialValue: Store = {
-  requestInFlight: false,
-  lastResult: initialResultValue,
-};
+export const initialValue: Store = produce<Store>(
+  {
+    requestInFlight: false,
+    lastResult: initialResultValue,
+  },
+  identity
+);
 
-export const reducer: Reducer<Store, Actions> = (state, action) => {
-  const draft = cloneDeep(state);
+export const reducer: Reducer<Store, Actions> = (state, action) =>
+  produce<Store>(state, (draft) => {
+    if (action.type === 'sendRequest') {
+      draft.requestInFlight = true;
+      draft.lastResult = initialResultValue;
+      return;
+    }
 
-  if (action.type === 'sendRequest') {
-    draft.requestInFlight = true;
-    draft.lastResult = initialResultValue;
-    return draft;
-  }
+    if (action.type === 'requestSuccess') {
+      draft.requestInFlight = false;
+      draft.lastResult = action.payload;
+      return;
+    }
 
-  if (action.type === 'requestSuccess') {
-    draft.requestInFlight = false;
-    draft.lastResult = action.payload;
-    return draft;
-  }
+    if (action.type === 'requestFail') {
+      draft.requestInFlight = false;
+      draft.lastResult = { ...initialResultValue, error: action.payload };
+      return;
+    }
 
-  if (action.type === 'requestFail') {
-    draft.requestInFlight = false;
-    draft.lastResult = { ...initialResultValue, error: action.payload };
-    return draft;
-  }
-
-  if (action.type === 'cleanRequest') {
-    draft.requestInFlight = false;
-    draft.lastResult = initialResultValue;
-    return draft;
-  }
-
-  return state;
-};
+    if (action.type === 'cleanRequest') {
+      draft.requestInFlight = false;
+      draft.lastResult = initialResultValue;
+      return;
+    }
+  });

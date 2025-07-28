@@ -6,11 +6,10 @@
  */
 
 import { ElasticModelDictionary } from './types';
-import { elasticModelIds } from './inference_endpoints';
 
 export const elasticModelDictionary: ElasticModelDictionary = {
-  [elasticModelIds.RainbowSprinkles]: {
+  'rainbow-sprinkles': {
     provider: 'bedrock',
-    model: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+    model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
   },
 };

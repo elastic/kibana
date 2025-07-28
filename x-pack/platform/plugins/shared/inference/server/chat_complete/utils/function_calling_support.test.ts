@@ -16,7 +16,6 @@ const createConnector = (
     connectorId: 'connector-id',
     name: 'my connector',
     config: {},
-    capabilities: {},
     ...parts,
   };
 };

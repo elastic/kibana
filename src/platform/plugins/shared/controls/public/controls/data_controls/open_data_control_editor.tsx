@@ -86,8 +86,6 @@ export const openDataControlEditor = <
         />
       );
     },
-    flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
-    },
+    triggerId: 'dashboard-controls-menu-button',
   });
 };

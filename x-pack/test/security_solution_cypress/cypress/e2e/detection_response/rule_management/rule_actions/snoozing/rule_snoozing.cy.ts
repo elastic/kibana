@@ -43,8 +43,7 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-// Failing: See https://github.com/elastic/kibana/issues/228942
-describe.skip('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

@@ -19,12 +19,9 @@ import type {
   StreamsApplicationProps,
 } from './types';
 import { StreamsAppServices } from './services/types';
-import {
-  createDiscoverFlyoutStreamFieldLink,
-  createDiscoverFlyoutStreamProcessingLink,
-} from './discover_features';
+import { createDiscoverStreamsLink } from './discover_streams_link';
+import { StreamsAppLocatorDefinition } from './app_locator';
 import { StreamsTelemetryService } from './telemetry/service';
-import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -51,19 +48,15 @@ export class StreamsAppPlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
-    const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
+    const locator = new StreamsAppLocatorDefinition();
+    pluginsStart.share.url.locators.create(locator);
     pluginsStart.streams.status$.subscribe((status) => {
       if (status.status !== 'enabled') return;
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',
-        renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
+        renderStreamsField: createDiscoverStreamsLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
-          locator,
-          coreApplication: coreStart.application,
-        }),
-        renderFlyoutStreamProcessingLink: createDiscoverFlyoutStreamProcessingLink({
-          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
-          locator,
+          locator: pluginsStart.share.url.locators.get(locator.id)!,
           coreApplication: coreStart.application,
         }),
       });

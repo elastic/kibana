@@ -6,37 +6,25 @@
  */
 
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
-import { TimeRange } from '@kbn/es-query';
 
 async function navigate({
   configId,
   locationId,
   spaceId,
-  timeRange,
-  tabId,
 }: {
   configId: string;
   locationId?: string;
   spaceId?: string;
-  timeRange?: TimeRange;
-  tabId?: string;
 }) {
   let queryParam = locationId ? `?locationId=${locationId}` : '';
-  const tab = `${tabId ? `/${tabId}` : ''}`;
 
   if (spaceId) {
     queryParam += queryParam ? `&spaceId=${spaceId}` : `?spaceId=${spaceId}`;
   }
 
-  if (timeRange) {
-    queryParam += queryParam
-      ? `&dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`
-      : `?dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`;
-  }
-
   return {
     app: 'synthetics',
-    path: `/monitor/${configId}${tab}${queryParam}`,
+    path: `/monitor/${configId}${queryParam}`,
     state: {},
   };
 }

@@ -205,7 +205,7 @@ export const SavedPlayground = () => {
           saveAs
           playgroundName={playgroundName}
           onClose={onCloseModal}
-          onNavigateToNewPlayground={(id: string) => {
+          navigateToNewPlayground={(id: string) => {
             navigateToView(id, pageMode ?? PlaygroundPageMode.Chat, viewMode, location.search);
           }}
         />

@@ -40,16 +40,6 @@ export const applyScheduledBackfillsToGap = async ({
       scheduleItem.status === adHocRunStatus.ERROR || scheduleItem.status === adHocRunStatus.TIMEOUT
   );
 
-  // Although calculateGapStateFromAllBackfills also calls updateGapFromSchedule,
-  // it's crucial to call updateGapFromSchedule first with the current scheduled items.
-  // This ensures that if a backfill has been deleted, we still update gaps based on any
-  // completed scheduled items it contained. Since deleted backfills aren't returned on refetch,
-  // calculateGapStateFromAllBackfills can't account for them.
-  updateGapFromSchedule({
-    gap,
-    scheduledItems,
-  });
-
   if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
     await calculateGapStateFromAllBackfills({
       gap,
@@ -59,5 +49,11 @@ export const applyScheduledBackfillsToGap = async ({
       actionsClient,
       logger,
     });
+    return;
   }
+
+  updateGapFromSchedule({
+    gap,
+    scheduledItems,
+  });
 };

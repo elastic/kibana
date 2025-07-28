@@ -21,11 +21,6 @@ export const getPrivilegedMonitorUsersJoin = (
   | RENAME event_timestamp AS @timestamp
   | WHERE user.is_privileged == true`;
 
-export const getPrivilegeMonitrUsersJoinNoTimestamp = (
-  namespace: string
-) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
-  | WHERE user.is_privileged == true`;
-
 /**
  * Rewrites que query to remove FORK branches that contain columns not available.
  */

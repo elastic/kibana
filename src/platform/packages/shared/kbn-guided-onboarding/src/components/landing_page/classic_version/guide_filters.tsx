@@ -69,6 +69,19 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={onSelectFilter}
+          data-filter-id="search"
+          color="text"
+          css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
+        >
+          <FormattedMessage
+            id="guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel"
+            defaultMessage="Elasticsearch"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          onClick={onSelectFilter}
           data-filter-id="security"
           color="text"
           css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}

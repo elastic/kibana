@@ -12,6 +12,7 @@ export { createScoutConfig } from './config';
 export { getEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
+export { getLogger } from './logger';
 
 export type { KibanaUrl } from './kibana_url';
 export type { SamlSessionManager } from '@kbn/test';

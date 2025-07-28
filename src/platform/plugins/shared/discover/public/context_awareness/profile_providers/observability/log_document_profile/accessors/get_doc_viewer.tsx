@@ -84,8 +84,7 @@ export const createGetDocViewer =
                 {...props}
                 ref={setLogsOverviewApi}
                 renderAIAssistant={logsAIAssistantFeature?.render}
-                renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
-                renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+                renderStreamsField={streamsFeature?.renderStreamsField}
               />
             );
           },

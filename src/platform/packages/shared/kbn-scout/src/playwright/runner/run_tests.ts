@@ -8,11 +8,10 @@
  */
 
 import { resolve } from 'path';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getFlags } from '@kbn/dev-cli-runner';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
@@ -32,19 +31,13 @@ export const getPlaywrightProject = (
   return 'local';
 };
 
-async function runPlaywrightTest(
-  procs: ProcRunner,
-  cmd: string,
-  args: string[],
-  env: Record<string, string> = {}
-) {
+async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[]) {
   return procs.run(`playwright`, {
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
     env: {
       ...process.env,
-      ...env,
     },
     wait: true,
   });
@@ -89,8 +82,7 @@ async function runLocalServersAndTests(
   log: ToolingLog,
   options: RunTestsOptions,
   cmd: string,
-  cmdArgs: string[],
-  env: Record<string, string> = {}
+  cmdArgs: string[]
 ) {
   const config = await loadServersConfig(options.mode, log);
   const abortCtrl = new AbortController();
@@ -122,7 +114,7 @@ async function runLocalServersAndTests(
     // wait for 5 seconds
     await silence(log, 5000);
 
-    await runPlaywrightTest(procs, cmd, cmdArgs, env);
+    await runPlaywrightTest(procs, cmd, cmdArgs);
   } finally {
     try {
       await procs.stop('kibana');
@@ -141,12 +133,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
-  const globalFlags = getFlags(process.argv.slice(2), {
-    allowUnexpected: true,
-  });
-  // Temporarily use `debug` log level for Playwright tests to better understand performance issues;
-  // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
-  const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
@@ -165,13 +151,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
     }
 
     reportTime(runStartTime, 'ready', {

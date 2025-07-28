@@ -68,7 +68,6 @@ describe('inferenceAdapter', () => {
         name: 'inference connector',
         connectorId: '.id',
         config: {},
-        capabilities: {},
       };
     });
   });

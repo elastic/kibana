@@ -12,7 +12,6 @@ export const PrivilegeMonitoringEngineActions = {
   CREATE: 'create',
   DELETE: 'delete',
   EXECUTE: 'execute',
-  DISABLE: 'disable',
 } as const;
 
 export type PrivilegeMonitoringEngineActions =

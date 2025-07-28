@@ -29,7 +29,6 @@
       "unifiedDocViewer"
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
   }
 }

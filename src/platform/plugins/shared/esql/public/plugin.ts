@@ -133,17 +133,13 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
-        const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices'
-        );
+    const getJoinIndicesAutocomplete = async () => {
+      const result = await core.http.get<IndicesAutocompleteResult>(
+        '/internal/esql/autocomplete/join/indices'
+      );
 
-        return result;
-      },
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
+      return result;
+    };
 
     const getTimeseriesIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {

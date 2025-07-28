@@ -19,11 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
-import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { PlaygroundHeaderDocs } from './playground_header_docs';
-import { SaveNewPlaygroundButton } from './save_new_playground_button';
 import { Toolbar } from './toolbar';
+import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
 
 interface HeaderProps {
   pageMode: PlaygroundPageMode;
@@ -83,17 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             size="xs"
           >
             <h2>
-              {isSearchModeEnabled ? (
-                <FormattedMessage
-                  id="xpack.searchPlayground.unsaved.pageTitle"
-                  defaultMessage="Unsaved playground"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.searchPlayground.pageTitle"
-                  defaultMessage="Playground"
-                />
-              )}
+              <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
             </h2>
           </EuiTitle>
 
@@ -125,7 +114,6 @@ export const Header: React.FC<HeaderProps> = ({
         <EuiFlexGroup alignItems="center">
           {showDocs && <PlaygroundHeaderDocs />}
           <Toolbar selectedPageMode={pageMode} />
-          {isSearchModeEnabled && <SaveNewPlaygroundButton disabled={isActionsDisabled} />}
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>

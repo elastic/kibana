@@ -208,7 +208,6 @@
               "\nBackground color for the beacon."
             ],
             "signature": [
-              "\"severity\" | ",
               "EuiThemeColorModeStandard",
               " | keyof ",
               "_EuiThemeBrandColors",

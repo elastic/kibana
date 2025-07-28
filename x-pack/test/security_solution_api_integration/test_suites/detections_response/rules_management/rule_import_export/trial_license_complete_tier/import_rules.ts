@@ -136,9 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
 
-  // Failing: See https://github.com/elastic/kibana/issues/220971
-  // Failing: See https://github.com/elastic/kibana/issues/220971
-  describe.skip('@ess @serverless @skipInServerlessMKI import_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI import_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

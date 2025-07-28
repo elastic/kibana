@@ -193,3 +193,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RequestsViewComponent as default };

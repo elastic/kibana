@@ -52,22 +52,6 @@ const gap = new Gap({
   },
 });
 
-const testToHaveBeenCalledBefore = (
-  calledFirst: jest.Mock,
-  calledSecond: jest.Mock,
-  timesCalled = 1
-) => {
-  const calledFirstOrder = calledFirst.mock.invocationCallOrder;
-  const calledSecondOrder = calledSecond.mock.invocationCallOrder;
-
-  expect(calledFirstOrder).toHaveLength(timesCalled);
-  expect(calledSecondOrder).toHaveLength(timesCalled);
-
-  calledFirstOrder.forEach((order, idx) => {
-    expect(order).toBeLessThan(calledSecondOrder[idx]);
-  });
-};
-
 describe('applyScheduledBackfillsToGap', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -84,8 +68,6 @@ describe('applyScheduledBackfillsToGap', () => {
         ruleId,
       });
 
-      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems: [] });
-
       expect(calculateGapStateFromAllBackfillsMock).toHaveBeenCalledWith({
         gap,
         savedObjectsRepository,
@@ -94,8 +76,7 @@ describe('applyScheduledBackfillsToGap', () => {
         actionsClient,
         logger: mockLogger,
       });
-
-      testToHaveBeenCalledBefore(updateGapFromScheduleMock, calculateGapStateFromAllBackfillsMock);
+      expect(updateGapFromScheduleMock).not.toHaveBeenCalled();
     });
 
     test('when there is a scheduled item with an errored task', async () => {
@@ -115,11 +96,6 @@ describe('applyScheduledBackfillsToGap', () => {
         ruleId,
       });
 
-      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({
-        gap,
-        scheduledItems: scheduledItemsWithFailedTask,
-      });
-
       expect(calculateGapStateFromAllBackfillsMock).toHaveBeenCalledWith({
         gap,
         savedObjectsRepository,
@@ -128,8 +104,7 @@ describe('applyScheduledBackfillsToGap', () => {
         actionsClient,
         logger: mockLogger,
       });
-
-      testToHaveBeenCalledBefore(updateGapFromScheduleMock, calculateGapStateFromAllBackfillsMock);
+      expect(updateGapFromScheduleMock).not.toHaveBeenCalled();
     });
 
     test('when there is a scheduled item with a task that timed out', async () => {
@@ -149,11 +124,6 @@ describe('applyScheduledBackfillsToGap', () => {
         ruleId,
       });
 
-      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({
-        gap,
-        scheduledItems: scheduledItemsWithFailedTask,
-      });
-
       expect(calculateGapStateFromAllBackfillsMock).toHaveBeenCalledWith({
         gap,
         savedObjectsRepository,
@@ -162,8 +132,7 @@ describe('applyScheduledBackfillsToGap', () => {
         actionsClient,
         logger: mockLogger,
       });
-
-      testToHaveBeenCalledBefore(updateGapFromScheduleMock, calculateGapStateFromAllBackfillsMock);
+      expect(updateGapFromScheduleMock).not.toHaveBeenCalled();
     });
 
     test('when shouldRefetchAllBackfills is true', async () => {
@@ -178,8 +147,6 @@ describe('applyScheduledBackfillsToGap', () => {
         shouldRefetchAllBackfills: true,
       });
 
-      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems });
-
       expect(calculateGapStateFromAllBackfillsMock).toHaveBeenCalledWith({
         gap,
         savedObjectsRepository,
@@ -188,8 +155,7 @@ describe('applyScheduledBackfillsToGap', () => {
         actionsClient,
         logger: mockLogger,
       });
-
-      testToHaveBeenCalledBefore(updateGapFromScheduleMock, calculateGapStateFromAllBackfillsMock);
+      expect(updateGapFromScheduleMock).not.toHaveBeenCalled();
     });
   });
 
@@ -205,8 +171,8 @@ describe('applyScheduledBackfillsToGap', () => {
         ruleId,
       });
 
-      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems });
       expect(calculateGapStateFromAllBackfillsMock).not.toHaveBeenCalled();
+      expect(updateGapFromScheduleMock).toHaveBeenCalledWith({ gap, scheduledItems });
     });
   });
 });

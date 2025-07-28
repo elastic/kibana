@@ -11,11 +11,9 @@ import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import {
-  ObservabilityLogsAIAssistantFeature,
-  ObservabilityStreamsFeature,
-} from '@kbn/discover-shared-plugin/public';
+import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { getStacktraceFields, LogDocument } from '@kbn/discover-utils/src';
+import { StreamsFeatureRenderDeps } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
@@ -25,9 +23,8 @@ import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_sectio
 import { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
 
 export type LogsOverviewProps = DocViewRenderProps & {
-  renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
-  renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
-  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+  renderStreamsField?: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 };
 
 export interface LogsOverviewApi {
@@ -44,8 +41,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       onAddColumn,
       onRemoveColumn,
       renderAIAssistant,
-      renderFlyoutStreamField,
-      renderFlyoutStreamProcessingLink,
+      renderStreamsField,
     },
     ref
   ) => {
@@ -79,16 +75,12 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onRemoveColumn={onRemoveColumn}
       >
         <EuiSpacer size="m" />
-        <LogsOverviewHeader
-          formattedDoc={parsedDoc}
-          doc={hit}
-          renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-        />
+        <LogsOverviewHeader doc={parsedDoc} />
         <EuiHorizontalRule margin="xs" />
         <LogsOverviewHighlights
           formattedDoc={parsedDoc}
           doc={hit}
-          renderFlyoutStreamField={renderFlyoutStreamField}
+          renderStreamsField={renderStreamsField}
         />
         <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
         {isStacktraceAvailable && (

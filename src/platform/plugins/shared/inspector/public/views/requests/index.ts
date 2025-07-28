@@ -13,9 +13,7 @@ import { lazy } from 'react';
 import { InspectorViewDescription } from '../../types';
 import { Adapters } from '../../../common';
 
-const RequestsViewComponent = lazy(() =>
-  import('../../async_services').then((module) => ({ default: module.RequestsViewComponent }))
-);
+const RequestsViewComponent = lazy(() => import('./components/requests_view'));
 
 export const getRequestsViewDescription = (): InspectorViewDescription => ({
   title: i18n.translate('inspector.requests.requestsTitle', {
@@ -25,6 +23,8 @@ export const getRequestsViewDescription = (): InspectorViewDescription => ({
   help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
     defaultMessage: 'View the search requests used to collect the data',
   }),
-  shouldShow: (adapters: Adapters) => Boolean(adapters.requests),
+  shouldShow(adapters: Adapters) {
+    return Boolean(adapters.requests);
+  },
   component: RequestsViewComponent,
 });

@@ -13,13 +13,8 @@ import {
   ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
-  getLogLevelCoalescedValue,
-  getLogLevelColor,
-  LOG_LEVEL_REGEX,
-  DataTableRecord,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -34,7 +29,7 @@ const LogMessage = ({
   className,
 }: {
   field: string;
-  value: string | HTMLElement;
+  value: string;
   className: string;
 }) => {
   const shouldRenderFieldName = field !== MESSAGE_FIELD;
@@ -63,22 +58,6 @@ const LogMessage = ({
   );
 };
 
-const getHighlightedMessage = (
-  value: string,
-  _row: DataTableRecord,
-  euiTheme: EuiThemeComputed
-): string => {
-  return value.replace(LOG_LEVEL_REGEX, (match) => {
-    const coalesced = getLogLevelCoalescedValue(match);
-    if (!coalesced) return match;
-
-    const bgColor = getLogLevelColor(coalesced, euiTheme);
-    if (!bgColor) return match;
-
-    return `<span style="background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
-  });
-};
-
 export const Content = ({
   columnId,
   dataView,
@@ -90,22 +69,10 @@ export const Content = ({
 }: ContentProps) => {
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
-
-  const { euiTheme } = useEuiTheme();
-
-  const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value as string, row, euiTheme) : value),
-    [value, row, euiTheme]
-  );
-
-  const shouldRenderContent = !!field && !!value && !!highlightedValue;
+  const shouldRenderContent = !!field && !!value;
 
   return shouldRenderContent ? (
-    <LogMessage
-      field={field}
-      value={highlightedValue}
-      className={isSingleLine ? 'eui-textTruncate' : ''}
-    />
+    <LogMessage field={field} value={value} className={isSingleLine ? 'eui-textTruncate' : ''} />
   ) : (
     <FormattedSourceDocument
       columnId={columnId}

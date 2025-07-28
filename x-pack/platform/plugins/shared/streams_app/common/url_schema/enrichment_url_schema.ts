@@ -46,7 +46,7 @@ export interface KqlSamplesDataSource extends BaseDataSource {
     query: string;
   };
   filters?: Filter[];
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
 }
 
 const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
@@ -56,12 +56,10 @@ const kqlSamplesDataSourceSchema = baseDataSourceSchema.extend({
     query: z.string(),
   }),
   filters: z.array(z.any()).optional(),
-  timeRange: z
-    .object({
-      from: z.string(),
-      to: z.string(),
-    })
-    .optional(),
+  timeRange: z.object({
+    from: z.string(),
+    to: z.string(),
+  }),
 }) satisfies z.Schema<KqlSamplesDataSource>;
 
 /**

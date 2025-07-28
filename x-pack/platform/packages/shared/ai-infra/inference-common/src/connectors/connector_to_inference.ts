@@ -8,7 +8,6 @@
 import { createInferenceRequestError } from '../errors';
 import type { InferenceConnector, RawConnector } from './connectors';
 import { isSupportedConnector } from './is_supported_connector';
-import { getContextWindowSize } from './connector_capabilities';
 
 /**
  * Converts an action connector to the internal inference connector format.
@@ -23,15 +22,10 @@ export const connectorToInference = (connector: RawConnector): InferenceConnecto
     );
   }
 
-  const inferenceConnector: InferenceConnector = {
+  return {
     connectorId: connector.id,
     name: connector.name,
     type: connector.actionTypeId,
     config: connector.config ?? {},
-    capabilities: {},
   };
-
-  inferenceConnector.capabilities.contextWindowSize = getContextWindowSize(inferenceConnector);
-
-  return inferenceConnector;
 };

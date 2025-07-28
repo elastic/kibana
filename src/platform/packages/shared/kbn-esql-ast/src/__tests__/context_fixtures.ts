@@ -204,7 +204,6 @@ export const mockContext: ICommandContext = {
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,
-  appId: 'discover',
 };
 
 export const getMockCallbacks = (): ICommandCallbacks => {

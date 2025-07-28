@@ -13,7 +13,7 @@ import styled from '@emotion/styled';
 
 const defaultButtonContent = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.processor.optionalFields',
-  { defaultMessage: 'Advanced settings' }
+  { defaultMessage: 'Optional fields' }
 );
 
 const StyledEuiAccordion = styled(EuiAccordion)`

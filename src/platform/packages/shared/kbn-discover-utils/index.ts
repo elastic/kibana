@@ -66,7 +66,6 @@ export {
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
-  severityOrder,
 } from './src';
 
 export type {

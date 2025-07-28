@@ -24,6 +24,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -58,6 +59,7 @@ export interface KibanaLogicProps {
   fleet?: FleetStart;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
@@ -91,6 +93,7 @@ export interface KibanaValues {
   fleet: FleetStart | null;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
+  guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isAgentlessEnabled: boolean;
@@ -133,6 +136,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     fleet: [props.fleet || null, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
     getNavLinks: [props.getNavLinks, {}],
+    guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
