@@ -20,6 +20,7 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
+import { services as svlServices } from './services';
 
 export default async () => {
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
@@ -184,7 +185,7 @@ export default async () => {
     // Used by FTR to recognize serverless project and change its behavior accordingly
     serverless: true,
 
-    services: {}, // define later
+    services: svlServices,
 
     // overriding default timeouts from src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
