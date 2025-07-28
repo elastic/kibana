@@ -213,6 +213,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           observability.users.defineBasicObservabilityRole({
             logs: ['all'],
             infrastructure: ['all'],
+            observabilityManageRules: ['all'],
           })
         );
 

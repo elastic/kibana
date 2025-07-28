@@ -94,7 +94,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('both logs and infrastructure privileges', () => {
+    describe('observability, logs, and infrastructure privileges', () => {
       const uuid = ` ${uuidv4()}`;
       const ruleName = `Custom threshold rule${uuid}`;
       it('logs in with privileged role', async () => {
@@ -103,13 +103,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       createCustomThresholdRule({ ruleName });
 
-      it('should have logs consumer by default', async () => {
+      it('should have observability consumer by default', async () => {
         const searchResults = (await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         )) as { body: { data: Array<{ consumer: string; id: string }> } };
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('logs');
+        expect(rule.consumer).toEqual('observability');
         ruleIdList.push(rule.id);
       });
     });
