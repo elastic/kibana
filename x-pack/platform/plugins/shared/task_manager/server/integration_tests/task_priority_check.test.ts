@@ -49,18 +49,19 @@ describe('Task priority checks', () => {
   });
 
   it('detects tasks with priority definitions', async () => {
-    // Ensure that the feature flags are initialized before checking task priorities
-    await retry(async () => {
-      const featureFlags = await kibanaServer.coreSetup.featureFlags.getInitialFeatureFlags();
-      expect(featureFlags).toEqual({});
-    });
-
     const taskTypes = taskTypeDictionary.getAllDefinitions();
     const taskTypesWithPriority = taskTypes
       .map((taskType: TaskDefinition) =>
         !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
       )
       .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
+
+    await retry(async () => {
+      expect(taskTypesWithPriority.length).toEqual(2);
+    });
+
     expect(taskTypesWithPriority).toMatchSnapshot();
   });
 });
+
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
