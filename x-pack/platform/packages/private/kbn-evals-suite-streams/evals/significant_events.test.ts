@@ -33,20 +33,20 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
           ],
         },
         task: async ({}) => {
-          const all$ = from(
-            fetch('/api/streams/logs/significant_events/_generate', {
-              method: 'GET',
-              asResponse: true,
-              rawResponse: true,
-              query: {
-                connectorId: connector.id,
-              },
-            })
-          ).pipe(httpResponseIntoObservable(), toArray());
+          const events$ = await lastValueFrom(
+            from(
+              fetch('/api/streams/logs/significant_events/_generate', {
+                method: 'GET',
+                asResponse: true,
+                rawResponse: true,
+                query: {
+                  connectorId: connector.id,
+                },
+              })
+            ).pipe(httpResponseIntoObservable(), toArray())
+          );
 
-          const events = await lastValueFrom(all$);
-
-          return events.map((e) => e.query);
+          return events$.map((e) => e.query);
         },
       },
       [

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './exclude_frozen_query';
-export * from './exclude_tiers_query';
 export * from './kql_query';
 export * from './range_query';
 export * from './term_query';
