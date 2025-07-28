@@ -27,16 +27,18 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
+  schema,
 }: Pick<
   GetHostParameters,
-  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics'
+  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'
 > & {
   hostNames: string[];
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
-  const metricAggregations = getInventoryModelAggregations(
+  const metricAggregations = await getInventoryModelAggregations(
     'host',
-    metrics.map((metric) => metric)
+    metrics.map((metric) => metric),
+    schema
   );
 
   const documentsFilter = await getDocumentsFilter({
@@ -44,6 +46,7 @@ export const getAllHosts = async ({
     apmDocumentSources,
     from,
     to,
+    schema,
   });
 
   const response = await infraMetricsClient.search({
