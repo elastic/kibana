@@ -19,6 +19,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 
 export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/229394
+  // Failing: See https://github.com/elastic/kibana/issues/229394
   describe.skip('PrivateLocationAPI', function () {
     this.tags('skipCloud');
     const supertestWithoutAuth = getService('supertestWithoutAuth');

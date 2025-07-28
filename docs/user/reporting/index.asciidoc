@@ -7,13 +7,18 @@
 :frontmatter-description: {kib} provides you with several options to share *Discover* sessions, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
 :frontmatter-tags-products: [kibana]
 
-{kib} provides you with several options to share *Discover* sessions, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. These sharing options are available from the *Share* menu in the toolbar.
+{kib} provides you with several options to share *Discover* sessions, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. These sharing options are available from the *Share* and **Export** menus in the toolbar.
 
 [float]
 [[share-a-direct-link]]
 == Share with a direct link
 
-You can share direct links to saved Discover sessions, dashboards, and visualizations. When clicking **Share**, look for the **Links** tab to get the shareable link and copy it. 
+You can share direct links to saved Discover sessions, dashboards, and visualizations. Look for the **Share** icon in the toolbar.
+
+When applicable, you can choose to share the object using a relative or an absolute time range:
+
+* **Relative time range**: The link shows current data. For example, if you share a "Last 7 days" view, users will see the most recent 7 days when they open the link.
+* **Absolute time range** (default): The link shows a fixed time period. For example, if you share a "Last 7 days" view on January 7, 2025, the link will always show that exact week of January 1-7, 2025, regardless of when users open the link.
 
 TIP: When sharing an object with unsaved changes, you get a temporary link that might break in the future, for example in case of upgrade. Save the object to get a permanent link instead.
 
@@ -21,7 +26,7 @@ To access the object shared with the link, users need to authenticate.
 
 Anonymous users can also access the link if you have configured <<anonymous-authentication,Anonymous authentication>> and your anonymous service account has privileges to access what you want to share.
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt49f2b5a80ec89a34/66b9e919af508f4ac182c194/share-dashboard.gif[getting a shareable link for a dashboard]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltc45bb05c1fab3e60/68826ffb4f04ad6e224c2248/share-dashboard.gif[getting a shareable link for a dashboard]
 
 [float]
 [[manually-generate-reports]]
@@ -100,7 +105,7 @@ Create and share JSON files for workpads.
 
 . Open the workpad you want to share.
 
-. From the toolbar, click *Share*, then select *Download as JSON*.
+. From the toolbar, click *Export*, then select *JSON*.
 
 [float]
 == Embed outside of {kib}
