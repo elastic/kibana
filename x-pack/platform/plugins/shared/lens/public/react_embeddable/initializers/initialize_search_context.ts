@@ -54,6 +54,8 @@ export function initializeSearchContext(
     : new BehaviorSubject<string | undefined>(undefined);
 
   const attributes = internalApi.attributes$.getValue();
+  // @TODO: remove
+  console.log(`--@@attributes`, attributes);
 
   const lastReloadRequestTime$ = new BehaviorSubject<number | undefined>(undefined);
 

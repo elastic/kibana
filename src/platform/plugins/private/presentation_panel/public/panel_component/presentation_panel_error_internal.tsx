@@ -30,6 +30,8 @@ export interface PresentationPanelErrorProps {
 }
 
 export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanelErrorProps) => {
+  // @TODO: remove
+  console.log(`--@@error`, error);
   const errorTextStyle = useErrorTextStyle();
 
   const [isEditable, setIsEditable] = useState(false);
