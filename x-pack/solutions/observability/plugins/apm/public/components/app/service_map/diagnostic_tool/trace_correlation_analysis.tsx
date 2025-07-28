@@ -14,23 +14,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiAccordion,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 
 interface TraceCorrelationAnalysisProps {
-  traceCorrelation: {
-    found: boolean;
-    foundInSourceNode: boolean;
-    foundInDestinationNode: boolean;
-    sourceNodeDocumentCount: number;
-    destinationNodeDocumentCount: number;
-  };
+  traceCorrelation: ServiceMapDiagnosticResponse['analysis']['traceCorrelation'];
   traceId: string;
   sourceNodeName: string;
   destinationNodeName: string;
-  traceCorrelationResponse?: any;
 }
 
 export function TraceCorrelationAnalysis({
@@ -38,7 +31,6 @@ export function TraceCorrelationAnalysis({
   traceId,
   sourceNodeName,
   destinationNodeName,
-  traceCorrelationResponse,
 }: TraceCorrelationAnalysisProps) {
   const {
     found,

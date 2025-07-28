@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiPanel,
@@ -58,7 +58,7 @@ export function DiagnosticConfigurationForm({
     return array.map((item, i) => (i === index ? value : item));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const [sourceNodeField, destinationNodeField] = selectedFields;
     const [sourceNodeValue, destinationNodeValue] = selectedValues;
     const sourceNode =
