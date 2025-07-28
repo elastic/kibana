@@ -231,16 +231,16 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
 /**
  * Finds the column closest to the given cursor position within an array of columns.
  *
- * @param columns An array of column objects.
+ * @param columns An array of ES|QL columns.
  * @param cursorPosition The current cursor position.
  * @returns The column object closest to the cursor, or null if the columns array is empty.
  */
-function findClosestColumn(
+export function findClosestColumn(
   columns: ESQLColumn[],
   cursorPosition?: monaco.Position
-): ESQLColumn | null {
+): ESQLColumn | undefined {
   if (columns.length === 0) {
-    return null;
+    return undefined;
   }
 
   if (!cursorPosition) {
@@ -248,7 +248,7 @@ function findClosestColumn(
   }
 
   const cursorCol = cursorPosition.column;
-  let closestColumn: ESQLColumn | null = null;
+  let closestColumn;
   let minDistance = Infinity;
 
   for (const column of columns) {
