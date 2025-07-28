@@ -67,7 +67,7 @@ export type CaretPosition =
   | 'grouping_expression_after_assignment'
   | 'after_where';
 
-export const getPosition = (command: ESQLCommand): CaretPosition => {
+export const getPosition = (command: ESQLCommand, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
@@ -85,7 +85,11 @@ export const getPosition = (command: ESQLCommand): CaretPosition => {
     return 'expression_after_assignment';
   }
 
-  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
+  if (
+    isFunctionExpression(lastCommandArg) &&
+    lastCommandArg.name === 'where' &&
+    !/,\s*$/.test(innerText)
+  ) {
     return 'after_where';
   }
 

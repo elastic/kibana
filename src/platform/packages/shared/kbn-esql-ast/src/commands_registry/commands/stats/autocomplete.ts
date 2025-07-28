@@ -65,7 +65,7 @@ export async function autocomplete(
   const columnExists = (name: string) => _columnExists(name, context);
 
   const innerText = query.substring(0, cursorPosition);
-  const pos = getPosition(command);
+  const pos = getPosition(command, innerText);
 
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
