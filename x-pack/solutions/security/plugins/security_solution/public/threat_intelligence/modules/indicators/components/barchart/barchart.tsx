@@ -55,42 +55,40 @@ export const IndicatorsBarChart: FC<IndicatorsBarChartProps> = ({
   const { announce } = useScreenReaderAnnouncements();
 
   return (
-    <>
-      <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
-        <Settings
-          baseTheme={chartBaseTheme}
-          showLegend
-          legendPosition={Position.Right}
-          legendSize={DEFAULT_LEGEND_SIZE}
-          legendAction={({ label }) => (
-            <IndicatorBarchartLegendAction
-              announceIndicatorActionChange={announce}
-              field={field}
-              data={label}
-            />
-          )}
-          locale={i18n.getLocale()}
-        />
-        <Axis
-          id={`${ID}TimeAxis`}
-          position={Position.Bottom}
-          tickFormat={barChartTimeAxisLabelFormatter(dateRange)}
-        />
-        <Axis id={`${ID}IndicatorAxis`} position={Position.Left} />
-        <BarSeries
-          id={`${ID}BarChart`}
-          name="Indicators"
-          // Defaults to multi layer time axis as of Elastic Charts v70
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
-          data={indicators}
-          timeZone={timeZone}
-        />
-      </Chart>
-    </>
+    <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
+      <Settings
+        baseTheme={chartBaseTheme}
+        showLegend
+        legendPosition={Position.Right}
+        legendSize={DEFAULT_LEGEND_SIZE}
+        legendAction={({ label }) => (
+          <IndicatorBarchartLegendAction
+            announceIndicatorActionChange={announce}
+            field={field}
+            data={label}
+          />
+        )}
+        locale={i18n.getLocale()}
+      />
+      <Axis
+        id={`${ID}TimeAxis`}
+        position={Position.Bottom}
+        tickFormat={barChartTimeAxisLabelFormatter(dateRange)}
+      />
+      <Axis id={`${ID}IndicatorAxis`} position={Position.Left} />
+      <BarSeries
+        id={`${ID}BarChart`}
+        name="Indicators"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        stackAccessors={['x']}
+        splitSeriesAccessors={['g']}
+        data={indicators}
+        timeZone={timeZone}
+      />
+    </Chart>
   );
 };

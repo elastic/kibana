@@ -12,6 +12,8 @@ import { timestampToIsoString } from './utils';
 
 jest.mock('./utils');
 
+const announceFn = jest.fn;
+
 describe('IndicatorBarchartLegendAction', () => {
   const mockDate = '14182940000';
 
@@ -25,7 +27,7 @@ describe('IndicatorBarchartLegendAction', () => {
     };
     render(
       <IndicatorBarchartLegendAction
-        announceIndicatorActionChange={() => {}}
+        announceIndicatorActionChange={announceFn}
         data={mockDate}
         field={mockField}
       />
@@ -40,7 +42,7 @@ describe('IndicatorBarchartLegendAction', () => {
     };
     render(
       <IndicatorBarchartLegendAction
-        announceIndicatorActionChange={() => {}}
+        announceIndicatorActionChange={announceFn}
         data={mockDate}
         field={mockField}
       />

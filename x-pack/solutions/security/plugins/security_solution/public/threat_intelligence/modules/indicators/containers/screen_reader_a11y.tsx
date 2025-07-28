@@ -14,7 +14,7 @@ import { ScreenReaderAnnouncementsContext } from '../hooks/use_screen_reader_con
 /**
  * Provider component that manages a11y screen reader announcements via context.
  */
-export const ScreenReaderAnnouncements: FC<PropsWithChildren<unknown>> = ({ children }) => {
+export const ScreenReaderAnnouncementsProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [screenReaderMessage, setScreenReaderMessage] = useState('');
 
   const announce = useCallback<ScreenReaderAnnouncementsContextValue['announce']>((message) => {

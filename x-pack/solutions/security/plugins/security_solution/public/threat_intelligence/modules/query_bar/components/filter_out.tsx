@@ -43,7 +43,7 @@ export interface FilterOutCellActionProps extends FilterOutProps {
 }
 
 export interface FilterOutContextMenuProps extends FilterOutProps {
-  announceFilterOutChange: (filterOutMessage: string) => void;
+  onAnnounce: (filterOutMessage: string) => void;
 }
 
 /**
@@ -121,7 +121,7 @@ export const FilterOutButtonEmpty: FC<FilterOutProps> = ({
 export const FilterOutContextMenu: FC<FilterOutContextMenuProps> = ({
   data,
   field,
-  announceFilterOutChange,
+  onAnnounce,
   'data-test-subj': dataTestSub,
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
@@ -136,9 +136,7 @@ export const FilterOutContextMenu: FC<FilterOutContextMenuProps> = ({
       size="s"
       onClick={() => {
         filterFn();
-        announceFilterOutChange(
-          FILTER_OUT_ANNOUNCEMENT(field, typeof data === 'string' ? data : '')
-        );
+        onAnnounce(FILTER_OUT_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
       }}
       data-test-subj={dataTestSub}
     >

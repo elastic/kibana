@@ -24,6 +24,8 @@ import { TestProvidersComponent } from '../../../mocks/test_providers';
 
 jest.mock('../../indicators/hooks/use_filters_context');
 
+const announceFn = jest.fn;
+
 const mockIndicator: Indicator = generateMockIndicator();
 const mockField: string = 'threat.feed.name';
 const TEST_ID: string = 'test';
@@ -77,7 +79,7 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const { getByTestId } = render(
       <FilterInContextMenu
-        announceFilterInChange={() => {}}
+        onAnnounce={announceFn}
         data={mockIndicator}
         field={mockField}
         data-test-subj={TEST_ID}

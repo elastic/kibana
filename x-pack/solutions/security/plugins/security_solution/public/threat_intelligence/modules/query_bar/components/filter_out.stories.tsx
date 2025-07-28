@@ -35,11 +35,7 @@ export const ContextMenu: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
   const items = [
-    <FilterOutContextMenu
-      announceFilterOutChange={() => {}}
-      data={mockIndicator}
-      field={mockField}
-    />,
+    <FilterOutContextMenu onAnnounce={() => {}} data={mockIndicator} field={mockField} />,
   ];
 
   return (

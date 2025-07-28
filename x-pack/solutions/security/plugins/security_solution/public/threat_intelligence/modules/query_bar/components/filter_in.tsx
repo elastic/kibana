@@ -43,7 +43,7 @@ export interface FilterInCellActionProps extends FilterInProps {
 }
 
 export interface FilterInContextMenuProps extends FilterInProps {
-  announceFilterInChange: (filterInMessage: string) => void;
+  onAnnounce: (filterInMessage: string) => void;
 }
 
 /**
@@ -122,7 +122,7 @@ export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
-  announceFilterInChange,
+  onAnnounce,
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
@@ -136,7 +136,7 @@ export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
       size="s"
       onClick={() => {
         filterFn();
-        announceFilterInChange(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
+        onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
       }}
       data-test-subj={dataTestSub}
     >
