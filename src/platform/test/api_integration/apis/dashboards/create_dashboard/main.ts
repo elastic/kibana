@@ -155,7 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 panelConfig: {},
                 panelIndex: 'bizz',
-                panelRefName: 'panel_bizz',
               },
             ],
           },

@@ -39,9 +39,7 @@ describe('IndexImportManageDataSource', () => {
       wrapper: TestProviders,
     });
 
-    expect(
-      screen.getByText(/One or more indices containing the user\.name field/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Select one or more indices containing the/i)).toBeInTheDocument();
   });
 
   it('shows "No indices added" when there are no indices', () => {

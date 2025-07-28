@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiErrorBoundary, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -83,24 +83,27 @@ export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
         <>
           <EuiTabs size="s">{renderTabs()}</EuiTabs>
           <EuiSkeletonText isLoading={loading}>
-            {selectedTabId === tabIds.OVERVIEW &&
-              (isSpan ? (
-                <SpanOverview
-                  hit={hit}
-                  indexes={indexes}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ) : (
-                <TransactionOverview
-                  hit={hit}
-                  indexes={indexes}
-                  showWaterfall={false}
-                  showActions={false}
-                  dataView={dataView}
-                />
-              ))}
+            {selectedTabId === tabIds.OVERVIEW && (
+              <EuiErrorBoundary>
+                {isSpan ? (
+                  <SpanOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                ) : (
+                  <TransactionOverview
+                    hit={hit}
+                    indexes={indexes}
+                    showWaterfall={false}
+                    showActions={false}
+                    dataView={dataView}
+                  />
+                )}
+              </EuiErrorBoundary>
+            )}
 
             {selectedTabId === tabIds.TABLE && <DocViewerTable hit={hit} dataView={dataView} />}
 

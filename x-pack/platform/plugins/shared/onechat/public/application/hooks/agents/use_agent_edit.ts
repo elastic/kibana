@@ -15,7 +15,7 @@ import {
 } from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
-import { useOnechatTools } from '../use_tools';
+import { useOnechatTools } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 
 export type AgentEditState = Omit<AgentDefinition, 'type'>;

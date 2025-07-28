@@ -43,6 +43,7 @@ interface ColorMappingByTermsProps {
   palette?: PaletteOutput<CustomPaletteParams>;
   palettes: KbnPalettes;
   isInlineEditing?: boolean;
+  onModeChange?: (isLegacy: boolean) => void;
   setPalette: (palette: PaletteOutput) => void;
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
   paletteService: PaletteRegistry;
@@ -58,6 +59,7 @@ export function ColorMappingByTerms({
   palette,
   palettes,
   isInlineEditing,
+  onModeChange,
   setPalette,
   setColorMapping,
   paletteService,
@@ -146,16 +148,17 @@ export function ColorMappingByTerms({
                 data-test-subj="lns_colorMappingOrLegacyPalette_switch"
                 compressed
                 checked={useLegacyPalettes}
-                onChange={({ target: { checked } }) => {
-                  const newColorMapping = checked
+                onChange={({ target: { checked: isLegacy } }) => {
+                  const newColorMapping = isLegacy
                     ? undefined
                     : palette
                     ? getConfigFromPalette(palettes, palette.name)
                     : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
-                  trackUiCounterEvents(`color_mapping_switch_${checked ? 'disabled' : 'enabled'}`);
+                  trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
                   setColorMapping(newColorMapping);
-                  setUseLegacyPalettes(checked);
+                  setUseLegacyPalettes(isLegacy);
+                  onModeChange?.(isLegacy);
                 }}
               />
               <EuiSpacer size="s" />

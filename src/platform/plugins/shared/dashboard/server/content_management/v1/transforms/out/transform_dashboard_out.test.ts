@@ -23,7 +23,7 @@ import { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
-describe('dashboardAttributesOut', () => {
+describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
     explicitInput: { anyKey: 'some value' },
     type: 'type1',
@@ -36,7 +36,6 @@ describe('dashboardAttributesOut', () => {
       gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
       id: '1',
       panelIndex: '1',
-      panelRefName: 'ref1',
       title: 'title1',
       type: 'type1',
       version: '2',
@@ -88,7 +87,6 @@ describe('dashboardAttributesOut', () => {
           },
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
           panelIndex: '1',
-          panelRefName: 'ref1',
           type: 'type1',
           version: '2',
         },
@@ -181,7 +179,6 @@ describe('dashboardAttributesOut', () => {
             i: '1',
           },
           panelIndex: '1',
-          panelRefName: 'ref1',
           type: 'type1',
           version: '2',
         },

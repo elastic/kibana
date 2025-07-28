@@ -8,15 +8,19 @@
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo, useEffect } from 'react';
+import { METRIC_SCHEMA_ECS } from '../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { GetInfraAssetCountResponsePayloadRT } from '../../../../../common/http_api';
+import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const { services } = useKibanaContextForPlugin();
-  const { telemetry } = services;
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
+
+  const schema = searchCriteria?.preferredSchema || METRIC_SCHEMA_ECS;
 
   const payload = useMemo(
     () =>
@@ -24,8 +28,9 @@ export const useHostCount = () => {
         query: buildQuery(),
         from: parsedDateRange.from,
         to: parsedDateRange.to,
+        schema,
       }),
-    [buildQuery, parsedDateRange]
+    [buildQuery, schema, parsedDateRange.from, parsedDateRange.to]
   );
 
   const { data, status, error } = useFetcher(
@@ -35,7 +40,7 @@ export const useHostCount = () => {
         body: payload,
       });
 
-      return decodeOrThrow(GetInfraAssetCountResponsePayloadRT)(response);
+      return decodeOrThrow(GetInfraEntityCountResponsePayloadRT)(response);
     },
     [payload]
   );

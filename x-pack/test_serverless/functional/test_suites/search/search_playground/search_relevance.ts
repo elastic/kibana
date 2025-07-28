@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await createIndex();
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.searchPlayground.session.clearSession();
-      await svlSearchNavigation.navigateToSearchPlayground();
+      await svlSearchNavigation.navigateToSearchPlayground('chat');
     });
 
     after(async () => {

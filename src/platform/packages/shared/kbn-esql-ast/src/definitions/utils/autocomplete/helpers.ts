@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
 import type {
@@ -24,7 +24,7 @@ import {
   isLiteralDateItem,
   compareTypesWithLiterals,
 } from '../literals';
-import { EDITOR_MARKER } from '../../../parser/constants';
+import { EDITOR_MARKER } from '../../constants';
 import {
   type SupportedDataType,
   isParameterType,
@@ -135,25 +135,28 @@ export function handleFragment(
     rangeToReplace: { start: number; end: number }
   ) => ISuggestionItem[] | Promise<ISuggestionItem[]>
 ): ISuggestionItem[] | Promise<ISuggestionItem[]> {
-  /**
-   * @TODO — this string manipulation is crude and can't support all cases
-   * Checking for a partial word and computing the replacement range should
-   * really be done using the AST node, but we'll have to refactor further upstream
-   * to make that available. This is a quick fix to support the most common case.
-   */
-  const fragment = findFinalWord(innerText);
+  const { fragment, rangeToReplace } = getFragmentData(innerText);
   if (!fragment) {
     return getSuggestionsForIncomplete('');
   } else {
-    const rangeToReplace = {
-      start: innerText.length - fragment.length,
-      end: innerText.length,
-    };
     if (isFragmentComplete(fragment)) {
       return getSuggestionsForComplete(fragment, rangeToReplace);
     } else {
       return getSuggestionsForIncomplete(fragment, rangeToReplace);
     }
+  }
+}
+
+export function getFragmentData(innerText: string) {
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return { fragment: '', rangeToReplace: { start: 0, end: 0 } };
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length,
+      end: innerText.length,
+    };
+    return { fragment, rangeToReplace };
   }
 }
 
@@ -183,7 +186,8 @@ export async function getFieldsOrFunctionsSuggestions(
   }: {
     ignoreFn?: string[];
     ignoreColumns?: string[];
-  } = {}
+  } = {},
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -231,11 +235,14 @@ export async function getFieldsOrFunctionsSuggestions(
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
     functions
-      ? getFunctionSuggestions({
-          location,
-          returnTypes: types,
-          ignored: ignoreFn,
-        })
+      ? getFunctionSuggestions(
+          {
+            location,
+            returnTypes: types,
+            ignored: ignoreFn,
+          },
+          hasMinimumLicenseRequired
+        )
       : [],
     userDefinedColumns
       ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
@@ -341,6 +348,8 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
+  advanceCursorAfterInitialField = true,
+  hasMinimumLicenseRequired,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -348,6 +357,9 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
+  advanceCursorAfterInitialField?: boolean;
+  // @TODO should this be required?
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -395,7 +407,10 @@ export async function suggestForExpression({
     case 'after_not':
       if (expressionRoot && isFunctionExpression(expressionRoot) && expressionRoot.name === 'not') {
         suggestions.push(
-          ...getFunctionSuggestions({ location, returnTypes: ['boolean'] }),
+          ...getFunctionSuggestions(
+            { location, returnTypes: ['boolean'] },
+            hasMinimumLicenseRequired
+          ),
           ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
         );
       } else {
@@ -443,6 +458,7 @@ export async function suggestForExpression({
           getExpressionType: (expression) =>
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
+          hasMinimumLicenseRequired,
         }))
       );
 
@@ -450,12 +466,12 @@ export async function suggestForExpression({
 
     case 'empty_expression':
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: true,
+        advanceCursor: advanceCursorAfterInitialField,
         openSuggestions: true,
       });
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location })
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
       );
 
       break;

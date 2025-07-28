@@ -7107,7 +7107,9 @@
             "label": "createFiltersFromValueClickAction",
             "description": [],
             "signature": [
-              "({ data, negate, }: ValueClickDataContext) => Promise<",
+              "(context: ",
+              "ValueClickDataContext",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7120,23 +7122,24 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.DataPublicPluginStartActions.createFiltersFromValueClickAction.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "context",
                 "description": [],
                 "signature": [
                   "ValueClickDataContext"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_value_click.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7161,7 +7164,6 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
@@ -7173,11 +7175,13 @@
                 "signature": [
                   "RangeSelectDataContext"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_range_select.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "data",
@@ -7187,7 +7191,7 @@
             "label": "createFiltersFromMultiValueClickAction",
             "description": [],
             "signature": [
-              "({ data, negate, }: { data: { cells: { column: number; row: number; }[]; table: Pick<",
+              "(context: { data: { cells: { column: number; row: number; }[]; table: Pick<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -7216,14 +7220,13 @@
             "path": "src/platform/plugins/shared/data/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "data",
                 "id": "def-public.DataPublicPluginStartActions.createFiltersFromMultiValueClickAction.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "context",
                 "description": [],
                 "signature": [
                   "{ data: { cells: { column: number; row: number; }[]; table: Pick<",
@@ -7244,11 +7247,13 @@
                   },
                   " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
                 ],
-                "path": "src/platform/plugins/shared/data/public/actions/filters/create_filters_from_multi_value_click.ts",
+                "path": "src/platform/plugins/shared/data/public/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11603,6 +11608,10 @@
           "trackAdoption": false,
           "references": [
             {
+              "plugin": "graph",
+              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
+            },
+            {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -11621,10 +11630,6 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",
