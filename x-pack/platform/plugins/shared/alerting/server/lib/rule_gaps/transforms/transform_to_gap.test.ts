@@ -16,27 +16,38 @@ describe('transformToGap', () => {
     lte: '2023-01-01T01:00:00.000Z',
   };
 
-  const createMockEvent = (overrides = {}): QueryEventsBySavedObjectResult => ({
+
+  const validAlertObject = {
+    rule: {
+      gap: {
+        range: validInterval,
+        filled_intervals: [validInterval],
+        in_progress_intervals: [validInterval],
+      },
+    },
+  }
+
+  const validSavedObjectsArray = [
+    {
+      type: 'alert',
+      id: 'some-rule-id'
+    }
+  ]
+
+  type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>
+  const createMockEvent = (overrides?: { alert?: ResultData['alert'], saved_objects?: ResultData['saved_objects'], '@timestamp'?: string }): QueryEventsBySavedObjectResult => ({
     total: 1,
     data: [
       {
-        '@timestamp': timestamp,
+        '@timestamp': overrides?.hasOwnProperty('@timestamp') ? overrides['@timestamp'] : timestamp,
         _id: 'test-id',
         _index: 'test-index',
         _seq_no: 1,
         _primary_term: 1,
         kibana: {
-          alert: {
-            rule: {
-              gap: {
-                range: validInterval,
-                filled_intervals: [validInterval],
-                in_progress_intervals: [validInterval],
-              },
-            },
-          },
+          alert: overrides?.hasOwnProperty('alert') ? overrides.alert : validAlertObject,
+          saved_objects: overrides?.hasOwnProperty('saved_objects') ? overrides.saved_objects : validSavedObjectsArray,
         },
-        ...overrides,
       },
     ],
     page: 1,
@@ -51,6 +62,7 @@ describe('transformToGap', () => {
     expect(result[0]).toBeInstanceOf(Gap);
     expect(result[0]).toEqual(
       new Gap({
+        ruleId: 'some-rule-id',
         timestamp,
         range: validInterval,
         filledIntervals: [validInterval],
@@ -67,12 +79,10 @@ describe('transformToGap', () => {
 
   it('filters out invalid gaps (missing range)', () => {
     const events = createMockEvent({
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: undefined,
-            },
+      alert: {
+        rule: {
+          gap: {
+            range: undefined,
           },
         },
       },
@@ -83,15 +93,52 @@ describe('transformToGap', () => {
 
   it('filters out invalid gaps (invalid range)', () => {
     const events = createMockEvent({
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
-            },
+      alert: {
+        rule: {
+          gap: {
+            range: { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
           },
         },
       },
+    });
+    const result = transformToGap(events);
+    expect(result).toHaveLength(0);
+  });
+
+  it('filters out invalid gaps (missing ruleSO)', () => {
+    const events = createMockEvent({
+      alert: {
+        rule: {
+          gap: {
+            range: validInterval,
+            filled_intervals: [validInterval],
+            in_progress_intervals: [validInterval],
+          },
+        },
+      },
+      saved_objects: undefined
+    });
+    const result = transformToGap(events);
+    expect(result).toHaveLength(0);
+  });
+
+  it('filters out invalid gaps (invalid ruleSO)', () => {
+    const events = createMockEvent({
+      alert: {
+        rule: {
+          gap: {
+            range: validInterval,
+            filled_intervals: [validInterval],
+            in_progress_intervals: [validInterval],
+          },
+        },
+      },
+      saved_objects: [
+        {
+          type: 'some-other-type',
+          id: 'some-rule-id'
+        }
+      ]
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);
@@ -107,14 +154,12 @@ describe('transformToGap', () => {
 
   it('handles missing intervals', () => {
     const events = createMockEvent({
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: validInterval,
-              filled_intervals: undefined,
-              in_progress_intervals: undefined,
-            },
+      alert: {
+        rule: {
+          gap: {
+            range: validInterval,
+            filled_intervals: undefined,
+            in_progress_intervals: undefined,
           },
         },
       },
@@ -128,20 +173,18 @@ describe('transformToGap', () => {
 
   it('filters out invalid intervals while keeping valid ones', () => {
     const events = createMockEvent({
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: validInterval,
-              filled_intervals: [
-                validInterval,
-                { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
-              ],
-              in_progress_intervals: [
-                validInterval,
-                { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
-              ],
-            },
+      alert: {
+        rule: {
+          gap: {
+            range: validInterval,
+            filled_intervals: [
+              validInterval,
+              { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
+            ],
+            in_progress_intervals: [
+              validInterval,
+              { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
+            ],
           },
         },
       },
@@ -155,21 +198,19 @@ describe('transformToGap', () => {
 
   it('should filter out soft deleted gaps', () => {
     const events = createMockEvent({
-      kibana: {
-        alert: {
-          rule: {
-            gap: {
-              range: validInterval,
-              filled_intervals: [
-                validInterval,
-                { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
-              ],
-              in_progress_intervals: [
-                validInterval,
-                { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
-              ],
-              deleted: true,
-            },
+      alert: {
+        rule: {
+          gap: {
+            range: validInterval,
+            filled_intervals: [
+              validInterval,
+              { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
+            ],
+            in_progress_intervals: [
+              validInterval,
+              { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
+            ],
+            deleted: true,
           },
         },
       },
