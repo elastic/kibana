@@ -16,7 +16,6 @@ describe('transformToGap', () => {
     lte: '2023-01-01T01:00:00.000Z',
   };
 
-
   const validAlertObject = {
     rule: {
       gap: {
@@ -25,17 +24,21 @@ describe('transformToGap', () => {
         in_progress_intervals: [validInterval],
       },
     },
-  }
+  };
 
   const validSavedObjectsArray = [
     {
       type: 'alert',
-      id: 'some-rule-id'
-    }
-  ]
+      id: 'some-rule-id',
+    },
+  ];
 
-  type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>
-  const createMockEvent = (overrides?: { alert?: ResultData['alert'], saved_objects?: ResultData['saved_objects'], '@timestamp'?: string }): QueryEventsBySavedObjectResult => ({
+  type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>;
+  const createMockEvent = (overrides?: {
+    alert?: ResultData['alert'];
+    saved_objects?: ResultData['saved_objects'];
+    '@timestamp'?: string;
+  }): QueryEventsBySavedObjectResult => ({
     total: 1,
     data: [
       {
@@ -46,7 +49,9 @@ describe('transformToGap', () => {
         _primary_term: 1,
         kibana: {
           alert: overrides?.hasOwnProperty('alert') ? overrides.alert : validAlertObject,
-          saved_objects: overrides?.hasOwnProperty('saved_objects') ? overrides.saved_objects : validSavedObjectsArray,
+          saved_objects: overrides?.hasOwnProperty('saved_objects')
+            ? overrides.saved_objects
+            : validSavedObjectsArray,
         },
       },
     ],
@@ -116,7 +121,7 @@ describe('transformToGap', () => {
           },
         },
       },
-      saved_objects: undefined
+      saved_objects: undefined,
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);
@@ -136,9 +141,9 @@ describe('transformToGap', () => {
       saved_objects: [
         {
           type: 'some-other-type',
-          id: 'some-rule-id'
-        }
-      ]
+          id: 'some-rule-id',
+        },
+      ],
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);
@@ -177,10 +182,7 @@ describe('transformToGap', () => {
         rule: {
           gap: {
             range: validInterval,
-            filled_intervals: [
-              validInterval,
-              { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
-            ],
+            filled_intervals: [validInterval, { gte: undefined, lte: '2023-01-01T01:00:00.000Z' }],
             in_progress_intervals: [
               validInterval,
               { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
@@ -202,10 +204,7 @@ describe('transformToGap', () => {
         rule: {
           gap: {
             range: validInterval,
-            filled_intervals: [
-              validInterval,
-              { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
-            ],
+            filled_intervals: [validInterval, { gte: undefined, lte: '2023-01-01T01:00:00.000Z' }],
             in_progress_intervals: [
               validInterval,
               { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
