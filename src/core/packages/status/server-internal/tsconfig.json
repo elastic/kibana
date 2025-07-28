@@ -32,6 +32,7 @@
     "@kbn/core-usage-data-base-server-internal",
     "@kbn/core-base-server-mocks",
     "@kbn/core-environment-server-mocks",
+    "@kbn/core-http-rate-limiter-server-internal",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-metrics-server-mocks",
