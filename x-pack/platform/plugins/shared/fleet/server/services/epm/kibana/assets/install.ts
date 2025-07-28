@@ -399,6 +399,13 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
         return;
       }
 
+      if (
+        soType === KibanaSavedObjectType.alert &&
+        !appContextService.getExperimentalFeatures().enableAlertRuleTemplateSupport
+      ) {
+        return;
+      }
+
       if (asset.type === soType) {
         await onEntry({ path: entry.path, assetType, asset });
       }

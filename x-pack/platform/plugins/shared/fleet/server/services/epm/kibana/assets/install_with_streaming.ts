@@ -8,8 +8,14 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { PackageInstallContext } from '../../../../../common/types';
-import type { KibanaAssetReference, KibanaAssetType, PackageSpecTags } from '../../../../types';
+import {
+  KibanaSavedObjectType,
+  type KibanaAssetReference,
+  type KibanaAssetType,
+  type PackageSpecTags,
+} from '../../../../types';
 import { getPathParts } from '../../archive';
+import { appContextService } from '../../../app_context';
 
 import { saveKibanaAssetsRefs } from '../../packages/install';
 
@@ -67,6 +73,13 @@ export async function installKibanaAssetsWithStreaming({
     const assetType = getPathParts(path).type as KibanaAssetType;
     const soType = KibanaSavedObjectTypeMapping[assetType];
     if (savedObject.type !== soType) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.alert &&
+      !appContextService.getExperimentalFeatures().enableAlertRuleTemplateSupport
+    ) {
       return;
     }
 
