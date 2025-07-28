@@ -37,8 +37,14 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
         <EuiPageHeader
           pageTitle={
             <FormattedMessage
-              id="data.mgmt.searchSessions.main.sectionTitleBackgroundSearch"
+              id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
               defaultMessage="Background Search"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
+              defaultMessage="Manage your background searches."
             />
           }
           bottomBorder
