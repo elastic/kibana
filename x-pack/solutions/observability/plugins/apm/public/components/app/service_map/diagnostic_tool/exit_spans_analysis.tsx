@@ -25,15 +25,15 @@ interface ExitSpansAnalysisProps {
   hasMatchingDestinationResources: boolean;
   totalConnections: number;
   apmExitSpans: ExitSpanFields[];
-  destinationNodeValue: string;
-  sourceNodeValue: string;
+  destinationNode: string;
+  sourceNode: string;
 }
 export function ExitSpansAnalysis({
   hasMatchingDestinationResources,
   totalConnections,
   apmExitSpans = [],
-  destinationNodeValue,
-  sourceNodeValue,
+  destinationNode,
+  sourceNode,
 }: ExitSpansAnalysisProps) {
   return (
     <EuiPanel paddingSize="m" color="subdued">
@@ -56,9 +56,8 @@ export function ExitSpansAnalysis({
               <EuiText>
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansFound', {
-                    defaultMessage:
-                      'Exit spans found for {sourceNodeValue} → {destinationNodeValue}',
-                    values: { sourceNodeValue, destinationNodeValue },
+                    defaultMessage: 'Exit spans found for {sourceNode} → {destinationNode}',
+                    values: { sourceNode, destinationNode },
                   })}
                 </strong>
               </EuiText>
@@ -77,10 +76,10 @@ export function ExitSpansAnalysis({
             <p>
               {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansFoundDescription', {
                 defaultMessage:
-                  'Found {count} exit span(s) from {sourceNodeValue} during the selected time range. These represent all outbound connections that were traced from this {sourceNode}.',
+                  'Found {count} exit span(s) from {sourceNode} during the selected time range. These represent all outbound connections that were traced from this {sourceNode}.',
                 values: {
                   count: apmExitSpans.length,
-                  sourceNodeValue,
+                  sourceNode,
                 },
               })}
             </p>
@@ -98,8 +97,8 @@ export function ExitSpansAnalysis({
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFound', {
                     defaultMessage: 'No exit spans found for {sourceNode} → {destinationNode}',
                     values: {
-                      sourceNode: sourceNodeValue,
-                      destinationNode: destinationNodeValue,
+                      sourceNode,
+                      destinationNode,
                     },
                   })}
                 </strong>
@@ -113,8 +112,8 @@ export function ExitSpansAnalysis({
                 'xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundDescription',
                 {
                   defaultMessage:
-                    'No exit spans were found from {sourceNodeValue} to {destinationNodeValue} during the selected time range. This could indicate:',
-                  values: { sourceNodeValue, destinationNodeValue },
+                    'No exit spans were found from {sourceNode} to {destinationNode} during the selected time range. This could indicate:',
+                  values: { sourceNode, destinationNode },
                 }
               )}
             </p>

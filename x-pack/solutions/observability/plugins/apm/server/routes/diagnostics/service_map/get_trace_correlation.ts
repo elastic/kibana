@@ -40,7 +40,7 @@ export async function getTraceCorrelation({
       source_node_traces: {
         filter: {
           term: {
-            [sourceNode.field]: sourceNode.value,
+            SERVICE_NAME: sourceNode,
           },
         },
         aggs: {
@@ -59,7 +59,7 @@ export async function getTraceCorrelation({
       destination_node_traces: {
         filter: {
           term: {
-            [destinationNode.field]: destinationNode.value,
+            SPAN_DESTINATION_SERVICE_RESOURCE: destinationNode,
           },
         },
         aggs: {

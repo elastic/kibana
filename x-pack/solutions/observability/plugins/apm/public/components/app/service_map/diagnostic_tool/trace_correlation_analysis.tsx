@@ -21,16 +21,16 @@ import type { ServiceMapDiagnosticResponse } from '../../../../../common/service
 
 interface TraceCorrelationAnalysisProps {
   traceCorrelation: ServiceMapDiagnosticResponse['analysis']['traceCorrelation'];
-  traceId: string;
-  sourceNodeName: string;
-  destinationNodeName: string;
+  traceId?: string;
+  sourceNode: string;
+  destinationNode: string;
 }
 
 export function TraceCorrelationAnalysis({
   traceCorrelation,
   traceId,
-  sourceNodeName,
-  destinationNodeName,
+  sourceNode,
+  destinationNode,
 }: TraceCorrelationAnalysisProps) {
   const {
     found,
@@ -39,6 +39,10 @@ export function TraceCorrelationAnalysis({
     sourceNodeDocumentCount,
     destinationNodeDocumentCount,
   } = traceCorrelation;
+
+  if (!traceId) {
+    return null;
+  }
 
   return (
     <EuiPanel paddingSize="m" color="subdued">
@@ -62,7 +66,7 @@ export function TraceCorrelationAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnostics.traceCorrelation.success', {
                     defaultMessage: 'Trace found in both {sourceNode} and {destinationNode}',
-                    values: { sourceNode: sourceNodeName, destinationNode: destinationNodeName },
+                    values: { sourceNode, destinationNode },
                   })}
                 </strong>
               </EuiText>
@@ -84,9 +88,9 @@ export function TraceCorrelationAnalysis({
                   'The trace was successfully found in both services: {sourceCount} document(s) in {sourceNode} and {destinationCount} document(s) in {destinationNode}. This indicates proper trace correlation between the services.',
                 values: {
                   sourceCount: sourceNodeDocumentCount,
-                  sourceNode: sourceNodeName,
+                  sourceNode,
                   destinationCount: destinationNodeDocumentCount,
-                  destinationNode: destinationNodeName,
+                  destinationNode,
                 },
               })}
             </p>
@@ -127,9 +131,9 @@ export function TraceCorrelationAnalysis({
                   values: {
                     traceId,
                     sourceCount: sourceNodeDocumentCount,
-                    sourceNode: sourceNodeName,
+                    sourceNode,
                     destinationCount: destinationNodeDocumentCount,
-                    destinationNode: destinationNodeName,
+                    destinationNode,
                   },
                 }
               )}
@@ -140,8 +144,8 @@ export function TraceCorrelationAnalysis({
                   {i18n.translate(
                     'xpack.apm.serviceMap.diagnostics.traceCorrelation.missingInSource',
                     {
-                      defaultMessage: 'Trace not found in source service ({sourceNodeName})',
-                      values: { sourceNodeName },
+                      defaultMessage: 'Trace not found in source service ({sourceNode})',
+                      values: { sourceNode },
                     }
                   )}
                 </li>
@@ -151,9 +155,8 @@ export function TraceCorrelationAnalysis({
                   {i18n.translate(
                     'xpack.apm.serviceMap.diagnostics.traceCorrelation.missingInDestination',
                     {
-                      defaultMessage:
-                        'Trace not found in destination service ({destinationNodeName})',
-                      values: { destinationNodeName },
+                      defaultMessage: 'Trace not found in destination service ({destinationNode})',
+                      values: { destinationNode },
                     }
                   )}
                 </li>

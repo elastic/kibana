@@ -14,14 +14,14 @@ import { DiagnosticInformationalMessage } from './diagnostic_informational_messa
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 export function DiagnosticResults({
   data,
-  sourceNodeName,
-  destinationNodeName,
+  sourceNode,
+  destinationNode,
   traceId,
 }: {
   data: ServiceMapDiagnosticResponse;
-  sourceNodeName?: string;
-  destinationNodeName?: string;
-  traceId: string;
+  sourceNode?: string;
+  destinationNode?: string;
+  traceId?: string;
 }) {
   const apmExitSpans = data?.analysis?.exitSpans?.apmExitSpans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
@@ -38,7 +38,7 @@ export function DiagnosticResults({
   };
   const traceCorrelationResponse = data?.elasticsearchResponses?.traceCorrelationQuery;
 
-  if (!sourceNodeName || !destinationNodeName) {
+  if (!sourceNode || !destinationNode) {
     return null;
   }
 
@@ -48,8 +48,8 @@ export function DiagnosticResults({
         hasMatchingDestinationResources={hasMatchingDestinationResources}
         totalConnections={totalConnections}
         apmExitSpans={apmExitSpans}
-        sourceNodeName={sourceNodeName}
-        destinationNodeName={destinationNodeName}
+        sourceNode={sourceNode}
+        destinationNode={destinationNode}
       />
 
       <EuiSpacer size="m" />
@@ -57,8 +57,8 @@ export function DiagnosticResults({
       <ParentRelationshipAnalysis
         hasParent={hasParent}
         destinationHits={destinationHits}
-        sourceNodeName={sourceNodeName}
-        destinationNodeName={destinationNodeName}
+        sourceNode={sourceNode}
+        destinationNode={destinationNode}
       />
 
       <EuiSpacer size="m" />
@@ -66,8 +66,8 @@ export function DiagnosticResults({
       <TraceCorrelationAnalysis
         traceCorrelation={traceCorrelation}
         traceId={traceId}
-        sourceNodeName={sourceNodeName}
-        destinationNodeName={destinationNodeName}
+        sourceNode={sourceNode}
+        destinationNode={destinationNode}
         traceCorrelationResponse={traceCorrelationResponse}
       />
 

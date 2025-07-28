@@ -21,15 +21,15 @@ import { i18n } from '@kbn/i18n';
 interface ParentRelationshipAnalysisProps {
   hasParent: boolean;
   destinationHits: any[];
-  sourceNodeName: string;
-  destinationNodeName: string;
+  sourceNode: string;
+  destinationNode: string;
 }
 
 export function ParentRelationshipAnalysis({
   hasParent,
   destinationHits,
-  sourceNodeName,
-  destinationNodeName,
+  sourceNode,
+  destinationNode,
 }: ParentRelationshipAnalysisProps) {
   return (
     <EuiPanel paddingSize="m" color="subdued">
@@ -53,7 +53,7 @@ export function ParentRelationshipAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsFound', {
                     defaultMessage: 'Parent relationships found for {destinationNode}',
-                    values: { destinationNode: destinationNodeName },
+                    values: { destinationNode: destinationNode },
                   })}
                 </strong>
               </EuiText>
@@ -75,8 +75,8 @@ export function ParentRelationshipAnalysis({
                   'Found {count} document(s) showing parent relationships pointing to {destinationNode} from {sourceNode} during the selected time range.',
                 values: {
                   count: destinationHits.length,
-                  destinationNode: destinationNodeName,
-                  sourceNode: sourceNodeName,
+                  destinationNode: destinationNode,
+                  sourceNode: sourceNode,
                 },
               })}
             </p>
@@ -93,7 +93,7 @@ export function ParentRelationshipAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFound', {
                     defaultMessage: 'No parent relationships found for {destinationNode}',
-                    values: { destinationNode: destinationNodeName },
+                    values: { destinationNode: destinationNode },
                   })}
                 </strong>
               </EuiText>
@@ -116,8 +116,8 @@ export function ParentRelationshipAnalysis({
                   defaultMessage:
                     'No parent IDs were found pointing from {sourceNode} to {destinationNode} during the selected time range. Found {count} total document(s) for analysis. This could indicate:',
                   values: {
-                    sourceNode: sourceNodeName,
-                    destinationNode: destinationNodeName,
+                    sourceNode: sourceNode,
+                    destinationNode: destinationNode,
                     count: destinationHits.length,
                   },
                 }

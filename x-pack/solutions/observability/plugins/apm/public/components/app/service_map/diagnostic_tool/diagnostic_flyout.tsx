@@ -220,9 +220,9 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         ) : data ? (
           <DiagnosticResults
             data={data}
-            sourceNodeName={form?.sourceNode?.value}
-            destinationNodeName={form?.destinationNode?.value}
-            traceId={form.traceId}
+            sourceNode={form?.sourceNode}
+            destinationNode={form?.destinationNode}
+            traceId={form?.traceId}
           />
         ) : null}
         <EuiSpacer size="m" />
