@@ -8,7 +8,7 @@
  */
 import { z } from '@kbn/zod';
 
-export const convertSchemaToParameters = (schema: z.ZodObject<any>) => {
+export const convertSchemaToObservabilityParameters = (schema: z.ZodObject<any>) => {
   const shape = schema.shape;
   const parameters: any = {
     type: 'object',
@@ -19,7 +19,7 @@ export const convertSchemaToParameters = (schema: z.ZodObject<any>) => {
 
   for (const [key, value] of Object.entries(shape)) {
     if (value instanceof z.ZodObject) {
-      const nestedParams = convertSchemaToParameters(value);
+      const nestedParams = convertSchemaToObservabilityParameters(value);
       if (Object.keys(nestedParams.properties || {}).length > 0) {
         parameters.properties[key] = nestedParams;
       } else {
@@ -39,7 +39,7 @@ export const convertSchemaToParameters = (schema: z.ZodObject<any>) => {
     } else if (value instanceof z.ZodOptional) {
       const unwrapped = (value as any).unwrap();
       if (unwrapped instanceof z.ZodObject) {
-        const nestedParams = convertSchemaToParameters(unwrapped);
+        const nestedParams = convertSchemaToObservabilityParameters(unwrapped);
         if (Object.keys(nestedParams.properties || {}).length > 0) {
           // Apply specific test expectations for nested objects
           if (key === 'heatmap') {

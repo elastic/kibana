@@ -8,7 +8,10 @@
  */
 import { z } from '@kbn/zod';
 import { chartTypes } from './use_observability_ai_assistant_context';
-import { convertSchemaToParameters, convertParametersToSchema } from './schema_adapters';
+import {
+  convertSchemaToObservabilityParameters,
+  convertParametersToSchema,
+} from './schema_adapters';
 
 const schema = z.object({
   esql: z.object({
@@ -189,9 +192,9 @@ const parameters = {
   },
   required: ['esql', 'type'],
 } as const;
-describe('convertSchemaToParameters', () => {
+describe('convertSchemaToObservabilityParameters', () => {
   it('should convert a zod schema to a parameters object', () => {
-    const converted = convertSchemaToParameters(schema);
+    const converted = convertSchemaToObservabilityParameters(schema);
     expect(converted).toEqual(parameters);
   });
   it('should convert a parameters object to a zod schema', () => {
