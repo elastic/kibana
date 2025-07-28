@@ -149,7 +149,7 @@ With PATH_TO_CONFIG and other options as follows.
 
    - PATH_TO_CONFIG: `src/platform/test/accessibility/config.ts`
    - Add `--grep=ml` to the test runner command
-   - Tests are located in `x-pack/test/accessibility/apps/group2`
+   - Tests are located in `x-pack/platform/test/accessibility/apps/group2`
 
 ## Generating docs screenshots
 
