@@ -91,7 +91,7 @@ export class AIAssistantManagementSelectionPlugin
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read', 'edit'],
         },
         read: {
           management: {
@@ -105,7 +105,7 @@ export class AIAssistantManagementSelectionPlugin
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['read'],
         },
       },
     });
