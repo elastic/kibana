@@ -79,7 +79,7 @@ export const PROVIDER_REQUIRED = i18n.translate(
 );
 
 export const DOCUMENTATION = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.documentation',
+  'xpack.inferenceEndpointUICommon.components.inferenceDocumentation',
   {
     defaultMessage: 'Inference API documentation',
   }
@@ -189,5 +189,16 @@ export const SOLUTION_FILTER = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.solutionFilterText',
   {
     defaultMessage: 'Solution filter.',
+  }
+);
+
+export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+  defaultMessage: 'Google Gemini',
+});
+
+export const DOCUMENTATION_BASE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.documentation',
+  {
+    defaultMessage: 'documentation',
   }
 );

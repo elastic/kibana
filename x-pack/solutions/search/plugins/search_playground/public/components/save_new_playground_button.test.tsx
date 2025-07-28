@@ -15,8 +15,7 @@ import {
   SaveNewPlaygroundButtonProps,
 } from './save_new_playground_button';
 import { useKibana } from '../hooks/use_kibana';
-import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../types';
-import { PLUGIN_ID } from '../../common';
+import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { LOCAL_STORAGE_KEY as PLAYGROUND_SESSION_LOCAL_STORAGE_KEY } from '../providers/unsaved_form_provider';
 
 // Mock dependencies
@@ -43,7 +42,7 @@ jest.mock('./saved_playground/save_playground_modal', () => ({
   ),
 }));
 
-const mockNavigateToApp = jest.fn();
+const mockHistoryPush = jest.fn();
 const mockStorage = {
   removeItem: jest.fn(),
   setItem: jest.fn(),
@@ -109,8 +108,8 @@ describe('SaveNewPlaygroundButton', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        application: {
-          navigateToApp: mockNavigateToApp,
+        history: {
+          push: mockHistoryPush,
         },
       },
     });
@@ -198,9 +197,7 @@ describe('SaveNewPlaygroundButton', () => {
     fireEvent.click(modalSaveButton);
 
     await waitFor(() => {
-      expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-        path: `/p/test-playground-id/${PlaygroundPageMode.Chat}`,
-      });
+      expect(mockHistoryPush).toHaveBeenCalledWith('/p/test-playground-id/chat');
       expect(mockStorage.removeItem).toHaveBeenCalledWith(PLAYGROUND_SESSION_LOCAL_STORAGE_KEY);
       expect(screen.queryByTestId('save-playground-modal')).not.toBeInTheDocument();
     });
@@ -302,7 +299,7 @@ describe('SaveNewPlaygroundButton', () => {
     fireEvent.click(modalSaveButton);
 
     await waitFor(() => {
-      expect(mockNavigateToApp).toHaveBeenCalledTimes(1);
+      expect(mockHistoryPush).toHaveBeenCalledTimes(1);
       expect(mockStorage.removeItem).toHaveBeenCalledTimes(1);
     });
   });
