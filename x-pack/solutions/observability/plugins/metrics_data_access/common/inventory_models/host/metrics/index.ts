@@ -9,6 +9,7 @@ import type { HostAggregations } from './snapshot';
 import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
 import type { InventoryMetricsConfig } from '../../shared/metrics/types';
+import { DataSchemaFormat } from '../../shared/metrics/types';
 
 const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'tx', 'rx'];
 export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
@@ -16,7 +17,7 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema, {
-      includeLegacyMetrics: (args?.schema ?? 'ecs') === 'ecs',
+      includeLegacyMetrics: (args?.schema ?? DataSchemaFormat.ECS) === DataSchemaFormat.ECS,
       legacyMetrics,
     });
     return catalog;
@@ -31,7 +32,7 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
     return charts;
   },
   getWaffleMapTooltipMetrics: (args) => {
-    if (args?.schema === 'semconv') {
+    if (args?.schema === DataSchemaFormat.SEMCONV) {
       return ['cpuV2', 'memory', 'txV2', 'rxV2'];
     }
 
