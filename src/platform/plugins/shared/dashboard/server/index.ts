@@ -44,6 +44,8 @@ export type {
   DashboardPanel,
   DashboardSection,
   DashboardSearchOut,
+  DashboardFilter,
+  DashboardQuery,
 } from './content_management';
 export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 

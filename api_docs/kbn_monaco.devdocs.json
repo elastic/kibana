@@ -717,6 +717,30 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCallbacks.getLicense",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicense",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLLicenseResult",
+                "text": "ESQLLicenseResult"
+              },
+              " | undefined>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
