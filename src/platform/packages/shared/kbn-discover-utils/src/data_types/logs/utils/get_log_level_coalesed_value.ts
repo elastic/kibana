@@ -50,7 +50,7 @@ export const logLevelSynonyms: Record<string, LogLevelCoalescedValue> = {
   inf: LogLevelCoalescedValue.info,
   dbg: LogLevelCoalescedValue.debug,
   dbug: LogLevelCoalescedValue.debug,
-  trace: LogLevelCoalescedValue.trace,
+  trac: LogLevelCoalescedValue.trace,
 };
 
 export const getLogLevelCoalescedValue = (
