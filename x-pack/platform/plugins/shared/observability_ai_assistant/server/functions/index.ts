@@ -69,10 +69,6 @@ export const registerFunctions: RegistrationCallback = async ({
 
   if (isKnowledgeBaseReady) {
     registerSummarizationFunction(registrationParameters);
-  } else {
-    functions.registerInstruction(
-      `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`
-    );
   }
 
   registerContextFunction({ ...registrationParameters, isKnowledgeBaseReady });

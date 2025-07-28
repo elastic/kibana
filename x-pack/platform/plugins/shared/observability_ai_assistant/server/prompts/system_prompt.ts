@@ -150,11 +150,11 @@ export function getSystemPrompt({
       <QueryLanguages>\n
       ${
         isObservabilityDeployment
-          ? '1.  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.'
+          ? '*  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.'
           : ''
       }
-      2.  **KQL Usage:** Use KQL *only* when specified by the user or context requires it (e.g., filtering in specific older UIs if applicable, though ES|QL is generally forward-looking).
-      3.  **Strict Syntax Separation:**
+      *  **KQL Usage:** Use KQL *only* when specified by the user or context requires it (e.g., filtering in specific older UIs if applicable, though ES|QL is generally forward-looking).
+      *  **Strict Syntax Separation:**
           *   **ES|QL:** Uses syntax like \`service.name == "foo"\`.
           *   **KQL (\`kqlFilter\` parameter):** Uses syntax like \`service.name:"foo"\`. **Crucially**, values in KQL filters **MUST** be enclosed in double quotes (\`"\`). Characters like \`:\`, \`(\`, \`)\`, \`\\\\\`, \`/\`, \`"\` within the value also need escaping.
           ${
@@ -162,7 +162,7 @@ export function getSystemPrompt({
               ? '*   **DO NOT MIX SYNTAX:** Never use ES|QL comparison operators (`==`, `>`, etc.) within a `kqlFilter` parameter, and vice-versa.'
               : ''
           }
-      4.  **Delegate ES|QL Tasks to the \`${QUERY_FUNCTION_NAME}\` tool:**
+      *  **Delegate ES|QL Tasks to the \`${QUERY_FUNCTION_NAME}\` tool:**
           *   You **MUST** use the \`${QUERY_FUNCTION_NAME}\` tool for *all* tasks involving ES|QL, including: generating, visualizing (preparing query for), running, breaking down, filtering, converting, explaining, or correcting ES|QL queries.
           *   **DO NOT** generate, explain, or correct ES|QL queries yourself. Always delegate to the \`${QUERY_FUNCTION_NAME}\` tool, even if it was just used or if it previously failed.
           ${
@@ -172,9 +172,9 @@ export function getSystemPrompt({
                 )} return no results, but the user asks for a query, *still* call the \`${QUERY_FUNCTION_NAME}\` tool to generate an *example* query based on the request.`
               : ''
           }
-      5. When a user requests paginated results using ES|QL (e.g., asking for a specific page or part of the results), you must inform them that ES|QL does not support pagination or offset. Clearly explain that only limiting the number of results (using LIMIT) is possible, and provide an example query that returns the first N results. Do not attempt to simulate pagination or suggest unsupported features. Always clarify this limitation in your response.
-      6. When converting queries from another language (e.g SPL, LogQL, DQL) to ES|QL, generate functionally equivalent ES|QL query using the available index and field information. Infer the indices and fields from the user's query and always call \`${QUERY_FUNCTION_NAME}\` tool to provide a **valid and functionally equivalent** example ES|QL query. Always clarify any field name assumptions and prompt the user for clarification if necessary.
-      7. **Critical ES|QL syntax rules:**
+      * When a user requests paginated results using ES|QL (e.g., asking for a specific page or part of the results), you must inform them that ES|QL does not support pagination or offset. Clearly explain that only limiting the number of results (using LIMIT) is possible, and provide an example query that returns the first N results. Do not attempt to simulate pagination or suggest unsupported features. Always clarify this limitation in your response.
+      * When converting queries from another language (e.g SPL, LogQL, DQL) to ES|QL, generate functionally equivalent ES|QL query using the available index and field information. Infer the indices and fields from the user's query and always call \`${QUERY_FUNCTION_NAME}\` tool to provide a **valid and functionally equivalent** example ES|QL query. Always clarify any field name assumptions and prompt the user for clarification if necessary.
+      * **Critical ES|QL syntax rules:**
           * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
           * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`.
       \n</QueryLanguages>`)
@@ -270,7 +270,7 @@ export function getSystemPrompt({
       );
     }
 
-    if (isFunctionAvailable(CONTEXT_FUNCTION_NAME)) {
+    if (isFunctionAvailable(CONTEXT_FUNCTION_NAME) && isKnowledgeBaseReady) {
       usage.push(
         `**Context Retrieval:** You can use the \`${CONTEXT_FUNCTION_NAME}\` tool to retrieve relevant information from the knowledge database. The response will include a "learnings" field containing information
           from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
@@ -328,6 +328,17 @@ export function getSystemPrompt({
     </UserInteraction>
     `)
   );
+
+  // Section Six: Knowledge base
+  if (!isKnowledgeBaseReady) {
+    promptSections.push(
+      dedent(`
+      <KnowledgeBase>\n
+        **Memory:** You do not have a working memory. If the user expects you to remember certain information, tell them they can set up the knowledge base.\n
+      </KnowledgeBase>
+      `)
+    );
+  }
 
   return promptSections
     .filter(Boolean)
