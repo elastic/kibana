@@ -19,15 +19,51 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import type { PostureInput } from '../../../../common/types_old';
 import { CnvmKspmTemplateInfo } from './cnvm_kspm_info';
 import { KspmEksInputSelector } from './kspm_eks_input_selector';
 import { EksCredentialsForm } from './eks_credentials_form';
+import {
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_VULN_MGMT_AWS,
+  CLOUDBEAT_EKS,
+  VULN_MGMT_POLICY_TEMPLATE,
+} from '../../../../common/constants';
 
 interface IntegrationInfoFieldsProps {
   fields: Array<{ id: string; value: string; label: React.ReactNode; error: string[] | null }>;
   onChange(field: string, value: string): void;
 }
+
+const isVulnMgmtAwsInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyInput & {
+  type: typeof CLOUDBEAT_VULN_MGMT_AWS;
+  policy_template: typeof VULN_MGMT_POLICY_TEMPLATE;
+} => {
+  return (
+    input.type === CLOUDBEAT_VULN_MGMT_AWS && input.policy_template === VULN_MGMT_POLICY_TEMPLATE
+  );
+};
+
+const isEksInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyInput & {
+  type: typeof CLOUDBEAT_EKS;
+  policy_template: typeof KSPM_POLICY_TEMPLATE;
+} => {
+  return input.type === CLOUDBEAT_EKS && input.policy_template === KSPM_POLICY_TEMPLATE;
+};
+
+const isKspmInput = (
+  input: NewPackagePolicyInput
+): input is NewPackagePolicyInput & {
+  type: typeof CLOUDBEAT_VANILLA;
+  policy_template: typeof KSPM_POLICY_TEMPLATE;
+} => {
+  return input.type === CLOUDBEAT_VANILLA && input.policy_template === KSPM_POLICY_TEMPLATE;
+};
 
 const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
   <div>
@@ -70,13 +106,6 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
     updatePolicy,
   }) => {
     const { euiTheme } = useEuiTheme();
-
-    // useCloudFormationTemplate({
-    //   packageInfo,
-    //   updatePolicy,
-    //   newPolicy,
-    // });
-
     const integrationFields = [
       {
         id: 'name',
@@ -102,83 +131,85 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
       },
     ];
 
-    return (
-      <>
-        <CnvmKspmTemplateInfo postureType={input.policy_template} />
-        <EuiSpacer size="l" />
-        {/* Defines the single enabled input of the active policy template */}
-        {input.type !== 'cloudbeat/cis_eks' && input.type !== 'cloudbeat/cis_k8s' ? null : (
-          <>
-            <KspmEksInputSelector
-              input={input}
-              // @ts-expect-error - TypeScript doesn't know that input.policy_template is a key of DEFAULT_INPUT_TYPE
-              setInput={setEnabledPolicyInput}
-              disabled={isEditPage}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
-          <>
-            <EuiSpacer size="l" />
-          </>
-        )}
-        <IntegrationSettings
-          fields={integrationFields}
-          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
-        />
-
-        {/* Namespace selector */}
-        {!input.type.includes('vuln_mgmt') && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              id="advancedOptions"
-              data-test-subj="advancedOptionsAccordion"
-              buttonContent={
-                <EuiText
-                  size="xs"
-                  color={euiTheme.colors.textPrimary}
-                  css={{
-                    fontWeight: euiTheme.font.weight.medium,
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
-                    defaultMessage="Advanced options"
-                  />
-                </EuiText>
-              }
-              paddingSize="m"
-            >
-              <NamespaceComboBox
-                fullWidth
-                namespace={newPolicy.namespace}
-                placeholder="default"
-                isEditPage={isEditPage}
-                validationError={validationResults?.namespace}
-                onNamespaceChange={(namespace: string) => {
-                  updatePolicy({ ...newPolicy, namespace });
-                }}
-                data-test-subj="namespaceInput"
-                labelId="xpack.csp.fleetIntegration.namespaceLabel"
-                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+    if (isKspmInput(input) || isEksInput(input) || isVulnMgmtAwsInput(input)) {
+      return (
+        <>
+          <CnvmKspmTemplateInfo policyTemplate={input.policy_template} />
+          <EuiSpacer size="l" />
+          {/* Defines the single enabled input of the active policy template */}
+          {(isEksInput(input) || isKspmInput(input)) && (
+            <>
+              <KspmEksInputSelector
+                input={input}
+                // @ts-expect-error - TypeScript doesn't know that input.policy_template is a key of DEFAULT_INPUT_TYPE
+                setInput={setEnabledPolicyInput}
+                disabled={isEditPage}
               />
-            </EuiAccordion>
-          </>
-        )}
+              <EuiSpacer size="l" />
+            </>
+          )}
 
-        {/* Defines the vars of the enabled input of the active policy template */}
-        {input.type === 'cloudbeat/cis_eks' && (
-          <EksCredentialsForm
-            input={input}
-            newPolicy={newPolicy}
-            updatePolicy={updatePolicy}
-            packageInfo={packageInfo}
+          {isVulnMgmtAwsInput(input) && (
+            <>
+              <EuiSpacer size="l" />
+            </>
+          )}
+          <IntegrationSettings
+            fields={integrationFields}
+            onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
           />
-        )}
-      </>
-    );
+
+          {/* Namespace selector */}
+          {!isVulnMgmtAwsInput(input) && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiAccordion
+                id="advancedOptions"
+                data-test-subj="advancedOptionsAccordion"
+                buttonContent={
+                  <EuiText
+                    size="xs"
+                    color={euiTheme.colors.textPrimary}
+                    css={{
+                      fontWeight: euiTheme.font.weight.medium,
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                      defaultMessage="Advanced options"
+                    />
+                  </EuiText>
+                }
+                paddingSize="m"
+              >
+                <NamespaceComboBox
+                  fullWidth
+                  namespace={newPolicy.namespace}
+                  placeholder="default"
+                  isEditPage={isEditPage}
+                  validationError={validationResults?.namespace}
+                  onNamespaceChange={(namespace: string) => {
+                    updatePolicy({ ...newPolicy, namespace });
+                  }}
+                  data-test-subj="namespaceInput"
+                  labelId="xpack.csp.fleetIntegration.namespaceLabel"
+                  helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                />
+              </EuiAccordion>
+            </>
+          )}
+
+          {/* Defines the vars of the enabled input of the active policy template */}
+          {isEksInput(input) && (
+            <EksCredentialsForm
+              input={input}
+              newPolicy={newPolicy}
+              updatePolicy={updatePolicy}
+              packageInfo={packageInfo}
+            />
+          )}
+        </>
+      );
+    }
   }
 );

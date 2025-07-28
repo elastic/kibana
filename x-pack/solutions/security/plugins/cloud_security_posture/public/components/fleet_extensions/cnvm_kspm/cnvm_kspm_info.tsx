@@ -9,21 +9,20 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../../../common/constants';
-import type { CloudSecurityPolicyTemplate } from '../../../../common/types_old';
 
 interface CnvmKspmTemplateInfoProps {
-  postureType: CloudSecurityPolicyTemplate;
+  policyTemplate: typeof KSPM_POLICY_TEMPLATE | typeof VULN_MGMT_POLICY_TEMPLATE;
 }
 
-export const CnvmKspmTemplateInfo = ({ postureType }: CnvmKspmTemplateInfoProps) => (
+export const CnvmKspmTemplateInfo = ({ policyTemplate }: CnvmKspmTemplateInfoProps) => (
   <EuiText color="subdued" size="s">
-    {postureType === KSPM_POLICY_TEMPLATE && (
+    {policyTemplate === KSPM_POLICY_TEMPLATE && (
       <FormattedMessage
         id="xpack.csp.fleetIntegration.configureKspmIntegrationDescription"
         defaultMessage="Select the Kubernetes cluster type you want to monitor and then fill in the name and description to help identify this integration"
       />
     )}
-    {postureType === VULN_MGMT_POLICY_TEMPLATE && (
+    {policyTemplate === VULN_MGMT_POLICY_TEMPLATE && (
       <>
         <EuiCallOut
           iconType="info"
