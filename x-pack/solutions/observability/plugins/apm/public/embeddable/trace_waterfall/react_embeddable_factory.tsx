@@ -17,7 +17,6 @@ import { isEmpty } from 'lodash';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
-import type { IWaterfallGetRelatedErrorsHref } from '../../../common/waterfall/typings';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
