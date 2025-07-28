@@ -21,7 +21,7 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery, rangeQuery } from '@kbn/es-query';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 
 interface FieldPatternResultBase {
   field: string;
@@ -186,7 +186,7 @@ export async function runCategorizeTextAggregation({
     timeout: '10s',
     query: {
       bool: {
-        filter: [query, ...rangeQuery(start, end)],
+        filter: [query, ...dateRangeQuery(start, end)],
       },
     },
     aggregations: {
@@ -282,7 +282,7 @@ export async function getLogPatterns({
     fields,
     index_filter: {
       bool: {
-        filter: [...rangeQuery(start, end)],
+        filter: [...dateRangeQuery(start, end)],
       },
     },
     index,
@@ -301,7 +301,7 @@ export async function getLogPatterns({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...kqlQuery(kql), ...rangeQuery(start, end)],
+        filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)],
       },
     },
   });

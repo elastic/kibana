@@ -61,7 +61,7 @@ export {
   getLanguageDisplayName,
 } from './src/es_query';
 
-export { kqlQuery, rangeQuery, termQuery } from './src/es_query/helpers';
+export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
 
 export {
   COMPARE_ALL_OPTIONS,
