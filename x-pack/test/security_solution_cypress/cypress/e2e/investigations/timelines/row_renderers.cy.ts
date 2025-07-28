@@ -15,6 +15,7 @@ import {
   TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
   TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
+  TIMELINE_ROW_RENDERERS_WRAPPER,
 } from '../../../screens/timeline';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
@@ -33,6 +34,13 @@ import {
 import { hostsUrl } from '../../../urls/navigation';
 
 describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'bulk_process' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', { archiveName: 'bulk_process' });
+  });
   beforeEach(() => {
     deleteTimelines();
     login();
@@ -56,7 +64,12 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Selected renderer can be disabled and enabled', () => {
+    // Ensure the row renders are not visible by default
+    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length', 0);
     enableAllRowRenderersWithSwitch();
+    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).should('have.length.gt', 0);
+    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).eq(0).should('be.visible');
+    cy.get(TIMELINE_ROW_RENDERERS_WRAPPER).eq(1).should('be.visible');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click();
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
