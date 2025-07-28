@@ -7,6 +7,7 @@
 
 import type { ActorRef } from 'xstate';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { type NotificationChannel } from '@kbn/xstate-utils';
 import type {
   LogView,
   LogViewAttributes,
@@ -14,7 +15,6 @@ import type {
   LogViewStatus,
   ResolvedLogView,
 } from '../../../../common/log_views';
-import { type NotificationChannel } from '../../xstate_helpers';
 import { type LogViewNotificationEvent } from './notifications';
 
 export interface LogViewContextWithReference {

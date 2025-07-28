@@ -208,10 +208,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const onDisableClick = useCallback(() => {
     if (isDisabled) {
       onEnable();
+    } else if (item.autoRecoverAlerts === false) {
+      onDisable(false);
     } else {
       onDisableModalOpen();
     }
-  }, [isDisabled, onEnable, onDisableModalOpen]);
+  }, [isDisabled, item.autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]);
 
   const panels = [
     {

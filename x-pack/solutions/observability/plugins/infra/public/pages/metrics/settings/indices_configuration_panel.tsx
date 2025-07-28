@@ -136,6 +136,7 @@ export const IndicesConfigurationPanel = ({
             readOnly={readOnly}
             isLoading={isLoading}
             {...metricAliasFieldProps}
+            isInvalid={metricAliasFieldProps.isInvalid}
           />
         </EuiFormRow>
         {isMetricAliasChanged && numberOfInfraRules > 0 && (

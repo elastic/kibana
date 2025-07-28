@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Privilege Monitoring', function () {
     loadTestFile(require.resolve('./engine'));
     loadTestFile(require.resolve('./search_indices'));
+    loadTestFile(require.resolve('./privilege_monitoring_privileges_check'));
     loadTestFile(require.resolve('./privileged_users/api'));
   });
 }

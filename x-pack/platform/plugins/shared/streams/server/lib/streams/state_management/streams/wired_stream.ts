@@ -8,8 +8,10 @@
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   IngestStreamLifecycle,
+  MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
+  getSegments,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
 import {
@@ -280,6 +282,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       };
     }
 
+    const nestingLevel = getSegments(this._definition.name).length;
+
+    if (nestingLevel > MAX_NESTING_LEVEL) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Cannot create wired stream "${this._definition.name}" due to nesting level exceeding ${MAX_NESTING_LEVEL}`
+          ),
+        ],
+      };
+    }
+
     const existsInStartingState = startingState.has(this._definition.name);
 
     if (!existsInStartingState) {
@@ -315,6 +330,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         }
       }
     }
+
+    getAncestors(this._definition.name).forEach((name) => {
+      const ancestor = desiredState.get(name);
+      if (!ancestor) {
+        throw new Error(`ancestor ${name} not found is desired state`);
+      }
+    });
 
     // validate routing
     const children: Set<string> = new Set();
@@ -440,8 +462,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
   }
 
-  protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
-    const ancestors = await this.dependencies.streamsClient.getAncestors(this._definition.name);
+  protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
+    const ancestors = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
+    );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
 
     return [
@@ -520,8 +544,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       });
     }
     const hasAncestorsWithChangedFields = getAncestors(this._definition.name).some((ancestor) => {
-      const ancestorStream = desiredState.get(ancestor) as WiredStream | undefined;
-      return ancestorStream && ancestorStream.hasChangedFields();
+      const ancestorStream = desiredState.get(ancestor)! as WiredStream;
+      return ancestorStream.hasChangedFields();
     });
     if (this.hasChangedFields() || hasAncestorsWithChangedFields) {
       actions.push({
@@ -553,14 +577,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
     let hasAncestorWithChangedLifecycle = false;
     for (const ancestor of ancestorsAndSelf) {
-      const ancestorStream = desiredState.get(ancestor) as WiredStream | undefined;
+      const ancestorStream = desiredState.get(ancestor)! as WiredStream;
       // as soon as at least one ancestor has an updated lifecycle, we need to update the lifecycle of the stream
       // once we find the ancestor actually defining the lifecycle
-      if (ancestorStream && ancestorStream.hasChangedLifecycle()) {
+      if (ancestorStream.hasChangedLifecycle()) {
         hasAncestorWithChangedLifecycle = true;
       }
       // look for the first non-inherit lifecycle, that's the one defining the effective lifecycle
-      if (ancestorStream && !isInheritLifecycle(ancestorStream.getLifecycle())) {
+      if (!isInheritLifecycle(ancestorStream.getLifecycle())) {
         if (hasAncestorWithChangedLifecycle) {
           actions.push({
             type: 'update_lifecycle',

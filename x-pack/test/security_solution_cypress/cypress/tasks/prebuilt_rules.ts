@@ -15,7 +15,7 @@ import {
   RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
   TOASTER,
-  SUCCESS_TOASTER,
+  SUCCESS_TOASTER_HEADER,
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 import {
@@ -184,7 +184,7 @@ export const assertRuleInstallationSuccessToastShown = (
   rules: Array<typeof SAMPLE_PREBUILT_RULE>
 ) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  cy.get(SUCCESS_TOASTER)
+  cy.get(SUCCESS_TOASTER_HEADER)
     .should('be.visible')
     .should('have.text', `${rules.length} ${rulesString} installed successfully`);
 };
@@ -200,7 +200,7 @@ export const assertRuleInstallationFailureToastShown = (
 
 export const assertRuleUpgradeSuccessToastShown = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  cy.get(SUCCESS_TOASTER)
+  cy.get(SUCCESS_TOASTER_HEADER)
     .should('be.visible')
     .should('contain', `${rules.length} ${rulesString} updated successfully`);
 };

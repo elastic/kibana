@@ -41,6 +41,7 @@
     ],
     "optionalPlugins": [
       "spaces",
+      "cases",
       "ml",
       "home",
       "osquery",

@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
   DEPRECATED_ALERTING_CONSUMERS,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
@@ -18,13 +17,11 @@ import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugi
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../common/alerting/metrics';
-import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
+import { METRICS_FEATURE_ID } from '../common/constants';
 
 const metricRuleTypes = [
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -104,82 +101,4 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     },
   };
   return METRICS_FEATURE;
-};
-
-const logsRuleTypes = [
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-  ES_QUERY_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-];
-export const getLogsFeature = (): KibanaFeatureConfig => {
-  const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
-    const consumers = [LOGS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
-
-    return {
-      ruleTypeId,
-      consumers,
-    };
-  });
-
-  const LOGS_FEATURE = {
-    id: LOGS_FEATURE_ID,
-    name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
-      defaultMessage: 'Logs',
-    }),
-    order: 700,
-    category: DEFAULT_APP_CATEGORIES.observability,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-    app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
-    catalogue: ['infralogging', 'logs'],
-    management: {
-      insightsAndAlerting: ['triggersActions'],
-    },
-    alerting: logsAlertingFeatures,
-    privileges: {
-      all: {
-        app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
-        catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
-        savedObject: {
-          all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
-          read: [],
-        },
-        alerting: {
-          rule: {
-            all: logsAlertingFeatures,
-          },
-          alert: {
-            all: logsAlertingFeatures,
-          },
-        },
-        management: {
-          insightsAndAlerting: ['triggersActions'],
-        },
-        ui: ['show', 'configureSource', 'save'],
-      },
-      read: {
-        app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
-        catalogue: ['infralogging', 'logs'],
-        api: ['infra', 'rac'],
-        alerting: {
-          rule: {
-            read: logsAlertingFeatures,
-          },
-          alert: {
-            read: logsAlertingFeatures,
-          },
-        },
-        management: {
-          insightsAndAlerting: ['triggersActions'],
-        },
-        savedObject: {
-          all: [],
-          read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
-        },
-        ui: ['show'],
-      },
-    },
-  };
-  return LOGS_FEATURE;
 };

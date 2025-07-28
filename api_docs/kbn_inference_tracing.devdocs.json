@@ -452,8 +452,49 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
-    "misc": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.ElasticGenAIAttributes",
+        "type": "Enum",
+        "tags": [],
+        "label": "ElasticGenAIAttributes",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.GenAISemanticConventions",
+        "type": "Enum",
+        "tags": [],
+        "label": "GenAISemanticConventions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.InferenceSpanAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceSpanAttributes",
+        "description": [],
+        "signature": [
+          "GenAISemConvAttributes"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

@@ -9,7 +9,8 @@ import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
@@ -17,7 +18,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const solutionNavigation = getPageObject('solutionNavigation');
-  const console = getPageObject('console');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const header = getPageObject('header');
@@ -53,7 +53,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: AppDeepLinkId;
         breadcrumbs: string[];
         pageTestSubject: string;
-        extraCheck?: () => Promise<void>;
       }> = [
         {
           deepLinkId: 'searchHomepage',
@@ -104,13 +103,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           deepLinkId: 'dev_tools:console',
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
-          extraCheck: async () => {
-            if (await console.isTourPopoverOpen()) {
-              // Skip the tour if it's open. This will prevent the tour popover from staying on the page
-              // and blocking breadcrumbs for other tests.
-              await console.clickSkipTour();
-            }
-          },
         },
       ];
 
@@ -125,9 +117,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
         await testSubjects.existOrFail(testCase.pageTestSubject);
-        if (testCase.extraCheck !== undefined) {
-          await testCase.extraCheck();
-        }
       }
 
       // Open Project Settings

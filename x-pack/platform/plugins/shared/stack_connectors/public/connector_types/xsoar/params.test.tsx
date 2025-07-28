@@ -150,7 +150,7 @@ const mockUseSubActionPlaybooks = jest.fn().mockImplementation(() => ({
 }));
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseSubActionPlaybooks);
 
-const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
@@ -158,7 +158,9 @@ jest.mock(triggersActionsPath, () => {
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
-      notifications: { toasts: mockToasts },
+      services: {
+        notifications: { toasts: mockToasts },
+      },
     }),
   };
 });
@@ -328,7 +330,7 @@ describe('XSOARParamsFields renders', () => {
       };
       render(<XSOARParamsFields {...props} />);
 
-      expect(mockToasts.warning).toHaveBeenCalledWith({
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
         title: translations.PLAYBOOK_NOT_FOUND_WARNING,
       });
     });
@@ -343,9 +345,9 @@ describe('XSOARParamsFields renders', () => {
 
       render(<XSOARParamsFields {...defaultProps} />);
 
-      expect(mockToasts.danger).toHaveBeenCalledWith({
+      expect(mockToasts.addDanger).toHaveBeenCalledWith({
         title: translations.PLAYBOOKS_ERROR,
-        body: errorMessage,
+        text: errorMessage,
       });
     });
 

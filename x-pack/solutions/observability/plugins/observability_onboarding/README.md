@@ -56,20 +56,20 @@ node scripts/functional_test_runner --config x-pack/solutions/observability/test
 
 ```sh
 # start server
-yarn test:ftr:server --config ./x-pack/test/observability_onboarding_api_integration/basic/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts
 
 # run tests
-yarn test:ftr:runner --config ./x-pack/test/observability_onboarding_api_integration/basic/config.ts --include ./x-pack/test/observability_onboarding_api_integration/tests/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts --include ./x-pack/solutions/observability/test/observability_onboarding_api_integration/tests/index.ts
 ```
 
 #### Cloud config
 
 ```sh
 # start server
-yarn test:ftr:server --config ./x-pack/test/observability_onboarding_api_integration/cloud/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts
 
 # run tests
-yarn test:ftr:runner --config ./x-pack/test/observability_onboarding_api_integration/cloud/config.ts --include ./x-pack/test/observability_onboarding_api_integration/tests/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts --include ./x-pack/solutions/observability/test/observability_onboarding_api_integration/tests/index.ts
 ```
 
 ### Functional Tests

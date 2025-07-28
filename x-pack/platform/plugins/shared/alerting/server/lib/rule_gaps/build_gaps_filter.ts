@@ -28,7 +28,8 @@ export const buildGapsFilter = ({
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
 }) => {
-  const baseFilter = 'event.action: gap AND event.provider: alerting';
+  const baseFilter =
+    'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
 
   const endFilter = end ? `kibana.alert.rule.gap.range <= "${end}"` : null;
   const startFilter = start ? `kibana.alert.rule.gap.range >= "${start}"` : null;

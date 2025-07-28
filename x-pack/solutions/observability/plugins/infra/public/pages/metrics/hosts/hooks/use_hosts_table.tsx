@@ -29,9 +29,9 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
 import type {
-  InfraAssetMetadataType,
-  InfraAssetMetricsItem,
-  InfraAssetMetricType,
+  InfraEntityMetadataType,
+  InfraEntityMetricsItem,
+  InfraEntityMetricType,
 } from '../../../../../common/http_api';
 import type { Sorting } from './use_hosts_table_url_state';
 import { useHostsTableUrlState } from './use_hosts_table_url_state';
@@ -46,7 +46,7 @@ import { AddDataTroubleshootingPopover } from '../components/table/add_data_trou
 /**
  * Columns and items types
  */
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
+type HostMetrics = Record<InfraEntityMetricType, number | null>;
 
 interface HostMetadata {
   os?: string | null;
@@ -65,14 +65,14 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
+const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
   const defaultValue = value ?? 0;
   return createInventoryMetricFormatter({ type })(defaultValue);
 };
 
 const buildMetricCell = (
   value: number | null,
-  formatType: InfraAssetMetricType,
+  formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
   if (!hasSystemMetrics && value === null) {
@@ -82,14 +82,14 @@ const buildMetricCell = (
   return formatMetric(formatType, value);
 };
 
-const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+const buildItemsList = (nodes: InfraEntityMetricsItem[]): HostNodeRow[] => {
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
         [curr.name]: curr.value,
       }),
-      {} as Record<InfraAssetMetadataType, string | null>
+      {} as Record<InfraEntityMetadataType, string | null>
     );
 
     return {
@@ -370,7 +370,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={formulas?.cpuUsage.value}
+            formula={formulas?.get('cpuUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -386,7 +386,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={formulas?.normalizedLoad1m.value}
+            formula={formulas?.get('normalizedLoad1m').value}
           />
         ),
         width: metricColumnsWidth,
@@ -402,7 +402,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={formulas?.memoryUsage.value}
+            formula={formulas?.get('memoryUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -418,7 +418,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={formulas?.memoryFree.value}
+            formula={formulas?.get('memoryFree').value}
           />
         ),
         width: metricColumnsWidth,
@@ -434,7 +434,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskUsage}
-            formula={formulas?.diskUsage.value}
+            formula={formulas?.get('diskUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -458,7 +458,7 @@ export const useHostsTable = () => {
             <ColumnHeader
               label={TABLE_COLUMN_LABEL.rx}
               toolTip={METRICS_TOOLTIP.rx}
-              formula={formulas?.rx.value}
+              formula={formulas?.get('rx').value}
             />
           </>
         ),
@@ -483,7 +483,7 @@ export const useHostsTable = () => {
             <ColumnHeader
               label={TABLE_COLUMN_LABEL.tx}
               toolTip={METRICS_TOOLTIP.tx}
-              formula={formulas?.tx.value}
+              formula={formulas?.get('tx').value}
             />
           </>
         ),
@@ -499,13 +499,7 @@ export const useHostsTable = () => {
     [
       displayAlerts,
       showApmHostTroubleshooting,
-      formulas?.cpuUsage.value,
-      formulas?.normalizedLoad1m.value,
-      formulas?.memoryUsage.value,
-      formulas?.memoryFree.value,
-      formulas?.diskUsage.value,
-      formulas?.rx.value,
-      formulas?.tx.value,
+      formulas,
       metricColumnsWidth,
       detailsItemId,
       setProperties,

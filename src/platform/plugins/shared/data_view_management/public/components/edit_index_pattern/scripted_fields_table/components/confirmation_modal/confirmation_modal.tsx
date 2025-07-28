@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
 
@@ -26,6 +26,8 @@ export const DeleteScritpedFieldConfirmationModal = ({
   hideDeleteConfirmationModal,
   deleteField,
 }: DeleteScritpedFieldConfirmationModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const title = i18n.translate(
     'indexPatternManagement.editIndexPattern.scripted.deleteFieldLabel',
     {
@@ -44,7 +46,9 @@ export const DeleteScritpedFieldConfirmationModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={title}
+      titleProps={{ id: modalTitleId }}
       onCancel={hideDeleteConfirmationModal}
       onConfirm={deleteField}
       cancelButtonText={cancelButtonText}

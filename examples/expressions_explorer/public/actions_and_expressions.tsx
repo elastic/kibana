@@ -45,7 +45,7 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
     // enrich event context with some extra data
     event.baseUrl = 'http://www.google.com';
 
-    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.data);
+    actions.getTrigger(NAVIGATE_TRIGGER_ID).exec(event.data);
   };
 
   return (

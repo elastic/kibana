@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
 import { useUrlPagination } from '../../../../../../hooks';
@@ -20,12 +20,6 @@ import type { InstalledPackageUIPackageListItem } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
-
-const ContentWrapper = styled.div`
-  max-width: 1200px;
-  margin: auto;
-  height: 100%;
-`;
 
 const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   // State management
@@ -63,7 +57,12 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
 
   return (
     <>
-      <ContentWrapper>
+      <div
+        css={css`
+          margin: auto;
+          height: 100%;
+        `}
+      >
         <InstalledIntegrationsSearchBar
           filters={filters}
           customIntegrationsCount={customIntegrationsCount}
@@ -78,7 +77,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
           installedPackages={installedPackages}
           selection={{ selectedItems, setSelectedItems }}
         />
-      </ContentWrapper>
+      </div>
       {viewPoliciesSelectedItem ? (
         <PackagePoliciesPanel installedPackage={viewPoliciesSelectedItem} />
       ) : null}

@@ -23,23 +23,26 @@ import {
 import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
 import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
+
+import { Actions } from './actions';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import type { SettingsOverrideOptions } from '../results/history/types';
+import { SETTINGS_TAB_ID } from '../settings_flyout/constants';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 interface Props {
   connectorId: string | undefined;
   connectorsAreConfigured: boolean;
   isLoading: boolean;
   isDisabledActions: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
-  openFlyout: () => void;
+  openFlyout: (tabId: string) => void;
   stats: AttackDiscoveryStats | null;
   showFlyout: boolean;
 }
@@ -57,7 +60,7 @@ const HeaderComponent: React.FC<Props> = ({
   showFlyout,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const disabled = connectorId == null;
+  const isDisabled = connectorId == null;
   const [didCancel, setDidCancel] = useState(false);
   const { inferenceEnabled } = useAssistantContext();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
@@ -115,11 +118,13 @@ const HeaderComponent: React.FC<Props> = ({
             color: 'primary' as EuiButtonProps['color'],
             dataTestSubj: 'generate',
             fill: attackDiscoveryAlertsEnabled,
-            onClick: onGenerate,
+            onClick: () => onGenerate(),
             text: i18n.GENERATE,
           },
     [attackDiscoveryAlertsEnabled, handleCancel, isLoading, onGenerate]
   );
+
+  const openLegacySettingsFlyout = useCallback(() => openFlyout(SETTINGS_TAB_ID), [openFlyout]);
 
   return (
     <EuiFlexGroup
@@ -177,43 +182,63 @@ const HeaderComponent: React.FC<Props> = ({
               </EuiFlexGroup>
             )}
           </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
+      {/* Conditional rendering: New Actions component vs Legacy buttons */}
+      {attackDiscoveryAlertsEnabled ? (
+        /* New Actions component when feature flag is enabled */
+        <EuiFlexItem grow={false}>
+          <Actions
+            isLoading={isLoading}
+            onGenerate={onGenerate}
+            openFlyout={openFlyout}
+            isDisabled={isDisabled}
+          />
+        </EuiFlexItem>
+      ) : (
+        /* Legacy settings and generate buttons when feature flag is disabled */
+        <>
           <EuiFlexItem
             css={css`
               margin-right: ${euiTheme.size.m};
             `}
             grow={false}
           >
-            <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
+            <EuiToolTip
+              content={i18n.SETTINGS}
+              data-test-subj="openAlertSelectionToolTip"
+              disableScreenReaderOutput
+            >
               <EuiButtonIcon
                 aria-label={i18n.SETTINGS}
                 color="text"
                 data-test-subj="openAlertSelection"
                 iconType="gear"
-                onClick={openFlyout}
+                onClick={openLegacySettingsFlyout}
               />
             </EuiToolTip>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={connectorId == null ? i18n.SELECT_A_CONNECTOR : null}
-          data-test-subj="generateTooltip"
-        >
-          <EuiButton
-            color={buttonProps.color}
-            data-test-subj={buttonProps.dataTestSubj}
-            disabled={disabled || didCancel || isDisabledActions}
-            fill={buttonProps.fill}
-            onClick={buttonProps.onClick}
-            size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
-          >
-            {buttonProps.text}
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={connectorId == null ? i18n.SELECT_A_CONNECTOR : null}
+              data-test-subj="generateTooltip"
+            >
+              <EuiButton
+                color={buttonProps.color}
+                data-test-subj={buttonProps.dataTestSubj}
+                disabled={isDisabled || didCancel || isDisabledActions}
+                fill={buttonProps.fill}
+                onClick={buttonProps.onClick}
+                size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
+              >
+                {buttonProps.text}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 };

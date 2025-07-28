@@ -7,13 +7,10 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-export const supportedDataSourcesRT = rt.keyof({
-  host: null,
-});
+import { SupportedEntityTypesRT } from '../http_api/shared/entity_type';
 
 export const getHasDataQueryParamsRT = rt.partial({
-  dataSource: supportedDataSourcesRT,
+  entityType: SupportedEntityTypesRT,
 });
 
 export const getHasDataResponseRT = rt.partial({
@@ -25,7 +22,7 @@ export const getTimeRangeMetadataQueryParamsRT = rt.intersection([
     kuery: rt.string,
   }),
   rt.type({
-    dataSource: supportedDataSourcesRT,
+    dataSource: SupportedEntityTypesRT,
     from: isoToEpochRt,
     to: isoToEpochRt,
   }),
@@ -40,7 +37,6 @@ export const getTimeRangeMetadataResponseRT = rt.type({
   ),
 });
 
-export type SupportedDataSources = rt.TypeOf<typeof supportedDataSourcesRT>;
 export type GetHasDataQueryParams = rt.TypeOf<typeof getHasDataQueryParamsRT>;
 export type GetHasDataResponse = rt.TypeOf<typeof getHasDataResponseRT>;
 export type GetTimeRangeMetadataQueryParams = rt.TypeOf<typeof getTimeRangeMetadataQueryParamsRT>;
