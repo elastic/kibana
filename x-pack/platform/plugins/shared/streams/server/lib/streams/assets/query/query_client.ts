@@ -258,7 +258,7 @@ export class QueryClient {
           timestampField: '@timestamp',
           query: esqlQuery,
         },
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },
