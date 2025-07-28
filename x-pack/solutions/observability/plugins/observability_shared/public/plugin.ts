@@ -95,7 +95,6 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
-    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
     coreSetup.getStartServices().then(([coreStart]) => {
       coreStart.chrome
         .getChromeStyle$()
