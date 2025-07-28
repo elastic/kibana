@@ -35,7 +35,7 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
-    await assetClient.getAssetLinks(name, ['dashboard', 'query']),
+    assetClient.getAssetLinks(name, ['dashboard', 'query']),
   ]);
 
   const [dashboardLinks, queryLinks] = partition(
