@@ -14,8 +14,6 @@ To view alerts in a dashboard, add *Alerts* panels that show selected alerts. Ea
 . (Optional) To use both types of filters, first define one filter, then use the boolean *+ OR* or *+ AND* options that appear to define the second filter.
 . Click *Save*. Your panel appears on the dashboard.
 
-image::/explore-analyze/images/dashboards-alert-panel.png[An alerts panel on a dashboard, screenshot]
-
 [[alert-panel-actions]]
 [discrete]
 == Take action on alerts
