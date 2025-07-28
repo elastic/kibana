@@ -41,6 +41,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
   it('should calculate gap state', async () => {
     const testGap = new Gap({
+      ruleId: 'test-rule-id',
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -67,6 +68,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
   it('should reset in-progress intervals before processing backfills', async () => {
     const testGap = new Gap({
+      ruleId: 'test-rule-id',
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -96,6 +98,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
   it('should update gap with backfill schedules from overlapping backfills', async () => {
     const testGap = new Gap({
+      ruleId: 'test-rule-id',
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -137,6 +140,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
   it('should filter out backfills with an error', async () => {
     const testGap = new Gap({
+      ruleId: 'test-rule-id',
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -174,6 +178,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
   it('should log an error and recover when converting to scheduled item throws an error', async () => {
     const testGap = new Gap({
+      ruleId: 'test-rule-id',
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',

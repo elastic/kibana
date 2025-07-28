@@ -26,8 +26,10 @@ describe('softDeleteGaps', () => {
   const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
   const softDeleteGapsBatchMock = softDeleteGapsBatch as jest.Mock;
 
+  const ruleId = 'test-rule-id';
   const gaps = [
     new Gap({
+      ruleId,
       range: {
         gte: '2024-01-01T00:00:00.000Z',
         lte: '2024-01-01T01:00:00.000Z',
@@ -35,7 +37,6 @@ describe('softDeleteGaps', () => {
     }),
   ];
 
-  const ruleId = 'test-rule-id';
   beforeEach(() => {
     jest.resetAllMocks();
     processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
