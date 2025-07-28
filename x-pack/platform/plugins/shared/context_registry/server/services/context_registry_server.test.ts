@@ -12,6 +12,8 @@ const mockTool: ToolDefinition = {
   description: 'A mock tool',
 };
 
+const mockOwner = 'observability' as const;
+
 describe('ContextRegistry', () => {
   let registry: ContextRegistryServer;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -34,44 +36,45 @@ describe('ContextRegistry', () => {
 
   const mockContext: ContextDefinitionServer = {
     key: 'mockContext',
+    owner: mockOwner,
     tools: { mockTool },
     handlers: { mockHandler },
   };
 
   it('registers a context definition successfully', () => {
     registry.register(mockContext);
-    expect(registry.get('mockContext')).toEqual(mockContext);
+    expect(registry.get('mockContext', mockOwner)).toEqual(mockContext);
   });
 
-  it('throws an error when registering a duplicate context definition', () => {
+  it('throws an error when registering a duplicate context definition for the same owner', () => {
     registry.register(mockContext);
     expect(() => registry.register(mockContext)).toThrow(
-      "Context type 'mockContext' is already registered with server context registry."
+      `Context type 'mockContext' is already registered for owner '${mockOwner}'.`
     );
   });
 
-  it('retrieves a tool successfully', () => {
+  it('retrieves a tool successfully for a specific owner', () => {
     registry.register(mockContext);
-    expect(registry.getTool('mockTool')).toEqual(mockTool);
+    expect(registry.getTool('mockTool', mockOwner)).toEqual(mockTool);
   });
 
-  it('throws an error when registering a duplicate tool', () => {
+  it('throws an error when registering a duplicate tool for the same owner', () => {
     registry.register(mockContext);
     const duplicateContext = {
       ...mockContext,
       key: 'duplicateContext',
     };
     expect(() => registry.register(duplicateContext)).toThrow(
-      "Tool 'mockTool' is already registered for context type 'duplicateContext'."
+      `Tool 'mockTool' is already registered for context type 'duplicateContext' under owner '${mockOwner}'.`
     );
   });
 
-  it('retrieves a tool handler successfully', () => {
+  it('retrieves a tool handler successfully for a specific owner', () => {
     registry.register(mockContext);
-    expect(registry.getToolHandler('mockHandler')).toBe(mockHandler);
+    expect(registry.getToolHandler('mockHandler', mockOwner)).toBe(mockHandler);
   });
 
-  it('throws an error when registering a duplicate tool handler', () => {
+  it('throws an error when registering a duplicate tool handler for the same owner', () => {
     registry.register(mockContext);
     const duplicateContext = {
       ...mockContext,
@@ -79,7 +82,7 @@ describe('ContextRegistry', () => {
       key: 'duplicateContextWithoutDuplicateTool',
     };
     expect(() => registry.register(duplicateContext)).toThrow(
-      "Handler 'mockHandler' is already registered for context type 'duplicateContextWithoutDuplicateTool'."
+      `Handler 'mockHandler' is already registered for context type 'duplicateContextWithoutDuplicateTool' under owner '${mockOwner}'.`
     );
   });
 });
@@ -93,12 +96,12 @@ describe('getContext', () => {
     registry = new ContextRegistryServer(mockLogger);
   });
 
-  it('returns an empty array when no handlers are registered', async () => {
-    const result = await registry.getContext({});
+  it('returns an empty array when no handlers are registered for the owner', async () => {
+    const result = await registry.getContextForOwner({}, mockOwner);
     expect(result).toEqual([]);
   });
 
-  it('calls all registered handlers and returns their results', async () => {
+  it('calls all registered handlers for the owner and returns their results', async () => {
     const mockHandler1 = jest.fn(async () => ({
       key: 'mockTool1',
       description: 'Handler 1',
@@ -112,13 +115,14 @@ describe('getContext', () => {
 
     const mockContext = {
       key: 'mockContext',
+      owner: mockOwner, // Updated to a single owner
       tools: { mockTool1: mockTool, mockTool2: mockTool },
       handlers: { mockHandler1, mockHandler2 },
     };
 
     registry.register(mockContext);
 
-    const result = await registry.getContext({});
+    const result = await registry.getContextForOwner({}, mockOwner);
     expect(result).toHaveLength(2);
     expect(mockHandler1).toHaveBeenCalled();
     expect(mockHandler2).toHaveBeenCalled();
@@ -134,27 +138,32 @@ describe('getContextByKey', () => {
     registry = new ContextRegistryServer(mockLogger);
   });
 
-  it('returns an empty array when the context key is not found', async () => {
-    await expect(registry.getContextByKey({ key: 'nonExistentKey', context: {} })).rejects.toThrow(
-      "Context with key 'nonExistentKey' is not registered."
+  it('throws an error when the context key is not found for the owner', async () => {
+    await expect(
+      registry.getContextByKey({ key: 'nonExistentKey', context: {}, owner: mockOwner })
+    ).rejects.toThrow(
+      `Context with key 'nonExistentKey' is not registered for owner '${mockOwner}'.`
     );
   });
 
-  it('throws an error when no handlers are registered for the context', async () => {
+  it('throws an error when no handlers are registered for the context under the owner', async () => {
     const mockContext = {
       key: 'mockContext',
+      owner: mockOwner, // Updated to a single owner
       tools: {},
       handlers: {},
     };
 
     registry.register(mockContext);
 
-    await expect(registry.getContextByKey({ key: 'mockContext', context: {} })).rejects.toThrow(
-      "No handlers registered for context with key 'mockContext'. Please ensure the context is properly defined."
+    await expect(
+      registry.getContextByKey({ key: 'mockContext', context: {}, owner: mockOwner })
+    ).rejects.toThrow(
+      `No handlers registered for context with key 'mockContext' under owner '${mockOwner}'.`
     );
   });
 
-  it('calls a specific handler when handlerName is provided', async () => {
+  it('calls a specific handler when handlerName is provided for the owner', async () => {
     const mockHandler = jest.fn(async () => ({
       key: 'mockTool',
       description: 'Specific handler',
@@ -163,6 +172,7 @@ describe('getContextByKey', () => {
 
     const mockContext = {
       key: 'mockContext',
+      owner: mockOwner, // Updated to a single owner
       tools: { mockTool },
       handlers: { mockHandler },
     };
@@ -173,13 +183,14 @@ describe('getContextByKey', () => {
       key: 'mockContext',
       handlerName: 'mockHandler',
       context: {},
+      owner: mockOwner,
     });
 
     expect(result).toHaveLength(1);
     expect(mockHandler).toHaveBeenCalled();
   });
 
-  it('calls all handlers when handlerName is not provided', async () => {
+  it('calls all handlers when handlerName is not provided for the owner', async () => {
     const mockHandler1 = jest.fn(async () => ({
       key: 'mockTool1',
       description: 'Handler 1',
@@ -193,13 +204,18 @@ describe('getContextByKey', () => {
 
     const mockContext = {
       key: 'mockContext',
+      owner: mockOwner, // Updated to a single owner
       tools: { mockTool1: mockTool, mockTool2: mockTool },
       handlers: { mockHandler1, mockHandler2 },
     };
 
     registry.register(mockContext);
 
-    const result = await registry.getContextByKey({ key: 'mockContext', context: {} });
+    const result = await registry.getContextByKey({
+      key: 'mockContext',
+      context: {},
+      owner: mockOwner,
+    });
     expect(result).toHaveLength(2);
     expect(mockHandler1).toHaveBeenCalled();
     expect(mockHandler2).toHaveBeenCalled();

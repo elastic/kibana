@@ -14,11 +14,9 @@ export type {
   ContextDefinitionServer,
   ContextRegistryServer,
   ContextHandler,
-  ContextRequest,
-  contextRequestSchema,
 } from './services/context_registry_server';
 
-export type { ContextResponse } from '../common/types';
+export { type ContextRequest, type ContextResponse, contextRequestSchema } from '../common/types';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ContextRegistryPlugin } = await import('./plugin');

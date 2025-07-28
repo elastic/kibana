@@ -15,6 +15,7 @@ export const getExampleByServiceName = (dependencies: {
 }): ContextDefinitionServer => {
   return {
     key: 'example',
+    owner: 'observability',
     tools: {
       searchExampleByServiceName: {
         description: 'Suggest synthetics monitor matching the same service.',

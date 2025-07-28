@@ -6,7 +6,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { contextRequestSchema } from '@kbn/context-registry-plugin/server/services/context_registry_server';
+import { contextRequestSchema } from '@kbn/context-registry-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type {
   ContextRegistryServerStart,
@@ -54,7 +54,11 @@ export class ContextRegistryExamplePlugin
 
         const results = await contextRegistry.registry.getContextByKey({
           key: 'example',
-          context: request.body,
+          context: request.body as {
+            'service.name'?: string;
+            timeRange?: { from: string; to: string };
+          },
+          owner: 'observability',
         });
 
         return response.ok({

@@ -13,5 +13,6 @@ import { SyntheticsMonitorContext } from '../../common/types';
 export const syntheticsMonitorContextDefinition: ContextDefinitionPublic<SyntheticsMonitorContext> =
   {
     key: 'example',
+    owner: 'observability',
     children: React.lazy(() => import('./context_children')),
   };

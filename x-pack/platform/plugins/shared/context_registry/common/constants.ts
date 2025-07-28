@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type { ContextRequest, ContextResponse, ContextOwners } from './types';
+import type { ContextOwners } from './types';
+
+export const OWNERS: Readonly<ContextOwners> = ['security', 'observability', 'stack'] as const;

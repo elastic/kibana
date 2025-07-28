@@ -59,7 +59,11 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
   }, [http, loadContext, setSyntheticsMonitorContext]);
 
   const Children = useMemo(
-    () => contextRegistry.registry.getContextByKey<SyntheticsMonitorContext>('example').children,
+    () =>
+      contextRegistry.registry.getContextByKey<SyntheticsMonitorContext>({
+        owner: 'observability',
+        key: 'example',
+      }).children,
     [contextRegistry]
   );
 

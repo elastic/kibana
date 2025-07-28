@@ -4,7 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { z } from '@kbn/zod';
 
+const contextOwnerSchema = z.enum(['observability', 'security', 'stack']);
+
+export const contextRequestSchema = z.object({
+  'service.name': z.string().optional(),
+  timeRange: z
+    .object({
+      from: z.string(),
+      to: z.string(),
+    })
+    .optional(),
+});
+
+export type ContextRequest = z.infer<typeof contextRequestSchema>;
+
+export type ContextOwner = z.infer<typeof contextOwnerSchema>;
+export type ContextOwners = ContextOwner[];
 export interface ContextItem<TPayload = Record<string, unknown>> {
   payload: TPayload; // The payload associated with the context
   description: string; // A plaintext description of the context
