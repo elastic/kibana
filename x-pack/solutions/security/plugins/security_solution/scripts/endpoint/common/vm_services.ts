@@ -88,13 +88,7 @@ export const createMultipassHostVmClient = (
       .command(`multipass exec ${name} -- ${command}`, { maxBuffer: MAX_BUFFER })
       .catch((e) => {
         log.error(dump(e));
-
-        // Return back an HostVmExecResponse that has a failure exit code
-        return {
-          stdout: e.stdout ?? '',
-          stderr: dump(e, 10),
-          exitCode: e.exitCode ?? 1,
-        };
+        throw e;
       });
 
     log.verbose(
@@ -334,13 +328,7 @@ export const createVagrantHostVmClient = (
       .command(`vagrant ssh -- ${command}`, execaOptions)
       .catch((e) => {
         log.error(dump(e));
-
-        // Return back an HostVmExecResponse that has a failure exit code
-        return {
-          stdout: e.stdout ?? '',
-          stderr: dump(e, 10),
-          exitCode: e.exitCode ?? 1,
-        };
+        throw e;
       });
 
     log.verbose(execResponse);

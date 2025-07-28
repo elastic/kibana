@@ -602,7 +602,11 @@ ${s1Info.status}
     },
 
     /**
-     * Runs a command on the given hostname, which is expected to be a hostname running on a vm
+     * Runs a command on the given hostname, which is expected to be a hostname running on a vm.
+     *
+     * IMPORTANT: command execution failures on the host will NOT cause this task to fail/throw.
+     *            Ensure that the `stderr` is checked if wanting to determine success/failure of
+     *            command execution on the host machine.
      * @param options
      * @param options.hostname
      * @param command.command
