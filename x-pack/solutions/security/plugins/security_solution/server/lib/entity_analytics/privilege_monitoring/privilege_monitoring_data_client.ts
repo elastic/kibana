@@ -778,31 +778,6 @@ export class PrivilegeMonitoringDataClient {
     });
   }
 
-  //   // create default index source for privilege monitoring for each namespace
-  // try {
-  //   const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-  //     type: 'index',
-  //     managed: true,
-  //     indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
-  //     name: `default-monitoring-index-${this.opts.namespace}`,
-  //   });
-  //   this.log(
-  //     'debug',
-  //     `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-  //   );
-  // } catch (e) {
-  //   this.log(
-  //     'error',
-  //     `Failed to create default index source for privilege monitoring: ${e.message}`
-  //   );
-  //   this.audit(
-  //     PrivilegeMonitoringEngineActions.INIT,
-  //     EngineComponentResourceEnum.privmon_engine,
-  //     'Failed to create default index source for privilege monitoring',
-  //     e
-  //   );
-  // }
-
   private createOrUpdateDefaultDataSource = async () => {
     const sourceName = `default-monitoring-index-${this.opts.namespace}`;
 
@@ -816,6 +791,8 @@ export class PrivilegeMonitoringDataClient {
     const existingSources = await this.monitoringIndexSourceClient.find({
       name: sourceName,
     });
+
+    console.log(`BADGER EXISTING SOURCES: ${JSON.stringify(existingSources)}`);
 
     if (existingSources.saved_objects.length > 0) {
       this.log('info', 'Default index source already exists, updating it.');
@@ -837,28 +814,28 @@ export class PrivilegeMonitoringDataClient {
           e
         );
       }
-    }
+    } else {
+      this.log('info', 'Creating default index source for privilege monitoring.');
 
-    this.log('info', 'Creating default index source for privilege monitoring.');
+      try {
+        const indexSourceDescriptor = this.monitoringIndexSourceClient.create(defaultIndexSource);
 
-    try {
-      const indexSourceDescriptor = this.monitoringIndexSourceClient.create(defaultIndexSource);
-
-      this.log(
-        'debug',
-        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-      );
-    } catch (e) {
-      this.log(
-        'error',
-        `Failed to create default index source for privilege monitoring: ${e.message}`
-      );
-      this.audit(
-        PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
-        'Failed to create default index source for privilege monitoring',
-        e
-      );
+        this.log(
+          'debug',
+          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+        );
+      } catch (e) {
+        this.log(
+          'error',
+          `Failed to create default index source for privilege monitoring: ${e.message}`
+        );
+        this.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to create default index source for privilege monitoring',
+          e
+        );
+      }
     }
   };
 
