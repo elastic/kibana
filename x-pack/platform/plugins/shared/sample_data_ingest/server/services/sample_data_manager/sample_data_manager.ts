@@ -136,6 +136,6 @@ export class SampleDataManager {
   }
 
   private getSampleDataIndexName(sampleType: DatasetSampleType): string {
-    return `${this.indexPrefixName}-${sampleType.toLowerCase()}`;
+    return `${this.indexPrefixName}${sampleType.toLowerCase()}`;
   }
 }
