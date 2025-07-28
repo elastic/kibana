@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { runBazel, runIBazel } = require('./src/bazel_runner');
+require('../src/setup_node_env');
 
-module.exports = { runBazel, runIBazel };
+require('../src/dev/build_package/build_package');
