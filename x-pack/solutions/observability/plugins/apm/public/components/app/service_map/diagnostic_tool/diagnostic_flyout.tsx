@@ -104,7 +104,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     setIsLoading(true);
 
     try {
-      if (start && end && form.sourceNode && form.destinationNode && form.traceId) {
+      if (start && end && form.sourceNode && form.destinationNode) {
         const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
           params: {
             body: {
@@ -120,7 +120,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         setData(response);
       } else {
-        // If validation fails, ensure loading is stopped
         setIsLoading(false);
       }
     } catch (error) {
@@ -132,7 +131,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
           defaultMessage: 'An error occurred while running the diagnostic. Please try again.',
         }),
       });
-      // Reset data on error to show clean state
       setData(undefined);
     } finally {
       setIsLoading(false);

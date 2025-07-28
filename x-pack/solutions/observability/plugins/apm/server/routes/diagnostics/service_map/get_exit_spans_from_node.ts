@@ -25,8 +25,8 @@ export async function getExitSpansFromSourceNode({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  sourceNode: { field: string; value: string };
-  destinationNode: { field: string; value: string };
+  sourceNode: string;
+  destinationNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_exit_spans_from_node', {
     apm: {
@@ -36,14 +36,14 @@ export async function getExitSpansFromSourceNode({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(sourceNode.field, sourceNode.value)],
+        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, sourceNode)],
       },
     },
     aggs: {
       matching_destination_resources: {
         filter: {
           term: {
-            [SPAN_DESTINATION_SERVICE_RESOURCE]: destinationNode.value,
+            [SPAN_DESTINATION_SERVICE_RESOURCE]: destinationNode,
           },
         },
         aggs: {
@@ -104,7 +104,7 @@ export async function getSourceSpanIds({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  sourceNode: { field: string; value: string };
+  sourceNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_source_span_ids', {
     apm: {
@@ -117,7 +117,7 @@ export async function getSourceSpanIds({
         filter: [
           ...rangeQuery(start, end),
           ...existsQuery(SPAN_ID),
-          ...termsQuery(sourceNode.field, sourceNode.value),
+          ...termsQuery(SERVICE_NAME, sourceNode),
         ],
       },
     },
@@ -148,7 +148,7 @@ export async function getDestinationParentIds({
   start: number;
   end: number;
   ids: string[] | undefined;
-  destinationNode: { field: string; value: string };
+  destinationNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_destination_parent_ids', {
     apm: {
@@ -165,8 +165,8 @@ export async function getDestinationParentIds({
           {
             bool: {
               should: [
-                ...termQuery(SERVICE_NAME, destinationNode.value),
-                ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, destinationNode.value),
+                ...termQuery(SERVICE_NAME, destinationNode),
+                ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, destinationNode),
               ],
             },
           },

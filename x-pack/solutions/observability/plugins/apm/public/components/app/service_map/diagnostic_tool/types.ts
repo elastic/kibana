@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import type {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/es_fields/apm';
-
-export type NodeField = typeof SERVICE_NAME | typeof SPAN_DESTINATION_SERVICE_RESOURCE;
-
-export interface NodeSelection {
-  field: NodeField;
-  value: string;
-}
-
 export interface DiagnosticFormState {
-  sourceNode?: NodeSelection;
-  destinationNode?: NodeSelection;
+  sourceNode?: string;
+  destinationNode?: string;
   traceId?: string;
   isValid: boolean;
 }

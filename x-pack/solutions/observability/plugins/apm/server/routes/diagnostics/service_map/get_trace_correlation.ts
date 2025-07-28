@@ -22,8 +22,8 @@ export async function getTraceCorrelation({
   start: number;
   end: number;
   traceId: string;
-  sourceNode: { field: string; value: string };
-  destinationNode: { field: string; value: string };
+  sourceNode: string;
+  destinationNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_trace_correlation', {
     apm: {

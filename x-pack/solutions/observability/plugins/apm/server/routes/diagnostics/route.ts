@@ -94,8 +94,10 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
     body: t.intersection([
       rangeRt,
       t.type({
-        sourceNode: t.type({ field: t.string, value: t.string }),
-        destinationNode: t.type({ field: t.string, value: t.string }),
+        sourceNode: t.string,
+        destinationNode: t.string,
+      }),
+      t.partial({
         traceId: t.string,
       }),
     ]),
@@ -118,14 +120,16 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         end,
         sourceNode,
       }),
-      getTraceCorrelation({
-        apmEventClient,
-        start,
-        end,
-        traceId,
-        sourceNode,
-        destinationNode,
-      }),
+      traceId
+        ? getTraceCorrelation({
+            apmEventClient,
+            start,
+            end,
+            traceId,
+            sourceNode,
+            destinationNode,
+          })
+        : [],
     ]);
 
     const destinationParentIds = await getDestinationParentIds({
@@ -150,11 +154,11 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
           sourceSpanIds: sourceSpanIds.spanIds.map((id) => String(id)),
         },
         traceCorrelation: {
-          found: traceCorrelation.analysis.foundInBothNodes,
-          foundInSourceNode: traceCorrelation.analysis.foundInSourceNode,
-          foundInDestinationNode: traceCorrelation.analysis.foundInDestinationNode,
-          sourceNodeDocumentCount: traceCorrelation.analysis.sourceNodeDocumentCount,
-          destinationNodeDocumentCount: traceCorrelation.analysis.destinationNodeDocumentCount,
+          found: traceCorrelation?.analysis?.foundInBothNodes,
+          foundInSourceNode: traceCorrelation?.analysis?.foundInSourceNode,
+          foundInDestinationNode: traceCorrelation?.analysis?.foundInDestinationNode,
+          sourceNodeDocumentCount: traceCorrelation?.analysis?.sourceNodeDocumentCount,
+          destinationNodeDocumentCount: traceCorrelation?.analysis?.destinationNodeDocumentCount,
         },
       },
       // Include raw Elasticsearch responses for debugging and advanced analysis
