@@ -34,22 +34,28 @@ describe('transformToGap', () => {
   ];
 
   type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>;
-  const createMockEvent = (overrides?: {
-    alert?: ResultData['alert'];
-    saved_objects?: ResultData['saved_objects'];
-    '@timestamp'?: string;
-  }): QueryEventsBySavedObjectResult => ({
+  const createMockEvent = (
+    overrides: {
+      alert?: ResultData['alert'];
+      saved_objects?: ResultData['saved_objects'];
+      '@timestamp'?: string;
+    } = {}
+  ): QueryEventsBySavedObjectResult => ({
     total: 1,
     data: [
       {
-        '@timestamp': overrides?.hasOwnProperty('@timestamp') ? overrides['@timestamp'] : timestamp,
+        '@timestamp': Object.prototype.hasOwnProperty.call(overrides, '@timestamp')
+          ? overrides['@timestamp']
+          : timestamp,
         _id: 'test-id',
         _index: 'test-index',
         _seq_no: 1,
         _primary_term: 1,
         kibana: {
-          alert: overrides?.hasOwnProperty('alert') ? overrides.alert : validAlertObject,
-          saved_objects: overrides?.hasOwnProperty('saved_objects')
+          alert: Object.prototype.hasOwnProperty.call(overrides, 'alert')
+            ? overrides.alert
+            : validAlertObject,
+          saved_objects: Object.prototype.hasOwnProperty.call(overrides, 'saved_objects')
             ? overrides.saved_objects
             : validSavedObjectsArray,
         },
