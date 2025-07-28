@@ -45,13 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await renderService.waitForRender(8);
     // There should be 0 error embeddables on the dashboard
 
-    const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
-    for (const errorEmbeddable of errorEmbeddables) {
-      log.error(
-        'Found embeddable with error: \n' + `"(${await errorEmbeddable.getVisibleText()})"`
-      );
-    }
-    expect(errorEmbeddables.length).to.be(0);
+    await PageObjects.dashboard.verifyNoRenderErrors();
   };
 
   describe('should be able to handle multi-space imports correctly', function () {

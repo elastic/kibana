@@ -790,6 +790,11 @@ export class DashboardPageObject extends FtrService {
 
   public async verifyNoRenderErrors() {
     const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    for (const errorEmbeddable of errorEmbeddables) {
+      this.log.error(
+        'Found embeddable with error: \n' + `"(${await errorEmbeddable.getVisibleText()})"`
+      );
+    }
     expect(errorEmbeddables.length).to.be(0);
   }
 
