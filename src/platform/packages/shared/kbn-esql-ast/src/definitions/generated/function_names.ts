@@ -182,6 +182,8 @@ export const esqlFunctionNames = [
   'TOP',
   'TRIM',
   'V_COSINE',
+  'V_DOT_PRODUCT',
+  'V_L1_NORM',
   'VALUES',
   'WEIGHTED_AVG',
   'ADD',
