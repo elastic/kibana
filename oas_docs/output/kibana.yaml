@@ -56293,7 +56293,7 @@ paths:
       summary: Preview significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
   /api/synthetics/monitor/test/{monitorId}:
     post:
       description: |
