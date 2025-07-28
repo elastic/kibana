@@ -35,6 +35,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
+      isAssistantManagementEnabled: true,
     });
     jest
       .mocked(useAssistantOverlay)
@@ -54,6 +55,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
+      isAssistantManagementEnabled: true,
     });
     jest
       .mocked(useAssistantOverlay)
@@ -73,6 +75,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
+      isAssistantManagementEnabled: true,
     });
     jest
       .mocked(useAssistantOverlay)
