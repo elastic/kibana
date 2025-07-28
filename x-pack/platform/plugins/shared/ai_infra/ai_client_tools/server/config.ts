@@ -7,7 +7,6 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { internalElserInferenceId } from '../common/consts';
 
 const configSchema = schema.object({
   artifactRepositoryUrl: schema.string({

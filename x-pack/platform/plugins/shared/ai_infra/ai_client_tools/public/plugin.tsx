@@ -14,7 +14,6 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from './types';
-import { InstallationService } from './services/installation';
 
 interface AIClientToolsInstallServiceParams {
   inferenceId: string;
@@ -38,24 +37,10 @@ export class AIClientToolsBasePlugin
     coreSetup: CoreSetup<PluginStartDependencies, AIClientToolsBasePluginStart>,
     pluginsSetup: PluginSetupDependencies
   ): AIClientToolsBasePluginSetup {
-    console.log(`--@@AIClientToolsBasePublicSetup`, pluginsSetup);
-
     return {};
   }
 
   start(coreStart: CoreStart, pluginsStart: PluginStartDependencies): AIClientToolsBasePluginStart {
-    // @TODO: remove
-    console.log(`--@@AIClientToolsBasePublicStart`, pluginsStart);
-    const installationService = new InstallationService({ http: coreStart.http });
-
-    return {
-      installation: {
-        getStatus: (params: AIClientToolsInstallServiceParams) =>
-          installationService.getInstallationStatus(params),
-        install: (params: AIClientToolsInstallServiceParams) => installationService.install(params),
-        uninstall: (params: AIClientToolsInstallServiceParams) =>
-          installationService.uninstall(params),
-      },
-    };
+    return {};
   }
 }

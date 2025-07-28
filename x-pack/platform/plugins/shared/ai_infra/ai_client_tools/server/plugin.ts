@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import Path from 'path';
 import type { Logger } from '@kbn/logging';
-import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { AIClientToolsBaseConfig } from './config';
 import {
   AIClientToolsBaseSetupContract,
@@ -20,13 +15,7 @@ import {
   AIClientToolsBaseStartDependencies,
   InternalServices,
 } from './types';
-import { productDocInstallStatusSavedObjectType } from './saved_objects';
-import { PackageInstaller } from './services/package_installer';
-import { AIClientToolsInstallClient } from './services/doc_install_status';
-import { DocumentationManager } from './services/doc_manager';
-import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
-import { registerTaskDefinitions } from './tasks';
 
 export class AIClientToolsBasePlugin
   implements
@@ -54,8 +43,6 @@ export class AIClientToolsBasePlugin
       return this.internalServices;
     };
 
-    coreSetup.savedObjects.registerType(productDocInstallStatusSavedObjectType);
-
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
@@ -69,60 +56,6 @@ export class AIClientToolsBasePlugin
     core: CoreStart,
     { licensing, taskManager }: AIClientToolsBaseStartDependencies
   ): AIClientToolsBaseStartContract {
-    console.log(`--@@AIClientToolsServerStart`);
-
-    const soClient = new SavedObjectsClient(
-      core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
-    );
-    const productDocClient = new AIClientToolsInstallClient({
-      soClient,
-      log: this.logger,
-    });
-
-    const packageInstaller = new PackageInstaller({
-      esClient: core.elasticsearch.client.asInternalUser,
-      productDocClient,
-      kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
-      artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
-      elserInferenceId: this.context.config.get().elserInferenceId,
-      logger: this.logger.get('package-installer'),
-    });
-
-    const searchService = new SearchService({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger.get('search-service'),
-    });
-
-    const documentationManager = new DocumentationManager({
-      logger: this.logger.get('doc-manager'),
-      docInstallClient: productDocClient,
-      licensing,
-      taskManager,
-      auditService: core.security.audit,
-    });
-
-    this.internalServices = {
-      logger: this.logger,
-      packageInstaller,
-      installClient: productDocClient,
-      documentationManager,
-      licensing,
-      taskManager,
-    };
-
-    documentationManager.update({ inferenceId: defaultInferenceEndpoints.ELSER }).catch((err) => {
-      this.logger.error(`Error scheduling product documentation update task: ${err.message}`);
-    });
-
-    return {
-      // management: {
-      //   install: documentationManager.install.bind(documentationManager),
-      //   update: documentationManager.update.bind(documentationManager),
-      //   uninstall: documentationManager.uninstall.bind(documentationManager),
-      //   getStatus: documentationManager.getStatus.bind(documentationManager),
-      // },
-      // search: searchService.search.bind(searchService),
-    };
+    return {};
   }
 }

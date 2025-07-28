@@ -10,7 +10,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "aiClientTools"],
-    "requiredPlugins": ["licensing", "taskManager"],
+    "requiredPlugins": ["licensing", "inference"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

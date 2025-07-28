@@ -6,7 +6,6 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { registerInstallationRoutes } from './installation';
 import type { InternalServices } from '../types';
 
 export const registerRoutes = ({
@@ -15,6 +14,4 @@ export const registerRoutes = ({
 }: {
   router: IRouter;
   getServices: () => InternalServices;
-}) => {
-  registerInstallationRoutes({ getServices, router });
-};
+}) => {};
