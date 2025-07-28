@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/test';
 import { setupUsers } from './setup_users';
 import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
+import { installMockPrebuiltRulesPackage } from '../tasks/api_calls/prebuilt_rules';
 
 before(() => {
   cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });
@@ -31,6 +32,15 @@ if (!Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
     setupUsers(KNOWN_ROLE_DEFINITIONS);
   });
 }
+
+// Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+// Prebuilt rules package installation has been known to be flakiness reason since
+// EPR might be unavailable or the network may have faults.
+// Real prebuilt rules package installation is prevented by
+// installing a lightweight mock package.
+before(() => {
+  installMockPrebuiltRulesPackage();
+});
 
 registerCypressGrep();
 

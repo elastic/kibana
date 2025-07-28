@@ -228,6 +228,8 @@ export const installMockEmptyPrebuiltRulesPackage = (): void => {
  * Installing it up front prevents installing the real package when making API requests.
  */
 export const installMockPrebuiltRulesPackage = (): void => {
+  cy.log('Install mock prebuilt rules package');
+
   installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'
   );
