@@ -795,6 +795,7 @@ module.exports = {
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1110,7 +1111,7 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
+              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
@@ -1608,7 +1609,7 @@ module.exports = {
       settings: {
         playwright: {
           globalAliases: {
-            test: ['test', 'spaceTest'],
+            test: ['test', 'spaceTest', 'apiTest'],
           },
         },
       },
