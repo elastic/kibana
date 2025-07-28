@@ -7,7 +7,6 @@
 
 import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
 
-import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack-security/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
@@ -26,10 +25,12 @@ import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 import { SvlDataUsagePageProvider } from './svl_data_usage';
 import { SvlCustomRolesPageProvider } from './svl_custom_roles_page';
+import { CspDashboardPageProvider } from './csp_dashboard_page';
+import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
+import { CspSecurityCommonProvider } from './security_common';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
-  ...cloudSecurityPosturePageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
@@ -49,4 +50,8 @@ export const pageObjects = {
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
   svlCustomRolesPage: SvlCustomRolesPageProvider,
+  // Cloud Security Posture specific page objects
+  cloudPostureDashboard: CspDashboardPageProvider,
+  cisAddIntegration: AddCisIntegrationFormPageProvider,
+  cspSecurity: CspSecurityCommonProvider,
 };
