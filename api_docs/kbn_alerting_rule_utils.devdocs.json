@@ -69,6 +69,39 @@
       },
       {
         "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.getEcsGroupsFromFlattenGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "getEcsGroupsFromFlattenGrouping",
+        "description": [],
+        "signature": [
+          "(flattenGrouping?: Record<string, unknown>) => Record<string, string | string[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.getEcsGroupsFromFlattenGrouping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flattenGrouping",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
         "id": "def-common.getFormattedGroupBy",
         "type": "Function",
         "tags": [],

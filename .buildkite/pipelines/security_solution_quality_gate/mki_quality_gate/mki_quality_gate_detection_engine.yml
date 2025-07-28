@@ -61,7 +61,7 @@ steps:
             - exit_status: '1'
               limit: 2
 
-      - label: 'API MKI - exception_lists:auth:items:qa:serverless
+      - label: 'API MKI - exception_lists:auth:items:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
         key: exception_lists:auth:items:qa:serverless
         agents:

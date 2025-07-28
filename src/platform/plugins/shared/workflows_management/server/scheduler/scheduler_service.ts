@@ -14,6 +14,7 @@ import { v4 as generateUuid } from 'uuid';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
+import { convertToWorkflowGraph, convertToSerializableGraph } from '../../common';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -56,7 +57,10 @@ export class SchedulerService {
     workflow: WorkflowExecutionEngineModel,
     inputs: Record<string, any>
   ): Promise<string> {
-    const connectorCredentials = await extractConnectorIds(workflow, this.actionsClient);
+    const executionGraph = convertToWorkflowGraph(workflow);
+    workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
+    const connectorCredentials = await extractConnectorIds(this.actionsClient);
+
     const workflowRunId = generateUuid();
     const context = {
       workflowRunId,
