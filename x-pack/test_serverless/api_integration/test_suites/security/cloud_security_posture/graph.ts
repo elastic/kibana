@@ -10,9 +10,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { result } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { result } from './utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
