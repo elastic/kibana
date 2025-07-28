@@ -76,7 +76,7 @@ export const uploadAllEventsFromPath = async (
   if (fs.statSync(eventLogPath).isDirectory()) {
     const ndjsonFilePaths: string[] = [];
 
-    readFilesRecursively(eventLogPath, async (filePath: string) => {
+    readFilesRecursively(eventLogPath, (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
         ndjsonFilePaths.push(filePath);
       }
