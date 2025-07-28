@@ -5,29 +5,60 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
+import { SchemaSelector } from '../../../../../components/schema_selector';
+import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { isPending } from '../../../../../hooks/use_fetcher';
+import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
+import type { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
 
 export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useKibanaContextForPlugin();
+  const { featureFlags } = usePluginConfig();
   const { metricsView } = useMetricsDataViewContext();
-  const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
+  const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
     useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
 
   const { SearchBar } = unifiedSearch.ui;
+
+  const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
+
+  const schemas: SchemaTypes[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata]
+  );
+
+  // Set preferredSchema in URL if not set and hostOtelEnabled
+  useEffect(() => {
+    if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
+    const current = searchCriteria.preferredSchema;
+
+    if (current === null) {
+      const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
+      onPreferredSchemaChange(next);
+    }
+  }, [
+    timeRangeMetadata,
+    searchCriteria.preferredSchema,
+    onPreferredSchemaChange,
+    schemas,
+    featureFlags.hostOtelEnabled,
+  ]);
 
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
@@ -40,9 +71,21 @@ export const UnifiedSearchBar = () => {
     [onSubmit, onPageRefreshStart]
   );
 
+  const isLoading = isPending(status);
+
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
+        {featureFlags.hostOtelEnabled && (
+          <EuiFlexItem>
+            <SchemaSelector
+              onChange={onPreferredSchemaChange}
+              schemas={schemas}
+              value={searchCriteria.preferredSchema}
+              isLoading={isLoading}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}
