@@ -15,31 +15,6 @@ import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_man
 export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.get(
     {
-      path: '/api/workflows/list',
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
-      validate: false,
-    },
-    async (context, request, response) => {
-      try {
-        const workflowsMap = await api.getAllWorkflowsMap();
-        return response.ok({ body: workflowsMap });
-      } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
-      }
-    }
-  );
-
-  router.get(
-    {
       path: '/api/workflows/{id}',
       security: {
         authz: {

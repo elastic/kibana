@@ -75,20 +75,6 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getWorkflow(id);
   }
 
-  public async getAllWorkflowsMap(): Promise<{ [workflowId: string]: string }> {
-    const workflows = await this.workflowsService.searchWorkflows({
-      limit: 10000,
-      offset: 0,
-    });
-
-    const workflowMap: { [workflowId: string]: string } = {};
-    workflows.results.forEach((workflow) => {
-      workflowMap[workflow.id] = workflow.name;
-    });
-
-    return workflowMap;
-  }
-
   public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
     return await this.workflowsService.createWorkflow(workflow);
   }

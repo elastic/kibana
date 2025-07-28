@@ -31,9 +31,7 @@ export const createExternalService = (
   // Default to localhost:5601 but this should be configurable in production
   const kibanaBaseUrl = process.env.KIBANA_URL || 'http://localhost:5601';
 
-  const axiosInstance = axios.create({
-    baseURL: kibanaBaseUrl,
-  });
+  const axiosInstance = axios.create();
 
   const runWorkflow = async ({
     workflowId,
@@ -45,7 +43,7 @@ export const createExternalService = (
       // Use internal Kibana API to run workflow
       const runRes: AxiosResponse = await request({
         axios: axiosInstance,
-        url: `/api/workflows/${workflowId}/run`,
+        url: `${kibanaBaseUrl}/api/workflows/${workflowId}/run`,
         method: 'post',
         logger,
         data: { inputs },

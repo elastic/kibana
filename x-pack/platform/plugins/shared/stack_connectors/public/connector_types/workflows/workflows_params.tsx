@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { WorkflowListDto } from '@kbn/workflows';
 import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
@@ -94,24 +95,22 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       setLoadError(null);
 
       try {
-        const response = await http.get('/api/workflows/list');
-        const workflowsMap = response as Record<string, string>;
+        const response = await http.post('/api/workflows/search');
+        const workflowsMap = response as WorkflowListDto;
 
-        const workflowOptions: WorkflowOption[] = Object.entries(workflowsMap).map(
-          ([id, name]) => ({
-            value: id,
-            inputDisplay: `${name} (${id})`,
-            dropdownDisplay: (
-              <div>
-                <strong>{name}</strong>
-                <br />
-                <EuiText size="s" color="subdued">
-                  ID: {id}
-                </EuiText>
-              </div>
-            ),
-          })
-        );
+        const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => ({
+          value: workflow.id,
+          inputDisplay: `${workflow.name} (${workflow.id})`,
+          dropdownDisplay: (
+            <div>
+              <strong>{workflow.name}</strong>
+              <br />
+              <EuiText size="s" color="subdued">
+                ID: {workflow.id}
+              </EuiText>
+            </div>
+          ),
+        }));
 
         setWorkflows(workflowOptions);
       } catch (error) {
