@@ -24,6 +24,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { Capabilities } from '@kbn/core/public';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -41,12 +42,19 @@ const mockDataViews = {
   getIndices: jest.fn(),
 } as unknown as DataViewsContract;
 
+const capabilitiesMock = {
+  aiAssistantManagementSelection: {
+    edit: true,
+  },
+} as unknown as Capabilities;
+
 const onTabChange = jest.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   onTabChange,
   currentTab: CONVERSATIONS_TAB,
+  capabilities: capabilitiesMock,
 };
 jest.mock('../../assistant_context');
 

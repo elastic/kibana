@@ -76,7 +76,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
-    const { navigateToApp } = useAssistantContext();
 
     const tabsConfig = useMemo(
       () => [
