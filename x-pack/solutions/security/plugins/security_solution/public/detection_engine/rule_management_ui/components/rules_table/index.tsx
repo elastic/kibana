@@ -8,7 +8,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { RulesManagementTour } from './rules_table/guided_onboarding/rules_management_tour';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
@@ -31,7 +30,6 @@ export const AllRules = React.memo(() => {
   if (tabName !== AllRulesTabs.updates) {
     return (
       <>
-        <RulesManagementTour />
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <RulesTableToolbar />
         <EuiSpacer />
