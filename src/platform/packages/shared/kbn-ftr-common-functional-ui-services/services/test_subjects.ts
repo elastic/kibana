@@ -447,16 +447,20 @@ export class TestSubjects extends FtrService {
    * Helper function to wait for accordion state to reach expected value
    * This helps avoid race conditions in tests where UI updates are still in progress
    */
-  public async waitForAccordionState(selector: string, expectedState: string, timeout = 5000) {
+  public async waitForAccordionState(
+    selector: string,
+    expectedState: string,
+    timeout: number = 5000
+  ) {
     await this.existOrFail(selector);
 
-    await this.retry.waitFor(
+    await this.retry.waitForWithTimeout(
       `accordion ${selector} to reach state ${expectedState}`,
+      timeout,
       async () => {
         const currentState = await this.getAccordionState(selector);
         return currentState === expectedState;
-      },
-      timeout
+      }
     );
   }
 }
