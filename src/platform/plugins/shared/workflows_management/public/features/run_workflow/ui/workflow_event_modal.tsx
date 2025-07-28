@@ -15,6 +15,7 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiFlexGroup,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -30,6 +31,7 @@ export function WorkflowEventModal({
 }) {
   const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  const modalTitleId = useGeneratedHtmlId();
 
   // Get current user
   useEffect(() => {
@@ -74,9 +76,9 @@ export function WorkflowEventModal({
   const [workflowEvent, setWorkflowEvent] = useState<string>(getDefaultWorkflowInputs());
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Run Workflow</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup direction="column" gutterSize="l">
