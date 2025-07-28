@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
 
-export const SchemaTypesRT = rt.keyof({
-  ecs: null,
-  semconv: null,
-});
+import { GenericFtrProviderContext } from '@kbn/test';
 
-export type SchemaTypes = rt.TypeOf<typeof SchemaTypesRT>;
+import { pageObjects } from './page_objects';
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
