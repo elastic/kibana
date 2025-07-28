@@ -37,9 +37,7 @@ export function ResolveAnomalySwimlaneUserInput({
       <AnomalySwimlaneInitializer
         adJobsApiService={adJobsApiService}
         initialInput={input}
-        onCreate={(explicitInput) => {
-          onConfirm(explicitInput);
-        }}
+        onCreate={onConfirm}
         onCancel={onCancel}
       />
     </KibanaContextProvider>
