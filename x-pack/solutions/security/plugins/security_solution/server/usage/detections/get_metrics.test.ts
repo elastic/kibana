@@ -78,12 +78,12 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>(getInitialDetectionMetrics());
     });
 
-    it('returns information with upgradeable disabled non-customized rule, alerts and cases', async () => {
+    it('returns information with disabled non-customized rule with upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
-      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse()); // immutable (elastic), not customized, disabled
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
       // Get empty saved object for legacy notification system.
       savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
@@ -194,7 +194,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with upgradeable enabled non-customized rule, alerts and cases', async () => {
+    it('returns information with enabled non-customized rule with upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -316,7 +316,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with upgradeable disabled customized rule, alerts and cases', async () => {
+    it('returns information with disabled customized rule with upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -438,7 +438,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with upgradeable enabled customized rule, alerts and cases', async () => {
+    it('returns information with enabled customized rule with upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -560,7 +560,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with non-upgradeable disabled non-customized rule, alerts and cases', async () => {
+    it('returns information with disabled non-customized rule without upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -682,7 +682,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with non-upgradeable enabled non-customized rule, alerts and cases', async () => {
+    it('returns information with enabled non-customized rule without upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -804,7 +804,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with non-upgradeable disabled customized rule, alerts and cases', async () => {
+    it('returns information with disabled customized rule without upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -926,7 +926,7 @@ describe('Detections Usage and Metrics', () => {
       });
     });
 
-    it('returns information with non-upgradeable enabled customized rule, alerts and cases', async () => {
+    it('returns information with enabled customized rule without upgrade, alerts and cases', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
