@@ -19,40 +19,76 @@ export const updateExcludedDocuments = ({
   results,
   isRuleAggregating,
   aggregatableTimestampField,
+  searchExhausted,
 }: {
-  excludedDocuments: ExcludedDocument[];
-  sourceDocuments: Record<string, FetchedDocument>;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
+  sourceDocuments: Record<string, FetchedDocument[]>;
   results: Array<Record<string, string>>;
   isRuleAggregating: boolean;
   aggregatableTimestampField: string;
+  searchExhausted: boolean;
 }): void => {
   // aggregating queries do not have event _id, so we will not exclude any documents
   if (isRuleAggregating) {
     return;
   }
+
+  const totalSourceDocuments = Object.keys(sourceDocuments).reduce(
+    (acc, index) => acc + sourceDocuments[index].length,
+    0
+  );
+
   const documentIds = Object.keys(sourceDocuments);
-  const lastId = results.at(-1)?._id;
+
+  if (totalSourceDocuments !== 1 && !searchExhausted) {
+    const lastId = results.at(-1)?._id;
+    const lastIndex = results.at(-1)?._index;
+
+    // if single document is returned(same id, same index across all results), we will exclude it
+    const excludeSingleDocument =
+      documentIds.length === 1 &&
+      results.reduce((acc, doc) => {
+        acc.add(doc._index);
+        return acc;
+      }, new Set()).size === 1;
+
+    if (lastId) {
+      if (lastIndex === undefined) {
+        sourceDocuments[lastId]?.pop();
+      } else {
+        sourceDocuments[lastId] = sourceDocuments[lastId].filter((doc) => {
+          return excludeSingleDocument ? doc._index === lastIndex : doc._index !== lastIndex;
+        });
+      }
+    }
+  }
 
   addToExcludedDocuments(
     excludedDocuments,
     sourceDocuments,
-    documentIds.length === 1 ? documentIds : documentIds.filter((id) => id !== lastId),
+    documentIds,
     aggregatableTimestampField
   );
 };
 
 const addToExcludedDocuments = (
-  excludedDocuments: ExcludedDocument[],
-  sourceDocuments: Record<string, FetchedDocument>,
+  excludedDocuments: Record<string, ExcludedDocument[]>,
+  sourceDocuments: Record<string, FetchedDocument[]>,
   documentIds: string[],
   aggregatableTimestampField: string
 ): void => {
   for (const documentId of documentIds) {
-    const document = sourceDocuments[documentId];
+    const documents = sourceDocuments[documentId];
 
-    excludedDocuments.push({
-      id: documentId,
-      timestamp: document.fields?.[aggregatableTimestampField]?.[0],
+    documents.forEach((document) => {
+      if (!excludedDocuments[document._index]) {
+        excludedDocuments[document._index] = [];
+      }
+
+      excludedDocuments[document._index].push({
+        id: documentId,
+        timestamp: document.fields?.[aggregatableTimestampField]?.[0],
+      });
     });
   }
 };

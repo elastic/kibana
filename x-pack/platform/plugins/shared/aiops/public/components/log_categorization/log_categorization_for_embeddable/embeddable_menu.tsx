@@ -143,7 +143,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
                   }
                 )}
               >
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

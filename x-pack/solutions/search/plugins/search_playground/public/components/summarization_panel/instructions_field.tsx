@@ -43,7 +43,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
           })}
           &nbsp;
           <EuiIconTip
-            type="questionInCircle"
+            type="question"
             color="subdued"
             content={i18n.translate('xpack.searchPlayground.sidebar.instructionsField.help', {
               defaultMessage:

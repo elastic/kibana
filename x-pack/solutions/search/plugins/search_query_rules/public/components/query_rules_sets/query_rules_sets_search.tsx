@@ -7,6 +7,8 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface QueryRulesSetsSearchProps {
   searchKey: string;
@@ -17,12 +19,15 @@ export const QueryRulesSetsSearch: React.FC<QueryRulesSetsSearchProps> = ({
   searchKey,
   setSearchKey,
 }) => {
+  const useTracker = useUsageTracker();
   const onSearch = useCallback(
     (newSearch: string) => {
+      useTracker?.load?.(AnalyticsEvents.rulesetSearched);
+
       const trimSearch = newSearch.trim();
       setSearchKey(trimSearch);
     },
-    [setSearchKey]
+    [setSearchKey, useTracker]
   );
 
   return (

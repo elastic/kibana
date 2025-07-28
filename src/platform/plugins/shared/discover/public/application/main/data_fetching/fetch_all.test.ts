@@ -69,7 +69,7 @@ describe('test fetchAll', () => {
     const { appState, internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock(
       {}
     );
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
+    const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
     );
@@ -81,6 +81,7 @@ describe('test fetchAll', () => {
       appStateContainer: appState,
       internalState,
       scopedProfilesManager: scopedProfilesManager$.getValue(),
+      scopedEbtManager: scopedEbtManager$.getValue(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       savedSearch: {

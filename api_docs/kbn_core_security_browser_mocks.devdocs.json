@@ -116,7 +116,7 @@
             "signature": [
               "(props?: Partial<Omit<",
               "AuthenticatedUser",
-              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; operator?: boolean | undefined; full_name: string; profile_uid: string; api_key?: ",
+              ", \"roles\"> & { roles: string[]; }>) => { username: string; enabled: boolean; metadata: { _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; }; email: string; full_name: string; profile_uid: string; operator?: boolean | undefined; api_key?: ",
               "ApiKeyDescriptor",
               " | undefined; authentication_provider: ",
               "AuthenticationProvider",

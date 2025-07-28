@@ -25,6 +25,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
     "@kbn/alerting-api-integration-helpers",
+    "@kbn/alerts-as-data-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -2,7 +2,6 @@
   "type": "plugin",
   "id": "@kbn/cases-plugin",
   "owner": [
-    "@elastic/response-ops",
     "@elastic/kibana-cases"
   ],
   "group": "platform",
@@ -49,7 +48,8 @@
       "savedObjectsFinder"
     ],
     "extraPublicDirs": [
-      "common"
+      "common",
+      "public/client/attachment_framework/types"
     ]
   }
 }

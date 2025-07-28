@@ -30,6 +30,7 @@ interface GetEventLogParams {
   provider: string;
   actions: Map<string, { gte: number } | { equal: number }>;
   filter?: string;
+  collapseByExecutionUUid?: boolean;
 }
 
 // Return event log entries given the specified parameters; for the `actions`
@@ -37,7 +38,7 @@ interface GetEventLogParams {
 export async function getEventLog(
   params: GetEventLogParams
 ): Promise<IValidatedEventInternalDocInfo[]> {
-  const { getService, spaceId, type, id, provider, actions } = params;
+  const { getService, spaceId, type, id, provider, actions, collapseByExecutionUUid } = params;
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
@@ -56,11 +57,23 @@ export async function getEventLog(
     .filter((event) => event?.event?.action)
     .filter((event) => actions.has(event?.event?.action!));
 
+  const actionExecutionUuidMap = new Map<string, number>();
   const foundActions = events
-    .map((event) => event?.event?.action)
-    .reduce((actionsSum, action) => {
-      if (action) {
-        actionsSum.set(action, 1 + (actionsSum.get(action) ?? 0));
+    .map((event) => ({
+      action: event?.event?.action,
+      uuid: event?.kibana?.alert?.rule?.execution?.uuid,
+    }))
+    .reduce((actionsSum, evt) => {
+      if (evt.action) {
+        if (collapseByExecutionUUid === true) {
+          const key = `${evt.action}${evt.uuid}`;
+          if (!actionExecutionUuidMap.has(key)) {
+            actionExecutionUuidMap.set(key, 1);
+            actionsSum.set(evt.action, 1 + (actionsSum.get(evt.action) ?? 0));
+          }
+        } else {
+          actionsSum.set(evt.action, 1 + (actionsSum.get(evt.action) ?? 0));
+        }
       }
       return actionsSum;
     }, new Map<string, number>());

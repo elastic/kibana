@@ -156,7 +156,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
-    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId, euiTheme);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
       getDateFormatTz(uiSettings)
     );

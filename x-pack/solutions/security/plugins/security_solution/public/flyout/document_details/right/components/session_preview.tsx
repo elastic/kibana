@@ -57,7 +57,7 @@ export const SessionPreview: FC = () => {
             />
           }
         >
-          <span style={emphasisStyles}>{processName}</span>
+          <span css={emphasisStyles}>{processName}</span>
         </ValueContainer>
       )
     );
@@ -141,7 +141,7 @@ export const SessionPreview: FC = () => {
       <ValueContainer>
         <EuiIcon type="user" />
         &nbsp;
-        <span style={emphasisStyles}>{userName}</span>
+        <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>
       {processNameFragment}
       {timeFragment}

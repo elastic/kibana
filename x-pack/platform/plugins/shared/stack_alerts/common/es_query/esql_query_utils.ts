@@ -9,9 +9,15 @@ import { entries, findLastIndex, intersection, isNil } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
-import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
-import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
+import {
+  type ESQLAstCommand,
+  parse,
+  isOptionNode,
+  isColumn,
+  isFunctionExpression,
+} from '@kbn/esql-ast';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -43,6 +49,14 @@ const ESQL_DOCUMENT_ID = 'esql_query_document';
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  is_partial?: boolean;
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const ALERT_ID_COLUMN = 'Alert ID';
@@ -227,7 +241,7 @@ const getLastStatsCommandIndex = (commands: ESQLAstCommand[]): number =>
 
 const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined => {
   for (const statsArg of astCommand.args) {
-    if (isOptionItem(statsArg) && statsArg.name === 'by') {
+    if (isOptionNode(statsArg) && statsArg.name === 'by') {
       return statsArg;
     }
   }
@@ -236,7 +250,7 @@ const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined 
 const getFields = (option: ESQLCommandOption): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
-    if (isColumnItem(arg)) {
+    if (isColumn(arg)) {
       fields.push(arg.name);
     }
   }
@@ -249,9 +263,9 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
   return astCommands.reduce((updatedFields, command) => {
     for (const renameArg of command.args) {
-      if (isFunctionItem(renameArg)) {
+      if (isFunctionExpression(renameArg)) {
         const { original, renamed } = getArgsFromRenameFunction(renameArg);
-        if (isColumnItem(original) && isColumnItem(renamed)) {
+        if (isColumn(original) && isColumn(renamed)) {
           updatedFields = updatedFields.map((field) =>
             field === original.name ? renamed.name : field
           );
@@ -267,7 +281,7 @@ const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | unde
 
   if (fromCommand) {
     for (const fromArg of fromCommand.args) {
-      if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
+      if (isOptionNode(fromArg) && fromArg.name === 'metadata') {
         return fromArg;
       }
     }
@@ -279,7 +293,7 @@ const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | unde
 const getIdField = (option: ESQLCommandOption): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
-    if (isColumnItem(arg) && arg.name === '_id') {
+    if (isColumn(arg) && arg.name === '_id') {
       fields.push(arg.name);
       return fields;
     }

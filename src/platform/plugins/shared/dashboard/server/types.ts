@@ -20,7 +20,7 @@ export interface DashboardPluginStart {
    * ```ts
    * // dashboardClient is scoped to the current user
    * // specifying the version is recommended to return a consistent result
-   * const dashboardClient = plugins.dashboard.getContentClient().getForRequest({ requestHandlerContext, request, version: 3 });
+   * const dashboardClient = plugins.dashboard.getContentClient().getForRequest({ requestHandlerContext, request, version: 1 });
    * ```
    *
    * @example

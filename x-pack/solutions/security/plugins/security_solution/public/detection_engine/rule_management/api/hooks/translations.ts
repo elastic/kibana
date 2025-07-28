@@ -27,3 +27,10 @@ export const ACTIONS_FETCH_ERROR_DESCRIPTION = i18n.translate(
     defaultMessage: 'Viewing actions is not available',
   }
 );
+
+export const FETCH_PREBUILT_RULE_BASE_VERSION_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.fetchPrebuiltRuleBaseVersion',
+  {
+    defaultMessage: 'Failed to fetch Elastic rule version',
+  }
+);

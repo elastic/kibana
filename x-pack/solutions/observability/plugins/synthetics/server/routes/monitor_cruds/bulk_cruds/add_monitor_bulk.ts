@@ -39,7 +39,8 @@ export const syncNewMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
+  const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -59,6 +60,7 @@ export const syncNewMonitorBulk = async ({
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
       monitorConfigRepository.createBulk({
         monitors: monitorsToCreate,
+        savedObjectType: query.savedObjectType,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
     ]);

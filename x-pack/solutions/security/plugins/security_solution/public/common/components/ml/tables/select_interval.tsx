@@ -45,7 +45,7 @@ export const SelectInterval: React.FC<{
       prepend={i18n.INTERVAL}
       append={
         <EuiToolTip content={i18n.INTERVAL_TOOLTIP}>
-          <EuiIcon type="questionInCircle" color="subdued" />
+          <EuiIcon type="question" color="subdued" />
         </EuiToolTip>
       }
       options={OPTIONS}

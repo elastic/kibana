@@ -189,7 +189,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield');
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield-updated');
 
-      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElements(0, 3);
+      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElementsByColumnName(
+        0,
+        '_bytes-runtimefield'
+      );
       const first = await firstSearchCell.getVisibleText();
       const second = await secondSearchCell.getVisibleText();
 

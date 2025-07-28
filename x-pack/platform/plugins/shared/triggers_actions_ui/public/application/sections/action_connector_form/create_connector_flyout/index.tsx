@@ -44,6 +44,7 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -156,7 +157,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
       const { actionTypeId, name, config, secrets } = data;
       const validConnector = {
         actionTypeId,

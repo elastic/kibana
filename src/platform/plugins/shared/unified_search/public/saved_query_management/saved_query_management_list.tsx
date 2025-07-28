@@ -27,6 +27,7 @@ import {
   PrettyDuration,
   EuiSelectableProps,
   UseEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -164,7 +165,7 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.description) {
     label = (
       <>
-        {label} <EuiIcon type="iInCircle" color="subdued" size="s" />
+        {label} <EuiIcon type="info" color="subdued" size="s" />
       </>
     );
   }
@@ -407,6 +408,8 @@ export const SavedQueryManagementList = ({
     return parts.join(' | ');
   }, [selectedSavedQuery, totalQueryCount]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <ListTitle queryBarMenuRef={queryBarMenuRef} />
@@ -564,6 +567,7 @@ export const SavedQueryManagementList = ({
       </EuiPopoverFooter>
       {showDeletionConfirmationModal && toBeDeletedSavedQuery && (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.translate(
             'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionTitle',
             {
@@ -573,6 +577,7 @@ export const SavedQueryManagementList = ({
               },
             }
           )}
+          titleProps={{ id: modalTitleId }}
           confirmButtonText={i18n.translate(
             'unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText',
             {

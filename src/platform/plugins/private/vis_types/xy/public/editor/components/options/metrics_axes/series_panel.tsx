@@ -15,6 +15,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
 
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { ValueAxis, SeriesParam } from '../../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from '.';
@@ -28,6 +30,8 @@ export interface SeriesPanelProps {
 }
 
 function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
+  const styles = useMemoCss(visEditorSidebarStyles);
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -52,6 +56,7 @@ function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
             defaultMessage: 'Toggle {agg} options',
             values: { agg: chart.data.label },
           })}
+          css={[styles.section, styles.collapsible, styles.aggGroupAccordionButtonContent]}
         >
           <>
             <EuiSpacer size="m" />

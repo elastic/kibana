@@ -60,6 +60,24 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
     - [**Scenario: User should be able to filter by customized rules in the rule updates table**](#scenario-user-should-be-able-to-filter-by-customized-rules-in-the-rule-updates-table)
     - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
+    - [**Scenario: Customized fields should be marked with a per-field "Modified" badge**](#scenario-customized-fields-should-be-marked-with-a-per-field-modified-badge)
+    - [**Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**](#scenario-clicking-on-the-rules-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Clicking on a per-field "Modified" badge should open a rule diff flyout**](#scenario-clicking-on-a-per-field-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Hovering on rule's "Modified" badge should show a tooltip if rule base version is missing**](#scenario-hovering-on-rules-modified-badge-should-show-a-tooltip-if-rule-base-version-is-missing)
+    - [**Scenario: Per-field "Modified" badges should not be displayed if rule base version is missing**](#scenario-per-field-modified-badges-should-not-be-displayed-if-rule-base-version-is-missing)
+  - [Reverting a rule to stock version](#reverting-a-rule-to-stock-version)
+    - [**Scenario: Reverting prebuilt rule customizations**](#scenario-reverting-prebuilt-rule-customizations)
+    - [**Scenario: Showing a customizations diff view in the flyout**](#scenario-showing-a-customizations-diff-view-in-the-flyout)
+    - [**Scenario: Disabling the "Revert" prebuilt rule button when rule's base version is missing**](#scenario-disabling-the-revert-prebuilt-rule-button-when-rules-base-version-is-missing)
+    - [**Scenario: Hiding the "Revert" prebuilt rule button when the prebuilt rule is non-customized**](#scenario-hiding-the-revert-prebuilt-rule-button-when-the-prebuilt-rule-is-non-customized)
+    - [**Scenario: Returning an error for prebuilt rules with missing base version**](#scenario-returning-an-error-for-prebuilt-rules-with-missing-base-version)
+    - [**Scenario: Making no effect on a non-customized rule**](#scenario-making-no-effect-on-a-non-customized-rule)
+    - [**Scenario: Returning an error for custom rules**](#scenario-returning-an-error-for-custom-rules)
+    - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
+  - [Reverting a rule to stock version: Concurrency control](#reverting-a-rule-to-stock-version-concurrency-control)
+    - [**Scenario: Returning an error when someone changed the prebuilt rule concurrently**](#scenario-returning-an-error-when-someone-changed-the-prebuilt-rule-concurrently)
+    - [**Scenario: Returning an error when someone updated the prebuilt rule concurrently**](#scenario-returning-an-error-when-someone-updated-the-prebuilt-rule-concurrently)
+    - [**Scenario: Notifying the user when the prebuilt rule's base version has disappeared**](#scenario-notifying-the-user-when-the-prebuilt-rules-base-version-has-disappeared)
   - [Licensing](#licensing)
     - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
@@ -82,6 +100,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+- **modified badge**: a badge in the UI that appears on the top of the rule details page whenever the rule's `is_customized` value is set to true.
+- **per-field modified badge**: a smaller modified badge in the UI that appears on an individual field component on the rule details page.
 - **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 - **customizing bulk action**: a bulk action that updates values of customizable fields in multiple rules at once. See list below.
 
@@ -96,6 +117,18 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 | Delete custom highlighted fields |
 | Update rule schedules |
 | Apply timeline template |
+
+- **customization adjacent field**: field on a rule object that can be changed but is not taken into account when calculating `is_customized` field. See list below.
+
+**Examples:**
+| `<customization_adjacent_field>` |
+| actions |
+| exceptions_list |
+| enabled |
+| revision |
+| meta |
+
+- **per field JSON diff view**: a tab on the rule details flyout that contains field-separated JSON diffs between two rule versions. Only fields that are different are displayed in this view, fields with identical values are hidden.
 
 ## Requirements
 
@@ -457,6 +490,251 @@ And applies the filter to display only non-customized prebuilt rules
 Then the table should display only non-customized prebuilt rules
 And the all shown table rows should NOT have the "Modified" badge present
 ```
+
+#### **Scenario: Customized fields should be marked with a per-field "Modified" badge**
+
+**Automation**: 1 cypress test and 1 unit test per field.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user navigates to that rule's details page
+Then the <field_name> field should be marked with a "Modified" rule badge
+```
+
+**Examples:**
+
+`<field_name>` = all customizable rule fields
+
+#### **Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user clicks the field's "Modified" badge on rule's details page
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And should list all fields that are different between the current and base versions
+And should not contain a button to revert the rule
+```
+
+#### **Scenario: Clicking on a per-field "Modified" badge should open a rule diff flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user navigates to that rule's details page
+And a per-field "Modified" badge is clicked
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And should list all fields that are different between the current and base version
+And should not contain a button to revert the rule
+```
+
+#### **Scenario: Hovering on rule's "Modified" badge should show a tooltip if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user navigates to that rule's details page and hovers on the "Modified" badge
+Then a tooltip should be displayed
+And the "Modified" badge isn't clickable
+```
+
+#### **Scenario: Per-field "Modified" badges should not be displayed if rule base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user navigates to that rule's details page
+Then no per-field "Modified" badges should be displayed
+```
+
+### Reverting a rule to stock version
+
+#### **Scenario: Reverting prebuilt rule customizations**
+
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user reverts that rule customizations
+Then rule customizations should be reset
+And rule data should match the base version
+And the rule's `is_customized` value should be false
+```
+
+#### **Scenario: Showing a customizations diff view in the flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When a user clicks the "Revert" rule's action button on the rule's details page
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And this flyout should list all fields that are different between the current and base version
+And this flyout should contain a button to revert the rule
+```
+
+#### **Scenario: Disabling the "Revert" prebuilt rule button when rule's base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user navigates to that rule's details page
+And clicks the overflow actions button
+Then the "Revert" rule button should be disabled
+And have an informational tooltip on hover
+```
+
+#### **Scenario: Hiding the "Revert" prebuilt rule button when the prebuilt rule is non-customized**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is non-customized
+When user clicks the overflow actions button on the rule's details page
+Then the revert rule button should not be displayed as an option
+```
+
+#### **Scenario: Returning an error for prebuilt rules with missing base version**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule does not have an existing base version
+When user makes a request to revert the rule customizations
+Then API should return a 500 HTTP error
+And the rule should stay unchanged
+```
+
+#### **Scenario: Making no effect on a non-customized rule**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is non-customized
+And that rule has an existing base version
+When user makes a request to revert the rule customizations
+Then API should return a successful response
+And the rule should stay unchanged
+```
+
+#### **Scenario: Returning an error for custom rules**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a custom rule
+When user makes a request to revert the rule customizations
+Then API should return a 500 HTTP error
+And the rule should remain the same
+```
+
+#### **Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**
+
+**Automation**: one integration test per field.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+And that rule has a custom <customization_adjacent_field_name> field different from the base version
+When user makes a request to revert the rule customizations
+Then the rule's `is_customized` value should be false
+And the <customization_adjacent_field_name> field stay unchanged
+```
+
+**Examples:**
+
+`<customization_adjacent_field_name>` = all customization adjacent fields
+
+### Reverting a rule to stock version: Concurrency control
+
+#### **Scenario: Returning an error when someone changed the prebuilt rule concurrently**
+
+**Automation**: 3 integration tests.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+And userA has <changed> that prebuilt rule concurrently
+When userB makes a request to revert the rule
+When a user calls the revert rule API endpoint with an outdated revision field
+Then the API should return a 500 HTTP error
+And the rule should stay unchanged
+```
+
+**Examples:**
+
+`<changed>` is
+
+- customizing the same fields
+- customizing the other fields
+- reverting the customization via rule edit
+- reverting the customization via "Revert" action
+- upgrading the rule
+
+#### **Scenario: Returning an error when someone updated the prebuilt rule concurrently**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+And userA has upgraded that prebuilt rule concurrently
+When userB makes a request to revert the rule
+Then the API should return a 500 HTTP error
+And the rule should stay unchanged
+```
+
+#### **Scenario: Notifying the user when the prebuilt rule's base version has disappeared**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a prebuilt rule installed
+And that rule is customized
+And that rule has an existing base version
+When user opens a revert rule flyout
+And that rule's base version <disappears>
+Then a notification regarding missing base version should be shown
+And the flyout should be blocked
+```
+
+**Examples:**
+
+`<disappears>` is
+
+- base version got removed manually
+- a new prebuilt rules package has been installed and it doesn't contain the base rule version
 
 ### Licensing
 

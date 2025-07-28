@@ -1,5 +1,5 @@
 ---
-title: "500ms to midnight: XZ / liblzma backdoor"
+title: "500ms to midnight: XZ A.K.A. liblzma backdoor"
 slug: "500ms-to-midnight"
 date: "2024-04-05"
 description: "Elastic Security Labs is releasing an initial analysis of the XZ Utility backdoor, including YARA rules, osquery, and KQL searches to identify potential compromises."

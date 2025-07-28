@@ -22,7 +22,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerEntityStoreRoutes(routeDeps);
   }
 
-  if (routeDeps.config.experimentalFeatures.privilegeMonitoringEnabled) {
+  if (!routeDeps.config.experimentalFeatures.privilegedUserMonitoringDisabled) {
     registerPrivilegeMonitoringRoutes(routeDeps);
   }
 };

@@ -19,7 +19,8 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import type { DocHistoryLocationState } from './locator';
-import { ScopedProfilesManagerProvider, useRootProfile } from '../../context_awareness';
+import { useRootProfile } from '../../context_awareness';
+import { ScopedServicesProvider } from '../../components/scoped_services_provider';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -27,7 +28,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core, profilesManager, getScopedHistory } = useDiscoverServices();
+  const { timefilter, core, profilesManager, ebtManager, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -53,7 +54,10 @@ export const SingleDocRoute = () => {
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
-  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
+  const [scopedEbtManager] = useState(() => ebtManager.createScopedEBTManager());
+  const [scopedProfilesManager] = useState(() =>
+    profilesManager.createScopedProfilesManager({ scopedEbtManager })
+  );
   const rootProfileState = useRootProfile();
 
   if (error) {
@@ -98,10 +102,13 @@ export const SingleDocRoute = () => {
   }
 
   return (
-    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+    <ScopedServicesProvider
+      scopedProfilesManager={scopedProfilesManager}
+      scopedEBTManager={scopedEbtManager}
+    >
       <rootProfileState.AppWrapper>
         <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
       </rootProfileState.AppWrapper>
-    </ScopedProfilesManagerProvider>
+    </ScopedServicesProvider>
   );
 };

@@ -87,7 +87,7 @@ function EstimatedLabel({ label }: { label: string }) {
       })}
     >
       <>
-        {label} <EuiIcon size="s" color="subdued" type="questionInCircle" />
+        {label} <EuiIcon size="s" color="subdued" type="question" />
       </>
     </EuiToolTip>
   );

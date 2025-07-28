@@ -122,10 +122,12 @@ export async function deleteAgentPolicyAndPackagePolicyByName({
   const agentPolicyId = agentPolicy.id;
   // @ts-expect-error
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
-  const packagePolicyId = packagePolicies.find(
-    (packagePolicy) => packagePolicy.name === packagePolicyName
-  )!.id;
+  const packagePolicyId = packagePolicies.find((packagePolicy) => {
+    return packagePolicy.name === packagePolicyName;
+  })?.id;
 
   await deleteAgentPolicy(bettertest, agentPolicyId);
-  await deletePackagePolicy(bettertest, packagePolicyId);
+  if (packagePolicyId) {
+    await deletePackagePolicy(bettertest, packagePolicyId);
+  }
 }

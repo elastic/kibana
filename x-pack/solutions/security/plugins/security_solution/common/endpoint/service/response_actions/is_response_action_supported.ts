@@ -16,7 +16,7 @@ type SupportMap = Record<
   Record<ResponseActionType, Record<ResponseActionAgentType, boolean>>
 >;
 
-/** @private */
+/** @internal */
 const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   isolate: {
     automated: {

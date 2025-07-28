@@ -637,7 +637,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     <EuiCallOut
                       title={i18n.WARNING_NO_CONNECTOR_TITLE}
                       color="warning"
-                      iconType="help"
+                      iconType="question"
                       data-test-subj="configure-cases-warning-callout"
                     >
                       <FormattedMessage

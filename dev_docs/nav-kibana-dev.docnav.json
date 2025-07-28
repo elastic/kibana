@@ -47,6 +47,12 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiGuidelines"
+        },
+        {
+          "id": "kibHttpApiTfGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {
@@ -160,6 +166,9 @@
         },
         {
           "id": "kibDevTutorialSavedObject"
+        },
+        {
+          "id": "kibDevTutorialElasticsearchClient"
         },
         {
           "id": "kibDevTutorialVersioningHTTPAPIs",

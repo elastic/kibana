@@ -11,13 +11,13 @@ import React, { ReactNode } from 'react';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import {
   ISessionService,
-  RefreshInterval,
   SearchSessionState,
   SearchUsageCollector,
   TimefilterContract,

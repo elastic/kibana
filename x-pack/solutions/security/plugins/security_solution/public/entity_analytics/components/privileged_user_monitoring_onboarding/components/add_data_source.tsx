@@ -38,7 +38,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.title"
-            defaultMessage="Add data source of your privileged users"
+            defaultMessage="Add data source for your privileged users"
           />
         </h3>
       </EuiTitle>
@@ -47,7 +47,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
         <p>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.description"
-            defaultMessage="To get started, define your privileged users by selecting an index with the relevant data, or importing your list of privileged users from a CSV file."
+            defaultMessage="To get started, define your privileged users by selecting an index with user data or importing your list of privileged users from a supported file."
           />
         </p>
       </EuiText>
@@ -74,7 +74,9 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             }
             onClick={showIndexModal}
           />
-          <IndexSelectorModal isOpen={isIndexModalOpen} onClose={hideIndexModal} />
+          {isIndexModalOpen && (
+            <IndexSelectorModal onClose={hideIndexModal} onImport={onComplete} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiCard
@@ -91,7 +93,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             description={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.file.description"
-                defaultMessage="Import a list of privileged users from a CSV, TXT, or TSV file"
+                defaultMessage="Import a list of privileged users from a CSV file"
               />
             }
             onClick={showImportFileModal}

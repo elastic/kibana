@@ -21,6 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
@@ -36,6 +38,7 @@ export interface ValueAxesPanelProps {
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
+  const styles = useMemoCss(visEditorSidebarStyles);
   const { addValueAxis, removeValueAxis, seriesParams, valueAxes } = props;
 
   const getSeries = useCallback(
@@ -59,7 +62,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
   const renderRemoveButton = useCallback(
     (axis: ValueAxis) => (
-      <EuiToolTip position="bottom" content={removeButtonTooltip}>
+      <EuiToolTip position="bottom" content={removeButtonTooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           color="danger"
           iconType="cross"
@@ -109,7 +112,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content={addButtonTooltip}>
+          <EuiToolTip position="bottom" content={addButtonTooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="plusInCircleFilled"
               onClick={addValueAxis}
@@ -140,6 +143,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
             }
           )}
           extraAction={valueAxes.length === 1 ? undefined : renderRemoveButton(axis)}
+          css={[styles.section, styles.collapsible, styles.aggGroupAccordionButtonContent]}
         >
           <>
             <EuiSpacer size="m" />

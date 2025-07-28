@@ -59,7 +59,7 @@ const iconMap: Record<string, string> = {
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',
 };
-const defaultToken = 'questionInCircle';
+const defaultToken = 'question';
 
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,

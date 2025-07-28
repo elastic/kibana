@@ -2007,6 +2007,21 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialEditStep",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "initialEditStep",
+            "description": [],
+            "signature": [
+              "RuleFormStepId",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

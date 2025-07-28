@@ -16,15 +16,15 @@ jest.mock('fs');
 describe('plugin_manifest', () => {
   describe('getManifestPath', () => {
     it('should resolve the manifest path correctly for a valid config path', () => {
-      const configPath = '/plugins/my_plugin/ui_tests/playwright.config.ts';
+      const configPath = '/plugins/my_plugin/test/scout/ui/playwright.config.ts';
       const expectedPath = path.resolve('/plugins/my_plugin/kibana.jsonc');
       expect(getManifestPath(configPath)).toBe(expectedPath);
     });
 
-    it(`should throw an error if 'ui_tests' is not in the path`, () => {
+    it(`should throw an error if 'scout' is not in the path`, () => {
       const configPath = '/plugins/my_plugin/tests/playwright.config.ts';
       expect(() => getManifestPath(configPath)).toThrow(
-        /Invalid path: "ui_tests" directory not found/
+        /Invalid path: "scout" directory not found/
       );
     });
   });
@@ -90,7 +90,7 @@ describe('plugin_manifest', () => {
   });
 
   describe('getPluginManifestData', () => {
-    const configPath = '/plugins/my_plugin/ui_tests/playwright.config.ts';
+    const configPath = '/plugins/my_plugin/test/scout/ui/playwright.config.ts';
     const manifestContent = `
       {
         "id": "my_plugin",

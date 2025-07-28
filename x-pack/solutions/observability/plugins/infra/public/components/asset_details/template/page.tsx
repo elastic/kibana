@@ -6,11 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
-import { isPending } from '../../../hooks/use_fetcher';
-import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -25,42 +21,27 @@ import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
-import { useEntitySummary } from '../hooks/use_entity_summary';
-import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
-import { useDatePickerContext } from '../hooks/use_date_picker';
-
-const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
-  host: [SYSTEM_INTEGRATION],
-};
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
-  const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
-    entityType: asset.type,
-    entityId: asset.id,
-    from: new Date(getDateRangeInTimestamp().from).toISOString(),
-    to: new Date(getDateRangeInTimestamp().to).toISOString(),
-  });
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
   useMetricsBreadcrumbs([
     {
       ...breadcrumbOptions.link,
       text: breadcrumbOptions.text,
     },
     {
-      text: asset.name,
+      text: entity.name,
     },
   ]);
 
@@ -72,7 +53,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
-        assetType: asset.type,
+        assetType: entity.type,
         tabId: activeTabId,
       };
 
@@ -86,36 +67,26 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
-
-  const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
-  const shouldBypassOnboarding =
-    isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
+  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry]);
 
   return (
     <InfraPageTemplate
-      onboardingFlow={
-        isPending(entitySummaryStatus) || shouldBypassOnboarding
-          ? undefined
-          : asset.type === 'host'
-          ? OnboardingFlow.Hosts
-          : OnboardingFlow.Infra
-      }
-      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
+      onboardingFlow={entity.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
+      dataSourceAvailability={entity.type === 'host' ? 'host' : undefined}
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
-        ) : showPageTitleWithPopover ? (
-          <PageTitleWithPopover name={asset.name} />
+        ) : entity.type === 'host' ? (
+          <PageTitleWithPopover name={entity.name} />
         ) : (
-          asset.name
+          entity.name
         ),
         tabs: tabEntries,
         rightSideItems,
         breadcrumbs: headerBreadcrumbs,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
-      data-asset-type={asset.type}
+      data-asset-type={entity.type}
     >
       <Content />
     </InfraPageTemplate>

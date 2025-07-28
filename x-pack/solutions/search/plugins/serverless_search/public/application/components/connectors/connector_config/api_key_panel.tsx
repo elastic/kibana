@@ -71,15 +71,12 @@ export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
                 name: `${connector.index_name}-connector`,
                 role_descriptors: {
                   [`${connector.index_name}-connector-role`]: {
-                    cluster: ['monitor'],
+                    cluster: ['monitor', 'manage_connector'],
                     index: [
                       {
                         names: [
                           connector.index_name,
-                          connector.index_name.replace(
-                            /^(?:search-)?(.*)$/,
-                            '.search-acl-filter-$1'
-                          ),
+                          `.search-acl-filter-${connector.index_name}`,
                           `${CONNECTORS_INDEX}*`,
                         ],
                         privileges: ['all'],

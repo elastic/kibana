@@ -19,8 +19,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
@@ -46,7 +46,7 @@ export const wrapSuppressedThresholdALerts = ({
   buckets: ThresholdCompositeBucket[];
   buildReasonMessage: BuildReasonMessage;
   startedAt: Date;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId } = sharedParams;
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
@@ -64,7 +64,7 @@ export const wrapSuppressedThresholdALerts = ({
 
     const instanceId = objectHash([suppressedValues, completeRule.alertId, spaceId]);
 
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: hit,
       applyOverrides: true,

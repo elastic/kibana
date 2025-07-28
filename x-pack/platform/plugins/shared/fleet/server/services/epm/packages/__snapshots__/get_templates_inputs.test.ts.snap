@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Fleet - getTemplateInputs should filter inputs when provided a filtering condition 1`] = `
+Object {
+  "inputs": Array [
+    Object {
+      "id": "redis-logfile",
+      "type": "logfile",
+    },
+    Object {
+      "id": "redis-redis",
+      "type": "redis",
+    },
+  ],
+}
+`;
+
 exports[`Fleet - getTemplateInputs should work for input package 1`] = `
 "inputs:
   # Custom log file: Collect your custom log files.

@@ -135,10 +135,8 @@ export class SecurityTelemetryTask {
         state: emptyState,
         params: { version: this.config.version },
       });
-    } catch (e) {
-      this.logger.error('Error scheduling task', {
-        error: e.message,
-      } as LogMeta);
+    } catch (error) {
+      this.logger.error('Error scheduling task', { error });
     }
   };
 

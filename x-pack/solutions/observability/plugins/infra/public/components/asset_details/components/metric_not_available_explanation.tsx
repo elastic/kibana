@@ -19,7 +19,7 @@ export const MetricNotAvailableExplanationTooltip = ({ metricName }: { metricNam
     <Popover
       iconSize="s"
       iconColor="subdued"
-      icon="questionInCircle"
+      icon="question"
       data-test-subj="infraAssetDetailsMetricNotAvailablePopoverButton"
     >
       <EuiText size="xs" color="subdued">

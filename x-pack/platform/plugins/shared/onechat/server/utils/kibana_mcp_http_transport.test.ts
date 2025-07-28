@@ -313,6 +313,66 @@ describe('KibanaMcpHttpTransport', () => {
     });
   });
 
+  describe('Protocol Version Handling', () => {
+    it('should accept requests with matching protocol version', async () => {
+      const request = createMockKibanaRequest(TEST_MESSAGES.toolsList, {
+        'content-type': 'application/json',
+        accept: 'application/json',
+        'mcp-protocol-version': '2025-06-18',
+      });
+
+      const response = await transport.handleRequest(request, responseFactory);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should accept requests without protocol version header', async () => {
+      const request = createMockKibanaRequest(TEST_MESSAGES.toolsList, {
+        'content-type': 'application/json',
+        accept: 'application/json',
+        // No mcp-protocol-version header
+      });
+
+      const response = await transport.handleRequest(request, responseFactory);
+
+      expect(response.status).toBe(200);
+    });
+
+    it('should reject requests with unsupported protocol version', async () => {
+      const request = createMockKibanaRequest(TEST_MESSAGES.toolsList, {
+        'content-type': 'application/json',
+        accept: 'application/json',
+        'mcp-protocol-version': '1999-01-01',
+      });
+
+      const response = await transport.handleRequest(request, responseFactory);
+
+      expect(response.status).toBe(400);
+      const errorData = JSON.parse(response.payload as string);
+      expect(errorData).toMatchObject({
+        jsonrpc: '2.0',
+        error: {
+          code: -32600,
+          message: expect.stringMatching(
+            /Bad Request: Unsupported protocol version \[1999-01-01\] \(supported versions: .+\)/
+          ),
+        },
+      });
+    });
+
+    it('should accept when protocol version differs from negotiated version', async () => {
+      const request = createMockKibanaRequest(TEST_MESSAGES.toolsList, {
+        'content-type': 'application/json',
+        accept: 'application/json',
+        'mcp-protocol-version': '2024-11-05', // Different but supported version
+      });
+
+      const response = await transport.handleRequest(request, responseFactory);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should reject requests without Accept header containing application/json', async () => {
       const request = createMockKibanaRequest(TEST_MESSAGES.initialize, {

@@ -9,7 +9,8 @@
 
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { createHttpService, createCoreContext } from '@kbn/core-http-server-mocks';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -43,8 +44,7 @@ function createCoreServerRequestHandlerContextMock() {
 export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const coreContext = createCoreContext({ coreId });
   const contextService = new ContextService(coreContext);
-
-  const server = createHttpService(coreContext);
+  const server = new HttpService(coreContext);
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
   const httpSetup = await server.setup({
     context: contextService.setup({ pluginDependencies: new Map() }),
@@ -57,8 +57,19 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   });
 
   return {
-    server,
-    httpSetup,
+    server: {
+      listener: httpSetup.server.listener,
+      start: async () => {
+        await server.start();
+      },
+      stop: async () => {
+        await server.stop();
+      },
+    },
+    createRouter: httpSetup.createRouter.bind(httpSetup),
+    registerRouteHandlerContext: httpSetup.registerRouteHandlerContext.bind(httpSetup),
     handlerContext,
   };
 };
+
+export type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

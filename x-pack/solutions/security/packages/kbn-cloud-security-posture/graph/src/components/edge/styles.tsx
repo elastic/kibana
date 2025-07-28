@@ -14,8 +14,9 @@ import {
   type EuiTextProps,
   type _EuiBackgroundColor,
 } from '@elastic/eui';
+import type { EdgeViewModel } from '../types';
 
-export const EdgeLabelHeight = 24;
+export const EdgeLabelHeight = 20;
 export const EdgeLabelWidth = 100;
 
 export interface EdgeLabelContainerProps {
@@ -87,3 +88,18 @@ export const EdgeLabelOnHover = styled(EdgeLabel)<EdgeLabelProps & EdgeLabelCont
     opacity: 1; /* Show on hover */
   }
 `;
+
+export const useEdgeColor = (edgeColor: EdgeViewModel['color']) => {
+  const { euiTheme } = useEuiTheme();
+  switch (edgeColor) {
+    case 'danger':
+      return euiTheme.colors.danger;
+    case 'warning':
+      return euiTheme.colors.warning;
+    case 'primary':
+      return euiTheme.colors.primary;
+    case 'subdued':
+    default:
+      return euiTheme.colors.borderBaseFormsControl;
+  }
+};

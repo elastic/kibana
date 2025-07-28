@@ -11,7 +11,6 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import type { ActionsConfig } from '../config';
-import { DEFAULT_USAGE_API_URL } from '../config';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -81,9 +80,6 @@ describe('custom_host_settings', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-      usage: {
-        url: DEFAULT_USAGE_API_URL,
-      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

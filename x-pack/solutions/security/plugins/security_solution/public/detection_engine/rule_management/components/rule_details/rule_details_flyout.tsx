@@ -128,6 +128,7 @@ interface RuleDetailsFlyoutProps {
   dataTestSubj?: string;
   id?: string;
   closeFlyout: () => void;
+  title?: string;
 }
 
 export function RuleDetailsFlyout({
@@ -171,6 +172,7 @@ function RuleDetailsFlyoutContent({
   extraTabs = DEFAULT_EXTRA_TABS,
   titleId,
   closeFlyout,
+  title,
 }: RuleDetailsFlyoutContentProps): JSX.Element {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
@@ -235,7 +237,7 @@ function RuleDetailsFlyoutContent({
     <>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id={titleId}>{rule.name}</h2>
+          <h2 id={titleId}>{title ?? rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         {subHeader && (

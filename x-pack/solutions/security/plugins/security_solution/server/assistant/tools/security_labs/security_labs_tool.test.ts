@@ -15,7 +15,8 @@ import type {
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { Document } from 'langchain/document';
-
+import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
+jest.mock('@kbn/elastic-assistant-plugin/server/routes/helpers');
 describe('SecurityLabsTool', () => {
   const contentReferencesStore = newContentReferencesStoreMock();
   const getKnowledgeBaseDocumentEntries = jest.fn();
@@ -52,7 +53,9 @@ In previous publications,`,
         }),
       ]);
 
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
 
       (contentReferencesStore.add as jest.Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
@@ -80,7 +83,9 @@ In previous publications,`,
           pageContent: `hello world`,
         }),
       ]);
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
 
       (contentReferencesStore.add as jest.Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
@@ -99,6 +104,28 @@ In previous publications,`,
       const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
 
       expect(result).toContain('Citation: {reference(exampleContentReferenceId)}');
+    });
+    it('Responds with The "AI Assistant knowledge base" needs to be installed... when no docs and no kb install', async () => {
+      getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
+      (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(false);
+      const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
+
+      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
+
+      expect(result).toContain('The "AI Assistant knowledge base" needs to be installed');
+    });
+    it('Responds with empty response when no docs and kb is installed', async () => {
+      getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
+      (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(true);
+      const tool = (await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(
+        defaultArgs
+      )) as DynamicStructuredTool;
+
+      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
+
+      expect(result).toEqual('[]');
     });
   });
 });

@@ -2,7 +2,7 @@ name: Enforce Dependency Review
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened, synchronize, ready_for_review]
     paths:
       - 'package.json'
     branches:
@@ -14,26 +14,27 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.repository == 'elastic/kibana' &&
-      github.actor != 'elastic-renovate-prod[bot]'
+      github.actor != 'elastic-renovate-prod[bot]' &&
+      github.event.pull_request.draft == false
     steps:
-    - name: Checkout kibana-operations
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        repository: 'elastic/kibana-operations'
-        ref: main
-        path: ./kibana-operations
-        token: ${{secrets.KIBANAMACHINE_TOKEN}}
+      - name: Checkout kibana-operations
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
-    - name: Run dependency security review
-      working-directory: ./kibana-operations/triage
-      env:
-        GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
-        PR_NUMBER: ${{ github.event.pull_request.number }}
-        REPO_OWNER: ${{ github.repository_owner }}
-        REPO_NAME: ${{ github.event.repository.name }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        EVENT_NAME: ${{ github.event_name }}
-      run: |
-        npm ci --omit=dev
-        node enforce-dependency-review.js
+      - name: Run dependency security review
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          npm ci --omit=dev
+          node enforce-dependency-review.js

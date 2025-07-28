@@ -2,26 +2,10 @@
   "id": "@kbn/react-field",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldButton",
+        "id": "def-public.FieldButton",
         "type": "Function",
         "tags": [],
         "label": "FieldButton",
@@ -30,9 +14,9 @@
           "({\n  size,\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  flush,\n  className,\n  dragHandle,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}: ",
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldButtonProps",
+            "section": "def-public.FieldButtonProps",
             "text": "FieldButtonProps"
           },
           ") => React.JSX.Element"
@@ -43,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButton.$1",
+            "id": "def-public.FieldButton.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  size,\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  flush,\n  className,\n  dragHandle,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
@@ -51,9 +35,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-field",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactFieldPluginApi",
-                "section": "def-common.FieldButtonProps",
+                "section": "def-public.FieldButtonProps",
                 "text": "FieldButtonProps"
               }
             ],
@@ -68,7 +52,7 @@
       },
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldIcon",
+        "id": "def-public.FieldIcon",
         "type": "Function",
         "tags": [],
         "label": "FieldIcon",
@@ -79,9 +63,9 @@
           "({\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}: ",
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldIconProps",
+            "section": "def-public.FieldIconProps",
             "text": "FieldIconProps"
           },
           ") => React.JSX.Element"
@@ -92,7 +76,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldIcon.$1",
+            "id": "def-public.FieldIcon.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}",
@@ -100,9 +84,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-field",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactFieldPluginApi",
-                "section": "def-common.FieldIconProps",
+                "section": "def-public.FieldIconProps",
                 "text": "FieldIconProps"
               }
             ],
@@ -117,7 +101,7 @@
       },
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldNameWithIcon",
+        "id": "def-public.FieldNameWithIcon",
         "type": "Function",
         "tags": [],
         "label": "FieldNameWithIcon",
@@ -126,9 +110,9 @@
           "({ name, type }: ",
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldNameWithIconProps",
+            "section": "def-public.FieldNameWithIconProps",
             "text": "FieldNameWithIconProps"
           },
           ") => string | React.JSX.Element"
@@ -139,7 +123,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldNameWithIcon.$1",
+            "id": "def-public.FieldNameWithIcon.$1",
             "type": "Object",
             "tags": [],
             "label": "{ name, type }",
@@ -147,9 +131,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/react-field",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactFieldPluginApi",
-                "section": "def-common.FieldNameWithIconProps",
+                "section": "def-public.FieldNameWithIconProps",
                 "text": "FieldNameWithIconProps"
               }
             ],
@@ -166,7 +150,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldButtonProps",
+        "id": "def-public.FieldButtonProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldButtonProps",
@@ -174,9 +158,9 @@
         "signature": [
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldButtonProps",
+            "section": "def-public.FieldButtonProps",
             "text": "FieldButtonProps"
           },
           " extends React.HTMLAttributes<HTMLDivElement>"
@@ -187,7 +171,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.fieldName",
+            "id": "def-public.FieldButtonProps.fieldName",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldName",
@@ -203,7 +187,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.fieldIcon",
+            "id": "def-public.FieldButtonProps.fieldIcon",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldIcon",
@@ -219,7 +203,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.fieldInfoIcon",
+            "id": "def-public.FieldButtonProps.fieldInfoIcon",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldInfoIcon",
@@ -235,7 +219,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.fieldAction",
+            "id": "def-public.FieldButtonProps.fieldAction",
             "type": "CompoundType",
             "tags": [],
             "label": "fieldAction",
@@ -251,7 +235,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.isActive",
+            "id": "def-public.FieldButtonProps.isActive",
             "type": "CompoundType",
             "tags": [],
             "label": "isActive",
@@ -267,7 +251,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.dragHandle",
+            "id": "def-public.FieldButtonProps.dragHandle",
             "type": "Object",
             "tags": [],
             "label": "dragHandle",
@@ -283,7 +267,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.size",
+            "id": "def-public.FieldButtonProps.size",
             "type": "CompoundType",
             "tags": [],
             "label": "size",
@@ -299,7 +283,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.flush",
+            "id": "def-public.FieldButtonProps.flush",
             "type": "string",
             "tags": [],
             "label": "flush",
@@ -315,7 +299,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.className",
+            "id": "def-public.FieldButtonProps.className",
             "type": "string",
             "tags": [],
             "label": "className",
@@ -331,7 +315,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.onClick",
+            "id": "def-public.FieldButtonProps.onClick",
             "type": "Function",
             "tags": [],
             "label": "onClick",
@@ -349,7 +333,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.dataTestSubj",
+            "id": "def-public.FieldButtonProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -365,7 +349,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.buttonProps",
+            "id": "def-public.FieldButtonProps.buttonProps",
             "type": "CompoundType",
             "tags": [],
             "label": "buttonProps",
@@ -386,7 +370,7 @@
       },
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldIconProps",
+        "id": "def-public.FieldIconProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldIconProps",
@@ -394,9 +378,9 @@
         "signature": [
           {
             "pluginId": "@kbn/react-field",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactFieldPluginApi",
-            "section": "def-common.FieldIconProps",
+            "section": "def-public.FieldIconProps",
             "text": "FieldIconProps"
           },
           " extends Omit<",
@@ -409,7 +393,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldIconProps.type",
+            "id": "def-public.FieldIconProps.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -423,7 +407,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldIconProps.label",
+            "id": "def-public.FieldIconProps.label",
             "type": "string",
             "tags": [],
             "label": "label",
@@ -437,7 +421,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldIconProps.scripted",
+            "id": "def-public.FieldIconProps.scripted",
             "type": "CompoundType",
             "tags": [],
             "label": "scripted",
@@ -454,7 +438,7 @@
       },
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.FieldNameWithIconProps",
+        "id": "def-public.FieldNameWithIconProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldNameWithIconProps",
@@ -465,7 +449,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldNameWithIconProps.name",
+            "id": "def-public.FieldNameWithIconProps.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -476,7 +460,7 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldNameWithIconProps.type",
+            "id": "def-public.FieldNameWithIconProps.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -496,7 +480,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/react-field",
-        "id": "def-common.ButtonSize",
+        "id": "def-public.ButtonSize",
         "type": "Type",
         "tags": [],
         "label": "ButtonSize",
@@ -510,6 +494,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }
