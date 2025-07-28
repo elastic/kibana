@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { TaskDefinition, TaskPriority } from '../task';
-import { setupTestServers } from './lib';
+import { retry, setupTestServers } from './lib';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
@@ -49,6 +49,12 @@ describe('Task priority checks', () => {
   });
 
   it('detects tasks with priority definitions', async () => {
+    // Ensure that the feature flags are initialized before checking task priorities
+    await retry(async () => {
+      const featureFlags = await kibanaServer.coreSetup.featureFlags.getInitialFeatureFlags();
+      expect(featureFlags).toEqual({});
+    });
+
     const taskTypes = taskTypeDictionary.getAllDefinitions();
     const taskTypesWithPriority = taskTypes
       .map((taskType: TaskDefinition) =>
