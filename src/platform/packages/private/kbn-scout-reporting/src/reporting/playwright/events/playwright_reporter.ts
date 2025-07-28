@@ -35,7 +35,6 @@ import {
   ScoutFileInfo,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
-  uploadScoutReportEvents,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
@@ -274,7 +273,6 @@ export class ScoutPlaywrightReporter implements Reporter {
     // Save, upload events & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);
