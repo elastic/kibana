@@ -200,9 +200,12 @@ export const useBulkActionItems = ({
           id: ALERT_CLOSING_REASON_PANEL_ID,
           title: 'Choose one option to mark closed as',
           items: [
-            { name: 'None', onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus) },
             {
-              name: 'False positive',
+              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+              onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
+            },
+            {
+              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
@@ -210,7 +213,7 @@ export const useBulkActionItems = ({
                 ),
             },
             {
-              name: 'Duplicate',
+              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
@@ -218,7 +221,7 @@ export const useBulkActionItems = ({
                 ),
             },
             {
-              name: 'Investigation required',
+              name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
               onClick: () =>
                 onClickUpdate(
                   FILTER_CLOSED as AlertWorkflowStatus,
