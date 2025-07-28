@@ -48,9 +48,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       it(`returns correct result`, async () => {
         expect(functions.TopN.length).to.equal(7047);
-        expect(functions.TotalCount).to.equal(80555);
-        expect(functions.selfCPU).to.equal(3534);
-        expect(functions.totalCPU).to.equal(80555);
+        expect(functions.TotalCount).to.equal(81049);
+        expect(functions.selfCPU).to.equal(3599);
+        expect(functions.totalCPU).to.equal(81049);
         expectSnapshot(functions).toMatch();
       });
     });
