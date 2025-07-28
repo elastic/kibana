@@ -158,6 +158,7 @@
     "@kbn/data-usage-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/response-ops-rule-params",
-    "@kbn/remote-clusters-plugin"
+    "@kbn/remote-clusters-plugin",
+    "@kbn/test-suites-xpack-platform"
   ]
 }
