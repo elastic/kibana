@@ -33,7 +33,6 @@ export const LOCAL_LOCATION = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/229387
   describe('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
