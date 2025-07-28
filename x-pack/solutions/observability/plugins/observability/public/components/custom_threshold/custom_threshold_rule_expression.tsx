@@ -38,7 +38,10 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators } from '../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  type CustomThresholdSearchSourceFields,
+} from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
@@ -261,16 +264,20 @@ export default function Expressions(props: Props) {
   const onSavedQueryUpdated = useCallback(
     (newSavedQuery: SavedQuery) => {
       setSavedQuery(newSavedQuery);
-      const newFilters = newSavedQuery.attributes.filters;
-      const newQuery = newSavedQuery.attributes.query;
-      if (newFilters || newQuery) {
+      const { filters: newFilters, query: newQuery } = newSavedQuery.attributes;
+
+      // Only update fields if they are defined
+      const updates: Partial<CustomThresholdSearchSourceFields> = {};
+      if (newFilters !== undefined) updates.filter = newFilters;
+      if (newQuery !== undefined) updates.query = newQuery;
+
+      if (Object.keys(updates).length > 0) {
         setRuleParams(
           'searchConfiguration',
           getSearchConfiguration(
             {
               ...ruleParams.searchConfiguration,
-              filter: newFilters,
-              query: newQuery,
+              ...updates,
             },
             setParamsWarning
           )
@@ -285,7 +292,11 @@ export default function Expressions(props: Props) {
     setRuleParams(
       'searchConfiguration',
       getSearchConfiguration(
-        { ...ruleParams.searchConfiguration, query: { language: 'kuery', query: '' } },
+        {
+          ...ruleParams.searchConfiguration,
+          query: { language: ruleParams.searchConfiguration.query?.language ?? 'kuery', query: '' },
+          filter: undefined,
+        },
         setParamsWarning
       )
     );
