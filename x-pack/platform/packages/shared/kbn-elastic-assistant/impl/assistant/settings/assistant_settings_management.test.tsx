@@ -33,6 +33,7 @@ const mockContext = {
   assistantFeatures: { assistantModelEvaluation: true },
   assistantAvailability: {
     isAssistantEnabled: true,
+    isAssistantManagementEnabled: true,
   },
 };
 
