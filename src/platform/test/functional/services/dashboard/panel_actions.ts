@@ -46,18 +46,24 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async getDashboardContainerTopOffset() {
-    const fixedHeaders = [
-      // global fixed eui headers, TODO: remove when Kibana switched to grid layout
-      ...(await this.find.allByCssSelector('[data-fixed-header="true"]', 500)),
-      // sticky unified search bar
-      ...(await this.find.allByCssSelector('[data-test-subj="globalQueryBar"]')),
-    ];
+    const fixedHeaders = (
+      await Promise.all([
+        // global fixed eui headers, TODO: remove when Kibana switched to grid layout
+        this.find.allByCssSelector('[data-fixed-header="true"]', 500),
+        // fixed header with actions from project navigation
+        this.find.byCssSelector('[data-test-subj="kibanaProjectHeaderActionMenu"]', 500),
+        // sticky unified search bar
+        this.find.byCssSelector('[data-test-subj="globalQueryBar"]'),
+      ])
+    ).flat();
 
     let fixedHeaderHeight = 0;
-    for (const header of fixedHeaders) {
-      const headerHeight = (await header.getSize()).height;
-      fixedHeaderHeight += headerHeight;
-    }
+    await Promise.all(
+      fixedHeaders.map(async (header) => {
+        const headerHeight = (await header.getSize()).height;
+        fixedHeaderHeight += headerHeight;
+      })
+    );
 
     const additionalOffsetForFloatingHoverActions = 32;
 
