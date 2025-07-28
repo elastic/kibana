@@ -231,10 +231,10 @@ export const containsInvalidDoesNotMatchEntries = (items: ThreatMapEntries[]): b
 };
 
 /**
- * Checks if there are any entries that have a single entry with negate set to true(DOES_NOT_MATCH)
+ * Checks if there are any entries that have a only entry with negate set to true(DOES_NOT_MATCH)
  */
-export const containsSingleDoesNotMatchEntry = (items: ThreatMapEntries[]): boolean => {
+export const containsDoesNotMatchEntriesOnly = (items: ThreatMapEntries[]): boolean => {
   return items.some((item) => {
-    return item.entries.length === 1 && item.entries[0].negate === true;
+    return item.entries.every((entry) => entry.negate === true);
   });
 };

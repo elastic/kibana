@@ -16,7 +16,7 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
-  containsSingleDoesNotMatchEntry,
+  containsDoesNotMatchEntriesOnly,
   containsInvalidDoesNotMatchEntries,
 } from './helpers';
 
@@ -338,9 +338,9 @@ describe('Helpers', () => {
     });
   });
 
-  describe('containsSingleDoesNotMatchEntry', () => {
+  describe('containsDoesNotMatchEntriesOnly', () => {
     test('returns false when items is empty', () => {
-      expect(containsSingleDoesNotMatchEntry([])).toBe(false);
+      expect(containsDoesNotMatchEntriesOnly([])).toBe(false);
     });
 
     test('returns true when items contains single entry with negate=true', () => {
@@ -351,7 +351,19 @@ describe('Helpers', () => {
           ],
         },
       ];
-      expect(containsSingleDoesNotMatchEntry(items)).toBe(true);
+      expect(containsDoesNotMatchEntriesOnly(items)).toBe(true);
+    });
+
+    test('returns true when items contains entry with multiple negate=true only', () => {
+      const items = [
+        {
+          entries: [
+            { field: 'field.one', type: 'mapping' as const, value: 'field.one', negate: true },
+            { field: 'field.two', type: 'mapping' as const, value: 'field.two', negate: true },
+          ],
+        },
+      ];
+      expect(containsDoesNotMatchEntriesOnly(items)).toBe(true);
     });
 
     test('returns false when items contains single entry with negate=false', () => {
@@ -362,7 +374,7 @@ describe('Helpers', () => {
           ],
         },
       ];
-      expect(containsSingleDoesNotMatchEntry(items)).toBe(false);
+      expect(containsDoesNotMatchEntriesOnly(items)).toBe(false);
     });
 
     test('returns false when items contains one entry with negate=false', () => {
@@ -374,7 +386,7 @@ describe('Helpers', () => {
           ],
         },
       ];
-      expect(containsSingleDoesNotMatchEntry(items)).toBe(false);
+      expect(containsDoesNotMatchEntriesOnly(items)).toBe(false);
     });
 
     test('returns true when one of multiple entries contains negate=true', () => {
@@ -390,7 +402,7 @@ describe('Helpers', () => {
           ],
         },
       ];
-      expect(containsSingleDoesNotMatchEntry(items)).toBe(true);
+      expect(containsDoesNotMatchEntriesOnly(items)).toBe(true);
     });
   });
 

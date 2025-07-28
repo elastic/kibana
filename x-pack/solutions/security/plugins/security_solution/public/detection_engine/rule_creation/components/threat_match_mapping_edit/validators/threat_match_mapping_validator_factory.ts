@@ -11,7 +11,7 @@ import {
   containsInvalidItems,
   singleEntryThreat,
   containsInvalidDoesNotMatchEntries,
-  containsSingleDoesNotMatchEntry,
+  containsDoesNotMatchEntriesOnly,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
 import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
@@ -115,7 +115,7 @@ export function threatMatchMappingValidatorFactory({
       };
     }
 
-    if (containsSingleDoesNotMatchEntry(value)) {
+    if (containsDoesNotMatchEntriesOnly(value)) {
       return {
         code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_SINGLE_NOT_MATCH_CLAUSE,
         path,
