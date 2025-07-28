@@ -9,9 +9,20 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseFleetApiConfig = await readConfigFile(require.resolve('./config.base.ts'));
+  const serverArgs: string[] = [...baseFleetApiConfig.get('kbnTestServer.serverArgs')];
+  const enableExperimentalIndex = serverArgs.findIndex((val) =>
+    val.includes('xpack.fleet.enableExperimental')
+  );
+  serverArgs[enableExperimentalIndex] = `--xpack.fleet.enableExperimental=${JSON.stringify([
+    'enableAlertRuleTemplateSupport',
+  ])}`;
 
   return {
     ...baseFleetApiConfig.getAll(),
+    kbnTestServer: {
+      ...baseFleetApiConfig.get('kbnTestServer'),
+      serverArgs,
+    },
     testFiles: [require.resolve('./apis/epm')],
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
