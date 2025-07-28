@@ -113,15 +113,11 @@ export function scopeIncludedObjects({
   }
 
   return {
-    ...include,
     objects: {
       ...include.objects,
       routing: include.objects.routing.map((routing) => ({
         destination: withRootPrefix(root, routing.destination),
-        ...scopeIncludedObjects({
-          root,
-          include: includedObjectsFor(routing.destination, include),
-        }),
+        ...scopeIncludedObjects({ root, include: routing }),
       })),
     },
   };
