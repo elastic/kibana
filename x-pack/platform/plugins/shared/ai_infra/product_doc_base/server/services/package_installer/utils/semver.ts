@@ -7,6 +7,12 @@
 
 import Semver from 'semver';
 
+/**
+ * @param availableVersions - List of available versions
+ * @param kibanaVer - Kibana version
+ * @returns The latest version from the list
+ * If kibanaVer is provided, return the previous closest version available
+ */
 export const latestVersion = (availableVersions: string[], kibanaVer?: string): string => {
   const kibanaSemver = kibanaVer ? Semver.coerce(kibanaVer) : undefined;
   let latest: string | undefined;
@@ -16,7 +22,10 @@ export const latestVersion = (availableVersions: string[], kibanaVer?: string): 
     if (!semver) continue;
 
     if (
+      // If a Kibana version is provided,
+      // narrow to only available versions prior to that Kibana version
       (!kibanaSemver || Semver.lte(semver, kibanaSemver)) &&
+      // Else, grab the newer version from the list
       (!latest || Semver.gt(semver, Semver.coerce(latest)!))
     ) {
       latest = version;
