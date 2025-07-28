@@ -110,7 +110,5 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/css-utils"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
