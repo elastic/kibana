@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -34,7 +34,10 @@ export interface TabStateGlobalState {
 }
 
 export interface TabState extends TabItem {
-  // Initial app and global state for the tab (provided before the tab is initialized).
+  // Initial internal, app, and global state for the tab (provided before the tab is initialized).
+  initialInternalState?: {
+    serializedSearchSource?: SerializedSearchSourceFields;
+  };
   initialAppState?: DiscoverAppState;
   initialGlobalState?: TabStateGlobalState;
 

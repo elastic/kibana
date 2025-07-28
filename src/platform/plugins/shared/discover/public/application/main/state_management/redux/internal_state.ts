@@ -21,7 +21,11 @@ import {
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
+import {
+  type RuntimeStateManager,
+  selectTabRuntimeAppState,
+  selectTabRuntimeInternalState,
+} from './runtime_state';
 import {
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
@@ -134,6 +138,7 @@ export const internalStateSlice = createSlice({
     setTabAppStateAndGlobalState: (
       state,
       action: TabAction<{
+        internalState: TabState['initialInternalState'] | undefined;
         appState: DiscoverAppState | undefined;
         globalState: TabState['lastPersistedGlobalState'] | undefined;
       }>
@@ -265,7 +270,9 @@ const createMiddleware = ({
       (action) => {
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
-        void tabsStorageManager.persistLocally(action.payload, getTabAppState);
+        const getTabInternalState = (tabId: string) =>
+          selectTabRuntimeInternalState(runtimeStateManager, tabId);
+        void tabsStorageManager.persistLocally(action.payload, getTabAppState, getTabInternalState);
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
