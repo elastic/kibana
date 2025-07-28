@@ -41,3 +41,5 @@ export {
   // command schemas
   CreateWorkflowCommandSchema,
 } from './v1';
+
+export type { EnterIfNode, ExitIfNode, EnterForeachNode, ExitForeachNode } from './execution';
