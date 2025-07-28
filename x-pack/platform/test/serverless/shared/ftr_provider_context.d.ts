@@ -7,6 +7,6 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services } from './services';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof commonFunctionalServices, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

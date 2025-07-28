@@ -11,6 +11,7 @@ import { SupertestProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { SvlReportingServiceProvider } from './svl_reporting';
 import { PlatformSecurityUtilsProvider } from './platform_security_utils';
+import { AlertingApiProvider } from './alerting_api';
 
 export type {
   InternalRequestHeader,
@@ -26,6 +27,7 @@ export const services = {
   customRoleScopedSupertest: platformDeploymentAgnosticServices.customRoleScopedSupertest,
   dataViewApi: platformDeploymentAgnosticServices.dataViewApi,
   // custom svl services
+  alertingApi: AlertingApiProvider,
   supertest: SupertestProvider,
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
