@@ -159,7 +159,6 @@ export async function exportContent(
   name: string,
   body: ContentPackManifest & {
     include: ContentPackIncludedObjects;
-    replaced_patterns: string[];
   },
   expectStatusCode: number = 200
 ) {

@@ -8,14 +8,13 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { ProcessorDefinition } from '@kbn/streams-schema';
 import { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef } from '../processor_state_machine';
 import {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
@@ -42,11 +41,11 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
+      addProcessor: (processor?: ProcessorDefinition) => {
         service.send({ type: 'processors.add', processor });
       },
-      reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {
-        service.send({ type: 'processors.reorder', processorsRefs });
+      reorderProcessors: (from: number, to: number) => {
+        service.send({ type: 'processors.reorder', from, to });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
@@ -170,10 +169,6 @@ export const useSimulatorRef = () => {
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
-
-  if (!simulationRef) {
-    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
-  }
 
   return useSelector(simulationRef, selector);
 };

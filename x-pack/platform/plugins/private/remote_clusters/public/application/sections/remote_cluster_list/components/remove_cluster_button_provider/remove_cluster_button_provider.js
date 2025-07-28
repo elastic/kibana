@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
 export class RemoveClusterButtonProvider extends Component {
   static propTypes = {
@@ -54,6 +54,8 @@ export class RemoveClusterButtonProvider extends Component {
     let modal;
 
     if (isModalOpen) {
+      const modalTitleId = htmlIdGenerator()('confirmModalTitle');
+
       const title = isSingleCluster
         ? i18n.translate(
             'xpack.remoteClusters.removeButton.confirmModal.deleteSingleClusterTitle',
@@ -88,7 +90,9 @@ export class RemoveClusterButtonProvider extends Component {
           {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
           <EuiConfirmModal
             data-test-subj="remoteClustersDeleteConfirmModal"
+            aria-labelledby={modalTitleId}
             title={title}
+            titleProps={{ id: modalTitleId }}
             onCancel={this.closeConfirmModal}
             onConfirm={this.onConfirm}
             cancelButtonText={i18n.translate(
