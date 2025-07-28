@@ -37,7 +37,7 @@ export function registerElasticsearchFunction({
           method: {
             type: 'string',
             description: 'The HTTP method of the Elasticsearch endpoint',
-            enum: ['GET', 'POST'] as const,
+            enum: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'] as const,
           },
           path: {
             type: 'string',
