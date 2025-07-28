@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { FieldMap, InstallParams } from '@kbn/index-adapter';
+import type { FieldMap } from '@kbn/index-adapter';
 import { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type { SiemMigrationsIndexNameProvider } from './types';
 
@@ -15,10 +14,6 @@ const TOTAL_FIELDS_LIMIT = 2500;
 interface CreateAdapterParams {
   name: string;
   fieldMap: FieldMap;
-}
-
-export interface SetupParams extends Omit<InstallParams, 'logger'> {
-  esClient: ElasticsearchClient;
 }
 
 export class SiemMigrationsBaseDataService {

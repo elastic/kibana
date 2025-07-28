@@ -27,17 +27,20 @@ const BULK_MAX_SIZE = 500 as const;
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
-  async create(migrationId: string, rawDashboards: SplunkOriginalDashboardExport[]): Promise<void> {
+  async create(
+    migrationId: string,
+    originalDashboards: SplunkOriginalDashboardExport[]
+  ): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let rawDashboardMaxBatch: SplunkOriginalDashboardExport[];
+    let originalDashboardsMaxBatch: SplunkOriginalDashboardExport[];
     const createdAt = new Date().toISOString();
-    while ((rawDashboardMaxBatch = rawDashboards.splice(0, BULK_MAX_SIZE)).length) {
+    while ((originalDashboardsMaxBatch = originalDashboards.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk<DashboardMigrationDashboard>({
           refresh: 'wait_for',
-          operations: rawDashboardMaxBatch.flatMap(({ result: { ...rawDashboard } }) => [
+          operations: originalDashboardsMaxBatch.flatMap(({ result: { ...rawDashboard } }) => [
             { create: { _index: index } },
             {
               migration_id: migrationId,
