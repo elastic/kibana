@@ -631,8 +631,6 @@ export class WrappingPrettyPrinter {
           }
 
           txt = `${operator}(${args.txt}${closingParenthesisFormatted}${inp.suffix ?? ''}`;
-
-          txt = this.decorateWithComments(inp, ctx.node, txt).txt;
         }
       }
 
