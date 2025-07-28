@@ -154,6 +154,9 @@
     "@kbn/visualizations-plugin",
     "@kbn/datemath",
     "@kbn/global-search-plugin",
-    "@kbn/global-search-test-plugin"
+    "@kbn/global-search-test-plugin",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/data-usage-plugin",
+    "@kbn/data-view-field-editor-plugin"
   ]
 }
