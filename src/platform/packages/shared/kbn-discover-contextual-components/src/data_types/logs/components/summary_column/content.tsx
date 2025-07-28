@@ -20,6 +20,7 @@ import {
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -66,7 +67,8 @@ const LogMessage = ({
 const getHighlightedMessage = (
   value: string,
   _row: DataTableRecord,
-  euiTheme: EuiThemeComputed
+  euiTheme: EuiThemeComputed,
+  isDarkTheme: boolean
 ): string => {
   return value.replace(LOG_LEVEL_REGEX, (match) => {
     const coalesced = getLogLevelCoalescedValue(match);
@@ -75,7 +77,9 @@ const getHighlightedMessage = (
     const bgColor = getLogLevelColor(coalesced, euiTheme);
     if (!bgColor) return match;
 
-    return `<span style="background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
+    const color = isDarkTheme ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
+
+    return `<span style="color:${color};background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
   });
 };
 
@@ -92,10 +96,11 @@ export const Content = ({
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
 
   const { euiTheme } = useEuiTheme();
+  const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value as string, row, euiTheme) : value),
-    [value, row, euiTheme]
+    () => (value ? getHighlightedMessage(value as string, row, euiTheme, isDarkTheme) : value),
+    [value, row, euiTheme, isDarkTheme]
   );
 
   const shouldRenderContent = !!field && !!value && !!highlightedValue;

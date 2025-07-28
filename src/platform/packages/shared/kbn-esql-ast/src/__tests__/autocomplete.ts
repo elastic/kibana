@@ -39,6 +39,35 @@ import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
+
+export const suggest = (
+  query: string,
+  context = mockContext,
+  commandName: string,
+  mockCallbacks = getMockCallbacks(),
+  autocomplete: (
+    arg0: string,
+    arg1: ESQLCommand,
+    arg2: ICommandCallbacks,
+    arg3: {
+      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+      fields: Map<string, ESQLFieldWithMetadata>;
+    },
+    arg4?: number
+  ) => Promise<ISuggestionItem[]>,
+  offset?: number
+): Promise<ISuggestionItem[]> => {
+  const correctedQuery = correctQuerySyntax(query);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const cursorPosition = offset ?? query.length;
+  const { command } = findAstPosition(ast, cursorPosition);
+  if (!command) {
+    throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
+  }
+
+  return autocomplete(query, command, mockCallbacks, context, cursorPosition);
+};
+
 export const expectSuggestions = async (
   query: string,
   expectedSuggestions: string[],
@@ -57,14 +86,7 @@ export const expectSuggestions = async (
   ) => Promise<ISuggestionItem[]>,
   offset?: number
 ) => {
-  const correctedQuery = correctQuerySyntax(query);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
-  const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
-  if (!command) {
-    throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
-  }
-  const result = await autocomplete(query, command, mockCallbacks, context, cursorPosition);
+  const result = await suggest(query, context, commandName, mockCallbacks, autocomplete, offset);
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {

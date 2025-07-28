@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
@@ -37,12 +37,10 @@ export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigatio
 }) => {
   const isCollapsed = useObservable(isCollapsed$, isCollapsed$.getValue());
 
-  const flyoutID = useGeneratedHtmlId();
-
   return (
     <>
-      <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} aria-controls={flyoutID} />
-      <CollapsibleNavigationFlyout id={flyoutID}>
+      <SideNavV2CollapseButton isCollapsed={isCollapsed} toggle={toggle} />
+      <CollapsibleNavigationFlyout>
         {
           ({ setWidth }) => null
           // <NavigationComponent
@@ -59,9 +57,8 @@ export const FixedLayoutProjectSideNavV2: FunctionComponent<CollapsibleNavigatio
 };
 
 const CollapsibleNavigationFlyout: FunctionComponent<{
-  id: string;
   children: (props: { setWidth: (width: number) => void }) => React.ReactNode;
-}> = ({ children, id }) => {
+}> = ({ children }) => {
   const [width, setWidth] = React.useState<number>(0);
 
   const childrenProps = React.useMemo(() => ({ setWidth }), [setWidth]);
@@ -77,8 +74,6 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         `}
       />
       <EuiFlyout
-        aria-labelledby={'primary-navigation'} // TODO: wire to navigation, now it is hardcoded?
-        id={id}
         size={width}
         side={'left'}
         type={'push'}
@@ -87,7 +82,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         hideCloseButton={true}
         onClose={() => {}}
       >
-        <div style={{ display: 'flex', height: '100%' }}>{children(childrenProps)}</div>
+        <div css={{ height: '100%', display: 'flex' }}>{children(childrenProps)}</div>
       </EuiFlyout>
     </>
   );
