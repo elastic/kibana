@@ -12,12 +12,15 @@ import {
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import {
   SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH,
+  SIEM_DASHBOARD_MIGRATION_PATH,
+  SIEM_DASHBOARD_MIGRATION_STATS_PATH,
   SIEM_DASHBOARD_MIGRATIONS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
 import {
   CreateDashboardMigrationDashboardsRequestBody,
   CreateDashboardMigrationRequestBody,
   CreateDashboardMigrationResponse,
+  GetDashboardMigrationStatsResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import SuperTest from 'supertest';
 import { replaceParams } from '@kbn/openapi-common/shared';
@@ -47,6 +50,40 @@ export const dashboardMigrationRouteFactory = (supertest: SuperTest.Agent) => {
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(body);
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    get: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: undefined }> => {
+      const url = replaceParams(SIEM_DASHBOARD_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    stats: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: GetDashboardMigrationStatsResponse }> => {
+      const url = replaceParams(SIEM_DASHBOARD_MIGRATION_STATS_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .get(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
       assertStatusCode(expectStatusCode, response);
       return response;

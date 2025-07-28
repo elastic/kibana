@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const dashboardMigrationRoutes = dashboardMigrationRouteFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Create Rules API', () => {
+  describe('@ess @serverless @serverlessQA Create Dashboards API', () => {
     let migrationId: string;
     beforeEach(async () => {
       deleteAllDashboardMigrations(es);

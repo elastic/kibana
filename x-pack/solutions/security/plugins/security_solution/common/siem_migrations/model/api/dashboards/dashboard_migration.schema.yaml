@@ -3,25 +3,6 @@ info:
   title: SIEM Dashboard Migration API
   version: '1'
 paths:
-  /internal/siem_migrations/dashboards/stats:
-    get:
-      summary: Retrieves the stats for all dashboards migrations
-      operationId: GetAllStatsDashboardMigration
-      x-codegen-enabled: true
-      x-internal: true
-      description: Retrieves the dashboard migrations stats for all migrations stored in the system
-      tags:
-        - SIEM dashboard Migrations
-      responses:
-        200:
-          description: Indicates dashboard migrations have been retrieved correctly.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'
-
   /internal/siem_migrations/dashboards:
     put:
       summary: Creates a new dashboard migration
@@ -112,3 +93,28 @@ paths:
       responses:
         200:
           description: Indicates rules have been added to the migration successfully.
+
+
+  /internal/siem_migrations/dashboards/{migration_id}/stats:
+    get:
+      summary: Retrieves the stats for single dashboards migrations
+      operationId: GetDashboardMigrationStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboard migrations stats for given migrations stored in the system
+      tags:
+        - SIEM dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates dashboard migration stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'

@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { dashboardMigrationRouteFactory } from '../../../utils/dashboards';
+import { deleteAllDashboardMigrations } from '../../../utils/es_queries_dashboards';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -16,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Create API', () => {
     beforeEach(async () => {
-      // await deleteAllRuleMigrations(es);
+      deleteAllDashboardMigrations(es);
     });
 
     it('should create migrations without any issues', async () => {

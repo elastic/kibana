@@ -16,8 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import { DashboardMigrationTaskStats, DashboardMigration } from '../../dashboard_migration.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { DashboardMigration, DashboardMigrationTaskStats } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 
 export type CreateDashboardMigrationRequestBody = z.infer<
@@ -59,11 +59,6 @@ export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
-export type GetAllStatsDashboardMigrationResponse = z.infer<
-  typeof GetAllStatsDashboardMigrationResponse
->;
-export const GetAllStatsDashboardMigrationResponse = z.array(DashboardMigrationTaskStats);
-
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
 export const GetDashboardMigrationRequestParams = z.object({
   migration_id: NonEmptyString,
@@ -74,3 +69,16 @@ export type GetDashboardMigrationRequestParamsInput = z.input<
 
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
 export const GetDashboardMigrationResponse = DashboardMigration;
+
+export type GetDashboardMigrationStatsRequestParams = z.infer<
+  typeof GetDashboardMigrationStatsRequestParams
+>;
+export const GetDashboardMigrationStatsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetDashboardMigrationStatsRequestParamsInput = z.input<
+  typeof GetDashboardMigrationStatsRequestParams
+>;
+
+export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
+export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;

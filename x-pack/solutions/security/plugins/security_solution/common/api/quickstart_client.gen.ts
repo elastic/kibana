@@ -392,9 +392,10 @@ import type {
   CreateDashboardMigrationResponse,
   CreateDashboardMigrationDashboardsRequestParamsInput,
   CreateDashboardMigrationDashboardsRequestBodyInput,
-  GetAllStatsDashboardMigrationResponse,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationStatsRequestParamsInput,
+  GetDashboardMigrationStatsResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   CreateRuleMigrationRequestBodyInput,
@@ -1399,21 +1400,6 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the dashboard migrations stats for all migrations stored in the system
-   */
-  async getAllStatsDashboardMigration() {
-    this.log.info(`${new Date().toISOString()} Calling API GetAllStatsDashboardMigration`);
-    return this.kbnClient
-      .request<GetAllStatsDashboardMigrationResponse>({
-        path: '/internal/siem_migrations/dashboards/stats',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Retrieves the rule migrations stats for all migrations stored in the system
    */
   async getAllStatsRuleMigration() {
@@ -1465,6 +1451,24 @@ finalize it.
     return this.kbnClient
       .request<GetDashboardMigrationResponse>({
         path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for given migrations stored in the system
+   */
+  async getDashboardMigrationStats(props: GetDashboardMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationStats`);
+    return this.kbnClient
+      .request<GetDashboardMigrationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2936,6 +2940,9 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationStatsProps {
+  params: GetDashboardMigrationStatsRequestParamsInput;
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;

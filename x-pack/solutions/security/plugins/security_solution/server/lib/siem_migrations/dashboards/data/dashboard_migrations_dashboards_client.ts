@@ -40,29 +40,29 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
       await this.esClient
         .bulk<DashboardMigrationDashboard>({
           refresh: 'wait_for',
-          operations: originalDashboardsMaxBatch.flatMap(({ result: { ...rawDashboard } }) => [
+          operations: originalDashboardsMaxBatch.flatMap(({ result: { ...originalDashboard } }) => [
             { create: { _index: index } },
             {
               migration_id: migrationId,
-              original_dashboard: {
-                id: rawDashboard.id,
-                title: rawDashboard.label ?? rawDashboard.title,
-                description: rawDashboard.description,
-                data: rawDashboard?.['eai:data'],
-                format: 'xml',
-                vendor: 'splunk',
-                last_updated: rawDashboard.updated,
-                vendor_properties: {
-                  app: rawDashboard['eai:acl.app'],
-                  owner: rawDashboard['eai:acl.owner'],
-                  sharing: rawDashboard['eai:acl.sharing'],
-                },
-              },
               '@timestamp': createdAt,
               status: SiemMigrationStatus.PENDING,
               created_by: profileId,
               updated_by: profileId,
               updated_at: createdAt,
+              original_dashboard: {
+                id: originalDashboard.id,
+                title: originalDashboard.label ?? originalDashboard.title,
+                description: originalDashboard.description ?? '',
+                data: originalDashboard?.['eai:data'],
+                format: 'xml',
+                vendor: 'splunk',
+                last_updated: originalDashboard.updated,
+                vendor_properties: {
+                  app: originalDashboard['eai:acl.app'],
+                  owner: originalDashboard['eai:acl.owner'],
+                  sharing: originalDashboard['eai:acl.sharing'],
+                },
+              },
             },
           ]),
         })
@@ -78,7 +78,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
   async getStats(migrationId: string): Promise<Omit<DashboardMigrationTaskStats, 'name'>> {
     const index = await this.getIndexName();
 
-    const migrationIdFilter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+    const migrationIdFilter: QueryDslQueryContainer = { term: { migration_id: migrationId } };
     const query = {
       bool: {
         filter: migrationIdFilter,

@@ -8,11 +8,20 @@ import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemDashboardMigrationsCreateRoute } from './create';
 import { registerSiemDashboardMigrationsCreateDashboardsRoute } from './dashboards/create';
+import { registerSiemDashboardMigrationsStatsRoute } from './stats';
+import { registerSiemDashboardMigrationsGetRoute } from './get';
 
 export const registerSiemDashboardMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
+  // ===== Dashboard Migrations ======
   registerSiemDashboardMigrationsCreateRoute(router, logger);
+  registerSiemDashboardMigrationsGetRoute(router, logger);
+
+  // ===== Stats ========
+  registerSiemDashboardMigrationsStatsRoute(router, logger);
+
+  // ===== Dashboards ======
   registerSiemDashboardMigrationsCreateDashboardsRoute(router, logger);
 };

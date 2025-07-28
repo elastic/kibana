@@ -9,7 +9,9 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@ess @serverless SecuritySolution Automatic Dashboard Migrations', () => {
-    // loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./dashboards/create'));
   });
 }

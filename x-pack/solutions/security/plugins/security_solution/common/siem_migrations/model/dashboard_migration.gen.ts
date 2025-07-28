@@ -54,7 +54,7 @@ export const DashboardMigrationData = z.object({
   /**
    * The rule migration name
    */
-  name: NonEmptyString.optional(),
+  name: NonEmptyString,
   /**
    * The user profile ID of the user who created the migration.
    */

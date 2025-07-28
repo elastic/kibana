@@ -44,6 +44,7 @@ components:
       type: object
       description: The dashboard migration object ( without Id ) with its settings.
       required:
+        - name
         - created_by
         - created_at
       properties:
