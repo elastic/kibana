@@ -52,7 +52,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Search Applications' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
@@ -103,7 +103,7 @@ export default function searchSolutionNavigation({
         },
         {
           deepLinkId: 'enterpriseSearchApplications:searchApplications',
-          breadcrumbs: ['Build', 'Search applications'],
+          breadcrumbs: ['Build', 'Search Applications'],
           pageTestSubject: 'searchApplicationsListPage',
         },
         {
