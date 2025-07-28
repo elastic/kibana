@@ -18,6 +18,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -33,6 +34,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -264,20 +266,25 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
+    const perPage = options.perPage ?? 5000;
+    const page = options.page ?? 1;
+    // fetch all possible monitors, sort locally since we can't sort across multiple types yet
+    const maximumPageSize = 10_000;
+
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
         ...options,
-        perPage: options.perPage ?? 5000,
+        perPage: maximumPageSize,
+        page: 1,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
-    const [result, legacyResult] = await Promise.all(promises);
-    return {
-      ...result,
-      total: result.total + legacyResult.total,
-      saved_objects: [...result.saved_objects, ...legacyResult.saved_objects],
-    };
+
+    const results = await Promise.all(promises);
+
+    // Use util to combine, sort, and slice
+    return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
@@ -333,7 +340,7 @@ export class MonitorConfigRepository {
     filter,
     sortField = 'name.keyword',
     sortOrder = 'asc',
-    searchFields,
+    searchFields = MONITOR_SEARCH_FIELDS,
     showFromAllSpaces,
   }: {
     search?: string;

@@ -1,0 +1,73 @@
+version: 1
+workflow:
+  name: "Pishing Alert Investigation"
+  description: "Workflow to detect if an alert is a real pishing attempt or not"
+  enabled: true
+  triggers:
+    - type: triggers.elastic.detectionRule
+      with:
+        rule_name: "Email Reported by User as ..."
+  steps:
+    - name: Parallel analysis
+      type: parallel
+      branches:
+        - name: URL scan
+          steps:
+            - name: URL scan
+              type: http.get
+              with:
+                url: "https://www.pishingemailsaddress.com?query=randomemail@addresss.com"
+        - name: Classification
+          steps:
+            - name: Classification
+              connectorId: "inference-open-ai-uuid"
+              type: openai.completion
+              with:
+                prompt: "Classify the email content for phishing risk."
+    - name: Merge results
+      type: merge
+      sources:
+        - "Parallel analysis.URL scan"
+        - "Parallel analysis.Classification"
+      steps:
+        - name: AI summary
+          connectorId: "inference-open-ai-uuid"
+          type: openai.completion
+          with:
+            description: "Determine if the email is malicious or not"
+            structuredOutput:
+              malicious: bool # true/false
+        - name: If malicious
+          type: if
+          condition: "{{steps.ai_summary.structuredOutput.malicious}}"
+          steps: # true
+            - name: Create case
+              type: kibana.createCase
+              with:
+                description: "Create a new case for the phishing alert"
+            - name: Add to case
+              type: kibana.addToCase
+              with:
+                description: "Add alert details to the case"
+            - name: Send message
+              type: slack.sendMessage
+              connectorId: "slack-uuid"
+              with:
+                channel: "#alerts_to_investigate"
+                message: "Potential phishing alert detected and case created. Please investigate."
+          else:
+            - name: Add note
+              type: kibana.addNote
+              with:
+                description: "Alert determined not to be phishing. Added note to alert."
+            - name: Close alert
+              type: kibana.closeAlert
+              with:
+                description: "Alert closed as not malicious."
+    - name: Workflow completion notification
+      type: slack.sendMessage
+      connectorId: "slack-uuid"
+      if: always()
+      with:
+        channel: "#workflow-notifications"
+        message: "Phishing alert investigation completed. Result: {{steps.ai_summary.structuredOutput.malicious ? 'MALICIOUS - Case created' : 'NOT MALICIOUS - Alert closed'}}"
