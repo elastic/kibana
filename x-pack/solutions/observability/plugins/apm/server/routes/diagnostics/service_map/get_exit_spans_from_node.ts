@@ -89,7 +89,7 @@ export async function getExitSpansFromSourceNode({
     },
   });
 
-  const exitSpans =
+  const apmExitSpans =
     response?.aggregations?.destination_resources?.buckets?.map((item: any) => {
       const doc = item?.sample_doc?.hits?.hits?.[0]?._source;
       return {
@@ -124,12 +124,12 @@ export async function getExitSpansFromSourceNode({
     }) || [];
 
   // Combine regular and OTEL exit spans
-  const allExitSpans = [...exitSpans, ...otelExitSpans];
+  const allExitSpans = [...apmExitSpans, ...otelExitSpans];
 
   return {
     exitSpans: allExitSpans,
     otelExitSpans,
-    apmExitSpans: exitSpans,
+    apmExitSpans,
     totalConnections: allExitSpans.length,
     rawResponse: response,
     hasMatchingDestinationResources:

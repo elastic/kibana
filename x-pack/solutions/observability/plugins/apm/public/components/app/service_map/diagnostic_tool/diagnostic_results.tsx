@@ -11,50 +11,19 @@ import { ExitSpansAnalysis } from './exit_spans_analysis';
 import { ParentRelationshipAnalysis } from './parent_relationship_analysis';
 import { TraceCorrelationAnalysis } from './trace_correlation_analysis';
 import { DiagnosticInformationalMessage } from './diagnostic_informational_message';
-
-interface DiagnosticResultsProps {
-  data: {
-    analysis: {
-      exitSpans: {
-        found: boolean;
-        totalConnections: number;
-        spans: any[];
-        otelExitSpans?: any[];
-        apmExitSpans?: any[];
-        hasMatchingDestinationResources: boolean;
-      };
-      parentRelationships: {
-        found: boolean;
-        documentCount: number;
-        sourceSpanIds: string[];
-      };
-      traceCorrelation: {
-        found: boolean;
-        foundInSourceNode: boolean;
-        foundInDestinationNode: boolean;
-        sourceNodeDocumentCount: number;
-        destinationNodeDocumentCount: number;
-      };
-    };
-    elasticsearchResponses: {
-      exitSpansQuery?: any;
-      sourceSpanIdsQuery?: any;
-      destinationParentIdsQuery?: any;
-      traceCorrelationQuery?: any;
-    };
-  };
-  sourceNodeName: string | undefined;
-  destinationNodeName: string | undefined;
-  traceId: string;
-}
-
+import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 export function DiagnosticResults({
   data,
   sourceNodeName,
   destinationNodeName,
   traceId,
-}: DiagnosticResultsProps) {
-  const exitSpansList = data?.analysis?.exitSpans?.spans || [];
+}: {
+  data: ServiceMapDiagnosticResponse;
+  sourceNodeName?: string;
+  destinationNodeName?: string;
+  traceId: string;
+}) {
+  const exitSpansList = data?.analysis?.exitSpans?.allExitSpans || [];
   const otelExitSpans = data?.analysis?.exitSpans?.otelExitSpans || [];
   const apmExitSpans = data?.analysis?.exitSpans?.apmExitSpans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;

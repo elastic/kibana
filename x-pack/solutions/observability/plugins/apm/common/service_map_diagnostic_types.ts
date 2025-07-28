@@ -5,14 +5,29 @@
  * 2.0.
  */
 
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
+
+export interface ExitSpanFields {
+  destinationService?: string;
+  spanSubType?: string;
+  spanId?: string;
+  spanType?: string;
+  transactionId?: string;
+  serviceNodeName?: string;
+  traceId?: string;
+  agentName?: string;
+  docCount?: number;
+  isOtel?: boolean;
+}
+
 export interface ServiceMapDiagnosticResponse {
   analysis: {
-    allExitSpans: {
+    exitSpans: {
       found: boolean;
       totalConnections: number;
-      spans: any[];
-      otelExitSpans?: any[];
-      apmExitSpans?: any[];
+      allExitSpans: ExitSpanFields[];
+      otelExitSpans: ExitSpanFields[];
+      apmExitSpans: ExitSpanFields[];
       hasMatchingDestinationResources: boolean;
     };
     parentRelationships: {
@@ -29,10 +44,10 @@ export interface ServiceMapDiagnosticResponse {
     };
   };
   elasticsearchResponses: {
-    exitSpansQuery?: any;
-    sourceSpanIdsQuery?: any;
-    destinationParentIdsQuery?: any;
-    traceCorrelationQuery?: any;
+    exitSpansQuery?: ESSearchResponse<unknown, ESSearchRequest>;
+    sourceSpanIdsQuery?: ESSearchResponse<unknown, ESSearchRequest>;
+    destinationParentIdsQuery?: ESSearchResponse<unknown, ESSearchRequest>;
+    traceCorrelationQuery?: ESSearchResponse<unknown, ESSearchRequest>;
   };
 }
 
