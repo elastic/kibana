@@ -501,7 +501,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             />
           </span>
         ),
-        width: '14%',
+        width: '100px',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
           if (!rule.enabled) {
