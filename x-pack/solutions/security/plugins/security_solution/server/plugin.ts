@@ -762,7 +762,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       )
       .catch(() => {});
 
-    if (this.config.cdn.url && this.config.cdn.publicKey) {
+    if (this.config.cdn?.url && this.config.cdn?.publicKey) {
       const cdnConfig: CdnConfig = {
         url: this.config.cdn.url,
         pubKey: this.config.cdn.publicKey,
