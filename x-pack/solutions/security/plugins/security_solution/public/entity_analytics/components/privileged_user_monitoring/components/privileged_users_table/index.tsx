@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
@@ -82,94 +83,95 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   });
 
   return (
-    <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-users-table-panel">
-      <HeaderSection
-        toggleStatus={toggleStatus}
-        toggleQuery={setToggleStatus}
-        id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-        showInspectButton
-        title={TITLE}
-        titleSize="s"
-        outerDirection="column"
-        hideSubtitle
-      />
-      {hasError && (
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.error',
-            {
-              defaultMessage:
-                'There was an error retrieving privileged users. Results may be incomplete.',
-            }
-          )}
-          color="danger"
-          iconType="error"
+    <InspectButtonContainer>
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-users-table-panel">
+        <HeaderSection
+          toggleStatus={toggleStatus}
+          toggleQuery={setToggleStatus}
+          id={PRIVILEGED_USERS_TABLE_QUERY_ID}
+          title={TITLE}
+          titleSize="s"
+          outerDirection="column"
+          hideSubtitle
         />
-      )}
-      {toggleStatus && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>{isLoading && <EuiProgress size="xs" color="accent" />}</EuiFlexItem>
-          {visibleRecords.length > 0 ? (
-            <>
-              <EuiText size={'s'}>
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.showing"
-                  defaultMessage="Showing "
+        {hasError && (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.error',
+              {
+                defaultMessage:
+                  'There was an error retrieving privileged users. Results may be incomplete.',
+              }
+            )}
+            color="danger"
+            iconType="error"
+          />
+        )}
+        {toggleStatus && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>{isLoading && <EuiProgress size="xs" color="accent" />}</EuiFlexItem>
+            {visibleRecords.length > 0 ? (
+              <>
+                <EuiText size={'s'}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.showing"
+                    defaultMessage="Showing "
+                  />
+                  <span
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.bold};
+                    `}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.countOfUsers"
+                      defaultMessage="{count} privileged {count, plural, one {user} other {users}}"
+                      values={{ count: visibleRecords.length }}
+                    />
+                  </span>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiHorizontalRule margin="none" css={{ height: 2 }} />
+                <EuiBasicTable
+                  id={PRIVILEGED_USERS_TABLE_QUERY_ID}
+                  loading={isLoading}
+                  items={visibleRecords || []}
+                  columns={columns}
                 />
-                <span
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
+              </>
+            ) : (
+              !isLoading && (
+                <EuiText size="s" color="subdued" textAlign="center">
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.noData"
+                    defaultMessage="No privileged users found"
+                  />
+                </EuiText>
+              )
+            )}
+            {hasNextPage && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  isLoading={isLoading}
+                  onClick={() => {
+                    setCurrentPage((page) => page + 1);
+                  }}
+                  flush="right"
+                  color="primary"
+                  size="s"
+                  iconType="sortDown"
+                  iconSide="right"
+                  iconSize="s"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.countOfUsers"
-                    defaultMessage="{count} privileged {count, plural, one {user} other {users}}"
-                    values={{ count: visibleRecords.length }}
+                    id="xpack.securitySolution.privilegedUserMonitoring.showMore"
+                    defaultMessage="Show more"
                   />
-                </span>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiHorizontalRule margin="none" css={{ height: 2 }} />
-              <EuiBasicTable
-                id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-                loading={isLoading}
-                items={visibleRecords || []}
-                columns={columns}
-              />
-            </>
-          ) : (
-            !isLoading && (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.noData"
-                  defaultMessage="No privileged users found"
-                />
-              </EuiText>
-            )
-          )}
-          {hasNextPage && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                isLoading={isLoading}
-                onClick={() => {
-                  setCurrentPage((page) => page + 1);
-                }}
-                flush="right"
-                color="primary"
-                size="s"
-                iconType="sortDown"
-                iconSide="right"
-                iconSize="s"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.privilegedUserMonitoring.showMore"
-                  defaultMessage="Show more"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
-    </EuiPanel>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };

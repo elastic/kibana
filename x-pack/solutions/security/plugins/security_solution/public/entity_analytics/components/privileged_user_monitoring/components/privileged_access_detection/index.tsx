@@ -10,6 +10,7 @@ import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from 
 import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PRIVILEGED_USER_ACTIVITY_QUERY_ID } from '../privileged_user_activity/constants';
@@ -119,42 +120,43 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
       )}
 
       {packageInstallationComplete && (
-        <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-access-detections-panel">
-          <HeaderSection
-            toggleStatus={toggleStatus}
-            toggleQuery={setToggleStatus}
-            id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
-            showInspectButton
-            title={
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
-                  defaultMessage="Top privileged access anomalies"
-                />
+        <InspectButtonContainer>
+          <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-access-detections-panel">
+            <HeaderSection
+              toggleStatus={toggleStatus}
+              toggleQuery={setToggleStatus}
+              id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
+              title={
+                <>
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
+                    defaultMessage="Top privileged access anomalies"
+                  />
 
-                <PrivilegedAccessInfoPopover />
-              </>
-            }
-            titleSize="s"
-            outerDirection="column"
-            hideSubtitle
-          >
+                  <PrivilegedAccessInfoPopover />
+                </>
+              }
+              titleSize="s"
+              outerDirection="column"
+              hideSubtitle
+            >
+              {toggleStatus && (
+                <EuiFlexGroup gutterSize="s">
+                  <PrivilegedAccessDetectionMLPopover />
+                  <PrivilegedAccessDetectionViewAllAnomaliesButton />
+                </EuiFlexGroup>
+              )}
+            </HeaderSection>
             {toggleStatus && (
-              <EuiFlexGroup gutterSize="s">
-                <PrivilegedAccessDetectionMLPopover />
-                <PrivilegedAccessDetectionViewAllAnomaliesButton />
-              </EuiFlexGroup>
+              <>
+                <PrivilegedAccessDetectionChart
+                  jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.job_id)}
+                  spaceId={spaceId}
+                />
+              </>
             )}
-          </HeaderSection>
-          {toggleStatus && (
-            <>
-              <PrivilegedAccessDetectionChart
-                jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.job_id)}
-                spaceId={spaceId}
-              />
-            </>
-          )}
-        </EuiPanel>
+          </EuiPanel>
+        </InspectButtonContainer>
       )}
     </>
   );
