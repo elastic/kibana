@@ -44,7 +44,7 @@ export const userEntityEngineDescription: EntityDescription = {
     collect({ source: 'user.roles' }),
     ...getCommonFieldDescriptions('user'),
   ],
-  customIngestProcessors: [
+  pipeline: [
     {
       set: {
         field: 'entity.type',

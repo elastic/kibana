@@ -112,7 +112,7 @@ const buildIngestPipeline = ({
           },
         ]
       : []),
-    ...(description.customIngestProcessors ? description.customIngestProcessors : []),
+    ...(Array.isArray(description.pipeline) ? description.pipeline : []),
   ];
 
   return typeof description.pipeline === 'function'

@@ -15,7 +15,6 @@ type PickPartial<T, K extends keyof T, Optional extends K = never> = {
 
 export type EntityDescription = PickPartial<
   EntityEngineInstallationDescriptor,
-  | 'customIngestProcessors'
   | 'version'
   | 'entityType'
   | 'fields'

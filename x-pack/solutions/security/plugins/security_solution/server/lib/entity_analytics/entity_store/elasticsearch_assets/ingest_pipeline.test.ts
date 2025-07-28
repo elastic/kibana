@@ -131,25 +131,6 @@ describe('ingest_pipeline', () => {
       );
     });
 
-    it('should include customIngestProcessors if provided', async () => {
-      const customProcessor = { set: { field: 'custom.field', value: 'custom_value' } };
-      const descriptionWithCustom: EntityEngineInstallationDescriptor = {
-        ...baseDescription,
-        customIngestProcessors: [customProcessor],
-      };
-
-      await createPlatformPipeline({
-        logger: mockLogger,
-        esClient: mockEsClient,
-        description: descriptionWithCustom,
-        options,
-      });
-
-      expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
-      const pipelineCall = (mockEsClient.ingest.putPipeline as jest.Mock).mock.calls[0][0];
-      expect(pipelineCall.processors).toEqual(expect.arrayContaining([customProcessor]));
-    });
-
     it('should have more processors if dynamic is true (indicating dynamicNewestRetentionSteps)', async () => {
       // Get length of processors for non-dynamic
       await createPlatformPipeline({
@@ -206,6 +187,25 @@ describe('ingest_pipeline', () => {
       expect(pipelineCall.processors).toEqual(
         expect.arrayContaining([{ set: { field: 'custom.pipeline', value: true } }])
       );
+    });
+
+    it('should use custom pipeline array if provided', async () => {
+      const customProcessor = { set: { field: 'custom.field', value: 'custom_value' } };
+      const descriptionWithCustom: EntityEngineInstallationDescriptor = {
+        ...baseDescription,
+        pipeline: [customProcessor],
+      };
+
+      await createPlatformPipeline({
+        logger: mockLogger,
+        esClient: mockEsClient,
+        description: descriptionWithCustom,
+        options,
+      });
+
+      expect(mockEsClient.ingest.putPipeline).toHaveBeenCalledTimes(1);
+      const pipelineCall = (mockEsClient.ingest.putPipeline as jest.Mock).mock.calls[0][0];
+      expect(pipelineCall.processors).toEqual(expect.arrayContaining([customProcessor]));
     });
   });
 
