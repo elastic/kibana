@@ -188,9 +188,6 @@ export async function autocomplete(
     }
 
     case 'grouping_expression_after_assignment': {
-      // TODO - incorporate columns to ignore
-      const ignored = alreadyUsedColumns(command);
-
       // Find expression root
       const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
       const assignment = byNode.args[byNode.args.length - 1];
@@ -209,6 +206,8 @@ export async function autocomplete(
         return [];
       }
 
+      const ignoredColumns = alreadyUsedColumns(command);
+
       return getExpressionSuggestions({
         innerText,
         expressionRoot,
@@ -217,13 +216,11 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
+        ignoredColumns,
       });
     }
 
     case 'grouping_expression_without_assignment': {
-      // TODO - incorporate columns to ignore
-      const ignored = alreadyUsedColumns(command);
-
       let expressionRoot: ESQLAstItem | undefined;
       if (!/,\s*$/.test(innerText)) {
         const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
@@ -234,6 +231,8 @@ export async function autocomplete(
       if (Array.isArray(expressionRoot)) {
         return [];
       }
+
+      const ignoredColumns = alreadyUsedColumns(command);
 
       return getExpressionSuggestions({
         innerText,
@@ -247,6 +246,7 @@ export async function autocomplete(
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         advanceCursorAfterInitialField: false,
+        ignoredColumns,
       });
     }
 
@@ -265,6 +265,7 @@ async function getExpressionSuggestions({
   afterCompleteSuggestions = [],
   advanceCursorAfterInitialField,
   suggestColumns = true,
+  ignoredColumns = [],
 }: {
   innerText: string;
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -275,6 +276,7 @@ async function getExpressionSuggestions({
   afterCompleteSuggestions?: ISuggestionItem[];
   advanceCursorAfterInitialField?: boolean;
   suggestColumns?: boolean;
+  ignoredColumns?: string[];
 }): Promise<ISuggestionItem[]> {
   const suggestions = await suggestForExpression({
     innerText,
@@ -283,7 +285,8 @@ async function getExpressionSuggestions({
     context,
     getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-    advanceCursorAfterInitialField,
+    advanceCursorAfterInitialColumn: advanceCursorAfterInitialField,
+    ignoredColumnsForEmptyExpression: ignoredColumns,
   });
 
   if (!expressionRoot) {

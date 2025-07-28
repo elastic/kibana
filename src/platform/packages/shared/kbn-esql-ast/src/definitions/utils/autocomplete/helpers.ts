@@ -357,8 +357,9 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
-  advanceCursorAfterInitialField = true,
+  advanceCursorAfterInitialColumn = true,
   hasMinimumLicenseRequired,
+  ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -366,10 +367,11 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType?: GetColumnsByTypeFn;
   context?: ICommandContext;
-  advanceCursorAfterInitialField?: boolean;
+  advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
-  suggestColumns?: boolean;
+  // a set of columns not to suggest when the expression is empty
+  ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
   const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
 
@@ -423,7 +425,10 @@ export async function suggestForExpression({
             { location, returnTypes: ['boolean'] },
             hasMinimumLicenseRequired
           ),
-          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+          ...(await getColumnsByType('boolean', [], {
+            advanceCursor: true,
+            openSuggestions: true,
+          }))
         );
       } else {
         suggestions.push(...getOperatorsSuggestionsAfterNot());
@@ -477,10 +482,14 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
-      const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: advanceCursorAfterInitialField,
-        openSuggestions: true,
-      });
+      const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
+        'any',
+        ignoredColumnsForEmptyExpression,
+        {
+          advanceCursor: advanceCursorAfterInitialColumn,
+          openSuggestions: true,
+        }
+      );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
         ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
