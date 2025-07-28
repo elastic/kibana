@@ -64,10 +64,10 @@ describe('Functions page', () => {
       { parentKey: 'impactEstimates', key: 'selfCPU', value: '13.45%' },
       { parentKey: 'impactEstimates', key: 'samples', value: '69' },
       { parentKey: 'impactEstimates', key: 'selfSamples', value: '67' },
-      { parentKey: 'impactEstimates', key: 'coreSeconds', value: '3.63 seconds' },
-      { parentKey: 'impactEstimates', key: 'selfCoreSeconds', value: '3.53 seconds' },
-      { parentKey: 'impactEstimates', key: 'annualizedCoreSeconds', value: '1.45 months' },
-      { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '1.41 months' },
+      { parentKey: 'impactEstimates', key: 'coreSeconds', value: '3.45 seconds' },
+      { parentKey: 'impactEstimates', key: 'selfCoreSeconds', value: '3.35 seconds' },
+      { parentKey: 'impactEstimates', key: 'annualizedCoreSeconds', value: '1.38 months' },
+      { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '1.34 months' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '10.58 lbs / 4.8 kg' },
@@ -156,14 +156,20 @@ describe('Functions page', () => {
         lowValue: '$0.62',
       },
     ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
-      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
-      cy.contains('Sort High-Low').click();
+      cy.get('[title="Sort High-Low"]').should('not.exist');
+      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`)
+        .focus()
+        .trigger('keydown', { key: 'Enter' });
+      cy.get('[title="Sort High-Low"]').click();
+
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
       cy.get(firstRowSelector).eq(1).contains(highRank);
       cy.get(firstRowSelector).eq(columnIndex).contains(highValue);
 
-      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
-      cy.contains('Sort Low-High').click();
+      cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`)
+        .focus()
+        .trigger('keydown', { key: 'Enter' });
+      cy.get('[title="Sort Low-High"]').click();
       cy.get(firstRowSelector).eq(1).contains(lowRank);
       if (lowValue !== undefined) {
         cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
@@ -172,14 +178,18 @@ describe('Functions page', () => {
       }
     });
 
-    cy.get(`[data-test-subj="dataGridHeaderCell-frame"]`).click();
-    cy.contains('Sort Z-A').click();
+    cy.get(`[data-test-subj="dataGridHeaderCell-frame"]`)
+      .focus()
+      .trigger('keydown', { key: 'Enter' });
+    cy.get('[title="Sort Z-A"]').click();
     const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(1).contains('1');
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
 
-    cy.get('[data-test-subj="dataGridHeaderCell-frame"]').click();
-    cy.contains('Sort A-Z').click();
+    cy.get('[data-test-subj="dataGridHeaderCell-frame"]')
+      .focus()
+      .trigger('keydown', { key: 'Enter' });
+    cy.get('[title="Sort A-Z"]').click();
     cy.get(firstRowSelector).eq(1).contains('88');
     cy.get(firstRowSelector).eq(2).contains('/');
   });
