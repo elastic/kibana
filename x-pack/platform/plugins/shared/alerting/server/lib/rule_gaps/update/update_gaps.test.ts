@@ -50,7 +50,7 @@ describe('updateGaps', () => {
       status: adHocRunStatus.COMPLETE,
     },
   ];
-  
+
   beforeEach(() => {
     jest.resetAllMocks();
     processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));

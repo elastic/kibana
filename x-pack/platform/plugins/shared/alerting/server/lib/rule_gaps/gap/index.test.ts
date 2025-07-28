@@ -50,7 +50,11 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:15:00.000Z',
       lte: '2024-01-01T00:30:00.000Z',
     };
-    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, filledIntervals: [partialFill] });
+    const gap = new Gap({
+      ruleId: 'some-rule-id',
+      range: baseRange,
+      filledIntervals: [partialFill],
+    });
     const filledDuration = (30 - 15) * 60 * 1000; // 15 min
 
     expect(gap.filledGapDurationMs).toBe(filledDuration);
@@ -64,7 +68,11 @@ describe('Gap Class Tests', () => {
       gte: '2024-01-01T00:40:00.000Z',
       lte: '2024-01-01T00:50:00.000Z',
     };
-    const gap = new Gap({ ruleId: 'some-rule-id', range: baseRange, inProgressIntervals: [inProgress] });
+    const gap = new Gap({
+      ruleId: 'some-rule-id',
+      range: baseRange,
+      inProgressIntervals: [inProgress],
+    });
 
     const inProgressDuration = (50 - 40) * 60 * 1000; // 10 min
     expect(gap.inProgressGapDurationMs).toBe(inProgressDuration);
