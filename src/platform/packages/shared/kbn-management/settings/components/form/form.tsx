@@ -87,7 +87,8 @@ export const Form = (props: FormProps) => {
       [id]: {
         ...change,
         scope,
-        needsReload: fields.some(
+        needsReload: fields.find((field) => field.id === id)?.requiresPageReload ?? false,
+
           (setting) =>
             Object.hasOwn({ ...unsavedChanges, [id]: change }, setting.id) &&
             setting.requiresPageReload
