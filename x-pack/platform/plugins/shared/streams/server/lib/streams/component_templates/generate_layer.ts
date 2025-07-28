@@ -85,7 +85,7 @@ export function generateLayer(
               ...properties,
               ...aliases,
             }
-          : properties,
+          : { ...properties, ...aliases },
       },
     },
     version: ASSET_VERSION,
