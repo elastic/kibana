@@ -50,8 +50,10 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
 }: {
   title: ReactNode;
   stackByField: string;
-
-  generateVisualizationQuery: (stackByValue: string) => EsqlQueryOrInvalidFields;
+  generateVisualizationQuery: (
+    stackByValue: string,
+    timerange: { from: string; to: string }
+  ) => EsqlQueryOrInvalidFields;
   generateTableQuery: (
     sortField: keyof TableItemType,
     sortDirection: 'asc' | 'desc',
@@ -74,8 +76,8 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
   );
 
   const visualizationQuery = useMemo(
-    () => generateVisualizationQuery(stackByField),
-    [generateVisualizationQuery, stackByField]
+    () => generateVisualizationQuery(stackByField, timerange),
+    [generateVisualizationQuery, stackByField, timerange]
   );
 
   const {
