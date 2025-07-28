@@ -239,9 +239,7 @@ export function WorkflowEventModal({
   };
 
   return (
-    <EuiModal onClose={onClose}>
-    <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
-    <EuiModal onClose={onClose} maxWidth={1400} style={{ width: '1200px' }}>
+    <EuiModal aria-labelledby={modalTitleId} onClose={onClose} maxWidth={1400} style={{ width: '1200px' }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
