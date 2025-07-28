@@ -116,6 +116,20 @@ export const selectTabRuntimeGlobalState = (
   };
 };
 
+export const selectTabRuntimeInternalState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): TabState['initialInternalState'] | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const savedSearch = tabRuntimeState?.stateContainer$.getValue()?.savedSearchState.getState();
+
+  if (!savedSearch) {
+    return undefined;
+  }
+
+  return { serializedSearchSource: savedSearch.searchSource.getSerializedFields() };
+};
+
 export const selectRestorableTabRuntimeHistogramLayoutProps = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string

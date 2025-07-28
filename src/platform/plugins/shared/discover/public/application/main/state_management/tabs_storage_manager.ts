@@ -27,6 +27,7 @@ export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
+  internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['lastPersistedGlobalState'] | undefined;
 };
@@ -67,11 +68,12 @@ export interface TabsStorageManager {
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
   persistLocally: (
     props: TabsInternalStatePayload,
-    getAppState: (tabId: string) => DiscoverAppState | undefined
+    getAppState: (tabId: string) => DiscoverAppState | undefined,
+    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'appState' | 'globalState'>
+    tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -150,14 +152,18 @@ export const createTabsStorageManager = ({
 
   const toTabStateInStorage = (
     tabState: TabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined
+    getAppState: (tabId: string) => DiscoverAppState | undefined,
+    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
   ): TabStateInLocalStorage => {
+    const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
+      getInternalState(tabId) || tabState.initialInternalState;
     const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
       getAppState(tabId) || tabState.initialAppState;
 
     return {
       id: tabState.id,
       label: tabState.label,
+      internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
       globalState: tabState.lastPersistedGlobalState || tabState.initialGlobalState,
     };
@@ -165,9 +171,10 @@ export const createTabsStorageManager = ({
 
   const toRecentlyClosedTabStateInStorage = (
     tabState: RecentlyClosedTabState,
-    getAppState: (tabId: string) => DiscoverAppState | undefined
+    getAppState: (tabId: string) => DiscoverAppState | undefined,
+    getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined
   ): RecentlyClosedTabStateInLocalStorage => {
-    const state = toTabStateInStorage(tabState, getAppState);
+    const state = toTabStateInStorage(tabState, getAppState, getInternalState);
     return {
       ...state,
       closedAt: tabState.closedAt,
@@ -185,6 +192,7 @@ export const createTabsStorageManager = ({
     tabStateInStorage: TabStateInLocalStorage,
     defaultTabState: Omit<TabState, keyof TabItem>
   ): TabState => {
+    const internalState = getDefinedStateOnly(tabStateInStorage.internalState);
     const appState = getDefinedStateOnly(tabStateInStorage.appState);
     const globalState = getDefinedStateOnly(
       tabStateInStorage.globalState || defaultTabState.lastPersistedGlobalState
@@ -192,6 +200,7 @@ export const createTabsStorageManager = ({
     return {
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
+      initialInternalState: internalState,
       initialAppState: appState,
       initialGlobalState: globalState,
       lastPersistedGlobalState: globalState || {},
@@ -259,7 +268,8 @@ export const createTabsStorageManager = ({
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
     { allTabs, selectedTabId, recentlyClosedTabs },
-    getAppState
+    getAppState,
+    getInternalState
   ) => {
     if (!enabled) {
       return;
@@ -270,12 +280,16 @@ export const createTabsStorageManager = ({
     const keptTabIds: Record<string, boolean> = {};
 
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) => {
-      const tabStateInStorage = toTabStateInStorage(tab, getAppState);
+      const tabStateInStorage = toTabStateInStorage(tab, getAppState, getInternalState);
       keptTabIds[tab.id] = true;
       return tabStateInStorage;
     });
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) => {
-      const tabStateInStorage = toRecentlyClosedTabStateInStorage(tab, getAppState);
+      const tabStateInStorage = toRecentlyClosedTabStateInStorage(
+        tab,
+        getAppState,
+        getInternalState
+      );
       keptTabIds[tab.id] = true;
       return tabStateInStorage;
     });
@@ -307,6 +321,7 @@ export const createTabsStorageManager = ({
           hasModifications = true;
           return {
             ...tab,
+            internalState: tabStatePartial.internalState,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
           };
@@ -348,6 +363,9 @@ export const createTabsStorageManager = ({
       const mappedTab: TabStateInLocalStorage = {
         id: rawTab.id,
         label: rawTab.label,
+        internalState: {
+          serializedSearchSource: rawTab.serializedSearchSource,
+        },
         appState: {
           columns: rawTab.columns,
           filters: rawTab.serializedSearchSource.filter,
