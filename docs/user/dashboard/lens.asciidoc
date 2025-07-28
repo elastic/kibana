@@ -443,7 +443,7 @@ If you've chosen to show missing values, you can also decide to extend data seri
 If you've chosen to show missing values, you can turn on this option to show gaps as a dotted line.
 
 **Point visibility**::
-For **Area** and **Line** charts. Use this option to show or hide data points. They're hidden by default.
+For **Area** and **Line** charts. Use this option to show or hide data points. Set to `Auto` by default: Points are visible unless the distance between them is too short.
 
 [float]
 ====== Tables
