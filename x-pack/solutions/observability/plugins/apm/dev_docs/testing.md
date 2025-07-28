@@ -175,13 +175,13 @@ Accessibility tests are added on the e2e with `checkA11y()`, they will run toget
 
 ```sh
 # Start server
-node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/functional/apps/apm/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
-APM tests are located in `x-pack/test/functional/apps/apm`.
+APM tests are located in `x-pack/solutions/observability/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b/x-pack/solutions/observability/plugins/apm/scripts/test/README.md
 

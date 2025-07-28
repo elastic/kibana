@@ -8,8 +8,7 @@
  */
 
 import { Reducer } from 'react';
-import { produce } from 'immer';
-import { identity } from 'fp-ts/function';
+import { cloneDeep } from 'lodash';
 
 import {
   EmbeddableConsoleView,
@@ -17,35 +16,33 @@ import {
   EmbeddedConsoleStore,
 } from '../../types/embeddable_console';
 
-export const initialValue: EmbeddedConsoleStore = produce<EmbeddedConsoleStore>(
-  {
-    consoleHasBeenOpened: false,
-    view: EmbeddableConsoleView.Closed,
-  },
-  identity
-);
+export const initialValue: EmbeddedConsoleStore = {
+  consoleHasBeenOpened: false,
+  view: EmbeddableConsoleView.Closed,
+};
 
-export const reducer: Reducer<EmbeddedConsoleStore, EmbeddedConsoleAction> = (state, action) =>
-  produce<EmbeddedConsoleStore>(state, (draft) => {
-    switch (action.type) {
-      case 'open':
-        const newView = action.payload?.alternateView
-          ? EmbeddableConsoleView.Alternate
-          : EmbeddableConsoleView.Console;
-        if (state.view !== newView) {
-          draft.consoleHasBeenOpened = true;
-          draft.view = newView;
-          draft.loadFromContent = action.payload?.content;
-          return draft;
-        }
-        break;
-      case 'close':
-        if (state.view !== EmbeddableConsoleView.Closed) {
-          draft.view = EmbeddableConsoleView.Closed;
-          draft.loadFromContent = undefined;
-          return draft;
-        }
-        break;
-    }
-    return state;
-  });
+export const reducer: Reducer<EmbeddedConsoleStore, EmbeddedConsoleAction> = (state, action) => {
+  switch (action.type) {
+    case 'open':
+      const newView = action.payload?.alternateView
+        ? EmbeddableConsoleView.Alternate
+        : EmbeddableConsoleView.Console;
+      if (state.view !== newView) {
+        const draft = cloneDeep(state);
+        draft.consoleHasBeenOpened = true;
+        draft.view = newView;
+        draft.loadFromContent = action.payload?.content;
+        return draft;
+      }
+      break;
+    case 'close':
+      if (state.view !== EmbeddableConsoleView.Closed) {
+        const draft = cloneDeep(state);
+        draft.view = EmbeddableConsoleView.Closed;
+        draft.loadFromContent = undefined;
+        return draft;
+      }
+      break;
+  }
+  return state;
+};
