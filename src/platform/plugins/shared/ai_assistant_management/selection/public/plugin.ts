@@ -12,7 +12,7 @@ import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
@@ -31,9 +31,8 @@ export interface SetupDependencies {
   serverless?: ServerlessPluginSetup;
 }
 
-export interface StartDependencies {
-  spaces?: SpacesPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDependencies {}
 
 export class AIAssistantManagementPlugin
   implements
