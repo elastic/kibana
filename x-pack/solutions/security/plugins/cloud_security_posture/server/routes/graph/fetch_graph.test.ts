@@ -24,6 +24,19 @@ describe('fetchGraph', () => {
       toArrowReader: jest.fn(),
     });
 
+    // Mock the enrich.getPolicy method with default behavior (policy exists)
+    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+      policies: [
+        {
+          config: {
+            match: {
+              name: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+            },
+          },
+        },
+      ],
+    });
+
     logger = {
       trace: jest.fn(),
       info: jest.fn(),
@@ -122,7 +135,20 @@ describe('fetchGraph', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
-  it('should include entity enrichment when isAssetInventoryEnabled is true', async () => {
+  it('should include entity enrichment when isAssetInventoryEnabled and isEnrichPolicyExists are both true', async () => {
+    // Mock the enrich.getPolicy method to return a policy that exists
+    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+      policies: [
+        {
+          config: {
+            match: {
+              name: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+            },
+          },
+        },
+      ],
+    });
+
     const validIndexPatterns = ['valid_index'];
     const params = {
       esClient,
@@ -147,7 +173,6 @@ describe('fetchGraph', () => {
     expect(query).toContain(
       `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
     );
-
     expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
     expect(query).toContain(
       `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
@@ -169,6 +194,110 @@ describe('fetchGraph', () => {
 
     expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
+    expect(result).toEqual([{ id: 'dummy' }]);
+  });
+
+  it('should not include entity enrichment when isAssetInventoryEnabled is true but isEnrichPolicyExists is false', async () => {
+    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+      policies: [],
+    });
+
+    const validIndexPatterns = ['valid_index'];
+    const params = {
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: validIndexPatterns,
+      esQuery: undefined as EsQuery | undefined,
+      isAssetInventoryEnabled: true,
+    };
+
+    const result = await fetchGraph(params);
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = esqlCallArgs[0].query;
+
+    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).not.toContain(
+      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
+    );
+    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).not.toContain(
+      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
+    );
+
+    // Verify that the STATS clause does NOT include actorsDocData and targetsDocData
+    expect(query).not.toContain(`actorsDocData = VALUES(actorDocData)`);
+    expect(query).not.toContain(`targetsDocData = VALUES(targetDocData)`);
+    expect(result).toEqual([{ id: 'dummy' }]);
+  });
+
+  it('should not include entity enrichment when isAssetInventoryEnabled is false', async () => {
+    const validIndexPatterns = ['valid_index'];
+    const params = {
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: validIndexPatterns,
+      esQuery: undefined as EsQuery | undefined,
+      isAssetInventoryEnabled: false,
+    };
+
+    const result = await fetchGraph(params);
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = esqlCallArgs[0].query;
+
+    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).not.toContain(
+      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
+    );
+    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).not.toContain(
+      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
+    );
+
+    expect(query).not.toContain(`actorsDocData = VALUES(actorDocData)`);
+    expect(query).not.toContain(`targetsDocData = VALUES(targetDocData)`);
+    expect(result).toEqual([{ id: 'dummy' }]);
+  });
+
+  it('should not include entity enrichment when the enrich policy check fails', async () => {
+    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest
+      .fn()
+      .mockRejectedValue(new Error('Failed to get enrich policy'));
+
+    const validIndexPatterns = ['valid_index'];
+    const params = {
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: validIndexPatterns,
+      esQuery: undefined as EsQuery | undefined,
+      isAssetInventoryEnabled: true,
+    };
+
+    const result = await fetchGraph(params);
+
+    expect(logger.error).toHaveBeenCalled();
+
+    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    const query = esqlCallArgs[0].query;
+
+    // Verify that the query does NOT include enrichment
+    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 });

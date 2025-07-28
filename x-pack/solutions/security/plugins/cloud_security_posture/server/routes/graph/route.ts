@@ -56,7 +56,6 @@ export const defineGraphRoute = (router: CspRouter) =>
         if (!isGraphEnabled) {
           return response.notFound();
         }
-        cspContext.logger.debug(`originEventIds: ${JSON.stringify(originEventIds)}`);
 
         try {
           const resp = await getGraphV1({
