@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { ContentPackStream } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 
-export const test_contentPackEntry = ({
+export const testContentPackEntry = ({
   name,
   fields = {},
   routing = [],
@@ -17,7 +18,7 @@ export const test_contentPackEntry = ({
   fields?: FieldDefinition;
   routing?: RoutingDefinition[];
   queries?: StreamQuery[];
-}) => ({
+}): ContentPackStream => ({
   type: 'stream' as const,
   name,
   request: {

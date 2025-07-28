@@ -6,24 +6,24 @@
  */
 
 import { asTree, mergeTrees } from './tree';
-import { test_contentPackEntry } from './test.utils';
+import { testContentPackEntry } from './test.utils';
 
 describe('content pack stream helpers', () => {
   describe('asTree', () => {
     it('builds a complete tree when includeAll is provided', () => {
-      const root = test_contentPackEntry({
+      const root = testContentPackEntry({
         name: 'root',
         routing: [
           { destination: 'root.child1', if: { always: {} } },
           { destination: 'root.child2', if: { always: {} } },
         ],
       });
-      const child1 = test_contentPackEntry({
+      const child1 = testContentPackEntry({
         name: 'root.child1',
         routing: [{ destination: 'root.child1.nested', if: { always: {} } }],
       });
-      const child2 = test_contentPackEntry({ name: 'root.child2' });
-      const child1Nested = test_contentPackEntry({ name: 'root.child1.nested' });
+      const child2 = testContentPackEntry({ name: 'root.child2' });
+      const child1Nested = testContentPackEntry({ name: 'root.child1.nested' });
 
       const tree = asTree({
         root: 'root',
@@ -39,19 +39,19 @@ describe('content pack stream helpers', () => {
     });
 
     it('allows nested includeAll', () => {
-      const root = test_contentPackEntry({
+      const root = testContentPackEntry({
         name: 'root',
         routing: [
           { destination: 'root.child1', if: { always: {} } },
           { destination: 'root.child2', if: { always: {} } },
         ],
       });
-      const child1 = test_contentPackEntry({
+      const child1 = testContentPackEntry({
         name: 'root.child1',
         routing: [{ destination: 'root.child1.nested', if: { always: {} } }],
       });
-      const child2 = test_contentPackEntry({ name: 'root.child2' });
-      const child1Nested = test_contentPackEntry({
+      const child2 = testContentPackEntry({ name: 'root.child2' });
+      const child1Nested = testContentPackEntry({
         name: 'root.child1.nested',
         queries: [{ id: 'keep', title: 'keep query', kql: { query: 'keep' } }],
       });
@@ -83,7 +83,7 @@ describe('content pack stream helpers', () => {
     });
 
     it('filters streams and queries according to include spec', () => {
-      const root = test_contentPackEntry({
+      const root = testContentPackEntry({
         name: 'root',
         queries: [
           { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
@@ -108,11 +108,11 @@ describe('content pack stream helpers', () => {
     });
 
     it('throws when included stream or query do not exist', () => {
-      const root = test_contentPackEntry({
+      const root = testContentPackEntry({
         name: 'root',
         routing: [{ destination: 'root.child1', if: { always: {} } }],
       });
-      const child1 = test_contentPackEntry({ name: 'root.child1' });
+      const child1 = testContentPackEntry({ name: 'root.child1' });
 
       expect(() =>
         asTree({
@@ -152,12 +152,12 @@ describe('content pack stream helpers', () => {
       const existing = asTree({
         root: 'root',
         streams: [
-          test_contentPackEntry({
+          testContentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
             fields: { existing: { type: 'keyword' } },
           }),
-          test_contentPackEntry({ name: 'root.a' }),
+          testContentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -165,12 +165,12 @@ describe('content pack stream helpers', () => {
       const incoming = asTree({
         root: 'root',
         streams: [
-          test_contentPackEntry({
+          testContentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.b', if: { always: {} } }],
             fields: { custom: { type: 'keyword' } },
           }),
-          test_contentPackEntry({ name: 'root.b' }),
+          testContentPackEntry({ name: 'root.b' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -190,22 +190,22 @@ describe('content pack stream helpers', () => {
       const existing = asTree({
         root: 'root',
         streams: [
-          test_contentPackEntry({
+          testContentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
           }),
-          test_contentPackEntry({ name: 'root.a' }),
+          testContentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
       const incoming = asTree({
         root: 'root',
         streams: [
-          test_contentPackEntry({
+          testContentPackEntry({
             name: 'root',
             routing: [{ destination: 'root.a', if: { always: {} } }],
           }),
-          test_contentPackEntry({ name: 'root.a' }),
+          testContentPackEntry({ name: 'root.a' }),
         ],
         include: { objects: { all: {} } },
       });
@@ -218,12 +218,12 @@ describe('content pack stream helpers', () => {
     it('throws on conflicting field mapping', () => {
       const existing = asTree({
         root: 'root',
-        streams: [test_contentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
+        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'keyword' } } })],
         include: { objects: { all: {} } },
       });
       const incoming = asTree({
         root: 'root',
-        streams: [test_contentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
+        streams: [testContentPackEntry({ name: 'root', fields: { custom: { type: 'long' } } })],
         include: { objects: { all: {} } },
       });
 

@@ -9,10 +9,10 @@ import { sortBy } from 'lodash';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import { prepareStreamsForExport } from './export';
 import { asTree } from './tree';
-import { test_contentPackEntry } from './test.utils';
+import { testContentPackEntry } from './test.utils';
 
 const streams = [
-  test_contentPackEntry({
+  testContentPackEntry({
     name: 'logs',
     routing: [
       { destination: 'logs.foo', if: { always: {} } },
@@ -20,12 +20,12 @@ const streams = [
     ],
     queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
   }),
-  test_contentPackEntry({
+  testContentPackEntry({
     name: 'logs.foo',
     routing: [{ destination: 'logs.foo.bar', if: { always: {} } }],
   }),
-  test_contentPackEntry({ name: 'logs.foo.bar' }),
-  test_contentPackEntry({
+  testContentPackEntry({ name: 'logs.foo.bar' }),
+  testContentPackEntry({
     name: 'logs.hello',
     queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
   }),
@@ -44,7 +44,7 @@ describe('content pack export', () => {
       inheritedFields: { inherited_field_1: { type: 'keyword' } },
     });
     expect(sortBy(exportedStreams, 'name')).toEqual([
-      test_contentPackEntry({
+      testContentPackEntry({
         name: ROOT_STREAM_ID,
         fields: { inherited_field_1: { type: 'keyword' } },
         routing: [
@@ -53,12 +53,12 @@ describe('content pack export', () => {
         ],
         queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
       }),
-      test_contentPackEntry({
+      testContentPackEntry({
         name: 'foo',
         routing: [{ destination: 'foo.bar', if: { always: {} } }],
       }),
-      test_contentPackEntry({ name: 'foo.bar' }),
-      test_contentPackEntry({
+      testContentPackEntry({ name: 'foo.bar' }),
+      testContentPackEntry({
         name: 'hello',
         queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
       }),
@@ -87,11 +87,11 @@ describe('content pack export', () => {
 
     const exportedStreams = prepareStreamsForExport({ tree, inheritedFields: {} });
     expect(sortBy(exportedStreams, 'name')).toEqual([
-      test_contentPackEntry({
+      testContentPackEntry({
         name: ROOT_STREAM_ID,
         routing: [{ destination: 'hello', if: { always: {} } }],
       }),
-      test_contentPackEntry({
+      testContentPackEntry({
         name: 'hello',
         queries: [{ id: 'hello-query', title: 'hello-query', kql: { query: 'hello' } }],
       }),
