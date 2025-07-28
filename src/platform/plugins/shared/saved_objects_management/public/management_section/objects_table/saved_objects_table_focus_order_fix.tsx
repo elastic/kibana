@@ -337,12 +337,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
   };
 
+  // Updated handler to focus Delete button after selection
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
     this.setState({ selectedSavedObjects: selection }, () => {
       if (selection.length > 0 && this.deleteButtonRef.current) {
-        if (this.deleteButtonRef.current && !this.deleteButtonRef.current.disabled) {
-          this.deleteButtonRef.current.focus();
-        }
+        this.deleteButtonRef.current.focus();
       }
     });
   };
@@ -746,7 +745,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
-            deleteButtonRef={this.deleteButtonRef}
           />
         </RedirectAppLinks>
       </div>
