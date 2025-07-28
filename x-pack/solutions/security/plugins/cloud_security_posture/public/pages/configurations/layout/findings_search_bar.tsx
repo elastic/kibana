@@ -15,7 +15,8 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
+import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
@@ -49,25 +50,16 @@ export const FindingsSearchBar = ({
 
   const { dataView } = useDataViewContext();
 
-  const queryClient = useQueryClient();
+  const misconfigurationRefreshQueryKey = CDR_MISCONFIGURATIONS_INDEX_PATTERN;
 
-  const misconfigurationRefreshQueryKey = [CDR_MISCONFIGURATIONS_INDEX_PATTERN];
-
-  const vulnerabilityRefreshQueryKey = [CDR_VULNERABILITIES_INDEX_PATTERN];
+  const vulnerabilityRefreshQueryKey = CDR_VULNERABILITIES_INDEX_PATTERN;
 
   const refreshQueryKey =
-    dataView.id === 'security_solution_cdr_latest_vulnerabilities-default'
+    dataView.id === CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX + '-default'
       ? vulnerabilityRefreshQueryKey
       : misconfigurationRefreshQueryKey;
-  const isFetchingData = useIsFetching({
-    queryKey: refreshQueryKey,
-  });
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({
-      queryKey: refreshQueryKey,
-    });
-  };
+  const { refresh, isRefreshing } = useRefresh(refreshQueryKey);
 
   let searchBarNode = (
     <div css={getContainerStyle(euiTheme)}>
@@ -76,14 +68,9 @@ export const FindingsSearchBar = ({
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}
-        isLoading={loading || isFetchingData > 0}
+        isLoading={loading || isRefreshing}
         indexPatterns={[dataView]}
-        onQuerySubmit={(payload, isUpdated) => {
-          if (isUpdated) setQuery(payload);
-          if (!isUpdated) {
-            handleRefresh();
-          }
-        }}
+        onQuerySubmit={(payload, isUpdated) => (isUpdated ? setQuery(payload) : refresh())}
         onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
         placeholder={placeholder}
         query={{
