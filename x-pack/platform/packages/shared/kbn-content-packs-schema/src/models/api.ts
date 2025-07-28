@@ -24,7 +24,7 @@ const includeAllSchema = z.object({
   objects: z.object({ all: z.strictObject({}) }),
 });
 
-export const isIncludeAll = (value: { objects: unknown }): value is ContentPackIncludeAll => {
+export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
   return includeAllSchema.safeParse(value).success;
 };
 
@@ -35,7 +35,7 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
       objects: z.object({
         queries: z.array(z.object({ id: z.string() })),
         routing: z.array(
-          z.union([contentPackIncludedObjectsSchema, includeAllSchema]).and(
+          contentPackIncludedObjectsSchema.and(
             z.object({
               destination: z.string(),
             })
@@ -45,9 +45,3 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
     }),
   ])
 );
-
-export const isContentPackIncludedObjects = (value: {
-  objects: unknown;
-}): value is ContentPackIncludedObjects => {
-  return contentPackIncludedObjectsSchema.safeParse(value).success;
-};
