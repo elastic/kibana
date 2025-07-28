@@ -168,29 +168,20 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    // 1. Check for ENRICH policy statements
     expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
-    expect(query).toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
-    );
+    expect(query).toContain(`WITH actorEntityName = entity.name, actorEntityType = entity.type`);
     expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
-    expect(query).toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
-    );
+    expect(query).toContain(`WITH targetEntityName = entity.name, targetEntityType = entity.type`);
 
-    // 2. Check for actor and target document data evaluation and STATS with individual assertions
-    // This approach is more resilient to formatting differences
     expect(query).toContain('EVAL actorDocData = CONCAT');
     expect(query).toContain('actor.entity.id');
     expect(query).toContain('actorEntityName');
     expect(query).toContain('actorEntityType');
-    expect(query).toContain('actorSourceIndex');
 
     expect(query).toContain('EVAL targetDocData = CONCAT');
     expect(query).toContain('target.entity.id');
     expect(query).toContain('targetEntityName');
     expect(query).toContain('targetEntityType');
-    expect(query).toContain('targetSourceIndex');
 
     expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
@@ -230,7 +221,6 @@ describe('fetchGraph', () => {
       `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
     );
 
-    // Verify that the STATS clause does NOT include actorsDocData and targetsDocData
     expect(query).not.toContain(`actorsDocData = VALUES(actorDocData)`);
     expect(query).not.toContain(`targetsDocData = VALUES(targetDocData)`);
     expect(result).toEqual([{ id: 'dummy' }]);
@@ -296,7 +286,6 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    // Verify that the query does NOT include enrichment
     expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });

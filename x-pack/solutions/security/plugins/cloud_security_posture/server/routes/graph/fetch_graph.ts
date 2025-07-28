@@ -15,6 +15,16 @@ import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/g
 import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../../../common/constants';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
+interface BuildEsqlQueryParams {
+  fromClause: string;
+  whereAndOriginClause: string;
+  documentMetadataClause: string;
+  statsClause: string;
+  isAssetInventoryEnabled?: boolean;
+  isEnrichPolicyExists: boolean;
+  enrichPolicyName: string;
+}
+
 export const fetchGraph = async ({
   esClient,
   logger,
@@ -79,24 +89,17 @@ export const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false';
 
-  // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
-  // TODO: We should use the appropriate specific index for each entity type in the future
-  let query: string;
+  // Base query components shared between both scenarios
+  const fromClause = `FROM ${indexPatterns
+    .filter((indexPattern) => indexPattern.length > 0)
+    .join(',')} METADATA _id, _index`;
 
-  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
-    // Query with entity enrichment
-    query = `FROM ${indexPatterns
-      .filter((indexPattern) => indexPattern.length > 0)
-      .join(',')} METADATA _id, _index
- | ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source
- | ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+  const whereAndOriginClause = `| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${originEventClause}
-| EVAL isOriginAlert = isOrigin AND ${originAlertClause}
-// Aggregate document's data for popover expansion and metadata enhancements
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
+| EVAL isOriginAlert = isOrigin AND ${originAlertClause}`;
+
+  const documentMetadataClause = `// Aggregate document's data for popover expansion and metadata enhancements
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 | EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
 | EVAL docData = CONCAT("{",
@@ -111,67 +114,9 @@ export const fetchGraph = async ({
       "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
     "}"), ""),`
         : ''
-    }
-// contact actor and target entities data
-| EVAL actorDocData = CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
-    ",\\"index\\":\\"", actorSourceIndex, "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-    "}",
-  "}")
-| EVAL targetDocData = CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
-    ",\\"index\\":\\"", targetSourceIndex, "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-    "}",
-  "}")
-| STATS badge = COUNT(*),
-  docs = VALUES(docData),
-  actorsDocData = VALUES(actorDocData),
-  targetsDocData = VALUES(targetDocData),
-  ips = VALUES(related.ip),
-  // hosts = VALUES(related.hosts),
-  users = VALUES(related.user),
-  isAlert = MV_MAX(VALUES(isAlert))
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      isOrigin,
-      isOriginAlert
-| LIMIT 1000
-| SORT isOrigin DESC, action`;
-  } else {
-    // Query without entity enrichment
-    query = `FROM ${indexPatterns
-      .filter((indexPattern) => indexPattern.length > 0)
-      .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-// Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${originEventClause}
-| EVAL isOriginAlert = isOrigin AND ${originAlertClause}
-// Aggregate document's data for popover expansion and metadata enhancements
-| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
-| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
-| EVAL docData = CONCAT("{",
-    "\\"id\\":\\"", _id, "\\"",
-    ",\\"type\\":\\"", docType, "\\"",
-    ",\\"index\\":\\"", _index, "\\"",
-  "}")
-    ${
-      // ESQL complains about missing field's mapping when we don't fetch from alerts index
-      alertsMappingsIncluded
-        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
-      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
-    "}"), ""),`
-        : ''
-    }
-| STATS badge = COUNT(*),
+    }`;
+
+  const statsClause = `| STATS badge = COUNT(*),
   docs = VALUES(docData),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
@@ -184,7 +129,19 @@ export const fetchGraph = async ({
       isOriginAlert
 | LIMIT 1000
 | SORT isOrigin DESC, action`;
-  }
+
+  // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
+  // TODO: We should use the appropriate specific index for each entity type once it's fixed
+
+  const query = buildEsqlQuery({
+    fromClause,
+    whereAndOriginClause,
+    documentMetadataClause,
+    statsClause,
+    isAssetInventoryEnabled,
+    isEnrichPolicyExists,
+    enrichPolicyName: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+  });
 
   logger.trace(`Executing query [${query}]`);
 
@@ -252,3 +209,67 @@ const buildDslFilter = (
     ],
   },
 });
+
+const buildEsqlQuery = ({
+  fromClause,
+  whereAndOriginClause,
+  documentMetadataClause,
+  statsClause,
+  isAssetInventoryEnabled,
+  isEnrichPolicyExists,
+  enrichPolicyName,
+}: BuildEsqlQueryParams): string => {
+  const limitSortClause = `| LIMIT 1000
+| SORT isOrigin DESC, action`;
+
+  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
+    // Enrichment-specific parts
+    const enrichClause = ` | ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
+ | ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`;
+
+    const entityDataClause = `// contact actor and target entities data
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actor.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", actorEntityName, "\\"",
+      ",\\"type\\":\\"", actorEntityType, "\\"",
+    "}",
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", target.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", targetEntityName, "\\"",
+      ",\\"type\\":\\"", targetEntityType, "\\"",
+    "}",
+  "}")`;
+
+    const enrichedStatsClause = `| STATS badge = COUNT(*),
+  docs = VALUES(docData),
+  actorsDocData = VALUES(actorDocData),
+  targetsDocData = VALUES(targetDocData),
+  ips = VALUES(related.ip),
+  // hosts = VALUES(related.hosts),
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
+    BY actorIds = actor.entity.id,
+      action = event.action,
+      targetIds = target.entity.id,
+      isOrigin,
+      isOriginAlert`;
+
+    // Query with entity enrichment
+    return `${fromClause}${enrichClause}${whereAndOriginClause}
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+${documentMetadataClause}${entityDataClause}
+${enrichedStatsClause}
+${limitSortClause}`;
+  } else {
+    // Query without entity enrichment - simpler case
+    return `${fromClause}${whereAndOriginClause}
+// Aggregate document's data for popover expansion and metadata enhancements
+${documentMetadataClause}${statsClause}`;
+  }
+};
