@@ -47,7 +47,6 @@ export const withDiagnoseButton = <P extends object>(WrappedComponent: React.Com
                         'xpack.apm.componentWithDiagnoseButton.diagnosethisconnectionButton.ariaLabel',
                         { defaultMessage: 'Diagnose this connection' }
                       )}
-                      // iconType="console"
                       data-test-subj="diagnose-connection-button"
                       onClick={onDiagnoseClick}
                       size="s"

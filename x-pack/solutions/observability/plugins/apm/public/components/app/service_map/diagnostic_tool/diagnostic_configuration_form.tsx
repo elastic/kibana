@@ -23,7 +23,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { DiagnosticFormState } from './types';
 
 interface DiagnosticConfigurationFormProps {
-  selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
   onSelectionUpdate: ({
     field,
     value,
@@ -31,13 +30,12 @@ interface DiagnosticConfigurationFormProps {
     field: keyof DiagnosticFormState;
     value?: string;
   }) => void;
-  form: DiagnosticFormState;
+  sourceNode?: string;
 }
 
 export function DiagnosticConfigurationForm({
-  selectedNode,
   onSelectionUpdate,
-  form,
+  sourceNode,
 }: DiagnosticConfigurationFormProps) {
   const {
     query: { rangeFrom, rangeTo },
@@ -82,6 +80,7 @@ export function DiagnosticConfigurationForm({
                 onChange={(selectedValue) =>
                   onSelectionUpdate({ field: 'sourceNode', value: selectedValue })
                 }
+                defaultValue={sourceNode}
                 start={start}
                 end={end}
               />

@@ -113,6 +113,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`,
   };
+
   const selectedElementData = selectedElement?.data() ?? {};
   const popoverRef = useRef<EuiPopover>(null);
   const selectedElementId = selectedElementData.id;
@@ -219,11 +220,13 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
           )}
         </EuiFlexGroup>
       </EuiPopover>
-      <DiagnosticFlyout
-        selectedNode={selectedElementData}
-        isOpen={isDiagnosticFlyoutOpen}
-        onClose={() => setIsDiagnosticFlyoutOpen(false)}
-      />
+      {selectedElementData.id && (
+        <DiagnosticFlyout
+          selectedNode={selectedElementData}
+          isOpen={isDiagnosticFlyoutOpen}
+          onClose={() => setIsDiagnosticFlyoutOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -39,7 +39,7 @@ import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
+  selectedNode: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): string[] {
@@ -79,11 +79,13 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setFormState] = useState<DiagnosticFormState>({
-    sourceNode: undefined,
+    sourceNode: selectedNode.id,
     destinationNode: undefined,
     traceId: undefined,
     isValid: false,
   });
+
+  console.log('form', form);
 
   const handleSelectionUpdate = useCallback(
     ({ field, value }: { field: keyof DiagnosticFormState; value?: string }) => {
@@ -172,8 +174,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         }}
       >
         <DiagnosticConfigurationForm
-          form={form}
-          selectedNode={selectedNode}
+          sourceNode={form.sourceNode}
           onSelectionUpdate={handleSelectionUpdate}
         />
         <EuiSpacer size="m" />
