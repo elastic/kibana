@@ -50,24 +50,21 @@ export const AwsInputVarFields = ({
       values: { field: label },
     });
 
-  const awsFields = fields.map((field) => {
-    const varDef = findVariableDef(packageInfo, field.id);
-    if (varDef) {
-      return {
-        ...field,
-        varDef,
-        dataTestSubj: field.dataTestSubj || `awsInputVarField-${field.id}`,
-      };
-    }
-    return null;
-  });
+  // const awsFields = fields.map((field) => {
+  //   const varDef = findVariableDef(packageInfo, field.id);
+  //   if (varDef) {
+  //     return {
+  //       ...field,
+  //       varDef,
+  //       dataTestSubj: field.dataTestSubj || `awsInputVarField-${field.id}`,
+  //     };
+  //   }
+  //   return null;
+  // });
 
   return (
     <div>
-      {awsFields.map((field) => {
-        if (!field) {
-          return null; // Skip fields that do not have a variable definition
-        }
+      {fields.map((field) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = getInvalidError(field.label);
 
@@ -78,13 +75,17 @@ export const AwsInputVarFields = ({
               <div css={passwordFieldStyles}>
                 <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                   <LazyPackagePolicyInputVarField
-                    varDef={field.varDef}
+                    varDef={{
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      ...findVariableDef(packageInfo, field.id)!,
+                      required: true,
+                      type: 'password',
+                    }}
                     value={field.value || ''}
                     onChange={(value) => onChange(field.id, value)}
                     errors={invalid ? [invalidError] : []}
                     forceShowErrors={invalid}
                     isEditPage={true}
-                    data-test-subj={field.dataTestSubj}
                   />
                 </Suspense>
               </div>

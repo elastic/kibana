@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -140,7 +140,7 @@ UseLoadFleetExtensionProps) => {
   // console.log(newPolicy.inputs.map((newInputs) => newInputs.enabled));
   // console.log(input);
 
-  const [isValid, setIsValid] = useState(true);
+  const isValidRef = useRef(true);
   const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
@@ -151,12 +151,12 @@ UseLoadFleetExtensionProps) => {
   const updatePolicy = useCallback(
     (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
       onChange({
-        isValid,
+        isValid: isValidRef.current,
         updatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isLoading, isValid, onChange]
+    [isLoading, isValidRef, onChange]
   );
 
   /**
@@ -197,8 +197,8 @@ UseLoadFleetExtensionProps) => {
     setIsLoading(false);
   }
 
-  if ((isSubscriptionValid && !isValid) || (!isValid && isServerless)) {
-    setIsValid(true);
+  if ((isSubscriptionValid && !isValidRef.current) || (!isValidRef.current && isServerless)) {
+    isValidRef.current = true;
   }
 
   if (
@@ -213,7 +213,7 @@ UseLoadFleetExtensionProps) => {
 
   return {
     isLoading,
-    isValid,
+    isValid: isValidRef.current,
     isSubscriptionValid,
     input,
     setEnabledPolicyInput,
