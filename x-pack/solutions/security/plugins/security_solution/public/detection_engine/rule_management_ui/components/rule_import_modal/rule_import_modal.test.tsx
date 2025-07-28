@@ -40,16 +40,16 @@ const mockInvalidateFindRulesQuery = jest.fn();
 const mockInvalidateFetchCoverageOverviewQuery = jest.fn();
 const mockInvalidateFetchRuleManagementFilters = jest.fn();
 const mockInvalidateFetchPrebuiltRuleBaseVerison = jest.fn();
-(useInvalidateFindRulesQuery as jest.Mock).mockImplementation(() => mockInvalidateFindRulesQuery);
-(useInvalidateFetchCoverageOverviewQuery as jest.Mock).mockImplementation(
-  () => mockInvalidateFetchCoverageOverviewQuery
-);
-(useInvalidateFetchRuleManagementFiltersQuery as jest.Mock).mockImplementation(
-  () => mockInvalidateFetchRuleManagementFilters
-);
-(useInvalidateFetchPrebuiltRuleBaseVersionQuery as jest.Mock).mockImplementation(
-  () => mockInvalidateFetchPrebuiltRuleBaseVerison
-);
+jest.mocked(useInvalidateFindRulesQuery).mockReturnValue(mockInvalidateFindRulesQuery);
+jest
+  .mocked(useInvalidateFetchCoverageOverviewQuery)
+  .mockReturnValue(mockInvalidateFetchCoverageOverviewQuery);
+jest
+  .mocked(useInvalidateFetchRuleManagementFiltersQuery)
+  .mockReturnValue(mockInvalidateFetchRuleManagementFilters);
+jest
+  .mocked(useInvalidateFetchPrebuiltRuleBaseVersionQuery)
+  .mockReturnValue(mockInvalidateFetchPrebuiltRuleBaseVerison);
 
 const file = new File(['file'], 'rules.json', { type: 'application/x-ndjson' });
 
@@ -69,20 +69,15 @@ describe('RuleImportModal', () => {
       </ReactQueryClientProvider>
     );
 
-    await waitFor(() => {
-      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
-      });
-    });
+    fireEvent.change(getByTestId('rule-file-picker'), { target: { files: [file] } });
+    fireEvent.click(getByTestId('import-data-modal-button'));
 
     await waitFor(() => {
-      fireEvent.click(getByTestId('import-data-modal-button') as HTMLButtonElement);
+      expect(mockInvalidateFindRulesQuery).toHaveBeenCalled();
+      expect(mockInvalidateFetchCoverageOverviewQuery).toHaveBeenCalled();
+      expect(mockInvalidateFetchRuleManagementFilters).toHaveBeenCalled();
+      expect(mockInvalidateFetchPrebuiltRuleBaseVerison).toHaveBeenCalled();
     });
-
-    expect(mockInvalidateFindRulesQuery).toHaveBeenCalled();
-    expect(mockInvalidateFetchCoverageOverviewQuery).toHaveBeenCalled();
-    expect(mockInvalidateFetchRuleManagementFilters).toHaveBeenCalled();
-    expect(mockInvalidateFetchPrebuiltRuleBaseVerison).toHaveBeenCalled();
   });
 
   test('should uncheck the selected checkboxes after importing new file', async () => {
