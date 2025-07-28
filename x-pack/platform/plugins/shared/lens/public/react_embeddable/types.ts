@@ -47,9 +47,9 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
   OverlayRef,
-  SavedObjectReference,
   ThemeServiceStart,
 } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
@@ -187,7 +187,7 @@ interface ContentManagementProps {
 }
 
 export type LensPropsVariants = (LensByValue & LensByReference) & {
-  references?: SavedObjectReference[];
+  references?: Reference[];
 };
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {

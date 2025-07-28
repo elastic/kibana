@@ -32,23 +32,19 @@ import { GrokDebuggerPageObject } from '@kbn/test-suites-xpack-platform/function
 import { LicenseManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/license_management_page';
 import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
 import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
+import { IngestPipelinesPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/ingest_pipelines_page';
+import { IndexLifecycleManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_lifecycle_management_page';
+import { LogstashPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/logstash_page';
+import { RollupPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/rollup_page';
+import { RemoteClustersPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/remote_clusters_page';
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
-import { GeoFileUploadPageObject } from './geo_file_upload';
-import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
-import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
-import { LogstashPageObject } from './logstash_page';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
-import { RemoteClustersPageProvider } from './remote_clusters_page';
-import { RollupPageObject } from './rollup_page';
-import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
-import { StatusPageObject } from './status_page';
-import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
@@ -66,7 +62,6 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
-  geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
@@ -95,13 +90,10 @@ export const pageObjects = {
   searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
-  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
-  statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
-  uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
 };
