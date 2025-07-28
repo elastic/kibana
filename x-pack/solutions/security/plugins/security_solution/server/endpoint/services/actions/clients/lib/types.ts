@@ -205,5 +205,5 @@ export interface ResponseActionsClient {
  */
 export type ResponseActionsClientMethods = keyof Omit<
   ResponseActionsClient,
-  'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+  'processPendingActions' | 'getFileInfo' | 'getFileDownload' | 'getCustomScripts'
 >;

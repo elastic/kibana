@@ -52,6 +52,7 @@ import type {
   CommonResponseActionMethodOptions,
   CustomScriptsResponse,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
 } from '../lib/types';
 import type {
@@ -73,6 +74,8 @@ import type {
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
   ResponseActionParametersWithProcessName,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -93,6 +96,7 @@ import type {
   ResponseActionGetFileRequestBody,
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
+  RunScriptActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -1019,9 +1023,37 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
+  async runscript(
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `'runscript' response action not supported for [${this.agentType}]`
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      ResponseActionRunScriptOutputContent
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'runscript',
+    };
+
+    // Below code is temporary only in order to ensure tests don't fail.
+    // implementation will be done with team issue #13284
+    throw (await this.validateRequest(reqIndexOptions)).error;
+  }
+
   async getCustomScripts({
     osType,
-  }: Omit<CustomScriptsRequestQueryParams, 'agentType'>): Promise<CustomScriptsResponse> {
+  }: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {}): Promise<CustomScriptsResponse> {
     if (
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
     ) {
