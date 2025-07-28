@@ -16,7 +16,7 @@ import type {
 import { InferencePlugin } from './plugin';
 
 export type { InferencePublicSetup, InferencePublicStart };
-
+export { correctCommonEsqlMistakes } from '../common/tasks/nl_to_esql';
 export const plugin: PluginInitializer<
   InferencePublicSetup,
   InferencePublicStart,

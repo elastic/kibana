@@ -24,13 +24,29 @@ import {
   type LensXYConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { z } from '@kbn/zod';
 import { pick } from 'lodash';
-import { DashboardApi } from '../../dashboard_api/types';
+import {
+  useEuiTheme,
+  EuiFlyoutHeader,
+  EuiFieldText,
+  EuiTextArea,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { i18n } from '@kbn/i18n';
+// import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/public';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
-// import { executeAddToDashboard, toolDetails, useAddToDashboardActions } from './temp';
+import { DashboardApi } from '../../dashboard_api/types';
+import { coreServices, inferenceService } from '../../services/kibana_services';
+
 import { convertSchemaToObservabilityParameters } from './schema_adapters';
+import { usePostToolClientActions } from '../poc/hooks';
 const chartTypes = [
   'bar',
   'xy',
@@ -309,15 +325,31 @@ interface AddToDashboardClientToolDependencies {
 }
 
 const tool: OneChatToolWithClientCallback<AddToDashboardClientToolDependencies> = {
+  toolId: '.add_to_dashboard',
   name: 'add_to_dashboard',
   description:
     'Add an ES|QL visualization to the current dashboard. Pick a single chart type, and based on the chart type, the corresponding key for `layers`. E.g., when you select type:metric, fill in only layers.metric.',
   schema,
   screenDescription:
     'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
-  getPostToolClientActions: (dependencies: AddToDashboardClientToolDependencies) => {
+  handler: async ({ indexPattern }, { modelProvider, esClient }) => {
+    // const indices = await esClient.asCurrentUser.cat.indices({ index: indexPattern });
+
+    // const model = await modelProvider.getDefaultModel();
+    // const response = await model.inferenceClient.chatComplete(somethingWith(indices));
+
+    // return response;
+    return [];
+  },
+  getPreToolClientActions: async (dependencies: AddToDashboardClientToolDependencies) => {
     if (!dependencies.dashboardApi) {
-      throw new Error('Dashboard API is not available');
+      return NO_ACTIONS;
+    }
+    return [executeAddToDashboard(dependencies)];
+  },
+  getPostToolClientActions: async (dependencies: AddToDashboardClientToolDependencies) => {
+    if (!dependencies.dashboardApi) {
+      return NO_ACTIONS;
     }
     return [executeAddToDashboard(dependencies)];
   },
@@ -331,14 +363,171 @@ const getObservabilityToolDetails = (oneChatTool: OneChatToolWithClientCallback)
 const getSecurityToolDetails = (oneChatTool: OneChatToolWithClientCallback) =>
   pick(oneChatTool, ['name', 'description', 'parameters']);
 
+// USING CONNECTOR ID
+
+const PLACEHOLDER_USER_PROMPT =
+  'Create a Lens XY bar chart visualization for index "kibana_sample_data_logstsdb" for count() vs top 10 values of clientip';
+
+export const CreateWithAIFlyout = ({
+  modalTitleId,
+  dashboardApi,
+}: {
+  modalTitleId: string;
+  dashboardApi: CanAddNewPanel;
+}) => {
+  const [text, setText] = useState(PLACEHOLDER_USER_PROMPT);
+  const [response, setResponse] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const dependencies = useMemo(() => ({ dashboardApi }), [dashboardApi]);
+  const actions = usePostToolClientActions(tool, dependencies);
+  const executeCreateWithAI = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const defaultConnectorId = await coreServices.uiSettings.get('genAI:defaultConnectorId');
+
+      // const callNaturalLanguageToEsql = async (question: string) => {
+      //   return lastValueFrom(
+      //     naturalLanguageToEsql({
+      //       client: inferenceService,
+      //       connectorId: defaultConnectorId,
+      //       input: question,
+      //       functionCalling: 'auto',
+      //       logger: { debug: () => undefined },
+      //     })
+      //   );
+      // };
+      // const esqlQuery = await callNaturalLanguageToEsql(text);
+      // console.log(`--@@esqlQuery`, esqlQuery);
+
+      const resp = await inferenceService?.output({
+        id: tool.toolId,
+        connectorId: defaultConnectorId,
+        schema: convertSchemaToObservabilityParameters(tool.schema),
+        input: `Generate Elasticsearch Piped Query Language (ES|QL) for the following user input. ${tool.description}
+        ES|QL should start with 'from' and never 'select'
+
+        Examples of ES|QL queries:
+        FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH \`openai-completion\` | LIMIT 2
+        FROM index | SAMPLE 0.1
+        FROM a | KEEP a.b
+        FROM a | STATS a WHERE b == test(c, 123)
+        FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)
+        Input: ${text}
+        `,
+      });
+      const args = resp.output;
+      const correctedQuery = correctCommonEsqlMistakes(args.esql.query);
+
+      // @TODO: remove
+      console.log(`--@@args`, args);
+      // @TODO: remove
+      console.log(`--@@correctedQuery`, correctedQuery);
+      args.esql.query = correctedQuery.output;
+
+      const controller = new AbortController();
+      for (const action of actions) {
+        await action({ args, signal: controller.signal });
+      }
+      // @TODO: remove
+      console.log(`--@@resp`, resp, actions);
+
+      // console.log(`--@@resp`, resp);
+
+      // // Parse content that starts wiht ```json and ends with ```
+      // let jsonContent = resp.content.match(/```json\n(.*)\n```/s);
+      // jsonContent = JSON.parse(jsonContent[1]);
+      // // const jsonContent = PLACEHOLDER_JSON;
+      // if (jsonContent) {
+      //   const json = jsonContent; // JSON.parse(jsonContent[1]);]
+      //   // Recursively assign 'references' in json with constant
+      //   const updatedJson = updateReferences(json, [
+      //     {
+      //       type: 'index-pattern',
+      //       id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      //       name: 'indexpattern-datasource-layer-d5cb6be0-b8e9-446c-b6cd-281572b55130',
+      //     },
+      //   ]);
+      //   // @TODO: remove
+      //   console.log(`--@@updatedJson`, updatedJson);
+
+      //   const embeddable = await dashboardApi.addNewPanel(updatedJson, true);
+      // }
+      // Handle chatResponse if needed
+    } catch (e) {
+      console.log(`--@@e`, e);
+      // Handle error if needed
+    } finally {
+      setIsLoading(false);
+    }
+  }, [text, actions]);
+  return (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={modalTitleId}>
+            {i18n.translate('embeddableApi.addPanel.Title', { defaultMessage: 'Create with AI' })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <EuiSpacer size="m" />
+        <EuiTextArea
+          fullWidth
+          autoFocus
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={i18n.translate('dashboard.createWithAI.placeholder', {
+            defaultMessage: 'Example: {placeholder}"',
+            values: { placeholder: PLACEHOLDER_USER_PROMPT },
+          })}
+        />
+        <EuiButton isLoading={isLoading} onClick={executeCreateWithAI}>
+          Generate visualization
+        </EuiButton>
+      </EuiFlyoutBody>
+    </>
+  );
+};
+export async function createLensWithAI(dashboardApi: DashboardApi) {
+  openLazyFlyout({
+    core: coreServices,
+    parentApi: dashboardApi,
+    loadContent: async ({ ariaLabelledBy }) => {
+      return <CreateWithAIFlyout dashboardApi={dashboardApi} modalTitleId={ariaLabelledBy} />;
+    },
+    flyoutProps: {
+      'data-test-subj': 'dashboardCreateWithAIFlyout',
+      triggerId: 'createWithAIButton',
+    },
+  });
+}
+
 export function useObservabilityAIAssistantContext({
   dashboardApi,
 }: {
   dashboardApi: DashboardApi | undefined;
 }) {
-  const actions = useMemo(() => {
-    return dashboardApi ? tool.getPostToolClientActions({ dashboardApi }) : NO_ACTIONS;
-  }, [dashboardApi]);
+  const dependencies = { dashboardApi };
+  const [actions, setActions] = useState<any[]>(NO_ACTIONS);
+
+  useEffect(
+    function postToolClientActionsEffect() {
+      let unmounted = false;
+      async function getActions() {
+        const postToolClientActions = await tool.getPostToolClientActions({ dashboardApi });
+        if (!unmounted) {
+          setActions(postToolClientActions);
+        }
+      }
+      getActions();
+      return () => {
+        unmounted = true;
+      };
+    },
+    [dashboardApi]
+  );
   useEffect(() => {
     if (!observabilityAssistantService) {
       return;

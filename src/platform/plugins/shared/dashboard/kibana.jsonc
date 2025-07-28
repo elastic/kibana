@@ -41,15 +41,16 @@
       "noDataPage",
       "observabilityAIAssistant",
       "lens",
-      // "llmTasks",
-      "inference"
+      "inference",
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects"
+      "savedObjects",
+      "inference",
+
     ]
   }
 }
