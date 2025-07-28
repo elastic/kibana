@@ -579,6 +579,15 @@ describe('esql query helpers', () => {
       expect(values).toEqual('my_field');
     });
 
+    it('should return the values from the query when we have more than one columns', () => {
+      const queryString = 'FROM my_index | WHERE my_field >= 1200 AND another_field == ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 63,
+      } as monaco.Position);
+      expect(values).toEqual('another_field');
+    });
+
     it('should return the values from the query field with new lines when cursor is not at the end', () => {
       const queryString = 'FROM my_index \n| WHERE my_field >= \n| STATS COUNT(*)';
       const values = getValuesFromQueryField(queryString, {

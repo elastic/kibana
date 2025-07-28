@@ -228,6 +228,55 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
   return lastChar === '?' || secondLastChar === '?';
 };
 
+/**
+ * Finds the column closest to the given cursor position within an array of columns.
+ *
+ * @param columns An array of column objects.
+ * @param cursorPosition The current cursor position.
+ * @returns The column object closest to the cursor, or null if the columns array is empty.
+ */
+function findClosestColumn(
+  columns: ESQLColumn[],
+  cursorPosition?: monaco.Position
+): ESQLColumn | null {
+  if (columns.length === 0) {
+    return null;
+  }
+
+  if (!cursorPosition) {
+    return columns[0]; // If no cursor position is provided, return the first column
+  }
+
+  const cursorCol = cursorPosition.column;
+  let closestColumn: ESQLColumn | null = null;
+  let minDistance = Infinity;
+
+  for (const column of columns) {
+    const columnMin = column.location.min;
+    const columnMax = column.location.max;
+
+    // If the cursor is within the column's range, it's the closest
+    if (cursorCol >= columnMin && cursorCol <= columnMax) {
+      return column;
+    }
+
+    // Calculate distance from the cursor to the nearest edge of the column
+    let distance: number;
+    if (cursorCol < columnMin) {
+      distance = columnMin - cursorCol; // Cursor is to the left of the column
+    } else {
+      distance = cursorCol - columnMax; // Cursor is to the right of the column
+    }
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColumn = column;
+    }
+  }
+
+  return closestColumn;
+}
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
 
@@ -244,7 +293,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
     visitColumn: (node) => columns.push(node),
   });
 
-  const column = Walker.match(lastCommand, { type: 'column' });
+  const column = findClosestColumn(columns, cursorPosition);
 
   if (column && column.name && column.name !== '*') {
     return `${column.name}`;
