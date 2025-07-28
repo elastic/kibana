@@ -173,7 +173,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 Create `configs/stateful/platform.stateful.config.ts` and link tests entry file:
 
 ```ts
-import { createStatefulTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
+import { createStatefulTestConfig } from 'kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
 import { services } from './services';
 
 export default createStatefulTestConfig({
@@ -204,7 +204,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 oblt.serverless.config.ts
 
 ```ts
-import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
+import { createServerlessTestConfig } from 'kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
 import { services } from './services';
 
 export default createServerlessTestConfig({
