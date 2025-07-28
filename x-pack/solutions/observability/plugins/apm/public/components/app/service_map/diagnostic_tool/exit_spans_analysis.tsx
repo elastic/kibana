@@ -19,25 +19,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HighlightedExitSpansTable } from './diagnostic_highlighted_exit_spans_table';
+import type { ExitSpanFields } from '../../../../../common/service_map_diagnostic_types';
 
 interface ExitSpansAnalysisProps {
   hasMatchingDestinationResources: boolean;
   totalConnections: number;
-  exitSpansList: any[];
-  otelExitSpans?: any[];
-  apmExitSpans?: any[];
-  sourceNodeName: string;
-  destinationNodeName: string;
+  apmExitSpans: ExitSpanFields[];
+  destinationNodeValue: string;
+  sourceNodeValue: string;
 }
-
 export function ExitSpansAnalysis({
   hasMatchingDestinationResources,
   totalConnections,
-  exitSpansList,
-  otelExitSpans = [],
   apmExitSpans = [],
-  sourceNodeName,
-  destinationNodeName,
+  destinationNodeValue,
+  sourceNodeValue,
 }: ExitSpansAnalysisProps) {
   return (
     <EuiPanel paddingSize="m" color="subdued">
@@ -60,8 +56,9 @@ export function ExitSpansAnalysis({
               <EuiText>
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansFound', {
-                    defaultMessage: 'Exit spans found for {sourceNode} → {destinationNode}',
-                    values: { sourceNode: sourceNodeName, destinationNode: destinationNodeName },
+                    defaultMessage:
+                      'Exit spans found for {sourceNodeValue} → {destinationNodeValue}',
+                    values: { sourceNodeValue, destinationNodeValue },
                   })}
                 </strong>
               </EuiText>
@@ -80,27 +77,13 @@ export function ExitSpansAnalysis({
             <p>
               {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansFoundDescription', {
                 defaultMessage:
-                  'Found {count} exit span(s) from {sourceNode} during the selected time range. These represent all outbound connections that were traced from this {sourceNode}.',
+                  'Found {count} exit span(s) from {sourceNodeValue} during the selected time range. These represent all outbound connections that were traced from this {sourceNode}.',
                 values: {
-                  count: exitSpansList.length,
-                  sourceNode: sourceNodeName,
+                  count: apmExitSpans.length,
+                  sourceNodeValue,
                 },
               })}
             </p>
-            {otelExitSpans.length > 0 && (
-              <p style={{ marginTop: '8px' }}>
-                <strong>
-                  {i18n.translate('xpack.apm.serviceMap.diagnosticResults.otelSpansFound', {
-                    defaultMessage:
-                      'OTEL spans detected: {count} of {total} spans use OpenTelemetry instrumentation.',
-                    values: {
-                      count: otelExitSpans.length,
-                      total: exitSpansList.length,
-                    },
-                  })}
-                </strong>
-              </p>
-            )}
           </EuiText>
         </>
       ) : (
@@ -115,8 +98,8 @@ export function ExitSpansAnalysis({
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFound', {
                     defaultMessage: 'No exit spans found for {sourceNode} → {destinationNode}',
                     values: {
-                      sourceNode: sourceNodeName,
-                      destinationNode: destinationNodeName,
+                      sourceNode: sourceNodeValue,
+                      destinationNode: destinationNodeValue,
                     },
                   })}
                 </strong>
@@ -130,8 +113,8 @@ export function ExitSpansAnalysis({
                 'xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundDescription',
                 {
                   defaultMessage:
-                    'No exit spans were found from {sourceNode} to {destinationNode} during the selected time range. This could indicate:',
-                  values: { sourceNode: sourceNodeName, destinationNode: destinationNodeName },
+                    'No exit spans were found from {sourceNodeValue} to {destinationNodeValue} during the selected time range. This could indicate:',
+                  values: { sourceNodeValue, destinationNodeValue },
                 }
               )}
             </p>
@@ -151,7 +134,7 @@ export function ExitSpansAnalysis({
         </>
       )}
 
-      {exitSpansList.length > 0 && (
+      {apmExitSpans.length > 0 && (
         <>
           <EuiSpacer size="m" />
           <EuiAccordion
@@ -168,7 +151,7 @@ export function ExitSpansAnalysis({
             paddingSize="none"
           >
             <EuiSpacer size="s" />
-            <HighlightedExitSpansTable items={exitSpansList} />
+            <HighlightedExitSpansTable items={apmExitSpans} />
           </EuiAccordion>
         </>
       )}

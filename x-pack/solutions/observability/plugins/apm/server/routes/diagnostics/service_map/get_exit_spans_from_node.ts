@@ -15,12 +15,6 @@ import {
 } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
-/**
- * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
- * @param start Start time (epoch ms)
- * @param end End time (epoch ms)
- * @param serviceName Service name to filter on
- */
 export async function getExitSpansFromSourceNode({
   apmEventClient,
   start,
@@ -73,19 +67,6 @@ export async function getExitSpansFromSourceNode({
           },
         },
       },
-      otel_destination_resources: {
-        terms: {
-          field: 'destination.address',
-          size: 50,
-        },
-        aggs: {
-          sample_doc: {
-            top_hits: {
-              size: 5,
-            },
-          },
-        },
-      },
     },
   });
 
@@ -106,43 +87,14 @@ export async function getExitSpansFromSourceNode({
       };
     }) || [];
 
-  const otelExitSpans =
-    response?.aggregations?.otel_destination_resources?.buckets?.map((item: any) => {
-      const doc = item?.sample_doc?.hits?.hits?.[0]?._source;
-      return {
-        destinationService: doc?.destination?.address ?? '',
-        spanSubType: doc?.span?.subtype ?? '',
-        spanId: doc?.span?.id ?? '',
-        spanType: doc?.span?.type ?? '',
-        transactionId: doc?.transaction?.id ?? '',
-        serviceNodeName: doc?.service?.node?.name ?? '',
-        traceId: doc?.trace?.id ?? '',
-        agentName: doc?.agent?.name ?? '',
-        docCount: item?.doc_count ?? 0,
-        isOtel: true,
-      };
-    }) || [];
-
-  // Combine regular and OTEL exit spans
-  const allExitSpans = [...apmExitSpans, ...otelExitSpans];
-
   return {
-    exitSpans: allExitSpans,
-    otelExitSpans,
     apmExitSpans,
-    totalConnections: allExitSpans.length,
+    totalConnections: apmExitSpans.length,
     rawResponse: response,
     hasMatchingDestinationResources:
       response?.aggregations?.matching_destination_resources?.sample_doc?.hits?.total?.value > 0,
   };
 }
-
-/**
- * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
- * @param start Start time (epoch ms)
- * @param end End time (epoch ms)
- * @param sourceNodeKql Service name to filter on
- */
 export async function getSourceSpanIds({
   apmEventClient,
   start,

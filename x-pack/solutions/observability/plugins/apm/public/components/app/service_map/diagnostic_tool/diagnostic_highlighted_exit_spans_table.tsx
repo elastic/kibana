@@ -9,19 +9,7 @@ import React from 'react';
 import { EuiBasicTable, EuiPanel, EuiBadge } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-interface ExitSpanFields {
-  destinationService?: string;
-  spanSubType?: string;
-  spanId?: string;
-  spanType?: string;
-  transactionId?: string;
-  serviceNodeName?: string;
-  traceId?: string;
-  agentName?: string;
-  docCount?: number;
-  isOtel?: boolean;
-}
+import type { ExitSpanFields } from '../../../../../common/service_map_diagnostic_types';
 
 export interface HighlightedExitSpansTableProps {
   /**

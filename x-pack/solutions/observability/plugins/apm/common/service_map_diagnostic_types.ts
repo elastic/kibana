@@ -25,8 +25,6 @@ export interface ServiceMapDiagnosticResponse {
     exitSpans: {
       found: boolean;
       totalConnections: number;
-      allExitSpans: ExitSpanFields[];
-      otelExitSpans: ExitSpanFields[];
       apmExitSpans: ExitSpanFields[];
       hasMatchingDestinationResources: boolean;
     };
