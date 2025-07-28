@@ -17,8 +17,8 @@ export function StreamQueriesList({
   disabled,
 }: {
   definition: { name: string; queries: StreamQueryKql[] };
-  selectedQueries: { id: string }[];
-  setSelectedQueries: (queries: { id: string }[]) => void;
+  selectedQueries: Array<{ id: string }>;
+  setSelectedQueries: (queries: Array<{ id: string }>) => void;
   disabled?: boolean;
 }) {
   return (

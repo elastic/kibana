@@ -15,8 +15,8 @@ export type ContentPackIncludedObjects =
   | ContentPackIncludeAll
   | {
       objects: {
-        queries: { id: string }[];
-        routing: ({ destination: string } & ContentPackIncludedObjects)[];
+        queries: Array<{ id: string }>;
+        routing: Array<{ destination: string } & ContentPackIncludedObjects>;
       };
     };
 

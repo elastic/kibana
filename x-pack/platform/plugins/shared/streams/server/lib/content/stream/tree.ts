@@ -7,8 +7,8 @@
 
 import { isEqual } from 'lodash';
 import { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
 import { FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
+import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
 import { ContentPackConflictError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
 

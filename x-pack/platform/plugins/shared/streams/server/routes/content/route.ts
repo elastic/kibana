@@ -14,6 +14,7 @@ import {
 } from '@kbn/content-packs-schema';
 import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
+import { QueryLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -25,7 +26,6 @@ import {
   scopeIncludedObjects,
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
-import { QueryLink } from '@kbn/streams-plugin/common/assets';
 import { asTree } from '../../lib/content/stream/tree';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB

@@ -70,7 +70,7 @@ export function ContentPackObjectsList({
   const isSignificantEventsEnabled = !!significantEvents?.available;
 
   const [selectedItems, setSelectedItems] = useState<
-    Record<string, { selected: boolean; queries: { id: string }[] }>
+    Record<string, { selected: boolean; queries: Array<{ id: string }> }>
   >({
     [ROOT_STREAM_ID]: { selected: true, queries: definition.queries },
   });
@@ -97,9 +97,9 @@ export function ContentPackObjectsList({
       ...rows.reduce((selection, { name, request }) => {
         selection[name] = { selected: true, queries: request.queries };
         return selection;
-      }, {} as Record<string, { selected: boolean; queries: { id: string }[] }>),
+      }, {} as Record<string, { selected: boolean; queries: Array<{ id: string }> }>),
     });
-    //onSelectionChange({ objects: { all: {} } });
+    // onSelectionChange({ objects: { all: {} } });
 
     return { rootEntry: root, descendants: rows };
   }, [objects, onSelectionChange]);
@@ -257,7 +257,7 @@ export function ContentPackObjectsList({
 
 function buildIncludedObjects(
   parent: string,
-  selection: Record<string, { selected: boolean; queries: { id: string }[] }>
+  selection: Record<string, { selected: boolean; queries: Array<{ id: string }> }>
 ): ContentPackIncludedObjects {
   const children = Object.keys(selection).filter((key) => {
     if (!selection[key].selected) {
@@ -282,7 +282,7 @@ function buildIncludedObjects(
 }
 
 function toIncludedObjects(
-  selection: Record<string, { selected: boolean; queries: { id: string }[] }>
+  selection: Record<string, { selected: boolean; queries: Array<{ id: string }> }>
 ): ContentPackIncludedObjects {
   return buildIncludedObjects(ROOT_STREAM_ID, selection);
 }
