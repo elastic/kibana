@@ -33,7 +33,8 @@ import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 function getContentsComponent(
-  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition
+  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition,
+  isDiagnosticModeEnabled: boolean
 ) {
   if (
     selectedElementData.groupedConnections &&
@@ -42,7 +43,7 @@ function getContentsComponent(
     return ExternalsListContents;
   }
   if (selectedElementData[SERVICE_NAME]) {
-    return ServiceContents;
+    return isDiagnosticModeEnabled ? withDiagnoseButton(ServiceContents) : ServiceContents;
   }
   if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
@@ -168,14 +169,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const popoverContentComponent = getContentsComponent(selectedElementData);
-
-  // Only wrap if there is a component
-  const ContentsComponent = isDiagnosticModeEnabled
-    ? popoverContentComponent
-      ? withDiagnoseButton(popoverContentComponent)
-      : null
-    : popoverContentComponent;
+  const ContentsComponent = getContentsComponent(selectedElementData, isDiagnosticModeEnabled);
 
   // Handler to open the diagnostic flyout
   const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
