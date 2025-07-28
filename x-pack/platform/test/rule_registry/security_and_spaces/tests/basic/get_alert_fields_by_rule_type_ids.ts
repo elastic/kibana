@@ -306,7 +306,7 @@ export default ({ getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForRuleToExecute = async (ruleId: string, index: string) => {
+  const waitForRuleToExecute = async (ruleId: string) => {
     await retry.try(async () => {
       return await getEventLog({
         getService,
