@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { termQuery, rangeQuery, existsQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_ID,
   PARENT_ID,
   SERVICE_NAME,
+  SPAN_NAME,
 } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
@@ -114,18 +115,24 @@ export async function getSourceSpanIds({
     size: 0,
     query: {
       bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...existsQuery(SPAN_ID),
-          ...termsQuery(SERVICE_NAME, sourceNode),
-        ],
+        filter: [...rangeQuery(start, end), ...termsQuery(SERVICE_NAME, sourceNode)],
       },
     },
     aggs: {
-      span_ids: {
+      samples: {
         terms: {
-          field: SPAN_ID,
-          size: 1000,
+          field: SPAN_NAME,
+          size: 500,
+        },
+        aggs: {
+          top_span_ids: {
+            top_hits: {
+              size: 10,
+              _source: {
+                include: [SPAN_ID],
+              },
+            },
+          },
         },
       },
     },
@@ -133,7 +140,10 @@ export async function getSourceSpanIds({
 
   return {
     sourceSpanIdsRawResponse: response,
-    spanIds: response.aggregations?.span_ids?.buckets?.map((bucket) => bucket.key) ?? [],
+    spanIds:
+      response.aggregations?.samples?.buckets?.flatMap((bucket) =>
+        bucket.top_span_ids.hits.hits.map((hit) => hit._source.span.id)
+      ) ?? [],
   };
 }
 
@@ -152,7 +162,7 @@ export async function getDestinationParentIds({
 }) {
   const response = await apmEventClient.search('diagnostics_get_destination_parent_ids', {
     apm: {
-      events: [ProcessorEvent.span],
+      events: [ProcessorEvent.transaction],
     },
     track_total_hits: false,
     size: 1,
@@ -162,14 +172,7 @@ export async function getDestinationParentIds({
         filter: [
           ...rangeQuery(start, end),
           ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
-          {
-            bool: {
-              should: [
-                ...termQuery(SERVICE_NAME, destinationNode),
-                ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, destinationNode),
-              ],
-            },
-          },
+          ...termQuery(SERVICE_NAME, destinationNode),
         ],
       },
     },
