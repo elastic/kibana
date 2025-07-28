@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
@@ -12,21 +13,23 @@ import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
 export async function ensureLatestRulesPackageInstalled(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   securityContext: SecuritySolutionApiRequestHandlerContext,
-  logDebug: (message: string) => void = (message: string) => {}
+  logger?: Logger
 ) {
-  logDebug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets');
+  logger?.debug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets');
   let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
-  logDebug(
+  logger?.debug(
     `ENSURE LATEST PACKAGE INSTALLED - fetched latest assets. Assets count: ${latestPrebuiltRules.length}`
   );
   if (latestPrebuiltRules.length === 0) {
     // Seems no packages with prepackaged rules were installed, try to install the default rules package
-    await installPrebuiltRulesPackage(securityContext, logDebug);
+    await installPrebuiltRulesPackage(securityContext, logger);
 
-    logDebug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets again');
+    logger?.debug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets again');
     // Try to get the prepackaged rules again
     latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   }
-  logDebug(`ENSURE LATEST PACKAGE INSTALLED complete. Assets count: ${latestPrebuiltRules.length}`);
+  logger?.debug(
+    `ENSURE LATEST PACKAGE INSTALLED complete. Assets count: ${latestPrebuiltRules.length}`
+  );
   return latestPrebuiltRules;
 }

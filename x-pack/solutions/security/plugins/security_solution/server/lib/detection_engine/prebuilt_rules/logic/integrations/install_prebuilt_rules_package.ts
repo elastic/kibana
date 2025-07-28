@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { findLatestPackageVersion } from './find_latest_package_version';
@@ -17,29 +18,34 @@ import { findLatestPackageVersion } from './find_latest_package_version';
  */
 export async function installPrebuiltRulesPackage(
   context: SecuritySolutionApiRequestHandlerContext,
-  logDebug: (message: string) => void = (message: string) => {}
+  logger?: Logger
 ) {
   const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
 
-  logDebug(`INSTALL PREBUILT RULES PACKAGE - package version in config: ${pkgVersion}`);
+  logger?.debug(`INSTALL PREBUILT RULES PACKAGE - package version in config: ${pkgVersion}`);
 
   if (!pkgVersion) {
     // Find latest package if the version isn't specified in the config
-    pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME);
+    pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME, logger);
   }
 
-  logDebug(`INSTALL PREBUILT RULES PACKAGE - installing package version: ${pkgVersion}`);
+  logger?.debug(`INSTALL PREBUILT RULES PACKAGE - installing package version: ${pkgVersion}`);
 
-  const packageInstallationResult = await context
-    .getInternalFleetServices()
-    .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+  try {
+    const packageInstallationResult = await context
+      .getInternalFleetServices()
+      .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
 
-  logDebug(
-    `INSTALL PREBUILT RULES PACKAGE - installation result: ${JSON.stringify(
-      packageInstallationResult
-    )}`
-  );
+    logger?.debug(
+      `INSTALL PREBUILT RULES PACKAGE - successfully installed package "${PREBUILT_RULES_PACKAGE_NAME}", version: ${pkgVersion}}`
+    );
 
-  return packageInstallationResult;
+    return packageInstallationResult;
+  } catch (error) {
+    logger?.error(
+      `INSTALL PREBUILT RULES PACKAGE - error installing package "${PREBUILT_RULES_PACKAGE_NAME}", version: ${pkgVersion}}, ${error.message}`
+    );
+    throw error;
+  }
 }

@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import { range } from 'lodash';
+// import type { Response } from 'supertest';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -980,11 +981,21 @@ export default ({ getService }: FtrProviderContext): void => {
               )}`
             );
 
+            // function assert200(error: Error, response: Response) {
+            //   if ((response.status || error?.code) !== 200) {
+            //     log.error(`TEST SUITE - Unexpected response status: ${response.status}`);
+            //     log.error(JSON.stringify(response));
+            //     log.error(JSON.stringify(error));
+            //     throw error;
+            //   }
+            // }
+
             const importResult = await supertest
               .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
               .set('kbn-xsrf', 'true')
               .set('elastic-api-version', '2023-10-31')
               .attach('file', buffer, 'rules.ndjson');
+            // .expect(assert200);
 
             log.debug(`TEST SUITE - importResult: ${JSON.stringify(importResult)}`);
 

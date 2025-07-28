@@ -12,6 +12,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
 import type {
   RuleResponse,
@@ -101,25 +102,23 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private currentRulesById: Record<string, RuleResponse> = {};
   private rulesToImport: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
-  private logDebug: (message: string) => void = () => {}; // noop
+  private logger: Logger | undefined;
 
   constructor({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
-    logDebug,
+    logger,
   }: {
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-    logDebug?: (message: string) => void;
+    logger?: Logger;
   }) {
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
-    if (logDebug) {
-      this.logDebug = logDebug;
-    }
+    this.logger = logger;
   }
 
   /**
@@ -128,26 +127,26 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
-    this.logDebug('RULE SOURCE IMPORTER - setup starts');
+    this.logger?.debug('RULE SOURCE IMPORTER - setup starts');
 
     if (!this.latestPackagesInstalled) {
-      this.logDebug('RULE SOURCE IMPORTER - latest package not installed');
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logDebug);
+      this.logger?.debug('RULE SOURCE IMPORTER - latest package not installed');
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logger);
       this.latestPackagesInstalled = true;
     } else {
-      this.logDebug('RULE SOURCE IMPORTER - latest package already installed');
+      this.logger?.debug('RULE SOURCE IMPORTER - latest package already installed');
     }
 
     this.rulesToImport = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
-    this.logDebug('RULE SOURCE IMPORTER - fetchMatchingAssetsByRuleId()');
+    this.logger?.debug('RULE SOURCE IMPORTER - fetchMatchingAssetsByRuleId()');
     this.matchingAssetsByRuleId = await this.fetchMatchingAssetsByRuleId();
-    this.logDebug('RULE SOURCE IMPORTER - fetchAvailableRuleAssetIds()');
+    this.logger?.debug('RULE SOURCE IMPORTER - fetchAvailableRuleAssetIds()');
     this.availableRuleAssetIds = new Set(await this.fetchAvailableRuleAssetIds());
-    this.logDebug('RULE SOURCE IMPORTER - fetchInstalledRulesByIds()');
+    this.logger?.debug('RULE SOURCE IMPORTER - fetchInstalledRulesByIds()');
     this.currentRulesById = await this.fetchInstalledRulesByIds(
       this.rulesToImport.map((rule) => rule.rule_id)
     );
-    this.logDebug('RULE SOURCE IMPORTER - setup complete');
+    this.logger?.debug('RULE SOURCE IMPORTER - setup complete');
   }
 
   public isPrebuiltRule(rule: RuleToImport): boolean {
@@ -222,17 +221,17 @@ export const createRuleSourceImporter = ({
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
-  logDebug = (message: string) => {},
+  logger,
 }: {
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-  logDebug?: (message: string) => void;
+  logger?: Logger;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
-    logDebug,
+    logger,
   });
 };

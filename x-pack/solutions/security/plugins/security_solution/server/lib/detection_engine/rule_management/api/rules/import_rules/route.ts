@@ -79,13 +79,7 @@ export const importRulesRoute = (
       async (context, request, response): Promise<IKibanaResponse<ImportRulesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        function logDebug(message: string) {
-          if (logger?.debug) {
-            logger.debug(message);
-          }
-        }
-
-        logDebug('IMPORT HANDLER - Import rules route handler started.');
+        logger?.debug('IMPORT HANDLER - Import rules route handler started.');
 
         try {
           const ctx = await context.resolve([
@@ -125,7 +119,7 @@ export const importRulesRoute = (
           );
 
           // import exceptions, includes validation
-          logDebug('IMPORT HANDLER - Importing rule exceptions...');
+          logger?.debug('IMPORT HANDLER - Importing rule exceptions...');
           const {
             errors: exceptionsErrors,
             successCount: exceptionsSuccessCount,
@@ -143,7 +137,7 @@ export const importRulesRoute = (
           );
 
           // import actions-connectors
-          logDebug('IMPORT HANDLER - Importing rule action connectors...');
+          logger?.debug('IMPORT HANDLER - Importing rule action connectors...');
           const {
             successCount: actionConnectorSuccessCount,
             success: actionConnectorSuccess,
@@ -155,19 +149,19 @@ export const importRulesRoute = (
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          logDebug('IMPORT HANDLER - Migrating legacy action IDs...');
+          logger?.debug('IMPORT HANDLER - Migrating legacy action IDs...');
           const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
             rulesToImportOrErrors,
             actionSOClient,
             actionsClient
           );
 
-          logDebug(`IMPORT HANDLER - Creating ruleSourceImporter`);
+          logger?.debug(`IMPORT HANDLER - Creating ruleSourceImporter`);
           const ruleSourceImporter = createRuleSourceImporter({
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
-            logDebug,
+            logger,
           });
 
           const [parsedRules, parsedRuleErrors] = partition(
@@ -178,7 +172,7 @@ export const importRulesRoute = (
           // After importing the actions and migrating action IDs on rules to import,
           // validate that all actions referenced by rules exist
           // Filter out rules that reference non-existent actions
-          logDebug(`IMPORT HANDLER - Validating rule actions...`);
+          logger?.debug(`IMPORT HANDLER - Validating rule actions...`);
           const { validatedActionRules, missingActionErrors } = await validateRuleActions({
             actionsClient,
             rules: parsedRules,
@@ -186,7 +180,7 @@ export const importRulesRoute = (
 
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
 
-          logDebug(
+          logger?.debug(
             `IMPORT HANDLER - Importing ${validatedActionRules.length} rules in ${ruleChunks.length} chunks...`
           );
           const importRuleResponse = await importRules({
@@ -196,7 +190,7 @@ export const importRulesRoute = (
             ruleSourceImporter,
             detectionRulesClient,
           });
-          logDebug('IMPORT HANDLER - importRules complete');
+          logger?.debug('IMPORT HANDLER - importRules complete');
 
           const parseErrors = parsedRuleErrors.map((error) =>
             createBulkErrorObject({
@@ -234,12 +228,11 @@ export const importRulesRoute = (
             action_connectors_warnings: actionConnectorWarnings,
           };
 
-          logDebug(`IMPORT HANDLER - Import rules route handler finished`);
+          logger?.debug(`IMPORT HANDLER - Import rules route handler finished`);
           return response.ok({ body: ImportRulesResponse.parse(importRulesResponse) });
         } catch (err) {
           const error = transformError(err);
-          logDebug(`IMPORT HANDLER - Error in import rules route handler: ${error.message}`);
-          logDebug(JSON.stringify(error));
+          logger?.debug(`IMPORT HANDLER - Error in import rules route handler`, err);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
