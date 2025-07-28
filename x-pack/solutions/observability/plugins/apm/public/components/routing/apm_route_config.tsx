@@ -26,7 +26,7 @@ import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service inventory',
 });
 
 /**

@@ -68,7 +68,7 @@ export function ServiceGroupTemplate({
         <EuiSkeletonTitle size="l" style={{ width: 180 }} isLoading={loadingServiceGroupName}>
           {serviceGroupName ||
             i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-              defaultMessage: 'Services',
+              defaultMessage: 'Service inventory',
             })}
         </EuiSkeletonTitle>
       </EuiFlexItem>
@@ -91,7 +91,7 @@ export function ServiceGroupTemplate({
         : [
             {
               title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
-                defaultMessage: 'Services',
+                defaultMessage: 'Service inventory',
               }),
               href: serviceGroupsLink,
             },
