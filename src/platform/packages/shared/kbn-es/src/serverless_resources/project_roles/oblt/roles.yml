@@ -35,6 +35,7 @@ viewer:
     - application: 'kibana-.kibana'
       privileges:
         - 'read'
+        - 'feature_fileUpload.all'
       resources:
         - '*'
   run_as: []

@@ -62,6 +62,7 @@ viewer:
         - feature_visualize_v2.all
         - feature_savedQueryManagement.all
         - feature_dataQuality.all
+        - feature_fileUpload.all
       resources: '*'
   run_as: []
 

@@ -20,6 +20,7 @@ describe('setupCapabilities', () => {
     expect(provider()).toMatchInlineSnapshot(`
       Object {
         "fileUpload": Object {
+          "canImport": true,
           "show": true,
         },
       }
@@ -48,6 +49,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
@@ -78,6 +80,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
@@ -112,6 +115,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
@@ -121,6 +125,7 @@ describe('setupCapabilities', () => {
     await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
             Object {
               "fileUpload": Object {
+                "canImport": false,
                 "show": false,
               },
             }
@@ -154,6 +159,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
@@ -193,6 +199,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
@@ -202,6 +209,7 @@ describe('setupCapabilities', () => {
     await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
             Object {
               "fileUpload": Object {
+                "canImport": false,
                 "show": false,
               },
             }
@@ -230,6 +238,7 @@ describe('setupCapabilities', () => {
       management: {},
       catalogue: {},
       fileUpload: {
+        canImport: true,
         show: true,
       },
     } as Capabilities;
