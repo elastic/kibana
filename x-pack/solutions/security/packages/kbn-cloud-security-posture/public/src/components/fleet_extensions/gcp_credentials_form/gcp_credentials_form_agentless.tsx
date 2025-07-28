@@ -113,7 +113,7 @@ export const GcpCredentialsFormAgentless = ({
             href={cloudShellUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.googleCloudShell.cloudCredentials.button"
+              id="securitySolutionPackages.agentlessForms.googleCloudShell.cloudCredentials.button"
               defaultMessage="Launch Google Cloud Shell"
             />
           </EuiButton>

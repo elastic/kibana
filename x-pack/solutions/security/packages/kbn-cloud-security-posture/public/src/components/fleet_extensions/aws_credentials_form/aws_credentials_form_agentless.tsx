@@ -259,7 +259,7 @@ export const AwsCredentialsFormAgentless = ({
             href={templateUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="securitySolutionPackages.agentlessForms.agentlessAWSCredentialsForm.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>

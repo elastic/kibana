@@ -29,7 +29,7 @@ export const CloudFormationCloudCredentialsGuide = ({
     [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
       intro: (
         <FormattedMessage
-          id="securitySolutionPackages.agentlessForm.cloudFormation.guide.description"
+          id="securitySolutionPackages.agentlessForms.cloudFormation.guide.description"
           defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user.
 Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up access. {learnMore}."
           values={{
@@ -41,7 +41,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 data-test-subj="externalLink"
               >
                 <FormattedMessage
-                  id="securitySolutionPackages.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                  id="securitySolutionPackages.agentlessForms.cloudFormation.guide.learnMoreLinkText"
                   defaultMessage="Learn more about CloudFormation"
                 />
               </EuiLink>
@@ -51,7 +51,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
       ),
       lastStep: (
         <FormattedMessage
-          id="securitySolutionPackages.agentlessForm.cloudFormation.steps.credentials"
+          id="securitySolutionPackages.agentlessForms.cloudFormation.steps.credentials"
           defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
           values={{
             accessKeyId: <strong>{'Access Key Id'}</strong>,
@@ -63,7 +63,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
     [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
       intro: (
         <FormattedMessage
-          id="securitySolutionPackages.agentlessForm.cloudFormation.guide.description.cloudConnectors"
+          id="securitySolutionPackages.agentlessForms.cloudFormation.guide.description.cloudConnectors"
           defaultMessage="To enable CSPM, you launch an AWS CloudFormation stack that automatically creates an IAM role in your account. This role includes the necessary permissions and embeds a unique External ID—generated during onboarding—into its trust policy. The resulting Role ARN and External ID are then used by CSPM to securely assume the role and access your AWS resources. Roles do not have standard long-term credentials such as passwords or access keys. {learnMore}."
           values={{
             learnMore: (
@@ -74,7 +74,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 data-test-subj="externalLink"
               >
                 <FormattedMessage
-                  id="securitySolutionPackages.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                  id="securitySolutionPackages.agentlessForms.cloudFormation.guide.learnMoreLinkText"
                   defaultMessage="Learn more about CloudFormation"
                 />
               </EuiLink>
@@ -84,7 +84,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
       ),
       lastStep: (
         <FormattedMessage
-          id="securitySolutionPackages.agentlessForm.cloudFormation.steps.credentials"
+          id="securitySolutionPackages.agentlessForms.cloudFormation.steps.credentials"
           defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
           values={{
             role: <strong>{'Role ARN'}</strong>,
@@ -104,7 +104,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           {isOrganization ? (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.agentlessForm.cloudFormation.guide.steps.organizationLogin"
+                id="securitySolutionPackages.agentlessForms.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an {admin} in the management account of the AWS Organization you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -114,7 +114,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ) : (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.agentlessForm.cloudFormation.guide.steps.singleLogin"
+                id="securitySolutionPackages.agentlessForms.cloudFormation.guide.steps.singleLogin"
                 defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -125,7 +125,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.cloudFormation.guide.steps.launch"
+              id="securitySolutionPackages.agentlessForms.cloudFormation.guide.steps.launch"
               defaultMessage="Click the {launchCloudFormation} button below."
               values={{
                 launchCloudFormation: <strong>{'Launch CloudFormation'}</strong>,
@@ -135,7 +135,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.cloudFormation.steps.region"
+              id="securitySolutionPackages.agentlessForms.cloudFormation.steps.region"
               defaultMessage="(Optional) Change the {amazonRegion} in the upper right corner to the region you want to deploy your stack to"
               values={{
                 amazonRegion: <strong>{'AWS region'}</strong>,
@@ -145,13 +145,13 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.cloudFormation.steps.accept"
+              id="securitySolutionPackages.agentlessForms.cloudFormation.steps.accept"
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
                   <strong>
                     <FormattedMessage
-                      id="securitySolutionPackages.agentlessForm.cloudFormation.steps.accept.acknowledge"
+                      id="securitySolutionPackages.agentlessForms.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
                   </strong>
@@ -159,7 +159,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 capabilities: (
                   <strong>
                     <FormattedMessage
-                      id="securitySolutionPackages.agentlessForm.cloudFormation.steps.accept.capabilties"
+                      id="securitySolutionPackages.agentlessForms.cloudFormation.steps.accept.capabilties"
                       defaultMessage="capabilities"
                     />
                   </strong>
@@ -170,7 +170,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.cloudFormation.steps.create"
+              id="securitySolutionPackages.agentlessForms.cloudFormation.steps.create"
               defaultMessage="Click {createStack}."
               values={{
                 createStack: <strong>{'Create stack'}</strong>,
@@ -180,7 +180,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForm.cloudFormation.steps.stackStatus"
+              id="securitySolutionPackages.agentlessForms.cloudFormation.steps.stackStatus"
               defaultMessage="Once  stack status is {createComplete} then click the Outputs tab"
               values={{
                 createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
