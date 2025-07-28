@@ -72,7 +72,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { FieldDefinition, getProcessorConfig } from '@kbn/streams-schema';
+import { FieldDefinition } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { DetectedField, Simulation } from './types';
 import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
-  const config = getProcessorConfig(processor);
-  if ('field' in config) {
-    const trimmedField = config.field.trim();
+export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+  // TODO: Change this to streamlang source fields
+  if ('field' in processor) {
+    const trimmedField = processor.field.trim();
     return trimmedField.length > 0 ? trimmedField : undefined;
   }
   return undefined;

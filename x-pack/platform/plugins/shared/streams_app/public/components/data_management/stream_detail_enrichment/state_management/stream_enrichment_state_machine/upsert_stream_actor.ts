@@ -13,7 +13,6 @@ import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 

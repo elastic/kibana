@@ -10,14 +10,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { css } from '@emotion/react';
-import { ProcessorFormState } from '../types';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { selectUnsupportedDottedFields } from '../state_management/simulation_state_machine/selectors';
 
 export const ProcessorFieldSelector = ({
+  fieldKey = 'from',
   helpText,
   onChange,
 }: {
+  fieldKey?: string;
   helpText?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }) => {
@@ -27,8 +28,8 @@ export const ProcessorFieldSelector = ({
     selectUnsupportedDottedFields(state.context)
   );
 
-  const { field, fieldState } = useController<ProcessorFormState, 'field'>({
-    name: 'field',
+  const { field, fieldState } = useController({
+    name: fieldKey,
     rules: {
       required: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorRequiredError',

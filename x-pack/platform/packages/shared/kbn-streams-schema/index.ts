@@ -12,38 +12,6 @@ export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
-export {
-  type ProcessorDefinition,
-  type ProcessorConfig,
-  type ProcessorDefinitionWithId,
-  type ProcessorType,
-  type ProcessorTypeOf,
-  type KvProcessorDefinition,
-  type KvProcessorConfig,
-  type GeoIpProcessorConfig,
-  type GeoIpProcessorDefinition,
-  type SetProcessorConfig,
-  type SetProcessorDefinition,
-  type RenameProcessorConfig,
-  type RenameProcessorDefinition,
-  type UrlDecodeProcessorConfig,
-  type UrlDecodeProcessorDefinition,
-  type UserAgentProcessorConfig,
-  type UserAgentProcessorDefinition,
-  type DateProcessorConfig,
-  type DateProcessorDefinition,
-  type DissectProcessorConfig,
-  type DissectProcessorDefinition,
-  type GrokProcessorConfig,
-  type GrokProcessorDefinition,
-  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
-  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
-  getProcessorConfig,
-  getProcessorType,
-  processorWithIdDefinitionSchema,
-  processorDefinitionSchema,
-} from './src/models/ingest/processors';
-
 export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';

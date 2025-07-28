@@ -5,40 +5,27 @@
  * 2.0.
  */
 
-import {
-  DateProcessorConfig,
-  DissectProcessorConfig,
-  GrokProcessorConfig,
-  ProcessorDefinition,
-  ProcessorTypeOf,
-} from '@kbn/streams-schema';
-import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import {
+  DateProcessor,
+  DissectProcessor,
+  GrokProcessor,
+  ManualIngestPipelineProcessor,
+} from '@kbn/streamlang';
 import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
-
-export type WithUIAttributes<T extends ProcessorDefinition> = T & {
-  id: string;
-  type: ProcessorTypeOf<T>;
-};
 
 /**
  * Processors' types
  */
-export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
-export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
-  type: 'grok';
+export type GrokFormState = Omit<GrokProcessor, 'patterns'> & {
   patterns: DraftGrokExpression[];
 };
 
-export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
-
-export type DateFormState = DateProcessorConfig & { type: 'date' };
-
-export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig & {
-  type: 'manual_ingest_pipeline';
-};
+export type DissectFormState = DissectProcessor;
+export type DateFormState = DateProcessor;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 
 export type SpecialisedFormState =
   | GrokFormState

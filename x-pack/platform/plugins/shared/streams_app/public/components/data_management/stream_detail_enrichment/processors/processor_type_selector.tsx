@@ -10,8 +10,8 @@ import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { ProcessorType } from '@kbn/streams-schema';
 import { DocLinksStart } from '@kbn/core/public';
+import { ProcessorType } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
@@ -35,12 +35,12 @@ export const ProcessorTypeSelector = ({
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
-  const { field, fieldState } = useController<ProcessorFormState, 'type'>({
-    name: 'type',
+  const { field, fieldState } = useController<ProcessorFormState, 'action'>({
+    name: 'action',
     rules: { required: true },
   });
 
-  const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
+  const processorType = useWatch<{ action: ProcessorType }>({ name: 'action' });
 
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
@@ -150,8 +150,9 @@ const availableProcessors: TAvailableProcessors = {
   },
 };
 
-const getProcessorDescription = (docLinks: DocLinksStart) => (type: ProcessorType) =>
-  availableProcessors[type].getDocUrl(docLinks);
+const getProcessorDescription = (docLinks: DocLinksStart) => (type: ProcessorType) => {
+  return availableProcessors[type].getDocUrl(docLinks);
+};
 
 const processorTypeSelectorOptions = Object.values(availableProcessors).map(
   ({ type, inputDisplay }) => ({ value: type, inputDisplay })

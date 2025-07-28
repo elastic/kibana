@@ -413,12 +413,19 @@ async function suggestAndValidateGrokProcessor({
     params: {
       path: { name: streamName },
       body: {
-        processing: [
-          {
-            id: SUGGESTED_GROK_PROCESSOR_ID,
-            grok: grokProcessor.grok,
-          },
-        ],
+        processing: {
+          steps: [
+            // TODO: Revisit this, as pattern_definitons are not supported in streamlang
+            {
+              action: 'grok',
+              customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
+              from: grokProcessor.grok.field,
+              patterns: grokProcessor.grok.patterns,
+              ignore_missing: grokProcessor.grok.ignore_missing,
+              ignore_failure: grokProcessor.grok.ignore_failure,
+            },
+          ],
+        },
         documents: sampleDocuments,
       },
     },

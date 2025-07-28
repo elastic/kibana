@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
+import { createIsNarrowSchema } from '@kbn/zod-helpers';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
@@ -156,3 +156,7 @@ export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysCon
 export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
+
+export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
+
+export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });

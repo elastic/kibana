@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { UrlDecodeProcessorConfig, UrlDecodeProcessorDefinition } from '@kbn/streams-schema';
 import { DocLinksStart } from '@kbn/core/public';
-import { ALWAYS_CONDITION } from '../../../../../../util/condition';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 

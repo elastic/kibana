@@ -12,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { KvProcessorConfig, KvProcessorDefinition } from '@kbn/streams-schema';
 import { DocLinksStart } from '@kbn/core/public';
-import { ALWAYS_CONDITION } from '../../../../../../util/condition';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
