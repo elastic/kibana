@@ -88,7 +88,7 @@ describe('Trusted apps form', () => {
       entries: [createEntry(ConditionEntryField.HASH, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
-      meta: {temporaryUuid: '1111'},
+      meta: { temporaryUuid: '1111' },
     };
     return {
       ...defaults,
