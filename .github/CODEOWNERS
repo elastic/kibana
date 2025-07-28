@@ -1956,6 +1956,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/accessibility/page_objects.ts @elastic/appex-qa
 /x-pack/platform/test/accessibility/services.ts @elastic/appex-qa
+/x-pack/test_serverless/functional/page_objects/add_cis_integration_form_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test_serverless/functional/page_objects/constants/test_subject_ids.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test_serverless/functional/page_objects/csp_dashboard_page.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test_serverless/functional/page_objects/security_common.ts @elastic/appex-qa # temporarily due to SKA tests relocation
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2471,7 +2475,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Cloud Security Posture
