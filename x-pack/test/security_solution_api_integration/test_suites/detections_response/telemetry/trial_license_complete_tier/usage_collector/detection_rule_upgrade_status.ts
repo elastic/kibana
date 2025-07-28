@@ -48,11 +48,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      afterEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es, log);
-        await deleteAllRules(supertest, log);
-      });
-
       /**
        * Creates a set of rule asset saved objects for testing.
        * Each rule has a unique ID and version number.
