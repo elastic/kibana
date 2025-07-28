@@ -42,19 +42,21 @@ const getSetupFormatFromInput = (
   return AWS_SETUP_FORMAT.CLOUD_FORMATION;
 };
 
+interface UseAwsCredentialsFormProps {
+  newPolicy: NewPackagePolicy;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  packageInfo: PackageInfo;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  setIsValid: (valid: boolean) => void;
+}
+
 export const useAwsCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
   updatePolicy,
   setIsValid,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
-  packageInfo: PackageInfo;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
-  setIsValid: (valid: boolean) => void;
-}) => {
+}: UseAwsCredentialsFormProps) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value, so we fall back to the default option.
 
