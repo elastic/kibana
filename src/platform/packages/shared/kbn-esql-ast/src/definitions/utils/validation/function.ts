@@ -30,7 +30,10 @@ import {
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import {
+  ICommandCallbacks,
+  getLocationFromCommandOrOptionName,
+} from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -326,6 +329,7 @@ export function validateFunction({
   parentCommand,
   parentOption,
   context,
+  callbacks,
   forceConstantOnly = false,
   isNested,
   parentAst,
@@ -335,6 +339,7 @@ export function validateFunction({
   parentCommand: string;
   parentOption?: string;
   context: ICommandContext;
+  callbacks: ICommandCallbacks;
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
@@ -398,7 +403,7 @@ export function validateFunction({
   const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, fn);
 
   // Check license requirements for the function
-  const hasMinimumLicenseRequired = context.hasMinimumLicenseRequired;
+  const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
 
   if (isFnSupported.supported && hasMinimumLicenseRequired) {
     const licenseMessages = validateFunctionLicense(fn, hasMinimumLicenseRequired);
@@ -487,6 +492,7 @@ export function validateFunction({
           parentCommand,
           parentOption,
           context,
+          callbacks,
           /*
            * The constantOnly constraint needs to be enforced for arguments that
            * are functions as well, regardless of whether the definition for the
