@@ -7,8 +7,15 @@
 
 import { isBoom, boomify } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
 import type { HTTPError } from '../../common/error';
-import { extractWarningValueFromWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
+import {
+  extractWarningValueFromWarningHeader,
+  logDeprecatedEndpoint,
+  wrapError,
+  validAttachment,
+  isPersistableStatePageAttachment,
+} from './utils';
 
 describe('Utils', () => {
   describe('wrapError', () => {
@@ -81,6 +88,59 @@ describe('Utils', () => {
       expect(extractWarningValueFromWarningHeader(`299 Kibana-8.1.0 "Deprecation endpoint"`)).toBe(
         'Deprecation endpoint'
       );
+    });
+  });
+
+  describe('validAttachment', () => {
+    it('validates a valid attachment', () => {
+      const attachment = {
+        persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
+        persistableStateAttachmentState: {
+          url: { pathAndQuery: '/internal/safe-url' },
+        },
+      };
+
+      expect(validAttachment.validate(attachment)).toEqual(attachment);
+    });
+
+    it('throws an error for an external URL', () => {
+      const invalidAttachment = {
+        persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
+        persistableStateAttachmentState: {
+          url: { pathAndQuery: 'http://external-url.com' },
+        },
+      };
+
+      expect(() => validAttachment.validate(invalidAttachment)).toThrow(
+        'External urls are not supported for page attachments. The provided url is: http://external-url.com'
+      );
+    });
+  });
+
+  describe('isPersistableStatePageAttachment', () => {
+    it('returns true for a valid persistable state page attachment', () => {
+      const attachment = {
+        persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
+        persistableStateAttachmentState: {},
+      };
+
+      expect(isPersistableStatePageAttachment(attachment)).toBe(true);
+    });
+
+    it('returns false for an invalid attachment', () => {
+      const invalidAttachment = {
+        someOtherProperty: 'value',
+      };
+
+      expect(isPersistableStatePageAttachment(invalidAttachment)).toBe(false);
+    });
+
+    it('returns false for a null value', () => {
+      expect(isPersistableStatePageAttachment(null)).toBe(false);
+    });
+
+    it('returns false for a non-object value', () => {
+      expect(isPersistableStatePageAttachment('string')).toBe(false);
     });
   });
 });
