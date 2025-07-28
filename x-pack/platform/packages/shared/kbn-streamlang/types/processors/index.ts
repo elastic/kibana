@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
+import { createIsNarrowSchema } from '@kbn/zod-helpers';
 import {
   ElasticsearchProcessorType,
   elasticsearchProcessorTypes,
@@ -18,6 +18,10 @@ import { Condition, conditionSchema } from '../conditions';
  * Base processor
  */
 export interface ProcessorBase {
+  /* Optional property that can be used to identify the processor block in an ingest pipeline once 
+  it's been through the transpiler. This will be mapped as a tag in the resulting pipeline. This can then
+  be used to relate the ingest pipeline processor back to the DSL definition, useful for things like simulation handling. */
+  transientId?: string;
   description?: string;
   ignore_failure?: boolean;
 }

@@ -7,10 +7,11 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { GrokCollection } from '@kbn/grok-ui';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import {
@@ -62,7 +63,7 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'processors.add'; processor?: ProcessorDefinition }
+  | { type: 'processors.add'; processor?: StreamlangProcessorDefinition }
   | { type: 'processors.reorder'; from: number; to: number }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };
