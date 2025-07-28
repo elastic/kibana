@@ -51,14 +51,14 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       key={FILTER_IN_BUTTON_TEST_ID}
       data={group}
       field={field.label}
-      announceFilterInChange={announceIndicatorActionChange}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_IN_BUTTON_TEST_ID}
     />,
     <FilterOutContextMenu
       key={FILTER_OUT_BUTTON_TEST_ID}
       data={group}
       field={field.label}
-      announceFilterOutChange={announceIndicatorActionChange}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
     />,
     <AddToTimelineContextMenu

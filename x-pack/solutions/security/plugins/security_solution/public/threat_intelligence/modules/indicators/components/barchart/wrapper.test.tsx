@@ -17,7 +17,7 @@ import {
   DROPDOWN_TEST_ID,
 } from './test_ids';
 import moment from 'moment';
-import { ScreenReaderAnnouncements } from '../../containers/screen_reader_a11y';
+import { ScreenReaderAnnouncementsProvider } from '../../containers/screen_reader_a11y';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 
@@ -29,7 +29,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
     it('should render barchart and field selector dropdown', () => {
       const { getByTestId, getAllByText } = render(
         <TestProvidersComponent>
-          <ScreenReaderAnnouncements>
+          <ScreenReaderAnnouncementsProvider>
             <IndicatorsBarChartWrapper
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
@@ -39,7 +39,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               isFetching={false}
               isLoading={false}
             />
-          </ScreenReaderAnnouncements>
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 
@@ -53,7 +53,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
     it('should render progress indicator', () => {
       const { queryByRole, getByTestId } = render(
         <TestProvidersComponent>
-          <ScreenReaderAnnouncements>
+          <ScreenReaderAnnouncementsProvider>
             <IndicatorsBarChartWrapper
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
@@ -63,7 +63,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               isFetching={false}
               isLoading={true}
             />
-          </ScreenReaderAnnouncements>
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 
@@ -76,7 +76,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
     it('should render progress indicator', () => {
       const component = render(
         <TestProvidersComponent>
-          <ScreenReaderAnnouncements>
+          <ScreenReaderAnnouncementsProvider>
             <IndicatorsBarChartWrapper
               dateRange={{ max: moment(), min: moment() }}
               series={[]}
@@ -86,7 +86,7 @@ describe('<IndicatorsBarChartWrapper />', () => {
               isFetching={true}
               isLoading={false}
             />
-          </ScreenReaderAnnouncements>
+          </ScreenReaderAnnouncementsProvider>
         </TestProvidersComponent>
       );
 

@@ -25,10 +25,10 @@ import { InspectorProvider } from '../../../containers/inspector';
 import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
-import { ScreenReaderAnnouncements } from '../containers/screen_reader_a11y';
+import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <ScreenReaderAnnouncements>
+  <ScreenReaderAnnouncementsProvider>
     <IndicatorsFilters>
       <FieldTypesProvider>
         <InspectorProvider>
@@ -36,7 +36,7 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
         </InspectorProvider>
       </FieldTypesProvider>
     </IndicatorsFilters>
-  </ScreenReaderAnnouncements>
+  </ScreenReaderAnnouncementsProvider>
 );
 
 const IndicatorsPageContent: FC = () => {
