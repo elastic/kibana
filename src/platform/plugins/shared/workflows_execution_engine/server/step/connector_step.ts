@@ -73,12 +73,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
-        // this.contextManager.logDebug(`Console output: ${step.with?.message}`);
-        return { output: step.with?.message, error: undefined };
-      } else if (step.type === 'console.sleep') {
-        const sleepTime = step.with?.sleepTime ?? 1000;
-        // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, sleepTime));
+        // eslint-disable-next-line no-console
+        console.log(step.with?.message);
         return { output: step.with?.message, error: undefined };
       } else if (step.type === 'delay') {
         const delayTime = step.with?.delay ?? 1000;
