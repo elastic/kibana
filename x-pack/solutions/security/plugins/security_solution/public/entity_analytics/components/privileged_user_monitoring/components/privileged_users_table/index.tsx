@@ -23,8 +23,11 @@ import { take } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useQuery } from '@tanstack/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/utils';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import type { TableItemType } from './types';
@@ -77,6 +80,7 @@ interface AssetCriticalityByUserName {
 }
 
 export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+  const { setQuery, deleteQuery } = useGlobalTime();
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USERS_TABLE_QUERY_ID);
 
   const { euiTheme } = useEuiTheme();
@@ -99,6 +103,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     data: result,
     isLoading: loadingPrivilegedUsers,
     isError: privilegedUsersError,
+    refetch,
   } = useQuery({
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
     enabled: toggleStatus,
@@ -196,13 +201,38 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const isLoading =
     loadingPrivilegedUsers || (records.length > 0 && (loadingRiskScore || loadingAssetCriticality));
   const visibleRecords = take(currentPage * DEFAULT_PAGE_SIZE, enrichedRecords);
+
+  const inspect = useMemo(() => {
+    return {
+      dsl: [
+        JSON.stringify(
+          {
+            index: [getPrivilegedMonitorUsersIndex(spaceId)],
+            body: prettifyQuery(privilegedUsersTableQuery, false),
+          },
+          null,
+          2
+        ),
+      ],
+      response: result ? [JSON.stringify(result, null, 2)] : [],
+    };
+  }, [privilegedUsersTableQuery, result, spaceId]);
+
+  useQueryInspector({
+    deleteQuery,
+    inspect,
+    refetch,
+    setQuery,
+    queryId: PRIVILEGED_USERS_TABLE_QUERY_ID,
+    loading: loadingPrivilegedUsers,
+  });
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-users-table-panel">
       <HeaderSection
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
         id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-        showInspectButton={false}
+        showInspectButton
         title={TITLE}
         titleSize="s"
         outerDirection="column"

@@ -20,7 +20,7 @@ import { PrivilegedAccessDetectionInstallPrompt } from './pad_install_prompt';
 import { PrivilegedAccessDetectionViewAllAnomaliesButton } from './pad_view_all_anomalies_button';
 import { PrivilegedAccessInfoPopover } from './info_popover';
 
-const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
+export const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
 
 const PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS = 10_000;
 
@@ -124,7 +124,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
             id={PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID}
-            showInspectButton={false}
+            showInspectButton
             title={
               <>
                 <FormattedMessage
