@@ -195,13 +195,15 @@ export class IndexUpdateService {
     this._indexName$,
     this._indexCrated$,
     this.pendingColumnsToBeSaved$.pipe(
-      startWith([]),
       // Refetch the dataView to look for new field types when there are new columns saved
       // (when pendingColumnsToBeSaved$ length decreases)
-      scan((prev, curr) => ({ prevLength: prev.currLength ?? 0, currLength: curr.length }), {
-        prevLength: 0,
-        currLength: 0,
-      }),
+      scan(
+        (acc, curr) => ({
+          prevLength: acc.currLength,
+          currLength: curr.length,
+        }),
+        { prevLength: 0, currLength: 0 }
+      ),
       filter(({ prevLength, currLength }) => currLength < prevLength || prevLength === 0),
       startWith({ prevLength: 0, currLength: 0 })
     ),
