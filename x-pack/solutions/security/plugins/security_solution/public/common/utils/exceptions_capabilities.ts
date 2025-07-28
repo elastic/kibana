@@ -7,7 +7,8 @@
 import type { Capabilities } from '@kbn/core/types';
 
 export function extractExceptionsCapabilities(capabilities: Capabilities) {
-  const exceptionsRead = capabilities.securitySolutionExceptions?.read === true;
-  const exceptionsCrud = capabilities.securitySolutionExceptions?.crud === true;
+  console.error('CAPABILITIES', capabilities);
+  const exceptionsRead = capabilities.securitySolutionRules?.readExceptions === true;
+  const exceptionsCrud = capabilities.securitySolutionRules?.crudExceptions === true;
   return { read: exceptionsRead, crud: exceptionsCrud };
 }

@@ -56,7 +56,7 @@ export const getExceptionsSubFeaturesMap = (
               all: savedObjects,
               read: savedObjects,
             },
-            ui: ['read', 'crud'],
+            ui: ['readExceptions', 'crudExceptions'],
             api: ['exceptions-read', 'exceptions-write', 'lists-all', 'lists-read'],
           },
           {
@@ -68,7 +68,7 @@ export const getExceptionsSubFeaturesMap = (
               all: [],
               read: savedObjects,
             },
-            ui: ['read'],
+            ui: ['readExceptions'],
             api: ['exceptions-read', 'lists-read'],
           },
         ],

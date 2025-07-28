@@ -275,7 +275,7 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
   // uncomment below after ying's pr merges
-  // if patchRule fails, delete the exception list created above?
+  // if patchRule fails, delete the exception list created above
   // try {
   //   const res = await rulesClient.bulkEditRuleParamsWithReadAuth({
   //     ids: [rule.id],
@@ -299,6 +299,7 @@ export const createAndAssociateDefaultExceptionList = async ({
   //   console.error('exc', exc);
   // }
 
+  // remove this code when ying's pr merges
   await detectionRulesClient.patchRule({
     rulePatch: {
       rule_id: rule.params.ruleId,
