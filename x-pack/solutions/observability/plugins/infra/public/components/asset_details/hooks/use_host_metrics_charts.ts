@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
-import type { SchemaTypes } from '../../../../common/http_api/shared/schema_type';
-import { usePluginConfig } from '../../../containers/plugin_config_context';
 import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
 
@@ -17,18 +15,18 @@ export const useHostCharts = ({
   metric,
   dataViewId,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
   dataViewId?: string;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
-  const config = usePluginConfig();
-
   const { value: charts = [], error } = useAsync(async () => {
     const hostCharts = await getHostsCharts({
       metric,
       overview,
-      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+      schema: schema ?? DataSchemaFormat.ECS,
     });
 
     return hostCharts.map((chart) => ({
@@ -39,7 +37,7 @@ export const useHostCharts = ({
         },
       }),
     }));
-  }, [config.featureFlags.hostOtelEnabled, dataViewId, metric, overview]);
+  }, [dataViewId, metric, overview, schema]);
 
   return { charts, error };
 };
@@ -47,16 +45,17 @@ export const useHostCharts = ({
 export const useKubernetesCharts = ({
   dataViewId,
   overview,
+  schema,
 }: {
   dataViewId?: string;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
-  const config = usePluginConfig();
 
   const { value: charts = [], error } = useAsync(async () => {
     const { kubernetesNode } = await model.metrics.getCharts({
-      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+      schema: schema ?? DataSchemaFormat.ECS,
     });
 
     if (!kubernetesNode) {
@@ -82,7 +81,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [model.metrics, config.featureFlags.hostOtelEnabled, overview, dataViewId]);
+  }, [model.metrics, schema, overview, dataViewId]);
 
   return { charts, error };
 };
@@ -98,17 +97,19 @@ export const useHostKpiCharts = ({
   dataViewId,
   seriesColor,
   getSubtitle,
+  schema,
 }: {
   dataViewId?: string;
   seriesColor?: string;
   getSubtitle?: (formulaValue: string) => string;
+  schema?: DataSchemaFormat | null;
 }) => {
   seriesColor = useChartSeriesColor(seriesColor);
-  const config = usePluginConfig();
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts({
-      schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+      schema: schema ?? DataSchemaFormat.ECS,
     });
 
     return [
@@ -127,7 +128,7 @@ export const useHostKpiCharts = ({
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle, config.featureFlags.hostOtelEnabled]);
+  }, [dataViewId, seriesColor, getSubtitle, schema]);
 
   return charts;
 };
@@ -139,11 +140,13 @@ const getHostsCharts = async ({
 }: {
   metric: HostMetricTypes;
   overview?: boolean;
-  schema: SchemaTypes;
+  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
 
-  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({ schema });
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
+    schema: schema ?? DataSchemaFormat.ECS,
+  });
 
   switch (metric) {
     case 'cpu':
