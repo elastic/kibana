@@ -19,20 +19,29 @@ type Sort = Record<string, SortOrder>;
 
 type SortArgs = Sort | string | Array<Sort | string>;
 
-// TODO: a better name?
-export function sortRaw<TQuery extends string, TParams extends Params<TQuery>>(
+export function sort<TQuery extends string, TParams extends Params<TQuery>>(
   body: TQuery,
   params?: TParams
+): QueryOperator;
+export function sort(...sorts: SortArgs[]): QueryOperator;
+export function sort<TQuery extends string, TParams extends Params<TQuery>>(
+  firstArg: TQuery | SortArgs,
+  secondArg?: TParams | SortArgs,
+  ...restSorts: SortArgs[]
 ): QueryOperator {
-  return append({ command: `SORT ${body}`, params });
-}
+  if (typeof firstArg === 'string' && firstArg.includes('?')) {
+    return append({ command: `SORT ${firstArg}`, params: secondArg as TParams });
+  }
 
-export function sort(...sorts: SortArgs[]): QueryOperator {
-  const allSorts = sorts
+  const allSorts = [
+    firstArg as SortArgs,
+    ...(secondArg !== undefined ? [secondArg as SortArgs] : []),
+    ...restSorts,
+  ]
     .flatMap((sortInstruction) => sortInstruction)
-    .map((sortInstruction): { column: string; order: 'ASC' | 'DESC' } => {
+    .map((sortInstruction): { column: string; order: SortOrder } => {
       if (typeof sortInstruction === 'string') {
-        return { column: sortInstruction, order: 'ASC' };
+        return { column: sortInstruction, order: SortOrder.Asc };
       }
       const column = Object.keys(sortInstruction)[0] as keyof typeof sortInstruction;
 

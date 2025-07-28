@@ -8,7 +8,7 @@
  */
 
 import { from } from './from';
-import { sort, SortOrder, sortRaw } from './sort';
+import { sort, SortOrder } from './sort';
 
 describe('sort', () => {
   const source = from('logs-*');
@@ -39,7 +39,7 @@ describe('sort', () => {
 
   it('handles SORT with params', () => {
     const pipeline = source.pipe(
-      sortRaw('??timestamp DESC, ??logLevel ASC', {
+      sort('??timestamp DESC, ??logLevel ASC', {
         timestamp: '@timestamp',
         logLevel: 'log.level',
       })

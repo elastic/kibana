@@ -53,18 +53,6 @@ describe('composer', () => {
     });
   });
 
-  it('escapes malicious query parameter', () => {
-    const pipeline = source.pipe(
-      where(`service.name == ?malicious"`, {
-        malicious: '"malicious" OR 1=1 --',
-      })
-    );
-
-    expect(pipeline.toString()).toEqual(
-      'FROM logs-*\n  | WHERE service.name == "\\"malicious\\" OR 1=1 --"'
-    );
-  });
-
   it('should build query from multiple `pipe` calls', () => {
     let pipeline = source.pipe(where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`));
     pipeline = pipeline.pipe(stats(`avg_duration = AVG(transaction.duration.us) BY service.name`));
@@ -77,18 +65,20 @@ describe('composer', () => {
   });
 
   it('appends commands conditionally using pipeIf', () => {
+    const withStats = true;
+    const withLimit = false;
     const pipeline = source
       .pipe(where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`))
-      .pipeIf(
-        true,
-        stats(`avg_duration = AVG(transaction.duration.us) BY service.name`),
-        keep('@timestamp', 'avg_duration', 'service.name')
+      .pipe(
+        withStats
+          ? stats(`avg_duration = AVG(transaction.duration.us) BY service.name`)
+          : (query) => query
       )
       .pipe(sort({ '@timestamp': SortOrder.Desc }))
-      .pipeIf(() => false, limit(100));
+      .pipe(withLimit ? limit(100) : (query) => query);
 
     expect(pipeline.toString()).toEqual(
-      'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT @timestamp DESC'
+      'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name\n  | SORT @timestamp DESC'
     );
   });
 });

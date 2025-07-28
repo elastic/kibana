@@ -12,7 +12,7 @@ import { QueryOperator, Params, Query } from '../types';
 
 export function append({ command, params }: { command: string; params?: Params }): QueryOperator {
   return (source): Query => {
-    const commandAst = synth.cmd`${command}`;
+    const commandAst = synth.cmd(command);
 
     return {
       root: source.root,

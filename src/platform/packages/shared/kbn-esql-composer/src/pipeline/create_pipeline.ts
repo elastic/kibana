@@ -37,19 +37,8 @@ export function createPipeline(source: Query): QueryPipeline {
     return createPipeline(nextSource);
   };
 
-  const pipeIf = (
-    condition: boolean | (() => boolean),
-    ...operators: Array<(query: Query) => Query>
-  ): QueryPipeline => {
-    if (typeof condition === 'function' ? condition() : condition) {
-      return pipe(...operators);
-    }
-    return createPipeline(source);
-  };
-
   return {
     pipe,
-    pipeIf,
     toString,
     asRequest,
   };
