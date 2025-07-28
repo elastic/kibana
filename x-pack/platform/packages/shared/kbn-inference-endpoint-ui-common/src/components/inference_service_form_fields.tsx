@@ -106,6 +106,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'secrets.providerSecrets',
       'config.taskType',
       'config.inferenceId',
+      'config.contextWindowLength',
       'config.provider',
       'config.providerConfig',
     ],

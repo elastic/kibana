@@ -125,6 +125,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
+        contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
       },
       secrets: {
         providerSecrets: {},

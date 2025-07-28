@@ -8,7 +8,7 @@
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
 import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration } from '../types/types';
+import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -81,7 +81,7 @@ export const getNonEmptyValidator = (
 export const mapProviderFields = (
   taskType: string,
   newProvider: InferenceProvider,
-  fieldOverrides?: { hidden: string[]; additional: FieldsConfiguration[] }
+  fieldOverrides?: OverrideFieldsContentType
 ): ConfigEntryView[] => {
   // fieldOverrides.additional
   // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]
