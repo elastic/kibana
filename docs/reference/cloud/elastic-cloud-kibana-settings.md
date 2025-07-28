@@ -79,6 +79,9 @@ stack: ga 9.1
 `xpack.actions.webhook.ssl.pfx.enabled`
 :   Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
 
+`xpack.banners.linkColor`
+:   The color for the banner link text. Defaults to `#0B64DD`.
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
@@ -413,9 +416,6 @@ Banners are disabled by default. You need to manually configure them in order to
 
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
-
-`xpack.banners.linkColor` {applies_to}`stack: ga 9.1`
-:   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.
