@@ -272,7 +272,7 @@ export const useLookupIndexCommand = (
       editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
     }
 
-    const existingIndices = await getLookupIndices!();
+    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
 
     const lookupIndices: string[] = inQueryLookupIndices.current;
 
