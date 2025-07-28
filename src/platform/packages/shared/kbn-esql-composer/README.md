@@ -57,7 +57,6 @@ The above example will output
 
 ### Conditional commands
 
-Queries can be conditionally built using `.pipeIf()` or or with typical if-statements.
 
 ```ts
 
@@ -81,7 +80,7 @@ pipeline.toString()
 let pipelipine = from('logs-*').pipe(
   where('@timestamp <= NOW() AND @timestamp > NOW() - 24 hours'),
   limit(10s)
-).pipeIf(limitReturnedFields, keep('@timestamp', 'service.name'));
+).pipe(limitReturnedFields ? keep('@timestamp', 'service.name') : (query) => query);
 
 pipeline.toString()
 
@@ -282,11 +281,11 @@ Output:
 `SORT` with named parameters
 
 ```ts
-import { from, sortRaw } from '@kbn/esql-composer';
+import { from, sort } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    sortRaw('??timestamp DESC, ??logLevel ASC', {
+    sort('??timestamp DESC, ??logLevel ASC', {
       timestamp: '@timestamp',
       logLevel: 'log.level',
     })
