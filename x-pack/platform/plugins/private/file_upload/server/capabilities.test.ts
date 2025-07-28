@@ -74,6 +74,7 @@ describe('setupCapabilities', () => {
 
     expect(coreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
     const [switcher] = coreSetup.capabilities.registerSwitcher.mock.calls[0];
+    const request = httpServerMock.createKibanaRequest();
 
     const capabilities = {
       navLinks: {},
@@ -85,9 +86,22 @@ describe('setupCapabilities', () => {
       },
     } as Capabilities;
 
-    const request = httpServerMock.createKibanaRequest();
-
     await expect(switcher(request, capabilities, true)).resolves.toMatchInlineSnapshot(`Object {}`);
+
+    // now with show set to false
+    const capabilitiesNoShow = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      fileUpload: {
+        canImport: true,
+        show: false,
+      },
+    } as Capabilities;
+
+    await expect(switcher(request, capabilitiesNoShow, true)).resolves.toMatchInlineSnapshot(
+      `Object {}`
+    );
 
     expect(security.authz.mode.useRbacForRequest).not.toHaveBeenCalled();
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
@@ -126,7 +140,7 @@ describe('setupCapabilities', () => {
             Object {
               "fileUpload": Object {
                 "canImport": false,
-                "show": false,
+                "show": true,
               },
             }
           `);
@@ -210,7 +224,7 @@ describe('setupCapabilities', () => {
             Object {
               "fileUpload": Object {
                 "canImport": false,
-                "show": false,
+                "show": true,
               },
             }
           `);
