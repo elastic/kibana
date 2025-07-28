@@ -29,7 +29,7 @@ export function useGetProductDoc(inferenceId: string | undefined) {
 
   const { mutateAsync: uninstallProductDoc, isLoading: isUninstalling } = useUninstallProductDoc();
 
-  const { isLoading, data, refetch } = useQuery({
+  const { isLoading, data, refetch, isRefetching } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],
     queryFn: async () => {
       return productDocBase!.installation.getStatus({ inferenceId });
@@ -58,7 +58,7 @@ export function useGetProductDoc(inferenceId: string | undefined) {
   return {
     status,
     refetch,
-    isLoading,
+    isLoading: isLoading || isRefetching,
     installProductDoc,
     uninstallProductDoc,
   };
