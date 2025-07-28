@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,8 +17,11 @@ interface ConfirmPackageUninstallProps {
 }
 export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => {
   const { onCancel, onConfirm, packageName, numOfAssets } = props;
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={
         <FormattedMessage
           id="xpack.fleet.integrations.settings.confirmUninstallModal.uninstallTitle"
@@ -26,6 +29,7 @@ export const ConfirmPackageUninstall = (props: ConfirmPackageUninstallProps) => 
           values={{ packageName }}
         />
       }
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={

@@ -34,7 +34,7 @@ export const getAllHosts = async ({
   hostNames: string[];
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
-  const metricAggregations = getInventoryModelAggregations(
+  const metricAggregations = await getInventoryModelAggregations(
     'host',
     metrics.map((metric) => metric)
   );
