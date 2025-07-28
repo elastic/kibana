@@ -32,7 +32,6 @@ export class DashboardPanelActionsService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly browser = this.ctx.getService('browser');
 
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
@@ -47,10 +46,22 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async getDashboardContainerTopOffset() {
-    return (
-      (await (await this.testSubjects.find('dashboardContainer')).getPosition()).y +
-      DASHBOARD_MARGIN_SIZE
-    );
+    const fixedHeaders = [
+      // global fixed eui headers, TODO: remove when Kibana switched to grid layout
+      ...(await this.find.allByCssSelector('[data-fixed-header="true"]', 500)),
+      // sticky unified search bar
+      ...(await this.find.allByCssSelector('[data-test-subj="globalQueryBar"]')),
+    ];
+
+    let fixedHeaderHeight = 0;
+    for (const header of fixedHeaders) {
+      const headerHeight = (await header.getSize()).height;
+      fixedHeaderHeight += headerHeight;
+    }
+
+    const additionalOffsetForFloatingHoverActions = 32;
+
+    return fixedHeaderHeight + DASHBOARD_MARGIN_SIZE + additionalOffsetForFloatingHoverActions;
   }
 
   async getCanvasContainerTopOffset() {
@@ -70,17 +81,10 @@ export class DashboardPanelActionsService extends FtrService {
   async scrollPanelIntoView(wrapper?: WebElementWrapper) {
     this.log.debug(`scrollPanelIntoView`);
     wrapper = wrapper || (await this.getPanelWrapper());
-    const yOffset = (await wrapper.getPosition()).y;
-    await this.browser.execute(`
-        const scrollY = window.scrollY;
-        window.scrollBy(0, scrollY - ${yOffset});
-      `);
 
     const containerTop = await this.getContainerTopOffset();
 
-    await wrapper.moveMouseTo({
-      topOffset: containerTop,
-    });
+    await wrapper.moveMouseTo({ topOffset: containerTop });
   }
 
   async toggleContextMenu(wrapper?: WebElementWrapper) {

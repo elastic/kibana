@@ -29,60 +29,58 @@
 
 export function scrollIntoViewIfNecessary(
   target: HTMLElement,
-  fixedHeaderHeight: number = 0,
-  fixedFooterHeight: number = 0
+  scrollFixedHeader: number = 0,
+  scrollFixedFooter: number = 0
 ) {
-  // Pick the element that actually scrolls:
-  // 1. A custom scroller with id="scrollId"
-  // 2. `document.scrollingElement`
-  // 3. `document.documentElement` (legacy fallback)
-  const rootScroller: HTMLElement | Element | null =
+  // Get bounding rectangles
+  const scroller =
     document.getElementById('app-main-scroll') ||
     document.scrollingElement ||
     document.documentElement;
 
-  if (!rootScroller) {
-    throw new Error('No scroll container found');
+  // Check if the target is in the scroller
+  if (!scroller.contains(target)) return;
+
+  // Measure helper, logic is different for scrolling the viewport vs a scroller element
+  const getRects = () => {
+    const targetRect = target.getBoundingClientRect();
+    const scrollIsViewport = scroller === document.documentElement || scroller === document.body;
+    const scrollReact = scrollIsViewport
+      ? { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }
+      : scroller.getBoundingClientRect();
+    return { targetRect, scrollReact };
+  };
+
+  const isVisible = ({ targetRect, scrollReact }: ReturnType<typeof getRects>) =>
+    targetRect.top >= scrollReact.top + scrollFixedHeader &&
+    targetRect.bottom <= scrollReact.bottom - scrollFixedFooter;
+
+  let { targetRect, scrollReact } = getRects();
+
+  if (isVisible({ targetRect, scrollReact })) return;
+
+  // First try native scrollIntoView on the correct container
+  target.scrollIntoView();
+
+  if (scrollFixedHeader) {
+    // remeasure
+    ({ targetRect, scrollReact } = getRects());
+
+    // Now adjust for fixed headers
+    const deltaTop = targetRect.top - (scrollReact.top + scrollFixedHeader);
+    if (deltaTop < 0) {
+      scroller.scrollBy({ top: deltaTop });
+    }
   }
 
-  // Current viewport size
-  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+  if (scrollFixedFooter) {
+    // remeasure again
+    ({ targetRect, scrollReact } = getRects());
 
-  const rootRect = rootScroller.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-
-  // Is the target fully visible inside the chosen scroller?
-  const isFullyVisible = () =>
-    targetRect.top >= rootRect.top + fixedHeaderHeight &&
-    targetRect.bottom <= rootRect.bottom - fixedFooterHeight &&
-    targetRect.left >= rootRect.left &&
-    targetRect.right <= rootRect.right &&
-    targetRect.top >= 0 &&
-    targetRect.left >= 0 &&
-    targetRect.bottom <= viewportHeight &&
-    targetRect.right <= viewportWidth;
-
-  // First, let the browser do a minimal scroll if needed
-  if (!isFullyVisible()) {
-    target.scrollIntoView();
-  }
-
-  // Re‑measure after the initial scroll
-  const freshRect = target.getBoundingClientRect();
-
-  // Pull the element down if the header still covers it
-  const overlapWithHeader = fixedHeaderHeight - freshRect.top;
-  if (overlapWithHeader > 0) {
-    rootScroller.scrollTop -= overlapWithHeader;
-  }
-
-  // Push the element up if the footer still covers it
-  if (fixedFooterHeight) {
-    const bottomOfViewport = viewportHeight - fixedFooterHeight;
-    const overlapWithFooter = freshRect.bottom - bottomOfViewport;
-    if (overlapWithFooter > 0) {
-      rootScroller.scrollTop += overlapWithFooter;
+    // Adjust for fixed footers
+    const deltaBottom = targetRect.bottom - (scrollReact.bottom - scrollFixedFooter);
+    if (deltaBottom > 0) {
+      scroller.scrollBy({ top: deltaBottom });
     }
   }
 }
