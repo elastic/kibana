@@ -2224,53 +2224,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.EsqlToolConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "EsqlToolConfig",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.EsqlToolConfig.query",
-            "type": "string",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.EsqlToolConfig.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              "{ [x: string]: ",
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.EsqlToolParam",
-                "text": "EsqlToolParam"
-              },
-              "; }"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.EsqlToolParam",
         "type": "Interface",
         "tags": [],
@@ -2809,7 +2762,7 @@
             "section": "def-common.ToolDefinitionWithSchema",
             "text": "ToolDefinitionWithSchema"
           },
-          " extends ",
+          "<TConfig> extends ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -2817,7 +2770,7 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "<Record<string, unknown>>"
+          "<TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
         "deprecated": false,
@@ -3339,6 +3292,29 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlToolConfig",
+        "description": [],
+        "signature": [
+          "{ query: string; params: Record<string, ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.EsqlToolParam",
+            "text": "EsqlToolParam"
+          },
+          ">; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.EsqlToolDefinition",
         "type": "Type",
         "tags": [],
@@ -3351,6 +3327,36 @@
             "docId": "kibKbnOnechatCommonPluginApi",
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.EsqlToolConfig",
+            "text": "EsqlToolConfig"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolDefinitionWithSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlToolDefinitionWithSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinitionWithSchema",
+            "text": "ToolDefinitionWithSchema"
           },
           "<",
           {
