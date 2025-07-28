@@ -39,7 +39,7 @@ export function defineLoginRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { excludeFromOAS: true },
+      options: { excludeFromOAS: true, excludeFromRateLimiter: true },
       security: {
         authc: {
           enabled: 'optional',
