@@ -13,6 +13,8 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiInMemoryTable,
+  EuiSkeletonLoading,
+  EuiSkeletonText,
   EuiText,
   Search,
   useEuiTheme,
@@ -21,9 +23,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
@@ -58,37 +61,49 @@ const getColumns = ({
   editTool: (toolId: string) => void;
 }): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => [
   {
-    field: 'id',
-    name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
-    sortable: true,
-    render: (id: string) => (
-      <EuiText size="s">
-        <strong>{id}</strong>
-      </EuiText>
+    name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'ID' }),
+    sortable: ({ id }: ToolDefinitionWithSchema) => id,
+    width: '60%',
+    render: (tool: ToolDefinitionWithSchema) => (
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiText size="s">
+          <strong>{tool.id}</strong>
+        </EuiText>
+        <EuiText size="s" color="subdued">
+          {truncateAtNewline(tool.description)}
+        </EuiText>
+      </EuiFlexGroup>
     ),
   },
   {
-    field: 'description',
-    name: i18n.translate('xpack.onechat.tools.toolDescriptionLabel', {
-      defaultMessage: 'Description',
+    field: 'type',
+    name: i18n.translate('xpack.onechat.tools.typeLabel', {
+      defaultMessage: 'Type',
     }),
-    width: '50%',
-    render: (description: string) => {
-      return <EuiText size="s">{truncateAtNewline(description)}</EuiText>;
-    },
+    width: '80px',
+    render: (type: string) =>
+      type === ToolType.esql ? (
+        <EuiText size="s">
+          {i18n.translate('xpack.onechat.tools.esqlLabel', {
+            defaultMessage: 'ES|QL',
+          })}
+        </EuiText>
+      ) : type === ToolType.builtin ? (
+        <EuiText size="s">
+          {i18n.translate('xpack.onechat.tools.builtinLabel', {
+            defaultMessage: 'System',
+          })}
+        </EuiText>
+      ) : null,
   },
   {
     field: 'tags',
     name: i18n.translate('xpack.onechat.tools.tagsLabel', {
-      defaultMessage: 'Tags',
+      defaultMessage: 'Labels',
     }),
-    valign: 'top',
     render: (tags: string[]) => <OnechatToolTags tags={tags} />,
   },
   {
-    name: i18n.translate('xpack.onechat.tools.actionsLabel', {
-      defaultMessage: 'Actions',
-    }),
     width: '100px',
     align: 'center',
     render: ({ id }: ToolDefinitionWithSchema) => {
@@ -313,6 +328,49 @@ export const OnechatTools = () => {
       />
       <KibanaPageTemplate.Section>
         <EuiInMemoryTable
+          childrenBetween={
+            <EuiFlexGroup
+              css={css`
+                margin-block: ${euiTheme.size.s} ${euiTheme.size.m};
+              `}
+            >
+              <EuiSkeletonLoading
+                isLoading={isLoadingTools}
+                loadingContent={
+                  <EuiSkeletonText
+                    css={css`
+                      display: inline-block;
+                      width: 200px;
+                    `}
+                    lines={1}
+                    size="xs"
+                  />
+                }
+                loadedContent={
+                  <EuiText size="xs">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.onechat.tools.toolsTableSummary"
+                        defaultMessage="Showing {start}-{end} of {total} {tools}"
+                        values={{
+                          start: <strong>{pageIndex * 10 + 1}</strong>,
+                          end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
+                          total: tools.length,
+                          tools: (
+                            <strong>
+                              {i18n.translate('xpack.onechat.tools.toolsLabel', {
+                                defaultMessage: 'Tools',
+                              })}
+                            </strong>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                }
+              />
+            </EuiFlexGroup>
+          }
           loading={isLoadingTools}
           columns={columns}
           items={tools}
