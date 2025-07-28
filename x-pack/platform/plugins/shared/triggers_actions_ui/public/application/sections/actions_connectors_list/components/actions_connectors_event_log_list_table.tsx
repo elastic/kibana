@@ -92,6 +92,18 @@ const MAX_RESULTS = 1000;
 
 export type ConnectorEventLogListOptions = 'stackManagement' | 'default';
 
+const removeLastItemWidthToExpandToFullContainerWidth = (
+  columns: EuiDataGridColumn[],
+  visibleColumns: string[]
+): EuiDataGridColumn[] => {
+  const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
+  return columns.map((col) => {
+    if (col.id !== lastVisibleColumnId) return col;
+    const { initialWidth, ...rest } = col;
+    return rest;
+  });
+};
+
 export type ConnectorEventLogListCommonProps = {
   localStorageKey?: string;
   refreshToken?: number;
@@ -473,15 +485,6 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     [onFilterChange, hasConnectorNames, showFromAllSpaces]
   );
 
-  const removeLastItemWidthToExpandToFullContainerWidth = (): EuiDataGridColumn[] => {
-    const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
-    return columns.map((col) => {
-      if (col.id !== lastVisibleColumnId) return col;
-      const { initialWidth, ...rest } = col;
-      return rest;
-    });
-  };
-
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -492,7 +495,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
         <EventLogDataGrid
-          columns={removeLastItemWidthToExpandToFullContainerWidth()}
+          columns={removeLastItemWidthToExpandToFullContainerWidth(columns, visibleColumns)}
           logs={logs}
           pagination={pagination}
           sortingColumns={sortingColumns}
