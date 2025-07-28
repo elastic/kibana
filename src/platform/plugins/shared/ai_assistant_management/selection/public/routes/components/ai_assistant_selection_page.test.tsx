@@ -49,7 +49,7 @@ describe('AiAssistantSelectionPage', () => {
     renderComponent(testCapabilities);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {
-        text: 'AI Assistant',
+        text: 'AI Assistants',
       },
     ]);
   });
