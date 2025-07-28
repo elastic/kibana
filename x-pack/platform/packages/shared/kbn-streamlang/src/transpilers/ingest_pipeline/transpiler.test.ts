@@ -32,16 +32,6 @@ describe('transpile (Streamlang DSL to ingest pipeline)', () => {
           to: 'attributes.status',
           value: 'active',
         } as SetProcessor,
-        // Regex where
-        {
-          action: 'set',
-          to: 'attributes.regex_field',
-          value: 'regex_value',
-          where: {
-            field: 'attributes.status',
-            regex: '^active$',
-          },
-        } as SetProcessor,
         // Grok parsing
         {
           action: 'grok',

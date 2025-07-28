@@ -26,7 +26,6 @@ export const OPERATORS: OperatorKey[] = [
   'startsWith',
   'endsWith',
   'range',
-  'regex',
 ];
 
 export interface RangeCondition {
@@ -47,7 +46,6 @@ export interface ShorthandBinaryFilterCondition {
   startsWith?: StringOrNumberOrBoolean;
   endsWith?: StringOrNumberOrBoolean;
   range?: RangeCondition;
-  regex?: string;
 }
 
 export const rangeConditionSchema = z.object({
@@ -70,7 +68,6 @@ export const shorthandBinaryFilterConditionSchema = z
     startsWith: stringOrNumberOrBoolean.optional(),
     endsWith: stringOrNumberOrBoolean.optional(),
     range: rangeConditionSchema.optional(),
-    regex: z.string().optional(),
   })
   .refine(
     (obj) =>

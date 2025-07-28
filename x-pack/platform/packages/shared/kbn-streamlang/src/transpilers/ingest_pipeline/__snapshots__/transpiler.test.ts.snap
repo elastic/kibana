@@ -167,34 +167,6 @@ Object {
       },
     },
     Object {
-      "set": Object {
-        "field": "attributes.regex_field",
-        "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
-  try {
-  if ((relevant_fields['attributes.status'] !== null && /^active$/.matcher(relevant_fields['attributes.status']).matches())) {
-    return true;
-  }
-  return false;
-} catch (Exception e) {
-  return false;
-}
-",
-        "value": "regex_value",
-      },
-    },
-    Object {
       "grok": Object {
         "field": "body.message",
         "patterns": Array [

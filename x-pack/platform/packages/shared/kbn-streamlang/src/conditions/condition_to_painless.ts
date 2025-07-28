@@ -144,10 +144,6 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
 
       return `((${field} instanceof Number && ${numberExpr}) || (${field} instanceof String && ${stringExpr}))`;
     }
-    case 'regex': {
-      const field = safePainlessField(condition);
-      return `/${value}/.matcher(${field}).matches()`;
-    }
     default: // eq
       return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
         condition
