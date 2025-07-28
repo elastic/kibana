@@ -6,12 +6,12 @@
  */
 
 import expect from 'expect';
-import { RoleCredentials } from '../../../../shared/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,
-} from '../../common/fleet/default_setup';
+} from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
+import { RoleCredentials } from '../../../../shared/services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');
