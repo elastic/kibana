@@ -19,6 +19,7 @@ const { collapseLiteralStrings } = XJson;
 export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
+  host?: string;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -115,6 +116,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           path,
           data,
           asResponse: true,
+          host: args.host,
         });
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
