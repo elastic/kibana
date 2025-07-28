@@ -60,7 +60,7 @@ import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_exe
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
-import { ResolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
+import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -189,7 +189,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             },
             loadContent: async ({ closeFlyout }) => {
               return (
-                <ResolveAnomalySwimlaneUserInput
+                <AnomalySwimlaneUserInput
                   coreStart={coreStartServices}
                   pluginStart={pluginsStartServices}
                   onConfirm={(result) => {
