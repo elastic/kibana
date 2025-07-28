@@ -228,7 +228,7 @@ describe('getSecondaryMetricInfo', () => {
     const trendConfig: TrendConfig = {
       showIcon: true,
       showValue: true,
-      palette: ['#f00', '#0f0', '#00f'],
+      palette: PALETTE,
       baselineValue: baseline,
       borderColor: undefined,
       compareToPrimary: true,

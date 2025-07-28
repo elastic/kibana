@@ -48,11 +48,16 @@ export function SecondaryMetric({
     staticColor,
   });
 
+  const badgeCss = [
+    styles.badge,
+    trendConfig?.borderColor ? css({ border: `1px solid ${trendConfig.borderColor}` }) : undefined,
+  ];
+
   const valueNode = secondaryMetricInfo.badgeColor ? (
     <EuiBadge
       color={secondaryMetricInfo.badgeColor}
       aria-label={secondaryMetricInfo.description}
-      css={styles.badge}
+      css={badgeCss}
     >
       {secondaryMetricInfo.value}
     </EuiBadge>

@@ -11,12 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/react';
 import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Metric,
-  Settings,
-  isMetricElementEvent,
-} from '@elastic/charts';
+import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
 import type {
   MetricSpec,
   MetricWProgress,
