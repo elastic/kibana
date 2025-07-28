@@ -21,10 +21,10 @@ import { KibanaNoDataPageProvider } from './services';
 
 describe('Kibana No Data Page', () => {
   const noDataConfig = {
-    pageTitle: 'Analytics',
+    title: 'Analytics',
     action: {
       elasticAgent: {
-        title: <h2>Add integration</h2>,
+        title: 'Add integration',
       },
     },
     docsLink: 'http://www.docs.com',
@@ -104,13 +104,15 @@ describe('Kibana No Data Page', () => {
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
 
-  test('shows EuiLoadingSpinner vs EuiLoadingElastic for custom branding', () => {
+  test('shows EuiLoadingSpinner vs EuiLoadingElastic for custom branding', async () => {
     const services = getKibanaNoDataPageServicesMock(config);
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated, showPlainSpinner: true }} />
       </KibanaNoDataPageProvider>
     );
+    await act(() => new Promise(setImmediate));
+
     expect(component.find(EuiLoadingSpinner).length).toBe(1);
     expect(component.find(EuiLoadingElastic).length).toBe(0);
   });

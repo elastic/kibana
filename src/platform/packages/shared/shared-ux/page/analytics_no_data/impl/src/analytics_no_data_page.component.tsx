@@ -47,18 +47,14 @@ const flavors: {
     //   defaultMessage: 'Analytics',
     // }),
     // pageTitle: i18n.translate('sharedUXPackages.noDataConfig.analyticsPageTitle', {
-    //   defaultMessage: 'Welcome!',
+    //   defaultMessage: 'Welcome to Analytics!',
     // }),
     // logo: 'logoKibana',
     action: {
       elasticAgent: {
-        title: (
-          <h2>
-            {i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
-              defaultMessage: 'Add integrations',
-            })}
-          </h2>
-        ),
+        title: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
+          defaultMessage: 'Add integrations',
+        }),
         description: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsDescription', {
           defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
         }),
@@ -77,13 +73,9 @@ const flavors: {
     logo: 'logoElasticsearch',
     action: {
       elasticsearch: {
-        title: (
-          <h2>
-            {i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
-              defaultMessage: 'Add data',
-            })}
-          </h2>
-        ),
+        title: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
+          defaultMessage: 'Add data',
+        }),
         description: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchDescription', {
           defaultMessage:
             'Set up your programming language client, ingest some data, and start searching.',
@@ -111,13 +103,9 @@ const flavors: {
     logo: 'logoObservability',
     action: {
       observability: {
-        title: (
-          <h2>
-            {i18n.translate('sharedUXPackages.noDataConfig.observabilityTitle', {
-              defaultMessage: 'Add data',
-            })}
-          </h2>
-        ),
+        title: i18n.translate('sharedUXPackages.noDataConfig.observabilityTitle', {
+          defaultMessage: 'Add data',
+        }),
         description: i18n.translate('sharedUXPackages.noDataConfig.observabilityDescription', {
           defaultMessage: 'Get started by collecting data using one of our many integrations.',
         }),
@@ -142,7 +130,7 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
   const { hasApiKeys } = useObservable(useMemo(() => getHasApiKeys$({ get }), [get])) ?? {};
 
-  const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors.kibana({
+  const noDataConfig: KibanaNoDataPageProps['noDataConfig'] = flavors[pageFlavor]({
     kibanaGuideDocLink,
     prependBasePath,
     hasApiKeys: Boolean(hasApiKeys),

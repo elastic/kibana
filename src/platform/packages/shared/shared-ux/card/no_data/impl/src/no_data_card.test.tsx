@@ -31,21 +31,21 @@ describe('NoDataCard', () => {
   describe('props', () => {
     test('button', () => {
       const component = render(
-        <NoDataCard button="Button" title="Card title" description="Description" />
+        <NoDataCard buttonLabel="Button" title="Card title" description="Description" />
       );
       expect(component).toMatchSnapshot();
     });
 
     test('href', () => {
       const component = render(
-        <NoDataCard href="#" button="Button" title="Card title" description="Description" />
+        <NoDataCard href="#" buttonLabel="Button" title="Card title" description="Description" />
       );
       expect(component).toMatchSnapshot();
     });
 
     test('no access to Fleet', () => {
       const component = render(
-        <NoDataCard button="Button" title="Card title" description="Description" />,
+        <NoDataCard buttonLabel="Button" title="Card title" description="Description" />,
         false
       );
       expect(component).toMatchSnapshot();
@@ -53,12 +53,7 @@ describe('NoDataCard', () => {
 
     test('extends EuiCardProps', () => {
       const component = render(
-        <NoDataCard
-          button="Button"
-          title="Card title"
-          description="Description"
-          className="custom_class"
-        />
+        <NoDataCard buttonLabel="Button" title="Card title" description="Description" />
       );
       expect(component).toMatchSnapshot();
     });

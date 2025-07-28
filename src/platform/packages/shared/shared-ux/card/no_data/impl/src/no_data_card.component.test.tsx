@@ -25,7 +25,7 @@ describe('NoDataCardComponent', () => {
 
   describe('props', () => {
     test('button', () => {
-      const component = shallow(<NoDataCard button="Button" canAccessFleet={true} />);
+      const component = shallow(<NoDataCard buttonLabel="Button" canAccessFleet={true} />);
       expect(component).toMatchSnapshot();
     });
 

@@ -55,7 +55,7 @@ export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinks
 /**
  * Props for the `NoDataCard` pure component.
  */
-export type NoDataCardComponentProps = Partial<EuiEmptyPromptProps> & {
+export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
   /**
    * Title for the card;
    * If not provided, the default will be used
