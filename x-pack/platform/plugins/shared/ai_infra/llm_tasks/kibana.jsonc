@@ -10,7 +10,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "llmTasks"],
-    "requiredPlugins": ["inference", "productDocBase", "onechat"],
+    "requiredPlugins": ["inference", "productDocBase"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []
