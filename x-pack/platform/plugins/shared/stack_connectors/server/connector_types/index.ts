@@ -65,6 +65,10 @@ export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook/types';
+export {
+  getWorkflowsConnectorAdapter,
+  getConnectorType as getWorkflowsConnectorType,
+} from './workflows';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 
@@ -107,6 +111,9 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
+  if (experimentalFeatures.workflowsConnectorOn) {
+    actions.registerType(getWorkflowsConnectorType());
+  }
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
@@ -129,8 +136,5 @@ export function registerConnectorTypes({
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {
     actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
-  }
-  if (experimentalFeatures.workflowsConnectorOn) {
-    actions.registerType(getWorkflowsConnectorType());
   }
 }

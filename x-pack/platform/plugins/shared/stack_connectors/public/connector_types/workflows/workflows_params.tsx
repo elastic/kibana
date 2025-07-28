@@ -37,6 +37,16 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [loadError, setLoadError] = useState<string | null>(null);
   const { http } = useKibana().services;
 
+  // Ensure proper initialization of action parameters
+  useEffect(() => {
+    if (!actionParams?.subAction) {
+      editAction('subAction', 'run', index);
+    }
+    if (!actionParams?.subActionParams) {
+      editAction('subActionParams', { workflowId: '', inputs: {} }, index);
+    }
+  }, [actionParams, editAction, index]);
+
   const editSubActionParams = useCallback(
     (key: string, value: any) => {
       const newParams = {

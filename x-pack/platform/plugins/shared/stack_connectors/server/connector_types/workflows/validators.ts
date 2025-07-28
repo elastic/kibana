@@ -6,7 +6,6 @@
  */
 
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { assertURL } from '@kbn/actions-plugin/server/lib';
 import * as i18n from './translations';
 import type { WorkflowsPublicConfigurationType, WorkflowsSecretConfigurationType } from './types';
 
@@ -30,7 +29,6 @@ export const validateAndNormalizeUrl = (
   url: string
 ): string => {
   try {
-    assertURL(url);
     configurationUtilities.ensureUriAllowed(url);
   } catch (allowListError) {
     throw new Error(i18n.INVALID_URL(url, allowListError.message));

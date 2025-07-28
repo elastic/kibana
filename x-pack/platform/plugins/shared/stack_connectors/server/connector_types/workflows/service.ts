@@ -27,14 +27,21 @@ export const createExternalService = (
   configurationUtilities: ActionsConfigurationUtilities,
   connectorUsageCollector: ConnectorUsageCollector
 ): ExternalService => {
-  // Use internal Kibana API - no external URL needed
-  const axiosInstance = axios.create();
+  // For internal Kibana API calls, we need to construct the proper URL
+  // Default to localhost:5601 but this should be configurable in production
+  const kibanaBaseUrl = process.env.KIBANA_URL || 'http://localhost:5601';
+
+  const axiosInstance = axios.create({
+    baseURL: kibanaBaseUrl,
+  });
 
   const runWorkflow = async ({
     workflowId,
     inputs = {},
   }: RunWorkflowParams): Promise<ExternalServiceIncidentResponse> => {
     try {
+      logger.info(`Attempting to run workflow ${workflowId} via internal API`);
+
       // Use internal Kibana API to run workflow
       const runRes: AxiosResponse = await request({
         axios: axiosInstance,
@@ -44,10 +51,13 @@ export const createExternalService = (
         data: { inputs },
         headers: {
           'Content-Type': 'application/json',
+          'kbn-xsrf': 'true', // Required for Kibana API calls
         },
         configurationUtilities,
         validateStatus: () => true,
       });
+
+      logger.info(`Workflow API response: status=${runRes.status}`);
 
       if (runRes.status >= 400) {
         throw new Error(
@@ -63,11 +73,14 @@ export const createExternalService = (
         throw new Error('Invalid response: missing workflowRunId');
       }
 
+      logger.info(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
+
       return {
         workflowRunId,
         status: 'executed',
       };
     } catch (error) {
+      logger.error(`Error running workflow ${workflowId}: ${error.message}`);
       throw createServiceError(error, `Unable to run workflow ${workflowId}`);
     }
   };

@@ -11,11 +11,13 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { api } from './api';
 import {
   ExecutorParamsSchema,
   ExternalWorkflowServiceConfigurationSchema,
   ExternalWorkflowServiceSecretConfigurationSchema,
+  WorkflowsRuleActionParamsSchema,
 } from './schema';
 import { createExternalService } from './service';
 import * as i18n from './translations';
@@ -32,6 +34,15 @@ import { validateConnector, validateWorkflowsConfig } from './validators';
 const supportedSubActions: string[] = ['run'];
 export type ActionParamsType = WorkflowsActionParamsType;
 export const ConnectorTypeId = '.workflows';
+
+export interface WorkflowsRuleActionParams {
+  subAction: 'run';
+  subActionParams: {
+    workflowId: string;
+    inputs?: Record<string, unknown>;
+  };
+  [key: string]: unknown;
+}
 
 // connector type definition
 export function getConnectorType(): ConnectorType<
@@ -59,6 +70,7 @@ export function getConnectorType(): ConnectorType<
     },
     executor,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    isSystemActionType: true,
   };
 }
 
@@ -71,7 +83,9 @@ export async function executor(
   >
 ): Promise<ConnectorTypeExecutorResult<WorkflowsExecutorResultData>> {
   const { actionId, configurationUtilities, params, logger, connectorUsageCollector } = execOptions;
+
   const { subAction, subActionParams } = params;
+
   let data: WorkflowsExecutorResultData | undefined;
 
   const externalService = createExternalService(
@@ -109,4 +123,66 @@ export async function executor(
   }
 
   return { status: 'ok', data, actionId };
+}
+
+// Connector adapter for system action
+export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
+  WorkflowsRuleActionParams,
+  ExecutorParams
+> {
+  return {
+    connectorTypeId: ConnectorTypeId,
+    ruleActionParamsSchema: WorkflowsRuleActionParamsSchema,
+    buildActionParams: ({ alerts, rule, params, ruleUrl, spaceId }) => {
+      try {
+        const subActionParams = params?.subActionParams;
+        if (!subActionParams) {
+          throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
+        }
+
+        const { workflowId, inputs } = subActionParams;
+        if (!workflowId) {
+          throw new Error(
+            `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
+          );
+        }
+
+        // Merge alert context with user inputs
+        const alertContext = {
+          alerts: { new: alerts.new },
+          rule: {
+            id: rule.id,
+            name: rule.name,
+            tags: rule.tags,
+            consumer: rule.consumer,
+            producer: rule.producer,
+            ruleTypeId: rule.ruleTypeId,
+          },
+          ruleUrl,
+          spaceId,
+        };
+
+        const userInputs = inputs || {};
+        const eventData = userInputs.event
+          ? { ...alertContext, ...userInputs.event }
+          : alertContext;
+
+        return {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId,
+            inputs: { ...userInputs, event: eventData },
+          },
+        };
+      } catch (error) {
+        return {
+          subAction: 'run' as const,
+          subActionParams: {
+            workflowId: params?.subActionParams?.workflowId || 'unknown',
+            inputs: params?.subActionParams?.inputs || {},
+          },
+        };
+      }
+    },
+  };
 }
