@@ -992,6 +992,16 @@ const maxOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -1106,6 +1116,16 @@ const minOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [

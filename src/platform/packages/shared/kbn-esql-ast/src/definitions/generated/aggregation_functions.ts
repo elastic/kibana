@@ -896,6 +896,16 @@ const maxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -1110,6 +1120,16 @@ const minDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [
