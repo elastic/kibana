@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
 
-export const SchemaTypesRT = rt.keyof({
-  ecs: null,
-  semconv: null,
+export const DataSchemaFormatRT = rt.keyof({
+  [DataSchemaFormat.ECS]: null,
+  [DataSchemaFormat.SEMCONV]: null,
 });
-
-export type SchemaTypes = rt.TypeOf<typeof SchemaTypesRT>;
