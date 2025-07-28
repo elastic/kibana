@@ -28,7 +28,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
   if (/=\s*$/.test(innerText)) {
-    return getFunctionSuggestions({ location: Location.ROW });
+    return getFunctionSuggestions({ location: Location.ROW }, callbacks?.hasMinimumLicenseRequired);
   }
 
   // ROW col0 = 23 /
@@ -43,6 +43,6 @@ export async function autocomplete(
   // ROW foo = "bar", /
   return [
     getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-    ...getFunctionSuggestions({ location: Location.ROW }),
+    ...getFunctionSuggestions({ location: Location.ROW }, callbacks?.hasMinimumLicenseRequired),
   ];
 }
