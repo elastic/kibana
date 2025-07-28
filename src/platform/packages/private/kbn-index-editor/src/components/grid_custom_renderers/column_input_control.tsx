@@ -103,6 +103,11 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
                 setIsEditing(false);
               }
             }}
+            css={{
+              '&:focus-within': {
+                outline: 'none',
+              },
+            }}
           />
         </EuiToolTip>
       </EuiForm>
