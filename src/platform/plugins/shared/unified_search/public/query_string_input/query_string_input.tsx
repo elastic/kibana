@@ -866,6 +866,11 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                   clear={{
                     onClick: () => {
                       this.onQueryStringChange('');
+                      // Force close the dropdown/suggestions
+                      this.setState({
+                        isSuggestionsVisible: false,
+                        index: null,
+                      });
                       if (this.props.autoSubmit) {
                         this.onSubmit({ query: '', language: this.props.query.language });
                       }
