@@ -21,7 +21,6 @@ import type {
   ESQLSingleAstItem,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { getFunctionSuggestions } from '../../../definitions/utils/functions';
 import {
   pipeCompleteItem,
   byCompleteItem,
@@ -98,7 +97,7 @@ export async function autocomplete(
         return [];
       }
 
-      return getExpressionSuggestions({
+      const expressionSuggestions = await getExpressionSuggestions({
         innerText,
         expressionRoot,
         location: Location.STATS,
@@ -114,16 +113,7 @@ export async function autocomplete(
         ],
       });
 
-      // TODO: control suggestions
-
-      return [
-        ...controlSuggestions,
-        ...getFunctionSuggestions(
-          { location: Location.STATS },
-          callbacks?.hasMinimumLicenseRequired
-        ),
-        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-      ];
+      return [...expressionSuggestions, ...controlSuggestions];
     }
 
     case 'expression_after_assignment': {
@@ -143,7 +133,7 @@ export async function autocomplete(
         return [];
       }
 
-      return getExpressionSuggestions({
+      const expressionSuggestions = await getExpressionSuggestions({
         innerText,
         expressionRoot,
         location: Location.STATS,
@@ -157,15 +147,7 @@ export async function autocomplete(
         ],
       });
 
-      // TODO reinstate control suggestions
-
-      return [
-        ...controlSuggestions,
-        ...getFunctionSuggestions(
-          { location: Location.STATS },
-          callbacks?.hasMinimumLicenseRequired
-        ),
-      ];
+      return [...expressionSuggestions, ...controlSuggestions];
     }
 
     case 'after_where': {
@@ -235,8 +217,6 @@ export async function autocomplete(
     }
 
     case 'grouping_expression_without_assignment': {
-      const histogramBarTarget = context?.histogramBarTarget;
-
       // TODO - incorporate columns to ignore
       const ignored = alreadyUsedColumns(command);
 
