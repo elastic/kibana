@@ -6,14 +6,15 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
   getScheduleBadRequestError,
-} from '../utils/helpers';
-import { getAttackDiscoverySchedulesApis } from '../utils/apis';
-import { getSimpleAttackDiscoverySchedule } from '../mocks';
+} from '../../utils/helpers';
+import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
+import { getSimpleAttackDiscoverySchedule } from '../../mocks';
+import { checkIfScheduleExists } from '../../utils/check_schedule_exists';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -43,6 +44,8 @@ export default ({ getService }: FtrProviderContext) => {
             updatedBy: username,
           })
         );
+
+        checkIfScheduleExists({ getService, id: schedule.id });
       });
 
       it('should create a new schedule with `enabled` defaulted to `false`', async () => {
