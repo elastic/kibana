@@ -188,6 +188,7 @@ describe('getNetworkEvents', () => {
       Array [
         Array [
           Object {
+            "ignore_unavailable": true,
             "body": Object {
               "query": Object {
                 "bool": Object {
