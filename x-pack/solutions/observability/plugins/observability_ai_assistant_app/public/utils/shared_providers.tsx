@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -34,23 +33,21 @@ export function SharedProviders({
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
-      <KibanaErrorBoundary>
-        <KibanaThemeProvider theme={theme}>
-          <KibanaContextProvider
-            services={{
-              ...coreStart,
-              ...pluginsStart,
-              plugins: {
-                start: pluginsStart,
-              },
-            }}
-          >
-            <RedirectAppLinks coreStart={coreStart}>
-              <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
-            </RedirectAppLinks>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </KibanaErrorBoundary>
+      <KibanaThemeProvider theme={theme}>
+        <KibanaContextProvider
+          services={{
+            ...coreStart,
+            ...pluginsStart,
+            plugins: {
+              start: pluginsStart,
+            },
+          }}
+        >
+          <RedirectAppLinks coreStart={coreStart}>
+            <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
+          </RedirectAppLinks>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
     </KibanaRenderContextProvider>
   );
 }
