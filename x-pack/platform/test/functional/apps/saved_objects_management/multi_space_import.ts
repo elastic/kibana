@@ -47,13 +47,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
     for (const errorEmbeddable of errorEmbeddables) {
-      log.error('GETTING ERRORED EMBEDDABLE TEXT');
-      log.error(await errorEmbeddable.getVisibleText());
+      log.error(
+        'Found embeddable with error: \n' + `"(${await errorEmbeddable.getVisibleText()})"`
+      );
     }
-    // if (errorEmbeddables.length > 0) {
-    //   console.log(await wd.driver.takeScreenshot());
-    // }
-    expect(errorEmbeddables).to.eql([]);
+    expect(errorEmbeddables.length).to.be(0);
   };
 
   describe('should be able to handle multi-space imports correctly', function () {
