@@ -46,10 +46,12 @@ export type StateType = typeof StateAnnotation.State;
 export const createPlannerAgentGraph = async ({
   chatModel,
   tools,
+  customInstructions,
   logger: log,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
+  customInstructions?: string;
   logger: Logger;
 }) => {
   const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
@@ -70,7 +72,7 @@ export const createPlannerAgentGraph = async ({
       });
 
     const response = await plannerModel.invoke(
-      getPlanningPrompt({ discussion: state.initialMessages })
+      getPlanningPrompt({ discussion: state.initialMessages, customInstructions })
     );
 
     log.trace(() => `createPlan - response: ${stringify(response)}`);
@@ -96,7 +98,7 @@ export const createPlannerAgentGraph = async ({
       chatModel,
       tools,
       logger: log,
-      systemPrompt: '',
+      noPrompt: true,
     });
 
     const { addedMessages } = await executorAgent.invoke(
@@ -104,6 +106,7 @@ export const createPlannerAgentGraph = async ({
         initialMessages: getExecutionPrompt({
           task: nextTask,
           backlog: state.backlog,
+          customInstructions,
         }),
       },
       { tags: ['executor_agent'], metadata: { graphName: 'executor_agent' } }
@@ -139,6 +142,7 @@ export const createPlannerAgentGraph = async ({
         discussion: state.initialMessages,
         plan: state.plan,
         backlog: state.backlog,
+        customInstructions,
       })
     );
 
@@ -172,6 +176,7 @@ export const createPlannerAgentGraph = async ({
       getAnswerPrompt({
         discussion: state.initialMessages,
         backlog: state.backlog,
+        customInstructions,
       })
     );
 

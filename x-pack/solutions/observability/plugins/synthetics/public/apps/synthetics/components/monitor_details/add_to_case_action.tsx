@@ -28,8 +28,8 @@ export function AddToCaseContextItem() {
   const {
     services: { cases },
   } = useKibana<ClientPluginsStart>();
-  const getCasesContext = cases.ui?.getCasesContext;
-  const canUseCases = cases.helpers?.canUseCases;
+  const getCasesContext = cases?.ui.getCasesContext;
+  const canUseCases = cases?.helpers.canUseCases;
   const { ObservabilityAIAssistantChatServiceContext, chatService } = useChatService();
 
   const casesPermissions: CasesPermissions = useMemo(() => {
@@ -82,14 +82,10 @@ function AddToCaseButtonContent() {
   const [comment, setComment] = useState<string>('');
   const { monitor } = useSelectedMonitor();
   const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
-  const {
-    services: {
-      cases: {
-        hooks: { useCasesAddToExistingCaseModal },
-      },
-      notifications,
-    },
-  } = useKibana<ClientPluginsStart>();
+  const services = useKibana<ClientPluginsStart>().services;
+  const notifications = services.notifications;
+  // type checked in wrapper component
+  const useCasesAddToExistingCaseModal = services.cases?.hooks?.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal();
   const timeRange: TimeRange = useMemo(
     () => ({
@@ -184,6 +180,9 @@ function AddToCaseButtonContent() {
       {isCommentModalOpen && (
         <EuiConfirmModal
           onCancel={onCloseModal}
+          aria-label={i18n.translate('xpack.synthetics.cases.addToCaseModal.ariaLabel', {
+            defaultMessage: 'Confirm add monitor to case',
+          })}
           onConfirm={onCommentAdded}
           data-test-subj="syntheticsAddToCaseCommentModal"
           style={{ width: 800 }}

@@ -267,6 +267,7 @@ export interface RruleSchedule {
 }
 
 interface RruleCommon {
+  dtstart?: string;
   freq: Frequency;
   interval: number;
   tzid: string;

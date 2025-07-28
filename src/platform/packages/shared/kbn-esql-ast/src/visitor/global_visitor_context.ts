@@ -209,9 +209,9 @@ export class GlobalVisitorContext<
         if (!this.methods.visitSampleCommand) break;
         return this.visitSampleCommand(parent, commandNode, input as any);
       }
-      case 'rrf': {
-        if (!this.methods.visitRrfCommand) break;
-        return this.visitRrfCommand(parent, commandNode, input as any);
+      case 'fuse': {
+        if (!this.methods.visitFuseCommand) break;
+        return this.visitFuseCommand(parent, commandNode, input as any);
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
@@ -451,13 +451,13 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitSampleCommand', context, input);
   }
 
-  public visitRrfCommand(
+  public visitFuseCommand(
     parent: contexts.VisitorContext | null,
     node: ESQLAstCommand,
-    input: types.VisitorInput<Methods, 'visitRrfCommand'>
-  ): types.VisitorOutput<Methods, 'visitRrfCommand'> {
-    const context = new contexts.RrfCommandVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitRrfCommand', context, input);
+    input: types.VisitorInput<Methods, 'visitFuseCommand'>
+  ): types.VisitorOutput<Methods, 'visitFuseCommand'> {
+    const context = new contexts.FuseCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitFuseCommand', context, input);
   }
 
   // #endregion

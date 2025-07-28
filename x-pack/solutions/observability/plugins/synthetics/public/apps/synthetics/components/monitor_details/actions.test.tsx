@@ -79,7 +79,7 @@ describe('Actions Component', () => {
     render(<Actions />);
 
     // Open the popover
-    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
 
     expect(screen.getByText('Edit monitor')).toBeInTheDocument();
     expect(screen.getByText('Refresh')).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe('Actions Component', () => {
     render(<Actions />);
 
     // Open the popover
-    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
 
     expect(screen.getByText('Edit monitor')).toBeInTheDocument();
     expect(screen.getByText('Refresh')).toBeInTheDocument();
@@ -175,7 +175,7 @@ describe('Actions Component', () => {
     render(<Actions />);
 
     // Open the popover
-    fireEvent.click(screen.getByTestId('o11yHeaderControlActionsButton'));
+    fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
 
     expect(screen.getByText('Edit monitor')).toBeInTheDocument();
     expect(screen.getByText('Refresh')).toBeInTheDocument();

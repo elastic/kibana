@@ -21,9 +21,10 @@ import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 
-const NODE_WIDTH = 81;
-const NODE_HEIGHT = 80;
+const NODE_SHAPE_WIDTH = 81;
+const NODE_SHAPE_HEIGHT = 80;
 
 export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
@@ -34,9 +35,9 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            width={NODE_SHAPE_WIDTH}
+            height={NODE_SHAPE_HEIGHT}
+            viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -62,8 +63,8 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
             <NodeExpandButton
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 4}px`}
-              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize / 2) / 2}px`}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
             />
           </>
         )}

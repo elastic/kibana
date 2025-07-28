@@ -1,12 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Port renders correctly against snapshot 1`] = `
-<a
+<button
   class="euiLink emotion-euiLink-primary"
   data-test-subj="network-details"
-  href="/ip/10.1.2.3/source/events"
-  rel="noreferrer"
+  type="button"
 >
   10.1.2.3
-</a>
+</button>
 `;

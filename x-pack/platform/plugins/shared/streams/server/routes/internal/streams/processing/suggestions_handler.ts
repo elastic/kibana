@@ -342,11 +342,7 @@ export function getLogMessageGroups(sampleDocuments: FlattenRecord[], fieldName:
 }
 
 function getProcessingErrors(documents: SimulationDocReport[]) {
-  return documents.flatMap((doc) =>
-    doc.errors
-      .filter((error) => error.type !== 'non_additive_processor_failure')
-      .map((error) => error.message)
-  );
+  return documents.flatMap((doc) => doc.errors.map((error) => error.message));
 }
 
 function getErrorMessageGroups(errors: string[]) {

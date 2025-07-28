@@ -60,3 +60,5 @@ export const plugin = async (ctx: PluginInitializerContext<ObservabilityAIAssist
   const { ObservabilityAIAssistantPlugin } = await import('./plugin');
   return new ObservabilityAIAssistantPlugin(ctx);
 };
+
+export { getInferenceIdFromWriteIndex } from './service/knowledge_base_service/get_inference_id_from_write_index';

@@ -16,7 +16,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { NewRulesCallout } from './new_rules_callout';
+import { EnhancedRulesCallout } from './enhanced_rules_callout';
 
 export function RulePage() {
   const {
@@ -86,7 +86,7 @@ export function RulePage() {
   return (
     <ObservabilityPageTemplate data-test-subj="rulePage">
       <HeaderMenu />
-      <NewRulesCallout ruleTypeId={ruleTypeId} />
+      <EnhancedRulesCallout ruleTypeId={ruleTypeId} />
       <RuleForm
         key={ruleTypeId}
         plugins={{

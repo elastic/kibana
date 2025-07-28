@@ -214,6 +214,7 @@ export function RuleComponent({
             statusMessage={statusMessage}
             requestRefresh={requestRefresh}
             refreshToken={refreshToken}
+            autoRecoverAlerts={ruleType.autoRecoverAlerts}
           />
         </EuiFlexItem>
         {suspendedComponentWithProps(

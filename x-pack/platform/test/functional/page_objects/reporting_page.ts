@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import type SuperTest from 'supertest';
-import { format as formatUrl } from 'url';
 import { promisify } from 'util';
 
 import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
@@ -20,7 +19,6 @@ const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
-  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly security = this.ctx.getService('security');
@@ -91,21 +89,20 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
-    this.log.debug(`getResponse for ${fullUrl}`);
-    const kibanaServerConfig = this.config.get('servers.kibana');
-    const baseURL = formatUrl({
-      ...kibanaServerConfig,
-      auth: false,
-    });
-    const urlWithoutBase = fullUrl.replace(baseURL, '');
-    const res = await this.security.testUserSupertest.get(urlWithoutBase);
+  async getResponse(url: string, isFullUrl: boolean = true): Promise<SuperTest.Response> {
+    this.log.debug(`getResponse for ${url}`);
+    let urlToUse = url;
+    if (isFullUrl) {
+      const parsedUrl = new URL(url);
+      urlToUse = `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+    }
+    const res = await this.security.testUserSupertest.get(urlToUse);
     return res ?? '';
   }
 
   async getReportInfo(jobId: string) {
     this.log.debug(`getReportInfo for ${jobId}`);
-    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`);
+    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`, false);
     return response.body;
   }
 

@@ -12,10 +12,11 @@ import {
 } from '@kbn/product-doc-common';
 
 export const getIndicesForProductNames = (
-  productNames: ProductName[] | undefined
+  productNames: ProductName[] | undefined,
+  inferenceId?: string
 ): string | string[] => {
   if (!productNames || !productNames.length) {
     return productDocIndexPattern;
   }
-  return productNames.map(getProductDocIndexName);
+  return productNames.map((productName) => getProductDocIndexName(productName, inferenceId));
 };

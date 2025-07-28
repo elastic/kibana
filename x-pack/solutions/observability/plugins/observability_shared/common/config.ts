@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const observabilitySharedConfigSchema = schema.object({
   unsafe: schema.maybe(
     schema.object({
-      investigativeExperienceEnabled: schema.maybe(schema.boolean({ defaultValue: true })),
+      investigativeExperienceEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
     })
   ),
 });

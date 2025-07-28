@@ -8,14 +8,19 @@ import { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server
 
 import { ObservabilitySharedConfig } from '../common/config';
 
+export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
+export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;
 export class ObservabilitySharedPlugin implements PluginType {
-  private config?: ObservabilitySharedConfig;
+  private config: ObservabilitySharedConfig;
 
-  constructor(private readonly initContext: PluginInitializerContext<ObservabilitySharedConfig>) {}
+  constructor(private readonly initContext: PluginInitializerContext<ObservabilitySharedConfig>) {
+    this.config = this.initContext.config.get<ObservabilitySharedConfig>();
+  }
 
   public setup() {
-    this.config = this.initContext.config.get<ObservabilitySharedConfig>();
-    return {};
+    return {
+      config: this.config,
+    };
   }
 
   public start() {

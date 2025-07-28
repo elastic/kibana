@@ -178,7 +178,7 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      {productDocBase ? <ProductDocEntry /> : undefined}
+      {productDocBase ? <ProductDocEntry knowledgeBase={knowledgeBase} /> : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
         <ChangeKbModel knowledgeBase={knowledgeBase} />

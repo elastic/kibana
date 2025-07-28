@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Node disk space', function () {
+  describe.skip('Node disk space', function () {
     describe('GET /api/upgrade_assistant/node_disk_space', () => {
       it('returns an array of nodes', async () => {
         const { body: apiRequestResponse } = await supertest

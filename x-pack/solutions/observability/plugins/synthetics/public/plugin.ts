@@ -65,6 +65,9 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -108,8 +111,9 @@ export interface ClientPluginsStart {
   share: SharePluginStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;
   appName: string;
@@ -122,12 +126,14 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  settings: SettingsStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

@@ -158,7 +158,7 @@ Object {
     ],
     "query": Object {
       "bool": Object {
-        "filter": Array [
+        "must": Array [
           Object {
             "exists": Object {
               "field": "log.logger",
@@ -169,6 +169,16 @@ Object {
               "@timestamp": Object {
                 "gte": "now-10m",
               },
+            },
+          },
+        ],
+        "must_not": Array [
+          Object {
+            "terms": Object {
+              "_tier": Array [
+                "data_frozen",
+                "data_cold",
+              ],
             },
           },
         ],

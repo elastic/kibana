@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, type IconType } from '@elastic/eui';
-import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
+import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 
 export interface GoToActionProps {
   state: PageAttachmentPersistedState;

@@ -43,6 +43,7 @@ describe('createCloudUsageCollector', () => {
         deploymentId: undefined,
         projectId: undefined,
         projectType: undefined,
+        productTier: undefined,
         orchestratorTarget: undefined,
       });
     });
@@ -62,6 +63,7 @@ describe('createCloudUsageCollector', () => {
         deploymentId: undefined,
         projectId: undefined,
         projectType: undefined,
+        productTier: undefined,
         orchestratorTarget: undefined,
       });
     });
@@ -75,6 +77,7 @@ describe('createCloudUsageCollector', () => {
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
         projectType: 'security',
+        productTier: 'complete',
         orchestratorTarget: 'canary',
       });
 
@@ -87,6 +90,7 @@ describe('createCloudUsageCollector', () => {
         deploymentId: 'a-deployment-id',
         projectId: 'a-project-id',
         projectType: 'security',
+        productTier: 'complete',
         orchestratorTarget: 'canary',
       });
     });

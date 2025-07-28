@@ -76,6 +76,7 @@ export const filtersOperation: OperationDefinition<
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
+  scale: () => 'ordinal',
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
@@ -108,7 +109,6 @@ export const filtersOperation: OperationDefinition<
       label: filtersLabel,
       dataType: 'string',
       operationType: OPERATION_NAME,
-      scale: 'ordinal',
       isBucketed: true,
       params,
     };

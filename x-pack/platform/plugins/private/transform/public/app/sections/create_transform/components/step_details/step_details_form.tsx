@@ -826,7 +826,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     defaultMessage: 'Choose a maximum page search size.',
                   }
                 )}
-                isInvalid={!isTransformFrequencyValid}
+                isInvalid={!isTransformSettingsMaxPageSearchSizeValid}
                 data-test-subj="transformMaxPageSearchSizeInput"
               />
             </EuiFormRow>

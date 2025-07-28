@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ADDED_PAGE = i18n.translate('xpack.observability.caseView.links.addedLink', {
+export const ADDED_PAGE = i18n.translate('xpack.observability.caseView.page.addedPage', {
   defaultMessage: 'added a page',
 });
-export const REMOVED_PAGE = i18n.translate('xpack.observability.caseView.links.removedLink', {
+export const REMOVED_PAGE = i18n.translate('xpack.observability.caseView.page.removedPage', {
   defaultMessage: 'removed page',
 });
-export const PAGE_LABEL = i18n.translate('xpack.observability.caseView.links.pageLabel', {
+export const PAGE_LABEL = i18n.translate('xpack.observability.caseView.page.pageLabel', {
   defaultMessage: 'Page',
 });

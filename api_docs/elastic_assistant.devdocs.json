@@ -1834,6 +1834,26 @@
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2122,7 +2142,7 @@
             "\nGet the registered tools for a given plugin name."
           ],
           "signature": [
-            "(pluginName: string) => ",
+            "(pluginName: string | string[]) => ",
             {
               "pluginId": "elasticAssistant",
               "scope": "server",
@@ -2140,11 +2160,14 @@
             {
               "parentPluginId": "elasticAssistant",
               "id": "def-server.ElasticAssistantPluginStart.getRegisteredTools.$1",
-              "type": "string",
+              "type": "CompoundType",
               "tags": [],
               "label": "pluginName",
               "description": [
                 "Name of the plugin to get the tools for"
+              ],
+              "signature": [
+                "string | string[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
               "deprecated": false,

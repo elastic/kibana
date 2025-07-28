@@ -21,8 +21,8 @@ describe('commands', () => {
           name: 'show',
           args: [
             {
-              type: 'function',
-              name: 'info',
+              type: 'identifier',
+              name: 'INFO',
             },
           ],
         },

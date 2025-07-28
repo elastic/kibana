@@ -18,7 +18,7 @@
       "discover",
       "security"
     ],
-    "optionalPlugins": ["streams", "observabilityAIAssistant"],
+    "optionalPlugins": ["cases","streams", "observabilityAIAssistant"],
     "requiredBundles": []
   }
 }

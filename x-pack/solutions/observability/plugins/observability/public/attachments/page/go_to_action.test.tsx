@@ -41,9 +41,6 @@ describe('GoToAction', () => {
       iconType: 'discoverApp',
       type: 'discoverSession',
       screenContext: null,
-      snapshot: {
-        imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
-      },
     };
 
     // @ts-ignore next line

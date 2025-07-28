@@ -103,7 +103,7 @@ export const RulesTableToolbar = React.memo(() => {
         <TabNavigation navTabs={ruleTabs} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {hasAssistantPrivilege && selectedRules.length > 0 && (
+        {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <NewChat
             category="detection-rules"
             conversationTitle={chatTitle}

@@ -68,12 +68,13 @@ export function AllCellsRenderer(props: AllCellsProps) {
         setChunk({ chunkStartRowIndex: nextRowIndex, chunkSize: nextChunkSize });
       } else {
         onFinish({
+          term: inTableSearchTerm,
           matchesList: matchesListRef.current,
           totalMatchesCount: totalMatchesCountRef.current,
         });
       }
     },
-    [setChunk, chunkStartRowIndex, chunkSize, rowsCount, onFinish]
+    [setChunk, chunkStartRowIndex, chunkSize, rowsCount, onFinish, inTableSearchTerm]
   );
 
   // Iterating through rows one chunk at the time to avoid blocking the main thread.

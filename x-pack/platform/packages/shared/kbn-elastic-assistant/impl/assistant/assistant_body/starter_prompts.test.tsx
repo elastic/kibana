@@ -81,7 +81,7 @@ const mockResponse = [
 const testProps = {
   setUserPrompt: jest.fn(),
 };
-
+const mockReportAssistantStarterPrompt = jest.fn();
 jest.mock('../../..', () => {
   return {
     useFindPrompts: jest.fn(),
@@ -89,12 +89,18 @@ jest.mock('../../..', () => {
       assistantAvailability: {
         isAssistantEnabled: true,
       },
+      assistantTelemetry: {
+        reportAssistantStarterPrompt: mockReportAssistantStarterPrompt,
+      },
       http: { fetch: {} },
     }),
   };
 });
 
 describe('StarterPrompts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should return an empty array if no prompts are provided', () => {
     expect(getAllPromptIds(promptGroups)).toEqual([
       'starterPromptTitle1',
@@ -157,5 +163,17 @@ describe('StarterPrompts', () => {
     );
     fireEvent.click(getByTestId('starterPromptPrompt2 from API yall'));
     expect(testProps.setUserPrompt).toHaveBeenCalledWith('starterPromptPrompt2 from API yall');
+  });
+  it('calls reportAssistantStarterPrompt with prompt title when a prompt is selected', () => {
+    (useFindPrompts as jest.Mock).mockReturnValue({ data: { prompts: mockResponse } });
+    const { getByTestId } = render(
+      <TestProviders>
+        <StarterPrompts {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('starterPromptPrompt2 from API yall'));
+    expect(mockReportAssistantStarterPrompt).toHaveBeenCalledWith({
+      promptTitle: 'starterPromptTitle2 from API yall',
+    });
   });
 });

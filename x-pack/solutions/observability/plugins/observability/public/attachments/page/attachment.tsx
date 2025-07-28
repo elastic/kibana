@@ -6,7 +6,10 @@
  */
 
 import React, { Suspense } from 'react';
-import { type PageAttachmentPersistedState, PAGE_ATTACHMENT_TYPE } from '@kbn/observability-schema';
+import {
+  type PageAttachmentPersistedState,
+  PAGE_ATTACHMENT_TYPE,
+} from '@kbn/page-attachment-schema';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   type PersistableStateAttachmentType,

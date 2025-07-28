@@ -11,33 +11,25 @@ export {
   getFieldByType,
   findInventoryFields,
   metrics,
-  type InventoryModels,
   isBasicMetricAgg,
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
 } from './inventory_models';
 
-export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
-export { containerSnapshotMetricTypes } from './inventory_models/container';
-export { awsS3SnapshotMetricTypes } from './inventory_models/aws_s3';
-export { hostSnapshotMetricTypes } from './inventory_models/host';
-export { awsEC2SnapshotMetricTypes } from './inventory_models/aws_ec2';
-export { awsRDSSnapshotMetricTypes } from './inventory_models/aws_rds';
-export { awsSQSSnapshotMetricTypes } from './inventory_models/aws_sqs';
-
 export {
-  InventoryMetricRT,
+  InventoryTsvbTypeKeysRT,
   InventoryFormatterTypeRT,
   InventoryVisTypeRT,
   ItemTypeRT,
   SnapshotMetricTypeRT,
   SnapshotMetricTypeKeys,
+  DataSchemaFormat,
 } from './inventory_models/types';
 
 export type {
   InventoryItemType,
-  InventoryMetric,
+  InventoryTsvbType,
   InventoryFormatterType,
   InventoryVisType,
   MetricsUIAggregation,
