@@ -37,9 +37,9 @@ function asExportedObject(
   const streamFields = tree.request.stream.ingest.wired.fields;
   const fields = tree.name === root ? { ...inheritedFields, ...streamFields } : streamFields;
 
-  const routing = tree.request.stream.ingest.wired.routing.map((routing) => ({
-    ...routing,
-    destination: withoutRootPrefix(root, routing.destination),
+  const routing = tree.request.stream.ingest.wired.routing.map(({ destination, ...rest }) => ({
+    ...rest,
+    destination: withoutRootPrefix(root, destination),
   }));
 
   return {

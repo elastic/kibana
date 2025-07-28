@@ -99,10 +99,9 @@ export function ContentPackObjectsList({
         return selection;
       }, {} as Record<string, { selected: boolean; queries: Array<{ id: string }> }>),
     });
-    // onSelectionChange({ objects: { all: {} } });
 
     return { rootEntry: root, descendants: rows };
-  }, [objects, onSelectionChange]);
+  }, [objects]);
 
   return !rootEntry ? null : (
     <>

@@ -46,11 +46,11 @@ export function filterQueries(entry: ContentPackStream, include: ContentPackIncl
   }
 
   return include.objects.queries.map(({ id }) => {
-    const query = entry.request.queries.find((query) => query.id === id);
-    if (!query) {
+    const existingQuery = entry.request.queries.find((query) => query.id === id);
+    if (!existingQuery) {
       throw new ContentPackIncludeError(`Stream [${entry.name}] does not define query [${id}]`);
     }
-    return query;
+    return existingQuery;
   });
 }
 
