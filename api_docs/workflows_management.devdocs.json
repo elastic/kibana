@@ -170,7 +170,93 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.convertToSerializableGraph",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToSerializableGraph",
+        "description": [],
+        "signature": [
+          "(graph: ",
+          "graphlib",
+          ".Graph<{}>) => any"
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/lib/build_execution_graph/build_execution_graph.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-common.convertToSerializableGraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "graph",
+            "description": [],
+            "signature": [
+              "graphlib",
+              ".Graph<{}>"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/common/lib/build_execution_graph/build_execution_graph.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-common.convertToWorkflowGraph",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToWorkflowGraph",
+        "description": [],
+        "signature": [
+          "(workflow: ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.WorkflowExecutionEngineModel",
+            "text": "WorkflowExecutionEngineModel"
+          },
+          ") => ",
+          "graphlib",
+          ".Graph<{}>"
+        ],
+        "path": "src/platform/plugins/shared/workflows_management/common/lib/build_execution_graph/build_execution_graph.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-common.convertToWorkflowGraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "workflow",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowExecutionEngineModel",
+                "text": "WorkflowExecutionEngineModel"
+              }
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/common/lib/build_execution_graph/build_execution_graph.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
