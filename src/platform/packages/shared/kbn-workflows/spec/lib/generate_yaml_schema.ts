@@ -11,11 +11,11 @@ import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
-  WorkflowSchema,
   getForEachStepSchema,
   getIfStepSchema,
-  getParallelStepSchema,
   getMergeStepSchema,
+  getParallelStepSchema,
+  WorkflowSchema,
   WorkflowYamlSchema,
 } from '../schema';
 
@@ -25,7 +25,6 @@ export interface ConnectorContract {
     name: string;
     type: 'string' | 'number' | 'boolean' | 'object';
   }>;
-  availableConnectorIds?: string[];
 }
 
 function getZodTypeForParam(param: ConnectorContract['params'][number]) {
@@ -52,9 +51,6 @@ function generateStepSchemaForConnector(connector: ConnectorContract) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
     with: z.object(paramSchema),
-    ...(connector.availableConnectorIds
-      ? { 'connector-id': z.enum(connector.availableConnectorIds as [string, ...string[]]) }
-      : {}),
   });
 }
 
