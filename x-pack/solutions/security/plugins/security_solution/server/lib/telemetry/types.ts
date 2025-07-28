@@ -551,3 +551,5 @@ export interface FleetAgentResponse {
   page: number;
   perPage: number;
 }
+
+export type AnyObject = Record<string, unknown>;
