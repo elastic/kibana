@@ -272,6 +272,7 @@ export function WaterfallItem({
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
+      data-test-subj="waterfallItem"
       onKeyDown={(e) => {
         if (onClick && (e.key === 'Enter' || e.key === ' ')) {
           // Ignore event if it comes from a link
@@ -294,9 +295,8 @@ export function WaterfallItem({
             })
           : undefined
       }
-      onClick={(e: React.MouseEvent) => {
+      onClick={() => {
         if (onClick) {
-          e.stopPropagation();
           onClick(waterfallItemFlyoutTab);
         }
       }}
