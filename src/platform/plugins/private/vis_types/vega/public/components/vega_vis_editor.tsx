@@ -50,16 +50,22 @@ function format(
 }
 
 const vegaVisStyles = {
-  base: css({
-    '&.vgaEditor': {
-      width: '100%',
-      flexGrow: 1,
-
-      '.kibanaCodeEditor': {
+  base: ({ colorMode }: UseEuiTheme) =>
+    css({
+      '&.vgaEditor': {
         width: '100%',
+        flexGrow: 1,
+
+        '.kibanaCodeEditor': {
+          width: '100%',
+        },
+        ...(colorMode === 'DARK' && {
+          '.monaco-editor': {
+            '--vscode-editor-inactiveSelectionBackground': '#3a3d41',
+          },
+        }),
       },
-    },
-  }),
+    }),
   editorActions: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',
