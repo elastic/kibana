@@ -8,15 +8,8 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import {
-  CLOUDBEAT_GCP,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_VULN_MGMT_AWS,
-} from '../../../common/constants';
-import type { PostureInput } from '../../../common/types_old';
+import { CLOUDBEAT_GCP, CLOUDBEAT_AZURE, CLOUDBEAT_AWS } from './constants';
+import type { PostureInput } from './types';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
@@ -24,11 +17,6 @@ export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
 export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
-export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
-export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
-export const getMockPolicyVulnMgmtAWS = () =>
-  getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
 export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
@@ -149,16 +137,6 @@ const getPolicyMock = (
     'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
   };
 
-  const eksVarsMock = {
-    access_key_id: { type: 'text' },
-    secret_access_key: { type: 'password', isSecret: true },
-    session_token: { type: 'text' },
-    shared_credential_file: { type: 'text' },
-    credential_profile_name: { type: 'text' },
-    role_arn: { type: 'text' },
-    'aws.credentials.type': { value: 'assume_role', type: 'text' },
-  };
-
   const gcpVarsMock = {
     'gcp.project_id': { type: 'text' },
     'gcp.organization_id': { type: 'text' },
@@ -199,24 +177,6 @@ const getPolicyMock = (
     },
     inputs: [
       {
-        type: CLOUDBEAT_VANILLA,
-        policy_template: 'kspm',
-        enabled: type === CLOUDBEAT_VANILLA,
-        streams: [{ enabled: type === CLOUDBEAT_VANILLA, data_stream: dataStream }],
-      },
-      {
-        type: CLOUDBEAT_EKS,
-        policy_template: 'kspm',
-        enabled: type === CLOUDBEAT_EKS,
-        streams: [
-          {
-            enabled: type === CLOUDBEAT_EKS,
-            data_stream: dataStream,
-            vars: { ...eksVarsMock, ...vars },
-          },
-        ],
-      },
-      {
         type: CLOUDBEAT_AWS,
         policy_template: 'cspm',
         enabled: type === CLOUDBEAT_AWS,
@@ -251,12 +211,6 @@ const getPolicyMock = (
             vars: { ...azureVarsMock, ...vars },
           },
         ],
-      },
-      {
-        type: CLOUDBEAT_VULN_MGMT_AWS,
-        policy_template: 'vuln_mgmt',
-        enabled: type === CLOUDBEAT_VULN_MGMT_AWS,
-        streams: [{ enabled: type === CLOUDBEAT_VULN_MGMT_AWS, data_stream: dataStream }],
       },
     ],
   };
