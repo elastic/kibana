@@ -213,6 +213,7 @@ describe('getNetworkEvents', () => {
               "size": 1000,
               "track_total_hits": true,
             },
+            "ignore_unavailable": true,
             "index": "synthetics-*",
           },
           Object {
