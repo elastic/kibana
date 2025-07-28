@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import {
   secOnlyReadSpacesAll,
@@ -23,15 +22,11 @@ import type { User } from '../../../common/lib/authentication/types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
-type AlertDoc = Alert & { runCount: number };
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const es = getService('es');
 
   const TEST_URL = '/internal/rac/alerts/fields';
 
