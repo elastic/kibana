@@ -18,7 +18,7 @@ import { SEARCH_PLAYGROUND_CHAT_PATH } from '../../routes';
 
 import { PlaygroundsListError } from './playgrounds_list_error';
 import { PlaygroundsListLoading } from './playgrounds_list_loading';
-import { PlaygroundsListEmptyState } from './playgrounds_list_empty_state';
+import { PlaygroundsListEmptyState } from './empty_state';
 import { PlaygroundsTable, PlaygroundsTableProps } from './playgrounds_table';
 import { PlaygroundListObject } from '../../types';
 
