@@ -26,18 +26,49 @@ import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
 
 // Logs Data logic
 const MESSAGE_LOG_LEVELS = [
-  { message: 'A simple log with something random <random> in the middle', level: 'info' },
+  { message: 'Detailed trace log for deep diagnostics', level: 'trace' },
   { message: 'Yet another debug log', level: 'debug' },
+  { message: 'A simple info log with something random <random> in the middle', level: 'info' },
+  { message: 'Notice: user profile updated successfully', level: 'notice' },
+  { message: 'Warning: potential configuration issue detected', level: 'warning' },
   { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+  { message: 'Critical failure detected in payment service', level: 'critical' },
+  { message: 'Alert: service downtime detected', level: 'alert' },
+  { message: 'Emergency! Core system unavailable', level: 'emergency' },
+  { message: 'Fatal error: cannot recover application state', level: 'fatal' },
+  {
+    message: '(trace|debug|info|notice|warning|error|critical|alert|emergency|fatal)',
+    level: 'info',
+  },
+  {
+    message: 'Error: This message has log level for info, but says Error instead',
+    level: 'info',
+  },
+  {
+    message:
+      'Log Level Not present in the log message: (trace|debug|info|notice|warning|error|critical|alert|emergency|fatal)',
+    level: 'dummy',
+  },
+  {
+    message: '[emerg] Incorrect spelling of log level Emergency',
+    level: 'dummy',
+  },
+  {
+    message: '[err] Incorrect spelling of log level Error',
+    level: 'dummy',
+  },
 ];
+
+const logMessagesLength = MESSAGE_LOG_LEVELS.length;
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 
   const constructLogsCommonData = () => {
     const index = Math.floor(Math.random() * 3);
+    const logMessageIndex = Math.floor(Math.random() * logMessagesLength);
     const serviceName = getServiceName(index);
-    const logMessage = MESSAGE_LOG_LEVELS[index];
+    const logMessage = MESSAGE_LOG_LEVELS[logMessageIndex];
     const { clusterId, clusterName, namespace } = getCluster(index);
     const cloudRegion = getCloudRegion(index);
 
@@ -80,7 +111,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {
@@ -103,7 +134,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {
@@ -114,6 +145,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
               return log
                 .create({ isLogsDb })
+                .message(message.replace('<random>', generateShortId()))
                 .service(serviceName)
                 .setGeoLocation(getGeoCoordinate())
                 .setHostIp(getIpAddress())
@@ -129,7 +161,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {
@@ -157,7 +189,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {
@@ -189,7 +221,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {
@@ -216,7 +248,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(3)
+          return Array(logMessagesLength)
             .fill(0)
             .map(() => {
               const {

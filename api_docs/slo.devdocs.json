@@ -204,7 +204,9 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; }"
+              "[]>) => void; }; config: ",
+              "ObservabilitySharedBrowserConfig",
+              "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -842,7 +844,9 @@
               "AppUpdater",
               ">; pricing: ",
               "PricingServiceStart",
-              "; }) => void; }"
+              "; }) => void; config: ",
+              "ObservabilitySharedBrowserConfig",
+              "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
