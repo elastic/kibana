@@ -14,7 +14,6 @@ import { HttpService } from '../../application/services/http_service';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import type { MlStartDependencies } from '../../plugin';
-import { getMlGlobalServices } from '../../application/util/get_services';
 
 export function ResolveAnomalySwimlaneUserInput({
   coreStart,
@@ -31,9 +30,8 @@ export function ResolveAnomalySwimlaneUserInput({
 }) {
   const { http } = coreStart;
   const adJobsApiService = jobsApiProvider(new HttpService(http));
-  const mlServices = getMlGlobalServices(coreStart, pluginStart.data.dataViews);
   return (
-    <KibanaContextProvider services={{ ...coreStart, ...pluginStart, mlServices }}>
+    <KibanaContextProvider services={{ ...coreStart, ...pluginStart }}>
       <AnomalySwimlaneInitializer
         adJobsApiService={adJobsApiService}
         initialInput={input}
