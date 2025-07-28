@@ -8,14 +8,14 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import { DashboardTiles } from './related_dashboards/dashboard_tiles';
-import { DashboardMetadata } from './related_dashboards/dashboard_tile';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
   rule: Rule;
-  suggestedDashboards?: DashboardMetadata[];
-  linkedDashboards?: DashboardMetadata[];
+  suggestedDashboards?: SuggestedDashboard[];
+  linkedDashboards?: LinkedDashboard[];
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
 }
