@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import {
   EuiFlexItem,
@@ -77,20 +78,19 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const [data, setData] = useState<ServiceMapDiagnosticResponse>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [form, setForm] = useState<DiagnosticFormState>({
-    sourceNode: null,
-    destinationNode: null,
-    traceId: '',
+  const [form, setFormState] = useState<DiagnosticFormState>({
+    sourceNode: undefined,
+    destinationNode: undefined,
+    traceId: undefined,
     isValid: false,
   });
 
-  const handleSelectionUpdate = React.useCallback(
-    ({ sourceNode, destinationNode, traceId, isValid }: DiagnosticFormState) => {
-      setForm({
-        sourceNode,
-        destinationNode,
-        traceId,
-        isValid,
+  const handleSelectionUpdate = useCallback(
+    ({ field, value }: { field: keyof DiagnosticFormState; value?: string }) => {
+      setFormState((prev) => {
+        const updated = { ...prev, [field]: value };
+        updated.isValid = !!(updated.sourceNode && updated.destinationNode);
+        return updated;
       });
     },
     []
@@ -174,6 +174,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         }}
       >
         <DiagnosticConfigurationForm
+          form={form}
           selectedNode={selectedNode}
           onSelectionUpdate={handleSelectionUpdate}
         />

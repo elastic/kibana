@@ -18,8 +18,8 @@ export interface NodeSelection {
 }
 
 export interface DiagnosticFormState {
-  sourceNode: NodeSelection | null;
-  destinationNode: NodeSelection | null;
-  traceId: string;
+  sourceNode?: NodeSelection;
+  destinationNode?: NodeSelection;
+  traceId?: string;
   isValid: boolean;
 }

@@ -23,8 +23,6 @@ export function DiagnosticResults({
   destinationNodeName?: string;
   traceId: string;
 }) {
-  const exitSpansList = data?.analysis?.exitSpans?.allExitSpans || [];
-  const otelExitSpans = data?.analysis?.exitSpans?.otelExitSpans || [];
   const apmExitSpans = data?.analysis?.exitSpans?.apmExitSpans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
   const hasMatchingDestinationResources =
@@ -49,8 +47,6 @@ export function DiagnosticResults({
       <ExitSpansAnalysis
         hasMatchingDestinationResources={hasMatchingDestinationResources}
         totalConnections={totalConnections}
-        exitSpansList={exitSpansList}
-        otelExitSpans={otelExitSpans}
         apmExitSpans={apmExitSpans}
         sourceNodeName={sourceNodeName}
         destinationNodeName={destinationNodeName}

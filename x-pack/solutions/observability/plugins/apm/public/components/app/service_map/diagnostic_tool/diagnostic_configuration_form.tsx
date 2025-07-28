@@ -5,38 +5,39 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import type { EuiSelectOption } from '@elastic/eui';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPanel,
   EuiTitle,
   EuiText,
   EuiFormRow,
-  EuiSelect,
   EuiSpacer,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiSteps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../../common/es_fields/apm';
-import type { DiagnosticFormState, NodeField } from './types';
+import type { DiagnosticFormState } from './types';
 
 interface DiagnosticConfigurationFormProps {
   selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
-  onSelectionUpdate: (params: DiagnosticFormState) => void;
+  onSelectionUpdate: ({
+    field,
+    value,
+  }: {
+    field: keyof DiagnosticFormState;
+    value?: string;
+  }) => void;
+  form: DiagnosticFormState;
 }
 
 export function DiagnosticConfigurationForm({
   selectedNode,
   onSelectionUpdate,
+  form,
 }: DiagnosticConfigurationFormProps) {
   const {
     query: { rangeFrom, rangeTo },
@@ -46,163 +47,108 @@ export function DiagnosticConfigurationForm({
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [traceId, setTraceId] = useState('');
-
-  const [selectedFields, setSelectedFields] = useState<string[]>([
-    SERVICE_NAME,
-    SPAN_DESTINATION_SERVICE_RESOURCE,
-  ]);
-  const [selectedValues, setSelectedValues] = useState<string[]>(['', '']);
-
-  const updateArrayAtIndex = <T,>(array: T[], index: number, value: T): T[] => {
-    return array.map((item, i) => (i === index ? value : item));
-  };
-
-  useEffect(() => {
-    const [sourceNodeField, destinationNodeField] = selectedFields;
-    const [sourceNodeValue, destinationNodeValue] = selectedValues;
-    const sourceNode =
-      sourceNodeField && sourceNodeValue
-        ? { field: sourceNodeField as NodeField, value: sourceNodeValue }
-        : null;
-
-    const destinationNode =
-      destinationNodeField && destinationNodeValue
-        ? { field: destinationNodeField as NodeField, value: destinationNodeValue }
-        : null;
-
-    onSelectionUpdate({
-      sourceNode,
-      destinationNode,
-      traceId,
-      isValid: !isEmpty(sourceNodeValue) && !isEmpty(destinationNodeValue) && !isEmpty(traceId),
-    });
-  }, [selectedFields, selectedValues, traceId, onSelectionUpdate]);
-
-  const onChangeField = (fieldName: string, index: number) => {
-    setSelectedFields((prev) => updateArrayAtIndex(prev, index, fieldName));
-    setSelectedValues((prev) => updateArrayAtIndex(prev, index, ''));
-  };
-
-  const onChangeValue = (value: string, index: number) => {
-    setSelectedValues((prev) => updateArrayAtIndex(prev, index, value));
-  };
-
-  const fieldOptions: EuiSelectOption[] = [
-    { value: SERVICE_NAME, text: SERVICE_NAME },
-    { value: SPAN_DESTINATION_SERVICE_RESOURCE, text: SPAN_DESTINATION_SERVICE_RESOURCE },
-  ];
 
   const steps = [
     {
-      title: 'Configure Missing Nodes',
+      title: i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.title', {
+        defaultMessage: 'Configure Missing Nodes',
+      }),
       children: (
         <div>
           <EuiText size="s" color="subdued">
             {i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.description', {
               defaultMessage:
-                'Specify the source service and destination node you expect to see connected in the service map.',
-            })}
-          </EuiText>
-          <EuiSpacer size="m" />
-          {selectedFields.map((fieldName, idx) => {
-            const filterId = `filter-${idx}`;
-            return (
-              <React.Fragment key={filterId}>
-                <EuiFormRow
-                  label={
-                    idx === 0
-                      ? i18n.translate(
-                          'xpack.apm.serviceMap.diagnoseMissingConnection.sourceNodeLabel',
-                          {
-                            defaultMessage: 'Source node',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.apm.serviceMap.diagnoseMissingConnection.destinationNodeLabel',
-                          {
-                            defaultMessage: 'Destination node',
-                          }
-                        )
-                  }
-                  fullWidth
-                >
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem>
-                      <EuiSelect
-                        aria-label={i18n.translate(
-                          'xpack.apm.settings.customLink.flyout.filters.ariaLabel',
-                          {
-                            defaultMessage: 'Choose a field',
-                          }
-                        )}
-                        data-test-subj={filterId}
-                        id={filterId}
-                        fullWidth
-                        options={fieldOptions}
-                        value={fieldName}
-                        prepend={i18n.translate(
-                          'xpack.apm.settings.customLink.flyout.filters.prepend',
-                          {
-                            defaultMessage: 'Field',
-                          }
-                        )}
-                        onChange={(e) => {
-                          onChangeField(e.target.value, idx);
-                        }}
-                        isInvalid={!isEmpty(selectedValues[idx]) && isEmpty(fieldName)}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <SuggestionsSelect
-                        key={`${filterId}-${fieldName}`} // Include fieldName in key to force re-render when field changes
-                        dataTestSubj={`${fieldName}.value`}
-                        fieldName={fieldName}
-                        placeholder={i18n.translate(
-                          'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
-                          { defaultMessage: 'Value' }
-                        )}
-                        defaultValue={selectedValues[idx]}
-                        onChange={(selectedValue) => onChangeValue(selectedValue as string, idx)}
-                        isInvalid={!isEmpty(fieldName) && isEmpty(selectedValues[idx])}
-                        start={start}
-                        end={end}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
-                <EuiSpacer size="s" />
-              </React.Fragment>
-            );
-          })}
-        </div>
-      ),
-    },
-    {
-      title: 'Provide Trace Information',
-      children: (
-        <>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.description', {
-              defaultMessage:
-                'Enter a trace ID that you expect to contain a connection between the selected source and destination nodes. This will help analyze if the trace properly flows through both services.',
+                'Specify the source and destination services you expect to see connected in the service map.',
             })}
           </EuiText>
           <EuiSpacer size="m" />
           <EuiFormRow
-            label={i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.traceIdLabel', {
+            label={i18n.translate(
+              'xpack.apm.serviceMap.diagnoseMissingConnection.sourceNodeLabel',
+              {
+                defaultMessage: 'Source node',
+              }
+            )}
+            fullWidth
+          >
+            <EuiFlexItem>
+              <SuggestionsSelect
+                dataTestSubj="sourceNode.value"
+                fieldName={'service.name'}
+                placeholder={i18n.translate(
+                  'xpack.apm.serviceMap.diagnoseMissingConnection.sourceNodePlaceholder',
+                  { defaultMessage: 'Select or type source service name' }
+                )}
+                onChange={(selectedValue) =>
+                  onSelectionUpdate({ field: 'sourceNode', value: selectedValue })
+                }
+                start={start}
+                end={end}
+              />
+            </EuiFlexItem>
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.apm.serviceMap.diagnoseMissingConnection.destinationNodeLabel',
+              {
+                defaultMessage: 'Destination node',
+              }
+            )}
+            fullWidth
+          >
+            <EuiFlexItem>
+              <SuggestionsSelect
+                dataTestSubj={`destinationNode.value`}
+                fieldName={'service.name'}
+                placeholder={i18n.translate(
+                  'xpack.apm.serviceMap.diagnoseMissingConnection.destinationNodePlaceholder',
+                  { defaultMessage: 'Select or type destination service name' }
+                )}
+                onChange={(selectedValue) =>
+                  onSelectionUpdate({ field: 'destinationNode', value: selectedValue })
+                }
+                start={start}
+                end={end}
+              />
+            </EuiFlexItem>
+          </EuiFormRow>
+        </div>
+      ),
+    },
+    {
+      title: i18n.translate('xpack.apm.serviceMap.traceInformation.title', {
+        defaultMessage: 'Provide Trace Information',
+      }),
+      children: (
+        <>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.apm.serviceMap.traceInformation.description', {
+              defaultMessage:
+                'Enter a trace ID that is expected to propagate across both the source and destination services',
+            })}
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMap.traceInformation.traceIdLabel', {
               defaultMessage: 'Trace ID',
             })}
-            fullWidth
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.apm.serviceMap.diagnoseMissingConnection.destinationNodeOptionalLabel"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
+            }
           >
             <SuggestionsSelect
               fieldName="trace.id"
-              onChange={(value) => setTraceId(value)}
-              isInvalid={isEmpty(traceId)}
+              onChange={(value) => onSelectionUpdate({ field: 'traceId', value })}
               placeholder={i18n.translate(
-                'xpack.apm.serviceMap.diagnoseMissingConnection.traceIdPlaceholder',
+                'xpack.apm.serviceMap.traceInformation.traceIdPlaceholder',
                 {
-                  defaultMessage: 'Enter Trace ID',
+                  defaultMessage: 'Select or type trace ID',
                 }
               )}
               start={start}
