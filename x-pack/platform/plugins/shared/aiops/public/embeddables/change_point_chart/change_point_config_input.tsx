@@ -33,11 +33,7 @@ export function EmbeddableChangePointUserInput({
         ...pluginStart,
       }}
     >
-      <ChangePointChartInitializer
-        initialInput={input}
-        onCreate={onConfirm}
-        onCancel={onCancel}
-      />
+      <ChangePointChartInitializer initialInput={input} onCreate={onConfirm} onCancel={onCancel} />
     </AiopsAppContext.Provider>
   );
 }
