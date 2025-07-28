@@ -10,7 +10,7 @@ import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
 
-const { GraphLargeStackedEdgeCases, GraphWithAssetInventoryData } = composeStories(stories);
+const { GraphLargeStackedEdgeCases } = composeStories(stories);
 
 const TRANSLATE_XY_REGEX =
   /translate\(\s*([+-]?\d+(\.\d+)?)(px|%)?\s*,\s*([+-]?\d+(\.\d+)?)(px|%)?\s*\)/;
@@ -53,8 +53,8 @@ jest.mock('./constants', () => ({
 }));
 
 describe('GraphLargeStackedEdgeCases story', () => {
-  it('all labels should be visible', async () => {
-    const { getAllByText } = render(<GraphLargeStackedEdgeCases />);
+  it('all labels should be visible and nodes should have correct icons', async () => {
+    const { getAllByText, container } = render(<GraphLargeStackedEdgeCases />);
 
     const labels = GraphLargeStackedEdgeCases.args?.nodes?.filter((node) => node.shape === 'label');
 
@@ -93,18 +93,11 @@ describe('GraphLargeStackedEdgeCases story', () => {
         labelsBoundingRect.push(labelRect!);
       }
     }
-  });
-});
-
-describe('GraphWithAssetInventoryData story', () => {
-  it('should render nodes with specific icons', async () => {
-    const { container } = render(<GraphWithAssetInventoryData />);
-
-    // Define expected node IDs and their icons
+    // test some nodes icons rendering
     const expectedNodes = [
+      { id: 'siem-windows', expectedIcon: 'storage' },
       { id: '213.180.204.3', expectedIcon: 'globe' },
       { id: 'user', expectedIcon: 'user' },
-      { id: 'ec2', expectedIcon: 'storage' },
     ];
 
     // Get all nodes in the rendered component
@@ -118,10 +111,8 @@ describe('GraphWithAssetInventoryData story', () => {
       expect(nodeElement).not.toBeNull();
 
       if (nodeElement) {
-        // Find the icon element - using an attribute selector that would match EUI icons
         const iconElement = nodeElement.querySelector(`[data-euiicon-type="${expectedIcon}"]`);
 
-        // Verify the expected icon is present
         expect(iconElement).not.toBeNull();
         expect(iconElement?.getAttribute('data-euiicon-type')).toBe(expectedIcon);
       }
