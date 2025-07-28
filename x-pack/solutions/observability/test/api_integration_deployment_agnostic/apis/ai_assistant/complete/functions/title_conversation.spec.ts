@@ -15,7 +15,6 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { AssistantScope } from '@kbn/ai-assistant-common';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
