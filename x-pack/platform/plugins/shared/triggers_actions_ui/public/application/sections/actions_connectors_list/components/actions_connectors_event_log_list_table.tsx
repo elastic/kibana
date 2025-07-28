@@ -473,7 +473,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     [onFilterChange, hasConnectorNames, showFromAllSpaces]
   );
 
-  const columnsWithoutInitialWidthForLastVisibleColumn = (): EuiDataGridColumn[] => {
+  const removeLastItemWidthToExpandToFullContainerWidth = (): EuiDataGridColumn[] => {
     const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
     return columns.map((col) => {
       if (col.id !== lastVisibleColumnId) return col;
@@ -492,7 +492,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
         <EventLogDataGrid
-          columns={columnsWithoutInitialWidthForLastVisibleColumn()}
+          columns={removeLastItemWidthToExpandToFullContainerWidth()}
           logs={logs}
           pagination={pagination}
           sortingColumns={sortingColumns}
