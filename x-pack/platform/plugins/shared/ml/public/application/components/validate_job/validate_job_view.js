@@ -92,7 +92,10 @@ const Modal = ({ close, title, children }) => {
 
       <EuiModalFooter>
         <EuiButton onClick={close} size="s" fill>
-          <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
+          <FormattedMessage
+            id="xpack.ml.validateJob.modal.closeButtonLabel"
+            defaultMessage="Close"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

@@ -52,7 +52,12 @@ export const DatasourcePreview = ({ done, datatable }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={done}
+      maxWidth="1000px"
+      className="canvasModal--fixedSize"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>{strings.getModalTitle()}</EuiModalHeaderTitle>
       </EuiModalHeader>

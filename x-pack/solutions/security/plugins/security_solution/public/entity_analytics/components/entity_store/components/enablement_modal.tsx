@@ -136,7 +136,11 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     </EuiCallOut>
   );
   return (
-    <EuiModal onClose={() => toggle(false)} aria-labelledby={modalTitleId} data-test-subj="entityStoreEnablementModal">
+    <EuiModal
+      onClose={() => toggle(false)}
+      aria-labelledby={modalTitleId}
+      data-test-subj="entityStoreEnablementModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
