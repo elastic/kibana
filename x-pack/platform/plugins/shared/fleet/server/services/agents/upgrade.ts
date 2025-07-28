@@ -134,6 +134,7 @@ export async function sendAutomaticUpgradeAgentsActions(
     agents: Agent[];
     version: string;
     upgradeDurationSeconds?: number;
+    spaceId?: string;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -142,6 +143,6 @@ export async function sendAutomaticUpgradeAgentsActions(
     options.agents,
     {},
     { ...options, isAutomatic: true },
-    currentSpaceId
+    options.spaceId ?? currentSpaceId
   );
 }
