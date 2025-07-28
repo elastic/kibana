@@ -59,6 +59,7 @@ const vegaVisStyles = {
         '.kibanaCodeEditor': {
           width: '100%',
         },
+        // See discussion: https://github.com/elastic/kibana/issues/228296#issuecomment-3126033291
         ...(colorMode === 'DARK' && {
           '.monaco-editor': {
             '--vscode-editor-inactiveSelectionBackground': '#3a3d41',
