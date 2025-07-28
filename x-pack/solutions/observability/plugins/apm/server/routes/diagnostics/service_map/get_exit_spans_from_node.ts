@@ -129,7 +129,7 @@ export async function getExitSpansFromSourceNode({
   return {
     exitSpans: allExitSpans,
     otelExitSpans,
-    regularExitSpans: exitSpans,
+    apmExitSpans: exitSpans,
     totalConnections: allExitSpans.length,
     rawResponse: response,
     hasMatchingDestinationResources:

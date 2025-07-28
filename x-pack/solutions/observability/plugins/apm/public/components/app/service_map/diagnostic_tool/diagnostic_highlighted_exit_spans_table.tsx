@@ -45,7 +45,7 @@ const columns: Array<EuiBasicTableColumn<ExitSpanFields>> = [
         {value || <em>—</em>}
         {item.isOtel && (
           <div style={{ marginTop: '4px' }}>
-            <EuiBadge color="accent" size="s">
+            <EuiBadge color="accent">
               {i18n.translate('xpack.apm.serviceMap.diagnosticResults.table.otelBadge', {
                 defaultMessage: 'OTEL (destination.address)',
               })}

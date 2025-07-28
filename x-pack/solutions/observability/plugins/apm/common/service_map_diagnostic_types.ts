@@ -7,12 +7,12 @@
 
 export interface ServiceMapDiagnosticResponse {
   analysis: {
-    exitSpans: {
+    allExitSpans: {
       found: boolean;
       totalConnections: number;
       spans: any[];
       otelExitSpans?: any[];
-      regularExitSpans?: any[];
+      apmExitSpans?: any[];
       hasMatchingDestinationResources: boolean;
     };
     parentRelationships: {

@@ -143,7 +143,7 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
           totalConnections: exitSpans.totalConnections,
           spans: exitSpans.exitSpans,
           otelExitSpans: exitSpans.otelExitSpans,
-          regularExitSpans: exitSpans.regularExitSpans,
+          apmExitSpans: exitSpans.apmExitSpans,
           hasMatchingDestinationResources: exitSpans.hasMatchingDestinationResources,
         },
         parentRelationships: {

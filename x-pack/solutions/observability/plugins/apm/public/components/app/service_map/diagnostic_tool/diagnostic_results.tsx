@@ -20,7 +20,7 @@ interface DiagnosticResultsProps {
         totalConnections: number;
         spans: any[];
         otelExitSpans?: any[];
-        regularExitSpans?: any[];
+        apmExitSpans?: any[];
         hasMatchingDestinationResources: boolean;
       };
       parentRelationships: {
@@ -56,7 +56,7 @@ export function DiagnosticResults({
 }: DiagnosticResultsProps) {
   const exitSpansList = data?.analysis?.exitSpans?.spans || [];
   const otelExitSpans = data?.analysis?.exitSpans?.otelExitSpans || [];
-  const regularExitSpans = data?.analysis?.exitSpans?.regularExitSpans || [];
+  const apmExitSpans = data?.analysis?.exitSpans?.apmExitSpans || [];
   const totalConnections = data?.analysis?.exitSpans?.totalConnections || 0;
   const hasMatchingDestinationResources =
     data?.analysis?.exitSpans?.hasMatchingDestinationResources || false;
@@ -82,7 +82,7 @@ export function DiagnosticResults({
         totalConnections={totalConnections}
         exitSpansList={exitSpansList}
         otelExitSpans={otelExitSpans}
-        regularExitSpans={regularExitSpans}
+        apmExitSpans={apmExitSpans}
         sourceNodeName={sourceNodeName}
         destinationNodeName={destinationNodeName}
       />

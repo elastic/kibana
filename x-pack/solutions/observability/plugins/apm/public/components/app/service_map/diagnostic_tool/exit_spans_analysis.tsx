@@ -25,7 +25,7 @@ interface ExitSpansAnalysisProps {
   totalConnections: number;
   exitSpansList: any[];
   otelExitSpans?: any[];
-  regularExitSpans?: any[];
+  apmExitSpans?: any[];
   sourceNodeName: string;
   destinationNodeName: string;
 }
@@ -35,7 +35,7 @@ export function ExitSpansAnalysis({
   totalConnections,
   exitSpansList,
   otelExitSpans = [],
-  regularExitSpans = [],
+  apmExitSpans = [],
   sourceNodeName,
   destinationNodeName,
 }: ExitSpansAnalysisProps) {

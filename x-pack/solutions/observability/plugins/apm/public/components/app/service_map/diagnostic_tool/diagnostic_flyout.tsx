@@ -103,12 +103,8 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     setData(undefined);
     setIsLoading(true);
 
-    console.log('click');
-
     try {
       if (start && end && form.sourceNode && form.destinationNode && form.traceId) {
-        console.log('passed validation');
-
         const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
           params: {
             body: {
@@ -124,7 +120,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         setData(response);
       } else {
-        console.log('failed validation');
         // If validation fails, ensure loading is stopped
         setIsLoading(false);
       }
