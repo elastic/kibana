@@ -35,7 +35,6 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -89,7 +88,6 @@ import {
   setCapabilities,
   setHttp,
   setSearch,
-  setSavedObjects,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -162,7 +160,6 @@ export interface VisualizationsStartDeps {
   application: ApplicationStart;
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -543,7 +540,6 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);
     setExpressions(expressions);

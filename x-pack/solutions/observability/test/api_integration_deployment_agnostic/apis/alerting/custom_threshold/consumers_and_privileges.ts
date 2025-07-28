@@ -106,8 +106,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Custom threshold - Rule visibility - consumer observability', () => {
+    describe('Custom threshold - Rule visibility - consumer observability', function () {
       const consumer = 'observability';
+
       it('creates rule successfully', async () => {
         const createdRule = await alertingApi.createRule({
           roleAuthc,
