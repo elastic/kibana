@@ -25,7 +25,7 @@ interface SelectOutputProps<State> {
   outputMode: ControlOutputOption;
   editorState: Partial<State>;
   editorConfig?: ControlGroupEditorConfig;
-  setEditorState: (s: Partial<State>) => void;
+  updateEditorState: (s: any) => void;
   setDefaultPanelTitle: (title: string) => void;
   setSelectedControlType: (type: string | undefined) => void;
   setControlOptionsValid: (valid: boolean) => void;
@@ -38,7 +38,7 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
   outputMode,
   editorConfig,
   editorState,
-  setEditorState,
+  updateEditorState,
   setDefaultPanelTitle,
   setControlOptionsValid,
   setSelectedControlType,
@@ -67,12 +67,11 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
               ? `??${value.replace(/\?/g, '')}`
               : value
             : `?${value}`;
-          setEditorState({ ...editorState, esqlVariableString });
+          updateEditorState({ esqlVariableString });
           setDefaultPanelTitle(esqlVariableString);
         }}
         onBlur={() => {
-          if (editorState.esqlVariableString === '?')
-            setEditorState({ ...editorState, esqlVariableString: '' });
+          if (editorState.esqlVariableString === '?') updateEditorState({ esqlVariableString: '' });
         }}
       />
     </EuiFormRow>
@@ -84,10 +83,12 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
       dataViewId={editorState.dataViewId}
       fieldName={editorState.fieldName}
       onChangeDataViewId={(newDataViewId) => {
-        setEditorState({ ...editorState, dataViewId: newDataViewId });
+        updateEditorState({ dataViewId: newDataViewId });
         setSelectedControlType(undefined);
       }}
       onSelectField={(field) => {
+        updateEditorState({ fieldName: field.name });
+
         /**
          * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
          */
@@ -111,7 +112,7 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
               isFullWidth
               options={CONTROL_OUTPUT_OPTIONS}
               idSelected={outputMode ?? DEFAULT_CONTROL_OUTPUT}
-              onChange={(output) => setEditorState({ ...editorState, output })}
+              onChange={(output) => updateEditorState({ output })}
               legend="Select control output"
             />
           </EuiFormRow>

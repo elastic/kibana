@@ -12,6 +12,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { appendStatsByToQuery } from '@kbn/esql-utils';
 import { AggregateQuery } from '@kbn/es-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { v4 } from 'uuid';
 import {
   DEFAULT_CONTROL_INPUT,
   ControlOutputOption,
@@ -41,7 +42,7 @@ interface SelectInputProps<State> {
   editorState: Partial<State>;
   selectedControlType: string | undefined;
   editorConfig?: ControlGroupEditorConfig;
-  setEditorState: (s: Partial<State>) => void;
+  updateEditorState: (s: any) => void;
   setSelectedControlType: (type: string | undefined) => void;
   setDefaultPanelTitle: (title: string) => void;
   setControlOptionsValid: (valid: boolean) => void;
@@ -56,7 +57,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   editorConfig,
   editorState,
   selectedControlType,
-  setEditorState,
+  updateEditorState,
   setSelectedControlType,
   setDefaultPanelTitle,
   setControlOptionsValid,
@@ -87,15 +88,25 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   const onStaticValuesChange = useCallback(
     (staticValues: EuiSelectOption[]) => {
       setHasTouchedInput(true);
-      setEditorState({
-        ...editorState,
-        staticValues,
+      updateEditorState({
+        staticValues: staticValues as State['staticValues'],
       });
       if (!selectedControlType && staticValues.some(({ text }) => !!text)) {
         setSelectedControlType(OPTIONS_LIST_CONTROL);
       }
     },
-    [setHasTouchedInput, setEditorState, editorState, selectedControlType, setSelectedControlType]
+    [setHasTouchedInput, updateEditorState, selectedControlType, setSelectedControlType]
+  );
+
+  const updatePreviewOptionsAndColumns = useCallback(
+    (nextOptions: string[], nextColumns: string[]) => {
+      updateEditorState({
+        staticValues: nextOptions.map((text) => ({ text, value: v4() })),
+      });
+      setPreviewOptions(nextOptions);
+      setPreviewColumns(nextColumns);
+    },
+    [updateEditorState]
   );
 
   const submitESQLQuery = useCallback(
@@ -115,13 +126,12 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
       }
 
       if (isSuccess) {
-        setPreviewOptions(result.values);
-        setPreviewColumns([]);
+        updatePreviewOptionsAndColumns(result.values, []);
         setESQLQueryValidation(EditorComponentStatus.COMPLETE);
 
         // Make sure the next editor state matches the submitted query. Calling submitESQLQuery from outside the
         // Run Query button can throw this out of sync
-        const nextEditorState = { ...editorState, esqlQuery: query };
+        const nextEditorState: Partial<DefaultDataControlState> = { esqlQuery: query };
         if (!editorState.esqlVariableString) {
           nextEditorState.esqlVariableString = fieldToESQLVariable(result.column);
         }
@@ -134,23 +144,23 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
               nextEditorState.fieldName = columnWithKeyword;
           }
         }
-        setEditorState(nextEditorState);
+        updateEditorState(nextEditorState);
 
         if (!selectedControlType) {
           setSelectedControlType(OPTIONS_LIST_CONTROL);
         }
       } else {
-        setPreviewOptions([]);
-        setPreviewColumns(result.columns);
+        updatePreviewOptionsAndColumns([], result.columns);
         setESQLQueryValidation(EditorComponentStatus.ERROR);
       }
     },
     [
       setESQLQueryValidation,
+      updatePreviewOptionsAndColumns,
       editorState,
-      setEditorState,
-      selectedControlType,
       fieldRegistry,
+      updateEditorState,
+      selectedControlType,
       setSelectedControlType,
     ]
   );
@@ -167,22 +177,22 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   const onESQLQueryChange = useCallback(
     (q: AggregateQuery) => {
       setHasTouchedInput(true);
-      setEditorState({ ...editorState, esqlQuery: q.esql });
+      updateEditorState({ ...editorState, esqlQuery: q.esql });
       setPreviewError(undefined);
       setPreviewOptions([]);
       setPreviewColumns([]);
       setESQLQueryValidation(EditorComponentStatus.INCOMPLETE);
     },
-    [setHasTouchedInput, setEditorState, editorState, setESQLQueryValidation]
+    [setHasTouchedInput, updateEditorState, editorState, setESQLQueryValidation]
   );
 
   const appendColumnToESQLQuery = useCallback(
     (column: string) => {
       const updatedQuery = appendStatsByToQuery(editorState.esqlQuery ?? '', column);
-      setEditorState({ ...editorState, esqlQuery: updatedQuery });
+      updateEditorState({ ...editorState, esqlQuery: updatedQuery });
       submitESQLQuery(updatedQuery);
     },
-    [editorState, setEditorState, submitESQLQuery]
+    [editorState, updateEditorState, submitESQLQuery]
   );
 
   const lockToStatic = useMemo(
@@ -220,7 +230,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           options={inputOptions}
           idSelected={editorState.input ?? DEFAULT_CONTROL_INPUT}
           onChange={(input) => {
-            setEditorState({ ...editorState, input });
+            updateEditorState({ input: input as ControlInputOption });
             setHasTouchedInput(true);
           }}
           legend="Select control input"
@@ -233,7 +243,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           dataViewId={editorState.dataViewId}
           fieldName={editorState.fieldName}
           onChangeDataViewId={(newDataViewId) => {
-            setEditorState({ ...editorState, dataViewId: newDataViewId });
+            updateEditorState({ ...editorState, dataViewId: newDataViewId });
             setSelectedControlType(undefined);
             setHasTouchedInput(true);
           }}
@@ -244,7 +254,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
             if (
               // If the user is in ES|QL output mode
               editorState.output === ControlOutputOption.ESQL ||
-              // And has not changed the variable name
+              // Or if they are not in ES|QL ouput mode and have not set the variable name
               isESQLVariableEmpty ||
               editorState.esqlVariableString === fieldToESQLVariable(prevFieldName ?? '')
             ) {
@@ -254,13 +264,13 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
                * name in case they switch
                */
               const esqlVariableString = fieldToESQLVariable(newFieldName);
-              setEditorState({ ...editorState, fieldName: newFieldName, esqlVariableString });
+              updateEditorState({ ...editorState, fieldName: newFieldName, esqlVariableString });
               setDefaultPanelTitle(esqlVariableString);
             } else {
               /**
                * if the variable name doesn't need changing, just set the field name
                */
-              setEditorState({ ...editorState, fieldName: newFieldName });
+              updateEditorState({ ...editorState, fieldName: newFieldName });
             }
 
             /**
@@ -312,6 +322,8 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           label={DataControlEditorStrings.manageControl.dataSource.getListOptionsTitle()}
           value={editorState.staticValues ?? []}
           onChange={onStaticValuesChange}
+          maxOptions={1000}
+          suggestions={previewOptions}
         />
       )}
     </>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -237,16 +237,20 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
 
   const [hasTouchedInput, setHasTouchedInput] = useState(isEdit);
 
+  const updateEditorState = useCallback(
+    (update: Partial<State>) => setEditorState((state) => ({ ...state, ...update })),
+    []
+  );
+
   // ADD FIELD DETECTION INFO CALLOUT
-  // STATIC VALUE QUERY PRESERVATION
 
   useEffect(() => {
     // Set the default input mode to ES|QL for showESQLOnly editors
     if (isDSLInputMode && showESQLOnly) {
-      setEditorState({ ...editorState, input: ControlInputOption.ESQL });
+      setEditorState((state) => ({ ...state, input: ControlInputOption.ESQL }));
     }
     if (!isESQLOutputMode && showESQLOnly) {
-      setEditorState({ ...editorState, output: ControlOutputOption.ESQL });
+      setEditorState((state) => ({ ...state, output: ControlOutputOption.ESQL }));
     }
 
     // Set the default control label to either the selected field name or entered ES|QL variable name
@@ -269,15 +273,15 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       switch (editorState.output) {
         case ControlOutputOption.DSL:
           if (!showESQLOnly && editorState.input !== ControlInputOption.DSL) {
-            setEditorState({ ...editorState, input: ControlInputOption.DSL });
+            setEditorState((state) => ({ ...state, input: ControlInputOption.DSL }));
           }
           break;
         case ControlOutputOption.ESQL:
           // If the user enters ?? in the ES|QL variable, set the values source to static
           if (editorState.esqlVariableString?.startsWith('??') && !isStaticInputMode) {
-            setEditorState({ ...editorState, input: ControlInputOption.STATIC });
+            setEditorState((state) => ({ ...state, input: ControlInputOption.STATIC }));
           } else if (isDSLInputMode) {
-            setEditorState({ ...editorState, input: ControlInputOption.ESQL });
+            setEditorState((state) => ({ ...state, input: ControlInputOption.ESQL }));
           }
           break;
       }
@@ -389,7 +393,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         <CustomSettings
           initialState={initialState}
           field={editorState.fieldName ? fieldRegistry[editorState.fieldName].field : undefined}
-          updateState={(newState) => setEditorState({ ...editorState, ...newState })}
+          updateState={(newState) => setEditorState((state) => ({ ...state, ...newState }))}
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
           output={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
@@ -423,7 +427,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     } else if (isESQLInputMode) {
       return esqlQueryValidation;
     } else if (isStaticInputMode) {
-      if (editorState.staticValues?.every(Boolean) && editorState.staticValues.length)
+      if (
+        editorState.staticValues?.every(({ text }) => Boolean(text)) &&
+        editorState.staticValues.length
+      )
         return EditorComponentStatus.COMPLETE;
     }
     return EditorComponentStatus.INCOMPLETE;
@@ -505,7 +512,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
             editorState={editorState}
             editorConfig={editorConfig}
-            setEditorState={setEditorState}
+            updateEditorState={updateEditorState}
             setDefaultPanelTitle={setDefaultPanelTitle}
             setSelectedControlType={setSelectedControlType}
             setControlOptionsValid={setControlOptionsValid}
@@ -517,7 +524,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             editorState={editorState}
             editorConfig={editorConfig}
             selectedControlType={selectedControlType}
-            setEditorState={setEditorState}
+            updateEditorState={updateEditorState}
             setDefaultPanelTitle={setDefaultPanelTitle}
             setSelectedControlType={setSelectedControlType}
             setControlOptionsValid={setControlOptionsValid}
@@ -560,10 +567,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 compressed
                 onChange={(e) => {
                   setPanelTitle(e.target.value ?? '');
-                  setEditorState({
-                    ...editorState,
+                  setEditorState((state) => ({
+                    ...state,
                     title: e.target.value === '' ? undefined : e.target.value,
-                  });
+                  }));
                 }}
               />
             </EuiFormRow>
@@ -579,7 +586,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                     options={CONTROL_WIDTH_OPTIONS}
                     idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
                     onChange={(newWidth: string) =>
-                      setEditorState({ ...editorState, width: newWidth as ControlWidth })
+                      setEditorState((state) => ({
+                        ...state,
+                        width: newWidth as ControlWidth,
+                      }))
                     }
                   />
                   <EuiSpacer size="s" />
@@ -588,7 +598,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                     label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
                     color="primary"
                     checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
-                    onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
+                    onChange={() =>
+                      setEditorState((state) => ({ ...state, grow: !editorState.grow }))
+                    }
                     data-test-subj="control-editor-grow-switch"
                   />
                 </div>

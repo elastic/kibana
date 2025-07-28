@@ -10,13 +10,14 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGrid,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiStat,
   EuiText,
@@ -24,9 +25,6 @@ import {
 import { max, min } from 'lodash';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { ChooseColumnPopover } from './choose_column_popover';
-
-const PREVIEW_VAL_MAX_CARDINALITY = 25;
-const PREVIEW_VAL_MAX_CHARS = 40;
 
 export const InputValuesPreview: React.FC<{
   previewOptions: string[];
@@ -58,22 +56,7 @@ export const InputValuesPreview: React.FC<{
         : 'string',
     [previewOptions, isEmpty]
   );
-  const options = useMemo(() => {
-    const totalCardinality = previewOptions.length;
-    const visibleOptions = previewOptions.slice(0, PREVIEW_VAL_MAX_CARDINALITY).map((value) => {
-      let text = value.slice(0, PREVIEW_VAL_MAX_CHARS);
-      if (text.length < value.length) text += '…';
-      return { text };
-    });
-    if (totalCardinality > visibleOptions.length) {
-      visibleOptions.push({
-        text: DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMoreText(
-          totalCardinality - visibleOptions.length
-        ),
-      });
-    }
-    return visibleOptions;
-  }, [previewOptions]);
+
   const range = useMemo(() => {
     if (typeofPreviewValues !== 'number') return null;
     const optionsAsNumbers = previewOptions.map((v) => Number(v));
@@ -140,7 +123,22 @@ export const InputValuesPreview: React.FC<{
       />
     </EuiFlexGrid>
   ) : (
-    <EuiSelect options={options} />
+    <div
+      css={css`
+        max-height: 200px;
+        overflow: auto;
+      `}
+    >
+      <EuiBadgeGroup
+        css={css`
+          justify-content: space-evenly;
+        `}
+      >
+        {previewOptions.map((option, i) => (
+          <EuiBadge key={`${i}-${option}`}>{option}</EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    </div>
   );
 
   const panelColor = previewError ? 'danger' : multiColumnResult ? 'warning' : undefined;
