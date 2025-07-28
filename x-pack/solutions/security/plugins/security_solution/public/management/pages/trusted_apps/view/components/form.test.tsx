@@ -31,6 +31,7 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -87,6 +88,7 @@ describe('Trusted apps form', () => {
       entries: [createEntry(ConditionEntryField.HASH, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
+      meta: {temporaryUuid: '1111'},
     };
     return {
       ...defaults,
@@ -181,6 +183,7 @@ describe('Trusted apps form', () => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
     latestUpdatedItem = createItem();
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
