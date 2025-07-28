@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
@@ -40,6 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
     // dashboard should load properly
     await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
+
+    expect(await PageObjects.dashboard.getIsInViewMode()).to.be(true);
 
     // count of panels rendered completely
     await renderService.waitForRender(8);
