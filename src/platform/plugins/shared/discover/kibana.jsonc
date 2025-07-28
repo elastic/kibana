@@ -13,6 +13,7 @@
     "server": true,
     "requiredPlugins": [
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "discoverShared",
