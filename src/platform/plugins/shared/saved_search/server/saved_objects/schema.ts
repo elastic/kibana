@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
@@ -135,4 +136,20 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
   density: schema.maybe(
     schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
   ),
+});
+
+const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
+  id: schema.string(),
+  label: schema.string(),
+  // Remove `title` and `description` from the tab schema as they exist at the top level of the saved object
+  attributes: SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+    title: undefined,
+    description: undefined,
+  }),
+});
+
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
+
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
