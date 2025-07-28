@@ -2068,10 +2068,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@70.1.0":
-  version "70.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.0.tgz#178c7304c1b82c05ca687367b83886aa861b1036"
-  integrity sha512-Re+MABG944Xm6fQGgf85Mlb0IWf0e8xhVALFqTWK+xKgqyjiecb0rj34fUGbKpqzzV6YRok6MK1nudsXK3KJTw==
+"@elastic/charts@70.1.1":
+  version "70.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.1.tgz#3ce1cd77b7d6b5c89cfe33f8dbdbf23e294d98e2"
+  integrity sha512-g6joH7VZlCL9syAJJDZ5Tf/x03XV3Zsc8HD0f77SioWa9MbMLPqRQZyuLG+Y2+1wCsoV6njuvk9AR96VgwbFdw==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2237,10 +2237,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.4":
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.4.tgz#a400bf7fb5058e7df5f37ce556a62dcc6c214f41"
-  integrity sha512-B504Q0SM3GysR7aGBj5O1U5/Y5j5fw0B+tbhmL8j8Gw5vogNG+/7TzwggPL39PjeRfpLqjiqu3DtWNNqjAlxcw==
+"@elastic/monaco-esql@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.6.tgz#c89a1eb142b9a8bd713bc697d651373a9c4144df"
+  integrity sha512-roRLyZelCI0Vb9Z2/Ugu/w+aUghoLIqrnF/oVQqYH1VHXSBpzKDtItGEp5SXcXWdz7gcta3mlygfNxvr5DTEvw==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -12027,10 +12027,10 @@
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.16.tgz#8ebe53d69efada7044454e3305c19017d97ced2a"
   integrity sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==
 
-"@types/getos@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/getos/-/getos-3.0.0.tgz#582c758e99e9d634f31f471faf7ce59cf1c39a71"
-  integrity sha512-g5O9kykBPMaK5USwU+zM5AyXaztqbvHjSQ7HaBjqgO3f5lKGChkRhLP58Z/Nrr4RBGNNPrBcJkWZwnmbmi9YjQ==
+"@types/getos@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@types/getos/-/getos-3.0.4.tgz#dc81e2b7c07d52776f0d781fa37f46d65d6676bd"
+  integrity sha512-OsNVsuGEBd5QoeXTgjPmA89a465hjQithLMImsiJlIi0aYP8axKWtWrsmEMfm50w6EL2oRzCz+cLkZmp9/LfZw==
 
 "@types/glob-stream@*":
   version "6.1.0"
@@ -19600,18 +19600,20 @@ form-data@4.0.0:
     mime-types "^2.1.12"
 
 form-data@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
-  integrity sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.4.tgz#938273171d3f999286a4557528ce022dc2c98df1"
+  integrity sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
-    mime-types "^2.1.12"
+    es-set-tostringtag "^2.1.0"
+    hasown "^2.0.2"
+    mime-types "^2.1.35"
 
-form-data@^4.0.0, form-data@^4.0.3, form-data@~4.0.0:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.3.tgz#608b1b3f3e28be0fccf5901fc85fb3641e5cf0ae"
-  integrity sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==
+form-data@^4.0.0, form-data@^4.0.4, form-data@~4.0.0:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
+  integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
@@ -19981,7 +19983,7 @@ getopts@^2.2.5:
   resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.5.tgz#67a0fe471cacb9c687d817cab6450b96dde8313b"
   integrity sha512-9jb7AW5p3in+IiJWhQiZmmwkpLaR/ccTWdWQCtZM66HJcHHLegowh4q4tSD7gouUyeNvFWRavfK9GXosQHDpFA==
 
-getos@^3.1.0, getos@^3.2.1:
+getos@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/getos/-/getos-3.2.1.tgz#0134d1f4e00eb46144c5a9c0ac4dc087cbb27dc5"
   integrity sha512-U56CfOK17OKgTVqozZjUKNdkfEv6jk5WISBJ8SHoagjE6L69zOwl3Z+O8myjY9MEW3i2HPWQBt/LTbCgcC973Q==
@@ -22555,10 +22557,10 @@ jiti@^1.20.0:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.6.tgz#6c7f7398dd4b3142767f9a168af2f317a428d268"
   integrity sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==
 
-joi-to-json@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.0.tgz#c56131ecf8a772fce89fd98b7f81d7b0fac31dbc"
-  integrity sha512-j6wV/liW2CmPJBJCAsRHegS91JV2QQtg2J/Z/67VfdSvuE65njCx6DrYZY1cw0BXwlxHewpVtiDnY8W0aaNr+A==
+joi-to-json@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.2.tgz#b2fba0bd4a1073893238098165ba59207fabcb36"
+  integrity sha512-ZGfdMpCwM2NNgcddh3q2SGtwmIQ5dU5iJJkccUYxZDRMDCO8CJ8VCnND7SkbnvID4YF5dDTM55ElsTGuktUs6Q==
   dependencies:
     combinations "^1.0.0"
     lodash "^4.17.21"
@@ -24287,7 +24289,7 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.53.0.tgz#3cb63cd820fc29896d9d4e8c32ab4fcd74ccb447"
   integrity sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==
 
-mime-types@^2.1.12, mime-types@^2.1.27, mime-types@^2.1.31, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24, mime-types@~2.1.34:
+mime-types@^2.1.12, mime-types@^2.1.27, mime-types@^2.1.31, mime-types@^2.1.35, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24, mime-types@~2.1.34:
   version "2.1.35"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.35.tgz#381a871b62a734450660ae3deee44813f70d959a"
   integrity sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==

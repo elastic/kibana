@@ -245,8 +245,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
             await PageObjects.console.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
-            await retry.waitFor('autocomplete to be visible', () =>
-              PageObjects.console.isAutocompleteVisible()
+            await retry.waitFor(
+              'autocomplete to be visible',
+              async () => await PageObjects.console.isAutocompleteVisible()
             );
             expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
           }

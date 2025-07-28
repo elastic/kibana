@@ -813,6 +813,40 @@ describe('ES deprecations table', () => {
         expect(exists('deprecation-reindex-reindex')).toBe(false);
         expect(exists('deprecation-reindex-delete')).toBe(true);
       });
+      it('it only displays reindexing button if reindex in progress', async () => {
+        httpRequestsMockHelpers.setReindexStatusResponse(
+          esDeprecationsMockResponse.migrationsDeprecations[3].index!,
+          {
+            reindexOp: {
+              status: ReindexStatus.inProgress,
+              lastCompletedStep: ReindexStep.readonly,
+              reindexTaskPercComplete: null,
+            },
+            warnings: [],
+            hasRequiredPrivileges: true,
+            meta: {
+              indexName: 'foo',
+              reindexName: 'reindexed-foo',
+              aliases: [],
+              isFrozen: false,
+              isReadonly: false,
+              isInDataStream: false,
+              isFollowerIndex: false,
+            },
+          }
+        );
+
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+        testBed.component.update();
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-reindex-readonly')).toBe(false);
+        expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(false);
+      });
     });
   });
   describe('datastreams', () => {
