@@ -114,7 +114,7 @@ export class RenderingService implements IRenderingService {
     const layout: LayoutService =
       layoutType === 'grid'
         ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
-        : new LegacyFixedLayout(renderCoreDeps);
+        : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
 
     const Layout = layout.getComponent();
 

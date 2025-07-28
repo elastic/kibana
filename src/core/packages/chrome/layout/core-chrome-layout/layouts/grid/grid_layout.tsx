@@ -75,7 +75,9 @@ export class GridLayout implements LayoutService {
 
     const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
     const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout({
-      includeSideNavigation: !v2ProjectSideNavEnabled,
+      // for v2 project side navigation we don't need to include the side navigation in the header,
+      // because it is rendered separately in the nav grid cell
+      includeSideNav: v2ProjectSideNavEnabled ? false : 'v1',
     });
     const headerBanner = chrome.getHeaderBanner();
 
@@ -86,7 +88,7 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
-    const projectSideNavigationV2 = chrome.getProjectSideNavV2Component();
+    const projectSideNavigationV2 = chrome.getProjectSideNavV2ComponentForGridLayout();
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
