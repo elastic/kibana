@@ -19,6 +19,7 @@
     "@kbn/core-base-server-internal",
     "@kbn/core-metrics-server",
     "@kbn/core-metrics-server-internal",
+    "@kbn/core-status-common",
   ],
   "exclude": [
     "target/**/*",

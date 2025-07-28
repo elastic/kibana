@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockRender = jest.fn();
-jest.mock('react-dom', () => {
-  return {
-    render: mockRender,
-  };
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/http/rate-limiter-browser-internal'],
+};

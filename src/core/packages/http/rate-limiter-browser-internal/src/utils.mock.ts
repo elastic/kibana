@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/http/rate-limiter-internal'],
-};
+export const mockGetRetryAfter = jest.fn(() => 0);
+export const mockIsRateLimiterError = jest.fn();
+
+jest.mock('./utils', () => ({
+  getRetryAfter: mockGetRetryAfter,
+  isRateLimiterError: mockIsRateLimiterError,
+}));

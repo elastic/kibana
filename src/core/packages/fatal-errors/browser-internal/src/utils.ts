@@ -8,11 +8,8 @@
  */
 
 import { inspect } from 'util';
-import type { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
-/**
- * Produce a string version of an error,
- */
-function formatErrorMessage(error: any): string {
+
+function getErrorMessage(error: any): string {
   if (typeof error === 'string') {
     return error;
   }
@@ -42,25 +39,24 @@ function formatErrorMessage(error: any): string {
 }
 
 /**
- * Format the stack trace from a message so that it setups with the message, which
- * some browsers do automatically and some don't
+ * Produce a string version of an error,
  */
-function formatStack(err: Error) {
-  if (err.stack && !err.stack.includes(err.message)) {
-    return 'Error: ' + err.message + '\n' + err.stack;
-  }
-
-  return err.stack;
+export function formatError(error: string | Error, source?: string): string {
+  return `${source ? source + ': ' : ''}${getErrorMessage(error)}`;
 }
 
 /**
- * Produce a simple FatalErrorInfo object from some error and optional source, used for
- * displaying error information on the fatal error screen
+ * Format the stack trace from a message so that it setups with the message, which
+ * some browsers do automatically and some don't
  */
-export function getErrorInfo(error: any, source?: string): FatalErrorInfo {
-  const prefix = source ? source + ': ' : '';
-  return {
-    message: prefix + formatErrorMessage(error),
-    stack: formatStack(error),
-  };
+export function formatStack(error: string | Error): string {
+  if (typeof error === 'string') {
+    return '';
+  }
+
+  if (error.stack && !error.stack.includes(error.message)) {
+    return 'Error: ' + error.message + '\n' + error.stack;
+  }
+
+  return error.stack ?? '';
 }
