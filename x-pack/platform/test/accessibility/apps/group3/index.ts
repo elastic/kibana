@@ -13,7 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./graph'));
-    loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
     loadTestFile(require.resolve('./rules_connectors'));
     // Please make sure that the remote clusters, snapshot and restore and
@@ -22,7 +21,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./snapshot_and_restore'));
     loadTestFile(require.resolve('./cross_cluster_replication'));
     loadTestFile(require.resolve('./reporting'));
-    loadTestFile(require.resolve('./enterprise_search'));
 
     // loadTestFile(require.resolve('./license_management'));
     // loadTestFile(require.resolve('./tags'));
