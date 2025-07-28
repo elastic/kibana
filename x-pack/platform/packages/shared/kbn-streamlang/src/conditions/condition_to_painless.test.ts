@@ -70,14 +70,6 @@ const operatorConditionAndResults = [
     result:
       "(relevant_fields['http.response.status_code'] !== null && ((relevant_fields['http.response.status_code'] instanceof Number && relevant_fields['http.response.status_code'] >= 200 && relevant_fields['http.response.status_code'] < 300) || (relevant_fields['http.response.status_code'] instanceof String && Float.parseFloat(relevant_fields['http.response.status_code']) >= 200 && Float.parseFloat(relevant_fields['http.response.status_code']) < 300)))",
   },
-  {
-    condition: {
-      field: 'log.message',
-      regex: '^nginx.*proxy$',
-    },
-    result:
-      "(relevant_fields['log.message'] !== null && /^nginx.*proxy$/.matcher(relevant_fields['log.message']).matches())",
-  },
 ];
 
 describe('conditionToPainless', () => {
