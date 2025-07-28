@@ -97,11 +97,9 @@ interface UseLoadFleetExtensionProps {
     updatedPolicy: NewPackagePolicy;
     isExtensionLoaded?: boolean;
   }) => void;
-  validationResults: any; // Replace with actual type if available
   isEditPage: boolean;
   packageInfo: PackageInfo;
   integrationToEnable?: CloudSecurityPolicyTemplate;
-  // setIntegrationToEnable?: (integration: CloudSecurityPolicyTemplate) => void;
   isSubscriptionLoading: boolean;
   isSubscriptionValid: boolean;
 }
@@ -115,14 +113,12 @@ const DEFAULT_INPUT_TYPE = {
 export const useLoadFleetExtension = ({
   newPolicy,
   onChange,
-  validationResults,
   isEditPage,
   isSubscriptionLoading,
   isSubscriptionValid,
   packageInfo,
   integrationToEnable,
-}: // setIntegrationToEnable,
-UseLoadFleetExtensionProps) => {
+}: UseLoadFleetExtensionProps) => {
   const { cloud } = useKibana().services;
   const isServerless = !!cloud.serverless.projectType;
   const integration =
@@ -131,17 +127,13 @@ UseLoadFleetExtensionProps) => {
       ? integrationToEnable
       : undefined;
   const input = getSelectedOption(newPolicy.inputs, integration);
-  // search for non null fields of the validation?.vars object
-  const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
-    (key) => (validationResults?.vars || {})[key] !== null
-  );
 
   const isValidRef = useRef(true);
   const setIsValid = useCallback((valid: boolean) => {
     isValidRef.current = valid;
   }, []);
 
-  const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
+  const [isLoading, setIsLoading] = useState(true);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
   const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
@@ -180,18 +172,6 @@ UseLoadFleetExtensionProps) => {
     updatePolicy,
     setCanFetchIntegration,
   });
-
-  // delaying component rendering due to a race condition issue from Fleet
-  // TODO: remove this workaround when the following issue is resolved:
-  // https://github.com/elastic/kibana/issues/153246
-  // useEffect(() => {
-  //   // using validation?.vars to know if the newPolicy state was reset due to race condition
-  //   if (validationResultsNonNullFields.length > 0) {
-  //     // Forcing rerender to recover from the validation errors state
-  //     setIsLoading(true);
-  //   }
-  //   setTimeout(() => setIsLoading(false), 200);
-  // }, [validationResultsNonNullFields]);
 
   if (!isSubscriptionLoading && isLoading) {
     setIsLoading(false);

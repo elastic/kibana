@@ -87,16 +87,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
     const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
 
-    const { isLoading, setEnabledPolicyInput, updatePolicy, input } = useLoadFleetExtension({
-      newPolicy,
-      onChange,
-      validationResults,
-      isEditPage,
-      packageInfo,
-      integrationToEnable,
-      isSubscriptionValid,
-      isSubscriptionLoading,
-    });
+    const { isLoading, setEnabledPolicyInput, updatePolicy, input, setIsValid } =
+      useLoadFleetExtension({
+        newPolicy,
+        onChange,
+        isEditPage,
+        packageInfo,
+        integrationToEnable: integrationToEnable as 'cspm' | 'kspm' | 'vuln_mgmt' | undefined,
+        isSubscriptionValid,
+        isSubscriptionLoading,
+      });
 
     if (isLoading) {
       return (
@@ -159,6 +159,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             isAgentlessEnabled={isAgentlessEnabled}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             namespaceSupportEnabled={true}
+            setIsValid={setIsValid}
           />
         )}
 
