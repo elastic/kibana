@@ -91,6 +91,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
     });
 
     after(async () => {
