@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { TableEntityType } from '@kbn/securitysolution-data-table';
+export {
+  BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
+  BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
+  BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
+  BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+} from '../../../../detections/hooks/translations';
 
 const ENTITY_TYPE_PLURAL = (entityType: TableEntityType, count: number) => {
   switch (entityType) {
