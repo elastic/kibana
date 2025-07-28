@@ -9,7 +9,7 @@ import expect from 'expect';
 import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,
-} from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
+} from '../../../services/default_fleet_setup';
 import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
