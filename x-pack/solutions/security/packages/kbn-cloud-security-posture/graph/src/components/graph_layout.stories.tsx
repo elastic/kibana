@@ -542,22 +542,11 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
-// Asset inventory data for graph nodes
-// Simplified asset data objects according to the new schema, containing only entityName
-const serverAssetData = {
-  entityName: 'SIEM Windows Server',
-  entityType: 'AWS EC2 Instance',
-};
-
-const adminUserAssetData = {
-  entityName: 'Admin User',
-  entityType: 'AWS IAM User',
-};
-
-const suspiciousUserAssetData = {
-  entityName: 'Suspicious User',
-  entityType: 'AWS IAM User',
-};
+const entitiesData = [
+  { name: 'Suspicious ip' },
+  { name: 'Admin User' },
+  { name: 'Suspicious User' },
+];
 
 export const LargeGraph: Story = {
   args: {
@@ -691,13 +680,11 @@ export const GraphWithAssetInventoryData: Story = {
     ...extractEdges([
       ...baseGraph.map((node, index) => {
         // Add asset data to specific nodes
-        if (index === 0) {
-          // First item - siem-windows node
+        if (index === 1) {
           return {
             ...node,
-            // Set the label from entityName in asset data
-            label: serverAssetData.entityName,
-            icon: 'storage',
+            label: entitiesData[0].name,
+            icon: 'globe',
             documentsData: [
               {
                 id: node.id,
@@ -706,11 +693,9 @@ export const GraphWithAssetInventoryData: Story = {
             ],
           };
         } else if (index === 2) {
-          // Third item - user node
           return {
             ...node,
-            // Set the label from entityName in asset data
-            label: adminUserAssetData.entityName,
+            label: entitiesData[1].name,
             icon: 'user',
             documentsData: [
               {
@@ -719,13 +704,11 @@ export const GraphWithAssetInventoryData: Story = {
               },
             ],
           };
-        } else if (index === 4) {
-          // Fifth item - hackeruser node
+        } else if (index === 6) {
           return {
             ...node,
-            // Set the label from entityName in asset data
-            label: suspiciousUserAssetData.entityName,
-            icon: 'user',
+            label: entitiesData[2].name,
+            icon: 'storage',
             documentsData: [
               {
                 id: node.id,

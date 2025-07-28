@@ -47,6 +47,22 @@ export const fetchGraph = async ({
     }
   });
 
+  let isEnrichPolicyExists = false;
+  try {
+    const { policies } = await esClient.asCurrentUser.enrich.getPolicy({
+      name: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+    });
+
+    isEnrichPolicyExists = policies.some(
+      (policy) => policy.config.match?.name === GENERIC_ENTITY_INDEX_ENRICH_POLICY
+    );
+  } catch (error) {
+    logger.error(`Error fetching enrich policy ${error.message}`);
+    logger.error(error);
+    // If we can't check the policy, assume it doesn't exist and continue without enrichment
+    isEnrichPolicyExists = false;
+  }
+
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
@@ -67,7 +83,7 @@ export const fetchGraph = async ({
   // TODO: We should use the appropriate specific index for each entity type in the future
   let query: string;
 
-  if (isAssetInventoryEnabled) {
+  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
     // Query with entity enrichment
     query = `FROM ${indexPatterns
       .filter((indexPattern) => indexPattern.length > 0)

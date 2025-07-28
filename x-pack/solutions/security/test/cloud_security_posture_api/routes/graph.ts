@@ -19,7 +19,7 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { dataViewRouteHelpersFactory } from '@kbn/test-suites-xpack/security_solution_api_integration/test_suites/entity_analytics/utils/data_view';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -36,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   const postGraph = (
     agent: Agent,
@@ -697,138 +698,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
       });
 
-      describe('Asset inventory enabled', () => {
+      describe('Enrich graph with entity metadata', () => {
         before(async () => {
-          // enable asset inventory feature flag
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
-          // load entity store data
           await esArchiver.loadIfNeeded(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
           );
         });
 
         after(async () => {
-          // cleanup entity store data
           await esArchiver.unload(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
           );
+          await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
         });
 
-        it('should return 400 when enrich policy is missing and enableAssetInventory is true', async () => {
-          const data = await postGraph(supertest, {
-            query: {
-              originEventIds: [],
-              start: 'now-1d/d',
-              end: 'now/d',
-              esQuery: {
-                bool: {
-                  filter: [
-                    {
-                      match_phrase: {
-                        'actor.entity.id': 'admin@example.com',
-                      },
-                    },
-                  ],
-                  must_not: [
-                    {
-                      match_phrase: {
-                        'event.action': 'google.iam.admin.v1.UpdateRole',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          }).expect(result(400, logger));
-
-          expect(data.text).to.match(/cannot find enrich policy/i);
-        });
-
-        it('should display enriched entity data', async () => {
-          const TARGET_INDEX = '.entities.v1.latest.security_generic_default';
-          // Define enrich fields to use in the policy
-          const ENRICH_FIELDS = [
-            'entity.name',
-            'entity.source',
-            'entity.type',
-            'entity.sub_type',
-            'entity.url',
-            'cloud.account.id',
-            'cloud.account.name',
-            'cloud.availability_zone',
-            'cloud.instance.id',
-            'cloud.instance.name',
-            'cloud.machine.type',
-            'cloud.project.id',
-            'cloud.project.name',
-            'cloud.provider',
-            'cloud.region',
-            'cloud.service.name',
-            'host.architecture',
-            'host.boot.id',
-            'host.cpu.usage',
-            'host.disk.read.bytes',
-            'host.disk.write.bytes',
-            'host.domain',
-            'host.hostname',
-            'host.id',
-            'host.mac',
-            'host.name',
-            'host.network.egress.bytes',
-            'host.network.egress.packets',
-            'host.network.ingress.bytes',
-            'host.network.ingress.packets',
-            'host.pid_ns_ino',
-            'host.type',
-            'host.uptime',
-            'host.ip',
-            'user.domain',
-            'user.email',
-            'user.full_name',
-            'user.roles',
-            'user.hash',
-            'user.id',
-            'user.name',
-            'orchestrator.api_version',
-            'orchestrator.cluster.id',
-            'orchestrator.cluster.name',
-            'orchestrator.cluster.url',
-            'orchestrator.cluster.version',
-            'orchestrator.namespace',
-            'orchestrator.organization',
-            'orchestrator.resource.annotation',
-            'orchestrator.resource.id',
-            'orchestrator.resource.ip',
-            'orchestrator.resource.label',
-            'orchestrator.resource.name',
-            'orchestrator.resource.parent.type',
-            'orchestrator.resource.type',
-            'orchestrator.type',
-            'asset.criticality',
-            'generic.risk.calculated_level',
-            'generic.risk.calculated_score',
-            'generic.risk.calculated_score_norm',
-          ];
-
-          // Use the transport.request API instead of the high-level API
-          await es.transport.request({
-            method: 'PUT',
-            path: `/_enrich/policy/${GENERIC_ENTITY_INDEX_ENRICH_POLICY}`,
-            body: {
-              match: {
-                indices: [TARGET_INDEX],
-                match_field: 'entity.id',
-                enrich_fields: ENRICH_FIELDS,
-              },
-            },
-          });
-
-          // Execute the enrich policy
-          await es.transport.request({
-            method: 'POST',
-            path: `/_enrich/policy/${GENERIC_ENTITY_INDEX_ENRICH_POLICY}/_execute`,
-          });
-
+        it('should return 200 when securitySolution:enableAssetInventory is true without enrich policy', async () => {
           const response = await postGraph(supertest, {
             query: {
               originEventIds: [],
@@ -854,44 +739,126 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           }).expect(result(200));
+
           expect(response.body).to.have.property('nodes').length(3);
           expect(response.body).to.have.property('edges').length(2);
-          expect(response.body).not.to.have.property('messages');
-          // Find the actor node
-          const actorNode = response.body.nodes.find(
-            (node: NodeDataModel) => node.id === 'admin@example.com'
-          ) as EntityNodeDataModel;
+        });
 
-          // Verify entity enrichment
-          expect(actorNode).not.to.be(undefined);
-          expect(actorNode.label).to.equal('AdminExample');
-          expect(actorNode.icon).to.equal('user');
-          expect(actorNode.shape).to.equal('ellipse');
+        it('should contain entity data when asset inventory is enabled', async () => {
+          // initialize security-solution-default data-view - needed for entity store
+          const dataView = dataViewRouteHelpersFactory(supertest);
+          await dataView.create('security-solution');
+          const enrichPolicyCreationTimeout = 5000;
 
-          // Verify other nodes
-          response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
-            expect(node).to.have.property('color');
-            expect(node.color).equal(
-              'primary',
-              `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
-            );
+          // enable asset inventory - install underlying indexes and enrich policies
+          await supertest
+            .post(`/api/asset_inventory/enable`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
 
-            if (node.shape === 'label') {
-              expect(node.documentsData).to.have.length(1);
-              expect(node.documentsData?.[0]).to.have.property(
-                'type',
-                node.shape === 'label' ? 'event' : 'entity'
+          const {
+            body: { status },
+          } = await supertest
+            .get(`/api/asset_inventory/status`)
+            .set('kbn-xsrf', 'xxxx')
+            .send()
+            .expect(200);
+
+          const data = await supertest
+            .get(`/api/fleet/epm/packages/cloud_asset_inventory`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
+
+          // although enrich policy is already create via 'api/asset_inventory/enable'
+          // we still would like to replicate as if cloud asset discovery integration was fully installed
+          await supertest
+            .post(`/api/fleet/epm/packages/_bulk`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packages: [
+                {
+                  name: 'cloud_asset_inventory',
+                  version: data.body.item.version,
+                },
+                'system',
+                'elastic_agent',
+              ],
+            })
+            .expect(200);
+
+          // Looks like there's some async operation that runs in the background
+          // so we use retry.tryForTime to wait for it to finish - otherwise sometimes policy is not yet created
+          await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                originEventIds: [],
+                start: '2024-09-01T00:00:00Z',
+                end: '2024-09-02T00:00:00Z',
+                esQuery: {
+                  bool: {
+                    filter: [
+                      {
+                        match_phrase: {
+                          'actor.entity.id': 'admin@example.com',
+                        },
+                      },
+                    ],
+                    must_not: [
+                      {
+                        match_phrase: {
+                          'event.action': 'google.iam.admin.v1.UpdateRole',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            }).expect(result(200));
+
+            expect(status).to.equal('ready');
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+            // Find the actor node
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'admin@example.com'
+            ) as EntityNodeDataModel;
+
+            // Verify entity enrichment
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.label).to.equal('AdminExample');
+            expect(actorNode.icon).to.equal('user');
+            expect(actorNode.shape).to.equal('ellipse');
+            expect(actorNode.tag).to.equal('Identity');
+
+            // Verify other nodes
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
               );
-            }
-          });
 
-          response.body.edges.forEach((edge: EdgeDataModel) => {
-            expect(edge).to.have.property('color');
-            expect(edge.color).equal(
-              'subdued',
-              `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
-            );
-            expect(edge.type).equal('solid');
+              if (node.shape === 'label') {
+                expect(node.documentsData).to.have.length(1);
+                expect(node.documentsData?.[0]).to.have.property(
+                  'type',
+                  node.shape === 'label' ? 'event' : 'entity'
+                );
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
           });
         });
       });

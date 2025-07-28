@@ -20,11 +20,9 @@ import type {
   NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
+import { set } from '@kbn/safer-lodash-set/fp';
 import type { GraphEdge } from './types';
-import {
-  mapEntityDataToNodeProps,
-  transformEntityTypeToIcon,
-} from './entity_data_to_node_props.mapper';
+import { transformEntityTypeToIcon } from './utils';
 
 interface LabelEdges {
   source: string;
@@ -197,23 +195,25 @@ const determineEntityNodeVisualProps = (
   // Extract entity data from the matching entity's documentsData if available
   const entityDetailsData = matchingEntity?.entity ?? {};
 
-  // Get mapped properties from the entity if found
-  const mappedProps = entityDetailsData
-    ? mapEntityDataToNodeProps({
-        entityData: entityDetailsData,
-        nodeFieldsMapping: {
-          name: {
-            targetField: 'label',
-          },
-          type: {
-            targetField: 'icon',
-            transform: transformEntityTypeToIcon,
-          },
-        },
-      })
-    : {};
+  let mappedProps = {};
 
-  let nodeProps: Partial<EntityNodeDataModel> = { shape: 'hexagon', ...mappedProps };
+  if (entityDetailsData.name) {
+    mappedProps = set('label', entityDetailsData.name)(mappedProps);
+  }
+
+  if (entityDetailsData.type) {
+    mappedProps = set('tag', entityDetailsData.type)(mappedProps);
+
+    const iconValue: string | undefined = transformEntityTypeToIcon(entityDetailsData.type);
+    if (iconValue) {
+      mappedProps = set('icon', iconValue)(mappedProps);
+    }
+  }
+
+  let nodeProps: Partial<EntityNodeDataModel> = {
+    shape: 'hexagon',
+    ...mappedProps,
+  };
 
   // If actor is a user return ellipse
   if (users.includes(actorId)) {

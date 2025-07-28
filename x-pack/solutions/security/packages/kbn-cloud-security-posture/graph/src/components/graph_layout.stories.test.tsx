@@ -97,45 +97,14 @@ describe('GraphLargeStackedEdgeCases story', () => {
 });
 
 describe('GraphWithAssetInventoryData story', () => {
-  it('should display entity names as node labels for specific nodes', async () => {
-    const { container } = render(<GraphWithAssetInventoryData />);
-
-    // Define node IDs and expected labels
-    const expectedNodes = [
-      { id: 'siem-windows', expectedLabel: 'SIEM Windows Server' },
-      { id: 'user', expectedLabel: 'Admin User' },
-      { id: 'hackeruser', expectedLabel: 'Suspicious User' },
-    ];
-
-    // Get all nodes in the rendered component
-    const nodeElements = container.querySelectorAll('.react-flow__node');
-
-    // Verify each expected node has the correct label
-    for (const { id, expectedLabel } of expectedNodes) {
-      // Find the DOM element for this node
-      const nodeElement = Array.from(nodeElements).find((el) => el.getAttribute('data-id') === id);
-
-      expect(nodeElement).not.toBeNull();
-
-      if (nodeElement) {
-        // Find the EuiText element within this node
-        const textElement = nodeElement.querySelector('.euiText');
-
-        // Verify the entity name is displayed as the label
-        expect(textElement).not.toBeNull();
-        expect(textElement?.textContent).toContain(expectedLabel);
-      }
-    }
-  });
-
   it('should render nodes with specific icons', async () => {
     const { container } = render(<GraphWithAssetInventoryData />);
 
     // Define expected node IDs and their icons
     const expectedNodes = [
-      { id: 'siem-windows', expectedIcon: 'storage' },
+      { id: '213.180.204.3', expectedIcon: 'globe' },
       { id: 'user', expectedIcon: 'user' },
-      { id: 'hackeruser', expectedIcon: 'user' },
+      { id: 'ec2', expectedIcon: 'storage' },
     ];
 
     // Get all nodes in the rendered component

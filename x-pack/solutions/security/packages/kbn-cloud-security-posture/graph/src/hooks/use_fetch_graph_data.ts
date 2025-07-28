@@ -123,7 +123,7 @@ export const useFetchGraphData = ({
     isFetching,
     isError,
     data,
-    error, // Include the error in the return value
+    error,
     refresh: () => {
       queryClient.invalidateQueries(QUERY_KEY);
     },
