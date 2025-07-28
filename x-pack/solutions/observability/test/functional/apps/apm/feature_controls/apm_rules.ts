@@ -9,17 +9,11 @@ import expect from '@kbn/expect';
 import { type FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
   describe('rules', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm'));
-    after(() =>
-      esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm')
-    );
-
     it('navigates to APM app', async () => {
       await PageObjects.common.navigateToApp('apm');
 
