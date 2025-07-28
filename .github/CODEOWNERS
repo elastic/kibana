@@ -179,7 +179,8 @@ src/core/packages/http/browser-mocks @elastic/kibana-core
 src/core/packages/http/common @elastic/kibana-core
 src/core/packages/http/context-server-internal @elastic/kibana-core
 src/core/packages/http/context-server-mocks @elastic/kibana-core
-src/core/packages/http/rate-limiter-internal @elastic/kibana-core
+src/core/packages/http/rate-limiter-browser-internal @elastic/kibana-core
+src/core/packages/http/rate-limiter-server-internal @elastic/kibana-core
 src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core
 src/core/packages/http/resources-server @elastic/kibana-core
@@ -2948,14 +2949,15 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
-oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs
-oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs
-oas_docs/output                               @elastic/core-docs @elastic/experience-docs
+oas_docs/linters                              @elastic/experience-docs
+oas_docs/overlays                             @elastic/experience-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
+oas_docs/kibana.info.yaml                     @elastic/experience-docs
+oas_docs/output                               @elastic/experience-docs
 
 # Documentation settings files
-docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
+docs/settings-gen                             @elastic/experience-docs
+docs/reference                                @elastic/experience-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
