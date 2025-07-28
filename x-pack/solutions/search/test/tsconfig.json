@@ -29,5 +29,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/inference-common",
+    "@kbn/test-suites-src",
   ]
 }
