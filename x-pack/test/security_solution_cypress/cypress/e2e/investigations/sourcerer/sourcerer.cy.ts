@@ -33,7 +33,8 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 // FLAKY: https://github.com/elastic/kibana/issues/177080
-describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
+// Skipping this as we are defaulting to the new data view picker, deprecating sourcerer
+describe.skip('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
