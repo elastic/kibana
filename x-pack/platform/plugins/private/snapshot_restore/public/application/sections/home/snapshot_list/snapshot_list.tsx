@@ -19,7 +19,7 @@ import {
   useExecutionContext,
 } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { useLoadSnapshots } from '../../../services/http';
+import { useLoadRepositories, useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
 import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
@@ -47,16 +47,14 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     error,
     isInitialRequest,
     isLoading,
-    data: {
-      snapshots = [],
-      repositories = [],
-      policies = [],
-      errors = {},
-      total: totalSnapshotsCount,
-    },
+    data: { snapshots = [], policies = [], errors = {}, total: totalSnapshotsCount },
     resendRequest: reload,
   } = useLoadSnapshots(listParams);
+  const {
+    data: { repositories = [] },
+  } = useLoadRepositories();
 
+  const repositoriesNames = repositories.map((repository: { name: string }) => repository?.name);
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
 
@@ -133,8 +131,14 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         </span>
       </PageLoading>
     );
-  } else if (error) {
-    content = (
+  } else if (!error && Object.keys(errors).length && repositoriesNames.length === 0) {
+    content = <RepositoryError />;
+  } else if (!error && repositoriesNames.length === 0) {
+    content = <RepositoryEmptyPrompt />;
+  } else if (!error && totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
+    content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
+  } else {
+    const snapshotsLoadingError = error ? (
       <PageError
         title={
           <FormattedMessage
@@ -142,16 +146,11 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Error loading snapshots"
           />
         }
+        data-test-subj="snapshotsLoadingError"
         error={error as Error}
       />
-    );
-  } else if (Object.keys(errors).length && repositories.length === 0) {
-    content = <RepositoryError />;
-  } else if (repositories.length === 0) {
-    content = <RepositoryEmptyPrompt />;
-  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
-    content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
-  } else {
+    ) : null;
+
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
         <EuiCallOut
@@ -190,13 +189,14 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
         <SnapshotTable
           snapshots={snapshots}
-          repositories={repositories}
+          repositories={repositoriesNames}
           reload={reload}
           onSnapshotDeleted={onSnapshotDeleted}
           listParams={listParams}
           setListParams={setListParams}
           totalItemCount={totalSnapshotsCount}
           isLoading={isLoading}
+          error={snapshotsLoadingError}
         />
       </section>
     );

@@ -418,7 +418,8 @@ describe('<SnapshotRestoreHome />', () => {
   describe('snapshots', () => {
     describe('when there are no snapshots nor repositories', () => {
       beforeAll(() => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [], repositories: [] });
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({ snapshots: [] });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [] });
       });
 
       beforeEach(async () => {
@@ -448,8 +449,10 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots: [],
-          repositories: ['my-repo'],
           total: 0,
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: 'my-repo' }],
         });
 
         testBed = await setup(httpSetup);
@@ -489,8 +492,10 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
-          repositories: [REPOSITORY_NAME],
           total: 2,
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }],
         });
 
         testBed = await setup(httpSetup);
@@ -528,7 +533,6 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           total: 2,
-          repositories: [REPOSITORY_NAME],
           errors: {
             repository_with_errors: {
               type: 'repository_exception',
@@ -536,6 +540,9 @@ describe('<SnapshotRestoreHome />', () => {
                 '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
             },
           },
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }],
         });
 
         testBed = await setup(httpSetup);
@@ -556,7 +563,6 @@ describe('<SnapshotRestoreHome />', () => {
       test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
-          repositories: [],
           errors: {
             repository_with_errors: {
               type: 'repository_exception',
@@ -564,6 +570,9 @@ describe('<SnapshotRestoreHome />', () => {
                 '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
             },
           },
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [],
         });
 
         testBed = await setup(httpSetup);
@@ -884,6 +893,35 @@ describe('<SnapshotRestoreHome />', () => {
           expect(shardText).toBe(`Shard ${mockedFailure.shard_id}`);
           expect(reasonText).toBe(`${mockedFailure.status}: ${mockedFailure.reason}`);
         });
+      });
+    });
+
+    describe('when there is an error while fetching the snapshots', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse(undefined, {
+          statusCode: 500,
+          message: '[repository_with_errors] cannot retrieve snapshots list from this repository',
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
+        });
+
+        testBed = await setup(httpSetup);
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+      });
+
+      test('should show a prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
+        const { find, exists } = testBed;
+
+        expect(exists('snapshotListSearch')).toBe(true);
+
+        expect(exists('snapshotsLoadingError')).toBe(true);
+        expect(find('snapshotsLoadingError').text()).toContain('Error loading snapshots');
       });
     });
   });
