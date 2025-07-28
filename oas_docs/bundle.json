@@ -58209,7 +58209,7 @@
                           "objects": {
                             "additionalProperties": false,
                             "properties": {
-                              "dashboards": {
+                              "streams": {
                                 "items": {
                                   "type": "string"
                                 },
@@ -58217,7 +58217,7 @@
                               }
                             },
                             "required": [
-                              "dashboards"
+                              "streams"
                             ],
                             "type": "object"
                           }
@@ -58246,12 +58246,6 @@
                   "name": {
                     "type": "string"
                   },
-                  "replaced_patterns": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
                   "version": {
                     "type": "string"
                   }
@@ -58260,7 +58254,6 @@
                   "name",
                   "description",
                   "version",
-                  "replaced_patterns",
                   "include"
                 ],
                 "type": "object"
