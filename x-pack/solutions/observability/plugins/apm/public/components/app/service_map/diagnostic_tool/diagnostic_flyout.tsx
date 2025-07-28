@@ -85,8 +85,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     isValid: false,
   });
 
-  console.log('form', form);
-
   const handleSelectionUpdate = useCallback(
     ({ field, value }: { field: keyof DiagnosticFormState; value?: string }) => {
       setFormState((prev) => {
@@ -94,6 +92,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         updated.isValid = !!(updated.sourceNode && updated.destinationNode);
         return updated;
       });
+      setData(undefined);
     },
     []
   );
@@ -101,8 +100,6 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   const forbiddenNames = useMemo(() => checkForForbiddenServiceNames(form), [form]);
 
   const handleRunDiagnostic = async () => {
-    // Clear previous data and set loading state
-    setData(undefined);
     setIsLoading(true);
 
     try {
