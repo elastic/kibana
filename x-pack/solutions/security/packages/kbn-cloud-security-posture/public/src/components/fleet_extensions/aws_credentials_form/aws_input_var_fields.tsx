@@ -50,18 +50,6 @@ export const AwsInputVarFields = ({
       values: { field: label },
     });
 
-  // const awsFields = fields.map((field) => {
-  //   const varDef = findVariableDef(packageInfo, field.id);
-  //   if (varDef) {
-  //     return {
-  //       ...field,
-  //       varDef,
-  //       dataTestSubj: field.dataTestSubj || `awsInputVarField-${field.id}`,
-  //     };
-  //   }
-  //   return null;
-  // });
-
   return (
     <div>
       {fields.map((field) => {

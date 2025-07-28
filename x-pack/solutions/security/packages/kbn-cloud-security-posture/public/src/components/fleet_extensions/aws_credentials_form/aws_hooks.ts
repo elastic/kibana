@@ -47,11 +47,13 @@ export const useAwsCredentialsForm = ({
   input,
   packageInfo,
   updatePolicy,
+  setIsValid,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   packageInfo: PackageInfo;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  setIsValid: (valid: boolean) => void;
 }) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value, so we fall back to the default option.
@@ -86,15 +88,15 @@ export const useAwsCredentialsForm = ({
     }
   }, [awsCredentialsType, input, newPolicy, updatePolicy]);
 
-  // useEffect(() => {
-  //   const isInvalid =
-  //     setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate;
+  useEffect(() => {
+    const isInvalid =
+      setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate;
 
-  //   setIsValid(!isInvalid);
+    setIsValid(!isInvalid);
 
-  //   updatePolicy(newPolicy);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [setupFormat, input.type]);
+    updatePolicy(newPolicy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setupFormat, input.type]);
 
   const elasticDocLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
 

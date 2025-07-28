@@ -136,11 +136,11 @@ UseLoadFleetExtensionProps) => {
     (key) => (validationResults?.vars || {})[key] !== null
   );
 
-  // console.log(validationResults);
-  // console.log(newPolicy.inputs.map((newInputs) => newInputs.enabled));
-  // console.log(input);
-
   const isValidRef = useRef(true);
+  const setIsValid = useCallback((valid: boolean) => {
+    isValidRef.current = valid;
+  }, []);
+
   const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
@@ -218,5 +218,6 @@ UseLoadFleetExtensionProps) => {
     input,
     setEnabledPolicyInput,
     updatePolicy,
+    setIsValid,
   };
 };

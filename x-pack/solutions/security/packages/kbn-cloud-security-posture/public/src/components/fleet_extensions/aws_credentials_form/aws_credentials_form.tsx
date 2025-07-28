@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { getPosturePolicy } from '../utils';
-import { useAwsCredentialsForm } from './hooks';
+import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
@@ -45,6 +45,7 @@ interface AwsFormProps {
   packageInfo: PackageInfo;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
+  setIsValid: (valid: boolean) => void;
 }
 
 const CloudFormationSetup = ({
@@ -126,6 +127,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   disabled = false,
   hasInvalidRequiredVars,
+  setIsValid,
 }: AwsFormProps) => {
   const {
     awsCredentialsType,
@@ -140,6 +142,7 @@ export const AwsCredentialsForm = ({
     input,
     packageInfo,
     updatePolicy,
+    setIsValid,
   });
 
   return (

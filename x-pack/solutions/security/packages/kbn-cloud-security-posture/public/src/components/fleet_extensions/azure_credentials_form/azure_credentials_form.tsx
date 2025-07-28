@@ -15,7 +15,7 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
-import { useAzureCredentialsForm } from './hooks';
+import { useAzureCredentialsForm } from './azure_hooks';
 import { getPosturePolicy } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
@@ -50,6 +50,7 @@ interface AzureCredentialsFormProps {
   // onChange: any;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
+  setIsValid: (valid: boolean) => void;
 }
 
 const ArmTemplateSetup = ({
@@ -208,6 +209,7 @@ export const AzureCredentialsForm = ({
   packageInfo,
   disabled,
   hasInvalidRequiredVars,
+  setIsValid,
 }: AzureCredentialsFormProps) => {
   const {
     group,
@@ -241,15 +243,12 @@ export const AzureCredentialsForm = ({
     AZURE_MANUAL_FIELDS_PACKAGE_VERSION
   );
 
-  // useEffect(() => {
-  //   setIsValid(isPackageVersionValidForAzure);
+  useEffect(() => {
+    setIsValid(isPackageVersionValidForAzure);
 
-  //   onChange({
-  //     isValid: isPackageVersionValidForAzure,
-  //     updatedPolicy: newPolicy,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [input, packageInfo, setupFormat]);
+    updatePolicy(newPolicy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, packageInfo, setupFormat]);
 
   if (!isPackageVersionValidForAzure) {
     return (

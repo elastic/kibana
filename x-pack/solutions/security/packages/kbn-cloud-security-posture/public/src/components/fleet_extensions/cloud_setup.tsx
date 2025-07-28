@@ -115,273 +115,279 @@ const EditScreenStepTitle = () => (
 // };
 
 interface CloudSetupProps {
-  namespaceSupportEnabled?: boolean;
+  defaultSetupTechnology?: SetupTechnology;
+  handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
+  integrationToEnable?: CloudSecurityPolicyTemplate;
+  isAgentlessEnabled?: boolean;
   isEditPage: boolean;
+  namespaceSupportEnabled?: boolean;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     isValid: boolean;
     updatedPolicy: NewPackagePolicy;
     isExtensionLoaded?: boolean;
   }) => void;
-  validationResults?: PackagePolicyValidationResults;
   packageInfo: PackageInfo;
-  handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
-  isAgentlessEnabled?: boolean;
-  defaultSetupTechnology?: SetupTechnology;
-  integrationToEnable?: CloudSecurityPolicyTemplate;
+  setIsValid: (valid: boolean) => void;
+  validationResults?: PackagePolicyValidationResults;
 }
 
-export const CloudSetup = ({
-  newPolicy,
-  onChange,
-  validationResults,
-  isEditPage,
-  packageInfo,
-  handleSetupTechnologyChange,
-  isAgentlessEnabled,
-  defaultSetupTechnology,
-  integrationToEnable,
-  namespaceSupportEnabled = false,
-}: CloudSetupProps) => {
-  const {
-    input,
-    setEnabledPolicyInput,
-    updatePolicy,
-    setupTechnology,
-    updateSetupTechnology,
-    shouldRenderAgentlessSelector,
-    isServerless,
-    showCloudConnectors,
-    hasInvalidRequiredVars,
-    cloud,
-  } = useLoadCloudSetup({
+export const CloudSetup = memo<CloudSetupProps>(
+  ({
+    defaultSetupTechnology,
+    handleSetupTechnologyChange,
+    integrationToEnable,
+    isAgentlessEnabled,
+    isEditPage,
+    namespaceSupportEnabled = false,
     newPolicy,
     onChange,
-    validationResults,
-    isEditPage,
     packageInfo,
-    handleSetupTechnologyChange,
-    isAgentlessEnabled,
-    defaultSetupTechnology,
-    integrationToEnable,
-  });
+    setIsValid,
+    validationResults,
+  }: CloudSetupProps) => {
+    const {
+      input,
+      setEnabledPolicyInput,
+      updatePolicy,
+      setupTechnology,
+      updateSetupTechnology,
+      shouldRenderAgentlessSelector,
+      isServerless,
+      showCloudConnectors,
+      hasInvalidRequiredVars,
+      cloud,
+    } = useLoadCloudSetup({
+      newPolicy,
+      onChange,
+      validationResults,
+      isEditPage,
+      packageInfo,
+      handleSetupTechnologyChange,
+      isAgentlessEnabled,
+      defaultSetupTechnology,
+      integrationToEnable,
+    });
 
-  const { euiTheme } = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
 
-  return (
-    <>
-      {isEditPage && <EditScreenStepTitle />}
+    return (
+      <>
+        {isEditPage && <EditScreenStepTitle />}
 
-      {isEditPage && (
-        <>
-          <EuiCallOut
-            title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-              defaultMessage: 'Modifying Integration Details',
-            })}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      )}
-
-      {/* Shows info on the active policy template */}
-      <FormattedMessage
-        id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
-        defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
-      />
-      <EuiSpacer size="l" />
-      {/* Defines the single enabled input of the active policy template */}
-      <PolicyTemplateInputSelector
-        input={input}
-        setInput={setEnabledPolicyInput}
-        disabled={isEditPage}
-      />
-      <EuiSpacer size="l" />
-
-      {/* AWS account type selection box */}
-      {input.type === 'cloudbeat/cis_aws' && (
-        <AwsAccountTypeSelect
-          input={input}
-          newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
-          packageInfo={packageInfo}
-          disabled={isEditPage}
-        />
-      )}
-
-      {input.type === 'cloudbeat/cis_gcp' && (
-        <GcpAccountTypeSelect
-          input={input}
-          newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
-          packageInfo={packageInfo}
-          disabled={isEditPage}
-        />
-      )}
-
-      {input.type === 'cloudbeat/cis_azure' && (
-        <AzureAccountTypeSelect
-          input={input}
-          newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
-          packageInfo={packageInfo}
-          disabled={isEditPage}
-          setupTechnology={setupTechnology}
-        />
-      )}
-
-      <EuiSpacer size="l" />
-      <IntegrationSettings
-        newPolicy={newPolicy}
-        validationResults={validationResults}
-        onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
-      />
-
-      {/* Namespace selector */}
-      {namespaceSupportEnabled && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="advancedOptions"
-            data-test-subj="advancedOptionsAccordion"
-            buttonContent={
-              <EuiText
-                size="xs"
-                color={euiTheme.colors.textPrimary}
-                css={{
-                  fontWeight: euiTheme.font.weight.medium,
-                }}
-              >
+        {isEditPage && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
+                defaultMessage: 'Modifying Integration Details',
+              })}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
                 <FormattedMessage
-                  id="xpack.csp.fleetIntegration.advancedOptionsLabel"
-                  defaultMessage="Advanced options"
+                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
+                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
                 />
-              </EuiText>
-            }
-            paddingSize="m"
-          >
-            <NamespaceComboBox
-              fullWidth
-              namespace={newPolicy.namespace}
-              placeholder="default"
-              isEditPage={isEditPage}
-              validationError={validationResults?.namespace}
-              onNamespaceChange={(namespace: string) => {
-                updatePolicy({ ...newPolicy, namespace });
-              }}
-              data-test-subj="namespaceInput"
-              labelId="xpack.csp.fleetIntegration.namespaceLabel"
-              helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
-            />
-          </EuiAccordion>
-        </>
-      )}
-      {shouldRenderAgentlessSelector && (
-        <>
-          <EuiSpacer size="m" />
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        {/* Shows info on the active policy template */}
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
+          defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
+        />
+        <EuiSpacer size="l" />
+        {/* Defines the single enabled input of the active policy template */}
+        <PolicyTemplateInputSelector
+          input={input}
+          setInput={setEnabledPolicyInput}
+          disabled={isEditPage}
+        />
+        <EuiSpacer size="l" />
+
+        {/* AWS account type selection box */}
+        {input.type === 'cloudbeat/cis_aws' && (
+          <AwsAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            disabled={isEditPage}
+          />
+        )}
+
+        {input.type === 'cloudbeat/cis_gcp' && (
+          <GcpAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            disabled={isEditPage}
+          />
+        )}
+
+        {input.type === 'cloudbeat/cis_azure' && (
+          <AzureAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
             disabled={isEditPage}
             setupTechnology={setupTechnology}
-            allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
-            showBetaBadge={false}
-            useDescribedFormGroup={false}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >,
-                    packageInfo,
-                    showCloudConnectors
-                  )
-                )
-              );
-            }}
           />
-        </>
-      )}
+        )}
 
-      {input.type === 'cloudbeat/cis_aws' && setupTechnology === SetupTechnology.AGENTLESS && (
-        <AwsCredentialsFormAgentless
-          input={input}
+        <EuiSpacer size="l" />
+        <IntegrationSettings
           newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          setupTechnology={setupTechnology}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          showCloudConnectors={showCloudConnectors}
-          cloud={cloud}
+          validationResults={validationResults}
+          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
-      )}
-      {input.type === 'cloudbeat/cis_aws' && setupTechnology !== SetupTechnology.AGENTLESS && (
-        <AwsCredentialsForm
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          disabled={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-        />
-      )}
-      {input.type === 'cloudbeat/cis_gcp' && setupTechnology === SetupTechnology.AGENTLESS && (
-        <GcpCredentialsFormAgentless
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          disabled={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-        />
-      )}
-      {input.type === 'cloudbeat/cis_gcp' && setupTechnology !== SetupTechnology.AGENTLESS && (
-        <GcpCredentialsForm
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          disabled={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-        />
-      )}
-      {input.type === 'cloudbeat/cis_azure' && setupTechnology === SetupTechnology.AGENTLESS && (
-        <AzureCredentialsFormAgentless
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-        />
-      )}
-      {input.type === 'cloudbeat/cis_azure' && setupTechnology !== SetupTechnology.AGENTLESS && (
-        <AzureCredentialsForm
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          disabled={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-        />
-      )}
-      <EuiSpacer />
-    </>
-  );
-};
+
+        {/* Namespace selector */}
+        {namespaceSupportEnabled && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id="advancedOptions"
+              data-test-subj="advancedOptionsAccordion"
+              buttonContent={
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.textPrimary}
+                  css={{
+                    fontWeight: euiTheme.font.weight.medium,
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                    defaultMessage="Advanced options"
+                  />
+                </EuiText>
+              }
+              paddingSize="m"
+            >
+              <NamespaceComboBox
+                fullWidth
+                namespace={newPolicy.namespace}
+                placeholder="default"
+                isEditPage={isEditPage}
+                validationError={validationResults?.namespace}
+                onNamespaceChange={(namespace: string) => {
+                  updatePolicy({ ...newPolicy, namespace });
+                }}
+                data-test-subj="namespaceInput"
+                labelId="xpack.csp.fleetIntegration.namespaceLabel"
+                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              />
+            </EuiAccordion>
+          </>
+        )}
+        {shouldRenderAgentlessSelector && (
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >,
+                      packageInfo,
+                      showCloudConnectors
+                    )
+                  )
+                );
+              }}
+            />
+          </>
+        )}
+
+        {input.type === 'cloudbeat/cis_aws' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <AwsCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            setupTechnology={setupTechnology}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            showCloudConnectors={showCloudConnectors}
+            cloud={cloud}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_aws' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <AwsCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setIsValid={setIsValid}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_gcp' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <GcpCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_gcp' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <GcpCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_azure' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <AzureCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_azure' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <AzureCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setIsValid={setIsValid}
+          />
+        )}
+        <EuiSpacer />
+      </>
+    );
+  }
+);
 
 CloudSetup.displayName = 'CloudSetup';
 
