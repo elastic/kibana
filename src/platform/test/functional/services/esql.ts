@@ -138,23 +138,19 @@ export class ESQLService extends FtrService {
   }
 
   public async waitESQLEditorLoaded(editorSubjId = 'ESQLEditor'): Promise<WebElementWrapper> {
-    this.log.debug('waitESQLEditorLoaded: ', editorSubjId);
     return await this.monacoEditor.waitCodeEditorReady(editorSubjId);
   }
 
   public async getEsqlEditorQuery() {
-    this.log.debug('getEsqlEditorQuery');
     await this.waitESQLEditorLoaded();
     return await this.monacoEditor.getCodeEditorValue();
   }
 
   public async setEsqlEditorQuery(query: string) {
-    this.log.debug("Esql.setEsqlEditorQuery('" + query + ")'");
     await this.monacoEditor.setCodeEditorValue(query);
   }
 
   public async typeEsqlEditorQuery(query: string, editorSubjId = 'ESQLEditor') {
-    this.log.debug('typeEsqlEditorQuery: ' + query);
     await this.setEsqlEditorQuery(''); // clear the default query
     await this.monacoEditor.typeCodeEditorValue(query, editorSubjId);
   }
