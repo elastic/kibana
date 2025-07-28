@@ -273,7 +273,6 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
         'machine_learning_user',
         'ft_ml_source_readonly',
         'ft_ml_dest_readonly',
-        ,
         'ft_file_upload_all',
       ],
     },
