@@ -233,7 +233,6 @@ export const Benchmarks = () => {
           <EuiSpacer size="s" />
           <SearchAnnouncement resultCount={benchmarkResult.length} searchValue={query.name} />
           <BenchmarksTable
-            tableCaption={`Search results: ${benchmarkResult.length} benchmarks`}
             benchmarks={benchmarkResult}
             data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
             error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
