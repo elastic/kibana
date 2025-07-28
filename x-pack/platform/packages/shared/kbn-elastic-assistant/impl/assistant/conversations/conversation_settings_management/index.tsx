@@ -46,12 +46,14 @@ interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
+  canEditAssistantSettings?: boolean;
 }
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
   isDisabled,
+  canEditAssistantSettings = false,
 }) => {
   const {
     actionTypeRegistry,
@@ -279,8 +281,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         handlePageUnchecked,
         handleRowChecked,
         handleRowUnChecked,
-        isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
-        isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
+        isDeleteEnabled: () =>
+          (canEditAssistantSettings ?? false) && !isDeleteAll && deletedConversations.length === 0,
+        isEditEnabled: () =>
+          (canEditAssistantSettings ?? false) && !isDeleteAll && deletedConversations.length === 0,
         isExcludedMode,
         onDeleteActionClicked,
         onEditActionClicked,
@@ -288,19 +292,20 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       }),
     [
       conversationOptions,
-      deletedConversations.length,
       deletedConversationsIds,
       excludedIds,
-      getColumns,
       handlePageChecked,
       handlePageUnchecked,
       handleRowChecked,
       handleRowUnChecked,
       isDeleteAll,
+      deletedConversations.length,
       isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
       totalItemCount,
+      canEditAssistantSettings,
+      getColumns,
     ]
   );
 
@@ -329,6 +334,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           assistantStreamingEnabled={assistantStreamingEnabled}
           setAssistantStreamingEnabled={setAssistantStreamingEnabled}
           compressed={false}
+          disabled={!canEditAssistantSettings}
         />
         <EuiSpacer size="l" />
         <EuiTitle size="xs">

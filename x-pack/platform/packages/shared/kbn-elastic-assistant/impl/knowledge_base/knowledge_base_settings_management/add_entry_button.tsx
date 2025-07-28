@@ -20,6 +20,7 @@ interface Props {
   isIndexAvailable?: boolean;
   onDocumentClicked?: () => void;
   onIndexClicked?: () => void;
+  disabled?: boolean;
 }
 
 export const AddEntryButton: React.FC<Props> = React.memo(
@@ -28,6 +29,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
     isIndexAvailable = true,
     onDocumentClicked,
     onIndexClicked,
+    disabled = false,
   }: Props) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -73,6 +75,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
             iconType="arrowDown"
             iconSide="right"
             onClick={onButtonClick}
+            disabled={disabled}
           >
             <EuiIcon type="plusInCircle" />
             {i18n.NEW}

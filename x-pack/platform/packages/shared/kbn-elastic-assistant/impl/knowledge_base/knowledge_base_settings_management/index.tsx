@@ -68,421 +68,442 @@ import { CANCEL_BUTTON_TEXT } from '../../assistant/assistant_header/translation
 
 interface Params {
   dataViews: DataViewsContract;
+  canEditAssistantSettings?: boolean;
 }
 
-export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
-  const confirmModalTitleId = useGeneratedHtmlId();
+export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(
+  ({ dataViews, canEditAssistantSettings = false }) => {
+    const confirmModalTitleId = useGeneratedHtmlId();
 
-  const {
-    assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
-    assistantTelemetry,
-    http,
-    knowledgeBase,
-    setKnowledgeBase,
-    toasts,
-  } = useAssistantContext();
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({
-    http,
-    enabled: isAssistantEnabled,
-  });
-  const isKbSetup = isKnowledgeBaseSetup(kbStatus);
-  const [searchParams] = useSearchParams();
-  const initialSearchTerm = useMemo(
-    () => (searchParams.get('entry_search_term') as string) ?? undefined,
-    [searchParams]
-  );
+    const {
+      assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
+      assistantTelemetry,
+      http,
+      knowledgeBase,
+      setKnowledgeBase,
+      toasts,
+    } = useAssistantContext();
+    const [hasPendingChanges, setHasPendingChanges] = useState(false);
+    const { data: kbStatus, isFetched } = useKnowledgeBaseStatus({
+      http,
+      enabled: isAssistantEnabled,
+    });
+    const isKbSetup = isKnowledgeBaseSetup(kbStatus);
+    const [searchParams] = useSearchParams();
+    const initialSearchTerm = useMemo(
+      () => (searchParams.get('entry_search_term') as string) ?? undefined,
+      [searchParams]
+    );
 
-  const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
-  const [duplicateKBItem, setDuplicateKBItem] = useState<KnowledgeBaseEntryCreateProps | null>(
-    null
-  );
-  const [originalEntry, setOriginalEntry] = useState<DocumentEntry | IndexEntry | undefined>(
-    undefined
-  );
+    const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
+    const [duplicateKBItem, setDuplicateKBItem] = useState<KnowledgeBaseEntryCreateProps | null>(
+      null
+    );
+    const [originalEntry, setOriginalEntry] = useState<DocumentEntry | IndexEntry | undefined>(
+      undefined
+    );
 
-  // Only needed for legacy settings management
-  const {
-    knowledgeBaseSettings,
-    resetKnowledgeBaseSettings,
-    saveKnowledgeBaseSettings,
-    setUpdatedKnowledgeBaseSettings,
-  } = useKnowledgeBaseUpdater({ assistantTelemetry, knowledgeBase, setKnowledgeBase });
+    // Only needed for legacy settings management
+    const {
+      knowledgeBaseSettings,
+      resetKnowledgeBaseSettings,
+      saveKnowledgeBaseSettings,
+      setUpdatedKnowledgeBaseSettings,
+    } = useKnowledgeBaseUpdater({ assistantTelemetry, knowledgeBase, setKnowledgeBase });
 
-  const handleUpdateKnowledgeBaseSettings = useCallback<
-    React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>
-  >(
-    (updatedKnowledgeBase) => {
-      setHasPendingChanges(true);
-      setUpdatedKnowledgeBaseSettings(updatedKnowledgeBase);
-    },
-    [setUpdatedKnowledgeBaseSettings]
-  );
+    const handleUpdateKnowledgeBaseSettings = useCallback<
+      React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>
+    >(
+      (updatedKnowledgeBase) => {
+        setHasPendingChanges(true);
+        setUpdatedKnowledgeBaseSettings(updatedKnowledgeBase);
+      },
+      [setUpdatedKnowledgeBaseSettings]
+    );
 
-  const handleSave = useCallback(
-    (param?: { callback?: () => void }) => {
-      saveKnowledgeBaseSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
+    const handleSave = useCallback(
+      (param?: { callback?: () => void }) => {
+        saveKnowledgeBaseSettings();
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        setHasPendingChanges(false);
+        param?.callback?.();
+      },
+      [saveKnowledgeBaseSettings, toasts]
+    );
+
+    const onCancelClick = useCallback(() => {
+      resetKnowledgeBaseSettings();
       setHasPendingChanges(false);
-      param?.callback?.();
-    },
-    [saveKnowledgeBaseSettings, toasts]
-  );
+    }, [resetKnowledgeBaseSettings]);
 
-  const onCancelClick = useCallback(() => {
-    resetKnowledgeBaseSettings();
-    setHasPendingChanges(false);
-  }, [resetKnowledgeBaseSettings]);
+    const onSaveButtonClicked = useCallback(() => {
+      handleSave();
+    }, [handleSave]);
 
-  const onSaveButtonClicked = useCallback(() => {
-    handleSave();
-  }, [handleSave]);
+    const { isFlyoutOpen: isFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
 
-  const { isFlyoutOpen: isFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
+    const [selectedEntry, setSelectedEntry] =
+      useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
 
-  const [selectedEntry, setSelectedEntry] =
-    useState<Partial<DocumentEntry | IndexEntry | KnowledgeBaseEntryCreateProps>>();
-
-  // CRUD API accessors
-  const { mutateAsync: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
-    http,
-    toasts,
-  });
-  const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } =
-    useUpdateKnowledgeBaseEntries({
+    // CRUD API accessors
+    const { mutateAsync: createEntry, isLoading: isCreatingEntry } = useCreateKnowledgeBaseEntry({
       http,
       toasts,
     });
-  const { mutateAsync: deleteEntry, isLoading: isDeletingEntries } = useDeleteKnowledgeBaseEntries({
-    http,
-    toasts,
-  });
-  const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
+    const { mutateAsync: updateEntries, isLoading: isUpdatingEntries } =
+      useUpdateKnowledgeBaseEntries({
+        http,
+        toasts,
+      });
+    const { mutateAsync: deleteEntry, isLoading: isDeletingEntries } =
+      useDeleteKnowledgeBaseEntries({
+        http,
+        toasts,
+      });
+    const isModifyingEntry = isCreatingEntry || isUpdatingEntries || isDeletingEntries;
 
-  const {
-    data: entries,
-    isFetching: isFetchingEntries,
-    refetch: refetchEntries,
-  } = useKnowledgeBaseEntries({
-    http,
-    toasts,
-    enabled: isAssistantEnabled,
-    isRefetching: kbStatus?.is_setup_in_progress,
-  });
-
-  const resetStateAndCloseFlyout = useCallback(() => {
-    setOriginalEntry(undefined);
-    setSelectedEntry(undefined);
-    setDuplicateKBItem(null);
-    closeFlyout();
-  }, [closeFlyout]);
-
-  // Flyout Save/Cancel Actions
-  const onSaveConfirmed = useCallback(async () => {
-    if (isKnowledgeBaseEntryResponse(selectedEntry)) {
-      await updateEntries([selectedEntry]);
-      resetStateAndCloseFlyout();
-    } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
-      if (originalEntry) {
-        setDuplicateKBItem(selectedEntry);
-        return;
-      }
-      await createEntry(selectedEntry);
-      resetStateAndCloseFlyout();
-    }
-  }, [selectedEntry, updateEntries, resetStateAndCloseFlyout, originalEntry, createEntry]);
-
-  const onSaveCancelled = useCallback(() => {
-    resetStateAndCloseFlyout();
-  }, [resetStateAndCloseFlyout]);
-
-  const { value: existingIndices } = useAsync(() => {
-    const indices: string[] = [];
-    entries.data.forEach((entry) => {
-      if (entry.type === 'index') {
-        indices.push(entry.index);
-      }
+    const {
+      data: entries,
+      isFetching: isFetchingEntries,
+      refetch: refetchEntries,
+    } = useKnowledgeBaseEntries({
+      http,
+      toasts,
+      enabled: isAssistantEnabled,
+      isRefetching: kbStatus?.is_setup_in_progress,
     });
 
-    return indices.length ? dataViews.getExistingIndices(indices) : Promise.resolve([]);
-  }, [entries.data]);
+    const resetStateAndCloseFlyout = useCallback(() => {
+      setOriginalEntry(undefined);
+      setSelectedEntry(undefined);
+      setDuplicateKBItem(null);
+      closeFlyout();
+    }, [closeFlyout]);
 
-  const { getColumns } = useKnowledgeBaseTable();
-  const columns = useMemo(
-    () =>
-      getColumns({
-        isKbSetupInProgress: kbStatus?.is_setup_in_progress ?? false,
-        existingIndices,
-        isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return (
-            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
-          );
-        },
-        // Add delete popover
-        onDeleteActionClicked: (item: KnowledgeBaseEntryResponse) => {
-          setDeleteKBItem(item);
-        },
-        isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
-          return (
-            !isSystemEntry(entry) && (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
-          );
-        },
-        onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
-          const entry = entries.data.find((e) => e.id === id);
-          setOriginalEntry(entry);
-          setSelectedEntry(entry);
-          openFlyout();
-        },
-      }),
-    [
-      entries.data,
-      existingIndices,
-      getColumns,
-      hasManageGlobalKnowledgeBase,
-      kbStatus?.is_setup_in_progress,
-      openFlyout,
-    ]
-  );
+    // Flyout Save/Cancel Actions
+    const onSaveConfirmed = useCallback(async () => {
+      if (isKnowledgeBaseEntryResponse(selectedEntry)) {
+        await updateEntries([selectedEntry]);
+        resetStateAndCloseFlyout();
+      } else if (isKnowledgeBaseEntryCreateProps(selectedEntry)) {
+        if (originalEntry) {
+          setDuplicateKBItem(selectedEntry);
+          return;
+        }
+        await createEntry(selectedEntry);
+        resetStateAndCloseFlyout();
+      }
+    }, [selectedEntry, updateEntries, resetStateAndCloseFlyout, originalEntry, createEntry]);
 
-  // Refresh button
-  const handleRefreshTable = useCallback(() => refetchEntries(), [refetchEntries]);
-
-  const onDocumentClicked = useCallback(() => {
-    setSelectedEntry({ type: DocumentEntryType.value, kbResource: 'user', source: 'user' });
-    openFlyout();
-  }, [openFlyout]);
-
-  const onIndexClicked = useCallback(() => {
-    setSelectedEntry({ type: IndexEntryType.value });
-    openFlyout();
-  }, [openFlyout]);
-
-  const search: EuiSearchBarProps = useMemo(
-    () => ({
-      toolsRight: (
-        <EuiFlexGroup
-          gutterSize={'m'}
-          css={css`
-            margin-left: -5px;
-          `}
-        >
-          <EuiFlexItem>
-            <EuiButton
-              color={'text'}
-              data-test-subj={'refresh-entries'}
-              isDisabled={isFetchingEntries}
-              onClick={handleRefreshTable}
-              iconType={'refresh'}
-              isLoading={isFetchingEntries}
-            >
-              <FormattedMessage
-                id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.refreshButton"
-                defaultMessage="Refresh"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AddEntryButton onDocumentClicked={onDocumentClicked} onIndexClicked={onIndexClicked} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      box: {
-        incremental: true,
-        placeholder: i18n.SEARCH_PLACEHOLDER,
-      },
-      filters: [],
-      defaultQuery: initialSearchTerm,
-    }),
-    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked, initialSearchTerm]
-  );
-
-  const flyoutTitle = useMemo(() => {
-    // @ts-expect-error TS doesn't understand that selectedEntry is a partial
-    if (selectedEntry?.id != null) {
-      return selectedEntry.type === DocumentEntryType.value
-        ? i18n.EDIT_DOCUMENT_FLYOUT_TITLE
-        : i18n.EDIT_INDEX_FLYOUT_TITLE;
-    }
-    return selectedEntry?.type === DocumentEntryType.value
-      ? i18n.NEW_DOCUMENT_FLYOUT_TITLE
-      : i18n.NEW_INDEX_FLYOUT_TITLE;
-  }, [selectedEntry]);
-
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'desc' as const,
-    },
-  };
-
-  const handleCancelDeleteEntry = useCallback(() => {
-    setDeleteKBItem(null);
-  }, [setDeleteKBItem]);
-
-  const handleDeleteEntry = useCallback(async () => {
-    if (deleteKBItem?.id) {
-      await deleteEntry({ ids: [deleteKBItem?.id] });
-      setDeleteKBItem(null);
-    }
-  }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
-
-  const handleCancelDuplicateEntry = useCallback(() => {
-    setDuplicateKBItem(null);
-  }, [setDuplicateKBItem]);
-
-  const handleDuplicateEntry = useCallback(async () => {
-    if (duplicateKBItem) {
-      await createEntry(duplicateKBItem);
+    const onSaveCancelled = useCallback(() => {
       resetStateAndCloseFlyout();
-    }
-  }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
+    }, [resetStateAndCloseFlyout]);
 
-  return (
-    <>
-      <ProductDocumentationManagement
-        status={kbStatus?.product_documentation_status}
-        inferenceId={defaultInferenceEndpoints.ELSER}
-      />
-      <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiText size={'m'}>
-          <FormattedMessage
-            id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription"
-            defaultMessage="The AI Assistant uses Elastic's ELSER model to semantically search your data sources and feed that context to an LLM. Import knowledge bases like Runbooks, GitHub issues, and others for more accurate, personalized assistance. {learnMore}."
-            values={{
-              learnMore: (
-                <EuiLink
-                  external
-                  href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
-                  target="_blank"
-                >
-                  {i18n.KNOWLEDGE_BASE_DOCUMENTATION}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            {!isFetched ? (
-              <EuiLoadingSpinner data-test-subj="spinning" size="l" />
-            ) : isKbSetup ? (
-              <EuiInMemoryTable
-                data-test-subj="knowledge-base-entries-table"
-                columns={columns}
-                items={entries.data ?? []}
-                search={search}
-                sorting={sorting}
+    const { value: existingIndices } = useAsync(() => {
+      const indices: string[] = [];
+      entries.data.forEach((entry) => {
+        if (entry.type === 'index') {
+          indices.push(entry.index);
+        }
+      });
+
+      return indices.length ? dataViews.getExistingIndices(indices) : Promise.resolve([]);
+    }, [entries.data]);
+
+    const { getColumns } = useKnowledgeBaseTable();
+    const columns = useMemo(
+      () =>
+        getColumns({
+          isKbSetupInProgress: kbStatus?.is_setup_in_progress ?? false,
+          existingIndices,
+          isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => {
+            return (
+              canEditAssistantSettings &&
+              !isSystemEntry(entry) &&
+              (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+            );
+          },
+          // Add delete popover
+          onDeleteActionClicked: (item: KnowledgeBaseEntryResponse) => {
+            setDeleteKBItem(item);
+          },
+          isEditEnabled: (entry: KnowledgeBaseEntryResponse) => {
+            return (
+              canEditAssistantSettings &&
+              !isSystemEntry(entry) &&
+              (isGlobalEntry(entry) ? hasManageGlobalKnowledgeBase : true)
+            );
+          },
+          onEditActionClicked: ({ id }: KnowledgeBaseEntryResponse) => {
+            const entry = entries.data.find((e) => e.id === id);
+            setOriginalEntry(entry);
+            setSelectedEntry(entry);
+            openFlyout();
+          },
+        }),
+      [
+        canEditAssistantSettings,
+        entries.data,
+        existingIndices,
+        getColumns,
+        hasManageGlobalKnowledgeBase,
+        kbStatus?.is_setup_in_progress,
+        openFlyout,
+      ]
+    );
+
+    // Refresh button
+    const handleRefreshTable = useCallback(() => refetchEntries(), [refetchEntries]);
+
+    const onDocumentClicked = useCallback(() => {
+      setSelectedEntry({ type: DocumentEntryType.value, kbResource: 'user', source: 'user' });
+      openFlyout();
+    }, [openFlyout]);
+
+    const onIndexClicked = useCallback(() => {
+      setSelectedEntry({ type: IndexEntryType.value });
+      openFlyout();
+    }, [openFlyout]);
+
+    const search: EuiSearchBarProps = useMemo(
+      () => ({
+        toolsRight: (
+          <EuiFlexGroup
+            gutterSize={'m'}
+            css={css`
+              margin-left: -5px;
+            `}
+          >
+            <EuiFlexItem>
+              <EuiButton
+                color={'text'}
+                data-test-subj={'refresh-entries'}
+                isDisabled={isFetchingEntries}
+                onClick={handleRefreshTable}
+                iconType={'refresh'}
+                isLoading={isFetchingEntries}
+              >
+                <FormattedMessage
+                  id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.refreshButton"
+                  defaultMessage="Refresh"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AddEntryButton
+                onDocumentClicked={onDocumentClicked}
+                onIndexClicked={onIndexClicked}
+                disabled={!canEditAssistantSettings}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        box: {
+          incremental: true,
+          placeholder: i18n.SEARCH_PLACEHOLDER,
+        },
+        filters: [],
+        defaultQuery: initialSearchTerm,
+      }),
+      [
+        canEditAssistantSettings,
+        isFetchingEntries,
+        handleRefreshTable,
+        onDocumentClicked,
+        onIndexClicked,
+        initialSearchTerm,
+      ]
+    );
+
+    const flyoutTitle = useMemo(() => {
+      // @ts-expect-error TS doesn't understand that selectedEntry is a partial
+      if (selectedEntry?.id != null) {
+        return selectedEntry.type === DocumentEntryType.value
+          ? i18n.EDIT_DOCUMENT_FLYOUT_TITLE
+          : i18n.EDIT_INDEX_FLYOUT_TITLE;
+      }
+      return selectedEntry?.type === DocumentEntryType.value
+        ? i18n.NEW_DOCUMENT_FLYOUT_TITLE
+        : i18n.NEW_INDEX_FLYOUT_TITLE;
+    }, [selectedEntry]);
+
+    const sorting = {
+      sort: {
+        field: 'name',
+        direction: 'desc' as const,
+      },
+    };
+
+    const handleCancelDeleteEntry = useCallback(() => {
+      setDeleteKBItem(null);
+    }, [setDeleteKBItem]);
+
+    const handleDeleteEntry = useCallback(async () => {
+      if (deleteKBItem?.id) {
+        await deleteEntry({ ids: [deleteKBItem?.id] });
+        setDeleteKBItem(null);
+      }
+    }, [deleteEntry, deleteKBItem, setDeleteKBItem]);
+
+    const handleCancelDuplicateEntry = useCallback(() => {
+      setDuplicateKBItem(null);
+    }, [setDuplicateKBItem]);
+
+    const handleDuplicateEntry = useCallback(async () => {
+      if (duplicateKBItem) {
+        await createEntry(duplicateKBItem);
+        resetStateAndCloseFlyout();
+      }
+    }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
+
+    return (
+      <>
+        <ProductDocumentationManagement
+          status={kbStatus?.product_documentation_status}
+          inferenceId={defaultInferenceEndpoints.ELSER}
+        />
+        <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+          <EuiText size={'m'}>
+            <FormattedMessage
+              id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription"
+              defaultMessage="The AI Assistant uses Elastic's ELSER model to semantically search your data sources and feed that context to an LLM. Import knowledge bases like Runbooks, GitHub issues, and others for more accurate, personalized assistance. {learnMore}."
+              values={{
+                learnMore: (
+                  <EuiLink
+                    external
+                    href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                    target="_blank"
+                  >
+                    {i18n.KNOWLEDGE_BASE_DOCUMENTATION}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              {!isFetched ? (
+                <EuiLoadingSpinner data-test-subj="spinning" size="l" />
+              ) : isKbSetup ? (
+                <EuiInMemoryTable
+                  data-test-subj="knowledge-base-entries-table"
+                  columns={columns}
+                  items={entries.data ?? []}
+                  search={search}
+                  sorting={sorting}
+                />
+              ) : (
+                <>
+                  <EuiSpacer size="l" />
+                  <EuiText size={'m'}>
+                    <FormattedMessage
+                      id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseSetupDescription"
+                      defaultMessage="Setup to get started with the Knowledge Base."
+                    />
+                  </EuiText>
+
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiFlexItem grow={false}>
+                      <SetupKnowledgeBaseButton />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsSettingsManagement
+          knowledgeBase={knowledgeBaseSettings}
+          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
+          canEditAssistantSettings={canEditAssistantSettings}
+        />
+        <AssistantSettingsBottomBar
+          hasPendingChanges={hasPendingChanges}
+          onCancelClick={onCancelClick}
+          onSaveButtonClicked={onSaveButtonClicked}
+        />
+        <Flyout
+          flyoutVisible={isFlyoutVisible}
+          title={flyoutTitle}
+          onClose={onSaveCancelled}
+          onSaveCancelled={onSaveCancelled}
+          onSaveConfirmed={onSaveConfirmed}
+          saveButtonDisabled={
+            !isKnowledgeBaseEntryCreateProps(selectedEntry) ||
+            (selectedEntry.users != null &&
+              !selectedEntry.users.length &&
+              !hasManageGlobalKnowledgeBase)
+          }
+          saveButtonLoading={isModifyingEntry}
+        >
+          <>
+            {selectedEntry?.type === DocumentEntryType.value ? (
+              <DocumentEntryEditor
+                entry={selectedEntry as DocumentEntry}
+                originalEntry={originalEntry as DocumentEntry}
+                setEntry={
+                  setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
+                }
+                hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
               />
             ) : (
-              <>
-                <EuiSpacer size="l" />
-                <EuiText size={'m'}>
-                  <FormattedMessage
-                    id="xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseSetupDescription"
-                    defaultMessage="Setup to get started with the Knowledge Base."
-                  />
-                </EuiText>
-
-                <EuiSpacer size="s" />
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <SetupKnowledgeBaseButton />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="l" />
-              </>
+              <IndexEntryEditor
+                http={http}
+                entry={selectedEntry as IndexEntry}
+                originalEntry={originalEntry as IndexEntry}
+                dataViews={dataViews}
+                setEntry={
+                  setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
+                }
+                hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
+              />
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="m" />
-      <AlertsSettingsManagement
-        knowledgeBase={knowledgeBaseSettings}
-        setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
-      />
-      <AssistantSettingsBottomBar
-        hasPendingChanges={hasPendingChanges}
-        onCancelClick={onCancelClick}
-        onSaveButtonClicked={onSaveButtonClicked}
-      />
-      <Flyout
-        flyoutVisible={isFlyoutVisible}
-        title={flyoutTitle}
-        onClose={onSaveCancelled}
-        onSaveCancelled={onSaveCancelled}
-        onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={
-          !isKnowledgeBaseEntryCreateProps(selectedEntry) ||
-          (selectedEntry.users != null &&
-            !selectedEntry.users.length &&
-            !hasManageGlobalKnowledgeBase)
-        }
-        saveButtonLoading={isModifyingEntry}
-      >
-        <>
-          {selectedEntry?.type === DocumentEntryType.value ? (
-            <DocumentEntryEditor
-              entry={selectedEntry as DocumentEntry}
-              originalEntry={originalEntry as DocumentEntry}
-              setEntry={
-                setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<DocumentEntry>>>
-              }
-              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
-            />
-          ) : (
-            <IndexEntryEditor
-              http={http}
-              entry={selectedEntry as IndexEntry}
-              originalEntry={originalEntry as IndexEntry}
-              dataViews={dataViews}
-              setEntry={
-                setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
-              }
-              hasManageGlobalKnowledgeBase={hasManageGlobalKnowledgeBase}
-            />
-          )}
-        </>
-      </Flyout>
-      {deleteKBItem && (
-        <EuiConfirmModal
-          aria-labelledby={confirmModalTitleId}
-          titleProps={{ id: confirmModalTitleId }}
-          data-test-subj="delete-entry-confirmation"
-          title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
-          onCancel={handleCancelDeleteEntry}
-          onConfirm={handleDeleteEntry}
-          cancelButtonText={CANCEL_BUTTON_TEXT}
-          confirmButtonText={DELETE}
-          buttonColor="danger"
-          defaultFocusedButton="cancel"
-          confirmButtonDisabled={isModifyingEntry}
-          isLoading={isModifyingEntry}
-        >
-          <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
-        </EuiConfirmModal>
-      )}
-      {duplicateKBItem && (
-        <EuiConfirmModal
-          aria-labelledby={confirmModalTitleId}
-          titleProps={{ id: confirmModalTitleId }}
-          title={i18n.DUPLICATE_ENTRY_CONFIRMATION_TITLE}
-          onCancel={handleCancelDuplicateEntry}
-          onConfirm={handleDuplicateEntry}
-          cancelButtonText={CANCEL_BUTTON_TEXT}
-          confirmButtonText={i18n.SAVE_BUTTON_TEXT}
-          defaultFocusedButton="confirm"
-          data-test-subj="create-duplicate-entry-modal"
-        >
-          <p>{i18n.DUPLICATE_ENTRY_CONFIRMATION_CONTENT}</p>
-        </EuiConfirmModal>
-      )}
-      <KnowledgeBaseTour isKbSettingsPage />
-    </>
-  );
-});
+          </>
+        </Flyout>
+        {deleteKBItem && (
+          <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
+            titleProps={{ id: confirmModalTitleId }}
+            data-test-subj="delete-entry-confirmation"
+            title={i18n.DELETE_ENTRY_CONFIRMATION_TITLE(deleteKBItem.name)}
+            onCancel={handleCancelDeleteEntry}
+            onConfirm={handleDeleteEntry}
+            cancelButtonText={CANCEL_BUTTON_TEXT}
+            confirmButtonText={DELETE}
+            buttonColor="danger"
+            defaultFocusedButton="cancel"
+            confirmButtonDisabled={isModifyingEntry}
+            isLoading={isModifyingEntry}
+          >
+            <p>{i18n.DELETE_ENTRY_CONFIRMATION_CONTENT}</p>
+          </EuiConfirmModal>
+        )}
+        {duplicateKBItem && (
+          <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
+            titleProps={{ id: confirmModalTitleId }}
+            title={i18n.DUPLICATE_ENTRY_CONFIRMATION_TITLE}
+            onCancel={handleCancelDuplicateEntry}
+            onConfirm={handleDuplicateEntry}
+            cancelButtonText={CANCEL_BUTTON_TEXT}
+            confirmButtonText={i18n.SAVE_BUTTON_TEXT}
+            defaultFocusedButton="confirm"
+            data-test-subj="create-duplicate-entry-modal"
+          >
+            <p>{i18n.DUPLICATE_ENTRY_CONFIRMATION_CONTENT}</p>
+          </EuiConfirmModal>
+        )}
+        <KnowledgeBaseTour isKbSettingsPage />
+      </>
+    );
+  }
+);
 
 KnowledgeBaseSettingsManagement.displayName = 'KnowledgeBaseSettingsManagement';
