@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
+import { extractTabs } from '@kbn/saved-search-plugin/common';
+import type { SearchEmbeddableSerializedState } from '../../public';
 
-interface Props {
-  error: Error | string;
-}
-
-const DocViewerErrorWrapper = ({ error }: Props) => {
-  throw error;
+export const searchEmbeddableTransforms: EmbeddableTransforms<SearchEmbeddableSerializedState> = {
+  transformOut: (state) => {
+    if (!state.attributes) return state;
+    const attributes = extractTabs(state.attributes);
+    return { ...state, attributes };
+  },
 };
-
-export const DocViewerError = ({ error }: Props) => (
-  <EuiErrorBoundary data-test-subj="docViewerError">
-    <DocViewerErrorWrapper error={error} />
-  </EuiErrorBoundary>
-);
