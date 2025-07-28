@@ -235,7 +235,7 @@ export class QueryClient {
           query: esqlQuery,
         },
         enabled: true,
-        tags: ['streams'],
+        tags: ['streams', stream],
         schedule: {
           interval: '1m',
         },
