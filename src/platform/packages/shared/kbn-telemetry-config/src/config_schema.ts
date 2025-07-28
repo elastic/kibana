@@ -6,6 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { schema } from '@kbn/config-schema';
 import { tracingConfigSchema } from '@kbn/tracing-config';
+import { metricsConfigSchema } from '@kbn/metrics-config';
 
-export const telemetryTracingSchema = tracingConfigSchema;
+export const telemetryTracingSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  tracing: tracingConfigSchema,
+  metrics: metricsConfigSchema,
+});

@@ -8,6 +8,15 @@
  */
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
+import { initMetrics } from '@kbn/metrics';
+
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { getInstrumentations } from '@elastic/opentelemetry-node/sdk';
+
+import { api, resources } from '@elastic/opentelemetry-node/sdk';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
+
 /**
  *
  * Initializes OpenTelemetry (currently only tracing)
@@ -27,23 +36,54 @@ export const initTelemetry = (
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
 
   const apmConfig = apmConfigLoader.getConfig(serviceName);
-
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
 
-  // explicitly check for enabled == false, as the default in the schema
-  // is true, but it's not parsed through @kbn/config-schema, so the
-  // default value is not returned
-  const telemetryEnabled = telemetryConfig?.enabled !== false;
+  // attributes.resource.*
+  const resource = resources.resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: apmConfig.serviceName,
+    [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
+    [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
+    [ATTR_SERVICE_NAMESPACE]: apmConfig.environment,
+    ...(apmConfig.globalLabels as Record<string, unknown>),
+  });
 
-  // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = telemetryEnabled && telemetryConfig?.tracing?.enabled;
+  if (telemetryConfig.enabled) {
+    if (telemetryConfig.tracing.enabled) {
+      initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+    }
 
-  if (!tracingEnabled) {
-    return async () => {};
+    if (telemetryConfig.metrics.enabled) {
+      initMetrics({ resource, metricsConfig: telemetryConfig.metrics });
+    }
+
+    if (telemetryConfig.metrics.enabled || telemetryConfig.tracing.enabled) {
+      // register EDOT auto-instrumentations (node-runtime, http, hapi, and more)
+      // https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/nodejs/supported-technologies#instrumentations
+      // Only register them if any of the metrics or tracing are enabled. Otherwise, there's no point in adding them (at least for now).
+      registerInstrumentations({
+        instrumentations: getInstrumentations(),
+      });
+    }
   }
 
-  return initTracing({
-    tracingConfig: telemetryConfig.tracing,
-    apmConfig,
-  });
+  /** Testing bits below... to be removed before sending for review */
+
+  // scope.name
+  const meter = api.metrics.getMeter('my plugin');
+
+  // metrics.my-own-counter: value
+  const counter = meter.createCounter('my-own-counter');
+
+  // metrics.my-own-counter: 1; attributes.myTag: myValue
+  counter.add(1, { myTag: 'myValue' });
+
+  // const log = console;
+  //
+  // api.diag.setLogger(
+  //   {
+  //     ...log,
+  //     verbose: (...args: any[]) => log.trace(...args),
+  //   },
+  //   api.DiagLogLevel.INFO
+  // );
 };

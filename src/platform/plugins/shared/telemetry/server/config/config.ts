@@ -18,40 +18,42 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('staging'),
 ];
 
-const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
-  hidePrivacyStatement: schema.boolean({ defaultValue: false }),
-  optIn: schema.boolean({ defaultValue: true }),
-  // `config` is used internally and not intended to be set
-  config: schema.string({ defaultValue: getConfigPath() }),
-  banner: schema.boolean({ defaultValue: true }),
-  sendUsageTo: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Point to staging if it's not a distributable release
-    schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
-    schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
-  ),
-  sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
-    defaultValue: 'server',
-  }),
-  appendServerlessChannelsSuffix: offeringBasedSchema({
-    serverless: schema.literal(true),
-    traditional: schema.literal(false),
-    options: { defaultValue: schema.contextRef('serverless') },
-  }),
-  // Used for extra enrichment of telemetry
-  labels: labelsSchema,
-  // Allows shipping telemetry to a local index in ES
-  localShipper: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Only allow changing it if it's not a distributable release
-    schema.boolean({ defaultValue: false }),
-    schema.literal(false),
-    { defaultValue: false }
-  ),
-  tracing: schema.maybe(telemetryTracingSchema),
-});
+const configSchema = schema
+  .object({
+    enabled: schema.boolean({ defaultValue: true }),
+    allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
+    hidePrivacyStatement: schema.boolean({ defaultValue: false }),
+    optIn: schema.boolean({ defaultValue: true }),
+    // `config` is used internally and not intended to be set
+    config: schema.string({ defaultValue: getConfigPath() }),
+    banner: schema.boolean({ defaultValue: true }),
+    sendUsageTo: schema.conditional(
+      schema.contextRef('dist'),
+      schema.literal(false), // Point to staging if it's not a distributable release
+      schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
+      schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
+    ),
+    sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
+      defaultValue: 'server',
+    }),
+    appendServerlessChannelsSuffix: offeringBasedSchema({
+      serverless: schema.literal(true),
+      traditional: schema.literal(false),
+      options: { defaultValue: schema.contextRef('serverless') },
+    }),
+    // Used for extra enrichment of telemetry
+    labels: labelsSchema,
+    // Allows shipping telemetry to a local index in ES
+    localShipper: schema.conditional(
+      schema.contextRef('dist'),
+      schema.literal(false), // Only allow changing it if it's not a distributable release
+      schema.boolean({ defaultValue: false }),
+      schema.literal(false),
+      { defaultValue: false }
+    ),
+  })
+  // Extend the plugin's configuration with the OpenTelemetry configuration
+  .extends(telemetryTracingSchema.getPropSchemas());
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
 
