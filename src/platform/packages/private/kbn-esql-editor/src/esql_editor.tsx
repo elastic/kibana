@@ -582,24 +582,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     application?.currentAppId$,
   ]);
 
-  const onLookupIndexCreate = useCallback(
-    async (resultQuery: string) => {
-      if (esqlCallbacks?.getJoinIndices) {
-        await esqlCallbacks?.getJoinIndices();
-      }
-      onQueryUpdate(resultQuery);
-    },
-    [esqlCallbacks, onQueryUpdate]
-  );
-
-  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
-    editor1,
-    editorModel,
-    esqlCallbacks?.getJoinIndices,
-    query,
-    onLookupIndexCreate
-  );
-
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
@@ -680,6 +662,28 @@ export const ESQLEditor = memo(function ESQLEditor({
       }
     },
     [parseMessages, dataErrorsControl?.enabled]
+  );
+
+  const onLookupIndexCreate = useCallback(
+    async (resultQuery: string) => {
+      if (esqlCallbacks?.getJoinIndices) {
+        // forces refresh
+        await esqlCallbacks?.getJoinIndices();
+      }
+      onQueryUpdate(resultQuery);
+      // Need to force validation, as the query might be unchanged,
+      // but the lookup index was created
+      await queryValidation({ active: true });
+    },
+    [esqlCallbacks, onQueryUpdate, queryValidation]
+  );
+
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+    editor1,
+    editorModel,
+    esqlCallbacks?.getJoinIndices,
+    query,
+    onLookupIndexCreate
   );
 
   useDebounceWithOptions(

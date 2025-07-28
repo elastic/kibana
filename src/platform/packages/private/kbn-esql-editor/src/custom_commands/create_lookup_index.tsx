@@ -161,12 +161,15 @@ export const useLookupIndexCommand = (
   onIndexCreated: (resultQuery: string) => Promise<void>
 ) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiActions, docLinks },
+  } = useKibana<ESQLEditorDeps>();
+
   const inQueryLookupIndices = useRef<string[]>([]);
 
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
-
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
       white-space: nowrap;
@@ -187,9 +190,6 @@ export const useLookupIndexCommand = (
       background-color: ${euiTheme.colors.backgroundBasePrimary};
     }
   `;
-
-  const kibana = useKibana<ESQLEditorDeps>();
-  const { uiActions, docLinks } = kibana.services;
 
   useEffect(
     function parseIndicesOnChange() {
@@ -212,46 +212,9 @@ export const useLookupIndexCommand = (
     [query.esql]
   );
 
-  const onFlyoutClose = useCallback(
-    async (
-      initialIndexName: string | undefined,
-      resultIndexName: string,
-      indexCreated: boolean
-    ) => {
-      if (!indexCreated) return;
-
-      const cursorPosition = editorRef.current?.getPosition();
-
-      if (!initialIndexName && !cursorPosition) {
-        throw new Error('Could not find cursor position in the editor');
-      }
-
-      const resultQuery = appendIndexToJoinCommand(
-        query.esql,
-        initialIndexName || cursorPosition!,
-        resultIndexName
-      );
-      await onIndexCreated(resultQuery);
-    },
-    [editorRef, query.esql, onIndexCreated]
-  );
-
   // TODO: Replace with the actual lookup index docs URL once it's available
   // @ts-ignore
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
-
-  const openFlyout = useCallback(
-    async (indexName: string, doesIndexExist?: boolean) => {
-      await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
-        indexName,
-        doesIndexExist,
-        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
-        },
-      } as EditLookupIndexContentContext);
-    },
-    [onFlyoutClose, uiActions]
-  );
 
   monaco.editor.registerCommand(
     'esql.lookup_index.create',
@@ -316,6 +279,50 @@ export const useLookupIndexCommand = (
       });
     }
   }, [editorModel, editorRef, getLookupIndices]);
+
+  const onFlyoutClose = useCallback(
+    async (
+      initialIndexName: string | undefined,
+      resultIndexName: string,
+      indexCreated: boolean
+    ) => {
+      if (!indexCreated) return;
+
+      const cursorPosition = editorRef.current?.getPosition();
+
+      if (!initialIndexName && !cursorPosition) {
+        throw new Error('Could not find cursor position in the editor');
+      }
+
+      const resultQuery = appendIndexToJoinCommand(
+        query.esql,
+        initialIndexName || cursorPosition!,
+        resultIndexName
+      );
+
+      await onIndexCreated(resultQuery);
+
+      if (query.esql === resultQuery) {
+        // The query might be unchanged, but the lookup index is created,
+        // so we need to force an update of the lookup index decorators.
+        await addLookupIndicesDecorator();
+      }
+    },
+    [editorRef, query.esql, onIndexCreated, addLookupIndicesDecorator]
+  );
+
+  const openFlyout = useCallback(
+    async (indexName: string, doesIndexExist?: boolean) => {
+      await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
+        indexName,
+        doesIndexExist,
+        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
+          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
+        },
+      } as EditLookupIndexContentContext);
+    },
+    [onFlyoutClose, uiActions]
+  );
 
   return {
     addLookupIndicesDecorator,
