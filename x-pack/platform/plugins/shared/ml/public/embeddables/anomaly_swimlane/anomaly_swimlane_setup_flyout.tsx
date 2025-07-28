@@ -15,7 +15,7 @@ import { jobsApiProvider } from '../../application/services/ml_api_service/jobs'
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import type { MlStartDependencies } from '../../plugin';
 
-export function ResolveAnomalySwimlaneUserInput({
+export function AnomalySwimlaneUserInput({
   coreStart,
   pluginStart,
   onConfirm,
