@@ -582,23 +582,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     application?.currentAppId$,
   ]);
 
-  const onIndexCreated = useCallback(
-    async (resultQueryString: string) => {
-      onQueryUpdate(resultQueryString);
-      await esqlCallbacks.getJoinIndices?.();
-    },
-    [esqlCallbacks, onQueryUpdate]
-  );
-
-  const { lookupIndexBadgeStyle, lookupIndexLabelClickHandler, addLookupIndicesDecorator } =
-    useCreateLookupIndexCommand(
-      editor1,
-      editorModel,
-      esqlCallbacks?.getJoinIndices,
-      query,
-      onIndexCreated
-    );
-
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
@@ -679,6 +662,28 @@ export const ESQLEditor = memo(function ESQLEditor({
       }
     },
     [parseMessages, dataErrorsControl?.enabled]
+  );
+
+  const onLookupIndexCreate = useCallback(
+    async (resultQuery: string) => {
+      if (esqlCallbacks?.getJoinIndices) {
+        // forces refresh
+        await esqlCallbacks?.getJoinIndices();
+      }
+      onQueryUpdate(resultQuery);
+      // Need to force validation, as the query might be unchanged,
+      // but the lookup index was created
+      await queryValidation({ active: true });
+    },
+    [esqlCallbacks, onQueryUpdate, queryValidation]
+  );
+
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+    editor1,
+    editorModel,
+    esqlCallbacks?.getJoinIndices,
+    query,
+    onLookupIndexCreate
   );
 
   useDebounceWithOptions(
@@ -902,13 +907,12 @@ export const ESQLEditor = memo(function ESQLEditor({
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
-                  editorDidMount={(editor) => {
+                  editorDidMount={async (editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
-                      // TODO add decorator here
-                      addLookupIndicesDecorator();
+                      await addLookupIndicesDecorator();
                     }
 
                     monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
@@ -927,7 +931,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
-                      await lookupIndexLabelClickHandler(e);
                     });
 
                     editor.onDidFocusEditorText(() => {
@@ -960,7 +963,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
 
-                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+                    editor.onDidChangeModelContent(async () => {
+                      await addLookupIndicesDecorator();
+                      showSuggestionsIfEmptyQuery();
+                    });
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {

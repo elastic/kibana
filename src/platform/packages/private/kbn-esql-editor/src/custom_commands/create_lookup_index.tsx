@@ -11,46 +11,134 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { type ESQLSource } from '@kbn/esql-ast';
-import { Parser } from '@kbn/esql-ast/src/parser/parser';
-import { memoize } from 'lodash';
+import {
+  BasicPrettyPrinter,
+  type ESQLAstItem,
+  type ESQLAstJoinCommand,
+  type ESQLSingleAstItem,
+  type ESQLSource,
+  mutate,
+  Parser,
+} from '@kbn/esql-ast';
 import { IndexAutocompleteItem } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
 
 /**
- * Returns a query with appended index name to the join command.
+ * Replace the index name in a join command.
  *
- * @param query Input query
- * @param cursorPosition
- * @param indexName
+ * @param query             - full ES|QL query
+ * @param initialIndexOrPos - either the index name we want to replace OR a Monaco
+ *                            cursor Position pointing at that name
+ * @param createdIndexName – new lookup-index name
  *
  * @returns {string} Query with appended index name to the join command
  */
 export function appendIndexToJoinCommand(
   query: string,
-  cursorPosition: monaco.Position,
-  indexName: string
+  initialIndexOrPos: string | monaco.Position,
+  createdIndexName: string
 ): string {
-  const cursorColumn = cursorPosition?.column ?? 1;
-  const cursorLine = cursorPosition?.lineNumber ?? 1;
+  if (!createdIndexName) return query; // nothing to do
 
-  const lines = query.split('\n');
-  const line = lines[cursorLine - 1];
+  // Resolve the “target” index name
+  let targetName: string | undefined;
 
-  let beforeCursor = line.slice(0, cursorColumn - 1);
-  const afterCursor = line.slice(cursorColumn - 1);
+  if (typeof initialIndexOrPos === 'string') {
+    targetName = initialIndexOrPos.trim();
+  }
 
-  // Check if the join command already had an index argument.
-  // Delete the last word before the cursor
-  beforeCursor = beforeCursor.replace(/\S+$/, '');
+  // If we came through name-path, and it equals new name – nothing to do
+  if (typeof initialIndexOrPos === 'string' && targetName === createdIndexName) {
+    return query;
+  }
 
-  const updatedLine = beforeCursor + indexName + afterCursor;
-  lines[cursorLine - 1] = updatedLine;
+  // Parse and walk the AST
+  const { root } = Parser.parse(query);
 
-  return lines.join('\n');
+  // Compute cursor offset once (if needed)
+  const cursorOffset: number | undefined =
+    typeof initialIndexOrPos === 'object'
+      ? (() => {
+          const { lineNumber, column } = initialIndexOrPos;
+          const lines = query.split('\n');
+          let off = 0;
+          for (let i = 0; i < lineNumber - 1; i++) {
+            off += lines[i].length + 1;
+          }
+          return off + column - 1;
+        })()
+      : undefined;
+
+  // Pick the JOIN command to modify
+  let selectedJoin:
+    | { joinCmd: ESQLAstJoinCommand; src: ESQLSource | undefined; firstArg: ESQLAstItem }
+    | undefined;
+  let smallestDistance = Number.MAX_SAFE_INTEGER;
+
+  for (const joinCmd of mutate.commands.join.list(root)) {
+    const firstArg = joinCmd.args[0]; // may be undefined
+    let src: ESQLSource | undefined;
+
+    if (isESQLSourceItem(firstArg)) {
+      src = firstArg;
+    } else if (!Array.isArray(firstArg) && firstArg.type === 'option' && firstArg.name === 'as') {
+      // "AS" clause: first argument is the underlying source
+      src = firstArg.args[0] as unknown as ESQLSource; // AS (<source>, <alias>)
+    }
+
+    const matchesByName = targetName !== undefined && src?.name === targetName;
+
+    if (matchesByName) {
+      selectedJoin = { joinCmd, src, firstArg };
+      break;
+    }
+
+    if (cursorOffset !== undefined && joinCmd.location) {
+      const { min, max } = joinCmd.location;
+      let distance = 0;
+      if (cursorOffset < min) distance = min - cursorOffset;
+      else if (cursorOffset > max) distance = cursorOffset - max;
+
+      if (distance < smallestDistance) {
+        smallestDistance = distance;
+        selectedJoin = { joinCmd, src, firstArg };
+      }
+    }
+  }
+
+  if (!selectedJoin) return query; // no join found
+
+  const { joinCmd, src, firstArg } = selectedJoin;
+
+  // If existing source already equals new name, nothing to do
+  if (src && src.name === createdIndexName) return query;
+
+  const newSource: ESQLSource = {
+    type: 'source',
+    sourceType: 'index',
+    incomplete: false,
+    location: src?.location ?? {
+      min: joinCmd.location?.min ?? 0,
+      max: (joinCmd.location?.min ?? 0) + createdIndexName.length,
+    },
+    text: createdIndexName,
+    name: createdIndexName,
+  };
+
+  if (src) {
+    const idx = joinCmd.args.indexOf(firstArg);
+    // remove the original argument (source or AS option) from the JOIN command
+    mutate.generic.commands.args.remove(root, firstArg as unknown as ESQLSingleAstItem);
+    mutate.generic.commands.args.insert(joinCmd, newSource, idx);
+  } else {
+    mutate.generic.commands.args.insert(joinCmd, newSource, 0);
+  }
+
+  return BasicPrettyPrinter.multiline(root);
 }
 
 function isESQLSourceItem(arg: unknown): arg is ESQLSource {
@@ -70,46 +158,38 @@ export const useLookupIndexCommand = (
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
-  onIndexCreated: (resultQuery: string) => void
+  onIndexCreated: (resultQuery: string) => Promise<void>
 ) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiActions, docLinks },
+  } = useKibana<ESQLEditorDeps>();
+
   const inQueryLookupIndices = useRef<string[]>([]);
 
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
-
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
-      cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: 2px;
-      max-inline-size: 100%;
-      font-size: 0.8571rem;
-      line-height: 18px;
-      font-weight: 500;
       white-space: nowrap;
       text-decoration: none;
-      border-radius: 3px;
+      border-radius: ${euiTheme.border.radius.small};
       text-align: start;
-      border-width: 1px;
-      border-style: solid;
+      border-width: ${euiTheme.border.thin};
       color: ${euiTheme.colors.text};
     }
+
     .${lookupIndexAddBadgeClassName} {
       border-color: ${euiTheme.colors.backgroundBaseDanger};
       background-color: ${euiTheme.colors.backgroundBaseDanger};
     }
+
     .${lookupIndexEditBadgeClassName} {
       border-color: ${euiTheme.colors.backgroundBasePrimary};
       background-color: ${euiTheme.colors.backgroundBasePrimary};
     }
   `;
-
-  const kibana = useKibana<ESQLEditorDeps>();
-  const { uiActions, docLinks } = kibana.services;
 
   useEffect(
     function parseIndicesOnChange() {
@@ -127,137 +207,125 @@ export const useLookupIndexCommand = (
         }
       });
 
-      inQueryLookupIndices.current = indexNames;
+      inQueryLookupIndices.current = Array.from(new Set(indexNames));
     },
     [query.esql]
-  );
-
-  const onFlyoutClose = useCallback(
-    (resultIndexName: string, indexCreated: boolean) => {
-      if (!indexCreated) return;
-
-      const cursorPosition = editorRef.current?.getPosition();
-
-      if (!cursorPosition) {
-        throw new Error('Could not find cursor position in the editor');
-      }
-
-      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, resultIndexName);
-      onIndexCreated(resultQuery);
-    },
-    [onIndexCreated, query.esql, editorRef]
   );
 
   // TODO: Replace with the actual lookup index docs URL once it's available
   // @ts-ignore
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
+  monaco.editor.registerCommand(
+    'esql.lookup_index.create',
+    async (_, args: { indexName: string; doesIndexExist?: boolean }) => {
+      const { indexName, doesIndexExist } = args;
+      await openFlyout(indexName, doesIndexExist);
+    }
+  );
+
+  const addLookupIndicesDecorator = useCallback(async () => {
+    // we need to remove the previous decorations first
+    const lineCount = editorModel.current?.getLineCount() || 1;
+    for (let i = 1; i <= lineCount; i++) {
+      const decorations = editorRef.current?.getLineDecorations(i) ?? [];
+      const lookupIndexDecorations = decorations.filter((decoration) =>
+        decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
+      );
+      editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
+    }
+
+    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
+
+    const lookupIndices: string[] = inQueryLookupIndices.current;
+
+    for (let i = 0; i < lookupIndices.length; i++) {
+      const lookupIndex = lookupIndices[i];
+
+      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+
+      const matches =
+        editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+
+      matches.forEach((match) => {
+        editorRef?.current?.createDecorationsCollection([
+          {
+            range: match.range,
+            options: {
+              isWholeLine: false,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              hoverMessage: {
+                value: `[${
+                  isExistingIndex
+                    ? i18n.translate('esqlEditor.lookupIndex.edit', {
+                        defaultMessage: 'Edit lookup index',
+                      })
+                    : i18n.translate('esqlEditor.lookupIndex.create', {
+                        defaultMessage: 'Create lookup index',
+                      })
+                }](command:esql.lookup_index.create?${encodeURIComponent(
+                  JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
+                )})`,
+                isTrusted: true,
+              },
+
+              inlineClassName:
+                lookupIndexBaseBadgeClassName +
+                ' ' +
+                (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
+            },
+          },
+        ]);
+      });
+    }
+  }, [editorModel, editorRef, getLookupIndices]);
+
+  const onFlyoutClose = useCallback(
+    async (
+      initialIndexName: string | undefined,
+      resultIndexName: string,
+      indexCreated: boolean
+    ) => {
+      if (!indexCreated) return;
+
+      const cursorPosition = editorRef.current?.getPosition();
+
+      if (!initialIndexName && !cursorPosition) {
+        throw new Error('Could not find cursor position in the editor');
+      }
+
+      const resultQuery = appendIndexToJoinCommand(
+        query.esql,
+        initialIndexName || cursorPosition!,
+        resultIndexName
+      );
+
+      await onIndexCreated(resultQuery);
+
+      if (query.esql === resultQuery) {
+        // The query might be unchanged, but the lookup index is created,
+        // so we need to force an update of the lookup index decorators.
+        await addLookupIndicesDecorator();
+      }
+    },
+    [editorRef, query.esql, onIndexCreated, addLookupIndicesDecorator]
+  );
+
   const openFlyout = useCallback(
     async (indexName: string, doesIndexExist?: boolean) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
-        onClose: ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          onFlyoutClose(resultIndexName, indexCreatedDuringFlyout);
+        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
+          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },
       } as EditLookupIndexContentContext);
     },
     [onFlyoutClose, uiActions]
   );
 
-  monaco.editor.registerCommand('esql.lookup_index.create', async (_, indexName) => {
-    await openFlyout(indexName, false);
-  });
-
-  const getLookupIndicesMemoized = useMemo(
-    () => memoize(getLookupIndices ?? (() => Promise.resolve({ indices: [] }))),
-    [getLookupIndices]
-  );
-
-  const addLookupIndicesDecorator = useCallback(() => {
-    // we need to remove the previous decorations first
-    const lineCount = editorModel.current?.getLineCount() || 1;
-    for (let i = 1; i <= lineCount; i++) {
-      const decorations = editorRef.current?.getLineDecorations(i) ?? [];
-
-      const lookupIndexDecorations = decorations.filter((decoration) =>
-        decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
-      );
-
-      editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
-    }
-
-    getLookupIndicesMemoized().then(({ indices: existingIndices }) => {
-      // TODO extract aliases as well
-      const lookupIndices: string[] = inQueryLookupIndices.current;
-      for (let i = 0; i < lookupIndices.length; i++) {
-        const lookupIndex = lookupIndices[i];
-
-        const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
-
-        const matches =
-          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
-
-        matches.forEach((match) => {
-          const range = new monaco.Range(
-            match.range.startLineNumber,
-            match.range.startColumn,
-            match.range.endLineNumber,
-            match.range.endColumn
-          );
-
-          editorRef?.current?.createDecorationsCollection([
-            {
-              range,
-              options: {
-                isWholeLine: false,
-                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-                inlineClassName:
-                  lookupIndexBaseBadgeClassName +
-                  ' ' +
-                  (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
-              },
-            },
-          ]);
-        });
-      }
-    });
-  }, [editorModel, getLookupIndicesMemoized, editorRef]);
-
-  useEffect(
-    function updateOnQueryChange() {
-      addLookupIndicesDecorator();
-    },
-    [query.esql, addLookupIndicesDecorator]
-  );
-
-  /**
-   * the onClick handler is set only once, hence the reference has to be stable.
-   */
-  const lookupIndexLabelClickHandler = useCallback(
-    async (e: monaco.editor.IEditorMouseEvent) => {
-      const mousePosition = e.target.position;
-      if (!mousePosition) return;
-
-      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
-      const clickedIndexName = inQueryLookupIndices.current.find((v) =>
-        currentWord?.word.includes(v)
-      );
-
-      const doesIndexExist = (await getLookupIndicesMemoized()).indices.some(
-        (index) => index.name === clickedIndexName
-      );
-
-      if (clickedIndexName) {
-        await openFlyout(clickedIndexName, doesIndexExist);
-      }
-    },
-    [editorModel, getLookupIndicesMemoized, openFlyout]
-  );
-
   return {
     addLookupIndicesDecorator,
     lookupIndexBadgeStyle,
-    lookupIndexLabelClickHandler,
   };
 };

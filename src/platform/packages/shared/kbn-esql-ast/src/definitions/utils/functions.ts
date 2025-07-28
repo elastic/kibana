@@ -461,7 +461,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
         }
       ),
 
-      arguments: [indexName],
+      arguments: [{ indexName }],
     },
   } as ISuggestionItem;
 }
