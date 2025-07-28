@@ -117,3 +117,15 @@ export const getScheduleBadRequestError = (attributeName: string) => {
     statusCode: 400,
   };
 };
+
+export const getMissingAssistantKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant]`,
+    statusCode: 403,
+  };
+};

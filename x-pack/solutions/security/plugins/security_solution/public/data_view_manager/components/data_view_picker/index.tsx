@@ -10,6 +10,7 @@ import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../../../../common/constants';
 import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
@@ -61,7 +62,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
     useSelector(sharedStateSelector);
   const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
+    return adhocDataViewSpecs
+      .filter((spec) => !spec.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
+      .map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
 
   const managedDataViews = useManagedDataViews();

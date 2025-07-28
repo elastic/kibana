@@ -408,7 +408,7 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `var(--euiFixedHeadersOffset, ${euiTheme.size.base})`,
+        top: `var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, ${euiTheme.size.base}))`,
         background: euiTheme.colors.backgroundBasePlain,
       },
     }),
