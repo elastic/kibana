@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
