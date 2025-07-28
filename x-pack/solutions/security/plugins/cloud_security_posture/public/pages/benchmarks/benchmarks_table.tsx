@@ -176,15 +176,6 @@ const getBenchmarkTableColumns = (
             href={integrationLink}
             iconType="plusInCircle"
             flush="left"
-            aria-label={i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluatedAriaLabel', {
-              defaultMessage:
-                'CIS Benchmark {benchmarkId} version {benchmarkVersion} evaluated with {resourceCountLabel} ',
-              values: {
-                benchmarkId: benchmark.id,
-                benchmarkVersion: benchmark.version || 'N/A',
-                resourceCountLabel,
-              },
-            })}
           >
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
               defaultMessage: 'Add {resourceCountLabel}',
@@ -205,6 +196,15 @@ const getBenchmarkTableColumns = (
           onClick={() => {
             navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
           }}
+          aria-label={i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluatedAriaLabel', {
+            defaultMessage:
+              'CIS Benchmark {benchmarkId} version {benchmarkVersion} evaluated with {resourceCountLabel} ',
+            values: {
+              benchmarkId: benchmark.id,
+              benchmarkVersion: benchmark.version || 'N/A',
+              resourceCountLabel,
+            },
+          })}
         >
           {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
             defaultMessage: '{benchmarkEvaluation} {resourceCountLabel}',

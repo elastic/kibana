@@ -141,7 +141,7 @@ const SearchAnnouncement = ({
 
   return (
     <EuiScreenReaderOnly>
-      <div aria-live="polite" aria-atomic="true" ref={liveRegionRef} role="status" tabIndex={-1} />
+      <div aria-live="polite" aria-atomic="true" ref={liveRegionRef} role="status" />
     </EuiScreenReaderOnly>
   );
 };
