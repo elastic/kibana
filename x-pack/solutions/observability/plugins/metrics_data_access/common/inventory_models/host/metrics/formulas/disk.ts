@@ -8,7 +8,6 @@
 import {
   DISK_READ_IOPS_LABEL,
   DISK_READ_THROUGHPUT_LABEL,
-  DISK_SPACE_AVAILABILITY_LABEL,
   DISK_SPACE_AVAILABLE_LABEL,
   DISK_USAGE_AVERAGE_LABEL,
   DISK_USAGE_LABEL,
@@ -49,23 +48,12 @@ export const diskSpaceAvailable: SchemaBasedFormula = {
   decimals: 0,
 };
 
-export const diskSpaceAvailability: SchemaBasedFormula = {
-  label: DISK_SPACE_AVAILABILITY_LABEL,
-  value: {
-    ecs: '1 - average(system.filesystem.used.pct)',
-    semconv:
-      "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
-  },
-  format: 'percent',
-  decimals: 0,
-};
-
 export const diskUsage: SchemaBasedFormula = {
   label: DISK_USAGE_LABEL,
   value: {
     ecs: 'max(system.filesystem.used.pct)',
     semconv:
-      "1 - max(metrics.system.filesystem.usage, kql='state: free') / max(metrics.system.filesystem.usage)",
+      "1 - max(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)",
   },
   format: 'percent',
   decimals: 0,
