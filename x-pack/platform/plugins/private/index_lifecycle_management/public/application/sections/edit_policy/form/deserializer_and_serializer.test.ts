@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
@@ -124,11 +123,6 @@ describe('deserializer and serializer', () => {
   let policy: SerializedPolicy;
   let serializer: ReturnType<typeof createSerializer>;
   let formInternal: FormInternal;
-
-  // So that we can modify produced form objects
-  beforeAll(() => setAutoFreeze(false));
-  // This is the default in dev, so change back to true (https://github.com/immerjs/immer/blob/master/docs/freezing.md)
-  afterAll(() => setAutoFreeze(true));
 
   beforeEach(() => {
     policy = cloneDeep(originalPolicy);

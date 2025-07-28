@@ -18,7 +18,10 @@ interface DeduplicateAttackDiscoveriesParams {
   esClient: ElasticsearchClient;
   indexPattern: string;
   logger: Logger;
-  ownerId: string;
+  ownerInfo: {
+    id: string;
+    isSchedule: boolean;
+  };
   replacements: Replacements | undefined;
   spaceId: string;
 }
@@ -29,13 +32,15 @@ export const deduplicateAttackDiscoveries = async ({
   esClient,
   indexPattern,
   logger,
-  ownerId,
+  ownerInfo,
   replacements,
   spaceId,
 }: DeduplicateAttackDiscoveriesParams): Promise<AttackDiscoveries> => {
   if (!attackDiscoveries || attackDiscoveries.length === 0) {
     return attackDiscoveries;
   }
+
+  const { id: ownerId, isSchedule } = ownerInfo;
 
   // 1. Transform all attackDiscoveries to alert documents and collect alertUuids
   const alertDocs = attackDiscoveries.map((attack) => {
@@ -70,8 +75,15 @@ export const deduplicateAttackDiscoveries = async ({
 
   const numDuplicates = attackDiscoveries.length - newDiscoveries.length;
   if (numDuplicates > 0) {
-    logger.info(`Found ${numDuplicates} duplicate alert(s), skipping report for those.`);
-    logger.debug(() => `Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`);
+    const logPrefix = isSchedule
+      ? `Attack Discovery Schedule [${ownerId}]`
+      : 'Ad-hoc Attack Discovery';
+    logger.info(
+      `${logPrefix}: Found ${numDuplicates} duplicate alert(s), skipping report for those.`
+    );
+    logger.debug(
+      () => `${logPrefix}: Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`
+    );
   }
 
   return newDiscoveries;

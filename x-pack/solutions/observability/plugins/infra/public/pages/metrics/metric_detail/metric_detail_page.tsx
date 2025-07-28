@@ -46,8 +46,8 @@ export const MetricDetailPage = () => {
     cloudId,
     metadata,
   } = useMetadata({
-    assetId: nodeId,
-    assetType: nodeType,
+    entityId: nodeId,
+    entityType: nodeType,
     requiredMetrics: inventoryModel.requiredMetrics,
     sourceId,
     timeRange: parsedTimeRange,

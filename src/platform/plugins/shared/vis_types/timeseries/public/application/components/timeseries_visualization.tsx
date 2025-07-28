@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { PersistedState, visContainerStyle } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { TimeseriesLoading } from './timeseries_loading';
@@ -186,7 +186,7 @@ function TimeseriesVisualization({
       <EuiFlexItem>
         <Suspense
           fallback={
-            <div className="visChart__spinner">
+            <div className="visChart__spinner" css={visContainerStyle}>
               <EuiLoadingChart size="l" />
             </div>
           }

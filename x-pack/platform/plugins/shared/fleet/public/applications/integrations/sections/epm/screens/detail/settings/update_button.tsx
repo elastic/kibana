@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -80,6 +81,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   startServices,
   isDisabled = false,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const history = useHistory();
   const { getPath } = useLink();
 
@@ -255,6 +258,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         defaultMessage: 'Upgrade {packageName} and policies',
         values: { packageName: title },
       })}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       <>
         {conflictCount && conflictCount > 0 ? (

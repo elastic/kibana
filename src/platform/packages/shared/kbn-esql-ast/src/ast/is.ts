@@ -18,6 +18,9 @@ export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
   typeof (node as types.ESQLProperNode).type === 'string' &&
   !!(node as types.ESQLProperNode).type;
 
+export const isQuery = (node: unknown): node is types.ESQLAstQueryExpression =>
+  isProperNode(node) && node.type === 'query';
+
 export const isCommand = (node: unknown): node is types.ESQLCommand =>
   isProperNode(node) && node.type === 'command';
 
@@ -77,6 +80,9 @@ export const isColumn = (node: unknown): node is types.ESQLColumn =>
 
 export const isSource = (node: unknown): node is types.ESQLSource =>
   isProperNode(node) && node.type === 'source';
+
+export const isMap = (node: unknown): node is types.ESQLMap =>
+  isProperNode(node) && node.type === 'map';
 
 export const isIdentifier = (node: unknown): node is types.ESQLIdentifier =>
   isProperNode(node) && node.type === 'identifier';

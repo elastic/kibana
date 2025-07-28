@@ -12,6 +12,7 @@
  */
 export const SEARCH_AI_LAKE_PACKAGES = [
   'crowdstrike',
+  'elastic_security',
   'google_secops',
   'microsoft_sentinel',
   'sentinel_one',

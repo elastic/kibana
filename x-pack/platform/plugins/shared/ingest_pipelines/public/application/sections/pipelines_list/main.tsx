@@ -185,7 +185,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     >
       <EuiContextMenu
         initialPanelId={0}
-        data-test-subj="autoFollowPatternActionContextMenu"
         panels={[
           {
             id: 0,

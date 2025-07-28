@@ -10,14 +10,8 @@
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { LinksAttributes } from '../../common/content_management';
 import { injectReferences } from '../../common/persistable_state';
-import { LinksByReferenceSerializedState, LinksRuntimeState, LinksSerializedState } from '../types';
+import { LinksRuntimeState } from '../types';
 import { resolveLinks } from './resolve_links';
-
-export const linksSerializeStateIsByReference = (
-  state?: LinksSerializedState
-): state is LinksByReferenceSerializedState => {
-  return Boolean(state && (state as LinksByReferenceSerializedState).savedObjectId !== undefined);
-};
 
 export const deserializeLinksSavedObject = async (
   linksSavedObject: SOWithMetadata<LinksAttributes>
