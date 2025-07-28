@@ -149,6 +149,20 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it(`${obsOnlySpacesAll.username} should be able to get only o11y non empty alert fields for siem and o11y ruleTypeIds`, async () => {
+        const resp = await getAlertFieldsByFeatureId(obsOnlySpacesAll, [
+          ...ruleTypeIds,
+          'siem.queryRule',
+          'siem.esqlRule',
+        ]);
+
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
+      });
+
       it(`${obsOnlyReadSpacesAll.username} should be able to get non empty alert fields for o11y ruleTypeIds`, async () => {
         const resp = await getAlertFieldsByFeatureId(obsOnlyReadSpacesAll, ruleTypeIds);
 
