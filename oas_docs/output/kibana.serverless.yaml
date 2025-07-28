@@ -52214,12 +52214,12 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            dashboards:
+                            streams:
                               items:
                                 type: string
                               type: array
                           required:
-                            - dashboards
+                            - streams
                       required:
                         - objects
                     - additionalProperties: false
@@ -52233,17 +52233,12 @@ paths:
                         - all
                 name:
                   type: string
-                replaced_patterns:
-                  items:
-                    type: string
-                  type: array
                 version:
                   type: string
               required:
                 - name
                 - description
                 - version
-                - replaced_patterns
                 - include
       responses: {}
       summary: Export stream content
@@ -57451,6 +57446,35 @@ components:
                     - level
                     - summary
                     - meta
+                http:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: Service status levels as human and machine readable values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: An unstructured set of extra metadata about this service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
                 savedObjects:
                   additionalProperties: false
                   type: object
@@ -59430,14 +59454,14 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: A list of user profile `uid`s to assign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: A list of user profile `uid`s to unassign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -63947,7 +63971,7 @@ components:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             format: nonempty
             minLength: 1
