@@ -17,9 +17,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AgentState, NodeParamsBase } from './types';
 
 import { stepRouter } from './nodes/step_router';
-import { modelInput } from './nodes/model_input';
 import { runAgent } from './nodes/run_agent';
-import { respond } from './nodes/respond';
 import { NodeType } from './constants';
 import { AssistantStateAnnotation } from './state';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
@@ -76,17 +74,9 @@ export const getDefaultAssistantGraph = async ({
         })
       )
       .addNode(NodeType.TOOLS, toolNode)
-      .addNode(NodeType.RESPOND, async (state: AgentState) => {
-        const model = await createLlmInstance();
-        return respond({ ...nodeParams, config: { signal }, state, model });
-      })
-      .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
-      .addEdge(START, NodeType.MODEL_INPUT)
-      .addEdge(NodeType.RESPOND, END)
+      .addEdge(START, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
-      .addEdge(NodeType.MODEL_INPUT, NodeType.AGENT)
       .addConditionalEdges(NodeType.AGENT, stepRouter, {
-        [NodeType.RESPOND]: NodeType.RESPOND,
         [NodeType.TOOLS]: NodeType.TOOLS,
         [NodeType.END]: END,
       });

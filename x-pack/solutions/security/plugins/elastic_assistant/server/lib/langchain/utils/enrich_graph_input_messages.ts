@@ -10,13 +10,15 @@ type Params = {
     connectorId: string;
     savedObjectsClient: SavedObjectsClientContract;
     actionsClient: PublicMethodsOf<ActionsClient>
+    messages: BaseMessage[];
 }
 
-export const enrichGraphInputMessages = (params: Params) => {
+/**
+ * Apply enrichments to a conversation
+ */
+export const enrichConversation = (params: Params) => {
     const userPromptEnricher = userPrompt(params);
-    return async (messages: BaseMessage[]): Promise<BaseMessage[]> => {
-        return userPromptEnricher(messages)
-    }
+    return userPromptEnricher(params.messages);
 }
 
 /**
@@ -43,8 +45,7 @@ const userPrompt = (params: Pick<Params, 'actionsClient' | 'savedObjectsClient' 
 
         const lastMessage = messages[messages.length - 1];
         if (lastMessage instanceof HumanMessage) {
-            lastMessage.content = userPrompt + lastMessage.content;
-            messages[messages.length - 1] = lastMessage;
+            messages[messages.length - 1] = new HumanMessage(userPrompt + lastMessage.content, lastMessage.additional_kwargs);
         }
         return messages;
     }

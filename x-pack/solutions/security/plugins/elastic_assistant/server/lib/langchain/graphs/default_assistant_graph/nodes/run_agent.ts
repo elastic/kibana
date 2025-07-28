@@ -38,7 +38,7 @@ export async function runAgent({
 
   const modifiedMessages = state.messages.map((message) => {
     if("content" in message && typeof message.content === 'string') {
-      message.content = `${message.content}.`; // For some reason if the content is stringified JSON, then Gemini throws an error.
+      message.content = `${message.content}.`; // For some reason if the content can be parsed as JSON, then Gemini throws an error. Append a period to avoid this.
     }
     return message
   })

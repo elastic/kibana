@@ -5,52 +5,17 @@
  * 2.0.
  */
 
-import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
-import { TOOL_CALLING_LLM_TYPES } from './agentRunnable';
+import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
 import { BaseMessage } from '@langchain/core/messages';
 import { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { ContentReferencesStore, DocumentEntry, enrichDocument } from '@kbn/elastic-assistant-common';
-import { ChatPromptValueInterface } from '@langchain/core/prompt_values';
-import { AIAssistantConversationsDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/conversations';
 import type { Logger } from '@kbn/logging';
 import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
-
-const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
-  ChatPromptTemplate.fromMessages([
-    ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
-    ['placeholder', '{knowledge_history}'],
-    ['placeholder', '{chat_history}'],
-    ['human', '{input}'],
-    ['placeholder', '{agent_scratchpad}'],
-  ]);
-
-const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
-  ChatPromptTemplate.fromMessages([
-    ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
-    ['placeholder', '{knowledge_history}'],
-    ['placeholder', '{chat_history}'],
-    [
-      'human',
-      '{input}\n\n{agent_scratchpad}\n\n(reminder to respond in a JSON blob no matter what)',
-    ],
-  ]);
-
-export const formatPrompt = ({
-  llmType,
-  prompt,
-  additionalPrompt,
-}: {
-  llmType: string | undefined;
-  prompt: string;
-  additionalPrompt?: string;
-}) => {
-  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
-    return formatPromptToolcalling(prompt, additionalPrompt);
-  }
-  return formatPromptStructured(prompt, additionalPrompt);
-};
-
-
+import { enrichConversation } from '../../utils/enrich_graph_input_messages';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { ChatPromptValueInterface } from '@langchain/core/prompt_values';
 
 type ChatPromptTemplateInputValues = {
   systemPrompt: string;
@@ -66,8 +31,21 @@ type Inputs = {
   conversationMessages: BaseMessage[];
   logger: Logger
   formattedTime: string;
+  actionsClient: PublicMethodsOf<ActionsClient>
+  savedObjectsClient: SavedObjectsClientContract
+  connectorId: string
+  llmType: string | undefined
 }
 
+export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<{
+    systemPrompt: string;
+    knowledgeHistory: string;
+    messages: BaseMessage[];
+  }, any>([
+    ['system', "{systemPrompt}"],
+    new MessagesPlaceholder("messages"),
+  ]);
+  
 const KNOWLEDGE_HISTORY_PREFIX = 'Knowledge History:';
 const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
 
@@ -81,7 +59,7 @@ const formatKnowledgeHistory = <T extends { text: string }>(knowledgeHistory: T[
  * Factory that creates a ChatPromptValueInterface from a ChatPromptTemplate with the given inputs.
  * This should be used to create the initial messages state for the graph.
  */
-export const chatPromptValueFactory = async (chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues, any>, inputs: Inputs): Promise<ChatPromptValueInterface> => {
+export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues, any>, inputs: Inputs): Promise<ChatPromptValueInterface> => {
 
   const knowledgeHistoryPromise: Promise<DocumentEntry[]> = inputs.kbClient?.getRequiredKnowledgeBaseDocumentEntries() ?? Promise.resolve([]);
 
@@ -91,7 +69,6 @@ export const chatPromptValueFactory = async (chatPromptTemplate: ChatPromptTempl
 
   const templatedSystemPrompt = inputs.additionalPrompt ? `${inputs.prompt}\n\n${inputs.additionalPrompt}` : inputs.prompt
 
-  console.log(templatedSystemPrompt)
   const systemPromptTemplate = PromptTemplate.fromTemplate(templatedSystemPrompt);
 
   const systemPrompt = await systemPromptTemplate.format({
@@ -100,10 +77,18 @@ export const chatPromptValueFactory = async (chatPromptTemplate: ChatPromptTempl
     knowledgeHistory: formattedKnowledgeHistory
   })
 
+  const enrichedMessages = await enrichConversation({
+    actionsClient: inputs.actionsClient,
+    savedObjectsClient: inputs.savedObjectsClient,
+    connectorId: inputs.connectorId,
+    llmType: inputs.llmType,
+    messages: inputs.conversationMessages,
+  })
+
   const chatPrompt = await chatPromptTemplate.invoke({
     knowledgeHistory: formattedKnowledgeHistory,
     systemPrompt: systemPrompt,
-    messages: inputs.conversationMessages,
+    messages: enrichedMessages,
   })
 
   return chatPrompt

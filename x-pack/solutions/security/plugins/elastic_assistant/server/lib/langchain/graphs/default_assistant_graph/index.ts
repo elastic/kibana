@@ -21,16 +21,12 @@ import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { chatPromptValueFactory, formatPrompt } from './prompts';
+import { DefaultAssistantGraphPromptTemplate, chatPromptFactory } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunnableFactory } from './agentRunnable';
-import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
-import { BaseMessage } from '@langchain/core/messages';
-import { enrichGraphInputMessages } from '../../utils/enrich_graph_input_messages';
 import { getConversationWithNewMessage } from '../../utils/get_conversation';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
@@ -224,23 +220,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const chatPromptTemplate = formatPrompt({
-    prompt: defaultSystemPrompt,
-    additionalPrompt: systemPrompt,
-    llmType,
-  });
-
-  const llm = await createLlmInstance();
-  const agentRunnable = await agentRunnableFactory({
-    llm,
-    llmType,
-    tools,
-    inferenceChatModelDisabled,
-    isOpenAI,
-    isStream,
-    prompt: chatPromptTemplate,
-  });
-
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
@@ -273,16 +252,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     newMessages: newMessages,
   })
 
-  const promptTemplate = ChatPromptTemplate.fromMessages<{
-    systemPrompt: string;
-    knowledgeHistory: string;
-    messages: BaseMessage[];
-  }, any>([
-    ['system', "{systemPrompt}"],
-    new MessagesPlaceholder("messages"),
-  ]);
-
-  const chatPromptValue = await chatPromptValueFactory(promptTemplate, {
+  const chatPrompt = await chatPromptFactory(DefaultAssistantGraphPromptTemplate, {
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
     kbClient: dataClients?.kbDataClient,
@@ -293,16 +263,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       screenContextTimezone: screenContext?.timeZone,
       uiSettingsDateFormatTimezone,
     }),
-  });
-
-  const inputMessagesEnricher = enrichGraphInputMessages({
     actionsClient,
     savedObjectsClient,
     connectorId,
-    llmType
-  })
-
-  const enrichedMessages = await inputMessagesEnricher(chatPromptValue.messages)
+    llmType,
+  });
 
   const inputs: GraphInputs = {
     responseLanguage,
@@ -311,7 +276,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
     isStream,
     isOssModel,
-    messages: enrichedMessages,
+    messages: chatPrompt.messages,
     newMessages,
     isRegeneration: newMessages.length === 0,
     provider: provider ?? '',

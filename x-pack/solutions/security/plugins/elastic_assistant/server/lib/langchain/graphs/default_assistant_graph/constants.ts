@@ -8,8 +8,6 @@ export const NodeType = {
   GENERATE_CHAT_TITLE: 'generateChatTitle',
   AGENT: 'agent',
   TOOLS: 'tools',
-  RESPOND: 'respond',
-  MODEL_INPUT: 'modelInput',
   STEP_ROUTER: 'stepRouter',
   END: 'end',
 } as const;

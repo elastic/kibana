@@ -13,7 +13,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
-import { AgentFinish } from 'langchain/agents';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
@@ -106,13 +105,7 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  // Stream is from tool calling agent or structured chat agent
-  if (
-    !inferenceChatModelDisabled ||
-    inputs.isOssModel ||
-    inputs?.llmType === 'bedrock' ||
-    inputs?.llmType === 'gemini'
-  ) {
+
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
@@ -124,10 +117,9 @@ export const streamGraph = async ({
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
         tags: traceOptions?.tags ?? [],
         version: 'v2',
-        streamMode: 'values',
+        streamMode: ['values', "debug"],
         recursionLimit: inputs?.isOssModel ? 50 : 25,
       },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
 
     const pushStreamUpdate = async () => {
@@ -139,13 +131,20 @@ export const streamGraph = async ({
               push({ payload: msg.content as string, type: 'content' });
             }
           }
-
-          if (
+          else if (
             event === 'on_chat_model_end' &&
             !data.output.lc_kwargs?.tool_calls?.length &&
             !didEnd
           ) {
             handleStreamEnd(data.output.content);
+          } else if (
+            // This is the end of one model invocation but more message will follow as there are tool calls. Add a newline separator to the stream to visually separate the chunks.
+            event === 'on_chat_model_end' &&
+            data.output.lc_kwargs?.tool_calls?.length &&
+            data.chunk.content &&
+            !didEnd
+          ) {
+            push({ payload: "\n\n" as string, type: 'content' });
           }
         }
       }
@@ -157,64 +156,6 @@ export const streamGraph = async ({
     });
 
     return responseWithHeaders;
-  }
-
-  // Stream is from openai functions agent
-  let finalMessage = '';
-  const stream = assistantGraph.streamEvents(
-    inputs,
-    {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
-    },
-    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-  );
-
-  const pushStreamUpdate = async () => {
-    for await (const { event, data, tags } of stream) {
-      if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_llm_stream') {
-          const chunk = data?.chunk;
-          const msg = chunk.message;
-          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            /* empty */
-          } else if (!didEnd) {
-            push({ payload: msg.content, type: 'content' });
-            finalMessage += msg.content;
-          }
-        }
-
-        if (event === 'on_llm_end' && !didEnd) {
-          const generation = data.output?.generations[0][0];
-          if (
-            // if generation is null, an error occurred - do nothing and let error handling complete the stream
-            generation != null &&
-            // no finish_reason means the stream was aborted
-            (!generation?.generationInfo?.finish_reason ||
-              generation?.generationInfo?.finish_reason === 'stop')
-          ) {
-            handleStreamEnd(
-              generation?.text && generation?.text.length ? generation?.text : finalMessage
-            );
-          }
-        }
-      }
-    }
-  };
-
-  pushStreamUpdate().catch((err) => {
-    logger.error(`Error streaming graph: ${err}`);
-    handleStreamEnd(err.message, true);
-  });
-
-  return responseWithHeaders;
 };
 
 interface InvokeGraphParams {

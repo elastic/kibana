@@ -13,17 +13,9 @@ export const AssistantStateAnnotation = Annotation.Root({
       reducer: (x: string, y?: string) => y ?? x,
       default: () => 'start',
     }),
-    hasRespondStep: Annotation<boolean>({
-      reducer: (x: boolean, y?: boolean) => y ?? x,
-      default: () => false,
-    }),
     messages: Annotation<BaseMessage[]>({
       reducer: messagesStateReducer,
       default: () => [],
-    }),
-    chatTitle: Annotation<string>({
-      reducer: (x: string, y?: string) => y ?? x,
-      default: () => '',
     }),
     llmType: Annotation<string>({
       reducer: (x: string, y?: string) => y ?? x,

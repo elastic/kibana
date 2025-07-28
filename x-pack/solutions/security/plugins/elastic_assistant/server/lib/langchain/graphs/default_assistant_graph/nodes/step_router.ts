@@ -21,7 +21,7 @@ export function stepRouter(state: AgentState): string {
       if ("tool_calls" in lastMessage && Array.isArray(lastMessage.tool_calls) && lastMessage.tool_calls?.length) {
         return NodeType.TOOLS;
       }
-      return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+      return NodeType.END;
 
     default:
       return NodeType.END;
