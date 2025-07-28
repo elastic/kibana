@@ -55,7 +55,6 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
 
     const valid = validator.validate(toolSchema, serializedArguments);
 
-    console.log(`--@@valid`, valid);
     if (!valid) {
       throw createToolValidationError(
         `Tool call arguments for ${toolCall.function.name} (${

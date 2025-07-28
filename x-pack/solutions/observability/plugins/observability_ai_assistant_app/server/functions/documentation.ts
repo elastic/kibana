@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
-import { zodToParameters } from './schema_adapter';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
 
@@ -36,30 +34,6 @@ export async function registerDocumentationFunction({
     });
   }
 
-  // Define the schema using Zod
-  const documentationSchema = z.object({
-    query: z.string().describe(
-      `The query to use to retrieve documentation
-      Always write the query in English, as the documentation is available only in English.
-      Examples:
-      - "How to enable TLS for Elasticsearch?"
-      - "What is Kibana Lens?"`
-    ),
-    product: z
-      .enum(Object.values(DocumentationProduct) as [string, ...string[]])
-      .optional()
-      .describe(
-        `If specified, will filter the products to retrieve documentation for
-      Possible options are:
-      - "kibana": Kibana product
-      - "elasticsearch": Elasticsearch product
-      - "observability": Elastic Observability solution
-      - "security": Elastic Security solution
-      If not specified, will search against all products
-      `
-      ),
-  });
-
   functions.registerFunction(
     {
       name: RETRIEVE_DOCUMENTATION_NAME,
@@ -68,7 +42,32 @@ export async function registerDocumentationFunction({
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
       or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search
       `,
-      parameters: zodToParameters(documentationSchema),
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
+            Examples:
+            - "How to enable TLS for Elasticsearch?"
+            - "What is Kibana Lens?"`,
+            type: 'string' as const,
+          },
+          product: {
+            description: `If specified, will filter the products to retrieve documentation for
+            Possible options are:
+            - "kibana": Kibana product
+            - "elasticsearch": Elasticsearch product
+            - "observability": Elastic Observability solution
+            - "security": Elastic Security solution
+            If not specified, will search against all products
+            `,
+            type: 'string' as const,
+            enum: Object.values(DocumentationProduct),
+          },
+        },
+        required: ['query'],
+      } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
       const response = await llmTasks!.retrieveDocumentation({
