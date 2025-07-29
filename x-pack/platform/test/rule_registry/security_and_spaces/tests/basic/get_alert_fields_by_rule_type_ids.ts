@@ -24,6 +24,7 @@ import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -41,6 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
     let securityRuleId: string;
 
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+
       await installKibanaSampleData();
 
       const [securityRule, stackRule] = await Promise.all([
@@ -75,6 +79,9 @@ export default ({ getService }: FtrProviderContext) => {
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
         .expect(204);
+
+      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
     });
 
     describe('Users:', () => {
