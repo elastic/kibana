@@ -14,7 +14,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
   const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
-  const log = getService('log')
+  const log = getService('log');
 
   return {
     async sectionHeadingText() {
@@ -122,7 +122,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async pipelineTreeNodesExist(pipelines: string[]) {
-      for (var pipeline of pipelines) {
+      for (const pipeline of pipelines) {
         const pipelineTreeNodeExists = await testSubjects.exists(`pipelineTreeNode-${pipeline}`);
         if (!pipelineTreeNodeExists) {
           log.debug(`Tree node pipelineTreeNode-${pipeline} doesn't exist.`);

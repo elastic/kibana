@@ -59,7 +59,7 @@ describe('<PipelinesList />', () => {
           pipeline: {
             name: 'test_pipeline2',
           },
-        }
+        },
       ],
       deprecated: true,
     };
