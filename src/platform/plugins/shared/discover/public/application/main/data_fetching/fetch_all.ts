@@ -79,13 +79,15 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    internalState,
   } = params;
   const { data, expressions } = services;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort, esqlVariables } = appStateContainer.getState();
+    const { query, sort } = appStateContainer.getState();
+    const { esqlVariables } = internalState.getState();
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();

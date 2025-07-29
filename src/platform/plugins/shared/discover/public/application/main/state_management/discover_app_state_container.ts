@@ -159,10 +159,6 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
-  /**
-   * ESQL query variables
-   */
-  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {

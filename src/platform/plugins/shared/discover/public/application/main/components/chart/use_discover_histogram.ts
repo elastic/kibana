@@ -60,6 +60,7 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
   type InitialUnifiedHistogramLayoutProps,
+  useInternalStateSelector,
 } from '../../state_management/redux';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
@@ -371,7 +372,7 @@ export const useDiscoverHistogram = (
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
-  const esqlVariables = useAppStateSelector((state) => state.esqlVariables || []);
+  const esqlVariables = useInternalStateSelector((state) => state.esqlVariables);
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>

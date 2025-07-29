@@ -22,6 +22,7 @@ import {
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
@@ -78,6 +79,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
+  esqlVariables: undefined,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
@@ -191,6 +193,10 @@ export const internalStateSlice = createSlice({
 
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
+    },
+
+    setEsqlVariables: (state, action: PayloadAction<ESQLControlVariable[] | undefined>) => {
+      state.esqlVariables = action.payload;
     },
 
     setResetDefaultProfileState: {

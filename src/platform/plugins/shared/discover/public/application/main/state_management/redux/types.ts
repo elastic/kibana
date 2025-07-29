@@ -11,6 +11,7 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
@@ -98,6 +99,10 @@ export interface DiscoverInternalState {
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
+  /**
+   * ESQL query variables
+   */
+  esqlVariables?: ESQLControlVariable[];
   tabs: {
     byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];

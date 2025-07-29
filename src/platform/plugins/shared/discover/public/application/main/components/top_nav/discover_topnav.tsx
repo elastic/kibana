@@ -12,6 +12,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
@@ -62,7 +63,7 @@ export const DiscoverTopNav = ({
   const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
-  const esqlVariables = useAppStateSelector((state) => state.esqlVariables);
+  const esqlVariables = useInternalStateSelector((state) => state.esqlVariables);
 
   const { timefilter } = data.query.timefilter;
   const timeRange = timefilter.getTime();
@@ -306,7 +307,24 @@ export const DiscoverTopNav = ({
           onSaveControl,
           onCancelControl,
           controlsWrapper: (
-            <ControlGroupRenderer onApiAvailable={setControlGroupAPI} timeRange={timeRange} />
+            <ControlGroupRenderer
+              onApiAvailable={setControlGroupAPI}
+              timeRange={timeRange}
+              getCreationOptions={async (initialState, builder) => {
+                const stateStorage = stateContainer.stateStorage;
+                const panels = stateStorage.get<ControlPanelsState>('controlPanels');
+                console.log(panels, 'Control Panels State');
+                console.log(esqlVariables, 'ESQL Variables');
+
+                return {
+                  initialState: {
+                    ...initialState,
+                    initialChildControlState: panels ?? initialState.initialChildControlState,
+                  },
+                };
+              }}
+              viewMode="edit"
+            />
           ),
         }}
       />

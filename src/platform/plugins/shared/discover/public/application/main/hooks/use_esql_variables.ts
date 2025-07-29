@@ -11,7 +11,7 @@ import { useCallback, useEffect } from 'react';
 import { type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
-import { FetchStatus } from '../../types';
+import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
 
 export const useESQLVariables = ({
   isEsqlMode,
@@ -26,18 +26,28 @@ export const useESQLVariables = ({
   stateContainer: DiscoverStateContainer;
   onTextLangQueryChange: (query: string) => void;
 }) => {
+  const dispatch = useInternalStateDispatch();
   useEffect(() => {
-    if (controlGroupAPI) {
-      const documents$ = stateContainer.dataState.data$.documents$;
-      const subscription = controlGroupAPI.esqlVariables$.subscribe((newESQLVariables) => {
-        if (!isEqual(newESQLVariables, currentEsqlVariables) && isEsqlMode) {
-          stateContainer.appState.update({ esqlVariables: newESQLVariables });
-          documents$.next({ fetchStatus: FetchStatus.PARTIAL });
-        }
-      });
-      return () => subscription.unsubscribe();
+    if (!controlGroupAPI) {
+      return;
     }
-  }, [controlGroupAPI, currentEsqlVariables, isEsqlMode, stateContainer]);
+    const stateStorage = stateContainer.stateStorage;
+    const subscription = controlGroupAPI.esqlVariables$.subscribe((newESQLVariables) => {
+      if (!isEqual(newESQLVariables, currentEsqlVariables) && isEsqlMode) {
+        dispatch(internalStateActions.setEsqlVariables(newESQLVariables));
+        stateContainer.dataState.fetch();
+      }
+    });
+    const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
+      if (input && input.initialChildControlState)
+        stateStorage.set('controlPanels', input.initialChildControlState);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroupAPI, currentEsqlVariables, dispatch, isEsqlMode, stateContainer]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {

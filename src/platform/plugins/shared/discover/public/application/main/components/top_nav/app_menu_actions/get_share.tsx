@@ -67,9 +67,6 @@ export const getShareAppMenuItem = ({
       filters,
       timeRange,
       refreshInterval,
-      esqlVariables: Array.isArray(appState.esqlVariables)
-        ? appState.esqlVariables.map((v) => ({ ...v }))
-        : [],
     };
     const relativeUrl = locator.getRedirectUrl(params);
 
