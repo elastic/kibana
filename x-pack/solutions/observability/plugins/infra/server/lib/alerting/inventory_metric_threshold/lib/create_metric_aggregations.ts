@@ -6,9 +6,12 @@
  */
 
 import { get } from 'lodash';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  DataSchemaFormat,
+  InventoryItemType,
+  SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import type { SchemaTypes } from '../../../../../common/http_api/shared/schema_type';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
@@ -23,7 +26,7 @@ export const createMetricAggregations = async (
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   customMetric?: SnapshotCustomMetricInput,
-  schema?: SchemaTypes
+  schema?: DataSchemaFormat
 ) => {
   const inventoryModel = findInventoryModel(nodeType);
   if (customMetric && customMetric.field) {

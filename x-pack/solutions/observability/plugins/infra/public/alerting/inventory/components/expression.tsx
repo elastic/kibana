@@ -30,12 +30,12 @@ import { debounce, omit } from 'lodash';
 import type { ChangeEvent, FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import {
   findInventoryModel,
   SnapshotMetricTypeRT,
   DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
@@ -299,14 +299,14 @@ export const Expressions: React.FC<Props> = (props) => {
               options={{
                 ecs: {
                   text: 'ECS',
-                  value: 'ecs',
+                  value: DataSchemaFormat.ECS,
                 },
                 semconv: {
                   text: 'SemConv',
-                  value: 'semconv',
+                  value: DataSchemaFormat.SEMCONV,
                 },
               }}
-              value={ruleParams.schema || 'ecs'}
+              value={ruleParams.schema || DataSchemaFormat.ECS}
               onChange={updateSchema}
             />
           </div>

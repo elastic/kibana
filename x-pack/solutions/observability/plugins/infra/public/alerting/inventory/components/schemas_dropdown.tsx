@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import type { SchemaTypes } from '../../../../common/http_api/shared/schema_type';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 interface WhenExpressionProps {
-  value: SchemaTypes;
-  options: { [key: string]: { text: string; value: SchemaTypes } };
-  onChange: (value: SchemaTypes) => void;
+  value: DataSchemaFormat;
+  options: { [key: string]: { text: string; value: DataSchemaFormat } };
+  onChange: (value: DataSchemaFormat) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -79,7 +79,7 @@ export const SchemaExpression = ({
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as SchemaTypes);
+            onChange(e.target.value as DataSchemaFormat);
             setSchemaPopoverOpen(false);
           }}
           options={Object.values(options).map((o) => o)}

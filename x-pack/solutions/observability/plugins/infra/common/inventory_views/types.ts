@@ -13,7 +13,7 @@ import {
   SnapshotGroupByRT,
   SnapshotMetricInputRT,
 } from '../http_api/snapshot_api';
-import { SchemaTypesRT } from '../http_api/shared/schema_type';
+import { DataSchemaFormatRT } from '../http_api/shared';
 
 export const inventoryColorPaletteRT = rt.keyof({
   status: null,
@@ -70,7 +70,7 @@ export const inventoryOptionsStateRT = rt.intersection([
     legend: inventoryLegendOptionsRT,
     source: rt.string,
     timelineOpen: rt.boolean,
-    preferredSchema: SchemaTypesRT,
+    preferredSchema: DataSchemaFormatRT,
   }),
 ]);
 

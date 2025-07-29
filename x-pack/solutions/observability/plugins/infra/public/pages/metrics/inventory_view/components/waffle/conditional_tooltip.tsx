@@ -60,7 +60,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
-    schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
+    schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : DataSchemaFormat.ECS,
   });
 
   const dataNode = first(nodes);

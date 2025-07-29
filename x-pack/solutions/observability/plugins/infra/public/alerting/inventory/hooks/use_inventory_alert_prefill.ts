@@ -93,7 +93,7 @@ export const useInventoryAlertPrefill = () => {
     []
   );
   const setSchema = useCallback(
-    (schema: SchemaTypes) => dispatch({ type: 'SET_SCHEMA', value: schema }),
+    (schema: DataSchemaFormat) => dispatch({ type: 'SET_SCHEMA', value: schema }),
     []
   );
 

@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type {
   InventoryView,
@@ -51,7 +51,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
   timelineOpen: false,
-  preferredSchema: 'ecs',
+  preferredSchema: DataSchemaFormat.ECS,
 };
 
 function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
