@@ -71,7 +71,7 @@ export interface SavedSearchAttributes {
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
 
-  tabs?: DiscoverSessionTab[];
+  tabs: DiscoverSessionTab[];
 }
 
 /** @internal **/

@@ -12,6 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { SavedSearchByValueAttributes } from '.';
 import { byValueToSavedSearch } from '.';
+import type { DiscoverSessionTab } from '../../../server';
 
 const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,
@@ -21,6 +22,20 @@ const mockServices = {
 
 describe('toSavedSearch', () => {
   it('succesfully converts attributes to saved search', async () => {
+    const tabs: DiscoverSessionTab[] = [
+      {
+        id: 'tab-1',
+        label: 'Tab 1',
+        attributes: {
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+          sort: [['@timestamp', 'desc']],
+          columns: ['message', 'extension'],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: false,
+        },
+      },
+    ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
       sort: [['@timestamp', 'desc']],
@@ -31,6 +46,7 @@ describe('toSavedSearch', () => {
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
       },
+      tabs,
       references: [
         {
           id: '1',
@@ -100,7 +116,30 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
-        "tabs": undefined,
+        "tabs": Array [
+          Object {
+            "attributes": Object {
+              "columns": Array [
+                "message",
+                "extension",
+              ],
+              "grid": Object {},
+              "hideChart": false,
+              "isTextBasedQuery": false,
+              "kibanaSavedObjectMeta": Object {
+                "searchSourceJSON": "{}",
+              },
+              "sort": Array [
+                Array [
+                  "@timestamp",
+                  "desc",
+                ],
+              ],
+            },
+            "id": "tab-1",
+            "label": "Tab 1",
+          },
+        ],
         "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,

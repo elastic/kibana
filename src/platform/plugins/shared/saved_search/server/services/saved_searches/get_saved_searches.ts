@@ -24,8 +24,9 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
     savedSearchId
   );
 
+  const [{ attributes }] = savedSearch.attributes.tabs;
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
