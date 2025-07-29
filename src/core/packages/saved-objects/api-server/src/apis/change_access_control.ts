@@ -16,13 +16,11 @@ export interface SavedObjectsChangeAccessControlObject {
   id: string;
 }
 
-export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
-  extends SavedObjectsBaseOptions {
+export interface SavedObjectsChangeOwnershipOptions extends SavedObjectsBaseOptions {
   newOwnerProfileUid?: SavedObjectAccessControl['owner'];
 }
 
-export interface SavedObjectsChangeAccessModeOptions<Attributes = unknown>
-  extends SavedObjectsBaseOptions {
+export interface SavedObjectsChangeAccessModeOptions extends SavedObjectsBaseOptions {
   accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
@@ -32,7 +30,7 @@ export interface SavedObjectsChangeAccessModeOptions<Attributes = unknown>
  * @public
  */
 
-export type SavedObjectsChangeAccessControlOptions<Attributes = unknown> = SavedObjectsBaseOptions &
+export type SavedObjectsChangeAccessControlOptions = SavedObjectsBaseOptions &
   SavedObjectsChangeOwnershipOptions &
   SavedObjectsChangeAccessModeOptions;
 

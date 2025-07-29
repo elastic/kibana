@@ -17,14 +17,14 @@ import type {
 import { changeObjectAccessControl } from './internals/change_object_access_control';
 import type { ApiExecutionContext } from './types';
 
-export interface PerformChangeAccessModeParams<T = unknown> {
+export interface PerformChangeAccessModeParams {
   objects: SavedObjectsChangeAccessControlObject[];
-  options: SavedObjectsChangeAccessControlOptions<T>;
+  options: SavedObjectsChangeAccessControlOptions;
 }
 
-export const isSavedObjectsChangeAccessModeOptions = <Attributes = unknown>(
+export const isSavedObjectsChangeAccessModeOptions = (
   options: unknown
-): options is SavedObjectsChangeAccessModeOptions<Attributes> => {
+): options is SavedObjectsChangeAccessModeOptions => {
   return (
     typeof options === 'object' &&
     options !== null &&

@@ -133,7 +133,7 @@ export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces
 
 /**
  * The AuthorizeUpdateObject interface extends AuthorizeObjectWithExistingSpaces
- * and contains a object namespace override. Used by the authorizeUpdate
+ * and contains an object namespace override. Used by the authorizeUpdate
  * and authorizeBulkUpdate methods.
  */
 export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces {
@@ -146,7 +146,7 @@ export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
 
 /**
  * The AuthorizeChangeOwnershipObject interface extends AuthorizeObjectWithExistingSpaces
- * and contains a object namespace override. Used by the authorizeChangeOwnership
+ * and contains an object namespace override. Used by the authorizeChangeOwnership
  * method.
  */
 export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExistingSpaces {
@@ -157,6 +157,11 @@ export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExist
   objectNamespace?: string;
 }
 
+/**
+ * The AuthorizeChangeAccessModeObject interface extends AuthorizeObjectWithExistingSpaces
+ * and contains an object namespace override. Used by the authorizeChangeAccessMode
+ * method.
+ */
 export interface AuthorizeChangeAccessModeObject extends AuthorizeObjectWithExistingSpaces {
   /**
    * The namespace in which to update this object. Populated by options
@@ -284,7 +289,7 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
 
 /**
  * The AuthorizeChangeOwnershipParams interface extends AuthorizeParams and is
- * used for the AuthorizeeChangeAccessControl method of the ISavedObjectsSecurityExtension.
+ * used for the AuthorizeChangeAccessControl method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
   /** The objects to authorize */
