@@ -1610,15 +1610,11 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('Refs', () => {
-    it(
-      'should expose the EuiDataGrid ref',
-      async () => {
-        const ref = React.createRef<EuiDataGridRefProps & RestorableStateProviderApi>();
-        render(<UnifiedDataTable {...getProps()} ref={ref} />);
+    it('should expose the EuiDataGrid ref', async () => {
+      const ref = React.createRef<EuiDataGridRefProps & RestorableStateProviderApi>();
+      render(<UnifiedDataTable {...getProps()} ref={ref} />);
 
-        expect(ref.current?.setFocusedCell).toBeDefined();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
+      expect(ref.current?.setFocusedCell).toBeDefined();
+    });
   });
 });
