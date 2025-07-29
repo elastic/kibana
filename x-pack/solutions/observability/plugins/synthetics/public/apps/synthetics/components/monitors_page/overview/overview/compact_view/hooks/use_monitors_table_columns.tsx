@@ -10,10 +10,11 @@ import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitorStatusCol } from '../components/monitor_status_col';
+import { i18n } from '@kbn/i18n';
 import { selectOverviewState } from '../../../../../../state';
+import { MonitorStatusCol } from '../components/monitor_status_col';
+import { MonitorLocations } from '../../../../management/monitor_list_table/monitor_locations';
 import { MonitorBarSeries } from '../components/monitor_bar_series';
 import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
@@ -68,7 +69,10 @@ export const useMonitorsTableColumns = ({
 
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
-      const { configId, locationLabel, locationId } = monitor;
+      const { configId } = monitor;
+
+      const locationId = monitor.locations[0].id;
+      const locationLabel = monitor.locations[0].label;
       dispatch(
         setFlyoutConfigCallback({
           configId,
@@ -88,6 +92,7 @@ export const useMonitorsTableColumns = ({
     return [
       {
         name: STATUS,
+        width: '150px',
         render: (monitor: OverviewStatusMetaData) => (
           <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
         ),
@@ -136,16 +141,12 @@ export const useMonitorsTableColumns = ({
           ),
       },
       {
-        field: 'locationLabel',
         name: LOCATIONS,
-        render: (locationLabel: OverviewStatusMetaData['locationLabel']) => (
-          <EuiLink
-            data-test-subj="syntheticsCompactViewLocation"
-            onClick={() => onClickMonitorFilter('locations', locationLabel)}
-          >
-            {locationLabel}
-          </EuiLink>
-        ),
+        render: (monitor: OverviewStatusMetaData) => {
+          return (
+            <MonitorLocations configId={monitor.configId} locationsWithStatus={monitor.locations} />
+          );
+        },
       },
       {
         field: 'tags',
@@ -170,10 +171,11 @@ export const useMonitorsTableColumns = ({
         },
         width: '220px',
         render: (configId: string, monitor: OverviewStatusMetaData) => {
-          const uniqId = `${configId}-${monitor.locationId}`;
+          const locationId = monitor.locations[0].id;
+          const uniqId = `${configId}-${locationId}`;
           return (
             <MonitorBarSeries
-              histogramSeries={histogramsById?.[uniqId]?.points}
+              histogramSeries={histogramsById?.[uniqId]?.points ?? histogramsById[configId]?.points}
               minInterval={minInterval!}
             />
           );

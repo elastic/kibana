@@ -54,12 +54,13 @@ export const MetricItemIcon = ({
   configIdByLocation: string;
   timestamp?: string;
 }) => {
+  const locationId = monitor.locations[0].id;
+
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);
   const { latestPing } = useLatestError({
+    monitor,
     configIdByLocation,
-    monitorId: monitor.configId,
-    locationLabel: monitor.locationLabel,
   });
 
   const dispatch = useDispatch();
@@ -68,9 +69,9 @@ export const MetricItemIcon = ({
   const inProgress = isTestRunning(testNowRun);
 
   const errorLink = useErrorDetailsLink({
+    locationId,
     configId: monitor.configId,
     stateId: latestPing?.state?.id!,
-    locationId: monitor.locationId,
   });
 
   const formatter = useDateFormat();
@@ -179,14 +180,14 @@ export const MetricItemIcon = ({
       </Container>
     );
   } else {
-    if (latestPing?.url) {
+    if (monitor.urls) {
       return (
         <Container>
           <EuiButtonIcon
-            title={latestPing.url.full}
+            title={monitor.urls}
             color="text"
             data-test-subj="syntheticsMetricItemIconButton"
-            href={latestPing.url.full}
+            href={monitor.urls}
             iconType="link"
             target="_blank"
             aria-label={i18n.translate('xpack.synthetics.metricItemIcon.euiButtonIcon.monitorUrl', {

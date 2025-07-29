@@ -15,6 +15,7 @@ export const getLatestTestRunRouteQuerySchema = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
   locationLabel: schema.maybe(schema.string()),
+  locationId: schema.maybe(schema.string()),
   monitorId: schema.string(),
 });
 
@@ -30,7 +31,8 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
     },
   },
   handler: async ({ syntheticsEsClient, request, response }): Promise<{ ping?: Ping }> => {
-    const { from, to, monitorId, locationLabel } = request.query as GetPingsRouteRequest;
+    const { from, to, monitorId, locationLabel, locationId } =
+      request.query as GetPingsRouteRequest;
 
     const getPing = (fromVal: string) => {
       return getLatestTestRun({
@@ -39,6 +41,7 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
         to: to || 'now',
         monitorId,
         locationLabel,
+        locationId,
       });
     };
 

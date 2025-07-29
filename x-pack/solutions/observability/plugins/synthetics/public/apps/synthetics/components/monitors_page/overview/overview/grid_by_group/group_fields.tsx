@@ -75,6 +75,18 @@ export const GroupFields = () => {
       },
     },
     {
+      label: MONITOR_LABEL,
+      value: 'monitor',
+      checked: groupField === 'monitor',
+      defaultSortOrder: 'asc',
+      onClick: () => {
+        handleChange({
+          field: 'monitor',
+          order: groupOrder,
+        });
+      },
+    },
+    {
       label: LOCATION_LABEL,
       value: 'location.id',
       checked: groupField === 'locationId',
@@ -199,6 +211,13 @@ const getOrderContent = (groupField: string) => {
         desc: SORT_ALPHABETICAL_DESC,
         label: PROJECT_LABEL,
       };
+    case 'monitor':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_LABEL,
+      };
+
     default:
       return {
         asc: ASCENDING_LABEL,
@@ -238,6 +257,9 @@ const DESCENDING_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.
 
 const NONE_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.none.label', {
   defaultMessage: 'None',
+});
+const MONITOR_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.monitor.label', {
+  defaultMessage: 'Monitor',
 });
 
 const LOCATION_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.location.label', {

@@ -5,44 +5,59 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { OverviewStatusState, ServiceLocations } from '../../../../../../../common/runtime_types';
+import { useSelector } from 'react-redux';
+import { MONITOR_STATUS_ENUM } from '../../../../../../../common/constants/monitor_management';
+import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
+import {
+  OverviewStatusMetaData,
+  ServiceLocations,
+} from '../../../../../../../common/runtime_types';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
+import { getStatusByConfig, selectOverviewStatus } from '../../../../state/overview_status';
 
 interface Props {
-  locations: ServiceLocations;
-  monitorId: string;
-  overviewStatus: OverviewStatusState | null;
+  locationsWithStatus?: OverviewStatusMetaData['locations'];
+  locations?: ServiceLocations;
+  configId: string;
 }
 
-export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
-  const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+export const MonitorLocations = ({ locationsWithStatus, locations, configId }: Props) => {
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
-  const locationsToDisplay = locations.map((loc) => {
-    const locById = `${monitorId}-${loc.id}`;
+  const getColor = useMonitorHealthColor();
+  if (locationsWithStatus) {
+    const locationsToDisplay = locationsWithStatus.map((loc) => {
+      const status = loc.status ?? MONITOR_STATUS_ENUM.PENDING;
+      const color = getColor(status);
 
-    let status: string = 'unknown';
-    let color = euiTheme.colors.disabled;
+      return {
+        status,
+        color,
+        id: loc.id,
+        label: loc.label ?? loc.id,
+      };
+    });
 
-    if (overviewStatus?.downConfigs[locById]) {
-      status = 'down';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.danger;
-    } else if (overviewStatus?.upConfigs[locById]) {
-      status = 'up';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
-    }
+    return (
+      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={false} />
+    );
+  } else {
+    const locationsToDisplay =
+      locations?.map((loc) => {
+        const status = getStatusByConfig(configId, overviewStatus, loc.id);
 
-    return {
-      id: loc.id,
-      label: loc.label ?? loc.id,
-      status,
-      color,
-    };
-  });
+        const color = getColor(status);
 
-  return (
-    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} />
-  );
+        return {
+          status,
+          color,
+          id: loc.id,
+          label: loc.label ?? loc.id,
+        };
+      }) ?? [];
+    return (
+      <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={true} />
+    );
+  }
 };

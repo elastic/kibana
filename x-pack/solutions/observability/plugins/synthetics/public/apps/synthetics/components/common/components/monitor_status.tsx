@@ -7,18 +7,25 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
+import {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+} from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
   status,
   isBrowserType,
   onClickBadge,
+  monitor,
 }: {
+  monitor?: OverviewStatusMetaData;
   status?: string;
   isBrowserType: boolean;
   onClickBadge?: () => void;
 }) => {
-  const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
+  const monStatus = status ? status : monitor?.overallStatus;
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 
   return (
@@ -109,7 +116,7 @@ interface BadgeData {
 }
 
 const badgeMapping: Record<string, BadgeData> = {
-  unknown: {
+  pending: {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },

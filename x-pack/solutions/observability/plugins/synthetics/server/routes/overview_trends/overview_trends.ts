@@ -36,7 +36,7 @@ export async function fetchTrends(
       for (const location of byLocation.buckets) {
         nTable[String(key) + String(location.key)] = {
           configId: String(key),
-          locationId: String(location.key),
+          locationIds: [String(location.key)],
           data: location.last50.buckets.map((durationBucket, x) => ({
             x,
             y: durationBucket.max.value!,
@@ -59,7 +59,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
     body: schema.arrayOf(
       schema.object({
         configId: schema.string(),
-        locationId: schema.string(),
+        locationIds: schema.arrayOf(schema.string()),
         schedule: schema.string(),
       })
     ) as unknown as ObjectType,
@@ -71,12 +71,12 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
     const configs = body.reduce(
       (
         acc: Record<string, { locations: string[]; interval: number }>,
-        { configId, locationId, schedule }
+        { configId, locationIds, schedule }
       ) => {
         if (!acc[configId]) {
-          acc[configId] = { locations: [locationId], interval: getIntervalForCheckCount(schedule) };
+          acc[configId] = { locations: locationIds, interval: getIntervalForCheckCount(schedule) };
         } else {
-          acc[configId].locations.push(locationId);
+          acc[configId].locations.push(...locationIds);
         }
         return acc;
       },

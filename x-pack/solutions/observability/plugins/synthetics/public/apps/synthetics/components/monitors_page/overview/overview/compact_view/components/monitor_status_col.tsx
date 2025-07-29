@@ -31,7 +31,7 @@ export const MonitorStatusCol = ({
   return (
     <div>
       <BadgeStatus
-        status={monitor.status}
+        monitor={monitor}
         isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
         onClickBadge={() => openFlyout(monitor)}
       />

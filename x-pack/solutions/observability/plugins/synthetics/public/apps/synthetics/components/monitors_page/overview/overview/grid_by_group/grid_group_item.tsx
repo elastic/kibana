@@ -66,7 +66,7 @@ const GroupGridCardContent = ({
         >
           {visibleMonitors.map((monitor) => (
             <EuiFlexItem
-              key={`${monitor.configId}-${monitor.locationId}`}
+              key={`${monitor.configId}-${monitor.locations[0].id}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
               <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
@@ -116,7 +116,10 @@ export const GroupGridItem = ({
   const downMonitors = groupMonitors.filter((monitor) => {
     const downConfigs = overviewStatus?.downConfigs;
     if (downConfigs) {
-      return downConfigs[`${monitor.configId}-${monitor.locationId}`]?.status === 'down';
+      return (
+        downConfigs[monitor.configId] ||
+        downConfigs[monitor.configId + '-' + monitor.locations[0].id]
+      );
     }
   });
 

@@ -13,8 +13,8 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
+import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
-import { ConfigKey } from '../../../common/constants/monitor_management';
 import { RouteContext } from '../types';
 import {
   EncryptedSyntheticsMonitorAttributes,
@@ -213,7 +213,7 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const monitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+          const monitorUrl = String(statusAgg.top?.[0].metrics?.['url.full.keyword']);
 
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
@@ -253,13 +253,26 @@ export class OverviewStatusService {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
       const meta = this.getMonitorMeta(monitor);
       monitor.attributes[ConfigKey.LOCATIONS]?.forEach((location) => {
-        disabledConfigs[`${meta.configId}-${location.id}`] = {
-          monitorQueryId,
-          status: 'disabled',
-          locationId: location.id,
-          locationLabel: location.label,
-          ...meta,
-        };
+        if (disabledConfigs[meta.configId]) {
+          disabledConfigs[meta.configId].locations.push({
+            id: location.id,
+            label: location.label,
+            status: MONITOR_STATUS_ENUM.DISABLED,
+          });
+        } else {
+          disabledConfigs[meta.configId] = {
+            monitorQueryId,
+            overallStatus: MONITOR_STATUS_ENUM.DISABLED,
+            locations: [
+              {
+                id: location.id,
+                label: location.label,
+                status: MONITOR_STATUS_ENUM.DISABLED,
+              },
+            ],
+            ...meta,
+          };
+        }
       });
     });
 
@@ -277,36 +290,84 @@ export class OverviewStatusService {
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const metaInfo = this.getMonitorMeta(monitor);
+        const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
+        const location = {
+          status,
+          id: monLocation.id,
+          label: monLocation.label,
+        };
         const meta = {
           ...metaInfo,
           monitorQueryId: monitorId,
-          locationId: monLocation.id,
           timestamp: locData?.timestamp,
-          locationLabel: monLocation.label,
           urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
+          locations: [location],
+          overallStatus: status,
         };
-        const monLocId = `${meta.configId}-${monLocation.id}`;
-        if (locData) {
-          if (locData.status === 'down') {
+        switch (status) {
+          case MONITOR_STATUS_ENUM.DOWN:
             down += 1;
-            downConfigs[monLocId] = {
-              ...meta,
-              status: 'down',
-            };
-          } else if (locData.status === 'up') {
+            break;
+          case MONITOR_STATUS_ENUM.UP:
             up += 1;
-            upConfigs[monLocId] = {
-              ...meta,
-              status: 'up',
-            };
+            break;
+          default:
+            break;
+        }
+
+        if (
+          downConfigs[meta.configId] ||
+          upConfigs[meta.configId] ||
+          pendingConfigs[meta.configId]
+        ) {
+          const existingMeta =
+            downConfigs[meta.configId] || upConfigs[meta.configId] || pendingConfigs[meta.configId];
+          existingMeta.locations.push(location);
+          // check if urls is missing from existing meta and update it
+          if (!existingMeta.urls && meta.urls) {
+            existingMeta.urls = meta.urls;
+          }
+          // also update timestamp if it is missing or older
+          if (
+            !existingMeta.timestamp ||
+            (meta.timestamp && moment(meta.timestamp).isAfter(existingMeta.timestamp))
+          ) {
+            existingMeta.timestamp = meta.timestamp;
+          }
+          if (status === MONITOR_STATUS_ENUM.DOWN) {
+            existingMeta.overallStatus = MONITOR_STATUS_ENUM.DOWN;
           }
         } else {
-          pendingConfigs[monLocId] = {
-            status: 'unknown',
-            ...meta,
-          };
+          switch (status) {
+            case MONITOR_STATUS_ENUM.DOWN:
+              downConfigs[meta.configId] = meta;
+              break;
+            case MONITOR_STATUS_ENUM.UP:
+              upConfigs[meta.configId] = meta;
+              break;
+            default:
+              pendingConfigs[meta.configId] = meta;
+              break;
+          }
         }
       });
+    });
+    // check if any pending config have any up/down location, move it there instead of keeping it in pending and delete it from pending
+    Object.values(pendingConfigs).forEach((pendingMeta) => {
+      if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.DOWN)) {
+        down += 1;
+        // sort locations and move pending to end
+        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
+        downConfigs[pendingMeta.configId] = pendingMeta;
+        delete pendingConfigs[pendingMeta.configId];
+      } else if (pendingMeta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.UP)) {
+        up += 1;
+        upConfigs[pendingMeta.configId] = pendingMeta;
+        pendingMeta.overallStatus = MONITOR_STATUS_ENUM.UP;
+        // sort locations and move pending to end
+        pendingMeta.locations = movePendingToEnd(pendingMeta.locations);
+        delete pendingConfigs[pendingMeta.configId];
+      }
     });
 
     return {
@@ -376,4 +437,16 @@ export class OverviewStatusService {
       maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
     };
   }
+}
+
+function movePendingToEnd(locations: Array<{ id: string; label: string; status: string }>) {
+  return locations.sort((a, b) => {
+    if (a.status === MONITOR_STATUS_ENUM.PENDING && b.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return 1;
+    }
+    if (b.status === MONITOR_STATUS_ENUM.PENDING && a.status !== MONITOR_STATUS_ENUM.PENDING) {
+      return -1;
+    }
+    return 0;
+  });
 }

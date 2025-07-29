@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
+import { useMonitorHealthColor } from '../components/monitors_page/hooks/use_monitor_health_color';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -26,8 +27,6 @@ export function useStatusByLocation({
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) {
-  const { euiTheme } = useEuiTheme();
-
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { locations: allLocations } = useLocations();
@@ -71,20 +70,9 @@ export function useStatusByLocation({
     { name: 'getMonitorStatusByLocation' }
   );
 
+  const getColor = useMonitorHealthColor();
+
   return useMemo(() => {
-    const getColor = (status: string) => {
-      const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
-
-      switch (status) {
-        case 'up':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
-        case 'down':
-          return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
-        default:
-          return euiTheme.colors.backgroundBaseSubdued;
-      }
-    };
-
     const locationPings = (data?.aggregations?.locations.buckets ?? []).map((loc) => {
       return loc.summary.hits.hits?.[0]._source as Ping;
     });
@@ -93,7 +81,11 @@ export function useStatusByLocation({
         const fullLoc = allLocations.find((l) => l.id === loc.id);
         if (fullLoc) {
           const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
-          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
+          const status = ping
+            ? ping.summary?.down ?? 0 > 0
+              ? MONITOR_STATUS_ENUM.DOWN
+              : MONITOR_STATUS_ENUM.UP
+            : MONITOR_STATUS_ENUM.PENDING;
           return {
             status,
             id: fullLoc?.id,
@@ -108,16 +100,5 @@ export function useStatusByLocation({
       locations,
       loading,
     };
-  }, [
-    allLocations,
-    data?.aggregations?.locations.buckets,
-    loading,
-    monitorLocations,
-    euiTheme.themeName,
-    euiTheme.colors.success,
-    euiTheme.colors.vis.euiColorVis0,
-    euiTheme.colors.vis.euiColorVis6,
-    euiTheme.colors.vis.euiColorVis9,
-    euiTheme.colors.backgroundBaseSubdued,
-  ]);
+  }, [data?.aggregations?.locations.buckets, monitorLocations, loading, allLocations, getColor]);
 }

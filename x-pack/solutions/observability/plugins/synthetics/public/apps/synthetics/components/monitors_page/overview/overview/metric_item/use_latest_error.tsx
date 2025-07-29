@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../../../contexts';
 import {
   getMonitorLastErrorRunAction,
@@ -15,16 +16,11 @@ import {
 } from '../../../../../state';
 
 interface UseMonitorLatestPingParams {
-  monitorId: string;
-  locationLabel: string;
   configIdByLocation: string;
+  monitor: OverviewStatusMetaData;
 }
 
-export const useLatestError = ({
-  monitorId,
-  locationLabel,
-  configIdByLocation,
-}: UseMonitorLatestPingParams) => {
+export const useLatestError = ({ monitor, configIdByLocation }: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
   const { lastRefresh } = useSyntheticsRefreshContext();
   const isPopoverOpen = useSelector(selectErrorPopoverState);
@@ -32,10 +28,18 @@ export const useLatestError = ({
   const { data: latestPing, loading } = useSelector(selectLastErrorRunMetadata);
 
   useEffect(() => {
-    if (monitorId && locationLabel && isPopoverOpen === configIdByLocation) {
-      dispatch(getMonitorLastErrorRunAction.get({ monitorId, locationLabel }));
+    const locationLabel = monitor?.locations?.[0]?.label;
+    if (locationLabel && isPopoverOpen === configIdByLocation) {
+      dispatch(getMonitorLastErrorRunAction.get({ monitorId: monitor.configId, locationLabel }));
     }
-  }, [dispatch, monitorId, locationLabel, lastRefresh, isPopoverOpen, configIdByLocation]);
+  }, [
+    dispatch,
+    lastRefresh,
+    isPopoverOpen,
+    configIdByLocation,
+    monitor?.locations,
+    monitor.configId,
+  ]);
 
   return { loading, latestPing };
 };

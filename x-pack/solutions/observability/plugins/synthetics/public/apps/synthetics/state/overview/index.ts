@@ -54,16 +54,16 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.isErrorPopoverOpen = action.payload;
     })
     .addCase(trendStatsBatch.get, (state, action) => {
-      for (const { configId, locationId } of action.payload) {
-        if (!state.trendStats[configId + locationId]) {
-          state.trendStats[configId + locationId] = 'loading';
+      for (const { configId } of action.payload) {
+        if (!state.trendStats[configId]) {
+          state.trendStats[configId] = 'loading';
         }
       }
     })
     .addCase(trendStatsBatch.fail, (state, action) => {
-      for (const { configId, locationId } of action.payload) {
-        if (state.trendStats[configId + locationId] === 'loading') {
-          state.trendStats[configId + locationId] = null;
+      for (const { configId } of action.payload) {
+        if (state.trendStats[configId] === 'loading') {
+          state.trendStats[configId] = null;
         }
       }
     })
@@ -71,9 +71,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       for (const key of Object.keys(action.payload.trendStats)) {
         state.trendStats[key] = action.payload.trendStats[key];
       }
-      for (const { configId, locationId } of action.payload.batch) {
-        if (!action.payload.trendStats[configId + locationId]) {
-          state.trendStats[configId + locationId] = null;
+      for (const { configId } of action.payload.batch) {
+        if (!action.payload.trendStats[configId]) {
+          state.trendStats[configId] = null;
         }
       }
     })

@@ -60,41 +60,41 @@ describe('useMonitorsSortedByStatus', () => {
               upConfigs: {
                 [`test-monitor-up-1-${location2.id}`]: {
                   configId: 'test-monitor-up-1',
-                  locationId: location2.id,
+                  locations: [location2],
                   name: 'test-monitor-up-1',
                 },
                 [`test-monitor-up-2-${location2.id}`]: {
                   configId: 'test-monitor-up-2',
-                  locationId: location2.id,
+                  locations: [location2],
                   name: 'test-monitor-up-2',
                 },
                 [`test-monitor-3-${location2.id}`]: {
                   configId: 'test-monitor-3',
-                  locationId: location2.id,
+                  locations: [location2],
                   name: 'test-monitor-3',
                 },
               },
               downConfigs: {
                 [`test-monitor-down-1-${location1.id}`]: {
                   configId: 'test-monitor-down-1',
-                  locationId: location1.id,
+                  locations: [location1],
                   name: 'test-monitor-down-1',
                 },
                 [`test-monitor-down-2-${location1.id}`]: {
                   configId: 'test-monitor-down-2',
-                  locationId: location1.id,
+                  locations: [location1],
                   name: 'test-monitor-down-2',
                 },
                 [`test-monitor-3${location1.id}`]: {
                   configId: 'test-monitor-3',
-                  locationId: location1.id,
+                  locations: [location1],
                   name: 'test-monitor-3',
                 },
               },
               pendingConfigs: {
                 [`test-monitor-4-${location1.id}`]: {
                   configId: 'test-monitor-4',
-                  locationId: location1.id,
+                  locations: [location1],
                   name: 'test-monitor-4',
                 },
               },
@@ -102,7 +102,7 @@ describe('useMonitorsSortedByStatus', () => {
             disabledConfigs: {
               [`test-monitor-disabled-1-${location1.id}`]: {
                 configId: 'test-monitor-disabled-1',
-                locationId: location1.id,
+                locations: [location1],
                 name: 'test-monitor-disabled-1',
               },
             } as any,
@@ -122,42 +122,98 @@ describe('useMonitorsSortedByStatus', () => {
       Array [
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
         Object {
           "configId": "test-monitor-4",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-4",
         },
         Object {
           "configId": "test-monitor-disabled-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-disabled-1",
         },
         Object {
           "configId": "test-monitor-down-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-1",
         },
         Object {
           "configId": "test-monitor-down-2",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-2",
         },
         Object {
           "configId": "test-monitor-up-1",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-1",
         },
         Object {
           "configId": "test-monitor-up-2",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-2",
         },
       ]
@@ -174,42 +230,98 @@ describe('useMonitorsSortedByStatus', () => {
       Array [
         Object {
           "configId": "test-monitor-up-2",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-2",
         },
         Object {
           "configId": "test-monitor-up-1",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-1",
         },
         Object {
           "configId": "test-monitor-down-2",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-2",
         },
         Object {
           "configId": "test-monitor-down-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-1",
         },
         Object {
           "configId": "test-monitor-disabled-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-disabled-1",
         },
         Object {
           "configId": "test-monitor-4",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-4",
         },
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
       ]
@@ -230,17 +342,38 @@ describe('useMonitorsSortedByStatus', () => {
       Array [
         Object {
           "configId": "test-monitor-up-2",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-2",
         },
         Object {
           "configId": "test-monitor-up-1",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-up-1",
         },
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_east",
+          "locations": Array [
+            Object {
+              "id": "us_east",
+              "isServiceManaged": true,
+              "label": "US East",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
       ]
@@ -261,17 +394,38 @@ describe('useMonitorsSortedByStatus', () => {
       Array [
         Object {
           "configId": "test-monitor-down-2",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-2",
         },
         Object {
           "configId": "test-monitor-down-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-down-1",
         },
         Object {
           "configId": "test-monitor-3",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-3",
         },
       ]
@@ -292,7 +446,14 @@ describe('useMonitorsSortedByStatus', () => {
       Array [
         Object {
           "configId": "test-monitor-disabled-1",
-          "locationId": "us_central",
+          "locations": Array [
+            Object {
+              "id": "us_central",
+              "isServiceManaged": true,
+              "label": "US Central",
+              "url": "mockUrl",
+            },
+          ],
           "name": "test-monitor-disabled-1",
         },
       ]

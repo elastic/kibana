@@ -57,7 +57,7 @@ export function* refreshTrends(): Generator<unknown, void, any> {
         const trend = existingTrends[key] as OverviewTrend;
         return {
           configId: trend.configId,
-          locationId: trend.locationId,
+          locationIds: trend.locationIds,
           schedule: monitorConfigs.find(({ configId }) => configId === trend.configId)!.schedule,
         };
       });

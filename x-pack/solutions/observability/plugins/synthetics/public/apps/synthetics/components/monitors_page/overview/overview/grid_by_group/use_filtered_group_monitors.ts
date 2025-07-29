@@ -27,7 +27,9 @@ export const useFilteredGroupMonitors = ({
 
   return groupMonitors.filter((monitor) => {
     const locationLabel =
-      locations.find((location) => location.id === monitor.locationId)?.label ?? monitor.locationId;
+      locations.find((location) => {
+        return monitor.locations.some((loc) => loc.id === location.id);
+      })?.label ?? monitor.locations[0].label;
 
     const status = getConfigStatusByLocation(overviewStatus, monitor.configId, locationLabel);
     if (statusFilter === 'up' && status.status === 'up') {

@@ -38,15 +38,20 @@ export const OverviewStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
     configId: t.string,
-    status: t.string,
-    locationId: t.string,
-    locationLabel: t.string,
+    locations: t.array(
+      t.interface({
+        id: t.string,
+        label: t.string,
+        status: t.string,
+      })
+    ),
     name: t.string,
     schedule: t.string,
     isEnabled: t.boolean,
     tags: t.array(t.string),
     isStatusAlertEnabled: t.boolean,
     type: t.string,
+    overallStatus: t.string,
   }),
   t.partial({
     projectId: t.string,

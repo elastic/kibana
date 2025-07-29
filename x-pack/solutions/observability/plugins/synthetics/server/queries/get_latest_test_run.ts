@@ -14,12 +14,14 @@ export async function getLatestTestRun<F>({
   syntheticsEsClient,
   monitorId,
   locationLabel,
+  locationId,
   from = 'now-1d',
   to = 'now',
 }: {
   syntheticsEsClient: SyntheticsEsClient;
   monitorId: string;
   locationLabel?: string;
+  locationId?: string;
   from?: string;
   to?: string;
 }): Promise<Ping | undefined> {
@@ -31,6 +33,7 @@ export async function getLatestTestRun<F>({
           getRangeFilter({ from, to }),
           { term: { 'monitor.id': monitorId } },
           ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
+          ...(locationId ? [{ term: { 'observer.name': locationId } }] : []),
         ] as QueryDslQueryContainer[],
       },
     },
