@@ -22,11 +22,25 @@ export const metrics: InventoryMetricsConfig<S3Aggregations> = {
     awsS3DownloadBytes,
     awsS3UploadBytes,
   },
+  requiredTsvb: [
+    'awsS3BucketSize',
+    'awsS3NumberOfObjects',
+    'awsS3TotalRequests',
+    'awsS3DownloadBytes',
+    'awsS3UploadBytes',
+  ],
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => [
+    's3BucketSize',
+    's3NumberOfObjects',
+    's3TotalRequests',
+    's3UploadBytes',
+    's3DownloadBytes',
+  ],
   defaultSnapshot: 's3BucketSize',
   defaultTimeRangeInSeconds: 86400 * 7, // 7 days
 };

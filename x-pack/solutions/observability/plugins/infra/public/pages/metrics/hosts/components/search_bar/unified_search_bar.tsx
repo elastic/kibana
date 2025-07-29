@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -21,8 +22,6 @@ import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../../hooks/use_fetcher';
-import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
-import type { SchemaTypes } from '../../../../../../common/http_api/shared/schema_type';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -38,7 +37,7 @@ export const UnifiedSearchBar = () => {
 
   const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
 
-  const schemas: SchemaTypes[] = useMemo(
+  const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata]
   );
@@ -49,7 +48,9 @@ export const UnifiedSearchBar = () => {
     const current = searchCriteria.preferredSchema;
 
     if (current === null) {
-      const next = schemas.includes(METRIC_SCHEMA_SEMCONV) ? METRIC_SCHEMA_SEMCONV : schemas[0];
+      const next = schemas.includes(DataSchemaFormat.SEMCONV)
+        ? DataSchemaFormat.SEMCONV
+        : schemas[0];
       onPreferredSchemaChange(next);
     }
   }, [
