@@ -375,8 +375,8 @@ describe('Detections Usage and Metrics', () => {
             elastic_customized_total: {
               alerts: 3400,
               cases: 1,
-              disabled: 0,
-              enabled: 1,
+              disabled: 1,
+              enabled: 0,
               legacy_notifications_enabled: 0,
               legacy_notifications_disabled: 0,
               notifications_enabled: 0,
@@ -387,9 +387,9 @@ describe('Detections Usage and Metrics', () => {
           },
           elastic_detection_rule_upgrade_status: {
             total: 1,
-            customized: 0,
-            enabled: 1,
-            disabled: 0,
+            customized: 1,
+            enabled: 0,
+            disabled: 1,
           },
         },
       });
@@ -685,6 +685,18 @@ describe('Detections Usage and Metrics', () => {
               alert_suppression: initialAlertSuppression,
             },
             elastic_total: {
+              alerts: 3400,
+              cases: 1,
+              disabled: 0,
+              enabled: 1,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_noncustomized_total: {
               alerts: 3400,
               cases: 1,
               disabled: 0,
