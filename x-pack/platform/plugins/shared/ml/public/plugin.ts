@@ -76,6 +76,15 @@ import { getElasticModels } from './application/services/get_elastic_models';
 import { renderApp } from './application/render_app';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import { registerEmbeddables } from './embeddables';
+import {
+  registerHomeFeature,
+  registerManagementSections,
+  registerMapExtension,
+  registerMlAlerts,
+  registerMlUiActions,
+  registerSearchLinks,
+  registerCasesAttachments,
+} from './register_helper';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -232,16 +241,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
           if (mlEnabled) {
-            const {
-              registerHomeFeature,
-              registerManagementSections,
-              registerMapExtension,
-              registerMlAlerts,
-              registerMlUiActions,
-              registerSearchLinks,
-              registerCasesAttachments,
-            } = await import('./register_helper');
-
             // add ML to home page
             if (pluginsSetup.home) {
               registerHomeFeature(pluginsSetup.home);

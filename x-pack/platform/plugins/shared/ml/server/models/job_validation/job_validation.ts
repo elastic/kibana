@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
-
 import type { MessageId, JobValidationMessage } from '@kbn/ml-common-constants/messages';
 import { getMessages } from '@kbn/ml-common-constants/messages';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
