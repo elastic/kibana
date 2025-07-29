@@ -313,8 +313,6 @@ export const DiscoverTopNav = ({
               getCreationOptions={async (initialState, builder) => {
                 const stateStorage = stateContainer.stateStorage;
                 const panels = stateStorage.get<ControlPanelsState>('controlPanels');
-                console.log(panels, 'Control Panels State');
-                console.log(esqlVariables, 'ESQL Variables');
 
                 return {
                   initialState: {
