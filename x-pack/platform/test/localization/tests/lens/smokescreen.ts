@@ -144,6 +144,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
+  function getTranslationDe(term: string, field?: string, values: number = 3) {
+    switch (term) {
+      case 'legacyMetric':
+        return 'Legacy-Metrik';
+      case 'datatable':
+        return 'Tabelle';
+      case 'bar':
+        return 'Säulendiagramm';
+      case 'line':
+        return 'Liniengraphik';
+      case 'pie':
+        return 'Kreisdiagramm';
+      case 'treemap':
+        return 'Treemap';
+      case 'heatmap':
+        return 'Heatmap';
+      case 'Number':
+        return 'Zahl';
+      case 'Percent':
+        return 'Prozent';
+      case 'Linear':
+        return 'Linear';
+      case 'Records':
+      case 'records':
+        return 'Einträge';
+      case 'moving_average':
+        return 'Bewegungsdurchschnitt';
+      case 'average':
+        return field ? `${field} Durchschnitt` : `Durchschnitt`;
+      case 'max':
+        return field ? `${field} Maximum` : 'Maximum';
+      case 'terms':
+        return field ? `${field} Top ${values} Werte` : 'Top Werte';
+      case 'sum':
+        return 'Summe';
+      default:
+        return term;
+    }
+  }
+
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
     switch (locale) {
       case 'ja-JP':
@@ -152,6 +192,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return getTranslationZh;
       case 'fr-FR':
         return getTranslationFr;
+      case 'de-DE':
+        return getTranslationDe;
       default:
         return (v: string, field?: string) => v;
     }
