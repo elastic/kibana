@@ -119,7 +119,7 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ onHide }) => {
             css={css`
               &.hide-scrollbar {
                 scrollbar-width: none;
-                padding: 0 ${euiTheme.size.xxs};
+                padding: 0 ${euiTheme.size.s};
               }
             `}
           >
