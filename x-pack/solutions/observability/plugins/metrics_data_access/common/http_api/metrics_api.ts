@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
+import type { estypes } from '@elastic/elasticsearch';
 import { afterKeyObjectRT, timeRangeRT } from './metrics_explorer';
 import type { MetricsUIAggregation } from '../inventory_models/types';
 
@@ -90,8 +91,12 @@ export const MetricsAPIResponseRT = rt.type({
   info: MetricsAPIPageInfoRT,
 });
 
-export type MetricsAPIRequest = Omit<rt.OutputOf<typeof MetricsAPIRequestRT>, 'metrics'> & {
+export type MetricsAPIRequest = Omit<
+  rt.OutputOf<typeof MetricsAPIRequestRT>,
+  'metrics' | 'filters'
+> & {
   metrics: MetricsAPIMetric[];
+  filters?: { bool: estypes.QueryDslBoolQuery };
 };
 
 export type MetricsAPITimerange = rt.TypeOf<typeof timeRangeRT>;
