@@ -42,6 +42,28 @@ export class RelatedDashboardsClient {
     private referencedPanelManager: ReferencedPanelManager
   ) {}
 
+  public async fetchRelatedDashboards(): Promise<{
+    suggestedDashboards: SuggestedDashboard[];
+    linkedDashboards: LinkedDashboard[];
+  }> {
+    const [alertDocument] = await Promise.all([
+      this.alertsClient.getAlertById(this.alertId),
+      this.fetchFirst500Dashboards(),
+    ]);
+    this.setAlert(alertDocument);
+    const [suggestedDashboards, linkedDashboards] = await Promise.all([
+      this.fetchSuggestedDashboards(),
+      this.getLinkedDashboards(),
+    ]);
+    const filteredSuggestedDashboards = suggestedDashboards.filter(
+      (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
+    );
+    return {
+      suggestedDashboards: filteredSuggestedDashboards.slice(0, 10), // limit to 10 suggested dashboards
+      linkedDashboards,
+    };
+  }
+
   private getPanelIndicesMap: Record<
     SuggestedDashboardsValidPanelType,
     (panel: DashboardPanel) => Set<string> | undefined
@@ -94,28 +116,6 @@ export class RelatedDashboardsClient {
 
   private isLensAttributesState(state: unknown): state is LensAttributes['state'] {
     return typeof state === 'object' && state !== null && 'datasourceStates' in state;
-  }
-
-  public async fetchRelatedDashboards(): Promise<{
-    suggestedDashboards: SuggestedDashboard[];
-    linkedDashboards: LinkedDashboard[];
-  }> {
-    const [alertDocument] = await Promise.all([
-      this.alertsClient.getAlertById(this.alertId),
-      this.fetchFirst500Dashboards(),
-    ]);
-    this.setAlert(alertDocument);
-    const [suggestedDashboards, linkedDashboards] = await Promise.all([
-      this.fetchSuggestedDashboards(),
-      this.getLinkedDashboards(),
-    ]);
-    const filteredSuggestedDashboards = suggestedDashboards.filter(
-      (suggested) => !linkedDashboards.some((linked) => linked.id === suggested.id)
-    );
-    return {
-      suggestedDashboards: filteredSuggestedDashboards.slice(0, 10), // limit to 10 suggested dashboards
-      linkedDashboards,
-    };
   }
 
   private setAlert(alert: AlertData) {
