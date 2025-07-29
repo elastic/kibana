@@ -51,7 +51,6 @@ import {
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
-  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
