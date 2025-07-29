@@ -128,6 +128,7 @@ describe('logs_explorer_url_schema', () => {
         name: 'All logs',
         title: 'logs-*,dataset-logs-*-*',
         timeFieldName: '@timestamp',
+        managed: true,
       });
     });
   });

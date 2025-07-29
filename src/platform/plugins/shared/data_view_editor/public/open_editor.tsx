@@ -50,7 +50,7 @@ export const getEditorOpener =
       allowAdHocDataView = false,
       editData,
       onDuplicate,
-      isEdit,
+      isDuplicatingManaged,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -82,7 +82,7 @@ export const getEditorOpener =
               allowAdHocDataView={allowAdHocDataView}
               showManagementLink={Boolean(editData && editData.isPersisted())}
               onDuplicate={onDuplicate}
-              isEdit={isEdit}
+              isDuplicatingManaged={isDuplicatingManaged}
             />
           </KibanaReactContextProvider>,
           core
