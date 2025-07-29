@@ -49,8 +49,7 @@ export function StreamDetailSignificantEventsView({
     end,
   });
 
-  const { addQuery, removeQuery, bulk } =
-    useSignificantEventsApi({ name: definition.stream.name }) || {};
+  const { addQuery, removeQuery, bulk } = useSignificantEventsApi({ name: definition.stream.name });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isGenerateFlyoutOpen, setIsGenerateFlyoutOpen] = useState(false);

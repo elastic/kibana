@@ -117,9 +117,7 @@ function SignificantEventFlyoutContents(props: GenerateSignificantEventFlyoutPro
                 setGeneratedQueries([]);
                 setSelectedQueries([]);
 
-                const generation$ = generate({
-                  connectorId: aiFeatures?.selectedConnector!,
-                });
+                const generation$ = generate(aiFeatures?.selectedConnector!);
                 generation$.subscribe({
                   next: (result) => {
                     setGeneratedQueries((prev) => [
