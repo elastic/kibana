@@ -13,6 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { vislibVisTypeStyles } from './vislib/vislib_vis_type.styles';
 import { vislibLayoutStyles } from './vislib/lib/layout/layout.styles';
 import { vislibMeterStyles } from './vislib/visualizations/gauges/meter.styles';
+import { vislibTooltipStyles } from './vislib/components/tooltip/tooltip.styles';
 
 // Styles for non-React DOM nodes
 export const GlobalVislibWrapperStyles = () => {
@@ -21,6 +22,7 @@ export const GlobalVislibWrapperStyles = () => {
   const vislibStyles = vislibVisTypeStyles;
   const layoutStyles = vislibLayoutStyles(euiThemeContext);
   const meterStyles = vislibMeterStyles(euiThemeContext);
+  const tooltipStyles = vislibTooltipStyles(euiThemeContext);
 
-  return <Global styles={[vislibStyles, layoutStyles, meterStyles]} />;
+  return <Global styles={[vislibStyles, layoutStyles, meterStyles, tooltipStyles]} />;
 };

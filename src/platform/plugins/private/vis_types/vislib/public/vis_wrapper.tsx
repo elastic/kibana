@@ -22,7 +22,6 @@ import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
 
-import './index.scss';
 import { getUsageCollectionStart } from './services';
 import { GlobalVislibWrapperStyles } from './vis_wrapper.styles';
 
