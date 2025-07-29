@@ -474,7 +474,7 @@ export class ChromeService {
       />
     );
 
-    // create observables one here to avoid re-renders, TODO: do it for everything else
+    // create observables once here to avoid re-renders, TODO: do it for everything else
     const navLinks$ = navLinks.getNavLinks$();
     const activeNodes$ = projectNavigation.getActiveNodes$();
     const navigationTreeUi$ = projectNavigation.getNavigationTreeUi$();
@@ -547,7 +547,7 @@ export class ChromeService {
                 setPanelSelectedNode={projectNavigation.setPanelSelectedNode}
                 loadingCount$={loadingCount$}
                 reportEvent={analytics.reportEvent}
-                dataTestSubj={activeDataTestSubj$}
+                dataTestSubj$={activeDataTestSubj$}
               />
             )}
 

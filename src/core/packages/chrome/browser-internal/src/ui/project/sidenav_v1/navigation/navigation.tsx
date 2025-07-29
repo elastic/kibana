@@ -17,10 +17,10 @@ import {
 
 export type Props = NavigationProps & NavigationChromeDependencies;
 
-export const Navigation: FC<Props> = ({ dataTestSubj, navigationTree$, ...rest }) => {
+export const Navigation: FC<Props> = ({ dataTestSubj$, navigationTree$, ...rest }) => {
   return (
     <NavigationKibanaProvider {...rest}>
-      <NavigationComponent dataTestSubj={dataTestSubj} navigationTree$={navigationTree$} />
+      <NavigationComponent dataTestSubj$={dataTestSubj$} navigationTree$={navigationTree$} />
     </NavigationKibanaProvider>
   );
 };

@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { isObservable, Observable, of } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { useNavigation as useNavigationService } from '../services';
 import {
   FeedbackBtn,
@@ -42,22 +42,14 @@ const NavigationContext = createContext<Context>({
 
 export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
-  dataTestSubj?: string | Observable<string | undefined>;
+  dataTestSubj$?: Observable<string | undefined>;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj: _dataTestSubj }) => {
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
   const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
     useNavigationService();
 
-  const dataTestSubj$ = useMemo(
-    () => (isObservable(_dataTestSubj) ? _dataTestSubj : of(_dataTestSubj)),
-    [_dataTestSubj]
-  );
-
-  const dataTestSubj = useObservable(
-    dataTestSubj$,
-    typeof _dataTestSubj === 'string' ? _dataTestSubj : undefined
-  );
+  const dataTestSubj = useObservable(dataTestSubj$ ?? EMPTY, undefined);
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationTree = useObservable(navigationTree$, { id: 'es', body: [] });
