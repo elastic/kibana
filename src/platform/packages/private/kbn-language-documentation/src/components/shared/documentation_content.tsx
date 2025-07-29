@@ -42,6 +42,30 @@ function createLicenseTooltip(license: LicenseInfo): string {
   return tooltip;
 }
 
+interface LicenseInfo {
+  name: string;
+  isSignatureSpecific: boolean;
+  paramsWithLicense: string[];
+}
+
+function createLicenseTooltip(license: LicenseInfo): string {
+  let tooltip = i18n.translate('languageDocumentation.licenseRequiredTooltip', {
+    defaultMessage: 'This feature requires {license} license',
+    values: { license: license.name },
+  });
+
+  if (license.isSignatureSpecific && license.paramsWithLicense.length > 0) {
+    tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
+      defaultMessage: ' only for specific values: {params}',
+      values: { license: license.name, params: license.paramsWithLicense.join(', ') },
+    })}`;
+  }
+
+  tooltip += `.`;
+
+  return tooltip;
+}
+
 interface DocumentationContentProps {
   searchText: string;
   scrollTargets: React.MutableRefObject<{ [key: string]: HTMLElement }>;

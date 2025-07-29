@@ -11,9 +11,56 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
+import { FunctionDefinition } from '@kbn/esql-ast';
 import { functions } from '../src/sections/generated/scalar_functions';
 import { getLicenseInfo } from '../src/utils/get_license_info';
 import { FunctionDefinition } from '../src/types';
+
+interface LicenseInfo {
+  name: string;
+  isSignatureSpecific: boolean;
+  paramsWithLicense: string[];
+}
+
+function createLicenseInfo(
+  licenseName: string | undefined,
+  fnDefinition: FunctionDefinition | undefined
+): LicenseInfo | undefined {
+  if (!licenseName) {
+    return undefined;
+  }
+
+  if (fnDefinition?.license) {
+    return {
+      name: licenseName,
+      isSignatureSpecific: false,
+      paramsWithLicense: [],
+    };
+  }
+
+  if (fnDefinition?.signatures) {
+    const licensedSignatures = fnDefinition.signatures.filter((sig) => sig.license === licenseName);
+
+    if (licensedSignatures.length > 0) {
+      // Extract parameter types from licensed signatures
+      const paramTypes = new Set<string>();
+      licensedSignatures.forEach((sig) => {
+        sig.params?.forEach((param) => {
+          if (param.type) {
+            paramTypes.add(param.type);
+          }
+        });
+      });
+
+      const paramsWithLicense = Array.from(paramTypes);
+      return {
+        name: licenseName,
+        isSignatureSpecific: !!paramsWithLicense.length,
+        paramsWithLicense,
+      };
+    }
+  }
+}
 
 interface DocsSectionContent {
   description: string;
