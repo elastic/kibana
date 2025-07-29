@@ -11,7 +11,7 @@ import {
   MessageContentComplex,
   isAIMessage,
 } from '@langchain/core/messages';
-import { ToolResult } from '@kbn/onechat-server/src/tool_result';
+import type { RunToolReturn } from '@kbn/onechat-server';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -62,7 +62,7 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
  * Note: this assumes the tool call was performed with the right configuration, so that
  * it was executed from a onechat agent.
  */
-export const extractToolReturn = (message: ToolMessage): ToolResult[] => {
+export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
   if (!message.artifact) {
     throw new Error('No artifact attached to tool message');
   }
@@ -70,5 +70,5 @@ export const extractToolReturn = (message: ToolMessage): ToolResult[] => {
     throw new Error('No results attached to artifact');
   }
 
-  return message.artifact.results as ToolResult[];
+  return message.artifact as RunToolReturn;
 };

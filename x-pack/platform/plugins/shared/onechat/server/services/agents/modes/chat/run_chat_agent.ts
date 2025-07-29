@@ -100,6 +100,7 @@ export const runChatAgent: RunChatAgentFn = async (
     convertGraphEvents({
       graphName: chatAgentGraphName,
       toolIdMapping,
+      logger,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
