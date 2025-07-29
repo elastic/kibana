@@ -47,7 +47,7 @@ export const ProcessorTypeSelector = ({
   const handleChange = (type: ProcessorType) => {
     const formState = getDefaultFormStateByType(
       type,
-      selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
       { grokCollection }
     );
     reset(formState);

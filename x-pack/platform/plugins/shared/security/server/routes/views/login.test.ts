@@ -52,7 +52,7 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ excludeFromOAS: true });
+      expect(routeConfig.options).toEqual({ excludeFromOAS: true, excludeFromRateLimiter: true });
 
       expect(routeConfig.security).toEqual(
         expect.objectContaining({
