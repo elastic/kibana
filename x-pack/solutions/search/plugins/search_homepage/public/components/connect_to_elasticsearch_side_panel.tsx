@@ -19,6 +19,11 @@ export const ConnectToElasticsearchSidePanel = () => {
 
   const { ingestSampleData, isLoading } = useIngestSampleData();
 
+  const canUploadFile = useMemo(
+    () => Boolean(application.capabilities.fileUpload.show),
+    [application.capabilities.fileUpload.show]
+  );
+
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
@@ -29,32 +34,34 @@ export const ConnectToElasticsearchSidePanel = () => {
   return (
     <EuiPanel color="subdued" grow={false}>
       <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiCard
-          display="plain"
-          hasBorder
-          textAlign="left"
-          titleSize="xs"
-          title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileTitle', {
-            defaultMessage: 'Upload a file',
-          })}
-          description={
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-              defaultMessage="Analyze and import data from a file."
-            />
-          }
-          footer={
-            <EuiButtonEmpty
-              onClick={onFileUpload}
-              iconType="importAction"
-              data-test-subj="uploadFileButton"
-            >
-              {i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileButton', {
-                defaultMessage: 'Upload a file',
-              })}
-            </EuiButtonEmpty>
-          }
-        />
+        {canUploadFile ? (
+          <EuiCard
+            display="plain"
+            hasBorder
+            textAlign="left"
+            titleSize="xs"
+            title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileTitle', {
+              defaultMessage: 'Upload a file',
+            })}
+            description={
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
+                defaultMessage="Analyze and import data from a file."
+              />
+            }
+            footer={
+              <EuiButtonEmpty
+                onClick={onFileUpload}
+                iconType="importAction"
+                data-test-subj="uploadFileButton"
+              >
+                {i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileButton', {
+                  defaultMessage: 'Upload a file',
+                })}
+              </EuiButtonEmpty>
+            }
+          />
+        ) : null}
 
         {sampleDataIngest && userPrivileges?.privileges?.canManageIndex === true && (
           <EuiCard
