@@ -47,17 +47,18 @@ const getUserPrompt = (
           })
         : '';
 
-    if (!userPrompt) {
+    if (!userPrompt || messages.length < 1) {
       return messages;
     }
 
-    const lastMessage = messages[messages.length - 1];
+    const messagesCopy = [...messages]; // Create a copy to avoid mutating the original messages
+    const lastMessage = messagesCopy[messagesCopy.length - 1];
     if (lastMessage instanceof HumanMessage) {
-      messages[messages.length - 1] = new HumanMessage(
-        userPrompt + lastMessage.content,
+      messagesCopy[messagesCopy.length - 1] = new HumanMessage(
+        `${userPrompt} ${lastMessage.content}`.trim(),
         lastMessage.additional_kwargs
       );
     }
-    return messages;
+    return messagesCopy;
   };
 };

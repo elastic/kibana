@@ -21,13 +21,13 @@ import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { DefaultAssistantGraphPromptTemplate, chatPromptFactory } from './prompts';
+import { DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, chatPromptFactory } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { getConversationWithNewMessage } from '../../utils/get_conversation';
+import { getConversationWithNewMessage } from '../../utils/get_conversation_with_new_message';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -243,7 +243,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     newMessages,
   });
 
-  const chatPrompt = await chatPromptFactory(DefaultAssistantGraphPromptTemplate, {
+  const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
     kbClient: dataClients?.kbDataClient,

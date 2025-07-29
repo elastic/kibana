@@ -41,7 +41,7 @@ interface Inputs {
   llmType: string | undefined;
 }
 
-export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<{
+export const DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE = ChatPromptTemplate.fromMessages<{
   systemPrompt: string;
   knowledgeHistory: string;
   messages: BaseMessage[];

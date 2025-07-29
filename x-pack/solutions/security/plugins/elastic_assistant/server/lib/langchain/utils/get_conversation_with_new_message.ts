@@ -56,7 +56,7 @@ export const getConversationWithNewMessage = async (params: Params) => {
 
   if (!updatedConversation) {
     params.logger.debug('Not updated conversation');
-    return [];
+    return params.newMessages;
   }
 
   const langChainMessages = getLangChainMessages(updatedConversation.messages ?? []);

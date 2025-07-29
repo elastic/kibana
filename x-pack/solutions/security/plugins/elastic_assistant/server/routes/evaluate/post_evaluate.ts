@@ -39,7 +39,7 @@ import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
 import {
-  DefaultAssistantGraphPromptTemplate,
+  DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE,
   chatPromptFactory,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
@@ -489,7 +489,7 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                 });
 
-                const chatPrompt = await chatPromptFactory(DefaultAssistantGraphPromptTemplate, {
+                const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
                   prompt: defaultSystemPrompt,
                   contentReferencesStore,
                   kbClient: dataClients?.kbDataClient,
