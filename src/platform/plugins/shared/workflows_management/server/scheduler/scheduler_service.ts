@@ -58,11 +58,12 @@ export class SchedulerService {
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    spaceId: string
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
-    const connectorCredentials = await extractConnectorIds(this.actionsClient);
+    const connectorCredentials = await extractConnectorIds(this.actionsClient, spaceId);
 
     const workflowRunId = generateUuid();
     const context = {
@@ -71,6 +72,7 @@ export class SchedulerService {
       event: 'event' in inputs ? inputs.event : undefined,
       connectorCredentials,
       triggeredBy: 'manual', // <-- mark as manual
+      spaceId,
     };
 
     const taskInstance = {
@@ -94,14 +96,18 @@ export class SchedulerService {
     return workflowRunId;
   }
 
-  public async pushEvent(eventType: string, eventData: Record<string, any>) {
+  public async pushEvent(eventType: string, eventData: Record<string, any>, spaceId: string) {
     try {
-      const worklfowsToRun = findWorkflowsByTrigger(eventType);
+      const workflowsToRun = findWorkflowsByTrigger(eventType);
 
-      for (const workflow of worklfowsToRun) {
-        await this.runWorkflow(workflow, {
-          event: eventData,
-        });
+      for (const workflow of workflowsToRun) {
+        await this.runWorkflow(
+          workflow,
+          {
+            event: eventData,
+          },
+          spaceId
+        );
       }
     } catch (error) {
       this.logger.error(`Failed to push event: ${error.message}`);

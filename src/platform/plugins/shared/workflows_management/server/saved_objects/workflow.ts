@@ -13,6 +13,7 @@ import { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 
 export interface WorkflowSavedObjectAttributes {
+  spaceId: string;
   name: string;
   description?: string;
   status: WorkflowStatus;
@@ -30,6 +31,15 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
   mappings: {
     dynamic: false,
     properties: {
+      spaceId: {
+        type: 'keyword',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
+      },
       name: {
         type: 'text',
         fields: {
@@ -81,6 +91,27 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
     }),
   },
   modelVersions: {
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            spaceId: { type: 'keyword' },
+          },
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => {
+            return {
+              attributes: {
+                ...doc.attributes,
+                spaceId: 'default',
+              },
+            };
+          },
+        },
+      ],
+    },
     1: {
       changes: [],
     },

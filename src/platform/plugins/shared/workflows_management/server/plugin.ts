@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -51,6 +52,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private spaces?: SpacesServiceStart | null = null;
   // TODO: replace with esClient promise from core
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -185,9 +187,10 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
+    this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger);
+    defineRoutes(router, this.api, this.logger, this.spaces!);
 
     return {
       management: this.api,
