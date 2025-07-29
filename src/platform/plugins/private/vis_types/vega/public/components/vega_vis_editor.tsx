@@ -51,8 +51,6 @@ function format(
   }
 }
 
-
-
 const monacoOverride = {
   override: ({ colorMode }: UseEuiTheme) =>
     css({
