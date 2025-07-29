@@ -112,7 +112,5 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
