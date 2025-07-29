@@ -7,11 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { APP } from '.';
 
-export class CorePluginStaticAssets implements Plugin {
-  public setup(core: CoreSetup, deps: {}) {}
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  BACKGROUND_SEARCH_ENABLED: true,
+}));
 
-  public start() {}
-  public stop() {}
-}
+describe('Sessions management - APP', () => {
+  it('should return the id', () => {
+    expect(APP.id).toBe('search_sessions');
+  });
+
+  describe('when background search is enabled', () => {
+    it('should return the correct i18n name', () => {
+      expect(APP.getI18nName()).toBe('Background Search');
+    });
+  });
+});

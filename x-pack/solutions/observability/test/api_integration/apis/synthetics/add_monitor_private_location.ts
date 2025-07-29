@@ -26,7 +26,6 @@ import { keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/229365
   describe('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');

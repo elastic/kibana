@@ -772,7 +772,6 @@ src/platform/test/plugin_functional/plugins/core_plugin_deprecations @elastic/ki
 src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_static_assets @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -2475,7 +2474,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 /x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
-/x-pack/test/security_solution_playwright @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
 ## Security Solution sub teams - Cloud Security Posture
