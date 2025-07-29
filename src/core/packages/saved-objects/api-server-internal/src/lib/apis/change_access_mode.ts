@@ -33,8 +33,8 @@ export const isSavedObjectsChangeAccessModeOptions = (
   );
 };
 
-export const performChangeAccessMode = async <T>(
-  { objects, options }: PerformChangeAccessModeParams<T>,
+export const performChangeAccessMode = async (
+  { objects, options }: PerformChangeAccessModeParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
   const { common: commonHelper } = helpers;
