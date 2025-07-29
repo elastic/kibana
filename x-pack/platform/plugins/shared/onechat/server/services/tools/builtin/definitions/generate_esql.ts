@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResult, ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResult, ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('The query to generate an ES|QL query from.'),

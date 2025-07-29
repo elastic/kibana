@@ -26,7 +26,7 @@ import {
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 jest.mock('../agents/modes/create_handler');
 

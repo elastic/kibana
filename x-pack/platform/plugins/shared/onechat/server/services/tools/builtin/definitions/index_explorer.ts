@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
 import { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const indexExplorerSchema = z.object({
   query: z.string().describe('A natural language query to infer which indices to use.'),

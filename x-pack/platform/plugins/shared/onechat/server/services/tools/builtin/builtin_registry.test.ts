@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;

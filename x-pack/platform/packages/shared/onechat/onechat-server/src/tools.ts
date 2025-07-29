@@ -11,10 +11,10 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition } from '@kbn/onechat-common';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
-import { ToolResult } from './tool_result';
 
 export type BuiltinToolId = `.${string}`;
 

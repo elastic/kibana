@@ -77,11 +77,11 @@ const createActions = ({
         round.steps.push(step);
       });
     },
-    setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
+    setToolCallResult: ({ results, toolCallId }: { results: string; toolCallId: string }) => {
       setCurrentRound((round) => {
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
-          step.result = result;
+          step.results = results;
         }
       });
     },

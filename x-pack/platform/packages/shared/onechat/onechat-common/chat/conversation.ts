@@ -57,7 +57,7 @@ export interface ToolCallWithResult {
   /**
    * Result of the tool, serialized as string.
    */
-  result: string;
+  results: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<

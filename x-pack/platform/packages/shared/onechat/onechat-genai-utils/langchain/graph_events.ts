@@ -57,14 +57,14 @@ export const createToolCallEvent = (data: {
 export const createToolResultEvent = (data: {
   toolCallId: string;
   toolId: string;
-  result: string;
+  results: string;
 }): ToolResultEvent => {
   return {
     type: ChatEventType.toolResult,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
-      result: data.result,
+      results: data.results,
     },
   };
 };

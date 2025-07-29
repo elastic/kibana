@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
-import { ToolResult } from './tool_result';
 
 /**
  * Return type for tool invocation APIs.

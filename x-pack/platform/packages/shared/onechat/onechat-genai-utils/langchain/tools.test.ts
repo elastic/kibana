@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/onechat-common';
 import type { ExecutableTool } from '@kbn/onechat-server';
 import { createToolIdMappings, toolToLangchain } from './tools';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const createTool = (
   toolId: string,

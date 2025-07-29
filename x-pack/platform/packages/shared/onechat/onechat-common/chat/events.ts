@@ -43,7 +43,7 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
 export interface ToolResultEventData {
   tool_call_id: string;
   tool_id: string;
-  result: string;
+  results: string;
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;

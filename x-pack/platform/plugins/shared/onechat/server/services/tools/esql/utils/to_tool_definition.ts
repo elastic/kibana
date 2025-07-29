@@ -7,7 +7,7 @@
 
 import { EsqlToolConfig, ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
-import { ToolResult } from '@kbn/onechat-server/src/tool_result';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolPersistedDefinition } from '../../client';
 import { InternalToolDefinition } from '../../tool_provider';
 

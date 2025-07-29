@@ -9,7 +9,7 @@ import { StructuredTool, tool as toTool } from '@langchain/core/tools';
 import { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolProvider, ExecutableTool, RunToolReturn } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;

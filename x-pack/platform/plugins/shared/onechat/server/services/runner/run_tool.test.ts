@@ -17,7 +17,7 @@ import {
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;

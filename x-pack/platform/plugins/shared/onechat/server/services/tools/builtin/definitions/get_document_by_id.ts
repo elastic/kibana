@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { getDocumentById } from '@kbn/onechat-genai-utils';
 import { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
