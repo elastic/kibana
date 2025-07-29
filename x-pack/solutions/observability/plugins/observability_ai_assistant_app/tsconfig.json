@@ -86,7 +86,6 @@
     "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client",
-    "@kbn/react-kibana-context-render",
   ],
   "exclude": ["target/**/*"]
 }
