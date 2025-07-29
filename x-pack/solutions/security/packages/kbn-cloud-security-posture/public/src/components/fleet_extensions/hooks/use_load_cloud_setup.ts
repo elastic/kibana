@@ -103,7 +103,7 @@ export const useLoadCloudSetup = ({
       onChange({
         isValid: true,
         updatedPolicy,
-        isExtensionLoaded: true,
+        isExtensionLoaded: isExtensionLoaded || true,
       });
     },
     [onChange]

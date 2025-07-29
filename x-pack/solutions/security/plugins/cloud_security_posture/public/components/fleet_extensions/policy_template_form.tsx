@@ -87,7 +87,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
     const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
 
-    const { isLoading, setEnabledPolicyInput, updatePolicy, input, setIsValid } =
+    const { isLoading, setEnabledPolicyInput, updatePolicy, input, setIsValid, isValid } =
       useLoadFleetExtension({
         newPolicy,
         onChange,
@@ -108,7 +108,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       );
     }
 
-    if (isLoading && !isSubscriptionValid) {
+    if (!isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
     }
     // If the input type is one of the cloud providers, we need to render the account type selector
@@ -160,6 +160,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             namespaceSupportEnabled={true}
             setIsValid={setIsValid}
+            isValid={isValid}
           />
         )}
 

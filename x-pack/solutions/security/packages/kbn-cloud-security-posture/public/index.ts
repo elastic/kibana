@@ -7,6 +7,12 @@
 
 export type * from './src/types';
 export * from './src/constants/navigation';
+export {
+  AWS_ORGANIZATION_ACCOUNT,
+  AWS_SINGLE_ACCOUNT,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+} from './src/components/fleet_extensions/constants';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';

@@ -172,6 +172,7 @@ export const useLoadFleetExtension = ({
       ? integrationToEnable
       : undefined;
   const input = getSelectedOption(newPolicy.inputs, integration);
+  const enabledPolicyInputCount = newPolicy.inputs.filter((i) => i.enabled).length;
 
   const isValidRef = useRef(true);
   const setIsValid = useCallback((valid: boolean) => {
@@ -232,7 +233,7 @@ export const useLoadFleetExtension = ({
     !isEditPage &&
     !isLoading &&
     !isSubscriptionLoading &&
-    !newPolicy.inputs.some((i) => i.enabled)
+    (enabledPolicyInputCount === 0 || enabledPolicyInputCount > 1)
   ) {
     setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
     refetch();

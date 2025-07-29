@@ -102,12 +102,15 @@ export const useAzureCredentialsForm = ({
   input,
   packageInfo,
   updatePolicy,
+  setIsValid,
+  isValid,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   packageInfo: PackageInfo;
-  // onChange: (opts: any) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  setIsValid: (isValid: boolean) => void;
+  isValid: boolean;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
     getAzureCredentialsType(input) || AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
@@ -123,16 +126,10 @@ export const useAzureCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
-  // useEffect(() => {
-  //   const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-  //   setIsValid(!isInvalid);
-
-  //   onChange({
-  //     isValid: !isInvalid,
-  //     updatedPolicy: newPolicy,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [setupFormat, input.type]);
+  if (isValid && setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl) {
+    setIsValid(!isValid);
+    updatePolicy(newPolicy);
+  }
 
   const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
 

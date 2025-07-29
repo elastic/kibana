@@ -51,6 +51,7 @@ interface AzureCredentialsFormProps {
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
   setIsValid: (valid: boolean) => void;
+  isValid: boolean;
 }
 
 const ArmTemplateSetup = ({
@@ -213,6 +214,7 @@ export const AzureCredentialsForm = ({
   disabled,
   hasInvalidRequiredVars,
   setIsValid,
+  isValid,
 }: AzureCredentialsFormProps) => {
   const {
     group,
@@ -227,13 +229,13 @@ export const AzureCredentialsForm = ({
     input,
     packageInfo,
     updatePolicy,
+    setIsValid,
+    isValid,
   });
 
-  useEffect(() => {
-    if (!setupFormat) {
-      onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
-    }
-  }, [setupFormat, onSetupFormatChange]);
+  if (!setupFormat) {
+    onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
+  }
 
   const packageSemanticVersion = semverValid(packageInfo.version);
   const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
@@ -246,12 +248,14 @@ export const AzureCredentialsForm = ({
     AZURE_MANUAL_FIELDS_PACKAGE_VERSION
   );
 
-  useEffect(() => {
+  if (
+    isValid &&
+    !isPackageVersionValidForAzure &&
+    setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
+  ) {
     setIsValid(isPackageVersionValidForAzure);
-
     updatePolicy(newPolicy);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo, setupFormat]);
+  }
 
   if (!isPackageVersionValidForAzure) {
     return (

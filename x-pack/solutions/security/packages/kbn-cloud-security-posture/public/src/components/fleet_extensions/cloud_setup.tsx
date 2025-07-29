@@ -14,7 +14,6 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-// import { assert } from '../../../common/utils/helpers';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
@@ -120,6 +119,7 @@ interface CloudSetupProps {
   integrationToEnable?: CloudSecurityPolicyTemplate;
   isAgentlessEnabled?: boolean;
   isEditPage: boolean;
+  isValid: boolean;
   namespaceSupportEnabled?: boolean;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
@@ -139,6 +139,7 @@ export const CloudSetup = memo<CloudSetupProps>(
     integrationToEnable,
     isAgentlessEnabled,
     isEditPage,
+    isValid,
     namespaceSupportEnabled = false,
     newPolicy,
     onChange,
@@ -384,6 +385,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             setIsValid={setIsValid}
+            isValid={isValid}
           />
         )}
         <EuiSpacer />
