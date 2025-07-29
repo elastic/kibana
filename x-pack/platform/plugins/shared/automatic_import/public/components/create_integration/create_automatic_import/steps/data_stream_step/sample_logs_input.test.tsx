@@ -243,12 +243,21 @@ describe('SampleLogsInput', () => {
       });
     });
 
-    const AUTOMATIC_IMPORT_DOCUMENTATION_URL = 'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
+    const AUTOMATIC_IMPORT_DOCUMENTATION_URL =
+      'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
 
     describe('when the file is invalid', () => {
       describe.each([
-        ['"test message 1"', 'The logs sample file contains non-object entries', 'Refer to the documentation for supported log formats'],
-        ['[]', 'The logs sample file is empty', 'Refer to the documentation for supported log formats'],
+        [
+          '"test message 1"',
+          'The logs sample file contains non-object entries',
+          'Refer to the documentation for supported log formats',
+        ],
+        [
+          '[]',
+          'The logs sample file is empty',
+          'Refer to the documentation for supported log formats',
+        ],
       ])('with logs content %s', (logsSample, errorMessage, errorDocsLinkText) => {
         beforeEach(async () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
