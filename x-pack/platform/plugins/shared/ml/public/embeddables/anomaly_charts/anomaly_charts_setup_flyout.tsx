@@ -15,11 +15,6 @@ import { jobsApiProvider } from '../../application/services/ml_api_service/jobs'
 import { getMlGlobalServices } from '../../application/util/get_services';
 import type { MlStartDependencies } from '../../plugin';
 
-type AnomalyChartsEmbeddableOverridableState = Pick<
-  AnomalyChartsEmbeddableState,
-  'title' | 'jobIds' | 'maxSeriesToPlot'
->;
-
 export function EmbeddableAnomalyChartsUserInput({
   coreStart,
   pluginStart,
@@ -29,9 +24,9 @@ export function EmbeddableAnomalyChartsUserInput({
 }: {
   coreStart: CoreStart;
   pluginStart: MlStartDependencies;
-  onConfirm: (state: AnomalyChartsEmbeddableOverridableState) => void;
+  onConfirm: (state: AnomalyChartsEmbeddableState) => void;
   onCancel: () => void;
-  input?: AnomalyChartsEmbeddableOverridableState;
+  input?: AnomalyChartsEmbeddableState;
 }) {
   const { http } = coreStart;
   const adJobsApiService = jobsApiProvider(new HttpService(http));
@@ -41,9 +36,7 @@ export function EmbeddableAnomalyChartsUserInput({
     <KibanaContextProvider services={{ ...coreStart, ...pluginStart, mlServices }}>
       <AnomalyChartsInitializer
         initialInput={input}
-        onCreate={({ jobIds, title, maxSeriesToPlot }) => {
-          onConfirm({ jobIds, title, maxSeriesToPlot } as AnomalyChartsEmbeddableOverridableState);
-        }}
+        onCreate={onConfirm}
         onCancel={onCancel}
         adJobsApiService={adJobsApiService}
       />
