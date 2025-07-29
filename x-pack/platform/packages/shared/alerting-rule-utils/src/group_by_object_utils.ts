@@ -59,12 +59,12 @@ export const getFormattedGroupBy = (
   return groupByKeysObjectMapping;
 };
 
-export const getFormattedGroups = (grouping?: Record<string, string>): Group[] | undefined => {
+export const getFormattedGroups = (grouping?: Record<string, unknown>): Group[] | undefined => {
   const groups: Group[] = [];
   if (grouping) {
     const groupKeys = Object.keys(grouping);
     groupKeys.forEach((group) => {
-      groups.push({ field: group, value: grouping[group] });
+      groups.push({ field: group, value: String(grouping[group]) });
     });
   }
   return groups.length ? groups : undefined;
