@@ -26,7 +26,6 @@ export default stories;
 export const FocusedIdIsRoot: StoryFn<any> = () => {
   return (
     <FocusedTraceWaterfall
-      docId="01d9ebaca760279d6d68d29ea5283c58"
       items={{
         traceItems: {
           rootDoc: {
@@ -73,7 +72,6 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
 export const ParentIdIsRoot: StoryFn<any> = () => {
   return (
     <FocusedTraceWaterfall
-      docId="01d9ebaca760279d6d68d29ea5283c58"
       items={{
         traceItems: {
           rootDoc: {
@@ -129,7 +127,6 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
 export const FocusedWithParent: StoryFn<any> = () => {
   return (
     <FocusedTraceWaterfall
-      docId="01d9ebaca760279d6d68d29ea5283c58"
       items={{
         traceItems: {
           rootDoc: {
@@ -185,7 +182,6 @@ export const FocusedWithParent: StoryFn<any> = () => {
 export const FocusedWithMultipleChildren: StoryFn<any> = () => {
   return (
     <FocusedTraceWaterfall
-      docId="01d9ebaca760279d6d68d29ea5283c58"
       items={{
         traceItems: {
           rootDoc: {
