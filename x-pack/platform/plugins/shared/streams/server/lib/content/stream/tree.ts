@@ -58,9 +58,9 @@ export function asTree({
 }
 
 /**
- * merges the routing and fields of the root stream provided.
- * - fails when trying to merge a children that already exists
- * - fails when trying to override a conflicting field type
+ * merges the root streams provided.
+ * this is not called recursively on the children as we currently
+ * fail when trying to merge a child that already exists.
  */
 export function mergeTrees({
   existing,
