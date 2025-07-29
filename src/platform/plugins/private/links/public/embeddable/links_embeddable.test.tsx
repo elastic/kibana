@@ -16,7 +16,14 @@ import { deserializeState, getLinksEmbeddableFactory } from './links_embeddable'
 import { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { LinksApi, LinksParentApi, LinksSerializedState, ResolvedLink } from '../types';
+import {
+  LinksApi,
+  LinksByReferenceSerializedState,
+  LinksByValueSerializedState,
+  LinksParentApi,
+  LinksSerializedState,
+  ResolvedLink,
+} from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 
@@ -164,12 +171,20 @@ describe('getLinksEmbeddableFactory', () => {
   });
 
   describe('by reference embeddable', () => {
-    const rawState = {
-      savedObjectId: '123',
-      title: 'my links',
-      description: 'just a few links',
-      hidePanelTitles: false,
-    } as LinksSerializedState;
+    const byRefState = {
+      rawState: {
+        title: 'my links',
+        description: 'just a few links',
+        hidePanelTitles: false,
+      } as LinksByReferenceSerializedState,
+      references: [
+        {
+          id: '123',
+          name: 'savedObjectRef',
+          type: 'links',
+        },
+      ],
+    };
 
     const expectedRuntimeState = {
       defaultTitle: 'links 001',
@@ -182,17 +197,10 @@ describe('getLinksEmbeddableFactory', () => {
       hidePanelTitles: false,
     };
 
-    let parent: LinksParentApi;
-
-    beforeEach(() => {
-      parent = getMockLinksParentApi(rawState, references);
-    });
+    const parent = getMockLinksParentApi(byRefState.rawState, byRefState.references);
 
     test('deserializeState', async () => {
-      const deserializedState = await deserializeState({
-        rawState,
-        references: [], // no references passed because the panel is by reference
-      });
+      const deserializedState = await deserializeState(byRefState);
       expect(deserializedState).toEqual({
         ...expectedRuntimeState,
       });
@@ -211,12 +219,17 @@ describe('getLinksEmbeddableFactory', () => {
         const api = onApiAvailable.mock.calls[0][0];
         expect(api.serializeState()).toEqual({
           rawState: {
-            savedObjectId: '123',
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: false,
           },
-          references: [],
+          references: [
+            {
+              id: '123',
+              name: 'savedObjectRef',
+              type: 'links',
+            },
+          ],
         });
         expect(await api.canUnlinkFromLibrary()).toBe(true);
         expect(api.defaultTitle$?.value).toBe('links 001');
@@ -249,15 +262,18 @@ describe('getLinksEmbeddableFactory', () => {
   });
 
   describe('by value embeddable', () => {
-    const rawState = {
-      attributes: {
-        links: getLinks(),
-        layout: 'horizontal',
-      },
-      description: 'just a few links',
-      title: 'my links',
-      hidePanelTitles: true,
-    } as LinksSerializedState;
+    const byValueState = {
+      rawState: {
+        attributes: {
+          links: getLinks(),
+          layout: 'horizontal',
+        },
+        description: 'just a few links',
+        title: 'my links',
+        hidePanelTitles: true,
+      } as LinksByValueSerializedState,
+      references,
+    };
 
     const expectedRuntimeState = {
       defaultTitle: undefined,
@@ -270,17 +286,10 @@ describe('getLinksEmbeddableFactory', () => {
       hidePanelTitles: true,
     };
 
-    let parent: LinksParentApi;
-
-    beforeEach(() => {
-      parent = getMockLinksParentApi(rawState, references);
-    });
+    const parent = getMockLinksParentApi(byValueState.rawState, byValueState.references);
 
     test('deserializeState', async () => {
-      const deserializedState = await deserializeState({
-        rawState,
-        references,
-      });
+      const deserializedState = await deserializeState(byValueState);
       expect(deserializedState).toEqual({ ...expectedRuntimeState, layout: 'horizontal' });
     });
 
@@ -330,12 +339,17 @@ describe('getLinksEmbeddableFactory', () => {
         expect(newId).toBe('333');
         expect(api.getSerializedStateByReference(newId)).toEqual({
           rawState: {
-            savedObjectId: '333',
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: true,
           },
-          references: [],
+          references: [
+            {
+              id: '333',
+              name: 'savedObjectRef',
+              type: 'links',
+            },
+          ],
         });
       });
     });

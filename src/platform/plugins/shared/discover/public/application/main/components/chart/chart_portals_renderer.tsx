@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
+import React, { type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
@@ -15,6 +15,7 @@ import {
   useInternalStateSelector,
   type RuntimeStateManager,
   selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
   useRuntimeState,
   CurrentTabProvider,
   RuntimeStateProvider,
@@ -133,7 +134,17 @@ const UnifiedHistogramChartWrapper = ({
   stateContainer,
   panelsToggle,
 }: UnifiedHistogramChartProps) => {
-  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(stateContainer);
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const [options] = useState(() => ({
+    initialLayoutProps: selectRestorableTabRuntimeHistogramLayoutProps(
+      stateContainer.runtimeStateManager,
+      currentTabId
+    ),
+  }));
+  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(
+    stateContainer,
+    options
+  );
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
@@ -141,8 +152,6 @@ const UnifiedHistogramChartWrapper = ({
       setUnifiedHistogramApi(unifiedHistogram.api);
     }
   }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
-
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
 
   useEffect(() => {
     if (unifiedHistogram.layoutProps) {

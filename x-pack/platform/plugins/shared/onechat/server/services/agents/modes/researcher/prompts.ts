@@ -6,6 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 import type { ResearchGoal } from './graph';
 import {
   isSearchResult,
@@ -18,8 +19,10 @@ import {
 } from './backlog';
 
 export const getIdentifyResearchGoalPrompt = ({
+  customInstructions,
   discussion,
 }: {
+  customInstructions?: string;
   discussion: BaseMessageLike[];
 }): BaseMessageLike[] => {
   return [
@@ -74,6 +77,8 @@ export const getIdentifyResearchGoalPrompt = ({
 
       "Can you clarify what aspect of AI interests you most? For example, are you thinking about ethics, job displacement, regulation, or something else?"
 
+      ${customInstructionsBlock(customInstructions)}
+
       Begin by reading the conversation so far. Either use the set_research_goal tool with a precise objective, or respond in plain text asking for clarification if needed.
       `,
     ],
@@ -82,9 +87,11 @@ export const getIdentifyResearchGoalPrompt = ({
 };
 
 export const getExecutionPrompt = ({
+  customInstructions,
   currentResearchGoal,
   backlog,
 }: {
+  customInstructions?: string;
   currentResearchGoal: ResearchGoal;
   backlog: BacklogItem[];
 }): BaseMessageLike[] => {
@@ -108,9 +115,10 @@ export const getExecutionPrompt = ({
       - Your response will be read by another agent which can understand any format
       - You can either return plain text, json, or any combination of the two, as you see fit depending on your goal.
 
+      ${customInstructionsBlock(customInstructions)}
+
       ### Additional information:
-      - The current date is ${new Date().toISOString()}.
-      `,
+      - The current date is: ${formatDate()}`,
     ],
     [
       'user',
@@ -128,12 +136,14 @@ export const getExecutionPrompt = ({
 };
 
 export const getReflectionPrompt = ({
+  customInstructions,
   userQuery,
   backlog,
   maxFollowUpQuestions = 3,
   remainingCycles,
   cycleBoundaries = { exploration: 3, refinement: 2, finalization: 1 },
 }: {
+  customInstructions?: string;
   userQuery: string;
   backlog: BacklogItem[];
   remainingCycles: number;
@@ -145,13 +155,13 @@ export const getReflectionPrompt = ({
       'system',
       `You are an expert research assistant from the Elasticsearch company analyzing information about the user's question: "${userQuery}".
 
-      Instructions:
+      ### Instructions:
       - Analyze the completeness and depth of data available in your backlog history.
       - Identify any missing, unclear, or shallow information.
       - If necessary, break down complex questions into smaller sub-problems.
       - Your goal is to generate a precise list of actionable questions that will help drive the research forward.
 
-      Cycle Awareness:
+      ### Cycle Awareness:
       - The research process is bounded. There is exactly **${remainingCycles} cycles remaining** before a final answer must be produced.
       - Use the following strategy based on that number:
         - If ${cycleBoundaries.exploration} or more cycles remain:
@@ -165,16 +175,18 @@ export const getReflectionPrompt = ({
           - Surface only essential missing information that would block the final answer.
           - Avoid speculative or marginal questions.
 
-      Guidelines:
+      ### Guidelines:
       - Only generate questions if the current information is incomplete or insufficient.
       - Do not generate more than ${maxFollowUpQuestions} actionable questions.
       - Focus on technical depth, implementation details, trade-offs, edge cases, or emerging trends.
       - Each question must be self-contained and ready to be used for search or further investigation.
 
-      Additional information:
-      - The current date is ${new Date().toISOString()}.
+      ${customInstructionsBlock(customInstructions)}
 
-      Output Format:
+      ### Additional information:
+      - The current date is: ${formatDate()}
+
+      ### Output Format:
       - Format your response as a JSON object with these exact keys:
          - "isSufficient": true or false
          - "nextQuestions": list of standalone research questions (empty if isSufficient is true)
@@ -231,9 +243,11 @@ export const getReflectionPrompt = ({
 };
 
 export const getAnswerPrompt = ({
+  customInstructions,
   userQuery,
   backlog,
 }: {
+  customInstructions?: string;
   userQuery: string;
   backlog: BacklogItem[];
 }): BaseMessageLike[] => {
@@ -243,23 +257,24 @@ export const getAnswerPrompt = ({
       `You are a senior technical expert from the Elasticsearch company.
        Your role is to provide a clear, well-reasoned answer to the user's question using the information gathered by prior research steps.
 
-      Instructions:
+      ### Instructions:
       - Carefully read the user's original question and the gathered information.
       - Synthesize an accurate response that directly answers the user's question.
       - Do not hedge. If the information is complete, provide a confident and final answer.
       - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
       - Prefer structured, organized output (e.g., use paragraphs, bullet points, or sections if helpful).
 
-      Guidelines:
+      ### Guidelines:
       - Do not mention the research process or that you are an AI or assistant.
       - Do not mention that the answer was generated based on previous steps.
       - Do not repeat the user's question or summarize the JSON input.
       - Do not speculate beyond the gathered information unless logically inferred from it.
 
-      Additional information:
-      - The current date is ${new Date().toISOString()}.
+      ${customInstructionsBlock(customInstructions)}
 
-      `,
+      ### Additional information:
+      - The current date is: ${formatDate()}
+      - You can use markdown format to structure your response`,
     ],
     [
       'user',

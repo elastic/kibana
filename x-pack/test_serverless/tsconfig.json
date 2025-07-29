@@ -88,8 +88,12 @@
     "@kbn/security-plugin-types-common",
     "@kbn/data-usage-plugin",
     "@kbn/scout-info",
-    "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/test-suites-xpack-security",
+    "@kbn/streams-schema",
+    "@kbn/infra-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/response-ops-rule-params",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/security-solution-plugin",
   ]
 }

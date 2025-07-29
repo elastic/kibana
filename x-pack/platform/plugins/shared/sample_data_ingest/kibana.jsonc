@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sample-data-ingest",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "sampleDataIngest",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "sampleDataIngest"],
+    "requiredPlugins": [],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

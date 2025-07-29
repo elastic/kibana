@@ -29,6 +29,7 @@ const rewriteRuleType: RewriteRequestCase<RuleType> = ({
   default_schedule_interval: defaultScheduleInterval,
   has_alerts_mappings: hasAlertsMappings,
   is_exportable: isExportable,
+  auto_recover_alerts: autoRecoverAlerts,
   ...rest
 }: AsApiContract<RuleType>) => ({
   enabledInLicense,
@@ -43,6 +44,7 @@ const rewriteRuleType: RewriteRequestCase<RuleType> = ({
   defaultScheduleInterval,
   hasAlertsMappings,
   isExportable,
+  autoRecoverAlerts,
   ...rest,
 });
 

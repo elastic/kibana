@@ -42,7 +42,8 @@ import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/
 import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
-import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import type { ApiKeyManager as EntityStoreApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 import type { MlAuthz } from './lib/machine_learning/authz';
@@ -64,7 +65,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
   getDataViewsService: () => DataViewsService;
-  getEntityStoreApiKeyManager: () => ApiKeyManager;
+  getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
@@ -73,6 +74,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
+  getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;

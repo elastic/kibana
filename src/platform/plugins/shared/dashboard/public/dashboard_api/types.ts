@@ -22,8 +22,8 @@ import {
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-  TracksOverlays,
 } from '@kbn/presentation-containers';
+import { type TracksOverlays } from '@kbn/presentation-util';
 import {
   EmbeddableAppContext,
   HasAppContext,

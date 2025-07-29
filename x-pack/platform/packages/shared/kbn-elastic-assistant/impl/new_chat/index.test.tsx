@@ -18,7 +18,10 @@ jest.mock('../assistant/use_assistant_overlay', () => ({
   useAssistantOverlay: () => mockUseAssistantOverlay,
 }));
 
-let mockUseAssistantContext = { codeBlockRef: { current: null } };
+let mockUseAssistantContext = {
+  codeBlockRef: { current: null },
+  assistantAvailability: { isAssistantVisible: true },
+};
 jest.mock('../..', () => ({
   useAssistantContext: () => mockUseAssistantContext,
 }));
@@ -33,7 +36,12 @@ const defaultProps: Props = {
 
 describe('NewChat', () => {
   beforeEach(() => {
-    mockUseAssistantContext = { codeBlockRef: { current: null } };
+    mockUseAssistantContext = {
+      codeBlockRef: { current: null },
+      assistantAvailability: {
+        isAssistantVisible: true,
+      },
+    };
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -45,6 +53,18 @@ describe('NewChat', () => {
     const newChatButton = screen.getByTestId('newChat');
 
     expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+  });
+
+  it('does not render the default New Chat button with a discuss icon when assistant is not visible', () => {
+    mockUseAssistantContext = {
+      codeBlockRef: { current: null },
+      assistantAvailability: {
+        isAssistantVisible: false,
+      },
+    };
+    render(<NewChat {...defaultProps} />);
+
+    expect(screen.queryByTestId('newChat')).not.toBeInTheDocument();
   });
 
   it('renders the default New Chat button even if the Assistant is disabled', () => {

@@ -1516,7 +1516,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"true\" | \"false\" | \"wait_for\" | undefined"
+              "\"false\" | \"true\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
@@ -1583,7 +1583,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"true\" | \"false\" | undefined"
+              "\"false\" | \"true\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
@@ -2062,7 +2062,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"true\" | \"false\" | \"wait_for\" | undefined"
+              "\"false\" | \"true\" | \"wait_for\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,
@@ -2107,7 +2107,7 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "\"true\" | \"false\" | undefined"
+              "\"false\" | \"true\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-api/src/types.ts",
             "deprecated": false,

@@ -75,7 +75,7 @@ const getDestinationSpace = (originSpaceId?: string) => {
 
 export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
-  const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const spacesSupertest = context.getService('spacesSupertest');
   const supertestWithAuth = context.getService('supertest');
   const config = context.getService('config');
   const license = config.get('esTestCluster.license');
@@ -84,7 +84,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
   const getSupertestWithAuth = async () =>
     license === 'basic' && !isServerless
       ? supertestWithAuth
-      : await roleScopedSupertest.getSupertestWithRoleScope(
+      : await spacesSupertest.getSupertestWithRoleScope(
           { role: 'admin' },
           {
             withCommonHeaders: true,
@@ -540,7 +540,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
       describeFn(description, () => {
         let supertest: SupertestWithRoleScopeType;
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
         });

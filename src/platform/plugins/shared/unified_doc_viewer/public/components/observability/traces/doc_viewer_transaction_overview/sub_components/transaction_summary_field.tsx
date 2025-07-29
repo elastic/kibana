@@ -9,18 +9,21 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldConfiguration } from '../../resources/get_field_configuration';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
 
 export interface TransactionSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
+  fieldMapping?: DataViewField;
   showActions?: boolean;
 }
 
 export function TransactionSummaryField({
   fieldConfiguration,
   fieldId,
+  fieldMapping,
   showActions = true,
 }: TransactionSummaryFieldProps) {
   if (!fieldConfiguration.value) {
@@ -33,6 +36,7 @@ export function TransactionSummaryField({
         data-test-subj={`unifiedDocViewerObservabilityTracesAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
+        fieldMapping={fieldMapping}
         value={fieldConfiguration.value as string}
         formattedValue={fieldConfiguration.value as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}

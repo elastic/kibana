@@ -65,7 +65,7 @@ export const LicenseProtectedCell: React.FC = () => {
   return (
     <div
       data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID}
-      style={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
+      css={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
     />
   );
 };

@@ -8,11 +8,17 @@
 import { defer, Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent } from '@kbn/onechat-common';
+import { AgentMode, ChatEvent } from '@kbn/onechat-common';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
 
-export type ChatParams = ChatRequestBodyPayload;
+export interface ChatParams {
+  agentId?: string;
+  mode?: AgentMode;
+  connectorId?: string;
+  conversationId?: string;
+  input: string;
+}
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -21,19 +27,19 @@ export class ChatService {
     this.http = http;
   }
 
-  chat({
-    agentId,
-    connectorId,
-    conversationId,
-    nextMessage,
-    mode,
-  }: ChatParams): Observable<ChatEvent> {
+  chat(params: ChatParams): Observable<ChatEvent> {
+    const payload: ChatRequestBodyPayload = {
+      input: params.input,
+      mode: params.mode,
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      connector_id: params.connectorId,
+    };
     return defer(() => {
-      return this.http.post('/internal/onechat/chat', {
-        query: { stream: true },
+      return this.http.post('/api/chat/converse/async', {
         asResponse: true,
         rawResponse: true,
-        body: JSON.stringify({ agentId, mode, connectorId, conversationId, nextMessage }),
+        body: JSON.stringify(payload),
       });
     }).pipe(
       // @ts-expect-error SseEvent mixin issue

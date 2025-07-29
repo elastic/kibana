@@ -1310,23 +1310,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1434,15 +1418,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -2672,25 +2648,25 @@
             "signature": [
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               " | ((prevRegistry: ",
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               ") => ",
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               ") | undefined"
@@ -4598,15 +4574,7 @@
               "\nOptionally set the refresh interval."
             ],
             "signature": [
-              "(",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " & ",
+              "(Readonly<{} & { value: number; pause: boolean; }> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",

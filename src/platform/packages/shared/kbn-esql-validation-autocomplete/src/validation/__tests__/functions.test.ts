@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes, Location } from '../../definitions/types';
-import { setTestFunctions } from '../../shared/test_functions';
+import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('function validation', () => {
@@ -679,7 +680,7 @@ describe('function validation', () => {
 
         await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
         await expectErrors('FROM a_index | SORT SORT_FN()', []);
-        await expectErrors('FROM a_index | STATS STATS_FN()', []);
+        await expectErrors('FROM a_index | STATS max(doubleField)', []);
         await expectErrors('ROW ROW_FN()', []);
         await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
 
@@ -739,9 +740,7 @@ describe('function validation', () => {
             ],
           },
         ]);
-
         const { expectErrors } = await setup();
-
         await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
         await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
           'STATS BY does not support function does_not_support_by_option',

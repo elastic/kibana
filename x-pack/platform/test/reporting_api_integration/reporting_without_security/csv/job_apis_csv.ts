@@ -22,7 +22,6 @@ const apiResponseFields = [
   'status',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestNoAuth = getService('supertestWithoutAuth');

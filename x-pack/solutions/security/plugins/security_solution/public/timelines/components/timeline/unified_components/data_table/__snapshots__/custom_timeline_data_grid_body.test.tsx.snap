@@ -52,16 +52,18 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
     >
       <div
         class="variable__list"
-        style="position: relative; height: 600px; width: 1000px; overflow: auto; will-change: transform; direction: ltr; scroll-padding: 0 0 0 0;"
+        style="position: relative; height: 600px; width: 1000px; overflow: auto; will-change: transform; direction: ltr;"
       >
         <div
           class="custom__grid__rows--container"
+          css="[object Object]"
           data-test-subj="customGridRowsContainer"
-          style="height: 0px; width: 100%; position: relative;"
+          style="height: 0px; width: 100%;"
         >
           <div
+            css="[object Object]"
             role="row"
-            style="position: absolute; left: 0px; top: 0px; height: 0px;"
+            style="position: absolute; left: 0px; top: 0px; height: 0px; width: 100%;"
           >
             <div
               class="euiDataGridRow "
@@ -87,8 +89,9 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
             </div>
           </div>
           <div
+            css="[object Object]"
             role="row"
-            style="position: absolute; left: 0px; top: 0px; height: 0px;"
+            style="position: absolute; left: 0px; top: 0px; height: 0px; width: 100%;"
           >
             <div
               class="euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"

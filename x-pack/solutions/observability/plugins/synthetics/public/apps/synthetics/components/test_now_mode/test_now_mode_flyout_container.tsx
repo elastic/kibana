@@ -17,6 +17,7 @@ import {
   testNowRunsSelector,
   TestRunStatus,
 } from '../../state/manual_test_runs';
+import { useMonitorById } from '../../hooks/use_monitor_by_id';
 
 export function TestNowModeFlyoutContainer() {
   const dispatch = useDispatch();
@@ -50,21 +51,23 @@ export function TestNowModeFlyoutContainer() {
     [dispatch]
   );
 
+  const monitor = useMonitorById(flyoutOpenTestRun?.configId);
+
   const testRun = useMemo(() => {
-    return flyoutOpenTestRun?.testRunId && flyoutOpenTestRun?.monitor
+    return flyoutOpenTestRun?.testRunId && monitor
       ? {
           id: flyoutOpenTestRun.testRunId,
-          monitor: flyoutOpenTestRun.monitor,
-          name: flyoutOpenTestRun.name,
+          monitor,
+          name: monitor.name,
         }
       : undefined;
-  }, [flyoutOpenTestRun]);
+  }, [flyoutOpenTestRun, monitor]);
 
   const flyout =
-    flyoutOpenTestRun && testRun ? (
+    flyoutOpenTestRun && testRun && monitor ? (
       <TestNowModeFlyout
         testRun={testRun}
-        name={flyoutOpenTestRun.name}
+        name={monitor.name}
         inProgress={
           flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
         }

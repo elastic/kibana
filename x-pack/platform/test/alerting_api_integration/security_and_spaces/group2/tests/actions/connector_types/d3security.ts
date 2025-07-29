@@ -22,7 +22,6 @@ const secrets = {
   token: 'token12345',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function d3SecurityTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

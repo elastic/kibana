@@ -35,5 +35,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/search-response-warnings",
     "@kbn/react-kibana-context-render",
+    "@kbn/css-utils",
   ]
 }

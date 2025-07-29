@@ -211,7 +211,11 @@ export const installSentinelOneAgent = async ({
     await hostVm.exec(`sudo ${installPath} management token set ${siteToken}`);
     await hostVm.exec(`sudo ${installPath} control start`);
 
-    const status = (await hostVm.exec(`sudo ${installPath} control status`)).stdout;
+    const status = (
+      await pRetry(async () => {
+        return hostVm.exec(`sudo ${installPath} control status`);
+      })
+    ).stdout;
 
     try {
       // Generate an alert in SentinelOne

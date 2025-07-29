@@ -139,17 +139,19 @@ describe('ObservabilityActions component', () => {
       refresh,
     };
 
+    const services = {
+      http: mockKibana.services.http,
+      data: mockKibana.services.data,
+      notifications: mockKibana.services.notifications,
+      application: mockKibana.services.application,
+      settings: mockKibana.services.settings,
+      cases: mockKibana.services.cases,
+      licensing: mockLicensing,
+      fieldFormats: fieldFormatsMock,
+    };
+
     const context = {
-      services: {
-        http: mockKibana.services.http,
-        data: mockKibana.services.data,
-        notifications: mockKibana.services.notifications,
-        application: mockKibana.services.application,
-        settings: mockKibana.services.settings,
-        cases: mockKibana.services.cases,
-        licensing: mockLicensing,
-        fieldFormats: fieldFormatsMock,
-      },
+      services,
     } as unknown as RenderContext<AdditionalContext>;
 
     const wrapper = mountWithIntl(
@@ -161,6 +163,7 @@ describe('ObservabilityActions component', () => {
                 {...(props as unknown as ComponentProps<
                   GetObservabilityAlertsTableProp<'renderActionsCell'>
                 >)}
+                services={services}
               />
             </QueryClientProvider>
           </AlertsTableContextProvider>

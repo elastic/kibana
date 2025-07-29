@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunAgentParams,
@@ -18,8 +19,17 @@ import {
   CreateScopedRunnerDepsMock,
   MockedTool,
   MockedAgent,
+  AgentClientMock,
+  createMockedAgentClient,
+  ToolRegistryMock,
+  createToolRegistryMock,
 } from '../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createAgentHandler } from '../agents/modes/create_handler';
+
+jest.mock('../agents/modes/create_handler');
+
+const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
 describe('Onechat runner', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
@@ -30,18 +40,25 @@ describe('Onechat runner', () => {
 
   describe('runTool', () => {
     let tool: MockedTool;
+    let registry: ToolRegistryMock;
 
     beforeEach(() => {
+      registry = createToolRegistryMock();
       const {
-        toolsService: { registry },
+        toolsService: { getRegistry },
       } = runnerDeps;
+      getRegistry.mockResolvedValue(registry);
 
-      tool = createMockedTool({});
+      tool = createMockedTool({
+        schema: z.object({
+          foo: z.string(),
+        }),
+      });
       registry.get.mockResolvedValue(tool);
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const params: ScopedRunnerRunToolsParams = {
         toolId: 'test-tool',
@@ -61,7 +78,7 @@ describe('Onechat runner', () => {
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const { request, ...otherRunnerDeps } = runnerDeps;
 
@@ -86,29 +103,44 @@ describe('Onechat runner', () => {
 
   describe('runAgent', () => {
     let agent: MockedAgent;
+    let agentClient: AgentClientMock;
+    let agentHandler: jest.MockedFn<any>;
 
     beforeEach(() => {
-      const {
-        agentsService: { registry },
-      } = runnerDeps;
-
       agent = createMockedAgent();
-      registry.get.mockResolvedValue(agent);
+
+      agentClient = createMockedAgentClient();
+      agentClient.get.mockResolvedValue(agent);
+
+      const {
+        agentsService: { getScopedClient },
+      } = runnerDeps;
+      getScopedClient.mockResolvedValue(agentClient);
+
+      agentHandler = jest.fn();
+      agentHandler.mockResolvedValue({
+        result: { success: true },
+      });
+      createAgentHandlerMock.mockReturnValue(agentHandler);
+    });
+
+    afterEach(() => {
+      createAgentHandlerMock.mockReset();
     });
 
     it('can be invoked through a scoped runner', async () => {
-      agent.handler.mockResolvedValue({ result: 'someResult' as any });
+      agentHandler.mockResolvedValue({ result: 'someResult' as any });
 
       const params: ScopedRunnerRunAgentParams = {
         agentId: 'test-tool',
-        agentParams: { foo: 'bar' },
+        agentParams: { nextInput: { message: 'dolly' } },
       };
 
       const runner = createScopedRunner(runnerDeps);
       const response = await runner.runAgent(params);
 
-      expect(agent.handler).toHaveBeenCalledTimes(1);
-      expect(agent.handler).toHaveBeenCalledWith(
+      expect(agentHandler).toHaveBeenCalledTimes(1);
+      expect(agentHandler).toHaveBeenCalledWith(
         {
           runId: expect.any(String),
           agentParams: params.agentParams,
@@ -123,21 +155,21 @@ describe('Onechat runner', () => {
     });
 
     it('can be invoked through a runner', async () => {
-      agent.handler.mockResolvedValue({ result: 'someResult' as any });
+      agentHandler.mockResolvedValue({ result: 'someResult' as any });
 
       const { request, ...otherRunnerDeps } = runnerDeps;
 
       const params: RunAgentParams = {
         agentId: 'test-tool',
-        agentParams: { foo: 'bar' },
+        agentParams: { nextInput: { message: 'dolly' } },
         request,
       };
 
       const runner = createRunner(otherRunnerDeps);
       const response = await runner.runAgent(params);
 
-      expect(agent.handler).toHaveBeenCalledTimes(1);
-      expect(agent.handler).toHaveBeenCalledWith(
+      expect(agentHandler).toHaveBeenCalledTimes(1);
+      expect(agentHandler).toHaveBeenCalledWith(
         {
           runId: expect.any(String),
           agentParams: params.agentParams,

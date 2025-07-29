@@ -10,7 +10,8 @@
 import { useEffect } from 'react';
 import { useEuiThemeCSSVariables } from '@elastic/eui';
 
-export const hackEuiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding';
+export const hackEuiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-end';
+export const hackEuiPushFlyoutPaddingInlineStart = '--eui-push-flyout-padding-inline-start';
 
 /**
  * This is definitely a hack for experimental purposes.
@@ -52,13 +53,27 @@ export function useHackSyncPushFlyout() {
           const paddingInline = parsedStyle.find(
             (style) => style.property === 'padding-inline'
           )?.value;
+          let paddingInlineStart = parsedStyle.find(
+            (style) => style.property === 'padding-inline-start'
+          )?.value;
           let paddingInlineEnd = parsedStyle.find(
             (style) => style.property === 'padding-inline-end'
           )?.value;
 
-          const [, end] = paddingInline?.split(' ') ?? ['', ''];
+          const [start, end] = paddingInline?.split(' ') ?? ['', ''];
 
+          paddingInlineStart = paddingInlineStart ?? start;
           paddingInlineEnd = paddingInlineEnd ?? end;
+
+          if (paddingInlineStart) {
+            setGlobalCSSVariables({
+              [hackEuiPushFlyoutPaddingInlineStart]: paddingInlineStart,
+            });
+          } else {
+            setGlobalCSSVariables({
+              [hackEuiPushFlyoutPaddingInlineStart]: null,
+            });
+          }
 
           if (paddingInlineEnd) {
             setGlobalCSSVariables({

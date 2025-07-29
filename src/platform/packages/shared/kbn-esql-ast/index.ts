@@ -11,7 +11,6 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
@@ -47,7 +46,9 @@ export {
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
+
 export * as synth from './src/synth';
+export { qry, cmd, exp } from './src/synth';
 
 export {
   LeafPrinter,
@@ -63,3 +64,12 @@ export { EsqlQuery } from './src/query';
 export * as mutate from './src/mutate';
 
 export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';
+
+export { esqlCommandRegistry } from './src/commands_registry';
+
+export * from './src/commands_registry/complete_items';
+export * from './src/commands_registry/constants';
+export * from './src/definitions/constants';
+export * from './src/definitions/types';
+export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
+export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
