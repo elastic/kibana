@@ -77,46 +77,46 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const createLlmInstance = async () =>
     !inferenceChatModelDisabled
       ? inference.getChatModel({
-        request,
-        connectorId,
-        chatModelOptions: {
+          request,
+          connectorId,
+          chatModelOptions: {
+            model: request.body.model,
+            signal: abortSignal,
+            temperature: getDefaultArguments(llmType).temperature,
+            // prevents the agent from retrying on failure
+            // failure could be due to bad connector, we should deliver that result to the client asap
+            maxRetries: 0,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'security_ai_assistant',
+              },
+            },
+            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+            // timeout,
+          },
+        })
+      : new llmClass({
+          actionsClient,
+          connectorId,
+          llmType,
+          logger,
+          // possible client model override,
+          // let this be undefined otherwise so the connector handles the model
           model: request.body.model,
-          signal: abortSignal,
+          // ensure this is defined because we default to it in the language_models
+          // This is where the LangSmith logs (Metadata > Invocation Params) are set
           temperature: getDefaultArguments(llmType).temperature,
+          signal: abortSignal,
+          streaming: isStream,
           // prevents the agent from retrying on failure
           // failure could be due to bad connector, we should deliver that result to the client asap
           maxRetries: 0,
-          metadata: {
-            connectorTelemetry: {
-              pluginId: 'security_ai_assistant',
-            },
+          convertSystemMessageToHumanContent: false,
+          timeout,
+          telemetryMetadata: {
+            pluginId: 'security_ai_assistant',
           },
-          // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
-          // timeout,
-        },
-      })
-      : new llmClass({
-        actionsClient,
-        connectorId,
-        llmType,
-        logger,
-        // possible client model override,
-        // let this be undefined otherwise so the connector handles the model
-        model: request.body.model,
-        // ensure this is defined because we default to it in the language_models
-        // This is where the LangSmith logs (Metadata > Invocation Params) are set
-        temperature: getDefaultArguments(llmType).temperature,
-        signal: abortSignal,
-        streaming: isStream,
-        // prevents the agent from retrying on failure
-        // failure could be due to bad connector, we should deliver that result to the client asap
-        maxRetries: 0,
-        convertSystemMessageToHumanContent: false,
-        timeout,
-        telemetryMetadata: {
-          pluginId: 'security_ai_assistant',
-        },
-      });
+        });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -188,14 +188,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
     ? new TelemetryTracer(
-      {
-        // this line MUST come before kbTools are added
-        elasticTools: tools.map(({ name }) => name),
-        telemetry,
-        telemetryParams,
-      },
-      logger
-    )
+        {
+          // this line MUST come before kbTools are added
+          elasticTools: tools.map(({ name }) => name),
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
     : undefined;
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
@@ -222,9 +222,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
-        connectorId,
-        actionsClient,
-      })
+          connectorId,
+          actionsClient,
+        })
       : { provider: llmType };
 
   const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>(
@@ -246,10 +246,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const conversationMessages = await getConversationWithNewMessage({
     logger,
     conversationsDataClient: dataClients?.conversationsDataClient,
-    conversationId: conversationId,
-    replacements: replacements,
-    newMessages: newMessages,
-  })
+    conversationId,
+    replacements,
+    newMessages,
+  });
 
   const chatPrompt = await chatPromptFactory(DefaultAssistantGraphPromptTemplate, {
     prompt: defaultSystemPrompt,

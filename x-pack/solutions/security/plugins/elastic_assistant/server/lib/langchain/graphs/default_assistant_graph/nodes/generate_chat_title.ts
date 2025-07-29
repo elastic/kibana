@@ -10,6 +10,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { BaseMessage } from '@langchain/core/messages';
 import { NEW_CHAT } from '../../../../../routes/helpers';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
@@ -18,7 +19,6 @@ import { GraphInputs, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getActionTypeId } from '../../../../../routes/utils';
-import { BaseMessage } from '@langchain/core/messages';
 
 export const GENERATE_CHAT_TITLE_PROMPT = ({
   prompt,
@@ -93,7 +93,7 @@ export async function generateChatTitle({
       .withConfig({ runName: 'Generate Chat Title' });
 
     const chatTitle = await graph.invoke({
-      newMessages: newMessages,
+      newMessages,
     });
     logger.debug(`chatTitle: ${chatTitle}`);
 

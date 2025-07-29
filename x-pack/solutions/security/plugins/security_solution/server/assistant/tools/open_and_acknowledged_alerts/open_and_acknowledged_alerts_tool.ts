@@ -83,22 +83,22 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         };
 
         const content = result.hits?.hits?.map((hit) => {
-            const transformed = transformRawData({
-              anonymizationFields,
-              currentReplacements: localReplacements, // <-- the latest local replacements
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements, // <-- the local callback
-              rawData: getRawDataOrDefault(hit.fields),
-            });
+          const transformed = transformRawData({
+            anonymizationFields,
+            currentReplacements: localReplacements, // <-- the latest local replacements
+            getAnonymizedValue,
+            onNewReplacements: localOnNewReplacements, // <-- the local callback
+            rawData: getRawDataOrDefault(hit.fields),
+          });
 
-            const hitId = hit._id;
-            const reference = hitId
-              ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
-              : undefined;
-            const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
+          const hitId = hit._id;
+          const reference = hitId
+            ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+            : undefined;
+          const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
 
-            return `${transformed}${citation ?? ''}`;
-          })
+          return `${transformed}${citation ?? ''}`;
+        });
 
         return JSON.stringify(content);
       },

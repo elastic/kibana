@@ -7,10 +7,10 @@
 
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { AIMessageChunk } from '@langchain/core/messages';
-import { AgentState, NodeParamsBase } from '../types';
-import { NodeType } from '../constants';
 import { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
 import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import { AgentState, NodeParamsBase } from '../types';
+import { NodeType } from '../constants';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -37,12 +37,12 @@ export async function runAgent({
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const modifiedMessages = state.messages.map((message) => {
-    if("content" in message && typeof message.content === 'string') {
+    if ('content' in message && typeof message.content === 'string') {
       message.content = `${message.content}.`; // For some reason if the content can be parsed as JSON, then Gemini throws an error. Append a period to avoid this.
     }
-    return message
-  })
-  
+    return message;
+  });
+
   const result = await model
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(modifiedMessages);

@@ -14,13 +14,13 @@ import { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AgentState, NodeParamsBase } from './types';
 
 import { stepRouter } from './nodes/step_router';
 import { runAgent } from './nodes/run_agent';
 import { NodeType } from './constants';
 import { AssistantStateAnnotation } from './state';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -60,7 +60,7 @@ export const getDefaultAssistantGraph = async ({
     if (!llm.bindTools) {
       throw new Error('Llm instance does not support bindTools method');
     }
-    const llmWithTools = llm.bindTools(tools)
+    const llmWithTools = llm.bindTools(tools);
     const toolNode = new ToolNode(tools);
 
     // Put together a new graph using default state from above

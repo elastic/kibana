@@ -27,7 +27,7 @@ export interface GraphInputs {
   responseLanguage?: string;
 }
 
-export type AgentState = typeof AssistantStateAnnotation.State
+export type AgentState = typeof AssistantStateAnnotation.State;
 
 export interface NodeParamsBase {
   actionsClient: PublicMethodsOf<ActionsClient>;

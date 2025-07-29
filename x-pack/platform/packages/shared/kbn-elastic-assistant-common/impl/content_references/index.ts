@@ -19,5 +19,5 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   enrichDocument,
-  sanitizeMessages
+  sanitizeMessages,
 } from './references/utils';
