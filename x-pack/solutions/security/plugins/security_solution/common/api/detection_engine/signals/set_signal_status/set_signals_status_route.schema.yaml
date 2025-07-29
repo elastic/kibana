@@ -127,22 +127,24 @@ components:
     ReasonEnum:
       type: string
       enum: ['FALSE_POSITIVE', 'DUPLICATE', 'INVESTIGATION_REQUIRED']
+      description: 'The reason for closing the alerts'
 
     SetAlertsStatusByIds:
       type: object
-      required: [signal_ids, status]
       properties:
         signal_ids:
           type: array
           description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             type: string
+            format: nonempty
+            minLength: 1
           minItems: 1
         status:
-          type: string
-          enum: [open, acknowledged]
+          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
         reason:
           $ref: '#/components/schemas/ReasonEnum'
+      required: [signal_ids, status]
 
     SetAlertsStatusByQuery:
       type: object
