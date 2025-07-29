@@ -350,6 +350,9 @@ describe('CoreApp', () => {
         {
           path: '/app/{id}/{any*}',
           validate: false,
+          options: {
+            excludeFromRateLimiter: true,
+          },
           security: {
             authz: {
               enabled: false,
