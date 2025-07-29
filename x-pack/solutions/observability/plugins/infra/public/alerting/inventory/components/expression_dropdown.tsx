@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectOption } from '@elastic/eui';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 
-interface WhenExpressionProps {
-  value: DataSchemaFormat;
-  options: { [key: string]: { text: string; value: DataSchemaFormat } };
-  onChange: (value: DataSchemaFormat) => void;
+interface WhenExpressionProps<TDropDownType extends string> {
+  value: TDropDownType;
+  options: Record<TDropDownType, EuiSelectOption>;
+  onChange: (value: TDropDownType) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -29,60 +29,55 @@ interface WhenExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+
+  description: string;
+  popoverTitle: string;
+
+  'aria-label'?: string;
+  'data-test-subj'?: string;
 }
 
-export const SchemaExpression = ({
+export const ExpressionDropDown = <TDropDownType extends string>({
   value,
   options,
   onChange,
   popupPosition,
-}: WhenExpressionProps) => {
-  const [schemaPopoverOpen, setSchemaPopoverOpen] = useState(false);
+  description,
+  popoverTitle,
+  ...props
+}: WhenExpressionProps<TDropDownType>) => {
+  const [popoverOpen, { toggle: togglePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
       button={
         <EuiExpression
-          data-test-subj="schemaExpression"
-          description={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
-            {
-              defaultMessage: 'Schema',
-            }
-          )}
+          data-test-subj="nodeTypeExpression"
+          description={description}
           value={options[value].text}
-          isActive={schemaPopoverOpen}
-          onClick={() => {
-            setSchemaPopoverOpen(true);
-          }}
+          isActive={popoverOpen}
+          onClick={togglePopover}
         />
       }
-      isOpen={schemaPopoverOpen}
-      closePopover={() => {
-        setSchemaPopoverOpen(false);
-      }}
+      isOpen={popoverOpen}
+      closePopover={togglePopover}
       ownFocus
       anchorPosition={popupPosition ?? 'downLeft'}
     >
-      <div>
-        <ClosablePopoverTitle onClose={() => setSchemaPopoverOpen(false)}>
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.expression.schema.popoverTitle"
-            defaultMessage="Schema"
-          />
+      <div onBlur={togglePopover}>
+        <ClosablePopoverTitle onClose={togglePopover}>
+          <>{popoverTitle}</>
         </ClosablePopoverTitle>
         <EuiSelect
-          aria-label={i18n.translate('xpack.infra.nodeTypeExpression.select.ariaLabel', {
-            defaultMessage: 'Schema',
-          })}
-          data-test-subj="forExpressionSelect"
+          aria-label={props['aria-label']}
+          data-test-subj={props['data-test-subj']}
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as DataSchemaFormat);
-            setSchemaPopoverOpen(false);
+            onChange(e.target.value as TDropDownType);
+            togglePopover();
           }}
-          options={Object.values(options).map((o) => o)}
+          options={Object.values(options).map((o) => o) as EuiSelectOption[]}
         />
       </div>
     </EuiPopover>

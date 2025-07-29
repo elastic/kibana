@@ -43,7 +43,7 @@ interface Props {
   schema?: DataSchemaFormat;
 }
 
-export const ExpressionChart: React.FC<Props> = ({
+export const ExpressionChart = ({
   expression,
   kuery,
   nodeType,
@@ -51,7 +51,7 @@ export const ExpressionChart: React.FC<Props> = ({
   accountId = '',
   region = '',
   schema = DataSchemaFormat.ECS,
-}) => {
+}: Props) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({

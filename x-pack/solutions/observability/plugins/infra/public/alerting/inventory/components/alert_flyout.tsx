@@ -31,42 +31,47 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVis
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { customMetrics = [], accountId, region } = inventoryPrefill;
 
-  const AddAlertFlyout = useMemo(
-    () => {
-      if (!triggersActionsUI) return null;
-      const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
-      return (
-        <RuleFormFlyout
-          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-          consumer={'infrastructure'}
-          onCancel={onCloseFlyout}
-          onSubmit={onCloseFlyout}
-          ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-          initialMetadata={{
-            accountId,
-            options,
-            nodeType,
-            filter,
-            customMetrics,
-            region,
-            schema,
-          }}
-          shouldUseRuleProducer
-        />
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [triggersActionsUI, visible]
-  );
+  const AddAlertFlyout = useMemo(() => {
+    if (!triggersActionsUI) return null;
+    const { customMetrics = [], accountId, region } = inventoryPrefill;
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+    return (
+      <RuleFormFlyout
+        plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+        consumer={'infrastructure'}
+        onCancel={onCloseFlyout}
+        onSubmit={onCloseFlyout}
+        ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+        initialMetadata={{
+          accountId,
+          options,
+          nodeType,
+          filter,
+          customMetrics,
+          region,
+          schema,
+        }}
+        shouldUseRuleProducer
+      />
+    );
+  }, [
+    filter,
+    inventoryPrefill,
+    nodeType,
+    onCloseFlyout,
+    options,
+    schema,
+    services,
+    triggersActionsUI,
+  ]);
 
   return <>{visible && AddAlertFlyout}</>;
 };
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, kuery } = inventoryPrefill;
+  const { nodeType, metric, kuery, schema } = inventoryPrefill;
 
   return (
     <AlertFlyout
@@ -75,6 +80,7 @@ export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) 
       filter={kuery}
       visible
       setVisible={onClose}
+      schema={schema}
     />
   );
 };

@@ -16,7 +16,7 @@ import type {
 interface State {
   nodeType: InventoryItemType;
   metric: SnapshotMetricInput;
-  filterQuery?: string;
+  kuery?: string;
   customMetrics: SnapshotCustomMetricInput[];
   accountId: string;
   region: string;
@@ -25,7 +25,7 @@ interface State {
 
 type Action =
   | { type: 'SET_NODE_TYPE'; value: InventoryItemType }
-  | { type: 'SET_FILTER_QUERY'; value: string }
+  | { type: 'SET_KUERY'; value: string }
   | { type: 'SET_METRIC'; value: SnapshotMetricInput }
   | { type: 'SET_CUSTOM_METRICS'; value: SnapshotCustomMetricInput[] }
   | { type: 'SET_ACCOUNT_ID'; value: string }
@@ -35,7 +35,7 @@ type Action =
 const initialState: State = {
   nodeType: 'host',
   metric: { type: 'cpuV2' },
-  filterQuery: undefined,
+  kuery: undefined,
   customMetrics: [],
   accountId: '',
   region: '',
@@ -46,8 +46,8 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'SET_NODE_TYPE':
       return { ...state, nodeType: action.value };
-    case 'SET_FILTER_QUERY':
-      return { ...state, filterQuery: action.value };
+    case 'SET_KUERY':
+      return { ...state, kuery: action.value };
     case 'SET_METRIC':
       return { ...state, metric: action.value };
     case 'SET_CUSTOM_METRICS':
@@ -66,13 +66,12 @@ function reducer(state: State, action: Action): State {
 export const useInventoryAlertPrefill = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Memoize each setter to keep stable references like useState setters
   const setNodeType = useCallback(
     (nodeType: InventoryItemType) => dispatch({ type: 'SET_NODE_TYPE', value: nodeType }),
     []
   );
-  const setFilterQuery = useCallback(
-    (filterQuery: string) => dispatch({ type: 'SET_FILTER_QUERY', value: filterQuery }),
+  const setKuery = useCallback(
+    (kuery: string) => dispatch({ type: 'SET_KUERY', value: kuery }),
     []
   );
   const setMetric = useCallback(
@@ -101,13 +100,13 @@ export const useInventoryAlertPrefill = () => {
     () => ({
       nodeType: state.nodeType,
       metric: state.metric,
-      filterQuery: state.filterQuery,
+      kuery: state.kuery,
       customMetrics: state.customMetrics,
       accountId: state.accountId,
       region: state.region,
       schema: state.schema,
       setNodeType,
-      setFilterQuery,
+      setKuery,
       setMetric,
       setCustomMetrics,
       setAccountId,
@@ -117,13 +116,13 @@ export const useInventoryAlertPrefill = () => {
     [
       state.nodeType,
       state.metric,
-      state.filterQuery,
+      state.kuery,
       state.customMetrics,
       state.accountId,
       state.region,
       state.schema,
       setNodeType,
-      setFilterQuery,
+      setKuery,
       setMetric,
       setCustomMetrics,
       setAccountId,

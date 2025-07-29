@@ -161,7 +161,7 @@ describe('ConditionalToolTip', () => {
     ];
 
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      kuery: '"host.name": host-01',
+      kuery: "'host.name': 'host-01'",
       metrics: expectedMetrics,
       groupBy: [],
       nodeType: 'host',
