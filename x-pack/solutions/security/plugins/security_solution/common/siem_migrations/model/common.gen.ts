@@ -51,7 +51,7 @@ export const LangSmithEvaluationOptions = LangSmithOptions.merge(
 );
 
 /**
- * The status of each Dashboard migration.
+ * The status of migration.
  */
 export type MigrationStatus = z.infer<typeof MigrationStatus>;
 export const MigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
