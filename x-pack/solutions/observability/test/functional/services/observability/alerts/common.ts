@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  AlertStatus,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -387,6 +392,88 @@ export function ObservabilityAlertsCommonProvider({
     return body;
   };
 
+  const createRule = async ({
+    supertest,
+    id,
+    name,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    name: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .post(`/api/alerting/rule/${id}`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name,
+        rule_type_id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+        consumer: 'observability',
+        tags: [],
+        schedule: {
+          interval: '1m',
+        },
+        params: {
+          criteria: [
+            {
+              comparator: '>',
+              metrics: [
+                {
+                  name: 'A',
+                  aggType: 'count',
+                },
+              ],
+              threshold: [100],
+              timeSize: 1,
+              timeUnit: 'm',
+            },
+          ],
+          alertOnNoData: false,
+          alertOnGroupDisappear: false,
+          searchConfiguration: {
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            index: 'remote_cluster:logs-*',
+          },
+        },
+        artifacts: {
+          dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
+        },
+        actions: [],
+        alert_delay: {
+          active: 1,
+        },
+      });
+
+    logger.debug(`Created rule: ${JSON.stringify(body)}`);
+    return body;
+  };
+
+  const deleteRule = async ({
+    supertest,
+    id,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .delete(`/api/alerting/rule/${id}`)
+      .set('kbn-xsrf', 'foo')
+      .send()
+      .expect(200);
+
+    logger.debug(`Deleted rule: ${JSON.stringify(body)}`);
+    return body;
+  };
+
   const deleteDataView = async ({
     supertest,
     id,
@@ -459,5 +546,7 @@ export function ObservabilityAlertsCommonProvider({
     createDataView,
     deleteDataView,
     selectAlertStatusFilter,
+    createRule,
+    deleteRule,
   };
 }
