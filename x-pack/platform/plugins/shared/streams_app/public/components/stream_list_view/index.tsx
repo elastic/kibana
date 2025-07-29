@@ -18,6 +18,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function StreamListView() {
   const {
@@ -35,6 +36,7 @@ export function StreamListView() {
   const handleAddData = () => {
     onboardingLocator?.navigate({});
   };
+  const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
       const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
@@ -42,7 +44,7 @@ export function StreamListView() {
       });
       return streams;
     },
-    [streamsRepositoryClient]
+    [streamsRepositoryClient, timeState.start, timeState.end]
   );
 
   const { euiTheme } = useEuiTheme();
