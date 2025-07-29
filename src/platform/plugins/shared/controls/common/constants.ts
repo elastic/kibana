@@ -37,10 +37,10 @@ export enum ControlOutputOption {
   DSL = 'dsl',
   ESQL = 'esql',
 }
-export enum ControlInputOption {
+export enum ControlValuesSource {
   DSL = 'dsl',
   ESQL = 'esql',
   STATIC = 'static',
 }
 export const DEFAULT_CONTROL_OUTPUT = ControlOutputOption.DSL;
-export const DEFAULT_CONTROL_INPUT = ControlInputOption.DSL;
+export const DEFAULT_CONTROL_VALUES_SOURCE = ControlValuesSource.DSL;

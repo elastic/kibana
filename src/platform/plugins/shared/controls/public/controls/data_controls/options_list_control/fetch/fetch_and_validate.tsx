@@ -19,7 +19,7 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { ControlInputOption } from '../../../../../common';
+import { ControlValuesSource } from '../../../../../common';
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,
@@ -45,7 +45,7 @@ export function fetchAndValidate$({
 }: {
   api: Pick<
     OptionsListControlApi,
-    | 'input$'
+    | 'valuesSource$'
     | 'dataViews$'
     | 'field$'
     | 'esqlQuery$'
@@ -68,7 +68,7 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   return combineLatest([
-    api.input$,
+    api.valuesSource$,
     api.dataViews$,
     api.field$,
     api.esqlQuery$,
@@ -113,8 +113,8 @@ export function fetchAndValidate$({
         selectedOptions,
       ]) => {
         let request: OptionsListRequest;
-        const isESQLInputMode = input === ControlInputOption.ESQL;
-        if (input === ControlInputOption.STATIC) {
+        const isESQLValuesSource = input === ControlValuesSource.ESQL;
+        if (input === ControlValuesSource.STATIC) {
           const suggestions =
             staticValues
               // Static searchTechnique is always 'wildcard'
@@ -130,7 +130,7 @@ export function fetchAndValidate$({
               (selection) => !suggestions.some(({ key }) => key === selection)
             ),
           };
-        } else if (isESQLInputMode) {
+        } else if (isESQLValuesSource) {
           if (!esqlQuery) return { suggestions: [] };
           request = {
             query: { esql: esqlQuery },

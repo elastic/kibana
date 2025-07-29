@@ -41,9 +41,9 @@ import {
   DEFAULT_CONTROL_WIDTH,
   type ControlWidth,
   type DefaultDataControlState,
-  ControlInputOption,
+  ControlValuesSource,
   ControlOutputOption,
-  DEFAULT_CONTROL_INPUT,
+  DEFAULT_CONTROL_VALUES_SOURCE,
   DEFAULT_CONTROL_OUTPUT,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
@@ -66,7 +66,7 @@ import {
 import { ControlFactory } from '../../types';
 import { confirmDeleteControl } from '../../../common';
 import { DataViewAndFieldContextProvider } from './data_view_and_field_picker';
-import { SelectInput } from './input/select_input';
+import { SelectValuesSource } from './input/select_values_source';
 import { SelectOutput } from './output/select_output';
 import { validateESQLVariableString } from './output/validate_esql_variable_string';
 
@@ -90,14 +90,14 @@ const CompatibleControlTypesComponent = ({
   selectedControlType,
   setSelectedControlType,
   isESQLOutputMode,
-  isStaticInputMode,
+  isStaticValuesSource,
 }: {
   fieldRegistry?: DataControlFieldRegistry;
   selectedFieldName?: string;
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
   isESQLOutputMode: boolean;
-  isStaticInputMode: boolean;
+  isStaticValuesSource: boolean;
 }) => {
   const [dataControlFactories, setDataControlFactories] = useState<
     DataControlFactory[] | undefined
@@ -146,7 +146,7 @@ const CompatibleControlTypesComponent = ({
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
         {(dataControlFactories ?? []).map((factory) => {
           const disabled =
-            isStaticInputMode || isESQLOutputMode
+            isStaticValuesSource || isESQLOutputMode
               ? factory.type !== OPTIONS_LIST_CONTROL
               : fieldRegistry && selectedFieldName
               ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
@@ -174,7 +174,7 @@ const CompatibleControlTypesComponent = ({
                   fieldSelected: Boolean(selectedFieldName),
                   controlType: factory.type,
                   isESQLOutputMode,
-                  isStaticInputMode,
+                  isStaticValuesSource,
                 }
               )}
             >
@@ -213,17 +213,17 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
   const existingESQLVariables = useStateFromPublishingSubject(controlGroupApi.esqlVariables$);
 
-  const isDSLInputMode = useMemo(
-    () => (editorState.input ?? DEFAULT_CONTROL_INPUT) === ControlInputOption.DSL,
-    [editorState.input]
+  const isDSLValuesSource = useMemo(
+    () => (editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE) === ControlValuesSource.DSL,
+    [editorState.valuesSource]
   );
-  const isESQLInputMode = useMemo(
-    () => editorState.input === ControlInputOption.ESQL,
-    [editorState.input]
+  const isESQLValuesSource = useMemo(
+    () => editorState.valuesSource === ControlValuesSource.ESQL,
+    [editorState.valuesSource]
   );
-  const isStaticInputMode = useMemo(
-    () => editorState.input === ControlInputOption.STATIC,
-    [editorState.input]
+  const isStaticValuesSource = useMemo(
+    () => editorState.valuesSource === ControlValuesSource.STATIC,
+    [editorState.valuesSource]
   );
 
   const isESQLOutputMode = useMemo(
@@ -232,7 +232,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   );
 
   const [esqlQueryValidation, setESQLQueryValidation] = useState<EditorComponentStatus>(
-    isEdit && isESQLInputMode ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
+    isEdit && isESQLValuesSource ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
   );
 
   const [hasTouchedInput, setHasTouchedInput] = useState(isEdit);
@@ -243,11 +243,13 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   );
 
   // ADD FIELD DETECTION INFO CALLOUT
+  // CACHE FIRST ESQL VARIABLE OPTION
+  // SUGGESTIONS
 
   useEffect(() => {
     // Set the default input mode to ES|QL for showESQLOnly editors
-    if (isDSLInputMode && showESQLOnly) {
-      setEditorState((state) => ({ ...state, input: ControlInputOption.ESQL }));
+    if (isDSLValuesSource && showESQLOnly) {
+      setEditorState((state) => ({ ...state, valuesSource: ControlValuesSource.ESQL }));
     }
     if (!isESQLOutputMode && showESQLOnly) {
       setEditorState((state) => ({ ...state, output: ControlOutputOption.ESQL }));
@@ -272,16 +274,16 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       // Sync up the output mode with the values source
       switch (editorState.output) {
         case ControlOutputOption.DSL:
-          if (!showESQLOnly && editorState.input !== ControlInputOption.DSL) {
-            setEditorState((state) => ({ ...state, input: ControlInputOption.DSL }));
+          if (!showESQLOnly && editorState.valuesSource !== ControlValuesSource.DSL) {
+            setEditorState((state) => ({ ...state, valuesSource: ControlValuesSource.DSL }));
           }
           break;
         case ControlOutputOption.ESQL:
           // If the user enters ?? in the ES|QL variable, set the values source to static
-          if (editorState.esqlVariableString?.startsWith('??') && !isStaticInputMode) {
-            setEditorState((state) => ({ ...state, input: ControlInputOption.STATIC }));
-          } else if (isDSLInputMode) {
-            setEditorState((state) => ({ ...state, input: ControlInputOption.ESQL }));
+          if (editorState.esqlVariableString?.startsWith('??') && !isStaticValuesSource) {
+            setEditorState((state) => ({ ...state, valuesSource: ControlValuesSource.STATIC }));
+          } else if (isDSLValuesSource) {
+            setEditorState((state) => ({ ...state, valuesSource: ControlValuesSource.ESQL }));
           }
           break;
       }
@@ -290,10 +292,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     hasTouchedInput,
     editorState,
     defaultPanelTitle,
-    isDSLInputMode,
+    isDSLValuesSource,
     showESQLOnly,
     isESQLOutputMode,
-    isStaticInputMode,
+    isStaticValuesSource,
   ]);
 
   const {
@@ -397,7 +399,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
           output={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
-          input={editorState.input ?? DEFAULT_CONTROL_INPUT}
+          valuesSource={editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE}
         />
       </div>
     );
@@ -409,24 +411,24 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         editorState.esqlVariableString,
         initialState.esqlVariableString,
         existingESQLVariables,
-        isStaticInputMode
+        isStaticValuesSource
       ),
     [
       editorState.esqlVariableString,
       initialState.esqlVariableString,
-      isStaticInputMode,
+      isStaticValuesSource,
       existingESQLVariables,
     ]
   );
 
   const inputStatus = useMemo(() => {
-    if (isDSLInputMode) {
+    if (isDSLValuesSource) {
       const hasFieldName = !!editorState.fieldName;
       const hasSelectedDataView = !!selectedDataView;
       if (hasFieldName && hasSelectedDataView) return EditorComponentStatus.COMPLETE;
-    } else if (isESQLInputMode) {
+    } else if (isESQLValuesSource) {
       return esqlQueryValidation;
-    } else if (isStaticInputMode) {
+    } else if (isStaticValuesSource) {
       if (
         editorState.staticValues?.every(({ text }) => Boolean(text)) &&
         editorState.staticValues.length
@@ -438,9 +440,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     esqlQueryValidation,
     editorState.fieldName,
     editorState.staticValues,
-    isDSLInputMode,
-    isESQLInputMode,
-    isStaticInputMode,
+    isDSLValuesSource,
+    isESQLValuesSource,
+    isStaticValuesSource,
     selectedDataView,
   ]);
 
@@ -509,7 +511,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         <EuiForm fullWidth>
           <SelectOutput
             outputMode={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
-            inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
+            valuesSource={editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE}
             editorState={editorState}
             editorConfig={editorConfig}
             updateEditorState={updateEditorState}
@@ -519,8 +521,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             variableStringError={esqlVariableError}
             showESQLOnly={showESQLOnly}
           />
-          <SelectInput
-            inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
+          <SelectValuesSource
+            valuesSource={editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE}
             editorState={editorState}
             editorConfig={editorConfig}
             selectedControlType={selectedControlType}
@@ -547,7 +549,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                     selectedControlType={selectedControlType}
                     setSelectedControlType={setSelectedControlType}
                     isESQLOutputMode={isESQLOutputMode}
-                    isStaticInputMode={isStaticInputMode}
+                    isStaticValuesSource={isStaticValuesSource}
                   />
                 </div>
               </EuiFormRow>

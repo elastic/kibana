@@ -32,8 +32,8 @@ export {
   ESQL_CONTROL,
   DEFAULT_CONTROL_OUTPUT,
   ControlOutputOption,
-  DEFAULT_CONTROL_INPUT,
-  ControlInputOption,
+  DEFAULT_CONTROL_VALUES_SOURCE,
+  ControlValuesSource,
 } from './constants';
 
 export { CONTROL_GROUP_TYPE } from './control_group';

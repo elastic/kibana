@@ -17,7 +17,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { PublishesESQLVariable } from '@kbn/esql-types';
-import { ControlInputOption, ControlOutputOption, DefaultDataControlState } from '../../../common';
+import { ControlValuesSource, ControlOutputOption, DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
@@ -30,7 +30,7 @@ export interface PublishesField {
 }
 
 export interface PublishesControlInputOutput {
-  input$: PublishingSubject<ControlInputOption>;
+  valuesSource$: PublishingSubject<ControlValuesSource>;
   output$: PublishingSubject<ControlOutputOption>;
 }
 
@@ -62,7 +62,7 @@ export interface CustomOptionsComponentProps<
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
   output: ControlOutputOption;
-  input: ControlInputOption;
+  valuesSource: ControlValuesSource;
 }
 
 export interface DataControlFactory<

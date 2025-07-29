@@ -14,9 +14,9 @@ import { AggregateQuery } from '@kbn/es-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { v4 } from 'uuid';
 import {
-  DEFAULT_CONTROL_INPUT,
+  DEFAULT_CONTROL_VALUES_SOURCE,
   ControlOutputOption,
-  ControlInputOption,
+  ControlValuesSource,
   DefaultDataControlState,
   ControlGroupEditorConfig,
   OPTIONS_LIST_CONTROL,
@@ -25,20 +25,20 @@ import { ListOptionsInput } from '../../../../common/list_options_input/list_opt
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker, useDataViewAndFieldContext } from '../data_view_and_field_picker';
 import {
-  CONTROL_INPUT_OPTIONS,
+  CONTROL_VALUES_SOURCE_OPTIONS,
   getESQLVariableInvalidRegex,
   EditorComponentStatus,
   INITIAL_EMPTY_STATE_ESQL_QUERY,
 } from '../editor_constants';
-import { ESQLLangEditor } from '../esql_lang_editor';
-import { InputValuesPreview } from './input_values_preview';
+import { ESQLLangEditor } from './esql_lang_editor';
+import { ESQLValuesPreview } from './esql_values_preview';
 import { getESQLSingleColumnValues } from '../../common/get_esql_single_column_values';
 
 const fieldToESQLVariable = (fieldName: string) =>
   `?${fieldName.replace(/\./g, '_').replace(getESQLVariableInvalidRegex(), '')}`;
 
-interface SelectInputProps<State> {
-  inputMode: ControlInputOption;
+interface SelectValuesSourceProps<State> {
+  valuesSource: ControlValuesSource;
   editorState: Partial<State>;
   selectedControlType: string | undefined;
   editorConfig?: ControlGroupEditorConfig;
@@ -52,8 +52,10 @@ interface SelectInputProps<State> {
   showESQLOnly: boolean;
 }
 
-export const SelectInput = <State extends DefaultDataControlState = DefaultDataControlState>({
-  inputMode,
+export const SelectValuesSource = <
+  State extends DefaultDataControlState = DefaultDataControlState
+>({
+  valuesSource,
   editorConfig,
   editorState,
   selectedControlType,
@@ -65,12 +67,12 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   setHasTouchedInput,
   isEdit,
   showESQLOnly,
-}: SelectInputProps<State>) => {
+}: SelectValuesSourceProps<State>) => {
   const [previewOptions, setPreviewOptions] = useState<string[]>([]);
   const [previewColumns, setPreviewColumns] = useState<string[]>([]);
   const [previewError, setPreviewError] = useState<Error | undefined>();
   const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(
-    isEdit && inputMode === ControlInputOption.ESQL
+    isEdit && valuesSource === ControlValuesSource.ESQL
   );
 
   const isESQLVariableEmpty = useMemo(
@@ -198,16 +200,16 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   const lockToStatic = useMemo(
     () =>
       editorState.esqlVariableString?.startsWith('??') &&
-      editorState.input === ControlInputOption.STATIC,
-    [editorState.esqlVariableString, editorState.input]
+      editorState.valuesSource === ControlValuesSource.STATIC,
+    [editorState.esqlVariableString, editorState.valuesSource]
   );
   const inputOptions = useMemo(
     () =>
       (showESQLOnly
-        ? CONTROL_INPUT_OPTIONS.filter(({ id }) => id !== ControlInputOption.DSL)
-        : CONTROL_INPUT_OPTIONS
+        ? CONTROL_VALUES_SOURCE_OPTIONS.filter(({ id }) => id !== ControlValuesSource.DSL)
+        : CONTROL_VALUES_SOURCE_OPTIONS
       ).map(({ id, ...rest }) => {
-        if (!lockToStatic || id === ControlInputOption.STATIC) {
+        if (!lockToStatic || id === ControlValuesSource.STATIC) {
           return { id, ...rest };
         }
         return {
@@ -228,16 +230,16 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         <EuiButtonGroup
           isFullWidth
           options={inputOptions}
-          idSelected={editorState.input ?? DEFAULT_CONTROL_INPUT}
+          idSelected={editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE}
           onChange={(input) => {
-            updateEditorState({ input: input as ControlInputOption });
+            updateEditorState({ input: input as ControlValuesSource });
             setHasTouchedInput(true);
           }}
           legend="Select control input"
           isDisabled={lockToStatic}
         />
       </EuiFormRow>
-      {inputMode === ControlInputOption.DSL && isESQLOutputMode && (
+      {valuesSource === ControlValuesSource.DSL && isESQLOutputMode && (
         <DataViewAndFieldPicker
           editorConfig={editorConfig}
           dataViewId={editorState.dataViewId}
@@ -283,7 +285,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           }}
         />
       )}
-      {inputMode === ControlInputOption.ESQL && (
+      {valuesSource === ControlValuesSource.ESQL && (
         <>
           <ESQLLangEditor
             formLabel={DataControlEditorStrings.manageControl.dataSource.getEsqlQueryTitle()}
@@ -306,7 +308,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
             expandToFitQueryOnMount
           />
           <EuiSpacer size="s" />
-          <InputValuesPreview
+          <ESQLValuesPreview
             previewOptions={previewOptions}
             previewColumns={previewColumns}
             previewError={previewError}
@@ -317,7 +319,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
           />
         </>
       )}
-      {inputMode === ControlInputOption.STATIC && (
+      {valuesSource === ControlValuesSource.STATIC && (
         <ListOptionsInput
           label={DataControlEditorStrings.manageControl.dataSource.getListOptionsTitle()}
           value={editorState.staticValues ?? []}

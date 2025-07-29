@@ -11,7 +11,7 @@ import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiSpacer } from '@elastic/eu
 import React, { useMemo } from 'react';
 import {
   ControlGroupEditorConfig,
-  ControlInputOption,
+  ControlValuesSource,
   ControlOutputOption,
   DEFAULT_CONTROL_OUTPUT,
   DefaultDataControlState,
@@ -21,7 +21,7 @@ import { DataViewAndFieldPicker } from '../data_view_and_field_picker';
 import { CONTROL_OUTPUT_OPTIONS, DEFAULT_ESQL_VARIABLE_NAME } from '../editor_constants';
 
 interface SelectOutputProps<State> {
-  inputMode: ControlInputOption;
+  valuesSource: ControlValuesSource;
   outputMode: ControlOutputOption;
   editorState: Partial<State>;
   editorConfig?: ControlGroupEditorConfig;
@@ -34,7 +34,7 @@ interface SelectOutputProps<State> {
 }
 
 export const SelectOutput = <State extends DefaultDataControlState = DefaultDataControlState>({
-  inputMode,
+  valuesSource,
   outputMode,
   editorConfig,
   editorState,
@@ -45,13 +45,16 @@ export const SelectOutput = <State extends DefaultDataControlState = DefaultData
   variableStringError,
   showESQLOnly,
 }: SelectOutputProps<State>) => {
-  const isStaticInputMode = useMemo(() => inputMode === ControlInputOption.STATIC, [inputMode]);
+  const isStaticValuesSource = useMemo(
+    () => valuesSource === ControlValuesSource.STATIC,
+    [valuesSource]
+  );
 
   const esqlVariableOutput = (
     <EuiFormRow
       label="Variable name"
       helpText={DataControlEditorStrings.manageControl.esqlOutput.getEsqlVariableHelpText(
-        isStaticInputMode
+        isStaticValuesSource
       )}
       isInvalid={!!variableStringError}
       error={variableStringError}

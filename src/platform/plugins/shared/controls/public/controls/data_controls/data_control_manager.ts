@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { ControlOutputOption, ControlInputOption } from '../../../common';
+import { ControlOutputOption, ControlValuesSource } from '../../../common';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
@@ -47,7 +47,7 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
   output: 'referenceEquality',
-  input: 'referenceEquality',
+  valuesSource: 'referenceEquality',
   esqlVariableString: 'referenceEquality',
   esqlQuery: 'referenceEquality',
   staticValues: 'deepEquality',
@@ -82,7 +82,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       fieldName: '',
       title: undefined,
       output: ControlOutputOption.DSL,
-      input: ControlInputOption.DSL,
+      valuesSource: ControlValuesSource.DSL,
       esqlVariableString: undefined,
       esqlQuery: undefined,
       staticValues: undefined,
@@ -139,7 +139,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     dataViews$,
     dataControlManager.api.fieldName$,
     dataControlManager.api.output$,
-    dataControlManager.api.input$,
+    dataControlManager.api.valuesSource$,
   ])
     .pipe(
       tap(() => {
@@ -147,7 +147,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       })
     )
     .subscribe(([nextDataViews, nextFieldName, nextOutput, nextInput]) => {
-      if (nextInput !== ControlInputOption.DSL) {
+      if (nextInput !== ControlValuesSource.DSL) {
         setBlockingError(undefined);
         field$.next(undefined);
         return;
@@ -200,7 +200,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     });
 
   const staticValuesSubscription = combineLatest([
-    dataControlManager.api.input$,
+    dataControlManager.api.valuesSource$,
     dataControlManager.api.staticValues$,
   ])
     .pipe(
@@ -209,7 +209,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       })
     )
     .subscribe(([nextInput, nextStaticValues]) => {
-      if (nextInput === ControlInputOption.STATIC) {
+      if (nextInput === ControlValuesSource.STATIC) {
         fieldFormatter.next(
           (key: any) => nextStaticValues?.find(({ value }) => key === value)?.text ?? String(key)
         );

@@ -68,12 +68,12 @@ export const DataControlEditorStrings = {
         fieldSelected,
         controlType,
         isESQLOutputMode,
-        isStaticInputMode,
+        isStaticValuesSource,
       }: {
         fieldSelected?: boolean;
         controlType?: string;
         isESQLOutputMode?: boolean;
-        isStaticInputMode?: boolean;
+        isStaticValuesSource?: boolean;
       }) => {
         if (!fieldSelected) {
           return i18n.translate(
@@ -84,7 +84,7 @@ export const DataControlEditorStrings = {
           );
         }
 
-        if (isStaticInputMode) {
+        if (isStaticValuesSource) {
           return i18n.translate(
             'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.notStaticCompatible',
             {
@@ -252,7 +252,7 @@ export const DataControlEditorStrings = {
         defaultMessage: 'Delete control',
       }),
     fieldOutput: {
-      getFieldOutputDescription: (fieldName?: string, isStaticInputMode?: boolean) =>
+      getFieldOutputDescription: (fieldName?: string, isStaticValuesSource?: boolean) =>
         fieldName ? (
           <FormattedMessage
             id="controls.controlGroup.manageControl.fieldOutput.fieldOutputDescription"
@@ -261,7 +261,7 @@ export const DataControlEditorStrings = {
               fieldName: <strong>{fieldName}</strong>,
             }}
           />
-        ) : isStaticInputMode ? (
+        ) : isStaticValuesSource ? (
           i18n.translate(
             'controls.controlGroup.manageControl.fieldOutput.fieldOutputDescriptionStaticNoSelectedField',
             {
@@ -299,7 +299,7 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.esqlOutput.nameInUseError', {
           defaultMessage: 'Variable name already in use',
         }),
-      getEsqlVariableHelpText: (isStaticInputMode: boolean) => {
+      getEsqlVariableHelpText: (isStaticValuesSource: boolean) => {
         const values = {
           valuesPrefix: <EuiCode>?</EuiCode>,
           fieldsPrefix: <EuiCode>??</EuiCode>,
@@ -325,7 +325,7 @@ export const DataControlEditorStrings = {
             </strong>
           ),
         };
-        if (isStaticInputMode)
+        if (isStaticValuesSource)
           return (
             <FormattedMessage
               id="controls.controlGroup.manageControl.esqlOutput.variableHelpTextStaticInput"

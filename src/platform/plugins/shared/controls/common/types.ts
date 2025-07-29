@@ -11,7 +11,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import {
   CONTROL_LABEL_POSITION_OPTIONS,
   CONTROL_WIDTH_OPTIONS,
-  ControlInputOption,
+  ControlValuesSource,
   ControlOutputOption,
 } from './constants';
 
@@ -44,7 +44,7 @@ export interface DefaultDataControlState extends DefaultControlState {
   fieldName: string;
   title?: string; // custom control label
   output: ControlOutputOption;
-  input: ControlInputOption;
+  valuesSource: ControlValuesSource;
   esqlVariableString?: string;
   esqlQuery?: string;
   staticValues?: Array<{ value: string; text: string }>;

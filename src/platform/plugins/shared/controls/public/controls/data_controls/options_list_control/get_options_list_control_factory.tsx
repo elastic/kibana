@@ -25,7 +25,7 @@ import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentat
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ControlInputOption, ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
+import { ControlValuesSource, ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSelection,
@@ -186,7 +186,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         temporaryStateManager.api.setAvailableOptions(successResponse.suggestions);
         temporaryStateManager.api.setTotalCardinality(successResponse.totalCardinality ?? 0);
 
-        if (dataControlManager.api.input$.getValue() === ControlInputOption.STATIC) {
+        if (dataControlManager.api.valuesSource$.getValue() === ControlValuesSource.STATIC) {
           // For static values, invalid selections means an option was deleted from the control. Deselect them instead
           // of displating them
           temporaryStateManager.api.setInvalidSelections(new Set([]));
@@ -257,7 +257,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
-        dataControlManager.api.input$,
+        dataControlManager.api.valuesSource$,
         dataControlManager.api.output$,
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
@@ -281,7 +281,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             availableOptions,
           ]) => {
             const selections =
-              input === ControlInputOption.STATIC
+              input === ControlValuesSource.STATIC
                 ? selectedOptions?.map(
                     (selection) =>
                       availableOptions?.find(({ key }) => key === selection)?.value ?? selection
@@ -437,9 +437,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             return;
           }
 
-          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
+          const isDSLValuesSource = api.valuesSource$.getValue() === ControlValuesSource.DSL;
           const field = api.field$.getValue();
-          if (!key || (isDSLInputMode && !field)) {
+          if (!key || (isDSLValuesSource && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -447,7 +447,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }
 
           let keyAsType: OptionsListSelection = key;
-          if (isDSLInputMode) {
+          if (isDSLValuesSource) {
             keyAsType = getSelectionAsFieldType(field!, key);
           }
 
@@ -469,17 +469,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
-          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
+          const isDSLValuesSource = api.valuesSource$.getValue() === ControlValuesSource.DSL;
           const field = api.field$.getValue();
 
-          if (!key || (isDSLInputMode && !field)) {
+          if (!key || (isDSLValuesSource && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
             return;
           }
           let keyAsType: OptionsListSelection = key;
-          if (isDSLInputMode) {
+          if (isDSLValuesSource) {
             keyAsType = getSelectionAsFieldType(field!, key);
           }
 
@@ -518,9 +518,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           sort$.next(sort);
         },
         selectAll: (keys: string[]) => {
-          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
+          const isDSLValuesSource = api.valuesSource$.getValue() === ControlValuesSource.DSL;
           const field = api.field$.getValue();
-          if (keys.length < 1 || (isDSLInputMode && !field)) {
+          if (keys.length < 1 || (isDSLValuesSource && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -532,9 +532,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
         },
         deselectAll: (keys: string[]) => {
-          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
+          const isDSLValuesSource = api.valuesSource$.getValue() === ControlValuesSource.DSL;
           const field = api.field$.getValue();
-          if (keys.length < 1 || (isDSLInputMode && !field)) {
+          if (keys.length < 1 || (isDSLValuesSource && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -573,10 +573,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }, []);
 
           const outputMode = useStateFromPublishingSubject(dataControlManager.api.output$);
-          const inputMode = useStateFromPublishingSubject(dataControlManager.api.input$);
+          const valuesSource = useStateFromPublishingSubject(dataControlManager.api.valuesSource$);
           const isESQLOutputMode = outputMode === ControlOutputOption.ESQL;
-          const isESQLInputMode = inputMode === ControlInputOption.ESQL;
-          const isStaticInputMode = inputMode === ControlInputOption.STATIC;
+          const isESQLValuesSource = valuesSource === ControlValuesSource.ESQL;
+          const isStaticValuesSource = valuesSource === ControlValuesSource.STATIC;
 
           return (
             <OptionsListControlContext.Provider
@@ -587,8 +587,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
                   hideActionBar,
                   hideExclude: isESQLOutputMode || hideExclude,
                   hideExists: isESQLOutputMode || hideExists,
-                  hideSort: isESQLOutputMode || isESQLInputMode || isStaticInputMode || hideSort,
-                  awaitInitialAvailableOptions: isStaticInputMode,
+                  hideSort:
+                    isESQLOutputMode || isESQLValuesSource || isStaticValuesSource || hideSort,
+                  awaitInitialAvailableOptions: isStaticValuesSource,
                 },
               }}
             >

@@ -42,18 +42,18 @@ export const validateESQLVariableString = (
   esqlVariableString: string | undefined,
   initialVariableString: string | undefined,
   existingESQLVariables: ESQLControlVariable[],
-  isStaticInputMode: boolean
+  isStaticValuesSource: boolean
 ): [EditorComponentStatus, string | null] => {
   if (
     !esqlVariableString ||
     esqlVariableString === '?' ||
     esqlVariableString.length === 0 ||
-    (isStaticInputMode && esqlVariableString === '??')
+    (isStaticValuesSource && esqlVariableString === '??')
   ) {
     return [EditorComponentStatus.INCOMPLETE, null];
   }
 
-  const invalidPrefix = !isStaticInputMode && esqlVariableString.startsWith('??');
+  const invalidPrefix = !isStaticValuesSource && esqlVariableString.startsWith('??');
   // Check for invalid characters after initial question mark(s)
   const invalidCharacters = getESQLVariableInvalidRegex().test(
     esqlVariableString.replace(/^\?+/, '')

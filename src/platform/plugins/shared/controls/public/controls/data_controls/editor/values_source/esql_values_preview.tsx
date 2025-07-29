@@ -26,7 +26,7 @@ import { max, min } from 'lodash';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { ChooseColumnPopover } from './choose_column_popover';
 
-export const InputValuesPreview: React.FC<{
+export const ESQLValuesPreview: React.FC<{
   previewOptions: string[];
   previewColumns: string[];
   previewError?: Error;

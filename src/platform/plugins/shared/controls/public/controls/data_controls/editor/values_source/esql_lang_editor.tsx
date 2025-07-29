@@ -24,8 +24,8 @@ import {
   storageService,
   fieldsMetadataService,
   usageCollectionService,
-} from '../../../services/kibana_services';
-import { DataControlEditorStrings } from '../data_control_constants';
+} from '../../../../services/kibana_services';
+import { DataControlEditorStrings } from '../../data_control_constants';
 
 export const ESQLLangEditor = (props: ESQLEditorProps) => {
   const { loading, value } = useAsync(() => {

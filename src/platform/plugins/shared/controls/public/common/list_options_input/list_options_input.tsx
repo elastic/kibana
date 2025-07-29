@@ -26,9 +26,7 @@ import {
 import { css } from '@emotion/react';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import React, { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { FixedSizeList } from 'react-window';
 import { v4 as uuidv4, NIL as UUID_NIL } from 'uuid';
 

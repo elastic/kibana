@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlInputOption, ControlOutputOption } from '../../../../common';
+import { ControlValuesSource, ControlOutputOption } from '../../../../common';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {
@@ -51,23 +51,23 @@ export const CONTROL_LAYOUT_OPTIONS = [
   },
 ];
 
-export const CONTROL_INPUT_OPTIONS = [
+export const CONTROL_VALUES_SOURCE_OPTIONS = [
   {
-    id: ControlInputOption.DSL,
+    id: ControlValuesSource.DSL,
     'data-test-subj': 'control-editor-input-dsl',
     label: i18n.translate('controls.controlGroup.management.input.dsl', {
       defaultMessage: 'Field',
     }),
   },
   {
-    id: ControlInputOption.ESQL,
+    id: ControlValuesSource.ESQL,
     'data-test-subj': 'control-editor-input-esql',
     label: i18n.translate('controls.controlGroup.management.input.esql', {
       defaultMessage: 'Query',
     }),
   },
   {
-    id: ControlInputOption.STATIC,
+    id: ControlValuesSource.STATIC,
     'data-test-subj': 'control-editor-input-static',
     label: i18n.translate('controls.controlGroup.management.input.static', {
       defaultMessage: 'Static values',

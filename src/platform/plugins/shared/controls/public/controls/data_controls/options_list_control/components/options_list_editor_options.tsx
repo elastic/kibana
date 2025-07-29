@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
-import { ControlInputOption, ControlOutputOption } from '../../../../../common';
+import { ControlValuesSource, ControlOutputOption } from '../../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSearchTechnique,
@@ -82,7 +82,7 @@ export const OptionsListEditorOptions = ({
   );
 
   const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
-  const isDSLInputMode = useMemo(() => input === ControlInputOption.DSL, [input]);
+  const isDSLValuesSource = useMemo(() => input === ControlValuesSource.DSL, [input]);
 
   const [singleSelect, setSingleSelect] = useState<boolean>(
     isESQLOutputMode || (initialState.singleSelect ?? false)
@@ -95,10 +95,10 @@ export const OptionsListEditorOptions = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (!isDSLInputMode) return ['wildcard' as OptionsListSearchTechnique];
+    if (!isDSLValuesSource) return ['wildcard' as OptionsListSearchTechnique];
     if (!field) return [];
     return getCompatibleSearchTechniques(field.type);
-  }, [field, isDSLInputMode]);
+  }, [field, isDSLValuesSource]);
 
   const searchOptions = useMemo(() => {
     return allSearchOptions.filter((searchOption) => {

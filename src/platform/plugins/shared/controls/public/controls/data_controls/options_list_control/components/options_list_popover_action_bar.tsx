@@ -28,7 +28,7 @@ import {
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { ControlInputOption } from '../../../../../common';
+import { ControlValuesSource } from '../../../../../common';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
 import {
   OptionsListSearchTechnique,
@@ -83,7 +83,7 @@ export const OptionsListPopoverActionBar = ({
   const searchString = useStateFromPublishingSubject(componentApi.searchString$);
 
   const [
-    inputMode,
+    valuesSource,
     searchTechnique,
     searchStringValid,
     selectedOptions = [],
@@ -95,7 +95,7 @@ export const OptionsListPopoverActionBar = ({
     dataLoading,
     singleSelect,
   ] = useBatchedPublishingSubjects(
-    componentApi.input$,
+    componentApi.valuesSource$,
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
     componentApi.selectedOptions$,
@@ -109,10 +109,10 @@ export const OptionsListPopoverActionBar = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (inputMode !== ControlInputOption.DSL) return ['wildcard' as OptionsListSearchTechnique];
+    if (valuesSource !== ControlValuesSource.DSL) return ['wildcard' as OptionsListSearchTechnique];
     if (!field) return [];
     return getCompatibleSearchTechniques(field.type);
-  }, [field, inputMode]);
+  }, [field, valuesSource]);
 
   const defaultSearchTechnique = useMemo(
     () => searchTechnique ?? compatibleSearchTechniques[0],
