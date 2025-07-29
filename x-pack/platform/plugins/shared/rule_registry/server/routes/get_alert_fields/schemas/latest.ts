@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export interface ServerlessConfig {
-  developer?: {
-    projectSwitcher?: {
-      enabled: boolean;
-      currentType: 'security' | 'observability' | 'search' | 'chat';
-    };
-  };
-}
+export * from './v1';
