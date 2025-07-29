@@ -21,7 +21,7 @@ export interface GetOAuthClientCredentialsSecrets {
 interface GetOAuthClientCredentialsAccessTokenOpts {
   connectorId?: string;
   tokenUrl: string;
-  oAuthScope: string;
+  oAuthScope?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   credentials: {
