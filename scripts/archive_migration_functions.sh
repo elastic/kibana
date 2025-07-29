@@ -350,7 +350,7 @@ migrate() {
 
 load_logstash() {
   set -x
-  node scripts/es_archiver.js load x-pack/test/functional/es_archives/logstash_functional --config "$test_config"
+  node scripts/es_archiver.js load x-pack/platform/test/fixtures/es_archives/logstash_functional --config "$test_config"
   set +x
 }
 

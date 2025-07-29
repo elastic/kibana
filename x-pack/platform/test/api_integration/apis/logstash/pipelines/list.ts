@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   // Failing: See https://github.com/elastic/kibana/issues/151350
   describe.skip('list', () => {
-    const archive = 'x-pack/test/functional/es_archives/logstash/example_pipelines';
+    const archive = 'x-pack/platform/test/fixtures/es_archives/logstash/example_pipelines';
 
     before('load pipelines archive', () => {
       return esArchiver.load(archive);

@@ -62,14 +62,14 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
     });
 

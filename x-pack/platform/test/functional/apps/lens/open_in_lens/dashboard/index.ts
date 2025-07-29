@@ -19,7 +19,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   let remoteEsArchiver;
 
   describe('lens app - TSVB Open in Lens', () => {
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {

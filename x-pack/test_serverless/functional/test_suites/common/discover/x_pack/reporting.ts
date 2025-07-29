@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // TODO: Manually loading logs archive and logs SOs in Serverless
         // instead of using `reportingAPI.initLogs()` since the original
         // logs SOs include a canvas SO which is not supported in Serverless
-        await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
           'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
         );
@@ -230,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs'
         );
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await reset();
       });
 

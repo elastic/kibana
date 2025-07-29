@@ -78,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
       await createSpace(testSpaceId);
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await deleteSpace(testSpaceId);
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     it('should install kibana assets', async function () {

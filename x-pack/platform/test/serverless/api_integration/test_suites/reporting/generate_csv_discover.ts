@@ -39,27 +39,27 @@ export default function ({ getService }: FtrProviderContext) {
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
-      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
     },
     unmappedFields: {
-      data: 'x-pack/test/functional/es_archives/reporting/unmapped_fields',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/unmapped_fields',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json',
     },
     logs: {
-      data: 'x-pack/test/functional/es_archives/logstash_functional',
+      data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
       savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
     },
     nanos: {
-      data: 'x-pack/test/functional/es_archives/reporting/nanos',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/nanos',
       savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
     },
     sales: {
-      data: 'x-pack/test/functional/es_archives/reporting/sales',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/sales',
       savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
     },
     bigIntIdField: {
-      data: 'x-pack/test/functional/es_archives/reporting/big_int_id_field',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/big_int_id_field',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field',
     },
   };

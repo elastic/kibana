@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet_agents_status', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await es.create({
         id: 'ingest-agent-policies:policy-inactivity-timeout',
         index: INGEST_SAVED_OBJECT_INDEX,
@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     it('should return the status of agents', async () => {

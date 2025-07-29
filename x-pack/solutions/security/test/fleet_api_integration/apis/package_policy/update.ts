@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
@@ -272,7 +272,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

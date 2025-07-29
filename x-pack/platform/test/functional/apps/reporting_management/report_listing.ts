@@ -41,13 +41,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       // to reset the data after deletion testing
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/reporting/archived_reports'
+      );
     });
 
     it('Confirm single report deletion works', async () => {
