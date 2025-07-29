@@ -108,6 +108,15 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
+export interface UpdateCapturePatternAction {
+  type: 'update_capture_pattern';
+  request: {
+    name: string;
+    capturePattern?: string;
+    oldPattern?: string;
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -122,7 +131,8 @@ export type ElasticsearchAction =
   | UpdateLifecycleAction
   | DeleteDatastreamAction
   | UpsertDotStreamsDocumentAction
-  | DeleteDotStreamsDocumentAction;
+  | DeleteDotStreamsDocumentAction
+  | UpdateCapturePatternAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -137,6 +147,7 @@ export interface ActionsByType {
   upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
   update_lifecycle: UpdateLifecycleAction[];
   delete_datastream: DeleteDatastreamAction[];
+  update_capture_pattern: UpdateCapturePatternAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
 }

@@ -20,6 +20,32 @@ export interface ListStreamDetail {
   data_stream?: estypes.IndicesDataStream;
 }
 
+export const listDataStreams = createServerRoute({
+  endpoint: 'GET /internal/streams/_list_data_streams/{pattern}',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      pattern: z.string().optional(),
+    }),
+  }),
+  handler: async ({ request, params, getScopedClients }): Promise<{ data_streams: string[] }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({
+      name: params.path.pattern ?? '*',
+      expand_wildcards: 'all',
+    });
+    const dataStreams = response.data_streams.map((dataStream) => dataStream.name);
+    return { data_streams: dataStreams };
+  },
+});
+
 export const listStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams',
   options: {
@@ -148,4 +174,5 @@ export const internalCrudRoutes = {
   ...listStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...listDataStreams,
 };

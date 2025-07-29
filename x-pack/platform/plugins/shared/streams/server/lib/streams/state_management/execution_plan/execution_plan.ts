@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { groupBy, orderBy } from 'lodash';
+import { groupBy, orderBy, uniq } from 'lodash';
 import { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -31,6 +31,7 @@ import { getRequiredPermissionsForActions } from './required_permissions';
 import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
 import type {
   ActionsByType,
+  UpdateCapturePatternAction,
   DeleteComponentTemplateAction,
   DeleteDatastreamAction,
   DeleteDotStreamsDocumentAction,
@@ -45,6 +46,7 @@ import type {
   UpsertIngestPipelineAction,
   UpsertWriteIndexOrRolloverAction,
 } from './types';
+import { MAX_PRIORITY } from '../../index_templates/generate_index_template';
 
 /**
  * This class takes a list of ElasticsearchActions and groups them by type.
@@ -74,6 +76,7 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      update_capture_pattern: [],
     };
   }
 
@@ -158,6 +161,7 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        update_capture_pattern,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -183,7 +187,10 @@ export class ExecutionPlan {
         this.updateLifecycle(update_lifecycle),
       ]);
 
-      await this.upsertIngestPipelines(upsert_ingest_pipeline);
+      await Promise.all([
+        this.upsertIngestPipelines(upsert_ingest_pipeline),
+        this.updateCapturePatterns(update_capture_pattern),
+      ]);
 
       await this.deleteDatastreams(delete_datastream);
 
@@ -238,6 +245,79 @@ export class ExecutionPlan {
           name: action.request.name,
         })
       )
+    );
+  }
+
+  private async updateCapturePatterns(actions: UpdateCapturePatternAction[]) {
+    return Promise.all(
+      actions.map(async (action) => {
+        const captureTemplateName = `capture-${action.request.name}@streams`;
+        const capturePipelineName = `capure-${action.request.name}@streams`;
+        let existingCoveredDataStreams: string[] = [];
+        if (action.request.oldPattern) {
+          const response =
+            await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+              name: action.request.oldPattern,
+            });
+          existingCoveredDataStreams = response.data_streams.map((ds) => ds.name);
+        }
+        if (!action.request.capturePattern) {
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.deleteIndexTemplate({
+            name: captureTemplateName,
+          });
+          // roll over all data streams that were covered by the old capture pattern
+          Promise.all(
+            existingCoveredDataStreams.map((dsName) =>
+              this.dependencies.scopedClusterClient.asCurrentUser.indices.rollover({
+                alias: dsName,
+              })
+            )
+          );
+          // TODO: We can't remove the pipeline without adjusting old backing indices, which we probably don't want to do - or maybe we do
+          // return await this.dependencies.scopedClusterClient.asCurrentUser.ingest.deletePipeline({
+          //   id: capturePipelineName,
+          // });
+          return;
+        }
+        const response =
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+            name: action.request.capturePattern,
+          });
+        const newCoveredDataStreams = response.data_streams.map((ds) => ds.name);
+        await Promise.all([
+          this.dependencies.scopedClusterClient.asCurrentUser.indices.putIndexTemplate({
+            name: captureTemplateName,
+            index_patterns: [action.request.capturePattern],
+            data_stream: {},
+            priority: `${MAX_PRIORITY}` as unknown as number,
+            template: {
+              settings: {
+                index: {
+                  default_pipeline: capturePipelineName,
+                },
+              },
+            },
+          }),
+          this.dependencies.scopedClusterClient.asCurrentUser.ingest.putPipeline({
+            id: capturePipelineName,
+            processors: [
+              {
+                reroute: {
+                  destination: action.request.name,
+                },
+              },
+            ],
+          }),
+        ]);
+        // roll over all data streams that were covered by the old capture pattern
+        return Promise.all(
+          uniq([...existingCoveredDataStreams, ...newCoveredDataStreams]).map((dsName) =>
+            this.dependencies.scopedClusterClient.asCurrentUser.indices.rollover({
+              alias: dsName,
+            })
+          )
+        );
+      })
     );
   }
 

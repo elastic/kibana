@@ -65,6 +65,8 @@ export function getRequiredPermissionsForActions({
     update_lifecycle,
     upsert_write_index_or_rollover,
     delete_datastream,
+    // TODO
+    update_capture_pattern,
     // we don't need to validate permissions for these actions
     // since they are done by the kibana system user
     upsert_dot_streams_document,
