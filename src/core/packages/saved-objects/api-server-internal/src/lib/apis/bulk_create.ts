@@ -115,11 +115,19 @@ export const performBulkCreate = async <T>(
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
+    const accessMode = options.accessControl?.accessMode ?? 'default';
+
+    if (!typeSupportsAccessControl && accessMode) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `The "accessMode" field is not supported for saved objects of type "${type}".`
+      );
+    }
+
     const accessControlToWrite =
       typeSupportsAccessControl && createdBy
         ? {
             owner: createdBy,
-            accessMode: options.accessControl?.accessMode,
+            accessMode,
           }
         : undefined;
     return right({

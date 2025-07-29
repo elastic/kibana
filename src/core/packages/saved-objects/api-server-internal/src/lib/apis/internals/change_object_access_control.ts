@@ -35,19 +35,19 @@ import { ApiExecutionContext } from '../types';
 
 export type ChangeAccessControlActionType = 'changeOwnership' | 'changeAccessMode';
 
-export interface ChangeAccessControlParams<T = unknown> {
+export interface ChangeAccessControlParams {
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: ApiExecutionContext['client'];
   serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   objects: SavedObjectsChangeAccessControlObject[];
-  options: SavedObjectsChangeAccessControlOptions<T>;
+  options: SavedObjectsChangeAccessControlOptions;
   securityExtension?: ISavedObjectsSecurityExtension;
   actionType: ChangeAccessControlActionType;
 }
-export const changeObjectAccessControl = async <T>(
-  params: ChangeAccessControlParams<T>
+export const changeObjectAccessControl = async (
+  params: ChangeAccessControlParams
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
   const { namespace } = params.options;
   const { actionType } = params;
@@ -104,7 +104,7 @@ export const changeObjectAccessControl = async <T>(
   const expectedBulkGetResults: Array<
     Either<
       { id: string; type: string; error: any },
-      { type: string; id: string; esRequestIndex: number }
+      { id: string; type: string; esRequestIndex: number }
     >
   > = objects.map((object) => {
     const { type, id } = object;
@@ -132,7 +132,7 @@ export const changeObjectAccessControl = async <T>(
     // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
     return {
       objects: expectedBulkGetResults.filter(isLeft).map(({ value }) => value),
-    } as unknown as SavedObjectsChangeAccessControlResponse;
+    };
   }
 
   const bulkGetDocs = validObjects.map<estypes.MgetOperation>((x) => ({
@@ -187,7 +187,7 @@ export const changeObjectAccessControl = async <T>(
   const expectedBulkOperationResults: Array<
     Either<
       { id: string; type: string; error: any },
-      { type: string; id: string; esRequestIndex?: number }
+      { id: string; type: string; esRequestIndex?: number }
     >
   > = expectedBulkGetResults.map((expectedBulkGetResult) => {
     if (isLeft(expectedBulkGetResult)) {
@@ -287,7 +287,7 @@ export const changeObjectAccessControl = async <T>(
         return { id, type };
       }
     ),
-  } as unknown as SavedObjectsChangeAccessControlResponse;
+  };
 };
 
 function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {

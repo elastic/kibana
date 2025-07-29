@@ -16,14 +16,14 @@ import type {
 import { changeObjectAccessControl } from './internals/change_object_access_control';
 import type { ApiExecutionContext } from './types';
 
-export interface PerformChangeOwnershipParams<T = unknown> {
+export interface PerformChangeOwnershipParams {
   objects: SavedObjectsChangeAccessControlObject[];
-  options: SavedObjectsChangeOwnershipOptions<T>;
+  options: SavedObjectsChangeOwnershipOptions;
 }
 
-export const isSavedObjectsChangeOwnershipOptions = <Attributes = unknown>(
+export const isSavedObjectsChangeOwnershipOptions = (
   options: unknown
-): options is SavedObjectsChangeOwnershipOptions<Attributes> => {
+): options is SavedObjectsChangeOwnershipOptions => {
   return (
     typeof options === 'object' &&
     options !== null &&
@@ -31,8 +31,8 @@ export const isSavedObjectsChangeOwnershipOptions = <Attributes = unknown>(
     typeof options.newOwnerProfileUid === 'string'
   );
 };
-export const performChangeOwnership = async <T>(
-  { objects, options }: PerformChangeOwnershipParams<T>,
+export const performChangeOwnership = async (
+  { objects, options }: PerformChangeOwnershipParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
   const { common: commonHelper } = helpers;

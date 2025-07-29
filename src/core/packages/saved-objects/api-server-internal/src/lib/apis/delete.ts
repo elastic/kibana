@@ -50,22 +50,21 @@ export const performDelete = async <T>(
 
   if (securityExtension) {
     let name;
-    let accessControl: SavedObjectsRawDocSource['accessControl'] | undefined;
+
+    const nameAttribute = registry.getNameAttribute(type);
+
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+      {
+        index: commonHelper.getIndexForType(type),
+        id: serializer.generateRawId(namespace, type, id),
+        _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+      },
+      { ignore: [404], meta: true }
+    );
+    const accessControl = savedObjectResponse.body._source?.accessControl;
 
     if (securityExtension.includeSavedObjectNames()) {
-      const nameAttribute = registry.getNameAttribute(type);
-
-      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
-        {
-          index: commonHelper.getIndexForType(type),
-          id: serializer.generateRawId(namespace, type, id),
-          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
-        },
-        { ignore: [404], meta: true }
-      );
-      accessControl = savedObjectResponse.body._source?.accessControl;
       const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
-
       name = SavedObjectsUtils.getName(nameAttribute, saveObject);
     }
 

@@ -1143,15 +1143,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         namespace: params.namespace,
         objects: params.objects,
       },
-      action,
-      operation
+      action
     );
   }
 
   async internalAuthorizeChangeAccessControl<A extends string>(
     params: AuthorizeBulkChangeOwnershipParams,
-    action: SecurityAction,
-    operation: 'changeAccessMode' | 'changeOwnership'
+    action: SecurityAction
   ): Promise<CheckAuthorizationResult<A>> {
     if (!this.typeRegistry) {
       throw new Error('Type registry is not defined');
