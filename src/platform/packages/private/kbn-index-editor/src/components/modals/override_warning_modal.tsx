@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { firstValueFrom } from 'rxjs';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextExtra } from '../../types';
 
 const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
