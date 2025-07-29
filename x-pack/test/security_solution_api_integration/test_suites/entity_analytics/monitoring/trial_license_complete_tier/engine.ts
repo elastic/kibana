@@ -7,18 +7,81 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
+import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const spaceName = 'default';
   const es = getService('es');
+  const USER_PASSWORD = 'changeme';
+  const BASIC_SECURITY_SOLUTION_PRIVILEGES = [
+    {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['read'],
+      },
+      spaces: ['default'],
+    },
+  ];
+  const READ_NO_INDEX_ROLE = {
+    name: 'no_index',
+    privileges: {
+      kibana: BASIC_SECURITY_SOLUTION_PRIVILEGES,
+      elasticsearch: {
+        indices: [],
+      },
+    },
+  };
+  const READ_ALL_INDICES_ROLE = {
+    name: 'all',
+    privileges: {
+      kibana: BASIC_SECURITY_SOLUTION_PRIVILEGES,
+      elasticsearch: {
+        indices: [
+          {
+            names: ['*'],
+            privileges: ['read'],
+          },
+        ],
+      },
+    },
+  };
+
+  const READ_PRIV_MON_INDICES_ROLE = {
+    name: 'priv_mon_read',
+    privileges: {
+      kibana: BASIC_SECURITY_SOLUTION_PRIVILEGES,
+      elasticsearch: {
+        indices: [
+          {
+            names: ['.entity_analytics.monitoring*'],
+            privileges: ['read'],
+          },
+        ],
+      },
+    },
+  };
+
+  const userHelper = usersAndRolesFactory(getService('security'));
+  const ROLES = [READ_ALL_INDICES_ROLE, READ_PRIV_MON_INDICES_ROLE, READ_NO_INDEX_ROLE];
+  async function createPrivilegeTestUsers() {
+    const rolePromises = ROLES.map((role) => userHelper.createRole(role));
+
+    await Promise.all(rolePromises);
+    const userPromises = ROLES.map((role) =>
+      userHelper.createUser({ username: role.name, roles: [role.name], password: USER_PASSWORD })
+    );
+
+    return Promise.all(userPromises);
+  }
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
@@ -45,6 +108,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Privilege Monitoring Init Access', () => {
+      before(async () => {
+        await createPrivilegeTestUsers();
+      });
+      it('should allow init for user with full privileges', async () => {
+        const res = await privMonUtils.initPrivMonEngineWithoutAuth({
+          username: READ_ALL_INDICES_ROLE.name,
+          password: USER_PASSWORD,
+        });
+        expect(res.status).to.eql(200);
+      });
+    });
     describe('plain index sync', () => {
       log.info(`Syncing plain index`);
       const indexName = 'tatooine-privileged-users';
@@ -68,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
           await es.indices.delete({ index: indexName }, { ignore: [404] });
           await api.deleteMonitoringEngine({ query: { data: true } });
         } catch (err) {
-          this.log('warn', `Failed to clean up in afterEach: ${err.message}`);
+          log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
       });
       beforeEach(async () => {
@@ -77,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
           await es.indices.delete({ index: indexName }, { ignore: [404] });
           await api.deleteMonitoringEngine({ query: { data: true } });
         } catch (err) {
-          this.log('warn', `Failed to clean up in beforeEach: ${err.message}`);
+          log.warning(`Failed to clean up in beforeEach: ${err.message}`);
         }
         // create the tatooine index
         await es.indices.create({
