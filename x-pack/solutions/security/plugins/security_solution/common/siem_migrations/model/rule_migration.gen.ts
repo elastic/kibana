@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { MigrationStatus, MigrationTaskStatus } from './common.gen';
+import { MigrationStatus, MigrationTaskStatus, MigrationLastExecution } from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -146,32 +146,14 @@ export const PrebuiltRuleVersion = z.object({
  * The last execution of the rule migration task.
  */
 export type RuleMigrationLastExecution = z.infer<typeof RuleMigrationLastExecution>;
-export const RuleMigrationLastExecution = z.object({
-  /**
-   * The moment the last execution started.
-   */
-  started_at: z.string().optional(),
-  /**
-   * The moment the last execution finished.
-   */
-  finished_at: z.string().nullable().optional(),
-  /**
-   * The connector ID used for the last execution.
-   */
-  connector_id: z.string().optional(),
-  /**
-   * The error message if the last execution failed.
-   */
-  error: z.string().nullable().optional(),
-  /**
-   * Indicates if the last execution was stopped by the user.
-   */
-  is_stopped: z.boolean().optional(),
-  /**
-   * Indicates if the last execution skipped pre-built rule matching.
-   */
-  skip_prebuilt_rules_matching: z.boolean().optional(),
-});
+export const RuleMigrationLastExecution = z
+  .object({
+    /**
+     * Indicates if the last execution skipped matching prebuilt rules.
+     */
+    skip_prebuilt_rules_matching: z.boolean().optional(),
+  })
+  .merge(MigrationLastExecution);
 
 /**
  * The rule migration object ( without Id ) with its settings.
@@ -187,7 +169,7 @@ export const RuleMigrationData = z.object({
    */
   created_at: NonEmptyString,
   /**
-   * The last execution of the rule migration task.
+   * The last execution details of a rule migration task.
    */
   last_execution: RuleMigrationLastExecution.optional(),
 });

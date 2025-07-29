@@ -6,27 +6,6 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    DashboardMigrationLastExecution:
-      type: object
-      description: The last execution of the dashboard migration task.
-      properties:
-        started_at:
-          type: string
-          description: The moment the last execution started.
-        finished_at:
-          type: string
-          nullable: true
-          description: The moment the last execution finished.
-        connector_id:
-          type: string
-          description: The connector ID used for the last execution.
-        error:
-          type: string
-          nullable: true
-          description: The error message if the last execution failed.
-        is_stopped:
-          type: boolean
-          description: Indicates if the last execution was stopped by the user.
 
     DashboardMigration:
       description: The dashboard migration object with its settings.
@@ -59,7 +38,7 @@ components:
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
           description: The last execution of the dashboard migration task.
-          $ref: '#/components/schemas/DashboardMigrationLastExecution'
+          $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
 
 
     DashboardMigrationDashboard:

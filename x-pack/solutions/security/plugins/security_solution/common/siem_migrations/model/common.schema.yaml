@@ -54,3 +54,26 @@ components:
         - stopped
         - finished
         - interrupted
+
+    MigrationLastExecution:
+      type: object
+      description: The last execution of a migration task.
+      properties:
+        started_at:
+          type: string
+          description: The moment the last execution started.
+        finished_at:
+          type: string
+          nullable: true
+          description: The moment the last execution finished.
+        connector_id:
+          type: string
+          description: The connector ID used for the last execution.
+        error:
+          type: string
+          nullable: true
+          description: The error message if the last execution failed.
+        is_stopped:
+          type: boolean
+          description: Indicates if the last execution was stopped by the user.
+

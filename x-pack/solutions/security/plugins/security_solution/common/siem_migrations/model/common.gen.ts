@@ -71,3 +71,30 @@ export const MigrationTaskStatus = z.enum([
 ]);
 export type MigrationTaskStatusEnum = typeof MigrationTaskStatus.enum;
 export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;
+
+/**
+ * The last execution of a migration task.
+ */
+export type MigrationLastExecution = z.infer<typeof MigrationLastExecution>;
+export const MigrationLastExecution = z.object({
+  /**
+   * The moment the last execution started.
+   */
+  started_at: z.string().optional(),
+  /**
+   * The moment the last execution finished.
+   */
+  finished_at: z.string().nullable().optional(),
+  /**
+   * The connector ID used for the last execution.
+   */
+  connector_id: z.string().optional(),
+  /**
+   * The error message if the last execution failed.
+   */
+  error: z.string().nullable().optional(),
+  /**
+   * Indicates if the last execution was stopped by the user.
+   */
+  is_stopped: z.boolean().optional(),
+});

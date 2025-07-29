@@ -17,35 +17,8 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { MigrationStatus, MigrationTaskStatus } from './common.gen';
+import { MigrationLastExecution, MigrationStatus, MigrationTaskStatus } from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
-
-/**
- * The last execution of the dashboard migration task.
- */
-export type DashboardMigrationLastExecution = z.infer<typeof DashboardMigrationLastExecution>;
-export const DashboardMigrationLastExecution = z.object({
-  /**
-   * The moment the last execution started.
-   */
-  started_at: z.string().optional(),
-  /**
-   * The moment the last execution finished.
-   */
-  finished_at: z.string().nullable().optional(),
-  /**
-   * The connector ID used for the last execution.
-   */
-  connector_id: z.string().optional(),
-  /**
-   * The error message if the last execution failed.
-   */
-  error: z.string().nullable().optional(),
-  /**
-   * Indicates if the last execution was stopped by the user.
-   */
-  is_stopped: z.boolean().optional(),
-});
 
 /**
  * The dashboard migration object ( without Id ) with its settings.
@@ -67,7 +40,7 @@ export const DashboardMigrationData = z.object({
   /**
    * The last execution of the dashboard migration task.
    */
-  last_execution: DashboardMigrationLastExecution.optional(),
+  last_execution: MigrationLastExecution.optional(),
 });
 
 /**
