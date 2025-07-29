@@ -62,12 +62,16 @@ export const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.objec
   args: schema.maybe(getNonEmptyString('Args')),
 });
 
-export const MSDefenderEndpointRunScriptActionRequestSchema = {
-  body: schema.object({
-    ...restBaseSchema,
-    parameters: MSDefenderEndpointRunScriptActionRequestParamsSchema,
-  }),
-};
+const SentinelOneRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The SentinelOne Script ID to be executed
+   */
+  scriptId: getNonEmptyString('ScriptName'),
+  /**
+   * Any input arguments for the selected script
+   */
+  scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
+});
 
 export const RunScriptActionRequestSchema = {
   body: schema.object({
@@ -80,7 +84,12 @@ export const RunScriptActionRequestSchema = {
         schema.siblingRef('agent_type'),
         'microsoft_defender_endpoint',
         MSDefenderEndpointRunScriptActionRequestParamsSchema,
-        schema.never()
+        schema.conditional(
+          schema.siblingRef('agent_type'),
+          'sentinel_one',
+          SentinelOneRunScriptActionRequestParamsSchema,
+          schema.never()
+        )
       )
     ),
   }),
