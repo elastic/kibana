@@ -12,11 +12,11 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import {
-  DashboardMigrationTaskStatusEnum,
   type DashboardMigrationDashboard,
   type DashboardMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
@@ -106,7 +106,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
       },
       created_at: (aggs.createdAt as AggregationsMinAggregate)?.value_as_string ?? '',
       last_updated_at: (aggs.lastUpdatedAt as AggregationsMaxAggregate)?.value_as_string ?? '',
-      status: DashboardMigrationTaskStatusEnum.ready,
+      status: MigrationTaskStatusEnum.ready,
     };
   }
 

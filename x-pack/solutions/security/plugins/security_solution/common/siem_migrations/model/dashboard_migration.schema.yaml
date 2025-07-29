@@ -98,7 +98,7 @@ components:
           $ref: '#/components/schemas/OriginalDashboard'
         status:
           description: The status of the dashboard migration process.
-          $ref: '#/components/schemas/DashboardMigrationStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
         updated_at:
           type: string
@@ -148,25 +148,6 @@ components:
       description: Additional properties specific to the vendor
       $ref: './vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardProperties'
 
-    DashboardMigrationStatus:
-      type: string
-      description: The status of each Dashboard migration.
-      enum: # should match SiemMigrationsStatus enum at ../constants.ts
-        - pending
-        - processing
-        - completed
-        - failed
-
-    DashboardMigrationTaskStatus:
-      type: string
-      description: The status of the migration task.
-      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
-        - ready
-        - running
-        - stopped
-        - finished
-        - interrupted
-
     DashboardMigrationTaskStats:
       type: object
       description: The dashboard migration task stats object.
@@ -186,7 +167,7 @@ components:
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
-          $ref: '#/components/schemas/DashboardMigrationTaskStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationTaskStatus'
         dashboards:
           type: object
           description: The dashboards migration stats.

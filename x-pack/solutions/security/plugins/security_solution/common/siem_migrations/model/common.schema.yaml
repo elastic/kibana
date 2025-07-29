@@ -35,3 +35,22 @@ components:
             dataset:
               type: string
               description: The dataset name to use for evaluations.
+
+    MigrationStatus:
+      type: string
+      description: The status of each Dashboard migration.
+      enum: # should match SiemMigrationsStatus enum at ../constants.ts
+        - pending
+        - processing
+        - completed
+        - failed
+
+    MigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+        - interrupted

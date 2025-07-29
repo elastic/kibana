@@ -49,3 +49,25 @@ export const LangSmithEvaluationOptions = LangSmithOptions.merge(
     dataset: z.string(),
   })
 );
+
+/**
+ * The status of each Dashboard migration.
+ */
+export type MigrationStatus = z.infer<typeof MigrationStatus>;
+export const MigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
+export type MigrationStatusEnum = typeof MigrationStatus.enum;
+export const MigrationStatusEnum = MigrationStatus.enum;
+
+/**
+ * The status of the migration task.
+ */
+export type MigrationTaskStatus = z.infer<typeof MigrationTaskStatus>;
+export const MigrationTaskStatus = z.enum([
+  'ready',
+  'running',
+  'stopped',
+  'finished',
+  'interrupted',
+]);
+export type MigrationTaskStatusEnum = typeof MigrationTaskStatus.enum;
+export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;

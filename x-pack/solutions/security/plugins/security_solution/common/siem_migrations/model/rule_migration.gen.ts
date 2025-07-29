@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
+import { MigrationStatus, MigrationTaskStatus } from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -217,14 +218,6 @@ export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslation
 export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
 
 /**
- * The status of each rule migration.
- */
-export type RuleMigrationStatus = z.infer<typeof RuleMigrationStatus>;
-export const RuleMigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
-export type RuleMigrationStatusEnum = typeof RuleMigrationStatus.enum;
-export const RuleMigrationStatusEnum = RuleMigrationStatus.enum;
-
-/**
  * The comment for the migration
  */
 export type RuleMigrationComment = z.infer<typeof RuleMigrationComment>;
@@ -281,7 +274,7 @@ export const RuleMigrationRuleData = z.object({
   /**
    * The status of the rule migration process.
    */
-  status: RuleMigrationStatus.default('pending'),
+  status: MigrationStatus.default('pending'),
   /**
    * The comments for the migration including a summary from the LLM in markdown.
    */
@@ -310,20 +303,6 @@ export const RuleMigrationRule = z
   .merge(RuleMigrationRuleData);
 
 /**
- * The status of the migration task.
- */
-export type RuleMigrationTaskStatus = z.infer<typeof RuleMigrationTaskStatus>;
-export const RuleMigrationTaskStatus = z.enum([
-  'ready',
-  'running',
-  'stopped',
-  'finished',
-  'interrupted',
-]);
-export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
-export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
-
-/**
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
@@ -339,7 +318,7 @@ export const RuleMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: RuleMigrationTaskStatus,
+  status: MigrationTaskStatus,
   /**
    * The rules migration stats.
    */

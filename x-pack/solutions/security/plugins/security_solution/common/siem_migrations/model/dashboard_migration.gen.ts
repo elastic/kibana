@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { MigrationStatus, MigrationTaskStatus } from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -128,14 +129,6 @@ export const OriginalDashboard = z.object({
 });
 
 /**
- * The status of each Dashboard migration.
- */
-export type DashboardMigrationStatus = z.infer<typeof DashboardMigrationStatus>;
-export const DashboardMigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
-export type DashboardMigrationStatusEnum = typeof DashboardMigrationStatus.enum;
-export const DashboardMigrationStatusEnum = DashboardMigrationStatus.enum;
-
-/**
  * The dashboard migration document object.
  */
 export type DashboardMigrationDashboardData = z.infer<typeof DashboardMigrationDashboardData>;
@@ -159,7 +152,7 @@ export const DashboardMigrationDashboardData = z.object({
   /**
    * The status of the dashboard migration process.
    */
-  status: DashboardMigrationStatus.default('pending'),
+  status: MigrationStatus.default('pending'),
   /**
    * The moment of the last update
    */
@@ -184,20 +177,6 @@ export const DashboardMigrationDashboard = z
   .merge(DashboardMigrationDashboardData);
 
 /**
- * The status of the migration task.
- */
-export type DashboardMigrationTaskStatus = z.infer<typeof DashboardMigrationTaskStatus>;
-export const DashboardMigrationTaskStatus = z.enum([
-  'ready',
-  'running',
-  'stopped',
-  'finished',
-  'interrupted',
-]);
-export type DashboardMigrationTaskStatusEnum = typeof DashboardMigrationTaskStatus.enum;
-export const DashboardMigrationTaskStatusEnum = DashboardMigrationTaskStatus.enum;
-
-/**
  * The dashboard migration task stats object.
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
@@ -213,7 +192,7 @@ export const DashboardMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: DashboardMigrationTaskStatus,
+  status: MigrationTaskStatus,
   /**
    * The dashboards migration stats.
    */
