@@ -10,11 +10,12 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { EuiPageTemplate, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+// import { EuiPageTemplate, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiPageTemplate, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+// import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import { ActionCard } from './action_card';
@@ -66,7 +67,7 @@ export const NoDataPage = ({
       className={classNames('kbnNoDataPageContents', className)}
       data-test-subj="kbnNoDataPage"
     >
-      <EuiText textAlign="center">
+      {/* <EuiText textAlign="center">
         <KibanaSolutionAvatar name={solution} iconType={logo || `logo${solution}`} size="xxl" />
         <EuiSpacer size="l" />
         <h1>{title}</h1>
@@ -74,7 +75,7 @@ export const NoDataPage = ({
           <p>{message}</p>
         </EuiTextColor>
       </EuiText>
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" /> */}
       <ActionCard {...{ action }} />
     </EuiPageTemplate.Section>
   );

@@ -5,81 +5,101 @@ exports[`NoDataCard props button 1`] = `
   class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
-  <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+        data-test-subj="noDataCard"
+        style="max-width:400px"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <img
-              alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              alt="Elastic Agent illustration"
+              data-test-subj="ElasticAgentIllustration"
+              height="92"
               src="test-file-stub"
-              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+              width="140"
             />
-          </figure>
-        </div>
-      </div>
-      <div
-        class="euiCard__content emotion-euiCard__content-vertical"
-      >
-        <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
-          id="generated-idTitle"
-        >
-          <a
-            aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-            href="/app/integrations/browse"
-            rel="noreferrer"
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
           >
+            <h2
+              class="euiTitle euiTitle emotion-euiTitle-m-euiTitle-m"
+            >
+              Card title
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                Description
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <a
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="kbnOverviewAddIntegrations"
+              href="/app/integrations/browse"
+              rel="noreferrer"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Button
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+        <div
+          class="euiEmptyPrompt__footer emotion-euiEmptyPrompt__footer-l-plain"
+        >
+          <span
+            class="euiTitle emotion-euiTitle-xxs"
+          >
+            Want to learn more?
+          </span>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://www.elastic.co/kibana"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Read the docs
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              Card title
+              (external, opens in a new tab or window)
             </span>
           </a>
-        </p>
-        <div
-          class="euiText emotion-euiText-s-euiCard__description"
-          id="generated-idDescription"
-        >
-          <p>
-            Description
-          </p>
         </div>
       </div>
-      <div
-        class="emotion-euiCard__footer"
-      >
-        <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="noDataDefaultFooterAction"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Button
-            </span>
-          </span>
-        </a>
-      </div>
     </div>
-  </div>
+  </section>
 </div>
 `;
 
@@ -88,81 +108,101 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
   class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
-  <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+        data-test-subj="noDataCard"
+        style="max-width:400px"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <img
-              alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              alt="Elastic Agent illustration"
+              data-test-subj="ElasticAgentIllustration"
+              height="92"
               src="test-file-stub"
-              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+              width="140"
             />
-          </figure>
-        </div>
-      </div>
-      <div
-        class="euiCard__content emotion-euiCard__content-vertical"
-      >
-        <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
-          id="generated-idTitle"
-        >
-          <a
-            aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-            href="/app/integrations/browse"
-            rel="noreferrer"
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
           >
+            <h2
+              class="euiTitle euiTitle emotion-euiTitle-m-euiTitle-m"
+            >
+              Card title
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                Description
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <a
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="kbnOverviewAddIntegrations"
+              href="/app/integrations/browse"
+              rel="noreferrer"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Button
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+        <div
+          class="euiEmptyPrompt__footer emotion-euiEmptyPrompt__footer-l-plain"
+        >
+          <span
+            class="euiTitle emotion-euiTitle-xxs"
+          >
+            Want to learn more?
+          </span>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://www.elastic.co/kibana"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Read the docs
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              Card title
+              (external, opens in a new tab or window)
             </span>
           </a>
-        </p>
-        <div
-          class="euiText emotion-euiText-s-euiCard__description"
-          id="generated-idDescription"
-        >
-          <p>
-            Description
-          </p>
         </div>
       </div>
-      <div
-        class="emotion-euiCard__footer"
-      >
-        <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="noDataDefaultFooterAction"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Button
-            </span>
-          </span>
-        </a>
-      </div>
     </div>
-  </div>
+  </section>
 </div>
 `;
 
@@ -171,81 +211,101 @@ exports[`NoDataCard props href 1`] = `
   class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
-  <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+        data-test-subj="noDataCard"
+        style="max-width:400px"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <img
-              alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              alt="Elastic Agent illustration"
+              data-test-subj="ElasticAgentIllustration"
+              height="92"
               src="test-file-stub"
-              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+              width="140"
             />
-          </figure>
-        </div>
-      </div>
-      <div
-        class="euiCard__content emotion-euiCard__content-vertical"
-      >
-        <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
-          id="generated-idTitle"
-        >
-          <a
-            aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-            href="#"
-            rel="noreferrer"
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
           >
+            <h2
+              class="euiTitle euiTitle emotion-euiTitle-m-euiTitle-m"
+            >
+              Card title
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                Description
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <a
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="kbnOverviewAddIntegrations"
+              href="#"
+              rel="noreferrer"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Button
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+        <div
+          class="euiEmptyPrompt__footer emotion-euiEmptyPrompt__footer-l-plain"
+        >
+          <span
+            class="euiTitle emotion-euiTitle-xxs"
+          >
+            Want to learn more?
+          </span>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://www.elastic.co/kibana"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Read the docs
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              Card title
+              (external, opens in a new tab or window)
             </span>
           </a>
-        </p>
-        <div
-          class="euiText emotion-euiText-s-euiCard__description"
-          id="generated-idDescription"
-        >
-          <p>
-            Description
-          </p>
         </div>
       </div>
-      <div
-        class="emotion-euiCard__footer"
-      >
-        <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="noDataDefaultFooterAction"
-          href="#"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Button
-            </span>
-          </span>
-        </a>
-      </div>
     </div>
-  </div>
+  </section>
 </div>
 `;
 
@@ -254,64 +314,82 @@ exports[`NoDataCard props no access to Fleet 1`] = `
   class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
-  <div
-    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-euiCard-center-disabled-NoDataCard"
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical-disabled"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+        data-test-subj="noDataCard"
+        style="max-width:400px"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <img
-              alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              alt="Elastic Agent illustration"
+              data-test-subj="ElasticAgentIllustration"
+              height="92"
               src="test-file-stub"
-              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+              width="140"
             />
-          </figure>
-        </div>
-      </div>
-      <div
-        class="euiCard__content emotion-euiCard__content-vertical"
-      >
-        <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
-          id="generated-idTitle"
-        >
-          <button
-            aria-describedby=" generated-idDescription"
-            class="euiCard__titleButton emotion-euiCard__text-center-disabled"
-            disabled=""
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
           >
-            <span
-              class="emotion-euiTextColor-default"
+            <h2
+              class="euiTitle euiTitle emotion-euiTitle-m-euiTitle-m"
             >
               Contact your administrator
-            </span>
-          </button>
-        </p>
-        <div
-          class="euiText emotion-euiText-s-euiCard__description"
-          id="generated-idDescription"
-        >
-          <p>
-            <span
-              class="emotion-euiTextColor-default"
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
             >
-              This integration is not yet enabled. Your administrator has the required permissions to turn it on.
+              <p>
+                This integration is not yet enabled. Your administrator has the required permissions to turn it on.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiEmptyPrompt__footer emotion-euiEmptyPrompt__footer-l-plain"
+        >
+          <span
+            class="euiTitle emotion-euiTitle-xxs"
+          >
+            Want to learn more?
+          </span>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://www.elastic.co/kibana"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Read the docs
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+              role="presentation"
+            />
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              (external, opens in a new tab or window)
             </span>
-          </p>
+          </a>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 `;
 
@@ -320,80 +398,100 @@ exports[`NoDataCard renders 1`] = `
   class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
-  <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
   >
     <div
-      class="euiCard__main emotion-euiCard__main-vertical"
+      class="emotion-euiPageSection__content-l-center"
     >
       <div
-        class="euiCard__top emotion-euiCard__top-vertical"
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+        data-test-subj="noDataCard"
+        style="max-width:400px"
       >
         <div
-          class="euiCard__image emotion-euiCard__image"
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
         >
-          <figure
-            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
           >
             <img
-              alt=""
-              class="euiImage emotion-euiImage-fullWidth"
+              alt="Elastic Agent illustration"
+              data-test-subj="ElasticAgentIllustration"
+              height="92"
               src="test-file-stub"
-              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+              width="140"
             />
-          </figure>
-        </div>
-      </div>
-      <div
-        class="euiCard__content emotion-euiCard__content-vertical"
-      >
-        <p
-          class="euiTitle euiCard__title emotion-euiTitle-s"
-          id="generated-idTitle"
-        >
-          <a
-            aria-describedby="generated-idDescription"
-            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
-            href="/app/integrations/browse"
-            rel="noreferrer"
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
           >
+            <h2
+              class="euiTitle euiTitle emotion-euiTitle-m-euiTitle-m"
+            >
+              Card title
+            </h2>
+            <div
+              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                Description
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <a
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="kbnOverviewAddIntegrations"
+              href="/app/integrations/browse"
+              rel="noreferrer"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Browse integrations
+                </span>
+              </span>
+            </a>
+          </div>
+        </div>
+        <div
+          class="euiEmptyPrompt__footer emotion-euiEmptyPrompt__footer-l-plain"
+        >
+          <span
+            class="euiTitle emotion-euiTitle-xxs"
+          >
+            Want to learn more?
+          </span>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://www.elastic.co/kibana"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Read the docs
+            <span
+              class="emotion-EuiExternalLinkIcon"
+              data-euiicon-type="popout"
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              Card title
+              (external, opens in a new tab or window)
             </span>
           </a>
-        </p>
-        <div
-          class="euiText emotion-euiText-s-euiCard__description"
-          id="generated-idDescription"
-        >
-          <p>
-            Description
-          </p>
         </div>
       </div>
-      <div
-        class="emotion-euiCard__footer"
-      >
-        <a
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
-          data-test-subj="noDataDefaultFooterAction"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiButtonDisplayContent"
-          >
-            <span
-              class="eui-textTruncate"
-            >
-              Card title
-            </span>
-          </span>
-        </a>
-      </div>
     </div>
-  </div>
+  </section>
 </div>
 `;
