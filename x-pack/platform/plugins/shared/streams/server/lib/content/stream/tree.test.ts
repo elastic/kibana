@@ -210,9 +210,7 @@ describe('content pack stream helpers', () => {
         include: { objects: { all: {} } },
       });
 
-      expect(() => mergeTrees({ existing, incoming })).toThrow(
-        'Child stream [root.a] already exists'
-      );
+      expect(() => mergeTrees({ existing, incoming })).toThrow('[root.a] already exists');
     });
 
     it('throws on conflicting field mapping', () => {
@@ -227,7 +225,7 @@ describe('content pack stream helpers', () => {
         include: { objects: { all: {} } },
       });
 
-      expect(() => mergeTrees({ existing, incoming })).toThrow('Cannot change mapping of [custom]');
+      expect(() => mergeTrees({ existing, incoming })).toThrow('Cannot change mapping of [custom] for [root]');
     });
   });
 });

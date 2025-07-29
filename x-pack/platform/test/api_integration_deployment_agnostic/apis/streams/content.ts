@@ -508,7 +508,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // succeeds when the field configuration is unchanged
