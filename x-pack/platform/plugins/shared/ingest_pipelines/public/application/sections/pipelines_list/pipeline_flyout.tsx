@@ -76,23 +76,24 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
           />
         )}
 
-        {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) && isLoading ? (
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.ingestPipelines.list.pipelineDetails.loading"
-              defaultMessage="Loading pipeline…"
+        {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) &&
+          (isLoading ? (
+            <SectionLoading>
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.pipelineDetails.loading"
+                defaultMessage="Loading pipeline…"
+              />
+            </SectionLoading>
+          ) : error ? (
+            <NotFoundPanel
+              pipelineName={pipelineName}
+              onCreatePipeline={() => onCreateClick(pipelineName)}
+              error={error}
+              displayWarning={pipelineName !== pipelineNameFromLocation}
             />
-          </SectionLoading>
-        ) : error ? (
-          <NotFoundPanel
-            pipelineName={pipelineName}
-            onCreatePipeline={() => onCreateClick(pipelineName)}
-            error={error}
-            displayWarning={pipelineName !== pipelineNameFromLocation}
-          />
-        ) : (
-          pipeline && <DetailsPanel pipeline={pipeline} />
-        )}
+          ) : (
+            pipeline && <DetailsPanel pipeline={pipeline} />
+          ))}
       </EuiSplitPanel.Outer>
 
       {((isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW) || !error) && pipeline && (
@@ -102,7 +103,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
           onCloneClick={onCloneClick}
           onDeleteClick={onDeleteClick}
           renderActions={!error}
-          renderViewTreeButton={isResponsiveFlyout}
+          renderViewTreeButton={isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW}
           onViewTreeClick={() => setResponsiveFlyoutContent(TREE_VIEW)}
         />
       )}
