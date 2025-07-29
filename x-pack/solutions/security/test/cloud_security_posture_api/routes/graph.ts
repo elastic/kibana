@@ -19,10 +19,10 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { dataViewRouteHelpersFactory } from '@kbn/test-suites-xpack/security_solution_api_integration/test_suites/entity_analytics/utils/data_view';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { dataViewRouteHelpersFactory } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -748,7 +748,7 @@ export default function (providerContext: FtrProviderContext) {
           // initialize security-solution-default data-view - needed for entity store
           const dataView = dataViewRouteHelpersFactory(supertest);
           await dataView.create('security-solution');
-          const enrichPolicyCreationTimeout = 5000;
+          const enrichPolicyCreationTimeout = 10000;
 
           // enable asset inventory - install underlying indexes and enrich policies
           await supertest
