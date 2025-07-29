@@ -27,14 +27,14 @@ export const getConversationWithNewMessage = async (params: Params) => {
     params.logger.debug(
       'No conversationsDataClient or conversationId provided, returning empty messages array'
     );
-    return [];
+    return params.newMessages;
   }
   const existingConversation = await conversationsDataClient.getConversation({
     id: conversationId,
   });
   if (!existingConversation) {
     params.logger.debug(`No conversation found for id: ${conversationId}`);
-    return [];
+    return params.newMessages;
   }
 
   const updatedConversation = await conversationsDataClient.appendConversationMessages({
