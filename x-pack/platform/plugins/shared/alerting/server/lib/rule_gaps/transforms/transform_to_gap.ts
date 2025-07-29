@@ -45,6 +45,7 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
 
       return new Gap({
         timestamp: doc['@timestamp'],
+        ruleId: doc?.rule?.id,
         range,
         filledIntervals,
         inProgressIntervals,

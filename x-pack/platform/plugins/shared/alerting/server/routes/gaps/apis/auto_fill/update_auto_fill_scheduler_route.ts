@@ -21,18 +21,19 @@ export const updateAutoFillSchema = schema.object({
   amountOfGapsToProcessPerRun: schema.maybe(schema.number()),
   amountOfRetries: schema.maybe(schema.number()),
   excludeRuleIds: schema.maybe(schema.arrayOf(schema.string())),
+  gapFillRange: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()), // <-- Added enabled field
 });
 
 export type UpdateAutoFillPayload = schema.TypeOf<typeof updateAutoFillSchema>;
 
-export const updateAutoFillRoute = (
+export const updateAutoFillSchedulerRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.put(
     {
-      path: '/api/alerting/gaps/auto_fill/{id}',
+      path: '/internal/alerting/rules/gaps/auto_fill_scheduler/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -50,7 +51,15 @@ export const updateAutoFillRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { id } = req.params;
-        const { schedule, name, amountOfGapsToProcessPerRun, amountOfRetries, excludeRuleIds, enabled } = req.body;
+        const {
+          schedule,
+          name,
+          amountOfGapsToProcessPerRun,
+          amountOfRetries,
+          excludeRuleIds,
+          gapFillRange,
+          enabled,
+        } = req.body;
 
         const alertingContext = await context.alerting;
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
@@ -59,9 +68,9 @@ export const updateAutoFillRoute = (
           // Get the current task to verify it exists and is the right type
           const task = await taskManager.get(id);
 
-          if (task.taskType !== 'gap-fill-processor') {
+          if (task.taskType !== 'gap-fill-auto-scheduler') {
             return res.badRequest({
-              body: { message: `Task with id ${id} is not a gap-fill-processor task` },
+              body: { message: `Task with id ${id} is not a gap-fill-auto-scheduler task` },
             });
           }
 
@@ -85,6 +94,7 @@ export const updateAutoFillRoute = (
             amountOfGapsToProcessPerRun !== undefined ||
             amountOfRetries !== undefined ||
             excludeRuleIds !== undefined ||
+            gapFillRange !== undefined ||
             schedule !== undefined
           ) {
             await taskManager.bulkUpdateState(
@@ -97,6 +107,7 @@ export const updateAutoFillRoute = (
                   ...(amountOfGapsToProcessPerRun !== undefined && { amountOfGapsToProcessPerRun }),
                   ...(amountOfRetries !== undefined && { amountOfRetries }),
                   ...(excludeRuleIds !== undefined && { excludeRuleIds }),
+                  ...(gapFillRange !== undefined && { gapFillRange }),
                   ...(schedule !== undefined && { schedule }),
                 },
               }),
@@ -137,4 +148,4 @@ export const updateAutoFillRoute = (
       })
     )
   );
-}; 
+};

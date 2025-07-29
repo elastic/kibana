@@ -40,6 +40,7 @@ interface GapAutoFillConfig {
   amountOfGapsToProcessPerRun: number;
   amountOfRetries: number;
   excludeRuleIds: string[];
+  gapFillRange: string;
   schedule: {
     interval: string;
   };
@@ -125,6 +126,7 @@ export const GapAutoFillSettings: React.FC = () => {
   const [amountOfGapsToProcessPerRun, setAmountOfGapsToProcessPerRun] = useState(100);
   const [amountOfRetries, setAmountOfRetries] = useState(3);
   const [excludeRuleIds, setExcludeRuleIds] = useState('');
+  const [gapFillRange, setGapFillRange] = useState('now-7d');
   const [schedule, setSchedule] = useState('1m');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +136,7 @@ export const GapAutoFillSettings: React.FC = () => {
     amountOfGapsToProcessPerRun: 100,
     amountOfRetries: 3,
     excludeRuleIds: '',
+    gapFillRange: 'now-7d',
     schedule: '1m',
   });
 
@@ -155,7 +158,7 @@ export const GapAutoFillSettings: React.FC = () => {
     setEventLogsError(null);
     try {
       const response = await KibanaServices.get().http.get<EventLogResponse>(
-        `/api/alerting/gaps/auto_fill/${AUTO_FILL_ID}/event_logs`
+        `/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}/logs`
       );
       setEventLogs(response.data);
       setEventLogsPagination((prev) => ({ ...prev, total: response.total }));
@@ -183,7 +186,7 @@ export const GapAutoFillSettings: React.FC = () => {
     setError(null);
     try {
       const data = await KibanaServices.get().http.get<GapAutoFill>(
-        `/api/alerting/gaps/auto_fill/${AUTO_FILL_ID}`
+        `/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`
       );
       setAutoFill(data);
       setEnabled(data.enabled);
@@ -194,12 +197,14 @@ export const GapAutoFillSettings: React.FC = () => {
         setAmountOfGapsToProcessPerRun(config.amountOfGapsToProcessPerRun || 100);
         setAmountOfRetries(config.amountOfRetries || 3);
         setExcludeRuleIds(config.excludeRuleIds?.join('\n') || '');
+        setGapFillRange(config.gapFillRange || 'now-7d');
         setSchedule(config.schedule?.interval || '1m');
       } else {
         setName('Gap Auto-Fill');
         setAmountOfGapsToProcessPerRun(100);
         setAmountOfRetries(3);
         setExcludeRuleIds('');
+        setGapFillRange('now-7d');
         setSchedule('1m');
       }
     } catch (err: unknown) {
@@ -212,6 +217,7 @@ export const GapAutoFillSettings: React.FC = () => {
         setAmountOfGapsToProcessPerRun(100);
         setAmountOfRetries(3);
         setExcludeRuleIds('');
+        setGapFillRange('now-7d');
         setSchedule('1m');
       } else {
         setError('Failed to load auto fill status');
@@ -229,14 +235,23 @@ export const GapAutoFillSettings: React.FC = () => {
     try {
       if (!autoFill) {
         // Auto fill doesn't exist - create it
-        await KibanaServices.get().http.post('/api/alerting/gaps/auto_fill', {
-          body: JSON.stringify({}),
+        await KibanaServices.get().http.post('/internal/alerting/rules/gaps/auto_fill_scheduler', {
+          body: JSON.stringify({
+            name: 'Gap Auto-Fill',
+            amountOfGapsToProcessPerRun: 100,
+            amountOfRetries: 3,
+            excludeRuleIds: [],
+            gapFillRange: 'now-7d',
+            schedule: {
+              interval: '1h',
+            },
+          }),
         });
         // Fetch the newly created auto fill
         await fetchAutoFill();
       } else {
         // Auto fill exists - toggle enable/disable
-        await KibanaServices.get().http.put(`/api/alerting/gaps/auto_fill/${AUTO_FILL_ID}`, {
+        await KibanaServices.get().http.put(`/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`, {
           body: JSON.stringify({ enabled: !enabled }),
         });
         setEnabled(!enabled);
@@ -255,6 +270,7 @@ export const GapAutoFillSettings: React.FC = () => {
       amountOfGapsToProcessPerRun,
       amountOfRetries,
       excludeRuleIds,
+      gapFillRange,
       schedule,
     });
     setIsEditing(true);
@@ -266,6 +282,7 @@ export const GapAutoFillSettings: React.FC = () => {
     setAmountOfGapsToProcessPerRun(originalValues.amountOfGapsToProcessPerRun);
     setAmountOfRetries(originalValues.amountOfRetries);
     setExcludeRuleIds(originalValues.excludeRuleIds);
+    setGapFillRange(originalValues.gapFillRange);
     setSchedule(originalValues.schedule);
     setIsEditing(false);
   };
@@ -282,12 +299,13 @@ export const GapAutoFillSettings: React.FC = () => {
         .map((id) => id.trim())
         .filter((id) => id.length > 0);
 
-      await KibanaServices.get().http.put(`/api/alerting/gaps/auto_fill/${AUTO_FILL_ID}`, {
+      await KibanaServices.get().http.put(`/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`, {
         body: JSON.stringify({
           name,
           amountOfGapsToProcessPerRun,
           amountOfRetries,
           excludeRuleIds: excludeRuleIdsArray,
+          gapFillRange,
           schedule: {
             interval: schedule,
           },
@@ -365,6 +383,9 @@ export const GapAutoFillSettings: React.FC = () => {
                   )}
                 </EuiDescriptionListDescription>
 
+                <EuiDescriptionListTitle>{'Gap Fill Range'}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{gapFillRange}</EuiDescriptionListDescription>
+
                 <EuiDescriptionListTitle>{'Schedule'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{schedule}</EuiDescriptionListDescription>
               </EuiDescriptionList>
@@ -423,6 +444,17 @@ export const GapAutoFillSettings: React.FC = () => {
                   disabled={saving}
                   rows={3}
                   placeholder="Enter rule IDs to exclude from auto-fill processing"
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="s" />
+
+              <EuiFormRow label="Gap Fill Range">
+                <EuiFieldText
+                  value={gapFillRange}
+                  onChange={(e) => setGapFillRange(e.target.value)}
+                  disabled={saving}
+                  placeholder="e.g., now-7d, now-1h"
                 />
               </EuiFormRow>
 
@@ -527,6 +559,7 @@ export const GapAutoFillSettings: React.FC = () => {
                 <EuiTableRow>
                   <EuiTableHeaderCell>{'Timestamp'}</EuiTableHeaderCell>
                   <EuiTableHeaderCell>{'Action'}</EuiTableHeaderCell>
+                  <EuiTableHeaderCell>{'Status'}</EuiTableHeaderCell>
                   <EuiTableHeaderCell>{'Message'}</EuiTableHeaderCell>
                 </EuiTableRow>
               </EuiTableHeader>
@@ -537,6 +570,17 @@ export const GapAutoFillSettings: React.FC = () => {
                       {new Date(log['@timestamp']).toLocaleString()}
                     </EuiTableRowCell>
                     <EuiTableRowCell>{log.event.action}</EuiTableRowCell>
+                    <EuiTableRowCell>
+                      <EuiBadge
+                        color={
+                          log.kibana.auto_gap_fill.execution.status === 'success'
+                            ? 'success'
+                            : 'danger'
+                        }
+                      >
+                        {log.kibana.auto_gap_fill.execution.status}
+                      </EuiBadge>
+                    </EuiTableRowCell>
                     <EuiTableRowCell>{log.message}</EuiTableRowCell>
                   </EuiTableRow>
                 ))}

@@ -117,7 +117,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
-import { registerGapFillTask } from './lib/rule_gaps/gap_fill_task';
+import { registerGapFillAutoSchedulerTask } from './lib/rule_gaps/gap_fill_auto_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -132,6 +132,7 @@ export const EVENT_LOG_ACTIONS = {
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
+  gapFillAutoSchedule: 'gap-fill-auto-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -427,12 +428,12 @@ export class AlertingPlugin {
       core.getStartServices
     );
 
-    // Register the gap-fill-processor task definition
-    registerGapFillTask({
+    // Register the gap-fill-auto-scheduler task definition
+    registerGapFillAutoSchedulerTask({
       taskManager: plugins.taskManager,
       logger: this.logger,
-      coreStartServices: core.getStartServices(),
-      getRulesClientContext: (request: KibanaRequest) => this.getRulesClientWithRequest(request),
+      getRulesClientWithRequest: (request: KibanaRequest) =>
+        this.getRulesClientWithRequest(request),
       eventLogger: this.eventLogger!,
     });
 

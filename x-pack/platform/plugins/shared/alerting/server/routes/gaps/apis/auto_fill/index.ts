@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { createAutoFillRoute } from './create_auto_fill_route';
-export { getAutoFillStatusRoute } from './get_auto_fill_status_route';
-export { listAutoFillsRoute } from './list_auto_fills_route';
-export { updateAutoFillRoute } from './update_auto_fill_route';
-export { getGapFillEventLogsRoute } from './get_gap_fill_event_logs_route';
+export { createAutoFillSchedulerRoute } from './create_auto_fill_scheduler_route';
+export { getAutoFillSchedulerRoute } from './get_auto_fill_scheduler_route';
+export { updateAutoFillSchedulerRoute } from './update_auto_fill_scheduler_route';
+export { getGapFillAutoSchedulerLogsRoute } from './get_auto_fill_scheduler_logs_route';

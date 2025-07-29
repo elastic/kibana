@@ -13,42 +13,27 @@ import type { AlertingRequestHandlerContext } from '../../../../types';
 
 // Define the schema for the auto fill creation payload
 export const autoFillSchema = schema.object({
-  // name: schema.string(),
-  // enabled: schema.boolean({ defaultValue: true }),
-  // schedule: schema.object({
-  //   interval: schema.string(),
-  // }),
-  // ruleFilters: schema.maybe(
-  //   schema.object({
-  //     ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
-  //     consumers: schema.maybe(schema.arrayOf(schema.string())),
-  //     tags: schema.maybe(schema.arrayOf(schema.string())),
-  //     names: schema.maybe(schema.arrayOf(schema.string())),
-  //   })
-  // ),
-  // gapFilters: schema.maybe(
-  //   schema.object({
-  //     statuses: schema.maybe(schema.arrayOf(schema.string())),
-  //     minGapDuration: schema.maybe(schema.string()),
-  //   })
-  // ),
-  // processingConfig: schema.maybe(
-  //   schema.object({
-  //     maxConcurrentRules: schema.maybe(schema.number()),
-  //     maxGapsPerRule: schema.maybe(schema.number()),
-  //   })
-  // ),
+  name: schema.maybe(schema.string()),
+  amountOfGapsToProcessPerRun: schema.maybe(schema.number()),
+  amountOfRetries: schema.maybe(schema.number()),
+  excludeRuleIds: schema.maybe(schema.arrayOf(schema.string())),
+  gapFillRange: schema.maybe(schema.string()),
+  schedule: schema.maybe(
+    schema.object({
+      interval: schema.string(),
+    })
+  ),
 });
 
 export type AutoFillPayload = TypeOf<typeof autoFillSchema>;
 
-export const createAutoFillRoute = (
+export const createAutoFillSchedulerRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: '/api/alerting/gaps/auto_fill',
+      path: '/internal/alerting/rules/gaps/auto_fill_scheduler',
       validate: { body: autoFillSchema },
       options: { access: 'internal' },
       security: {
@@ -62,11 +47,19 @@ export const createAutoFillRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
+        const {
+          name,
+          amountOfGapsToProcessPerRun,
+          amountOfRetries,
+          excludeRuleIds,
+          gapFillRange,
+          schedule,
+        } = req.body;
         const autoFill = {
-          schedule: {
-            interval: '1m',
+          schedule: schedule || {
+            interval: '1h',
           },
-          name: 'gap-fill-auto-fill-name',
+          name: name || 'gap-fill-auto-fill-name',
         };
         // Generate a unique auto fill/task ID (could use uuid or a simple timestamp-based id)
         const autoFillId = `gap-fill-auto-fill-${Date.now()}`;
@@ -75,16 +68,17 @@ export const createAutoFillRoute = (
           await taskManager.schedule(
             {
               id: 'default',
-              taskType: 'gap-fill-processor', // This task type must be registered elsewhere
+              taskType: 'gap-fill-auto-scheduler', // This task type must be registered elsewhere
               schedule: autoFill.schedule,
               scope: ['securitySolution'],
               params: {},
               state: {
                 config: {
-                  name: 'gap-fill-auto-fill-name',
-                  amountOfGapsToProcessPerRun: 100,
-                  amountOfRetries: 3,
-                  excludeRuleIds: [],
+                  name: name || 'gap-fill-auto-fill-name',
+                  amountOfGapsToProcessPerRun: amountOfGapsToProcessPerRun || 100,
+                  amountOfRetries: amountOfRetries || 3,
+                  excludeRuleIds: excludeRuleIds || [],
+                  gapFillRange: gapFillRange || 'now-7d',
                 },
                 lastRun: null,
               },
@@ -105,4 +99,4 @@ export const createAutoFillRoute = (
       })
     )
   );
-}; 
+};

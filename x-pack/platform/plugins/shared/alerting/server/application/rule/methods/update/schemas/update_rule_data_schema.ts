@@ -15,6 +15,7 @@ import {
   systemActionRequestSchema,
   flappingSchema,
   artifactsSchema,
+  lastGapAutoFillSchema,
 } from '../../../schemas';
 
 export const updateRuleDataSchema = schema.object(
@@ -32,6 +33,7 @@ export const updateRuleDataSchema = schema.object(
     alertDelay: schema.maybe(alertDelaySchema),
     flapping: schema.maybe(schema.nullable(flappingSchema)),
     artifacts: schema.maybe(artifactsSchema),
+    lastGapAutoFill: schema.maybe(schema.nullable(lastGapAutoFillSchema)),
   },
   { unknowns: 'allow' }
 );

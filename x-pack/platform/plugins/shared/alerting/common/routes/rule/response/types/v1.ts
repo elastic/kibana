@@ -55,4 +55,5 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   alert_delay?: RuleResponseSchemaType['alert_delay'];
   flapping?: RuleResponseSchemaType['flapping'];
   artifacts?: RuleResponseSchemaType['artifacts'];
+  last_gap_auto_fill?: RuleResponseSchemaType['last_gap_auto_fill'];
 }

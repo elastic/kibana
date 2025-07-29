@@ -154,6 +154,7 @@ export const EventSchema = schema.maybe(
                     amountOfGapsToProcessPerRun: ecsStringOrNumber(),
                     amountOfRetries: ecsStringOrNumber(),
                     excludeRuleIds: ecsStringMulti(),
+                    gapFillRange: ecsString(),
                     schedule: schema.maybe(
                       schema.object({
                         interval: ecsString(),
