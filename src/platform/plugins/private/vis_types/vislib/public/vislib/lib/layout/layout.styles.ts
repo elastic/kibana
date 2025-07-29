@@ -9,9 +9,12 @@
 
 import { css } from '@emotion/react';
 import { type UseEuiTheme, euiFontSize, euiScrollBarStyles } from '@elastic/eui';
-
+import chroma from 'chroma-js';
 export const vislibLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
+  const visLineColor = chroma(euiTheme.colors.darkShade).alpha(0.2).css();
+  const visHoverBackgroundColor = chroma(euiTheme.colors.fullShade).alpha(0.1).css();
+
   return css`
     // BEM NOTE: These selectors could not be renamed.
     // Most come from an external libray, others are too general for
@@ -54,15 +57,13 @@ export const vislibLayoutStyles = (euiThemeContext: UseEuiTheme) => {
       }
 
       .grid > path {
-        stroke: ${euiTheme.colors.darkShade};
-        stroke-opacity: 0.8;
+        stroke: ${visLineColor};
       }
 
       .label-line {
         fill: none;
         stroke-width: 2px;
-        stroke: ${euiTheme.colors.darkShade};
-        stroke-opacity: 0.8;
+        stroke: ${visLineColor};
       }
 
       .label-text {
@@ -169,8 +170,7 @@ export const vislibLayoutStyles = (euiThemeContext: UseEuiTheme) => {
       /* Brush Styling */
       .brush .extent {
         shape-rendering: crispEdges;
-        fill: ${euiTheme.colors.fullShade};
-        fill-opacity: 0.9;
+        fill: ${visHoverBackgroundColor};
       }
 
       .series > path,
@@ -210,8 +210,7 @@ export const vislibLayoutStyles = (euiThemeContext: UseEuiTheme) => {
 
       .endzone {
         pointer-events: none;
-        fill: ${euiTheme.colors.fullShade};
-        fill-opacity: 0.9;
+        fill: ${visHoverBackgroundColor};
       }
     }
 
