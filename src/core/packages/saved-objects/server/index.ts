@@ -113,11 +113,7 @@ export type {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   WithAuditName,
-  AuthorizeChangeOwnershipParams,
-  AuthorizeBulkChangeOwnershipParams,
-  AuthorizeChangeAccessModeParams,
-  AuthorizeChangeOwnershipObject,
-  AuthorizeChangeAccessModeObject,
+  AuthorizeChangeAccessControlParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';

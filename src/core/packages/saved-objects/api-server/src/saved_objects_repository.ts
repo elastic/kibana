@@ -570,9 +570,9 @@ export interface ISavedObjectsRepository {
    * @param options {@link SavedObjectsChangeOwnershipOptions} - object containing owner profile_uid that will be the new owner
    * @returns the {@link SavedObjectsChangeAccessControlResponse}
    */
-  changeOwnership<T = unknown>(
+  changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeOwnershipOptions<T>
+    options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 
   /**
@@ -581,8 +581,8 @@ export interface ISavedObjectsRepository {
    * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
    * @param options {@link SavedObjectsChangeAccessControlOptions} - object containing access mode. If empty, is considered to be marked as editable
    */
-  changeAccessMode<T = unknown>(
+  changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessModeOptions<T>
+    options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }
