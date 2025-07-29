@@ -1257,7 +1257,7 @@ export const functions = {
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.md5.markdown', {
             defaultMessage: `
   ### MD5
-  Computes the MD5 hash of the input.
+  Computes the MD5 hash of the input (if the MD5 hash is available on the JVM).
 
   \`\`\`esql
   FROM sample_data
