@@ -26,6 +26,7 @@ import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
+  getVulnMgmtCloudFormationDefaultValue,
   isPostureInput,
 } from './utils';
 
@@ -90,6 +91,50 @@ const usePolicyTemplateInitialName = ({
   }, [integration, isEditPage, packagePolicyList]);
 };
 
+const useCloudFormationTemplate = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+}) => {
+  if (
+    newPolicy.inputs.some(
+      (input) =>
+        input.type === CLOUDBEAT_VULN_MGMT_AWS && input.config?.cloud_formation_template_url
+    )
+  ) {
+    return;
+  }
+
+  const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
+
+  // If the template is not available, do not update the policy
+  if (templateUrl === '') return;
+
+  const checkCurrentTemplate = newPolicy?.inputs?.find(
+    (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
+  )?.config?.cloud_formation_template_url?.value;
+
+  // If the template is already set, do not update the policy
+  if (checkCurrentTemplate === templateUrl) return;
+
+  updatePolicy?.({
+    ...newPolicy,
+    inputs: newPolicy.inputs.map((input) => {
+      if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
+        return {
+          ...input,
+          config: { cloud_formation_template_url: { value: templateUrl } },
+        };
+      }
+      return input;
+    }),
+  });
+};
+
 interface UseLoadFleetExtensionProps {
   newPolicy: NewPackagePolicy;
   onChange: (args: {
@@ -151,10 +196,12 @@ export const useLoadFleetExtension = ({
     [isLoading, isValidRef, onChange]
   );
 
-  /**
-   * - Updates policy inputs by user selection
-   * - Updates hidden policy vars
-   */
+  useCloudFormationTemplate({
+    packageInfo,
+    updatePolicy,
+    newPolicy,
+  });
+
   const setEnabledPolicyInput = useCallback(
     (inputType: PostureInput) => {
       const inputVars = getPostureInputHiddenVars(inputType);
