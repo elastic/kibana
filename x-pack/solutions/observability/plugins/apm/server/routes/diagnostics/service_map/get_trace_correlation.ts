@@ -74,9 +74,9 @@ export async function getTraceCorrelation({
     response.aggregations?.destination_node_traces?.sample_docs?.hits?.total?.value || 0;
 
   return {
-    foundInSourceNode: 0,
+    foundInSourceNode: sourceNodeCount > 0,
     foundInDestinationNode: destinationNodeCount > 0,
-    foundInBothNodes: destinationNodeCount > 0,
+    foundInBothNodes: destinationNodeCount > 0 && sourceNodeCount > 0,
     sourceNodeDocumentCount: sourceNodeCount,
     destinationNodeDocumentCount: destinationNodeCount,
     rawResponse: response,

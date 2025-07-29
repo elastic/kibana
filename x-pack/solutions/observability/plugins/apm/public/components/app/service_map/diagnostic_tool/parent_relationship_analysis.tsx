@@ -53,7 +53,7 @@ export function ParentRelationshipAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsFound', {
                     defaultMessage: 'Parent relationships found for {destinationNode}',
-                    values: { destinationNode: destinationNode },
+                    values: { destinationNode },
                   })}
                 </strong>
               </EuiText>
@@ -75,8 +75,8 @@ export function ParentRelationshipAnalysis({
                   'Found {count} document(s) showing parent relationships pointing to {destinationNode} from {sourceNode} during the selected time range.',
                 values: {
                   count: destinationHits.length,
-                  destinationNode: destinationNode,
-                  sourceNode: sourceNode,
+                  destinationNode,
+                  sourceNode,
                 },
               })}
             </p>
@@ -93,16 +93,18 @@ export function ParentRelationshipAnalysis({
                 <strong>
                   {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFound', {
                     defaultMessage: 'No parent relationships found for {destinationNode}',
-                    values: { destinationNode: destinationNode },
+                    values: { destinationNode },
                   })}
                 </strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="warning">
-                {destinationHits.length}{' '}
                 {i18n.translate('xpack.apm.diagnosticResults.documentsBadgeLabel', {
-                  defaultMessage: 'documents',
+                  defaultMessage: '{count, plural, one {# document} other {# documents}}',
+                  values: {
+                    count: destinationHits.length,
+                  },
                 })}
               </EuiBadge>
             </EuiFlexItem>
@@ -114,10 +116,10 @@ export function ParentRelationshipAnalysis({
                 'xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundDescription',
                 {
                   defaultMessage:
-                    'No parent IDs were found pointing from {sourceNode} to {destinationNode} during the selected time range. Found {count} total document(s) for analysis. This could indicate:',
+                    'No parent IDs were found pointing from {sourceNode} to {destinationNode} during the selected time range. Found {count, plural, one {# document} other {# documents}} for analysis. This could indicate:',
                   values: {
-                    sourceNode: sourceNode,
-                    destinationNode: destinationNode,
+                    sourceNode,
+                    destinationNode,
                     count: destinationHits.length,
                   },
                 }

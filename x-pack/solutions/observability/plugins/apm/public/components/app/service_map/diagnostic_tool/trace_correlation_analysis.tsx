@@ -113,9 +113,11 @@ export function TraceCorrelationAnalysis({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="warning">
-                {sourceNodeDocumentCount + destinationNodeDocumentCount}{' '}
                 {i18n.translate('xpack.apm.diagnosticResults.documentsBadgeLabel', {
-                  defaultMessage: 'documents',
+                  defaultMessage: '{count, plural, one {# document} other {# documents}}',
+                  values: {
+                    count: sourceNodeDocumentCount + destinationNodeDocumentCount,
+                  },
                 })}
               </EuiBadge>
             </EuiFlexItem>
@@ -127,7 +129,7 @@ export function TraceCorrelationAnalysis({
                 'xpack.apm.serviceMap.diagnostics.traceCorrelation.notFoundDescription',
                 {
                   defaultMessage:
-                    'Trace ID {traceId} was not found in both services during the selected time range. Found {sourceCount} document(s) in {sourceNode} and {destinationCount} document(s) in {destinationNode}. This could indicate:',
+                    'Trace ID {traceId} was not found in both services during the selected time range. Found {sourceCount, plural, one {# document} other {# documents}} in {sourceNode} and {destinationCount, plural, one {# document} other {# documents}} in {destinationNode}. This could indicate:',
                   values: {
                     traceId,
                     sourceCount: sourceNodeDocumentCount,

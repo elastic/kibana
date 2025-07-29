@@ -29,7 +29,7 @@ export async function getExitSpansFromSourceNode({
   sourceNode: string;
   destinationNode: string;
 }) {
-  const response = await apmEventClient.search('diagnostics_get_exit_spans_from_node', {
+  const response = await apmEventClient.search('diagnostics_get_exit_spans_from_source_node', {
     apm: {
       events: [ProcessorEvent.span],
     },
@@ -48,9 +48,9 @@ export async function getExitSpansFromSourceNode({
           },
         },
         aggs: {
-          sample_doc: {
+          sample_docs: {
             top_hits: {
-              size: 1,
+              size: 5,
             },
           },
         },
@@ -61,7 +61,7 @@ export async function getExitSpansFromSourceNode({
           size: 50,
         },
         aggs: {
-          sample_doc: {
+          sample_docs: {
             top_hits: {
               size: 5,
             },
@@ -93,7 +93,7 @@ export async function getExitSpansFromSourceNode({
     totalConnections: apmExitSpans.length,
     rawResponse: response,
     hasMatchingDestinationResources:
-      response?.aggregations?.matching_destination_resources?.sample_doc?.hits?.total?.value > 0,
+      response?.aggregations?.matching_destination_resources?.sample_docs?.hits?.total?.value > 0,
   };
 }
 export async function getSourceSpanIds({
@@ -107,7 +107,7 @@ export async function getSourceSpanIds({
   end: number;
   sourceNode: string;
 }) {
-  const response = await apmEventClient.search('diagnostics_get_source_span_ids', {
+  const response = await apmEventClient.search('diagnostics_get_source_node_span_ids', {
     apm: {
       events: [ProcessorEvent.span],
     },
@@ -160,7 +160,7 @@ export async function getDestinationParentIds({
   ids: string[] | undefined;
   destinationNode: string;
 }) {
-  const response = await apmEventClient.search('diagnostics_get_destination_parent_ids', {
+  const response = await apmEventClient.search('diagnostics_get_destination_node_parent_ids', {
     apm: {
       events: [ProcessorEvent.transaction],
     },
