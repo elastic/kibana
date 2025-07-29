@@ -182,7 +182,19 @@ class AgentClientImpl implements AgentClient {
     }
 
     const now = new Date();
-    const document = await this.storage.getClient().get({ id: agentId });
+
+    let document: Document;
+    try {
+      document = await this.storage.getClient().get({ id: agentId });
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        throw createAgentNotFoundError({
+          agentId,
+        });
+      } else {
+        throw e;
+      }
+    }
 
     if (!hasAccess({ profile: document, user: this.user })) {
       throw createAgentNotFoundError({ agentId });
