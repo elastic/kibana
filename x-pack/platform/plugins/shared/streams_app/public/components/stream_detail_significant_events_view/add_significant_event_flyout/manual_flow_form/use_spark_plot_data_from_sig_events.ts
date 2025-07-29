@@ -10,8 +10,8 @@ import { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-s
 import { useEuiTheme } from '@elastic/eui';
 import { TickFormatter } from '@elastic/charts';
 import { useMemo } from 'react';
-import { formatChangePoint } from '../utils/change_point';
-import { getAnnotationFromFormattedChangePoint } from '../utils/get_annotation_from_formatted_change_point';
+import { formatChangePoint } from '../../utils/change_point';
+import { getAnnotationFromFormattedChangePoint } from '../../utils/get_annotation_from_formatted_change_point';
 
 export function useSparkplotDataFromSigEvents({
   previewFetch,

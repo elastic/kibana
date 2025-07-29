@@ -11,8 +11,8 @@ import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { calculateAuto } from '@kbn/calculate-auto';
 import moment from 'moment';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export function useSignificantEventPreviewFetch({
   name,

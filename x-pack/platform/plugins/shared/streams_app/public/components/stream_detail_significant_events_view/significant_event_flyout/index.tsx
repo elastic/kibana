@@ -28,10 +28,13 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { SparkPlot } from '../../spark_plot';
 import { UncontrolledStreamsAppSearchBar } from '../../streams_app_search_bar/uncontrolled_streams_app_bar';
-import { getSigEventFlyoutTitle, getSigEventSubmitTitle } from './i18n';
-import { useSignificantEventPreviewFetch } from './use_significant_event_preview_fetch';
-import { useSignificantEventValidation } from './use_significant_event_validation';
-import { useSparkplotDataFromSigEvents } from './use_spark_plot_data_from_sig_events';
+import {
+  getSigEventFlyoutTitle,
+  getSigEventSubmitTitle,
+} from '../add_significant_event_flyout/manual_flow_form/i18n';
+import { useSignificantEventPreviewFetch } from '../add_significant_event_flyout/manual_flow_form/use_significant_event_preview_fetch';
+import { useSignificantEventValidation } from '../add_significant_event_flyout/manual_flow_form/use_significant_event_validation';
+import { useSparkplotDataFromSigEvents } from '../add_significant_event_flyout/manual_flow_form/use_spark_plot_data_from_sig_events';
 
 interface SignificantEventFlyoutProps {
   name: string;

@@ -15,13 +15,13 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { Timeline, TimelineEvent } from './timeline';
-import { formatChangePoint } from './utils/change_point';
+import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
-import { SignificantEventFlyout } from './significant_event_flyout';
-import { SignificantEventsTable } from './significant_events_table';
 import { GenerateSignificantEventFlyout } from './generate_significant_event_flyout';
+import { SignificantEventsTable } from './significant_events_table';
+import { Timeline, TimelineEvent } from './timeline';
+import { formatChangePoint } from './utils/change_point';
 
 export function StreamDetailSignificantEventsView({
   definition,
@@ -83,16 +83,16 @@ export function StreamDetailSignificantEventsView({
   }
 
   const editFlyout = isEditFlyoutOpen ? (
-    <SignificantEventFlyout
-      onCreate={async (next) => {
-        await addQuery?.(next).then(
+    <AddSignificantEventFlyout
+      definition={definition.stream}
+      query={queryToEdit}
+      onSave={async (next) => {
+        await bulk?.(next.map((s) => ({ index: s }))).then(
           () => {
             notifications.toasts.addSuccess({
               title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateSuccessToastTitle',
-                {
-                  defaultMessage: `Added significant event`,
-                }
+                'xpack.streams.significantEvents.addGeneratedSignificantEventSuccessToastTitle',
+                { defaultMessage: `Added generated significant events` }
               ),
             });
             setIsEditFlyoutOpen(false);
@@ -101,37 +101,8 @@ export function StreamDetailSignificantEventsView({
           (error) => {
             notifications.showErrorDialog({
               title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventCreateErrorToastTitle',
-                {
-                  defaultMessage: `Could not add significant event`,
-                }
-              ),
-              error,
-            });
-          }
-        );
-      }}
-      onUpdate={async (next) => {
-        await addQuery?.(next).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateSuccessToastTitle',
-                {
-                  defaultMessage: `Updated significant event`,
-                }
-              ),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate(
-                'xpack.streams.significantEvents.significantEventUpdateErrorToastTitle',
-                {
-                  defaultMessage: `Could not update significant event`,
-                }
+                'xpack.streams.significantEvents.addGeneratedSignificantEventErrorToastTitle',
+                { defaultMessage: `Could not add generated significant events` }
               ),
               error,
             });
@@ -142,10 +113,73 @@ export function StreamDetailSignificantEventsView({
         setIsEditFlyoutOpen(false);
         setQueryToEdit(undefined);
       }}
-      query={queryToEdit}
-      name={definition.stream.name}
     />
   ) : null;
+
+  // const editFlyout = isEditFlyoutOpen ? (
+  //   <SignificantEventFlyout
+  //     onCreate={async (next) => {
+  //       await addQuery?.(next).then(
+  //         () => {
+  //           notifications.toasts.addSuccess({
+  //             title: i18n.translate(
+  //               'xpack.streams.significantEvents.significantEventCreateSuccessToastTitle',
+  //               {
+  //                 defaultMessage: `Added significant event`,
+  //               }
+  //             ),
+  //           });
+  //           setIsEditFlyoutOpen(false);
+  //           significantEventsFetchState.refresh();
+  //         },
+  //         (error) => {
+  //           notifications.showErrorDialog({
+  //             title: i18n.translate(
+  //               'xpack.streams.significantEvents.significantEventCreateErrorToastTitle',
+  //               {
+  //                 defaultMessage: `Could not add significant event`,
+  //               }
+  //             ),
+  //             error,
+  //           });
+  //         }
+  //       );
+  //     }}
+  //     onUpdate={async (next) => {
+  //       await addQuery?.(next).then(
+  //         () => {
+  //           notifications.toasts.addSuccess({
+  //             title: i18n.translate(
+  //               'xpack.streams.significantEvents.significantEventUpdateSuccessToastTitle',
+  //               {
+  //                 defaultMessage: `Updated significant event`,
+  //               }
+  //             ),
+  //           });
+  //           setIsEditFlyoutOpen(false);
+  //           significantEventsFetchState.refresh();
+  //         },
+  //         (error) => {
+  //           notifications.showErrorDialog({
+  //             title: i18n.translate(
+  //               'xpack.streams.significantEvents.significantEventUpdateErrorToastTitle',
+  //               {
+  //                 defaultMessage: `Could not update significant event`,
+  //               }
+  //             ),
+  //             error,
+  //           });
+  //         }
+  //       );
+  //     }}
+  //     onClose={() => {
+  //       setIsEditFlyoutOpen(false);
+  //       setQueryToEdit(undefined);
+  //     }}
+  //     query={queryToEdit}
+  //     name={definition.stream.name}
+  //   />
+  // ) : null;
 
   const generateFlyout = isGenerateFlyoutOpen ? (
     <GenerateSignificantEventFlyout

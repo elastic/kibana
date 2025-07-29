@@ -15,25 +15,43 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import React from 'react';
+import { StreamQueryKql, Streams, streamQuerySchema } from '@kbn/streams-schema';
+import React, { useMemo, useState } from 'react';
+import { v4 } from 'uuid';
 import { FlowSelector } from './flow_selector';
+import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow } from './types';
 
 interface Props {
   onClose?: () => void;
   definition: Streams.all.Definition;
+  onSave: (queries: StreamQueryKql[]) => Promise<void>;
+  query?: StreamQueryKql;
 }
 
-export function AddSignificantEventFlyout(props: Props) {
-  const [selectedFlow, setSelectedFlow] = React.useState<Flow>();
+export function AddSignificantEventFlyout({ query, onClose, definition, onSave }: Props) {
+  const isEditMode = !!query?.id;
+  const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
+    isEditMode ? 'manual' : undefined
+  );
+  const [queries, setQueries] = useState<StreamQueryKql[]>([
+    {
+      id: v4(),
+      title: '',
+      kql: {
+        query: '',
+      },
+      ...query,
+    },
+  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const parsedQueries = useMemo(() => {
+    return streamQuerySchema.array().safeParse(queries);
+  }, [queries]);
 
   return (
-    <EuiFlyout
-      aria-labelledby="addSignificantEventFlyout"
-      onClose={() => props.onClose?.()}
-      size="m"
-    >
+    <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose?.()} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>
@@ -44,20 +62,61 @@ export function AddSignificantEventFlyout(props: Props) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <FlowSelector selected={selectedFlow} onSelect={(flow) => setSelectedFlow(flow)} />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {!isEditMode && (
+            <FlowSelector selected={selectedFlow} onSelect={(flow) => setSelectedFlow(flow)} />
+          )}
+
+          {selectedFlow === 'manual' && (
+            <ManualFlowForm
+              isEditMode={isEditMode}
+              setQuery={(next: StreamQueryKql) => setQueries([next])}
+              query={queries[0]}
+              definition={definition}
+            />
+          )}
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiButton
             color="text"
             onClick={() => {
-              props.onClose?.();
+              onClose?.();
             }}
           >
             {i18n.translate(
               'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
             )}
+          </EuiButton>
+          <EuiButton
+            color="primary"
+            fill
+            iconType="plusInCircle"
+            disabled={isSubmitting || !parsedQueries.success}
+            isLoading={isSubmitting}
+            onClick={() => {
+              if (!parsedQueries.success) {
+                return;
+              }
+
+              setIsSubmitting(true);
+
+              onSave(queries).finally(() => {
+                setIsSubmitting(false);
+              });
+            }}
+          >
+            {isEditMode
+              ? i18n.translate(
+                  'xpack.streams.streamDetailView.addSignificantEventFlyout.updateButtonLabel',
+                  { defaultMessage: 'Update' }
+                )
+              : i18n.translate(
+                  'xpack.streams.streamDetailView.addSignificantEventFlyout.addButtonLabel',
+                  { defaultMessage: 'Add' }
+                )}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
