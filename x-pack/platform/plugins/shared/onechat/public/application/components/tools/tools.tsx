@@ -22,8 +22,11 @@ import {
   EuiTableSelectionType,
   EuiText,
   Search,
+  EuiSearchBar,
+  EuiSearchBarOnChangeArgs,
   useEuiTheme,
   useGeneratedHtmlId,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +36,7 @@ import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { noop } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
@@ -59,6 +62,7 @@ import { truncateAtNewline } from '../../utils/truncate_at_newline';
 import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql/esql_tool_flyout';
 import { OnechatEsqlToolFormData } from './esql/form/types/esql_tool_form_types';
 import { OnechatToolTags } from './tags/tool_tags';
+import { useToolTags } from '../../hooks/tools/use_tool_tags';
 
 const ToolId = ({
   tool,
@@ -243,21 +247,35 @@ const ToolContextMenu = ({
   );
 };
 
-const TableHeader = ({
+const ToolsTableHeader = ({
   isLoading,
   pageIndex,
   tools,
+  total,
+  selectedTools,
+  setSelectedTools,
 }: {
   isLoading: boolean;
   pageIndex: number;
   tools: ToolDefinitionWithSchema[];
+  total: number;
+  selectedTools: ToolDefinitionWithSchema[];
+  setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const selectAll = useCallback(() => {
+    setSelectedTools(tools.filter(isEsqlTool));
+  }, [setSelectedTools, tools]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedTools([]);
+  }, [setSelectedTools]);
 
   return (
     <EuiFlexGroup
       css={css`
-        margin-block: ${euiTheme.size.s} ${euiTheme.size.m};
+        margin-block: ${euiTheme.size.s};
       `}
     >
       <EuiSkeletonLoading
@@ -273,15 +291,21 @@ const TableHeader = ({
           />
         }
         loadedContent={
-          <EuiText size="xs">
-            <p>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            css={css`
+              min-height: 24px;
+            `}
+          >
+            <EuiText size="xs">
               <FormattedMessage
                 id="xpack.onechat.tools.toolsTableSummary"
                 defaultMessage="Showing {start}-{end} of {total} {tools}"
                 values={{
-                  start: <strong>{pageIndex * 10 + 1}</strong>,
+                  start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,
                   end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
-                  total: tools.length,
+                  total,
                   tools: (
                     <strong>
                       {i18n.translate('xpack.onechat.tools.toolsLabel', {
@@ -291,8 +315,57 @@ const TableHeader = ({
                   ),
                 }}
               />
-            </p>
-          </EuiText>
+            </EuiText>
+            {selectedTools.length > 0 && (
+              <EuiFlexGroup gutterSize="none">
+                <EuiButtonEmpty
+                  iconType="trash"
+                  iconSize="m"
+                  size="xs"
+                  color="danger"
+                  onClick={() => {}}
+                >
+                  <EuiText
+                    size="xs"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {i18n.translate('xpack.onechat.tools.deleteSelectedToolsButtonLabel', {
+                      defaultMessage: 'Delete {count, plural, one {# Tool} other {# Tools}}',
+                      values: {
+                        count: selectedTools.length,
+                      },
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+                <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
+                  <EuiText
+                    size="xs"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {i18n.translate('xpack.onechat.tools.selectAllToolsButtonLabel', {
+                      defaultMessage: 'Select all',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+                <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
+                  <EuiText
+                    size="xs"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {i18n.translate('xpack.onechat.tools.clearSelectionButtonLabel', {
+                      defaultMessage: 'Clear selection',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
         }
       />
     </EuiFlexGroup>
@@ -367,8 +440,15 @@ const getColumns = ({
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatTools();
+  const { tags, isLoading: isLoadingTags } = useToolTags();
   const [pageIndex, setPageIndex] = useState(0);
+  const [tableItems, setTableItems] = useState<ToolDefinitionWithSchema[]>([]);
+  const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
   const { addSuccessToast, addErrorToast } = useToasts();
+
+  useEffect(() => {
+    setTableItems(tools);
+  }, [tools]);
 
   const onDeleteSuccess = useCallback<DeleteToolSuccessCallback>(
     (toolId) => {
@@ -526,15 +606,81 @@ export const OnechatTools = () => {
 
   const selection: EuiTableSelectionType<ToolDefinitionWithSchema> = {
     selectable: isEsqlTool,
+    onSelectionChange: (selectedItems) => {
+      setSelectedTools(selectedItems);
+    },
+    selected: selectedTools,
   };
 
+  const onSearch = useCallback(
+    ({ query, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      if (searchError) {
+        addErrorToast({
+          title: i18n.translate('xpack.onechat.tools.searchToolsErrorToast', {
+            defaultMessage: 'Error searching tools',
+          }),
+          text: searchError.message,
+        });
+        return;
+      }
+
+      const newItems = query
+        ? EuiSearchBar.Query.execute(query, tools, {
+            defaultFields: ['id', 'description', 'type'],
+          })
+        : tools;
+
+      setTableItems(newItems);
+      setPageIndex(0);
+    },
+    [tools, addErrorToast]
+  );
+
   const search: Search = {
+    onChange: onSearch,
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.onechat.tools.searchToolsPlaceholder', {
         defaultMessage: 'Search',
       }),
     },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: i18n.translate('xpack.onechat.tools.typeFilter', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: false,
+        options: [
+          {
+            value: ToolType.esql,
+            name: i18n.translate('xpack.onechat.tools.esqlLabel', {
+              defaultMessage: 'ES|QL',
+            }),
+          },
+          {
+            value: ToolType.builtin,
+            name: i18n.translate('xpack.onechat.tools.builtinLabel', {
+              defaultMessage: 'System',
+            }),
+          },
+        ],
+      },
+      {
+        type: 'field_value_selection',
+        field: 'tags',
+        name: i18n.translate('xpack.onechat.tools.tagsFilter', {
+          defaultMessage: 'Labels',
+        }),
+        multiSelect: 'or',
+        options: tags.map((tag) => ({
+          value: tag,
+          name: tag,
+        })),
+        searchThreshold: 1,
+      },
+    ],
   };
 
   return (
@@ -569,6 +715,12 @@ export const OnechatTools = () => {
       <KibanaPageTemplate.Section>
         <EuiInMemoryTable
           css={css`
+            border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+
+            table {
+              background-color: transparent;
+            }
+
             .euiTableRow:hover {
               .tool-quick-actions {
                 visibility: visible;
@@ -576,11 +728,18 @@ export const OnechatTools = () => {
             }
           `}
           childrenBetween={
-            <TableHeader isLoading={isLoadingTools} pageIndex={pageIndex} tools={tools} />
+            <ToolsTableHeader
+              isLoading={isLoadingTools}
+              pageIndex={pageIndex}
+              tools={tableItems}
+              total={tools.length}
+              selectedTools={selectedTools}
+              setSelectedTools={setSelectedTools}
+            />
           }
           loading={isLoadingTools}
           columns={columns}
-          items={tools}
+          items={tableItems}
           itemId="id"
           error={errorMessage}
           search={search}
@@ -602,11 +761,19 @@ export const OnechatTools = () => {
             },
           }}
           noItemsMessage={
-            <EuiText component="p" size="s" textAlign="center" color="subdued">
-              {i18n.translate('xpack.onechat.tools.noEsqlToolsMessage', {
-                defaultMessage: "It looks like you don't have any ES|QL tools defined yet.",
-              })}
-            </EuiText>
+            isLoadingTools ? (
+              <EuiSkeletonText lines={1} />
+            ) : (
+              <EuiText component="p" size="s" textAlign="center" color="subdued">
+                {tools.length > 0 && tableItems.length === 0
+                  ? i18n.translate('xpack.onechat.tools.noEsqlToolsMatchMessage', {
+                      defaultMessage: 'No tools match your search.',
+                    })
+                  : i18n.translate('xpack.onechat.tools.noEsqlToolsMessage', {
+                      defaultMessage: "It looks like you don't have any ES|QL tools defined yet.",
+                    })}
+              </EuiText>
+            )
           }
         />
         <OnechatEsqlToolFlyout
