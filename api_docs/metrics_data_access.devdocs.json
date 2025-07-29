@@ -612,37 +612,11 @@
           "<TType extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: TType) => { readonly host: ",
           "InventoryModel",
           "<\"host\", { cpuV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
-          "; diskLatency: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; diskSpaceUsage: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; load: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; logRate: ",
           {
             "pluginId": "metricsDataAccess",
@@ -652,53 +626,15 @@
             "text": "MetricsUIAggregation"
           },
           "; memory: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; memoryFree: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
-          "; memoryTotal: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; normalizedLoad1m: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; rxV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; txV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; cpu: ",
           {
             "pluginId": "metricsDataAccess",
@@ -1884,40 +1820,21 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.DataSchemaFormat",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataSchemaFormat",
+        "description": [],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.AggregationsCatalog",
-        "type": "Type",
-        "tags": [],
-        "label": "AggregationsCatalog",
-        "description": [],
-        "signature": [
-          "BaseMetricsCatalog",
-          "<TConfigMap>"
-        ],
-        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsDataAccess",
-        "id": "def-common.FormulasCatalog",
-        "type": "Type",
-        "tags": [],
-        "label": "FormulasCatalog",
-        "description": [],
-        "signature": [
-          "BaseMetricsCatalog",
-          "<TConfigMap>"
-        ],
-        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/shared/metrics/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "metricsDataAccess",
         "id": "def-common.InventoryFormatterType",
@@ -1950,21 +1867,6 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.InventoryMetric",
-        "type": "Type",
-        "tags": [],
-        "label": "InventoryMetric",
-        "description": [],
-        "signature": [
-          "\"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsDataAccess",
         "id": "def-common.inventoryModels",
         "type": "Array",
         "tags": [],
@@ -1974,37 +1876,11 @@
           "(",
           "InventoryModel",
           "<\"host\", { cpuV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
-          "; diskLatency: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; diskSpaceUsage: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; load: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; logRate: ",
           {
             "pluginId": "metricsDataAccess",
@@ -2014,53 +1890,15 @@
             "text": "MetricsUIAggregation"
           },
           "; memory: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; memoryFree: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
-          "; memoryTotal: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; normalizedLoad1m: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; rxV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; txV2: ",
-          {
-            "pluginId": "metricsDataAccess",
-            "scope": "common",
-            "docId": "kibMetricsDataAccessPluginApi",
-            "section": "def-common.MetricsUIAggregation",
-            "text": "MetricsUIAggregation"
-          },
+          "SchemaBasedAggregations",
           "; cpu: ",
           {
             "pluginId": "metricsDataAccess",
@@ -2958,6 +2796,21 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.InventoryTsvbType",
+        "type": "Type",
+        "tags": [],
+        "label": "InventoryTsvbType",
+        "description": [],
+        "signature": [
+          "\"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.InventoryVisType",
         "type": "Type",
         "tags": [],
@@ -3154,7 +3007,7 @@
         "label": "TSVBMetricModel",
         "description": [],
         "signature": [
-          "{ id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "{ id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -3169,7 +3022,7 @@
         "label": "TSVBMetricModelCreator",
         "description": [],
         "signature": [
-          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"hostSystemOverview\" | \"hostCpuUsageTotal\" | \"hostCpuUsage\" | \"hostK8sOverview\" | \"hostK8sCpuCap\" | \"hostK8sDiskCap\" | \"hostK8sMemoryCap\" | \"hostK8sPodCap\" | \"hostLoad\" | \"hostMemoryUsage\" | \"hostNetworkTraffic\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"containerOverview\" | \"containerCpuUsage\" | \"containerDiskIOOps\" | \"containerDiskIOBytes\" | \"containerMemory\" | \"containerNetworkTraffic\" | \"containerK8sOverview\" | \"containerK8sCpuUsage\" | \"containerK8sMemoryUsage\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -3235,14 +3088,14 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.InventoryMetricRT",
+        "id": "def-common.InventoryTsvbTypeKeysRT",
         "type": "Object",
         "tags": [],
-        "label": "InventoryMetricRT",
+        "label": "InventoryTsvbTypeKeysRT",
         "description": [],
         "signature": [
           "KeyofC",
-          "<{ hostSystemOverview: null; hostCpuUsageTotal: null; hostCpuUsage: null; hostK8sOverview: null; hostK8sCpuCap: null; hostK8sDiskCap: null; hostK8sMemoryCap: null; hostK8sPodCap: null; hostLoad: null; hostMemoryUsage: null; hostNetworkTraffic: null; podOverview: null; podCpuUsage: null; podMemoryUsage: null; podLogUsage: null; podNetworkTraffic: null; containerOverview: null; containerCpuUsage: null; containerDiskIOOps: null; containerDiskIOBytes: null; containerMemory: null; containerNetworkTraffic: null; containerK8sOverview: null; containerK8sCpuUsage: null; containerK8sMemoryUsage: null; nginxHits: null; nginxRequestRate: null; nginxActiveConnections: null; nginxRequestsPerConnection: null; awsOverview: null; awsCpuUtilization: null; awsNetworkBytes: null; awsNetworkPackets: null; awsDiskioBytes: null; awsDiskioOps: null; awsEC2CpuUtilization: null; awsEC2NetworkTraffic: null; awsEC2DiskIOBytes: null; awsS3TotalRequests: null; awsS3NumberOfObjects: null; awsS3BucketSize: null; awsS3DownloadBytes: null; awsS3UploadBytes: null; awsRDSCpuTotal: null; awsRDSConnections: null; awsRDSQueriesExecuted: null; awsRDSActiveTransactions: null; awsRDSLatency: null; awsSQSMessagesVisible: null; awsSQSMessagesDelayed: null; awsSQSMessagesSent: null; awsSQSMessagesEmpty: null; awsSQSOldestMessage: null; custom: null; }>"
+          "<{ podOverview: null; podCpuUsage: null; podMemoryUsage: null; podLogUsage: null; podNetworkTraffic: null; nginxHits: null; nginxRequestRate: null; nginxActiveConnections: null; nginxRequestsPerConnection: null; awsOverview: null; awsCpuUtilization: null; awsNetworkBytes: null; awsNetworkPackets: null; awsDiskioBytes: null; awsDiskioOps: null; awsEC2CpuUtilization: null; awsEC2NetworkTraffic: null; awsEC2DiskIOBytes: null; awsS3TotalRequests: null; awsS3NumberOfObjects: null; awsS3BucketSize: null; awsS3DownloadBytes: null; awsS3UploadBytes: null; awsRDSCpuTotal: null; awsRDSConnections: null; awsRDSQueriesExecuted: null; awsRDSActiveTransactions: null; awsRDSLatency: null; awsSQSMessagesVisible: null; awsSQSMessagesDelayed: null; awsSQSMessagesSent: null; awsSQSMessagesEmpty: null; awsSQSOldestMessage: null; custom: null; }>"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

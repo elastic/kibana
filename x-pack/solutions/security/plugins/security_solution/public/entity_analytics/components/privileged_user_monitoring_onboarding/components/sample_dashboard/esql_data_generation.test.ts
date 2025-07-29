@@ -66,7 +66,10 @@ describe('esql_data_generation', () => {
   describe('generateVisualizationESQLQuery', () => {
     it('should generate the correct ESQL query for visualization', () => {
       const generateQuery = generateVisualizationESQLQuery(generateESQLSource());
-      const query = generateQuery('target_user');
+      const query = generateQuery('target_user', {
+        from: '2025-03-06T12:00:00.000Z',
+        to: '2025-03-07T11:00:00.000Z',
+      });
       expect(getValue(query)).toMatchSnapshot();
     });
   });

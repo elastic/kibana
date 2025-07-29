@@ -52,10 +52,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Playground', () => {
       before(async () => {
-        await common.navigateToApp('elasticsearch/applications');
+        await common.navigateToApp('search_playground');
+      });
+
+      it('loads playground list page', async function () {
+        await retry.waitFor(
+          'new playground button',
+          async () => await testSubjects.exists('newPlaygroundButton')
+        );
+        await a11y.testAppSnapshot();
       });
 
       it('loads playground', async function () {
+        await testSubjects.click('newPlaygroundButton');
+
         await retry.waitFor(
           'playground docs link',
           async () => await testSubjects.exists('playground-documentation-link')
@@ -100,6 +110,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'synonyms docs link',
           async () => await testSubjects.exists('searchSynonymsEmptyPromptFooterLink')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Search Query Rules', () => {
+      before(async () => {
+        await common.navigateToApp('elasticsearch/query_rules');
+      });
+
+      it('loads Query Rules page', async function () {
+        await retry.waitFor(
+          'query rules docs link',
+          async () => await testSubjects.exists('searchQueryRulesEmptyPromptFooterLink')
         );
         await a11y.testAppSnapshot();
       });

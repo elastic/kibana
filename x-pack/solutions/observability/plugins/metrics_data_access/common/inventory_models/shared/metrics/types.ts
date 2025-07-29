@@ -7,6 +7,7 @@
 
 import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
+  InventoryTsvbType,
   LensConfigWithId,
   MetricsUIAggregation,
   SnapshotMetricType,
@@ -14,11 +15,15 @@ import type {
 } from '../../types';
 
 /* base types */
-export type SchemaTypes = 'ecs' | 'semconv';
+export enum DataSchemaFormat {
+  ECS = 'ecs',
+  SEMCONV = 'semconv',
+}
+
 export type SchemaBasedFormulas = Omit<LensBaseLayer, 'value'> & {
-  value: Record<SchemaTypes, LensBaseLayer['value']>;
+  value: Record<DataSchemaFormat, LensBaseLayer['value']>;
 };
-export type SchemaBasedAggregations = Record<SchemaTypes, MetricsUIAggregation>;
+export type SchemaBasedAggregations = Record<DataSchemaFormat, MetricsUIAggregation>;
 
 export type FormulasConfig = LensBaseLayer | SchemaBasedFormulas;
 export type AggregationConfig = MetricsUIAggregation | SchemaBasedAggregations;
@@ -74,17 +79,25 @@ export type LensMetricChartConfig = Record<
 
 /** inventory types */
 export interface BaseInventoryMetricsConfig<TAggregations extends AggregationConfigMap> {
-  tsvb?: Record<string, TSVBMetricModelCreator>;
-  defaultSnapshot: SnapshotMetricType;
+  defaultSnapshot: keyof TAggregations;
   defaultTimeRangeInSeconds: number;
-  getAggregations: (args?: { schema?: SchemaTypes }) => Promise<AggregationsCatalog<TAggregations>>;
+  legacyMetrics?: SnapshotMetricType[];
+
+  getWaffleMapTooltipMetrics: (args?: { schema?: DataSchemaFormat }) => SnapshotMetricType[];
+  getAggregations: (args?: {
+    schema?: DataSchemaFormat;
+  }) => Promise<AggregationsCatalog<TAggregations>>;
 }
 
+export interface InventoryTsvbMetrics {
+  tsvb: Record<string, TSVBMetricModelCreator>;
+  requiredTsvb: InventoryTsvbType[];
+}
 export interface InventoryMetricsConfigWithLens<
   TFormulas extends FormulasConfigMap,
   TCharts extends LensMetricChartConfig
 > {
-  getFormulas: (args?: { schema?: SchemaTypes }) => Promise<FormulasCatalog<TFormulas>>;
+  getFormulas: (args?: { schema?: DataSchemaFormat }) => Promise<FormulasCatalog<TFormulas>>;
   getCharts: () => Promise<TCharts>;
 }
 
@@ -94,7 +107,9 @@ export type InventoryMetricsConfig<
   TCharts extends LensMetricChartConfig | undefined = undefined
 > = BaseInventoryMetricsConfig<TAggregations> &
   (TFormulas extends undefined
-    ? {}
+    ? TCharts extends undefined
+      ? InventoryTsvbMetrics
+      : never
     : TCharts extends undefined
-    ? {}
+    ? never
     : InventoryMetricsConfigWithLens<NonNullable<TFormulas>, NonNullable<TCharts>>);

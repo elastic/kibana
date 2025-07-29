@@ -94,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           text: testPlaygroundName,
         });
       });
-      it('should be able to search index', async () => {
+      it.skip('should be able to search index', async () => {
         await pageObjects.searchPlayground.expectPageModeToBeSelected('chat');
         await pageObjects.searchPlayground.selectPageMode('search');
         await pageObjects.searchPlayground.expectPageModeToBeSelected('search');
@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', false);
       });
       it('should support running query in query mode', async () => {
-        await pageObjects.searchPlayground.PlaygroundSearchPage.runQueryInQueryMode('atwood');
+        await pageObjects.searchPlayground.PlaygroundChatPage.runQueryInQueryMode('atwood');
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
       });
     });

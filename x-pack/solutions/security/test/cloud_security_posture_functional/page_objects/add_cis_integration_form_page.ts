@@ -37,6 +37,7 @@ const TEST_IDS = {
   GCP_POLICY_OPTION_TEST_ID: 'cisGcpTestId',
   AWS_POLICY_OPTION_TEST_ID: 'cisAwsTestId',
   AZURE_POLICY_OPTION_TEST_ID: 'cisAzureTestId',
+  INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID: 'agentPolicyFormSystemMonitoringCheckbox',
 } as const;
 
 export function AddCisIntegrationFormPageProvider({
@@ -309,7 +310,7 @@ export function AddCisIntegrationFormPageProvider({
   const findOptionInPage = async (text: string) => {
     await PageObjects.header.waitUntilLoadingHasFinished();
     const optionToBeClicked = await testSubjects.find(text);
-    return await optionToBeClicked;
+    return optionToBeClicked;
   };
 
   const clickAccordianButton = async (text: string) => {
@@ -376,7 +377,20 @@ export function AddCisIntegrationFormPageProvider({
     await azurePolicyOption.click();
   };
 
-  const clickSaveButton = async () => {
+  const clickSaveButton = async (includeSystemPackage: boolean = false) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const isIncludeSystemPackageCheckboxExists = await testSubjects.exists(
+      TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
+    );
+
+    // If the checkbox is not found, it means the system package option is not available (e.g., when using agentless setup)
+    if (isIncludeSystemPackageCheckboxExists) {
+      const includeSystemPackageCheckbox = (await findOptionInPage(
+        TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
+      )) as unknown as HTMLInputElement;
+      includeSystemPackageCheckbox.checked = includeSystemPackage;
+    }
+
     const optionToBeClicked = await findOptionInPage(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
     await optionToBeClicked.click();
   };

@@ -48,5 +48,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
+    "@kbn/es-archiver",
   ]
 }

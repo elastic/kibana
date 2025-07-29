@@ -14,7 +14,7 @@ disabled:
   - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
   # Playwright
-  - x-pack/test/security_solution_playwright/serverless_config.ts
+  - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
 
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts

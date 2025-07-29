@@ -40,7 +40,7 @@ export const GrokPatternAISuggestions = ({
   grokCollection: GrokCollection;
   setValue: UseFormSetValue<FieldValues>;
   onAddPattern: () => void;
-}): React.ReactElement => {
+}) => {
   const {
     definition: { stream },
   } = useStreamDetail();
@@ -72,9 +72,12 @@ export const GrokPatternAISuggestions = ({
               'patterns',
               suggestion.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
-              )
+              ),
+              { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
+            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
+              shouldValidate: true,
+            });
           }
           refreshSuggestions(null);
         }}
@@ -90,14 +93,13 @@ export const GrokPatternAISuggestions = ({
           <EuiFlexItem grow={false}>
             <GeneratePatternButton
               aiFeatures={aiFeatures}
-              onClick={(connectorId) =>
+              onClick={(connectorId) => {
                 refreshSuggestions({
                   connectorId,
                   streamName: stream.name,
-                  samples: previewDocuments,
                   fieldName: fieldValue,
-                })
-              }
+                });
+              }}
               isLoading={suggestionsState.loading}
               isDisabled={!isValidField}
             />
@@ -116,7 +118,6 @@ export const GrokPatternAISuggestions = ({
               { defaultMessage: 'Add pattern' }
             )}
           </EuiButtonEmpty>
-          {/* <AddPatternButton onClick={onAddPattern} isDisabled={suggestionsState.loading} /> */}
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&

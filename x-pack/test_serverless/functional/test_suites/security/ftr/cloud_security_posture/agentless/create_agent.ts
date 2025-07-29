@@ -25,8 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
   const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
 
-  // Failing: See https://github.com/elastic/kibana/issues/229397
-  describe.skip('Agentless API Serverless', function () {
+  describe('Agentless API Serverless', function () {
     this.tags(['skipMKI', 'cloud_security_posture_agentless']);
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;

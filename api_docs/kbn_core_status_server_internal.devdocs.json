@@ -103,7 +103,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "({ analytics, elasticsearch, pluginDependencies, http, metrics, savedObjects, environment, coreUsageData, }: ",
+              "({ analytics, elasticsearch, pluginDependencies, http, httpRateLimiter, metrics, savedObjects, environment, coreUsageData, }: ",
               "StatusServiceSetupDeps",
               ") => Promise<{ core$: ",
               "Observable",
@@ -140,7 +140,7 @@
                 "id": "def-server.StatusService.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
+                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    httpRateLimiter,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
                 "description": [],
                 "signature": [
                   "StatusServiceSetupDeps"
@@ -323,6 +323,24 @@
             "description": [],
             "signature": [
               "InternalHttpServiceSetup"
+            ],
+            "path": "src/core/packages/status/server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.httpRateLimiter",
+            "type": "Object",
+            "tags": [],
+            "label": "httpRateLimiter",
+            "description": [],
+            "signature": [
+              "{ status$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<unknown> | undefined>; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
             "deprecated": false,
