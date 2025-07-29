@@ -452,13 +452,6 @@ export default function Expressions(props: Props) {
     );
   }
 
-  const placeHolder = i18n.translate(
-    'xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder',
-    {
-      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
-    }
-  );
-
   return (
     <>
       {!!paramsWarning && (
@@ -549,7 +542,6 @@ export default function Expressions(props: Props) {
       <SearchBar
         appName="Custom threshold rule"
         iconType="search"
-        placeholder={placeHolder}
         indexPatterns={dataView ? [dataView] : undefined}
         allowSavingQueries
         showQueryInput
