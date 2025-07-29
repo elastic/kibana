@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ExecutionStatus, WorkflowListItemAction, WorkflowListItemDto } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
 import { Link } from 'react-router-dom';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
