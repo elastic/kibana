@@ -23,7 +23,11 @@ import { saveArchiveEntriesFromAssetsMap, removeArchiveEntries } from '../../../
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 
-import { stepSaveArchiveEntries, cleanupArchiveEntriesStep } from './step_save_archive_entries';
+import {
+  stepSaveArchiveEntries,
+  cleanupArchiveEntriesStep,
+  saveKnowledgeBaseContent,
+} from './step_save_archive_entries';
 
 jest.mock('../../../archive/storage', () => {
   return {
@@ -430,5 +434,80 @@ describe('cleanupArchiveEntriesStep', () => {
     });
 
     expect(mockedRemoveArchiveEntries).not.toBeCalled();
+  });
+});
+
+describe('saveKnowledgeBaseContent', () => {
+  beforeEach(() => {
+    soClient = savedObjectsClientMock.create();
+    jest.clearAllMocks();
+  });
+
+  it('should save knowledge base content as a saved object', async () => {
+    const knowledgeBaseContent = [
+      {
+        filename: 'test-guide.md',
+        content: '# Test Guide\n\nThis is a test knowledge base document.',
+      },
+      {
+        filename: 'troubleshooting.md',
+        content: '# Troubleshooting\n\nCommon issues and solutions.',
+      },
+    ];
+
+    soClient.create.mockResolvedValueOnce({
+      id: 'test-package',
+      type: 'epm-packages-knowledge-base',
+      attributes: {
+        package_name: 'test-package',
+        version: '1.0.0',
+        installed_at: expect.any(String),
+        knowledge_base_content: knowledgeBaseContent,
+      },
+      references: [],
+    } as any);
+
+    await saveKnowledgeBaseContent({
+      savedObjectsClient: soClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent,
+    });
+
+    expect(soClient.create).toHaveBeenCalledWith(
+      'epm-packages-knowledge-base',
+      {
+        package_name: 'test-package',
+        version: '1.0.0',
+        installed_at: expect.any(String),
+        knowledge_base_content: knowledgeBaseContent,
+      },
+      {
+        id: 'test-package',
+        overwrite: true,
+      }
+    );
+  });
+
+  it('should not save anything if knowledge base content is empty', async () => {
+    await saveKnowledgeBaseContent({
+      savedObjectsClient: soClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [],
+    });
+
+    expect(soClient.create).not.toHaveBeenCalled();
+  });
+
+  it('should not save anything if knowledge base content is null', async () => {
+    await saveKnowledgeBaseContent({
+      savedObjectsClient: soClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: null as any,
+    });
+
+    expect(soClient.create).not.toHaveBeenCalled();
   });
 });

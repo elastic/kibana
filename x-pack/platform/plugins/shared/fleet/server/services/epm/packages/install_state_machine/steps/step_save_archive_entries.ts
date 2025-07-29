@@ -25,7 +25,9 @@ import { INSTALL_STATES } from '../../../../../../common/types';
 import type { KnowledgeBaseItem, PackageKnowledgeBase } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
 
-export async function stepSaveArchiveEntries(context: InstallContext) {
+export async function stepSaveArchiveEntries(
+  context: InstallContext
+): Promise<{ packageAssetRefs: Array<{ id: string; path: string; type: string }> }> {
   const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
   await appContextService.getLogger().info(`Installing package from: ${installSource}`);
@@ -45,6 +47,8 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
     });
   }
 
+  let packageAssetRefs: Array<{ id: string; path: string; type: string }> = [];
+
   // We would try to optimize it by using streaming here before, but for registry we have streaming kibana assets, not package files
   if (!useStreaming) {
     try {
@@ -59,13 +63,55 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
         () => true
       );
 
-      await saveArchiveEntriesFromAssetsMap({
+      const result = await saveArchiveEntriesFromAssetsMap({
         savedObjectsClient,
         assetsMap,
         paths,
         packageInfo,
         installSource,
       });
+
+      // Transform the saved objects into package asset references
+      packageAssetRefs = result.saved_objects.map((savedObject) => ({
+        id: savedObject.id,
+        path: savedObject.attributes.asset_path,
+        type: ASSETS_SAVED_OBJECT_TYPE,
+      }));
+    } catch (error) {
+      throw new Error(`Error saving archive entries: ${error}`);
+    }
+  } else {
+    // For streaming, we still save package files (icons, readme, changelog, manifest, etc.)
+    // but not Kibana assets since those are streamed separately
+    try {
+      const assetsMap = new Map<string, Buffer | undefined>();
+      await archiveIterator.traverseEntries(
+        async (entry) => {
+          if (entry.buffer) {
+            assetsMap.set(entry.path, entry.buffer);
+          }
+        },
+        (path: string) => {
+          // Only process non-Kibana assets for streaming
+          // Kibana assets are in paths like "package-name/kibana/..."
+          return !path.includes('/kibana/');
+        }
+      );
+
+      const result = await saveArchiveEntriesFromAssetsMap({
+        savedObjectsClient,
+        assetsMap,
+        paths,
+        packageInfo,
+        installSource,
+      });
+
+      // Transform the saved objects into package asset references
+      packageAssetRefs = result.saved_objects.map((savedObject) => ({
+        id: savedObject.id,
+        path: savedObject.attributes.asset_path,
+        type: ASSETS_SAVED_OBJECT_TYPE,
+      }));
     } catch (error) {
       throw new Error(`Error saving archive entries: ${error}`);
     }
@@ -88,6 +134,8 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   if (useStreaming) {
     context.nextState = 'save_archive_entries_from_assets_map';
   }
+
+  return { packageAssetRefs };
 }
 
 export async function cleanupArchiveEntriesStep(context: InstallContext) {
