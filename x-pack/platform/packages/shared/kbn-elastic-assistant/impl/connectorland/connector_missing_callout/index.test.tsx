@@ -22,6 +22,7 @@ describe('connectorMissingCallout', () => {
         hasUpdateAIAssistantAnonymization: true,
         hasManageGlobalKnowledgeBase: true,
         isAssistantEnabled: true,
+        isAssistantManagementEnabled: true,
       };
 
       it('should show connector privileges required button if no connectors exist', async () => {
@@ -61,6 +62,7 @@ describe('connectorMissingCallout', () => {
         hasUpdateAIAssistantAnonymization: true,
         hasManageGlobalKnowledgeBase: false,
         isAssistantEnabled: true,
+        isAssistantManagementEnabled: true,
       };
 
       it('should show connector privileges required button', async () => {

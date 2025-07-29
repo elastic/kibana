@@ -217,6 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const isAssistantAvailable =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           license?.hasAtLeast('enterprise');
+
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );

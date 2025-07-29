@@ -54,6 +54,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
+      assistantAvailability: { isAssistantManagementEnabled },
+      navigateToApp,
     } = useAssistantContext();
     const { data: connectors } = useLoadConnectors({
       http,
@@ -111,6 +113,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         isSelected: t.id === selectedSettingsTab,
       }));
     }, [onTabChange, selectedSettingsTab, tabsConfig]);
+
+    if (!isAssistantManagementEnabled) {
+      navigateToApp('management');
+    }
 
     return (
       <>
