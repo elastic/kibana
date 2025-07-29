@@ -49,7 +49,7 @@ export const PrivMonUtils = (
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
+      .send();
   };
 
   const bulkUploadUsersCsv = async (
