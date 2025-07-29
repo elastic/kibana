@@ -1058,5 +1058,57 @@ describe('actions schemas', () => {
         }).toThrow();
       });
     });
+
+    describe('SentinelOne agent type', () => {
+      it('should error if `parameters.scriptId` is not provided', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: {},
+          });
+        }).toThrow();
+      });
+
+      it('should error if script ID value is an empty string', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { scriptId: '  ' },
+          });
+        }).toThrow();
+      });
+
+      it('should accept a script id', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { scriptId: 'some-id' },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept scriptInput value', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { scriptId: 'some-id', scriptInput: 'some input here' },
+          });
+        }).not.toThrow();
+      });
+
+      it('should error if scriptInput is empty string', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            agent_type: 'sentinel_one',
+            endpoint_ids: ['endpoint_id'],
+            parameters: { scriptId: 'some-id', scriptInput: '  ' },
+          });
+        }).toThrow();
+      });
+    });
   });
 });
