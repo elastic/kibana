@@ -1249,6 +1249,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -1984,6 +1989,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -2380,6 +2390,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -2402,6 +2417,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -3137,6 +3157,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -3533,6 +3558,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -3555,6 +3585,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -4290,6 +4325,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -4686,6 +4726,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -4708,6 +4753,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -5443,6 +5493,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -5839,6 +5894,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -5861,6 +5921,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -6596,6 +6661,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -6992,6 +7062,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -7020,6 +7095,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -7755,6 +7835,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -8151,6 +8236,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -8173,6 +8263,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -8908,6 +9003,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -9304,6 +9404,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
@@ -9326,6 +9431,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "actor.entity.id": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "ecs.version": Object {
       "array": false,
       "required": false,
@@ -10061,6 +10171,11 @@ Object {
       "required": false,
       "type": "version",
     },
+    "related.entity": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "service.asset.criticality": Object {
       "array": false,
       "required": false,
@@ -10457,6 +10572,11 @@ Object {
       "type": "alias",
     },
     "tags": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "target.entity.id": Object {
       "array": true,
       "required": false,
       "type": "keyword",
