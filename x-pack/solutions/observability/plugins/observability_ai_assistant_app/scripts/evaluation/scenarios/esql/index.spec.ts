@@ -11,6 +11,17 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
+import {
+  generateApacheErrorSpikeLogs,
+  generateCorrelationIdLog,
+  generateFrequentErrorLogs,
+  generateHttpStatusLogs,
+  generateNginxLatencyLogs,
+  generatePodRestartLogs,
+  generateServiceErrorRateLogs,
+  generateUniqueUserLoginLogs,
+} from '../../data_generators/logs';
+import { generatePacketbeatData } from '../../data_generators/packetbeat';
 
 async function evaluateEsqlQuery({
   question,
@@ -45,6 +56,260 @@ async function evaluateEsqlQuery({
 
 describe('ES|QL query generation', () => {
   describe('ES|QL scenarios with data', () => {
+    describe('Logs dataset', () => {
+      const logsClient = synthtraceEsClients.logsSynthtraceEsClient;
+
+      before(async () => {
+        await synthtraceEsClients.logsSynthtraceEsClient.clean();
+
+        await Promise.all([
+          generateFrequentErrorLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'my_app',
+            errorMessages: {
+              'ERROR: Database connection timed out': 50,
+              'ERROR: Null pointer exception at com.example.UserService': 35,
+              'ERROR: Payment gateway returned status 503': 20,
+              'ERROR: Invalid API key provided': 15,
+              'ERROR: Disk space is critically low': 10,
+            },
+          }),
+          generateNginxLatencyLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'nginx.access',
+            count: 500,
+            services: ['api-gateway', 'user-service', 'billing-service'],
+          }),
+          generateApacheErrorSpikeLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'apache.error',
+            errorMessage:
+              '[client 127.0.0.1:1234] AH00128: File does not exist: /var/www/html/favicon.ico',
+          }),
+          generateUniqueUserLoginLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'auth_service',
+            userPool: ['alice', 'bob', 'charlie', 'diana', 'edward', 'fiona'],
+            days: 7,
+          }),
+          generateServiceErrorRateLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'my_service_app',
+            serviceName: 'my-service',
+            hours: 6,
+            intervalMinutes: 5,
+            errorRatio: 0.4,
+          }),
+          generatePodRestartLogs({
+            logsSynthtraceEsClient: logsClient,
+            minutesAgo: 30,
+          }),
+          generateCorrelationIdLog({
+            logsSynthtraceEsClient: logsClient,
+            minutesAgo: 10,
+          }),
+          generateHttpStatusLogs({
+            logsSynthtraceEsClient: logsClient,
+            dataset: 'nginx.access',
+            count: 1000,
+          }),
+        ]);
+      });
+
+      after(async () => {
+        await synthtraceEsClients.logsSynthtraceEsClient.clean();
+
+        const catResponse = await esClient.cat.indices({
+          index: 'logs-*',
+          format: 'json',
+          h: 'index',
+        });
+
+        const indicesToDelete = catResponse
+          .map((i: { index?: string }) => i.index)
+          .filter((index): index is string => Boolean(index));
+
+        if (indicesToDelete.length > 0) {
+          await esClient.indices.delete({
+            index: indicesToDelete,
+            allow_no_indices: true,
+          });
+        }
+
+        await esClient.indices.delete({
+          index: 'users_metadata',
+          ignore_unavailable: true,
+        });
+      });
+
+      it('generates a query to show top 20 error messages', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'From logs-my_app-*, show the 20 most frequent error messages in the last six hours. Log levels have lowercase values (e.g. "error").',
+          expected: `FROM logs-my_app-*
+          | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+          | STATS error_count = COUNT(*) BY message
+          | SORT error_count DESC
+          | LIMIT 20`,
+          execute: true,
+          criteria: [
+            `The results should be equivalent to:
+              12 - ERROR: Database connection timed out
+              9 - ERROR: Null pointer exception at com.example.UserService
+              4 - ERROR: Payment gateway returned status 503
+              3 - ERROR: Invalid API key provided
+              2 - ERROR: Disk space is critically low`,
+          ],
+        });
+      });
+
+      it('count all error logs by dataset', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset. Log levels have lowercase values (e.g. "error").',
+          expected: `FROM logs-*
+          | WHERE @timestamp >= NOW() - 24 hours AND log.level == "error"
+          | STATS error_count = COUNT(*) BY data_stream.dataset
+          | SORT error_count DESC`,
+          execute: true,
+          criteria: [
+            `Should identify errors in 'apache.error', 'my_app', 'my_service_app' and 'my_test_app' datasets.`,
+            'The highest number of errors should be in in the apache.error dataset',
+          ],
+        });
+      });
+
+      it('generates a query for hourly error rate for a service', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it. Log levels have lowercase values (e.g. "error").',
+          expected: `FROM logs-*
+          | WHERE @timestamp >= NOW() - 6 hours AND service.name == "my-service"
+          | EVAL is_error = CASE(log.level == "error", 1, 0)
+          | STATS total = COUNT(*), errors = SUM(is_error) BY BUCKET(@timestamp, 1h)
+          | EVAL error_rate_pct = TO_DOUBLE(errors) / total * 100`,
+          execute: true,
+          criteria: [
+            'The total number of logs in each full one-hour bucket should be 12.',
+            'The number of errors in each bucket should be between 0 and 12, inclusive.',
+            'The error rate percentage should be correctly calculated based on total and errors.',
+          ],
+        });
+      });
+
+      it('generates a query to calculate average nginx request time', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'What is the average request time in milliseconds for Nginx services over the last 2 hours?',
+          expected: `FROM logs-nginx.access-*
+          | WHERE @timestamp >= NOW() - 2 hours
+          | GROK message "%{GREEDYDATA} %{NUMBER:request_time:double}"
+          | KEEP request_time, message`,
+          execute: true,
+        });
+      });
+
+      it('generates a query to find top 5 slowest nginx requests', async () => {
+        await evaluateEsqlQuery({
+          question:
+            "Find the top 5 slowest Nginx requests for the 'api-gateway' service in the last two hours.",
+          expected: `FROM logs-nginx.access-*
+          | WHERE @timestamp >= NOW() - 2 hours AND service.name == "api-gateway"
+          | DISSECT message "%{} %{} %{} %{} %{} %{} %{} %{} %{} %{} %{request_time}"
+          | EVAL request_time_s = TO_DOUBLE(request_time)
+          | SORT request_time_s DESC
+          | LIMIT 5
+          | KEEP @timestamp, message, request_time_s`,
+          execute: true,
+          criteria: ['Identifies the top 5 slowest requests.'],
+        });
+      });
+
+      it('generates a query to find pod restarts', async () => {
+        await evaluateEsqlQuery({
+          question: 'Show logs from Kubernetes pods that have restarted in the last 24 hours.',
+          expected: `FROM logs-*
+          | WHERE @timestamp >= NOW() - 24 hours AND kubernetes.pod.restart_count > 0
+          | KEEP kubernetes.pod.restart_count`,
+          execute: true,
+          criteria: ['The restart count should be identified as 2.'],
+        });
+      });
+
+      it('generates a query to fetch logs with a specific correlation id', async () => {
+        await evaluateEsqlQuery({
+          question: 'Find all log entries with correlation id abc123.',
+          expected: `FROM logs-*
+          | WHERE trace.id == "abc123"`,
+          execute: true,
+          criteria: ['Should retrieve 1 log with the trace ID abc123.'],
+        });
+      });
+
+      it('generates a query to calculate the apache error count by time interval', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies. Log levels have lowercase values (e.g. "error").',
+          expected: `FROM logs-apache.error-*
+          | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+          | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
+          | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
+          execute: true,
+        });
+      });
+
+      it('generates and executes a query to find daily unique user logins', async () => {
+        await evaluateEsqlQuery({
+          question: 'How many unique users logged in each day over the last 7 days?',
+          expected: `FROM logs-auth_service-*
+          | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
+          | STATS unique_users = COUNT_DISTINCT(user.id) BY BUCKET(@timestamp, 1d)
+          | SORT \`BUCKET(@timestamp, 1d)\` ASC`,
+          execute: true,
+        });
+      });
+
+      it('generates and executes a query to find power users by login count', async () => {
+        await evaluateEsqlQuery({
+          question: 'List users who logged in more than 5 times in the last 3 days.',
+          expected: `FROM logs-auth_service-*
+          | WHERE @timestamp >= NOW() - 3 days AND event.action == "login"
+          | STATS login_count = COUNT(user.id) BY user.id
+          | WHERE login_count > 5
+          | SORT login_count DESC`,
+          execute: true,
+        });
+      });
+
+      it('generates and executes a query to calculate total login count vs login count in the last hour', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'What is the total number of login events, and how many of those occurred during the hour before last? (Total count vs count last hour)',
+          expected: `FROM logs-auth_service-*
+          | SORT @timestamp
+          | EVAL now = NOW()
+          | EVAL key = CASE(@timestamp < (now - 1 hour) AND @timestamp > (now - 2 hour), "Last hour", "Other")
+          | STATS count = COUNT(*) BY key
+          | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
+          | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
+          | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+          execute: true,
+        });
+      });
+
+      it('count successful vs error http responses', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'Show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests from nginx.access logs over the last 24 hours.',
+          expected: `FROM logs-nginx.access-*
+          | WHERE @timestamp >= NOW() - 24 hours
+          | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
+          | STATS count = COUNT(*) BY status_type`,
+          execute: true,
+        });
+      });
+    });
+
     describe('APM dataset', () => {
       before(async () => {
         const myServiceInstance = apm
@@ -95,17 +360,17 @@ describe('ES|QL query generation', () => {
           question:
             'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
           expected: `FROM traces-apm*
-        | WHERE @timestamp >= NOW() - 24 hours
-        | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
-        | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = SUM(is_success) / COUNT(*) BY service.name
-        | KEEP service.name, avg_duration, success_rate, total_requests`,
+          | WHERE @timestamp >= NOW() - 24 hours
+          | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
+          | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = SUM(is_success) / COUNT(*) BY service.name
+          | KEEP service.name, avg_duration, success_rate, total_requests`,
           execute: true,
         });
       });
 
       it('exit span', async () => {
         await evaluateEsqlQuery({
-          question: `I've got APM data in metrics-apm*. Show me a query that filters on metricset.name:service_destination and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
+          question: `I've got APM data in metrics-apm*. Show me a query that filters on metricset.name:service_destination and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1. Just show me the query.`,
           expected: `FROM metrics-apm
           | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
           | EVAL total_response_time = span.destination.service.response_time.sum.us / span.destination.service.response_time.count, total_failures = CASE(event.outcome == "failure", 1, 0) * span.destination.service.response_time.count
@@ -146,7 +411,7 @@ describe('ES|QL query generation', () => {
       it('error message and date', async () => {
         await evaluateEsqlQuery({
           question:
-            'From logs-apm*, I want to see the 5 latest messages using ESQL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+            'From logs-apm*, I want to see the 5 latest messages using ES|QL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
           expected: `FROM logs-apm*
           | SORT @timestamp DESC
           | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
@@ -161,56 +426,20 @@ describe('ES|QL query generation', () => {
     });
 
     describe('Packetbeat dataset', () => {
-      before(async () => {
-        await esClient.indices.create({
-          index: 'packetbeat-8.11.3',
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-              destination: {
-                type: 'object',
-                properties: {
-                  domain: {
-                    type: 'keyword',
-                  },
-                },
-              },
-              url: {
-                type: 'object',
-                properties: {
-                  domain: {
-                    type: 'keyword',
-                  },
-                },
-              },
-            },
-          },
-        });
+      const indexName = 'packetbeat-test-data';
 
-        await esClient.index({
-          index: 'packetbeat-8.11.3',
-          document: {
-            '@timestamp': '2024-01-23T12:30:00.000Z',
-            destination: {
-              domain: 'observability.ai.assistant',
-            },
-            url: {
-              domain: 'elastic.co',
-            },
-          },
-        });
+      before(async () => {
+        await generatePacketbeatData({ esClient, indexName });
       });
 
       after(async () => {
         await esClient.indices.delete({
-          index: 'packetbeat-8.11.3',
+          index: indexName,
           allow_no_indices: true,
         });
       });
 
-      it('top 10 unique domains', async () => {
+      it('finds top 10 unique domains', async () => {
         await evaluateEsqlQuery({
           question:
             'For standard Elastic ECS compliant packetbeat data view, show me the top 10 unique destination.domain with the most docs',
@@ -219,6 +448,48 @@ describe('ES|QL query generation', () => {
           | SORT doc_count DESC
           | LIMIT 10`,
           execute: true,
+        });
+      });
+
+      it('counts HTTP requests by status code', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'Show me the count of each HTTP response status code. Ignore null values in the status code.',
+          expected: `FROM packetbeat-*
+          | WHERE http.response.status_code IS NOT NULL
+          | STATS request_count = COUNT(*) BY http.response.status_code
+          | SORT request_count DESC`,
+          execute: true,
+          criteria: ['The result should show counts for status codes 200, 404, and 503.'],
+        });
+      });
+
+      it('identifies failed DNS queries', async () => {
+        await evaluateEsqlQuery({
+          question: 'List all failed DNS queries from the last hour.',
+          expected: `FROM packetbeat-*
+          | WHERE @timestamp >= NOW() - 1 hour AND dns.response_code IS NOT NULL AND dns.response_code != "NOERROR"`,
+          execute: true,
+          criteria: [
+            'The result should find the query for "nonexistent.domain.xyz" with the response code "NXDomain".',
+          ],
+        });
+      });
+
+      it('finds top network conversations by total bytes', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'What are the top 5 network conversations by total bytes transferred? Ignore null values for client.ip and server.ip',
+          expected: `FROM packetbeat-*
+          | WHERE client.ip IS NOT NULL AND server.ip IS NOT NULL
+          | EVAL total_bytes = destination.bytes + source.bytes
+          | STATS total_transfer = SUM(total_bytes) BY client.ip, server.ip
+          | SORT total_transfer DESC
+          | LIMIT 5`,
+          execute: true,
+          criteria: [
+            'The result should show IP pairs and their total data transfer, sorted descending.',
+          ],
         });
       });
     });
@@ -301,21 +572,21 @@ describe('ES|QL query generation', () => {
         question:
           'Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
         expected: `FROM .ds-metrics-apm*
-      | WHERE @timestamp >= NOW() - 15 minutes
-      | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
-      | SORT avg_cpu DESC
-      | LIMIT 10`,
+        | WHERE @timestamp >= NOW() - 15 minutes
+        | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
+        | SORT avg_cpu DESC
+        | LIMIT 10`,
         execute: false,
       });
     });
 
     it('metricbeat avg cpu', async () => {
       await evaluateEsqlQuery({
-        question: `Assume my data is in \`metricbeat*\`. Show me a query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host name`,
+        question: `Assume my data is in \`metricbeat*\`. Show me an example query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host name`,
         expected: `FROM metricbeat*
-    | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
-    | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
-    | SORT host.name ASC`,
+        | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
+        | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
+        | SORT host.name ASC`,
         execute: false,
       });
     });
@@ -325,9 +596,24 @@ describe('ES|QL query generation', () => {
         question:
           'Show me an example ES|QL query to extract the query duration from postgres log messages in postgres-logs*, with this format:\n `2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table`. \n Use ECS fields, and calculate the avg.',
         expected: `FROM postgres-logs*
-    | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
-    | EVAL duration_double = TO_DOUBLE(duration)
-    | STATS AVG(duration_double)`,
+        | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
+        | EVAL duration_double = TO_DOUBLE(duration)
+        | STATS AVG(duration_double)`,
+        execute: false,
+      });
+    });
+
+    // This works on the Kibana UI but times out via the /chat/complete API
+    // See trace: https://35-187-109-62.sslip.io/projects/UHJvamVjdDo5/traces/630f92adcb3620295794180f71ccb37a?selectedSpanNodeId=U3BhbjozODYxNTQ%3D
+    it.skip('enriches login logs with user metadata using a lookup join', async () => {
+      await evaluateEsqlQuery({
+        question:
+          "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
+        expected: `FROM logs-auth_service-*
+          | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+          | LOOKUP JOIN users_metadata ON user.id
+          | KEEP @timestamp, user.id, full_name, department
+          | LIMIT 20`,
         execute: false,
       });
     });
@@ -336,7 +622,7 @@ describe('ES|QL query generation', () => {
   describe('SPL to ES|QL conversion', () => {
     it('network_firewall count by', async () => {
       await evaluateEsqlQuery({
-        question: `Can you convert this SPL query to ESQL? index=network_firewall "SYN Timeout" | stats count by dest`,
+        question: `Can you convert this SPL query to ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,
         expected: `FROM network_firewall
         | WHERE _raw == "SYN Timeout"
         | STATS count = count(*) by dest`,
@@ -346,12 +632,12 @@ describe('ES|QL query generation', () => {
 
     it('prod_web length', async () => {
       await evaluateEsqlQuery({
-        question: `Can you convert this SPL query to ESQL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
+        question: `Can you convert this SPL query to ES|QL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
         expected: `from prod_web
         | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
         | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
         criteria: [
-          'The query provided by the Assistant uses the ESQL functions LENGTH and CASE, not the SPL functions len and if',
+          'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
         ],
         execute: false,
       });
@@ -359,17 +645,172 @@ describe('ES|QL query generation', () => {
 
     it('prod_web filter message and host', async () => {
       await evaluateEsqlQuery({
-        question: `Can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+        question: `Can you convert this SPL query to ES|QL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
         expected: `FROM prod_web
-      | WHERE _raw NOT LIKE "Connection reset"
-        AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
-        AND sourcetype != "prod_urlf_east_logs"
-        AND sourcetype != "prod_urlf_west_logs"
-        AND host NOT LIKE "dbs-tools-*"
-        AND _raw NOT LIKE "Public] in context with path [/global]"
-        AND host NOT LIKE "*dev*"
-        AND host NOT LIKE "*qa*"
-        AND host NOT LIKE "*uat*"`,
+        | WHERE _raw NOT LIKE "Connection reset"
+          AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
+          AND sourcetype != "prod_urlf_east_logs"
+          AND sourcetype != "prod_urlf_west_logs"
+          AND host NOT LIKE "dbs-tools-*"
+          AND _raw NOT LIKE "Public] in context with path [/global]"
+          AND host NOT LIKE "*dev*"
+          AND host NOT LIKE "*qa*"
+          AND host NOT LIKE "*uat*"`,
+        execute: false,
+      });
+    });
+
+    it('should handle basic term search', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=security sourcetype=linux_secure "Failed password"`,
+        expected: `FROM security
+        | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
+        execute: false,
+      });
+    });
+
+    it('should handle boolean operators (AND, OR, NOT)', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`,
+        expected: `FROM firewall
+        | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
+        execute: false,
+      });
+    });
+
+    it('should handle wildcard filtering for strings', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=prod_web host="webapp-*"`,
+        expected: `FROM prod_web
+        | WHERE host LIKE "webapp-%"`,
+        execute: false,
+      });
+    });
+
+    it('should handle numerical comparisons', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=sales status>=400 status<500`,
+        expected: `FROM sales
+        | WHERE status >= 400 AND status < 500`,
+        execute: false,
+      });
+    });
+
+    /**
+     * Category: Field Manipulation (`eval`, `rename`, `fields`)
+     * The following tests focus on creating, modifying, and selecting fields.
+     */
+    it('should handle complex eval expressions with math and case', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=inventory | eval price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`,
+        expected: `FROM inventory
+        | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
+        criteria: ['The query should use the ES|QL function CASE, not the SPL function if'],
+        execute: false,
+      });
+    });
+
+    it('should handle the rename command', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`,
+        expected: `FROM network_logs
+        | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
+        execute: false,
+      });
+    });
+
+    it('should handle the fields command for projection', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=employees | fields name, department, title`,
+        expected: `FROM employees
+        | KEEP name, department, title`,
+        execute: false,
+      });
+    });
+
+    it('should handle the fields command for exclusion', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=employees | fields - _raw, _time`,
+        expected: `FROM employees
+        | DROP _raw, _time`,
+        execute: false,
+      });
+    });
+
+    /**
+     * Category: Aggregation (`stats`, `chart`, `timechart`)
+     * The following tests cover various aggregation and summarization techniques.
+     */
+    it('should handle stats with multiple aggregation functions and aliases', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`,
+        expected: `FROM web_traffic
+        | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
+        execute: false,
+      });
+    });
+
+    it('should handle the sort command', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=products | stats sum(sales) as total_sales by category | sort - total_sales`,
+        expected: `FROM products
+        | STATS total_sales = sum(sales) by category
+        | SORT total_sales DESC`,
+        execute: false,
+      });
+    });
+
+    it('should handle the top command', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=access_logs | top limit=10 user`,
+        expected: `FROM access_logs
+        | STATS count = count(*) by user
+        | SORT count DESC
+        | LIMIT 10`,
+        execute: false,
+      });
+    });
+
+    it('should handle the rare command', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=error_logs | rare limit=5 error_code`,
+        expected: `FROM error_logs
+        | STATS count = count(*) by error_code
+        | SORT count ASC
+        | LIMIT 5`,
+        execute: false,
+      });
+    });
+
+    it('should handle timechart for time-series aggregation', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=auth | timechart span=1h count by action`,
+        expected: `FROM auth
+        | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
+        criteria: [
+          'The query should use the HISTOGRAM function to bucket data over time, which is the ES|QL equivalent of timechart.',
+        ],
+        execute: false,
+      });
+    });
+
+    /**
+     * Category: Category: Advanced Scenarios (`subsearches`, `table`)
+     */
+    it('should handle a subsearch in a WHERE clause', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
+        expected: `FROM main
+        | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+        execute: false,
+      });
+    });
+
+    it('should handle the table command', async () => {
+      await evaluateEsqlQuery({
+        question: `Can you convert this SPL query to ES|QL? index=firewall | table _time, src_ip, dest_ip, action`,
+        expected: `FROM firewall
+        | KEEP _time, src_ip, dest_ip, action`,
         execute: false,
       });
     });
