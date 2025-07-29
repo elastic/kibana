@@ -918,8 +918,10 @@ describe('<SnapshotRestoreHome />', () => {
       test('should show a prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
         const { find, exists } = testBed;
 
+        // Check that the search bar is still present
         expect(exists('snapshotListSearch')).toBe(true);
 
+        // Check that the error message is displayed
         expect(exists('snapshotsLoadingError')).toBe(true);
         expect(find('snapshotsLoadingError').text()).toContain('Error loading snapshots');
       });
