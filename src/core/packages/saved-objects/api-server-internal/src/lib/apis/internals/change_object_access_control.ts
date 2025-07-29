@@ -46,6 +46,7 @@ export interface ChangeAccessControlParams {
   securityExtension?: ISavedObjectsSecurityExtension;
   actionType: ChangeAccessControlActionType;
 }
+
 export const changeObjectAccessControl = async (
   params: ChangeAccessControlParams
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
