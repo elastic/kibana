@@ -44,6 +44,9 @@ export function StreamListView() {
       });
       return streams;
     },
+    // time state change is used to trigger a refresh of the listed
+    // streams metadata but we operate on stale data if we don't
+    // also refresh the streams
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
