@@ -92,7 +92,7 @@ paths:
                 $ref: '../../vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardExport'
       responses:
         200:
-          description: Indicates rules have been added to the migration successfully.
+          description: Indicates dashboards have been added to the migration successfully.
 
 
   /internal/siem_migrations/dashboards/{migration_id}/stats:

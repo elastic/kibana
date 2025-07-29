@@ -36,7 +36,7 @@ components:
             - id
           properties:
             id:
-              description: The rule migration id
+              description: The dashboard migration id
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/DashboardMigrationData'
 
@@ -49,7 +49,7 @@ components:
         - created_at
       properties:
         name:
-          description: The rule migration name
+          description: The dashboard migration name
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         created_by:
           description: The user profile ID of the user who created the migration.
@@ -58,25 +58,25 @@ components:
           description:  The moment migration was created
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
-          description: The last execution of the rule migration task.
+          description: The last execution of the dashboard migration task.
           $ref: '#/components/schemas/DashboardMigrationLastExecution'
 
 
     DashboardMigrationDashboard:
-      description: The rule migration document object.
+      description: The dashboard migration document object.
       allOf:
         - type: object
           required:
             - id
           properties:
             id:
-              description: The rule migration id
+              description: The dashboard migration id
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/DashboardMigrationDashboardData'
 
     DashboardMigrationDashboardData:
       type: object
-      description: The rule migration document object.
+      description: The dashboard migration document object.
       required:
         - '@timestamp'
         - migration_id
@@ -94,10 +94,10 @@ components:
           description: The user profile ID of the user who created the migration.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         original_dashboard:
-          description: The original rule to migrate.
+          description: The original dashboard to migrate.
           $ref: '#/components/schemas/OriginalDashboard'
         status:
-          description: The status of the rule migration process.
+          description: The status of the dashboard migration process.
           $ref: '#/components/schemas/DashboardMigrationStatus'
           default: pending
         updated_at:
@@ -169,7 +169,7 @@ components:
 
     DashboardMigrationTaskStats:
       type: object
-      description: The rule migration task stats object.
+      description: The dashboard migration task stats object.
       required:
         - id
         - name
@@ -189,7 +189,7 @@ components:
           $ref: '#/components/schemas/DashboardMigrationTaskStatus'
         dashboards:
           type: object
-          description: The rules migration stats.
+          description: The dashboards migration stats.
           required:
             - total
             - pending
@@ -199,19 +199,19 @@ components:
           properties:
             total:
               type: integer
-              description: The total number of rules to migrate.
+              description: The total number of dashboards to migrate.
             pending:
               type: integer
-              description: The number of rules that are pending migration.
+              description: The number of dashboards that are pending migration.
             processing:
               type: integer
-              description: The number of rules that are being migrated.
+              description: The number of dashboards that are being migrated.
             completed:
               type: integer
-              description: The number of rules that have been migrated successfully.
+              description: The number of dashboards that have been migrated successfully.
             failed:
               type: integer
-              description: The number of rules that have failed migration.
+              description: The number of dashboards that have failed migration.
         created_at:
           type: string
           description: The moment the migration was created.
