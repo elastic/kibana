@@ -72,10 +72,8 @@ export const createAgentGraph = ({
   };
 
   const toolHandler = async (state: StateType) => {
-    logger.debug(`Running tool node with state: ${JSON.stringify(state, null, 2)}`);
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
-    logger.debug(`Tool node result: ${JSON.stringify(toolNodeResult, null, 2)}`);
-    //
+
     return {
       addedMessages: [...toolNodeResult],
     };

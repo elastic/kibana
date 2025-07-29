@@ -91,8 +91,7 @@ export const toolToLangchain = ({
       try {
         logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
         const toolReturn = await tool.execute({ toolParams: input });
-        logger.debug(`Tool ${tool.id} returned: ${toolReturn}`);
-        const content = JSON.stringify(toolReturn.results);
+        const content = JSON.stringify({ results: toolReturn.results });
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);

@@ -121,14 +121,14 @@ describe('runTool', () => {
       results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
 
-    const result = await runTool({
+    const results = await runTool({
       toolExecutionParams: params,
       parentManager: runnerManager,
     });
 
-    expect(result).toEqual({
+    expect(results).toEqual({
       runId: expect.any(String),
-      result: { test: true, over: 9000 },
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
     });
   });
 

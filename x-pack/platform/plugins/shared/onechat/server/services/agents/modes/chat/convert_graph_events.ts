@@ -108,12 +108,11 @@ export const convertGraphEvents = ({
           for (const toolMessage of toolMessages) {
             const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
             const toolReturn = extractToolReturn(toolMessage);
-            logger.debug(`Tool return: ${JSON.stringify(toolReturn, null, 2)}`);
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? 'unknown',
-                result: toolReturn.results, // TODO for sqren: maybe remove stringify?
+                result: JSON.stringify({ results: toolReturn.results }),
               })
             );
           }

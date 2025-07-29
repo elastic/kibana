@@ -12,6 +12,7 @@ import {
   isAIMessage,
 } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
+import { isArray } from 'lodash';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -66,8 +67,8 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
   if (!message.artifact) {
     throw new Error('No artifact attached to tool message');
   }
-  if (!message.artifact.results) {
-    throw new Error('No results attached to artifact');
+  if (!isArray(message.artifact.results)) {
+    throw new Error('No results array attached to artifact');
   }
 
   return message.artifact as RunToolReturn;
