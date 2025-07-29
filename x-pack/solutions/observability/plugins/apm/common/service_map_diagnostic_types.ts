@@ -33,7 +33,7 @@ export interface ServiceMapDiagnosticResponse {
       documentCount: number;
       sourceSpanIds: string[];
     };
-    traceCorrelation: {
+    traceCorrelation?: {
       found: boolean;
       foundInSourceNode: boolean;
       foundInDestinationNode: boolean;

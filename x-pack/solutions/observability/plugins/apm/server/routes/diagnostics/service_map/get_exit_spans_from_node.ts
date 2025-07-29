@@ -120,7 +120,7 @@ export async function getSourceSpanIds({
       },
     },
     aggs: {
-      samples: {
+      sample_docs: {
         terms: {
           field: SPAN_NAME,
           size: 500,
@@ -142,7 +142,7 @@ export async function getSourceSpanIds({
   return {
     sourceSpanIdsRawResponse: response,
     spanIds:
-      response.aggregations?.samples?.buckets?.flatMap((bucket) =>
+      response.aggregations?.sample_docs?.buckets?.flatMap((bucket) =>
         bucket.top_span_ids.hits.hits.map((hit) => hit._source.span.id)
       ) ?? [],
   };
@@ -175,6 +175,13 @@ export async function getDestinationParentIds({
           ...(ids ? termsQuery(PARENT_ID, ...ids) : []),
           ...termQuery(SERVICE_NAME, destinationNode),
         ],
+      },
+    },
+    aggs: {
+      sample_docs: {
+        top_hits: {
+          size: 5,
+        },
       },
     },
   });

@@ -120,16 +120,14 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         end,
         sourceNode,
       }),
-      traceId
-        ? getTraceCorrelation({
-            apmEventClient,
-            start,
-            end,
-            traceId,
-            sourceNode,
-            destinationNode,
-          })
-        : [],
+      getTraceCorrelation({
+        apmEventClient,
+        start,
+        end,
+        traceId,
+        sourceNode,
+        destinationNode,
+      }),
     ]);
 
     const destinationParentIds = await getDestinationParentIds({
@@ -150,23 +148,27 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
         },
         parentRelationships: {
           found: destinationParentIds.hasParent,
-          documentCount: destinationParentIds.response?.hits?.hits?.length || 0,
-          sourceSpanIds: sourceSpanIds.spanIds.map((id: string) => id),
+          documentCount: destinationParentIds.rawResponse?.hits?.hits?.length || 0,
+          sourceSpanIds: [...sourceSpanIds.spanIds],
         },
-        traceCorrelation: {
-          found: traceCorrelation?.foundInBothNodes,
-          foundInSourceNode: traceCorrelation?.foundInSourceNode,
-          foundInDestinationNode: traceCorrelation?.foundInDestinationNode,
-          sourceNodeDocumentCount: traceCorrelation?.sourceNodeDocumentCount,
-          destinationNodeDocumentCount: traceCorrelation?.destinationNodeDocumentCount,
-        },
+        ...(traceId && {
+          traceCorrelation: {
+            found: traceCorrelation?.foundInBothNodes,
+            foundInSourceNode: traceCorrelation?.foundInSourceNode,
+            foundInDestinationNode: traceCorrelation?.foundInDestinationNode,
+            sourceNodeDocumentCount: traceCorrelation?.sourceNodeDocumentCount,
+            destinationNodeDocumentCount: traceCorrelation?.destinationNodeDocumentCount,
+          },
+        }),
       },
       // Include raw Elasticsearch responses for debugging and advanced analysis
       elasticsearchResponses: {
         exitSpansQuery: exitSpans.rawResponse,
         sourceSpanIdsQuery: sourceSpanIds.sourceSpanIdsRawResponse,
         destinationParentIdsQuery: destinationParentIds.rawResponse,
-        traceCorrelationQuery: traceCorrelation.rawResponse,
+        ...(traceId && {
+          traceCorrelationQuery: traceCorrelation?.rawResponse,
+        }),
       },
     };
   },

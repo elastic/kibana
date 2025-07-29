@@ -21,7 +21,7 @@ export async function getTraceCorrelation({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  traceId: string;
+  traceId?: string;
   sourceNode: string;
   destinationNode: string;
 }) {
