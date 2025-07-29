@@ -137,7 +137,7 @@ export const OverviewPage: FC = () => {
     'overview'
   );
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
-  const canUploadFile = useMemo(() => !!capabilities.fileUpload.show, [capabilities]);
+  const canUploadFile = useMemo(() => Boolean(capabilities.fileUpload.show), [capabilities]);
 
   useEffect(
     function loadUserName() {
