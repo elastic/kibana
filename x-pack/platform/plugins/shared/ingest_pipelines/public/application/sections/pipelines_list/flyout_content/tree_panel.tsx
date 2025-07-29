@@ -57,11 +57,11 @@ export const TreePanel = React.memo(
     }, [history, clickTreeNode, setTreeRootStack]);
 
     return (
-      <EuiSplitPanel.Inner color="subdued">
-        <EuiTitle id="pipelineTreeTitle" data-test-subj="pipelineTreeTitle">
+      <EuiSplitPanel.Inner color="subdued" data-test-subj="pipelineTreePanel">
+        <EuiTitle id="pipelineTreeTitle">
           <h2>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.title', {
-              defaultMessage: 'Ingest pipeline structure',
+              defaultMessage: 'Ingest pipeline hierarchy',
             })}
           </h2>
         </EuiTitle>

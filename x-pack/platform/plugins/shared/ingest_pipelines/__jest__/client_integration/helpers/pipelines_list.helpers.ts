@@ -122,4 +122,4 @@ export type PipelineListTestSubjects =
   | 'missingCustomPipeline'
   | 'missingCustomPipeline.cause'
   | 'createCustomPipeline'
-  | 'pipelineTreeTitle';
+  | 'pipelineTreePanel';

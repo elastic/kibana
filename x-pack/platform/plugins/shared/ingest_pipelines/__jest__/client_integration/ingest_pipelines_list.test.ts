@@ -54,10 +54,12 @@ describe('<PipelinesList />', () => {
               position: 1,
             },
           },
+        },
+        {
           pipeline: {
             name: 'test_pipeline2',
           },
-        },
+        }
       ],
       deprecated: true,
     };
@@ -90,7 +92,7 @@ describe('<PipelinesList />', () => {
           pipeline.name,
           '',
           `test_pipeline${i + 1} description`,
-          i < 2 ? '0' : '1',
+          i === 2 ? '2' : '0',
           'EditDelete',
         ]);
       });
@@ -293,7 +295,7 @@ describe('<PipelinesList />', () => {
 
           expect(exists('pipelinesTable')).toBe(true);
           expect(exists('pipelineDetails')).toBe(true);
-          expect(exists('pipelineTreeTitle')).toBe(false);
+          expect(exists('pipelineTreePanel')).toBe(false);
         });
 
         test('should display structure tree panel if pipeline has Pipeline processors', async () => {
@@ -325,8 +327,7 @@ describe('<PipelinesList />', () => {
 
           expect(exists('pipelinesTable')).toBe(true);
           expect(exists('pipelineDetails')).toBe(true);
-          expect(exists('pipelineTreeTitle')).toBe(true);
-          expect(find('pipelineTreeTitle').text()).toBe('Ingest pipeline structure');
+          expect(exists('pipelineTreePanel')).toBe(true);
         });
       });
     });
