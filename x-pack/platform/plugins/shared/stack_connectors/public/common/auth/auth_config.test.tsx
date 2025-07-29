@@ -672,7 +672,7 @@ describe('AuthConfig renders', () => {
         await userEvent.clear(additionalFieldsInput!);
         await userEvent.type(additionalFieldsInput!, '{{"sdf": "value"}');
       });
-      screen.debug(undefined, 30000);
+
       await waitFor(() => {
         expect(screen.queryByText('Invalid JSON')).not.toBeInTheDocument();
       });

@@ -47,7 +47,7 @@ describe('getAxiosConfig', () => {
   const services: Services = createServicesMock();
 
   const params: GetAxiosConfigParams = {
-    actionId: 'test-action-id',
+    connectorId: 'test-action-id',
     config: {
       authType: AuthType.OAuth2ClientCredentials,
       accessTokenUrl: 'https://example.com/oauth/token',
