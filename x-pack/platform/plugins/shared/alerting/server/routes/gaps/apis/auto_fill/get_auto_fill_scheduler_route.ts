@@ -10,13 +10,13 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-export const getAutoFillStatusRoute = (
+export const getAutoFillSchedulerRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: '/api/alerting/gaps/auto_fill/{id}',
+      path: '/internal/alerting/rules/gaps/auto_fill_scheduler/{id}',
       validate: {
         params: schema.object({
           id: schema.string(),

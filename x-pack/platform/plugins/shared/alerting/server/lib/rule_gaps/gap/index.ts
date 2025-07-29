@@ -35,6 +35,7 @@ export class Gap {
   private _inProgressIntervals: Interval[];
   private _internalFields?: InternalFields;
   private _timestamp?: string;
+  private _ruleId?: string;
 
   constructor({
     timestamp,
@@ -42,6 +43,7 @@ export class Gap {
     filledIntervals = [],
     inProgressIntervals = [],
     internalFields,
+    ruleId,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
@@ -51,6 +53,9 @@ export class Gap {
     }
     if (timestamp) {
       this._timestamp = timestamp;
+    }
+    if (ruleId) {
+      this._ruleId = ruleId;
     }
   }
 
@@ -126,6 +131,10 @@ export class Gap {
     } else {
       return gapStatus.PARTIALLY_FILLED;
     }
+  }
+
+  public get ruleId() {
+    return this._ruleId;
   }
 
   public resetInProgressIntervals(): void {

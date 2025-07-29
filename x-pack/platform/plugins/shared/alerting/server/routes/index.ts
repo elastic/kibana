@@ -92,11 +92,10 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
-import { createAutoFillRoute } from './gaps/apis/auto_fill/create_auto_fill_route';
-import { getAutoFillStatusRoute } from './gaps/apis/auto_fill/get_auto_fill_status_route';
-import { listAutoFillsRoute } from './gaps/apis/auto_fill/list_auto_fills_route';
-import { updateAutoFillRoute } from './gaps/apis/auto_fill/update_auto_fill_route';
-import { getGapFillEventLogsRoute } from './gaps/apis/auto_fill/get_gap_fill_event_logs_route';
+import { createAutoFillSchedulerRoute } from './gaps/apis/auto_fill/create_auto_fill_scheduler_route';
+import { getAutoFillSchedulerRoute } from './gaps/apis/auto_fill/get_auto_fill_scheduler_route';
+import { updateAutoFillSchedulerRoute } from './gaps/apis/auto_fill/update_auto_fill_scheduler_route';
+import { getGapFillAutoSchedulerLogsRoute } from './gaps/apis/auto_fill/get_auto_fill_scheduler_logs_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -196,11 +195,10 @@ export function defineRoutes(opts: RouteOptions) {
   fillGapByIdRoute(router, licenseState);
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
-  createAutoFillRoute(router, licenseState);
-  getAutoFillStatusRoute(router, licenseState);
-  listAutoFillsRoute(router, licenseState);
-  updateAutoFillRoute(router, licenseState);
-  getGapFillEventLogsRoute(router, licenseState);
+  createAutoFillSchedulerRoute(router, licenseState);
+  getAutoFillSchedulerRoute(router, licenseState);
+  updateAutoFillSchedulerRoute(router, licenseState);
+  getGapFillAutoSchedulerLogsRoute(router, licenseState);
 
   // Rules Settings APIs
   if (alertingConfig.rulesSettings.enabled) {

@@ -636,6 +636,10 @@
                                                 "isArray": "true"
                                             }
                                         },
+                                        "gapFillRange": {
+                                            "type": "keyword",
+                                            "ignore_above": 1024
+                                        },
                                         "schedule": {
                                             "properties": {
                                                 "interval": {

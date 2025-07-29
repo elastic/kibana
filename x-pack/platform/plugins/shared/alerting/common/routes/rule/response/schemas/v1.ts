@@ -655,6 +655,29 @@ export const ruleResponseSchema = schema.object({
   alert_delay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
   artifacts: schema.maybe(artifactsSchema),
+  last_gap_auto_fill: schema.maybe(
+    schema.nullable(
+      schema.object({
+        check_time: schema.string({
+          meta: {
+            description: 'The timestamp when the last gap auto-fill check was performed.',
+          },
+        }),
+        status: schema.oneOf([schema.literal('success'), schema.literal('failure')], {
+          meta: {
+            description: 'The status of the last gap auto-fill operation.',
+          },
+        }),
+        error_message: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'Error message if the gap auto-fill operation failed.',
+            },
+          })
+        ),
+      })
+    )
+  ),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

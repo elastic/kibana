@@ -10,13 +10,13 @@ import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 
-export const getGapFillEventLogsRoute = (
+export const getGapFillAutoSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: '/api/alerting/gaps/auto_fill/{id}/event_logs',
+      path: '/internal/alerting/rules/gaps/auto_fill_scheduler/{id}/logs',
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -64,6 +64,8 @@ export const getGapFillEventLogsRoute = (
 
           const eventLogClient = await rulesClient.getEventLogClient();
 
+          console.log('formattedSort', JSON.stringify(formattedSort, null, 2));
+
           // Use the task as a saved object - tasks ARE saved objects with type 'task'
           const result = await eventLogClient.findEventsBySavedObjectIds(
             'task', // Task saved object type
@@ -74,7 +76,9 @@ export const getGapFillEventLogsRoute = (
               start,
               end,
               sort: formattedSort,
-              filter: filter ? `(${filter}) AND kibana.auto_gap_fill:*` : 'kibana.auto_gap_fill:*',
+              filter: filter
+                ? `(${filter}) AND event.action:gap-fill-auto-schedule`
+                : 'event.action:gap-fill-auto-schedule',
             }
           );
 
