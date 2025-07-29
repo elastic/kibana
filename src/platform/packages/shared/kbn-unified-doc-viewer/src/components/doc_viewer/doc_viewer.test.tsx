@@ -43,7 +43,12 @@ const WrappedDocViewer = (props: DocViewerProps) => (
 describe('<DocViewer />', () => {
   test('Render <DocViewer/> with 3 different tabs', () => {
     const registry = new DocViewsRegistry();
-    registry.add({ id: 'function', order: 10, title: 'Render function', component: jest.fn() });
+    registry.add({
+      id: 'function',
+      order: 10,
+      title: 'Render function',
+      component: jest.fn(() => null),
+    });
     registry.add({
       id: 'component',
       order: 20,
