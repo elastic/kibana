@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
@@ -147,7 +148,7 @@ export function SettingsPage() {
                     )}
                     css={css`
                       ${headerIconShadow};
-                      margin-right: ${euiTheme.base * 0.75}px;
+                      margin-right: ${euiTheme.size.m};
                     `}
                   />
                 </EuiFlexItem>
@@ -156,12 +157,10 @@ export function SettingsPage() {
             <EuiFlexItem grow={false}>
               <EuiTitle size="m">
                 <h2>
-                  {i18n.translate(
-                    'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-                    {
-                      defaultMessage: 'AI Assistant for Observability and Search',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel"
+                    defaultMessage="AI Assistant for Observability and Search"
+                  />
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -174,12 +173,10 @@ export function SettingsPage() {
             onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
             data-test-subj="genAiSettingsButton"
           >
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton',
-              {
-                defaultMessage: 'GenAI Settings',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
+              defaultMessage="GenAI Settings"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

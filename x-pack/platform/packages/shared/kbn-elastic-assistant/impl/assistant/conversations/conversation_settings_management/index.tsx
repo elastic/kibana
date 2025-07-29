@@ -282,9 +282,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         handleRowChecked,
         handleRowUnChecked,
         isDeleteEnabled: () =>
-          (canEditAssistantSettings ?? false) && !isDeleteAll && deletedConversations.length === 0,
+          Boolean(canEditAssistantSettings) && !isDeleteAll && deletedConversations.length === 0,
         isEditEnabled: () =>
-          (canEditAssistantSettings ?? false) && !isDeleteAll && deletedConversations.length === 0,
+          Boolean(canEditAssistantSettings) && !isDeleteAll && deletedConversations.length === 0,
         isExcludedMode,
         onDeleteActionClicked,
         onEditActionClicked,

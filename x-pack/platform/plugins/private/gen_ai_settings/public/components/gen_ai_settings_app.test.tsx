@@ -17,12 +17,11 @@ jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
 
 describe('GenAiSettingsApp', () => {
-  let coreStart: ReturnType<typeof coreMock.createStart>;
-  let setBreadcrumbs: jest.MockedFunction<any>;
+  const coreStart = coreMock.createStart();
+  const setBreadcrumbs = jest.fn();
 
   beforeEach(() => {
-    coreStart = coreMock.createStart();
-    setBreadcrumbs = jest.fn();
+    jest.clearAllMocks();
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -41,10 +40,6 @@ describe('GenAiSettingsApp', () => {
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   const renderComponent = (props = {}) => {
     return renderWithI18n(
       <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} coreStart={coreStart} {...props} />
@@ -52,7 +47,7 @@ describe('GenAiSettingsApp', () => {
   };
 
   describe('breadcrumbs', () => {
-    it('should set breadcrumbs with AI breadcrumb when showAiBreadcrumb is true', () => {
+    it('should set breadcrumbs correctly based on showAiBreadcrumb', () => {
       renderComponent();
 
       expect(setBreadcrumbs).toHaveBeenCalledWith([
@@ -63,9 +58,9 @@ describe('GenAiSettingsApp', () => {
           text: 'GenAI Settings',
         },
       ]);
-    });
 
-    it('should set breadcrumbs without AI breadcrumb when showAiBreadcrumb is false', () => {
+      jest.clearAllMocks();
+
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: true,
         isPermissionsBased: false,
@@ -83,29 +78,24 @@ describe('GenAiSettingsApp', () => {
   });
 
   describe('content rendering', () => {
-    it('should render the main page section', () => {
+    it('should render all expected sections with default settings', () => {
       renderComponent();
 
+      // Main page section
       expect(screen.getByTestId('genAiSettingsPage')).toBeInTheDocument();
       expect(screen.getByTestId('genAiSettingsTitle')).toBeInTheDocument();
-    });
 
-    it('should render connectors section', () => {
-      renderComponent();
-
+      // Connectors section
       expect(screen.getByTestId('connectorsSection')).toBeInTheDocument();
       expect(screen.getByTestId('connectorsTitle')).toBeInTheDocument();
       expect(screen.getByTestId('manageConnectorsLink')).toBeInTheDocument();
-    });
 
-    it('should render ai feature visibility section when showSpacesIntegration is true', () => {
-      renderComponent();
-
+      // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
     });
 
-    it('should not render ai feature visibility section when showSpacesIntegration is false', () => {
+    it('should conditionally render sections based on settings', () => {
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: false,
         isPermissionsBased: false,
@@ -113,28 +103,9 @@ describe('GenAiSettingsApp', () => {
       });
 
       renderComponent();
-
       expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
       expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
-    });
 
-    it('should not render ai feature visibility section when canManageSpaces is false', () => {
-      coreStart.application.capabilities = {
-        ...coreStart.application.capabilities,
-        management: {
-          kibana: {
-            spaces: false,
-          },
-        },
-      };
-
-      renderComponent();
-
-      expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
-    });
-
-    it('should render ai feature visibility section when both showSpacesIntegration and canManageSpaces are true', () => {
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: true,
         isPermissionsBased: false,
@@ -144,20 +115,20 @@ describe('GenAiSettingsApp', () => {
         ...coreStart.application.capabilities,
         management: {
           kibana: {
-            spaces: true,
+            spaces: false,
           },
         },
       };
 
       renderComponent();
-
-      expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
-      expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('aiFeatureVisibilitySection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('goToSpacesButton')).not.toBeInTheDocument();
     });
   });
 
   describe('permissions-based view', () => {
-    it('should handle permissions-based view correctly when canManageSpaces is true', () => {
+    it('should conditionally render permissions section based on settings', () => {
+      // permissions-based view is enabled and canManageSpaces is true
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: true,
         isPermissionsBased: true,
@@ -173,16 +144,9 @@ describe('GenAiSettingsApp', () => {
       };
 
       renderComponent();
-
       expect(screen.getByTestId('goToPermissionsTabButton')).toBeInTheDocument();
-    });
 
-    it('should not render permissions section when canManageSpaces is false', () => {
-      mockUseEnabledFeatures.mockReturnValue({
-        showSpacesIntegration: true,
-        isPermissionsBased: true,
-        showAiBreadcrumb: true,
-      });
+      // permissions-based view is enabled and canManageSpaces is false
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
         management: {
@@ -193,7 +157,6 @@ describe('GenAiSettingsApp', () => {
       };
 
       renderComponent();
-
       expect(screen.queryByTestId('goToPermissionsTabButton')).not.toBeInTheDocument();
     });
   });

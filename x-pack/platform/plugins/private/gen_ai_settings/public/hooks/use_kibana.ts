@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import {
+  useKibana as useKibanaBase,
+  type KibanaReactContextValue,
+} from '@kbn/kibana-react-plugin/public';
 import type { GenAiSettingsStartDeps } from '../plugin';
 
-export const useKibana = () => useKibanaBase<GenAiSettingsStartDeps>();
+export type StartServices = CoreStart & GenAiSettingsStartDeps;
+
+export const useKibana = () => useKibanaBase<StartServices>();
+
+export type GenAiSettingsKibanaReactContextValue = KibanaReactContextValue<StartServices>;

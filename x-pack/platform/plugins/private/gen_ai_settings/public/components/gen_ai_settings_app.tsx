@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
@@ -21,27 +21,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
+import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
-import { getConnectorsManagementHref } from '../utils/connectors';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  coreStart: CoreStart;
 }
 
-export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
-  setBreadcrumbs,
-  coreStart,
-}) => {
-  const { application, http, docLinks } = coreStart;
+export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
+  const { services } = useKibana();
+  const { application, http, docLinks } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
 
-  const canManageSpaces = coreStart.application.capabilities.management.kibana.spaces;
+  const canManageSpaces = application.capabilities.management.kibana.spaces;
 
   useEffect(() => {
     const breadcrumbs = [
@@ -64,24 +60,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
     setBreadcrumbs(breadcrumbs);
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
-  const getUrlForSpaces = (toPermissionsTab: boolean = false) => {
+  const handleNavigateToSpaces = useCallback(() => {
     const basePath = http.basePath.get();
     const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
+    const spacesPath = `/kibana/spaces/edit/${spaceId}${isPermissionsBased ? '/roles' : ''}`;
 
-    const path = `/kibana/spaces/edit/${spaceId}${toPermissionsTab ? '/roles' : ''}`;
-
-    return application.getUrlForApp('management', {
-      path,
+    application.navigateToApp('management', {
+      path: spacesPath,
+      openInNewTab: true,
     });
-  };
+  }, [application, http.basePath, isPermissionsBased]);
 
   return (
     <div data-test-subj="genAiSettingsPage">
       <EuiTitle size="l">
         <h2 data-test-subj="genAiSettingsTitle">
-          {i18n.translate('xpack.genAiSettings.pageTitle', {
-            defaultMessage: 'GenAI Settings',
-          })}
+          <FormattedMessage id="xpack.genAiSettings.pageTitle" defaultMessage="GenAI Settings" />
         </h2>
       </EuiTitle>
 
@@ -98,9 +92,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                 <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h3 data-test-subj="connectorsTitle">
-                      {i18n.translate('genAiSettings.aiConnectorLabel', {
-                        defaultMessage: 'AI Connector',
-                      })}
+                      <FormattedMessage
+                        id="genAiSettings.aiConnectorLabel"
+                        defaultMessage="AI Connector"
+                      />
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -121,14 +116,29 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                         href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
                         target="_blank"
                       >
-                        {i18n.translate('genAiSettings.additionalCostsLink', {
-                          defaultMessage: 'additional costs incur',
-                        })}
+                        <FormattedMessage
+                          id="genAiSettings.additionalCostsLink"
+                          defaultMessage="additional costs incur"
+                        />
                       </EuiLink>
                     ),
-                    elasticManagedLlm: <strong>Elastic Managed LLM</strong>,
+                    elasticManagedLlm: (
+                      <strong>
+                        <FormattedMessage
+                          id="genAiSettings.elasticManagedLlm"
+                          defaultMessage="Elastic Managed LLM"
+                        />
+                      </strong>
+                    ),
                     ...(showSpacesIntegration && {
-                      aiFeatureVisibility: <strong>AI feature visibility</strong>,
+                      aiFeatureVisibility: (
+                        <strong>
+                          <FormattedMessage
+                            id="genAiSettings.aiFeatureVisibilityText"
+                            defaultMessage="AI feature visibility"
+                          />
+                        </strong>
+                      ),
                     }),
                   }}
                 />
@@ -142,13 +152,17 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                     iconType="popout"
                     iconSide="right"
                     data-test-subj="manageConnectorsLink"
-                    href={getConnectorsManagementHref(http)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={() => {
+                      application.navigateToApp('management', {
+                        path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
+                        openInNewTab: true,
+                      });
+                    }}
                   >
-                    {i18n.translate('genAiSettings.goToConnectorsButtonLabel', {
-                      defaultMessage: 'Manage connectors',
-                    })}
+                    <FormattedMessage
+                      id="genAiSettings.goToConnectorsButtonLabel"
+                      defaultMessage="Manage connectors"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -163,9 +177,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               data-test-subj="aiFeatureVisibilitySection"
               title={
                 <h3 data-test-subj="aiFeatureVisibilityTitle">
-                  {i18n.translate('genAiSettings.aiFeatureVisibilityLabel', {
-                    defaultMessage: 'AI feature visibility',
-                  })}
+                  <FormattedMessage
+                    id="genAiSettings.aiFeatureVisibilityLabel"
+                    defaultMessage="AI feature visibility"
+                  />
                 </h3>
               }
               description={
@@ -175,17 +190,32 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                       id="genAiSettings.solutionViewDescriptionLabel"
                       defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
                       values={{
-                        permissionsTab: <strong>Permissions tab</strong>,
-                        spaces: <strong>Spaces</strong>,
+                        permissionsTab: (
+                          <strong>
+                            <FormattedMessage
+                              id="genAiSettings.permissionsTab"
+                              defaultMessage="Permissions tab"
+                            />
+                          </strong>
+                        ),
+                        spaces: (
+                          <strong>
+                            <FormattedMessage
+                              id="genAiSettings.spacesLabel"
+                              defaultMessage="Spaces"
+                            />
+                          </strong>
+                        ),
                         rolesLink: (
                           <EuiLink
                             href={application.getUrlForApp('management', {
                               path: '/security/roles',
                             })}
                           >
-                            {i18n.translate('genAiSettings.rolesLink', {
-                              defaultMessage: 'Stack Management > Roles',
-                            })}
+                            <FormattedMessage
+                              id="genAiSettings.rolesLink"
+                              defaultMessage="Stack Management > Roles"
+                            />
                           </EuiLink>
                         ),
                       }}
@@ -195,7 +225,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                       id="genAiSettings.showAIAssistantDescriptionLabel"
                       defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
                       values={{
-                        spaces: <strong>Spaces</strong>,
+                        spaces: (
+                          <strong>
+                            <FormattedMessage
+                              id="genAiSettings.spacesLabel"
+                              defaultMessage="Spaces"
+                            />
+                          </strong>
+                        ),
                       }}
                     />
                   )}
@@ -204,7 +241,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
             >
               <EuiFormRow fullWidth>
                 <GoToSpacesButton
-                  getUrlForSpaces={getUrlForSpaces}
+                  onNavigateToSpaces={handleNavigateToSpaces}
                   navigateToPermissions={isPermissionsBased}
                 />
               </EuiFormRow>

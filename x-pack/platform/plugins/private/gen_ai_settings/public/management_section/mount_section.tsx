@@ -42,7 +42,7 @@ export const mountManagementSection = async ({
       <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
         <EnabledFeaturesContextProvider config={config}>
           <Router history={history}>
-            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} coreStart={coreStart} />
+            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} />
           </Router>
         </EnabledFeaturesContextProvider>
       </KibanaContextProvider>

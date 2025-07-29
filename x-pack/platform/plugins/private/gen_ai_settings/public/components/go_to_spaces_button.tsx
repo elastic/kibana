@@ -7,35 +7,32 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface GoToSpacesButtonProps {
-  getUrlForSpaces: (toPermissions?: boolean) => string;
+  onNavigateToSpaces: () => void;
   navigateToPermissions?: boolean;
 }
 
 export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
-  getUrlForSpaces,
+  onNavigateToSpaces,
   navigateToPermissions = false,
 }) => {
-  const label = navigateToPermissions
-    ? i18n.translate('genAiSettings.goToPermissionsTabButtonLabel', {
-        defaultMessage: 'Go to Permissions tab',
-      })
-    : i18n.translate('genAiSettings.goToSpacesButtonLabel', {
-        defaultMessage: 'Go to spaces',
-      });
-
   return (
     <EuiButton
       iconType="popout"
       iconSide="right"
       data-test-subj={navigateToPermissions ? 'goToPermissionsTabButton' : 'goToSpacesButton'}
-      href={getUrlForSpaces(navigateToPermissions)}
-      target="_blank"
-      rel="noopener noreferrer"
+      onClick={onNavigateToSpaces}
     >
-      {label}
+      <FormattedMessage
+        id={
+          navigateToPermissions
+            ? 'genAiSettings.goToPermissionsTabButtonLabel'
+            : 'genAiSettings.goToSpacesButtonLabel'
+        }
+        defaultMessage={navigateToPermissions ? 'Go to Permissions tab' : 'Go to Spaces'}
+      />
     </EuiButton>
   );
 };
