@@ -48,6 +48,7 @@ function transformToWorkflowExecutionListModel(
     results: response.hits.hits.map((hit) => {
       const workflowExecution = hit._source!;
       return {
+        spaceId: workflowExecution.spaceId,
         id: hit._id!,
         status: workflowExecution.status,
         startedAt: workflowExecution.startedAt,

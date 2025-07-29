@@ -17,6 +17,7 @@ interface GetWorkflowExecutionParams {
   workflowExecutionIndex: string;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  spaceId: string;
 }
 
 export const getWorkflowExecution = async ({
@@ -25,13 +26,30 @@ export const getWorkflowExecution = async ({
   workflowExecutionIndex,
   stepsExecutionIndex,
   workflowExecutionId,
+  spaceId,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query: {
-        match: {
-          _id: workflowExecutionId,
+        bool: {
+          must: [
+            {
+              match: {
+                _id: workflowExecutionId,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { term: { spaceId } },
+                  // Backward compatibility for objects without spaceId
+                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
       },
     });
@@ -47,6 +65,7 @@ export const getWorkflowExecution = async ({
       logger,
       stepsExecutionIndex,
       workflowExecutionId,
+      spaceId,
     });
 
     return transformToWorkflowExecutionDetailDto(workflowExecution, stepExecutions);

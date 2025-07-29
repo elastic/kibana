@@ -100,21 +100,35 @@ export class WorkflowEventLoggerService {
     });
   }
 
-  public async searchLogs(query: {
-    workflowId?: string;
-    executionId?: string;
-    stepId?: string;
-    level?: string;
-    startTime?: Date;
-    endTime?: Date;
-    size?: number;
-    from?: number;
-  }) {
+  public async searchLogs(
+    query: {
+      workflowId?: string;
+      executionId?: string;
+      stepId?: string;
+      level?: string;
+      startTime?: Date;
+      endTime?: Date;
+      size?: number;
+      from?: number;
+    },
+    spaceId: string
+  ) {
     if (!this.initialized) {
       throw new Error('WorkflowEventLoggerService not initialized. Call initialize() first.');
     }
 
-    const must: any[] = [];
+    const must: any[] = [
+      {
+        bool: {
+          should: [
+            { term: { spaceId } },
+            // Backward compatibility for objects without spaceId
+            { bool: { must_not: { exists: { field: 'spaceId' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
 
     if (query.workflowId) {
       must.push({ term: { 'workflow.id': query.workflowId } });
@@ -165,12 +179,12 @@ export class WorkflowEventLoggerService {
     }
   }
 
-  public async getExecutionLogs(executionId: string) {
-    return this.searchLogs({ executionId });
+  public async getExecutionLogs(executionId: string, spaceId: string) {
+    return this.searchLogs({ executionId }, spaceId);
   }
 
-  public async getStepLogs(executionId: string, stepId: string) {
-    return this.searchLogs({ executionId, stepId });
+  public async getStepLogs(executionId: string, stepId: string, spaceId: string) {
+    return this.searchLogs({ executionId, stepId }, spaceId);
   }
 
   public async shutdown(): Promise<void> {

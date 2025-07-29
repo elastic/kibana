@@ -15,6 +15,7 @@ import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
+  spaceId: string;
   workflowRunId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   previousExecution?: Record<string, any>;
@@ -44,6 +45,7 @@ export class WorkflowContextManager {
 
   constructor(init: ContextManagerInit) {
     this.context = {
+      spaceId: init.spaceId,
       workflowRunId: init.workflowRunId,
       workflow: init.workflow,
       previousExecution: init.previousExecution ?? {},
