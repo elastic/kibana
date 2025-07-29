@@ -166,7 +166,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TMeta extends {} = {}
 > = Omit<ResponseActionsRequestBody, 'parameters'> & {
-  parameters: LogsEndpointAction<TParameters>['EndpointActions']['data']['parameters'];
+  parameters?: TParameters;
 } & Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
