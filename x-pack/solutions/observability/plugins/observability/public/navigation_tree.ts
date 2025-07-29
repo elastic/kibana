@@ -99,6 +99,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
                     },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    link: 'apm:service-groups-list',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                    },
+                    sideNavStatus: 'hidden',
                   },
                   {
                     link: 'apm:services',

@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/e
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+// import { useLocation } from 'react-router-dom';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -90,8 +91,14 @@ export function ServiceGroupTemplate({
           ]
         : [
             {
-              title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+              title: i18n.translate('xpack.apm.serviceInventory.breadcrumb.title', {
                 defaultMessage: 'Service inventory',
+              }),
+              href: router.link('/services', { query }),
+            },
+            {
+              title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+                defaultMessage: 'Service groups',
               }),
               href: serviceGroupsLink,
             },
