@@ -41,7 +41,7 @@ export interface InventoryLocatorParams extends SerializableRecord {
   nodeType: string;
   region?: string;
 
-  preferredSchema: string;
+  preferredSchema?: string;
   sort?: {
     by: string;
     direction: 'desc' | 'async';
