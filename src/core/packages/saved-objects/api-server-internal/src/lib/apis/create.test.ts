@@ -51,6 +51,7 @@ import {
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -62,6 +63,7 @@ describe('#create', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {

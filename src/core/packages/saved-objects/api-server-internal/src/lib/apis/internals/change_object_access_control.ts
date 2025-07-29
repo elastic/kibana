@@ -47,6 +47,12 @@ export interface ChangeAccessControlParams {
   actionType: ChangeAccessControlActionType;
 }
 
+const USER_PROFILE_REGEX = /^u_[^_]+_[^_]+$/;
+
+const isValidUserProfileId = (userProfileId: string): boolean => {
+  return USER_PROFILE_REGEX.test(userProfileId);
+};
+
 export const changeObjectAccessControl = async (
   params: ChangeAccessControlParams
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
@@ -93,8 +99,7 @@ export const changeObjectAccessControl = async (
   }
 
   if (actionType === 'changeOwnership' && newOwnerProfileUid) {
-    const esUserProfile = await client.security?.getUserProfile({ uid: newOwnerProfileUid });
-    if (esUserProfile?.errors) {
+    if (!isValidUserProfileId(newOwnerProfileUid)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `Failed to get user profile for owner: ${newOwnerProfileUid}`
       );

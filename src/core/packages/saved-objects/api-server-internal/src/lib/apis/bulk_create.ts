@@ -114,8 +114,15 @@ export const performBulkCreate = async <T>(
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
+
+    if (!createdBy && options.accessControl?.accessMode === 'read_only') {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+      );
+    }
+
     const typeSupportsAccessControl = registry.supportsAccessControl(type);
-    const accessMode = options.accessControl?.accessMode ?? 'default';
+    const accessMode = options.accessControl?.accessMode;
 
     if (!typeSupportsAccessControl && accessMode) {
       throw SavedObjectsErrorHelpers.createBadRequestError(

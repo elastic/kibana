@@ -141,6 +141,7 @@ export const mockTimestampFieldsWithCreated = {
   updated_at: mockTimestamp,
   created_at: mockTimestamp,
 };
+export const ACCESS_CONTROL_TYPE = 'accessControlType';
 export const REMOVE_REFS_COUNT = 42;
 
 export interface TypeIdTuple {
@@ -382,6 +383,11 @@ export const createRegistry = () => {
   registry.registerType(
     createType(MULTI_NAMESPACE_ENCRYPTED_TYPE, {
       namespaceType: 'multiple',
+    })
+  );
+  registry.registerType(
+    createType(ACCESS_CONTROL_TYPE, {
+      supportsAccessControl: true,
     })
   );
   return registry;
