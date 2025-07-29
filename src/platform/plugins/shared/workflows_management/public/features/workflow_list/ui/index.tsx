@@ -24,8 +24,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ExecutionStatus, WorkflowListItemAction, WorkflowListItemDto } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
 import { Link } from 'react-router-dom';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 
@@ -88,7 +89,7 @@ export function WorkflowList() {
   );
 
   const getAvailableActions = useCallback(() => {
-    const availableActions: WorkflowListItemAction[] = [];
+    const availableActions: Array<Action<WorkflowListItemDto>> = [];
 
     if (canExecuteWorkflow) {
       availableActions.push({
