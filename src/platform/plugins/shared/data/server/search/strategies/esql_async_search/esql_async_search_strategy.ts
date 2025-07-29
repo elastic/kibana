@@ -154,6 +154,7 @@ export const esqlAsyncSearchStrategyProvider = (
     const cancel = async () => {
       if (!id || options.isStored) return;
       try {
+        const result = await stopEsqlAsyncSearch(id, options, deps);
         await cancelEsqlAsyncSearch(id, deps);
       } catch (e) {
         // A 404 means either this search request does not exist, or that it is already cancelled
@@ -199,7 +200,9 @@ export const esqlAsyncSearchStrategyProvider = (
     cancel: async (id, options, deps) => {
       logger.debug(`cancel ${id}`);
       try {
+        const result = await stopEsqlAsyncSearch(id, options, deps);
         await cancelEsqlAsyncSearch(id, deps);
+        return result;
       } catch (e) {
         throw getKbnServerError(e);
       }

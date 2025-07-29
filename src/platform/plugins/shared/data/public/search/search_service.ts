@@ -71,9 +71,15 @@ import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import {
+  getOpenBackgroundSearchFlyoutFn,
+  registerSearchSessionsMgmt,
+} from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import { createConnectedSearchSessionIndicator as createConnectedSearchSessionIndicatorBackgroundSearch } from './session/session_indicator_background_search';
+import { createConnectedBackgroundSessionButton } from './session/button/search_session_indicator/connected_background_search_button';
 import { ISearchSetup, ISearchStart } from './types';
+import { BACKGROUND_SEARCH_ENABLED } from '../../common/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -99,6 +105,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
+  private openBackgroundSearchFlyout?: any;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -206,6 +213,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         sessionsConfig,
         this.initializerContext.env.packageInfo.version
       );
+
+      this.openBackgroundSearchFlyout = getOpenBackgroundSearchFlyoutFn(
+        core as CoreSetup<DataStartDependencies>,
+        {
+          searchUsageCollector: this.usageCollector!,
+          sessionsClient: this.sessionsClient,
+          management,
+        },
+        sessionsConfig,
+        this.initializerContext.env.packageInfo.version
+      );
     }
 
     return {
@@ -217,7 +235,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
+    coreStart: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -229,6 +247,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
+    const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
 
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
@@ -281,22 +300,36 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     const config = this.initializerContext.config.get();
+    let renderBackgroundSearchButton;
+    let toolbarBackgroundSearchButton;
+    let onSendToBackgroundFn = () => Promise.resolve();
     if (config.search.sessions.enabled) {
-      chrome.setBreadcrumbsAppendExtension({
-        content: toMountPoint(
-          React.createElement(
-            createConnectedSearchSessionIndicator({
-              sessionService: this.sessionService,
-              application,
-              basePath: http.basePath,
-              storage: new Storage(window.localStorage),
-              usageCollector: this.usageCollector,
-              tourDisabled: screenshotMode.isScreenshotMode(),
-            })
+      const searchsessionBtnProps = {
+        sessionService: this.sessionService,
+        application,
+        basePath: http.basePath,
+        storage: new Storage(window.localStorage),
+        usageCollector: this.usageCollector,
+        tourDisabled: screenshotMode.isScreenshotMode(),
+        coreStart,
+        onOpenFlyout: () => {
+          this.openBackgroundSearchFlyout()();
+        },
+        onSendToBackground: () => onSendToBackgroundFn(),
+      };
+      renderBackgroundSearchButton = createConnectedBackgroundSessionButton(searchsessionBtnProps);
+
+      if (!BACKGROUND_SEARCH_ENABLED) {
+        chrome.setBreadcrumbsAppendExtension({
+          content: toMountPoint(
+            React.createElement(createConnectedSearchSessionIndicator(searchsessionBtnProps)),
+            startServices
           ),
-          startServices
-        ),
-      });
+        });
+      } else {
+        toolbarBackgroundSearchButton =
+          createConnectedSearchSessionIndicatorBackgroundSearch(searchsessionBtnProps);
+      }
     }
 
     return {
@@ -304,6 +337,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       showError: (e) => {
         this.searchInterceptor.showError(e);
+      },
+      renderBackgroundSearchButton: ({ onSendToBackground }: { onSendToBackground: any }) => {
+        onSendToBackgroundFn = onSendToBackground;
+        return renderBackgroundSearchButton();
+      },
+      renderToolbarBackgroundSearchButton: () => {
+        return toolbarBackgroundSearchButton();
       },
       showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {

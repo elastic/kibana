@@ -17,6 +17,7 @@ import {
   AppMenuRegistry,
   type AppMenuItemPrimary,
   type AppMenuItemSecondary,
+  AppMenuActionType,
 } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
@@ -240,6 +241,30 @@ export const useTopNavLinks = ({
         testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
       };
       entries.unshift(esqLDataViewTransitionToggle);
+    }
+
+    if (services.data.search.renderToolbarBackgroundSearchButton) {
+      entries.push({
+        id: 'BackgroundSearch',
+        type: AppMenuActionType.primary,
+        iconType: 'clockCounter',
+        iconOnly: true,
+        iconComponent: () => {
+          return services.data.search.renderToolbarBackgroundSearchButton?.({
+            stateContainer: state,
+            services,
+          });
+        },
+        controlProps: {
+          label: i18n.translate('discover.localMenu.searchSessionIndicatorLabel', {
+            defaultMessage: 'Background search',
+          }),
+          description: i18n.translate('discover.localMenu.searchSessionIndicatorDescription', {
+            defaultMessage: 'Manage background search',
+          }),
+          testId: 'discoverBackgroundSearch',
+        },
+      });
     }
 
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {

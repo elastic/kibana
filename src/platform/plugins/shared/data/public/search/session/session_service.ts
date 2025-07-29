@@ -53,7 +53,7 @@ import {
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { NowProviderInternalContract } from '../../now_provider';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { BACKGROUND_SEARCH_ENABLED, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
@@ -293,6 +293,7 @@ export class SessionService {
     });
 
     // keep completed searches alive until user explicitly saves the session
+    // this is no longer necessary for background search
     this.subscription.add(
       this.getSession$()
         .pipe(
@@ -470,8 +471,10 @@ export class SessionService {
    * https://github.com/elastic/kibana/issues/121543
    *
    * @deprecated
+   * we can remove this for background search
    */
   public continue(sessionId: string) {
+    if (BACKGROUND_SEARCH_ENABLED) return;
     if (this.lastSessionSnapshot?.sessionId === sessionId) {
       this.state.set({
         ...this.lastSessionSnapshot,
@@ -554,7 +557,7 @@ export class SessionService {
       sessionStartTime: this.state.get().startTime,
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
-
+    // this is where the saved object is created
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,

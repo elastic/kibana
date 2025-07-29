@@ -9,15 +9,15 @@
 
 import { LoadingIndicator } from './loading_indicator';
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 describe('Loading indicator', () => {
   it('default renders correctly', () => {
-    const component = mount(<LoadingIndicator />);
-    expect(component.render()).toMatchSnapshot();
+    const { container } = render(<LoadingIndicator />);
+    expect(container).toMatchSnapshot();
   });
   it('elastic renders correctly', () => {
-    const component = mount(<LoadingIndicator type="elastic" />);
-    expect(component.render()).toMatchSnapshot();
+    const { container } = render(<LoadingIndicator type="elastic" />);
+    expect(container).toMatchSnapshot();
   });
 });
