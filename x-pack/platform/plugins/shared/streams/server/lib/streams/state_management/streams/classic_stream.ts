@@ -27,23 +27,23 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 
-interface UnwiredStreamChanges extends StreamChanges {
+interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   lifecycle: boolean;
 }
 
-export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
-  protected _changes: UnwiredStreamChanges = {
+export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
+  protected _changes: ClassicStreamChanges = {
     processing: false,
     lifecycle: false,
   };
 
-  constructor(definition: Streams.UnwiredStream.Definition, dependencies: StateDependencies) {
+  constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  protected doClone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
-    return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
+  protected doClone(): StreamActiveRecord<Streams.ClassicStream.Definition> {
+    return new ClassicStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(
@@ -55,7 +55,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    if (!Streams.UnwiredStream.Definition.is(definition)) {
+    if (!Streams.ClassicStream.Definition.is(definition)) {
       throw new StatusError('Cannot change stream types', 400);
     }
 
@@ -65,7 +65,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
 
     if (
       startingStateStreamDefinition &&
-      !Streams.UnwiredStream.Definition.is(startingStateStreamDefinition)
+      !Streams.ClassicStream.Definition.is(startingStateStreamDefinition)
     ) {
       throw new StatusError('Unexpected starting state stream type', 400);
     }
@@ -118,7 +118,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
             isValid: false,
             errors: [
               new Error(
-                `Cannot create Unwired stream ${this.definition.name} due to existing index`
+                `Cannot create Classic stream ${this.definition.name} due to existing index`
               ),
             ],
           };
@@ -129,7 +129,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
             isValid: false,
             errors: [
               new Error(
-                `Cannot create Unwired stream ${this.definition.name} due to missing backing Data Stream`
+                `Cannot create Classic stream ${this.definition.name} due to missing backing Data Stream`
               ),
             ],
           };
@@ -148,9 +148,9 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     return { isValid: true, errors: [] };
   }
 
-  // The actions append_processor_to_ingest_pipeline and delete_processor_from_ingest_pipeline are unique to UnwiredStreams
-  // Because there is no guarantee that there is a dedicated index template and ingest pipeline for UnwiredStreams
-  // These actions are merged across UnwiredStream instances as part of ExecutionPlan.plan()
+  // The actions append_processor_to_ingest_pipeline and delete_processor_from_ingest_pipeline are unique to ClassicStreams
+  // Because there is no guarantee that there is a dedicated index template and ingest pipeline for ClassicStreams
+  // These actions are merged across ClassicStream instances as part of ExecutionPlan.plan()
   // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
@@ -184,7 +184,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
   protected async doDetermineUpdateActions(
     desiredState: State,
     startingState: State,
-    startingStateStream: UnwiredStream
+    startingStateStream: ClassicStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
     if (this._changes.processing && this._definition.ingest.processing.length > 0) {
