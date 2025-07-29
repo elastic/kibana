@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiConfirmModal, EuiFormRow, EuiFieldText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -28,6 +28,8 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const copyAgentPolicyPrompt: CopyAgentPolicy = (
     agentPolicyToCopy,
@@ -94,6 +96,8 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
 
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         title={
           <span className="eui-textBreakWord">
             <FormattedMessage

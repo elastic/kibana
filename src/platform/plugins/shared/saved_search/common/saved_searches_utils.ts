@@ -48,5 +48,6 @@ export const fromSavedSearchAttributes = <
     breakdownField: attributes.breakdownField,
     visContext: attributes.visContext,
     density: attributes.density,
+    tabs: attributes.tabs,
     managed,
   } as ReturnType);
