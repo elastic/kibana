@@ -5,7 +5,7 @@ exports[`TitleWithBadge component renders with string titles 1`] = `
   Welcome!
    
   <EuiNotificationBadge
-    className="css-721pd1-floatTopRight"
+    className="css-1aoydhg-floatTopRight"
     color="subdued"
     size="m"
   >

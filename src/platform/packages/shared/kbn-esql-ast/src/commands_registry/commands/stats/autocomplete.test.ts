@@ -329,6 +329,7 @@ describe('STATS Autocomplete', () => {
               'text',
               'keyword',
               'date_nanos',
+              'unsigned_long',
             ],
             {
               scalar: true,

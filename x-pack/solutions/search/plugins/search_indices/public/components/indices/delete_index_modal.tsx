@@ -6,7 +6,7 @@
  */
 import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDeleteIndex } from '../../hooks/api/use_delete_index';
 interface DeleteIndexModelProps {
@@ -20,6 +20,8 @@ export const DeleteIndexModal: React.FC<DeleteIndexModelProps> = ({
   navigateToIndexListPage,
 }) => {
   const { mutate, isLoading, isSuccess } = useDeleteIndex(indexName);
+  const modalTitleId = useGeneratedHtmlId();
+
   useEffect(() => {
     if (isSuccess) {
       navigateToIndexListPage();
@@ -28,12 +30,14 @@ export const DeleteIndexModal: React.FC<DeleteIndexModelProps> = ({
   return (
     <EuiConfirmModal
       data-test-subj="deleteIndexActionModal"
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.searchIndices.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
         {
           defaultMessage: 'Delete index',
         }
       )}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={() => mutate()}
       isLoading={isLoading}
