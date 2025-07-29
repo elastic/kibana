@@ -276,12 +276,12 @@ View [#203996]({{kib-pull}}203996).
 ::::
 
 $$$kibana-203685$$$
-::::{dropdown} Removed Logs Explorer
+::::{dropdown} Removed Logs explorer
 :name: deprecation-203685
 
 **Details**
 
-Logs Explorer has been removed. Instead, you can use Discover, that was improved to provide an optimal logs exploration experience. View [#203685]({{kib-pull}}203685).
+Logs explorer has been removed. Instead, you can use Discover, that was improved to provide an optimal logs exploration experience. View [#203685]({{kib-pull}}203685).
 ::::
 
 **Elastic Security solution**
