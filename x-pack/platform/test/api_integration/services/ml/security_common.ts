@@ -180,6 +180,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             advancedSettings: ['all'],
             indexPatterns: ['all'],
             generalCasesV3: ['all'],
+            fileUpload: ['all'],
           },
           spaces: ['*'],
         },
