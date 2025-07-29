@@ -45,14 +45,19 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {
     error,
-    isInitialRequest,
-    isLoading,
+    isInitialRequest: isSnapshotsInitialRequest,
+    isLoading: isSnapshotsLoading,
     data: { snapshots = [], policies = [], errors = {}, total: totalSnapshotsCount },
     resendRequest: reload,
   } = useLoadSnapshots(listParams);
   const {
+    isInitialRequest: isRepositoriesInitialRequest,
+    isLoading: isRepositoriesLoading,
     data: { repositories = [] },
   } = useLoadRepositories();
+
+  const isInitialRequest = isSnapshotsInitialRequest && isRepositoriesInitialRequest;
+  const isLoading = isSnapshotsLoading || isRepositoriesLoading;
 
   const repositoriesNames = repositories.map((repository: { name: string }) => repository?.name);
   const { uiMetricService } = useServices();
