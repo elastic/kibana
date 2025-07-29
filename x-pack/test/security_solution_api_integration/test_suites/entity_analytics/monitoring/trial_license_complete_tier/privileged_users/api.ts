@@ -17,9 +17,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+
   const privMonUtils = PrivMonUtils(getService);
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users CRUD APIs', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const kibanaServer = getService('kibanaServer');
     before(async () => {

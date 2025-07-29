@@ -70,6 +70,8 @@ export const monitoringEntitySourceRoute = (
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           await privMonDataClient.scheduleNow();
 
+          console.log(`privMonDataClient.scheduleNow!!!!!!!!!!!!!!!`);
+
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

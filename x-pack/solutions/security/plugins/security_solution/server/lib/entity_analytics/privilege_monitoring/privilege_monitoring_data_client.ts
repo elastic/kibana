@@ -79,7 +79,7 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-import type { MonitoringSyncIntervalConfig, BulkProcessingResults } from '../types';
+import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
 
 interface PrivilegeMonitoringClientOpts {
@@ -507,13 +507,18 @@ export class PrivilegeMonitoringDataClient {
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
     const indexSources = await this.monitoringIndexSourceClient.findByIndex();
+    console.log('------------------------plainIndexSync--------------------------');
+
+    console.log(JSON.stringify(indexSources, null, 2));
     if (indexSources.length === 0) {
+      console.log('No monitoring index sources found. Skipping sync.');
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
     const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of indexSources) {
+      console.log(JSON.stringify(source));
       // eslint-disable-next-line no-continue
       if (!source.indexPattern) continue; // if no index pattern, skip this source
       const index: string = source.indexPattern;
@@ -525,6 +530,10 @@ export class PrivilegeMonitoringDataClient {
         });
         // collect stale users
         const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
+
+        console.log('batchUserNames', JSON.stringify(batchUserNames, null, 2));
+        console.log('staleUsers', JSON.stringify(staleUsers, null, 2));
+
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
