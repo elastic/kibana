@@ -299,12 +299,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     if (!existsInStartingState) {
       // Check for conflicts
-      try {
-        const dataStreamResponse =
-          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-            name: this._definition.name,
-          });
-
+      const dataStreamResponse = await this.getMatchingDataStream();
+      if (dataStreamResponse) {
         if (dataStreamResponse.data_streams.length === 0) {
           return {
             isValid: false,
@@ -316,17 +312,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           };
         }
 
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`
-            ),
-          ],
-        };
-      } catch (error) {
-        if (!isNotFoundError(error)) {
-          throw error;
+        const existingDataStreamManagedByStreams =
+          dataStreamResponse.data_streams.length === 1 &&
+          dataStreamResponse.data_streams[0]._meta?.managed_by === 'streams';
+
+        if (!existingDataStreamManagedByStreams) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`
+              ),
+            ],
+          };
         }
       }
     }
@@ -414,6 +412,20 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return { isValid: true, errors: [] };
   }
 
+  private async getMatchingDataStream() {
+    try {
+      const response =
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+          name: this._definition.name,
+        });
+      return response;
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+    }
+  }
+
   protected async doValidateDeletion(
     desiredState: State,
     startingState: State
@@ -422,7 +434,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   private async assertNoHierarchicalConflicts(definitionName: string) {
-    const streamNames = [...getAncestors(definitionName), definitionName];
+    const streamNames = getAncestors(definitionName);
     const hasConflict = await Promise.all(
       streamNames.map((streamName) => this.isStreamNameTaken(streamName))
     );
@@ -467,6 +479,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
     );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
+    const dataStreamResponse = await this.getMatchingDataStream();
+    const existingDataStreamManagedByStreams =
+      dataStreamResponse?.data_streams.length === 1 &&
+      dataStreamResponse?.data_streams[0]._meta?.managed_by === 'streams';
 
     return [
       {
@@ -495,12 +511,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_index_template',
         request: generateIndexTemplate(this._definition.name),
       },
-      {
-        type: 'upsert_datastream',
-        request: {
-          name: this._definition.name,
-        },
-      },
+      existingDataStreamManagedByStreams
+        ? {
+            type: 'upsert_write_index_or_rollover',
+            request: {
+              name: this._definition.name,
+            },
+          }
+        : {
+            type: 'upsert_datastream',
+            request: {
+              name: this._definition.name,
+            },
+          },
       {
         type: 'update_lifecycle',
         request: {
