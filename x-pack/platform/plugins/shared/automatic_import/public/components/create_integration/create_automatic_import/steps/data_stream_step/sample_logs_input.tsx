@@ -315,7 +315,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           {i18n.LOGS_SAMPLE_LABEL.MAIN}
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="xs">
-            {i18n.LOGS_SAMPLE_LABEL.SUBTEXT_PRETEXT + " "}
+            {`${i18n.LOGS_SAMPLE_LABEL.SUBTEXT_PRETEXT} `}
             <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
               {i18n.LOGS_SAMPLE_LABEL.SUBTEXT_INFO_LINK}
             </EuiLink>

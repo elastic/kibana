@@ -142,28 +142,28 @@ export const TECH_PREVIEW_TOOLTIP = i18n.translate(
 );
 
 export const LOGS_SAMPLE_LABEL = {
-  MAIN: i18n.translate(
-    'xpack.automaticImport.step.dataStream.logsSample.label',
-    {
-      defaultMessage: 'Logs',
-    }),
+  MAIN: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.label', {
+    defaultMessage: 'Logs',
+  }),
   SUBTEXT_PRETEXT: i18n.translate(
     'xpack.automaticImport.step.dataStream.logsSample.warningInfoPretext',
     {
       defaultMessage: 'For more information about supported log formats, ',
     }
   ),
-  SUBTEXT_INFO_LINK: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.warningInfoLink', {
-    defaultMessage: 'refer to the documentation.',
-  }),
-}
+  SUBTEXT_INFO_LINK: i18n.translate(
+    'xpack.automaticImport.step.dataStream.logsSample.warningInfoLink',
+    {
+      defaultMessage: 'refer to the documentation.',
+    }
+  ),
+};
 
 export const LOGS_SAMPLE_WARNING = {
   MAIN: i18n.translate('xpack.automaticImport.step.dataStream.logsSample.warning', {
     defaultMessage:
       'Please note that this data will be analyzed by a third-party AI tool. Ensure that you comply with privacy and security guidelines when selecting data.',
   }),
-
 };
 
 export const LOGS_SAMPLE_DESCRIPTION = {
