@@ -134,7 +134,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       ownFocus
       onClose={onClose}
       size="m"
-      style={{ zIndex: 20000 }}
+      style={{ zIndex: 1001 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"
     >

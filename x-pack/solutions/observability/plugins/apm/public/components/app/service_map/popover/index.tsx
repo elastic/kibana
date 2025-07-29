@@ -186,6 +186,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
         isOpen={isOpen}
         ref={popoverRef}
         style={popoverStyle}
+        zIndex={1000}
       >
         <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
           <EuiFlexItem>
