@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../configs/ess/trial.config.ts')
+    require.resolve('../../../../../../configs/ess/rules_management.trial.config')
   );
 
   const testConfig = {

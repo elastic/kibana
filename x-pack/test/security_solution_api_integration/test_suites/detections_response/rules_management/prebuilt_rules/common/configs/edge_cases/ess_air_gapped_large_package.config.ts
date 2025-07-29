@@ -15,7 +15,7 @@ export const BUNDLED_PACKAGE_DIR = path.join(
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../configs/ess/basic.config')
+    require.resolve('../../../../configs/ess/rules_management.basic.config')
   );
 
   return {

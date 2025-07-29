@@ -12,7 +12,7 @@ const PACKAGES_PATH = path.join(path.dirname(__filename), '../../fixtures/packag
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../configs/ess/basic.config')
+    require.resolve('../../../../configs/ess/rules_management.basic.config')
   );
 
   return {
