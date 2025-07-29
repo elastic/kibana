@@ -38,6 +38,7 @@
     "@kbn/licensing-plugin",
     "@kbn/i18n-react",
     "@kbn/esql-ast",
+    "@kbn/restorable-state",
     "@kbn/index-editor"
   ],
   "exclude": [

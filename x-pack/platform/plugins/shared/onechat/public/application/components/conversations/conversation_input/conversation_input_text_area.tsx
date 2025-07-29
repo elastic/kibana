@@ -17,16 +17,17 @@ const inputContainerStyles = css`
   .euiFormControlLayout__childrenWrapper {
     height: 100%;
   }
-`;
-const textareaStyles = css`
-  height: 100%;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  &:focus:focus-visible {
+  /* Using ID for high specificity selector */
+  #conversationInput {
+    border: none;
+    box-shadow: none;
     outline: none;
     background-image: none;
   }
+`;
+const textareaStyles = css`
+  height: 100%;
+  padding: 0;
 `;
 
 interface ConversationInputTextAreaProps {
@@ -49,6 +50,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
+        id="conversationInput"
         name={i18n.translate('xpack.onechat.conversationInputForm.textArea.name', {
           defaultMessage: 'Conversation input',
         })}

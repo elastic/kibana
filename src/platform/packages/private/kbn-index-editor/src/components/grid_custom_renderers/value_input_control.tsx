@@ -100,7 +100,7 @@ export const getCellValueRenderer =
                   />
                 </EuiText>
               ) : (
-                cellValue
+                `${cellValue}`
               )
             }
           </div>

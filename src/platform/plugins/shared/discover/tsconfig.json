@@ -110,9 +110,8 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/css-utils",
     "@kbn/restorable-state",
+    "@kbn/esql-editor",
     "@kbn/file-upload-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

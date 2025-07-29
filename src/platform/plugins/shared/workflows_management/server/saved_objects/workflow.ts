@@ -8,7 +8,7 @@
  */
 
 import { SavedObjectsType } from '@kbn/core/server';
-import { WorkflowStatus } from '@kbn/workflows';
+import { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
 
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 
@@ -18,7 +18,7 @@ export interface WorkflowSavedObjectAttributes {
   status: WorkflowStatus;
   tags: string[];
   yaml: string;
-  definition: Record<string, any>;
+  definition: WorkflowYaml;
   createdBy: string;
   lastUpdatedBy: string;
 }

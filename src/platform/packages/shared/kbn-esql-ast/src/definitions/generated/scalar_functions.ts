@@ -10601,6 +10601,7 @@ const stGeohexDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.COMPLETION,
   ],
+  license: 'PLATINUM',
   validate: undefined,
   examples: [
     'FROM airports\n| EVAL geohex = ST_GEOHEX(location, 1)\n| STATS\n    count = COUNT(*),\n    centroid = ST_CENTROID_AGG(location)\n      BY geohex\n| WHERE count >= 10\n| EVAL geohexString = ST_GEOHEX_TO_STRING(geohex)\n| KEEP count, centroid, geohexString\n| SORT count DESC, geohexString ASC',

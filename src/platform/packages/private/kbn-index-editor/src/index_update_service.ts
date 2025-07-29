@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { difference, groupBy } from 'lodash';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -35,7 +35,7 @@ import {
   skipWhile,
   startWith,
   switchMap,
-  takeUntil,
+  take,
   takeWhile,
   tap,
   timer,
@@ -113,6 +113,9 @@ export class IndexUpdateService {
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
+  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
+  public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
+
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
 
@@ -123,18 +126,37 @@ export class IndexUpdateService {
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
     scan((acc: DocUpdate[], action: Action) => {
-      if (action.type === 'add') {
-        return [...acc, action.payload];
-      } else if (action.type === 'undo') {
-        return acc.slice(0, -1); // remove last
-      } else if (action.type === 'saved') {
-        // Clear the buffer after save
-        // TODO check for update response
-        return [];
-      } else if (action.type === 'discard-unsaved-values') {
-        return [];
-      } else {
-        return acc;
+      switch (action.type) {
+        case 'add':
+          return [...acc, action.payload];
+        case 'undo':
+          return acc.slice(0, -1); // remove last
+        case 'saved':
+          // Clear the buffer after save
+          // TODO check for update response
+          return [];
+        case 'discard-unsaved-values':
+          return [];
+        case 'edit-column':
+          // if a column name has changed, we need to update the values added with the previous name.
+          return acc.map((docUpdate) => {
+            if (action.payload.previousName && docUpdate.value[action.payload.previousName]) {
+              const newValue = {
+                ...docUpdate.value,
+                [action.payload.name]: docUpdate.value[action.payload.previousName],
+              };
+              delete newValue[action.payload.previousName];
+              return { ...docUpdate, value: newValue };
+            }
+            return docUpdate;
+          });
+        case 'delete-column':
+          // if a column has been deleted, we need to delete the values added to it.
+          return acc.filter((docUpdate) => {
+            return !docUpdate.value[action.payload.name];
+          });
+        default:
+          return acc;
       }
     }, []),
     shareReplay(1) // keep latest buffer for retries
@@ -157,16 +179,12 @@ export class IndexUpdateService {
   );
 
   // Observable to track the number of milliseconds left to allow undo of the last change
-  public readonly undoTimer$: Observable<number> = this._actions$.pipe(
+  public readonly undoTimer$: Observable<number> = this.bufferState$.pipe(
     skipWhile(() => !this.isIndexCreated()),
-    filter((action) => action.type === 'add' || action.type === 'undo'),
-    switchMap((action) =>
-      action.type === 'add'
+    switchMap((updates) =>
+      updates.length > 0
         ? timer(0, UNDO_EMIT_MS).pipe(
-            map((elapsed) => {
-              return Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0);
-            }),
-            takeUntil(this._actions$.pipe(filter((a) => a.type === 'undo'))),
+            map((elapsed) => Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0)),
             takeWhile((remaining) => remaining > 0, true)
           )
         : of(0)
@@ -176,6 +194,19 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
+    this.pendingColumnsToBeSaved$.pipe(
+      // Refetch the dataView to look for new field types when there are new columns saved
+      // (when pendingColumnsToBeSaved$ length decreases)
+      scan(
+        (acc, curr) => ({
+          prevLength: acc.currLength,
+          currLength: curr.length,
+        }),
+        { prevLength: 0, currLength: 0 }
+      ),
+      filter(({ prevLength, currLength }) => currLength < prevLength || prevLength === 0),
+      startWith({ prevLength: 0, currLength: 0 })
+    ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -185,9 +216,6 @@ export class IndexUpdateService {
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
-
-  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
-  public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
@@ -280,9 +308,6 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
-            // Clear the buffer after successful update
-            this._actions$.next({ type: 'saved', payload: { response, updates } });
-
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
             const mappedResponse = response.items.reduce((acc, item, index) => {
@@ -312,6 +337,9 @@ export class IndexUpdateService {
               })
             );
 
+            // Clear the buffer after successful update
+            this._actions$.next({ type: 'saved', payload: { response, updates } });
+
             this._isSaving$.next(false);
 
             // TODO handle index docs
@@ -327,7 +355,8 @@ export class IndexUpdateService {
     // Fetch ES docs
     this._subscription.add(
       combineLatest([
-        this.dataView$,
+        // Only when the dataview is set for the first time
+        this.dataView$.pipe(take(1)),
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         this._refreshSubject$,
@@ -402,23 +431,10 @@ export class IndexUpdateService {
               return acc.filter((column) => column.name !== action.payload.name);
             }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
-              const unsavedColumns = acc.filter((column) =>
+              // Filter out columns that were saved with a value.
+              return acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
               );
-
-              // Add saved columns to the data view
-              const savedColumns = difference(acc, unsavedColumns);
-              savedColumns.forEach((column) => {
-                dataView.fields.add({
-                  name: column.name,
-                  type: KBN_FIELD_TYPES.UNKNOWN,
-                  aggregatable: true,
-                  searchable: true,
-                });
-              });
-
-              return unsavedColumns;
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row
