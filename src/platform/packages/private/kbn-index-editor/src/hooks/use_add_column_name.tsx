@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isPlaceholderColumn } from '../utils';
 import { KibanaContextExtra } from '../types';
 
 const fieldAlreadyExistsError = (columnName: string) =>
@@ -23,10 +24,10 @@ export const useAddColumnName = (initialColumnName = '') => {
   const {
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
-
   const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
-  const [columnName, setColumnName] = useState(initialColumnName);
+  const initialInputValue = isPlaceholderColumn(initialColumnName) ? '' : initialColumnName;
+  const [columnName, setColumnName] = useState(initialInputValue);
 
   const validationError = useMemo(() => {
     if (
@@ -50,10 +51,15 @@ export const useAddColumnName = (initialColumnName = '') => {
     }
   }, [columnName, indexUpdateService, initialColumnName, validationError]);
 
+  const resetColumnName = () => {
+    setColumnName(initialInputValue);
+  };
+
   return {
     columnName,
     validationError,
     setColumnName,
     saveColumn,
+    resetColumnName,
   };
 };

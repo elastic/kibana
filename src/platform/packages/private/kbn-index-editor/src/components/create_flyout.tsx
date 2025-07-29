@@ -14,6 +14,7 @@ import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
 import { distinctUntilChanged, firstValueFrom, from, skip, takeUntil } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
   const {
@@ -47,7 +48,11 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
       indexUpdateService.pendingColumnsToBeSaved$
     );
 
-    if (pendingColumnsToBeSaved.length) {
+    const unsavedColumnsWithoutPlaceholders = pendingColumnsToBeSaved.filter(
+      (column) => !isPlaceholderColumn(column.name)
+    );
+
+    if (unsavedColumnsWithoutPlaceholders.length) {
       deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
       return;
     }
