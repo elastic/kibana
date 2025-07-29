@@ -12,7 +12,7 @@ import { TickFormatter } from '@elastic/charts';
 import { Streams } from '@kbn/streams-schema';
 import { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
-import { formatChangePoint } from './change_point';
+import { formatChangePoint } from './utils/change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
