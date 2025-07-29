@@ -20,6 +20,7 @@ import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
+  ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
@@ -164,8 +165,14 @@ async function validateAst(
     joinIndices: joinIndices?.indices || [],
   };
 
+  const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
+
   for (const [_, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands);
+    const commandMessages = validateCommand(command, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 
@@ -191,7 +198,8 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst
+  ast: ESQLAst,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -215,7 +223,7 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    messages.push(...commandDefinition.methods.validate(command, ast, context));
+    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
   }
 
   // no need to check for mandatory options passed
