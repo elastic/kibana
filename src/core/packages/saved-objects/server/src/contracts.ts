@@ -162,6 +162,37 @@ export interface SavedObjectsServiceStart {
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
   /**
+   * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
+   * uses the internal Kibana user for authenticating with Elasticsearch.
+   * This client supports extensions (encryption, spaces) but bypasses user-based security.
+   *
+   * @param options - Options for configuring the internal client.
+   *
+   * @remarks
+   * This is intended for internal operations that need extension support
+   * (like encryption) but should not be scoped to a specific user.
+   *
+   * **Security Note**: The security extension is automatically excluded to prevent
+   * user-based filtering. Use this only for operations that should run with
+   * system-level privileges.
+   *
+   * Use this instead of creating fake requests to work around security scoping.
+   *
+   * @example
+   * ```typescript
+   * // Basic usage
+   * const client = savedObjects.getUnsafeInternalClient();
+   *
+   * // With hidden types
+   * const client = savedObjects.getUnsafeInternalClient({
+   *   includedHiddenTypes: ['fleet-agent-policies']
+   * });
+   * ```
+   */
+  getUnsafeInternalClient: (
+    options?: SavedObjectsClientProviderOptions
+  ) => SavedObjectsClientContract;
+  /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.

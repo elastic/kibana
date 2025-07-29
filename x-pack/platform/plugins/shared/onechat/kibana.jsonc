@@ -11,7 +11,7 @@
     "configPath": ["xpack", "onechat"],
     "requiredPlugins": ["actions", "inference", "features", "data", "esql"],
     "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }
 }
