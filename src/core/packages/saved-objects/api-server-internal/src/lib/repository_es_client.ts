@@ -25,7 +25,6 @@ const methods = [
   'search',
   'update',
   'updateByQuery',
-  'security',
 ] as const;
 
 type MethodName = (typeof methods)[number];
@@ -34,22 +33,16 @@ export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName | 'transpo
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
-    if (key === 'security') {
-      Object.defineProperty(acc, 'security', {
-        value: client.security,
-      });
-    } else {
-      Object.defineProperty(acc, key, {
-        value: async (params?: unknown, options?: TransportRequestOptions) => {
-          try {
-            return await retryCallCluster(() => (client[key] as Function)(params, options ?? {}));
-          } catch (e) {
-            // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
-            throw decorateEsError(e);
-          }
-        },
-      });
-    }
+    Object.defineProperty(acc, key, {
+      value: async (params?: unknown, options?: TransportRequestOptions) => {
+        try {
+          return await retryCallCluster(() => (client[key] as Function)(params, options ?? {}));
+        } catch (e) {
+          // retry failures are caught here, as are 404's that aren't ignored (e.g update calls)
+          throw decorateEsError(e);
+        }
+      },
+    });
 
     return acc;
   }, {} as RepositoryEsClient);

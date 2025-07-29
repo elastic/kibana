@@ -49,6 +49,7 @@ import {
   createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
+  ACCESS_CONTROL_TYPE,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -59,6 +60,7 @@ describe('#create', () => {
   let serializer: jest.Mocked<SavedObjectsSerializer>;
 
   const registry = createRegistry();
+
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
@@ -826,6 +828,52 @@ describe('#create', () => {
           coreMigrationVersion: expect.any(String),
           typeMigrationVersion: '1.1.1',
           managed: true,
+        });
+      });
+    });
+
+    describe('access control', () => {
+      it('should not allow creating a document with a type that does not support access control', async () => {
+        await expect(
+          repository.create(ACCESS_CONTROL_TYPE, attributes, {
+            id,
+            namespace,
+            accessControl: {
+              accessMode: 'read_only',
+            },
+          })
+        ).rejects.toThrowError(
+          createBadRequestErrorPayload(
+            `Cannot create a saved object of type \"multiNamespaceType\" with \"read_only\" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+          )
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
+      it('allows creation of a document with access control when the type supports it', async () => {
+        const accessControl = {
+          accessMode: 'read_only' as const,
+          userProfileId: 'u_profile_domain',
+        };
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+          accessControl,
+        });
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+          accessControl,
         });
       });
     });

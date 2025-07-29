@@ -101,6 +101,7 @@ export const performCreate = async <T>(
       initialNamespaces || getSavedObjectNamespaces(namespace, preflightResult?.existingDocument);
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
+
   if (!createdBy && options.accessControl?.accessMode === 'read_only') {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
@@ -108,7 +109,7 @@ export const performCreate = async <T>(
   }
 
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
-  const accessMode = options.accessControl?.accessMode ?? 'default';
+  const accessMode = options.accessControl?.accessMode;
 
   if (!typeSupportsAccessControl && accessMode) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -120,7 +121,7 @@ export const performCreate = async <T>(
     typeSupportsAccessControl && createdBy
       ? {
           owner: createdBy,
-          accessMode,
+          accessMode: accessMode ?? 'default',
         }
       : undefined;
 
