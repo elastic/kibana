@@ -20,7 +20,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   describe('lens app - TSVB Open in Lens', function () {
     // see details: https://github.com/elastic/kibana/issues/208926
     this.tags(['failsOnMKI']);
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {

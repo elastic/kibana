@@ -6026,6 +6026,21 @@
           },
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-common.HostsLocatorParams.preferredSchema",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferredSchema",
+            "description": [],
+            "signature": [
+              "DataSchemaFormat",
+              " | null | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/hosts_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-common.HostsLocatorParams.tableProperties",
             "type": "Object",
             "tags": [],
