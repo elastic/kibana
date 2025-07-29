@@ -24,6 +24,7 @@ import {
   getCategorizeColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
+  getEsqlQueryPreview,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
 import { parse, walk } from '@kbn/esql-ast';
@@ -853,6 +854,51 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getEsqlQueryPreview', () => {
+    it('should return the original ES|QL if numPipes is 0', () => {
+      const esql = 'from source | stats count() | sort @timestamp';
+      const numPipes = 0;
+
+      const result = getEsqlQueryPreview(esql, numPipes);
+
+      expect(result).toBe(esql);
+    });
+
+    it('should return the original ES|QL if numPipes is negative', () => {
+      const esql = 'FROM source | STATS COUNT() | SORT @timestamp';
+      const numPipes = -5;
+
+      const result = getEsqlQueryPreview(esql, numPipes);
+      expect(result).toBe(esql);
+    });
+
+    it('should return the original ES|QL if commands.length is less than or equal to numPipes', () => {
+      const esql = 'FROM source | STATS COUNT()';
+      const numPipes = 3; // Query has 2 commands, so 3 pipes is more than enough
+
+      const result = getEsqlQueryPreview(esql, numPipes);
+
+      expect(result).toBe(esql);
+    });
+
+    it('should remove commands beyond the specified numPipes', () => {
+      const esql = 'FROM source | STATS COUNT() | SORT @timestamp | LIMIT 10';
+      const numPipes = 2;
+
+      const result = getEsqlQueryPreview(esql, numPipes);
+      expect(result).toBe('FROM source | STATS COUNT() ...');
+    });
+
+    it('should handle a single command query and numPipes = 1', () => {
+      const esql = 'FROM source | STATS COUNT()';
+      const numPipes = 1;
+
+      const result = getEsqlQueryPreview(esql, numPipes);
+
+      expect(result).toBe('FROM source ...');
     });
   });
 });

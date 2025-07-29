@@ -11,8 +11,11 @@ import {
   Walker,
   walk,
   BasicPrettyPrinter,
+  Parser,
   isFunctionExpression,
   isColumn,
+  WrappingPrettyPrinter,
+  mutate,
 } from '@kbn/esql-ast';
 
 import type {
@@ -22,6 +25,7 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
+  ESQLCommand,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -383,4 +387,34 @@ export const getCategorizeField = (esql: string): string[] => {
   }
 
   return columns;
+};
+
+/**
+ * Extracts a preview of the ES|QL query, given the number of pipes we want to preview.
+ * @param esql: string - The ESQL query string
+ * @param numPipes: number - The number of pipes to include in the preview
+ */
+export const getEsqlQueryPreview = (esql: string, numPipes: number): string => {
+  if (numPipes <= 0) {
+    return esql;
+  }
+  const { root } = Parser.parse(esql, { withFormatting: true });
+  const commands: ESQLCommand[] = [];
+
+  walk(root, {
+    visitCommand: (node) => {
+      commands.push(node);
+    },
+  });
+
+  // query is too short, no need to slice
+  if (commands.length <= numPipes) {
+    return esql;
+  }
+
+  for (let i = numPipes; i < commands.length; i++) {
+    mutate.generic.commands.remove(root, commands[i]);
+  }
+
+  return `${WrappingPrettyPrinter.print(root)} ...`;
 };
