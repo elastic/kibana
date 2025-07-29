@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
