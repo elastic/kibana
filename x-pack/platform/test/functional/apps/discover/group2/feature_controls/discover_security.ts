@@ -230,6 +230,7 @@ export default function (ctx: FtrProviderContext) {
             value: 60000,
             pause: true,
           },
+          esqlVariables: [],
         });
         await share.closeShareModal();
       });
