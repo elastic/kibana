@@ -31,6 +31,14 @@ export interface FeatureTypeUsage {
   legacy_investigation_fields: number;
   alert_suppression: AlertSuppressionUsage;
 }
+
+export interface UpgradeableRulesSummary {
+  total: number;
+  customized: number;
+  enabled: number;
+  disabled: number;
+}
+
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
@@ -49,6 +57,7 @@ export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  elastic_detection_rule_upgrade_status: UpgradeableRulesSummary;
 }
 
 export interface RuleMetric {
