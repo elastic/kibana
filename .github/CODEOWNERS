@@ -1877,6 +1877,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa # Maybe this should be a glob?
+/x-pack/test/functional/services/observability/alerts/common.ts @elastic/appex-qa
+/x-pack/test/functional/services/observability/overview/common.ts @elastic/appex-qa
 /x-pack/test/accessibility/services.ts @elastic/appex-qa
 /x-pack/test/accessibility/page_objects.ts @elastic/appex-qa
 /x-pack/test/accessibility/ftr_provider_context.d.ts @elastic/appex-qa
