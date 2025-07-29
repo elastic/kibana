@@ -62,7 +62,12 @@ export class ProductFeatures {
         Array.from(productFeatureConfig.values())
       );
 
-      this.logger.debug(() => JSON.stringify(completeProductFeatureConfig));
+      if (completeProductFeatureConfig.id === 'siemV3') {
+        this.logger.debug(() => {
+          const config = JSON.stringify(completeProductFeatureConfig, null, 2);
+          return `Registering feature "${completeProductFeatureConfig.id}" with config: ${config}`;
+        });
+      }
       this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
       this.addRegisteredActions(completeProductFeatureConfig);
     }

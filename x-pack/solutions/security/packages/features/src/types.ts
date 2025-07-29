@@ -32,7 +32,7 @@ export type ProductFeatureKeys = ProductFeatureKeyType[];
 export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
 export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
 
-export type FeatureConfigModifier = (baseFeatureConfig: BaseKibanaFeatureConfig) => void;
+export type FeatureConfigModifier = (config: KibanaFeatureConfig) => void;
 
 export type ProductFeatureKibanaConfig<T extends string = string> =
   RecursivePartial<BaseKibanaFeatureConfig> & {
