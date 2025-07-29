@@ -127,13 +127,13 @@ describe('streamGraph', () => {
                   content: 'I will use the search tool to find more information.',
                   tool_calls: [
                     {
-                      name: "search",
+                      name: 'search',
                       args: {
-                        query: "example",
+                        query: 'example',
                       },
-                      id: "tool_abcd123",
+                      id: 'tool_abcd123',
                     },
-                  ]
+                  ],
                 }),
               },
               tags: [AGENT_NODE_TAG],
@@ -150,7 +150,7 @@ describe('streamGraph', () => {
           expect(mockOnLlmResponse).not.toHaveBeenCalled();
         });
       });
-      
+
       it('on_chat_model_end events is called with chunks if there is no final text value', async () => {
         mockStreamEvents.mockReturnValue({
           async *[Symbol.asyncIterator]() {
@@ -162,7 +162,7 @@ describe('streamGraph', () => {
             yield {
               event: 'on_chat_model_end',
               data: {
-                  output: new AIMessage('content'),
+                output: new AIMessage('content'),
               },
               tags: [AGENT_NODE_TAG],
             };

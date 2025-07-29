@@ -7,37 +7,42 @@
 
 import { ChatPromptTemplate, MessagesPlaceholder, PromptTemplate } from '@langchain/core/prompts';
 import { BaseMessage } from '@langchain/core/messages';
-import { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
-import { ContentReferencesStore, DocumentEntry, enrichDocument } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  DocumentEntry,
+  enrichDocument,
+} from '@kbn/elastic-assistant-common';
 import type { Logger } from '@kbn/logging';
-import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
-import { enrichConversation } from '../../utils/enrich_graph_input_messages';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ChatPromptValueInterface } from '@langchain/core/prompt_values';
+import { enrichConversation } from '../../utils/enrich_graph_input_messages';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../../ai_assistant_data_clients/knowledge_base';
+import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
 
-type ChatPromptTemplateInputValues = {
+interface ChatPromptTemplateInputValues {
   systemPrompt: string;
   knowledgeHistory: string;
   messages: BaseMessage[];
 }
 
-type Inputs = {
+interface Inputs {
   prompt: string;
   additionalPrompt?: string;
   contentReferencesStore: ContentReferencesStore;
   kbClient?: AIAssistantKnowledgeBaseDataClient;
   conversationMessages: BaseMessage[];
-  logger: Logger
+  logger: Logger;
   formattedTime: string;
-  actionsClient: PublicMethodsOf<ActionsClient>
-  savedObjectsClient: SavedObjectsClientContract
-  connectorId: string
-  llmType: string | undefined
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  savedObjectsClient: SavedObjectsClientContract;
+  connectorId: string;
+  llmType: string | undefined;
 }
 
-export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<{
+export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<
+  {
     systemPrompt: string;
     knowledgeHistory: string;
     messages: BaseMessage[];
@@ -53,7 +58,7 @@ const formatKnowledgeHistory = <T extends { text: string }>(knowledgeHistory: T[
   return knowledgeHistory.length
     ? `${KNOWLEDGE_HISTORY_PREFIX}\n${knowledgeHistory.map((e) => e.text).join('\n')}`
     : NO_KNOWLEDGE_HISTORY;
-}
+};
 
 /**
  * Factory that creates a ChatPromptValueInterface from a ChatPromptTemplate with the given inputs.
@@ -67,15 +72,17 @@ export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<C
   const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(inputs.contentReferencesStore));
   const formattedKnowledgeHistory = formatKnowledgeHistory(citedKnowledgeHistory);
 
-  const templatedSystemPrompt = inputs.additionalPrompt ? `${inputs.prompt}\n\n${inputs.additionalPrompt}` : inputs.prompt
+  const templatedSystemPrompt = inputs.additionalPrompt
+    ? `${inputs.prompt}\n\n${inputs.additionalPrompt}`
+    : inputs.prompt;
 
   const systemPromptTemplate = PromptTemplate.fromTemplate(templatedSystemPrompt);
 
   const systemPrompt = await systemPromptTemplate.format({
     citations_prompt: inputs.contentReferencesStore.options?.disabled ? '' : INCLUDE_CITATIONS,
     formattedTime: inputs.formattedTime ?? '',
-    knowledgeHistory: formattedKnowledgeHistory
-  })
+    knowledgeHistory: formattedKnowledgeHistory,
+  });
 
   const enrichedMessages = await enrichConversation({
     actionsClient: inputs.actionsClient,
@@ -83,13 +90,13 @@ export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<C
     connectorId: inputs.connectorId,
     llmType: inputs.llmType,
     messages: inputs.conversationMessages,
-  })
+  });
 
   const chatPrompt = await chatPromptTemplate.invoke({
     knowledgeHistory: formattedKnowledgeHistory,
-    systemPrompt: systemPrompt,
+    systemPrompt,
     messages: enrichedMessages,
-  })
+  });
 
-  return chatPrompt
-}
+  return chatPrompt;
+};

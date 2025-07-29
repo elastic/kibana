@@ -103,57 +103,52 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+  const stream = await assistantGraph.streamEvents(inputs, {
+    callbacks: [
+      apmTracer,
+      ...(traceOptions?.tracers ?? []),
+      ...(telemetryTracer ? [telemetryTracer] : []),
+    ],
+    runName: DEFAULT_ASSISTANT_GRAPH_ID,
+    tags: traceOptions?.tags ?? [],
+    version: 'v2',
+    streamMode: ['values', 'debug'],
+    recursionLimit: inputs?.isOssModel ? 50 : 25,
+  });
 
-    const stream = await assistantGraph.streamEvents(
-      inputs,
-      {
-        callbacks: [
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-          ...(telemetryTracer ? [telemetryTracer] : []),
-        ],
-        runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        tags: traceOptions?.tags ?? [],
-        version: 'v2',
-        streamMode: ['values', "debug"],
-        recursionLimit: inputs?.isOssModel ? 50 : 25,
-      },
-    );
-
-    const pushStreamUpdate = async () => {
-      for await (const { event, data, tags } of stream) {
-        if ((tags || []).includes(AGENT_NODE_TAG)) {
-          if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
-            const msg = data.chunk as AIMessageChunk;
-            if (!didEnd && !msg.tool_call_chunks?.length && msg.content && msg.content.length) {
-              push({ payload: msg.content as string, type: 'content' });
-            }
+  const pushStreamUpdate = async () => {
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
+          const msg = data.chunk as AIMessageChunk;
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content && msg.content.length) {
+            push({ payload: msg.content as string, type: 'content' });
           }
-          else if (
-            event === 'on_chat_model_end' &&
-            !data.output.lc_kwargs?.tool_calls?.length &&
-            !didEnd
-          ) {
-            handleStreamEnd(data.output.content);
-          } else if (
-            // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
-            event === 'on_chat_model_end' &&
-            data.output.lc_kwargs?.tool_calls?.length &&
-            (data.chunk?.content || data.output?.content) && 
-            !didEnd
-          ) {
-            push({ payload: "\n\n" as string, type: 'content' });
-          }
+        } else if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleStreamEnd(data.output.content);
+        } else if (
+          // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
+          event === 'on_chat_model_end' &&
+          data.output.lc_kwargs?.tool_calls?.length &&
+          (data.chunk?.content || data.output?.content) &&
+          !didEnd
+        ) {
+          push({ payload: '\n\n' as string, type: 'content' });
         }
       }
-    };
+    }
+  };
 
-    pushStreamUpdate().catch((err) => {
-      logger.error(`Error streaming graph: ${err}`);
-      handleStreamEnd(err.message, true);
-    });
+  pushStreamUpdate().catch((err) => {
+    logger.error(`Error streaming graph: ${err}`);
+    handleStreamEnd(err.message, true);
+  });
 
-    return responseWithHeaders;
+  return responseWithHeaders;
 };
 
 interface InvokeGraphParams {
@@ -209,8 +204,8 @@ export const invokeGraph = async ({
       recursionLimit: inputs?.isOssModel ? 50 : 25,
     });
     const lastMessage = result.messages[result.messages.length - 1];
-    const output = lastMessage.text
-    const conversationId = result.conversationId
+    const output = lastMessage.text;
+    const conversationId = result.conversationId;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
