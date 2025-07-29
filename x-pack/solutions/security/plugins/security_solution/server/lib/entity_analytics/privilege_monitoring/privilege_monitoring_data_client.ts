@@ -43,6 +43,7 @@ import type { ApiKeyManager } from './auth/api_key';
 import {
   startPrivilegeMonitoringTask,
   removePrivilegeMonitoringTask,
+  scheduleNow,
 } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
@@ -78,7 +79,9 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
+import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
+
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -89,6 +92,7 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
+  config?: MonitoringSyncIntervalConfig;
 }
 
 export class PrivilegeMonitoringDataClient {
@@ -165,11 +169,11 @@ export class PrivilegeMonitoringDataClient {
       if (this.apiKeyGenerator) {
         await this.apiKeyGenerator.generate();
       }
-
       await startPrivilegeMonitoringTask({
         logger: this.opts.logger,
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
+        interval: this.opts.config?.privileges.developer.syncInterval,
       });
 
       const setupEndTime = moment().utc().toISOString();
@@ -503,13 +507,18 @@ export class PrivilegeMonitoringDataClient {
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
     const indexSources = await this.monitoringIndexSourceClient.findByIndex();
+    console.log('------------------------plainIndexSync--------------------------');
+
+    console.log(JSON.stringify(indexSources, null, 2));
     if (indexSources.length === 0) {
+      console.log('No monitoring index sources found. Skipping sync.');
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
     const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of indexSources) {
+      console.log(JSON.stringify(source));
       // eslint-disable-next-line no-continue
       if (!source.indexPattern) continue; // if no index pattern, skip this source
       const index: string = source.indexPattern;
@@ -521,6 +530,10 @@ export class PrivilegeMonitoringDataClient {
         });
         // collect stale users
         const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
+
+        console.log('batchUserNames', JSON.stringify(batchUserNames, null, 2));
+        console.log('staleUsers', JSON.stringify(staleUsers, null, 2));
+
         allStaleUsers.push(...staleUsers);
       } catch (error) {
         if (
@@ -853,5 +866,31 @@ export class PrivilegeMonitoringDataClient {
       );
       throw new Error(msg);
     }
+  }
+
+  public async scheduleNow() {
+    if (!this.opts.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    const engineStatus = await this.getEngineStatus();
+
+    if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      throw new Error(
+        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+      );
+    }
+
+    this.audit(
+      PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
+      EngineComponentResourceEnum.privmon_engine,
+      'Privilege Monitoring Engine scheduled for immediate run'
+    );
+
+    return scheduleNow({
+      taskManager: this.opts.taskManager,
+      namespace: this.opts.namespace,
+      logger: this.opts.logger,
+    });
   }
 }

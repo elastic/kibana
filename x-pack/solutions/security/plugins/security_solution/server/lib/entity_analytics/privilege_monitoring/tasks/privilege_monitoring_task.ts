@@ -26,6 +26,7 @@ import {
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import type { SyncIntervalConfig } from '../types';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -191,9 +192,9 @@ export const startPrivilegeMonitoringTask = async ({
   logger,
   namespace,
   taskManager,
-}: StartParams) => {
+  interval = INTERVAL,
+}: StartParams & { interval?: SyncIntervalConfig }) => {
   const taskId = getTaskId(namespace);
-
   try {
     await taskManager.ensureScheduled({
       id: taskId,
@@ -232,6 +233,26 @@ export const removePrivilegeMonitoringTask = async ({
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
     );
+    throw e;
+  }
+};
+
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+
+  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  try {
+    await taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };
