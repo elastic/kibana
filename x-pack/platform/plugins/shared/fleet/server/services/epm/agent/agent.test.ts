@@ -276,7 +276,7 @@ New lines and \\n escaped values.`,
         multiline_text: {
           type: 'textarea',
           value: `This is a text with
-New lines and \n escaped values.`,
+New lines and\n escaped values.`,
         },
       };
 

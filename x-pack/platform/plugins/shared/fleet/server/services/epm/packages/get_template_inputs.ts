@@ -170,12 +170,15 @@ export async function getTemplateInputs(
     savedObjectsClient: soClient,
     ignoreUnverified,
   });
+  // placeholderId is used in case of an otelcol type input and ignored in all other cases
+  const placeHolderId = `<POLICY_ID>`;
 
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
     inputsWithStreamIds,
-    assetsMap
+    assetsMap,
+    { otelcolSuffixId: placeHolderId }
   );
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,

@@ -430,7 +430,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.vars || {},
         inputs,
         assetsMap,
-        packagePolicyId
+        { otelcolSuffixId: packagePolicyId }
       );
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -643,7 +643,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 pkgInfo,
                 packagePolicy.vars || {},
                 inputs,
-                assetsMap
+                assetsMap,
+                { otelcolSuffixId: id }
               )
             : inputs;
 
@@ -771,7 +772,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
       });
       inputs = pkgInfo
-        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
+            otelcolSuffixId: id,
+          })
         : inputs;
 
       elasticsearch = pkgInfo?.elasticsearch;
@@ -1213,7 +1216,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         restOfPackagePolicy.vars || {},
         inputs,
         assetsMap,
-        id
+        { otelcolSuffixId: id }
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1595,7 +1598,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               restOfPackagePolicy.vars || {},
               inputs,
               assetsMap,
-              id
+              { otelcolSuffixId: id }
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -2964,7 +2967,7 @@ export function _compilePackagePolicyInputs(
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
   assetsMap: PackagePolicyAssetsMap,
-  packagePolicyId?: string
+  opts?: { otelcolSuffixId?: string }
 ): PackagePolicyInput[] {
   const experimentalFeature = appContextService.getExperimentalFeatures();
 
@@ -2972,7 +2975,7 @@ export function _compilePackagePolicyInputs(
     if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       return {
         ...input,
-        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
+        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
         compiled_input: [],
       };
     }
@@ -3038,10 +3041,10 @@ function _compilePackageStreams(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   assetsMap: PackagePolicyAssetsMap,
-  packagePolicyId?: string
+  otelcolSuffixId?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, packagePolicyId)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
   );
 }
 
@@ -3108,7 +3111,7 @@ function _compilePackageStream(
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
   assetsMap: PackagePolicyAssetsMap,
-  packagePolicyId?: string
+  otelcolSuffixId?: string
 ) {
   let stream = streamIn;
 
@@ -3168,7 +3171,7 @@ function _compilePackageStream(
     Object.assign({}, vars, input.vars, stream.vars),
     pkgStreamTemplate.buffer.toString(),
     input.type,
-    packagePolicyId
+    otelcolSuffixId
   );
 
   stream.compiled_stream = yaml;

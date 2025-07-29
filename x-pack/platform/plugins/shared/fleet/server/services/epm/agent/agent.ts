@@ -27,7 +27,7 @@ export function compileTemplate(
   variables: PackagePolicyConfigRecord,
   templateStr: string,
   inputType?: string,
-  packagePolicyId?: string
+  otelcolSuffixId?: string
 ) {
   const logger = appContextService.getLogger();
   const experimentalFeature = appContextService.getExperimentalFeatures();
@@ -55,9 +55,9 @@ export function compileTemplate(
     if (
       experimentalFeature.enableOtelIntegrations &&
       inputType === OTEL_COLLECTOR_INPUT_TYPE &&
-      packagePolicyId
+      otelcolSuffixId
     ) {
-      patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, packagePolicyId);
+      patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, otelcolSuffixId);
     }
 
     // Hack to keep empty string ('') values around in the end yaml because
@@ -80,10 +80,10 @@ export function compileTemplate(
   }
 }
 // Patch YAML for OTEL Collector
-function patchYamlForOtelcol(yaml: any, packagePolicyId: string): string | undefined {
+function patchYamlForOtelcol(yaml: any, otelcolSuffixId: string): string | undefined {
   const parentKeys = ['receivers', 'processors', 'extensions'];
 
-  const updatedYaml = replaceKeyByParent(yaml, parentKeys, packagePolicyId);
+  const updatedYaml = replaceKeyByParent(yaml, parentKeys, otelcolSuffixId);
 
   return updatedYaml;
 }
