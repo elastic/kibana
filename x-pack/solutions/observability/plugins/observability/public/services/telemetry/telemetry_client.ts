@@ -28,4 +28,9 @@ export class TelemetryClient implements ITelemetryClient {
       dashboard_id: dashboardId,
     });
   }
+  reportCaseSelectedFromObservability(caseContext: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY, {
+      caseContext,
+    });
+  }
 }

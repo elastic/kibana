@@ -379,7 +379,7 @@ function InternalAlertsPage() {
                       additionalContext={{
                         observabilityRuleTypeRegistry,
                         config,
-                        sourceContext: 'observability_alerts_page',
+                        caseContext: 'observability_alerts_page',
                       }}
                       renderAdditionalToolbarControls={() => (
                         <GroupingToolbarControls

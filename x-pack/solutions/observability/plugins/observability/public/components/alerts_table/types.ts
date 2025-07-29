@@ -13,7 +13,7 @@ export interface ObservabilityAlertsTableContext {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   config: ConfigSchema;
   parentAlert?: TopAlert;
-  sourceContext?: string;
+  caseContext?: string; // It has the the page from which the case is being added
 }
 
 export type ObservabilityAlertsTableProps = SetOptional<

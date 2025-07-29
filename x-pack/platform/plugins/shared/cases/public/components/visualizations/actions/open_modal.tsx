@@ -22,19 +22,12 @@ interface Props {
   lensApi: LensApi;
   onSuccess: () => void;
   onClose: (theCase?: CaseUI) => void;
-  sourceContext?: string;
 }
 
-const AddExistingCaseModalWrapper: React.FC<Props> = ({
-  lensApi,
-  onClose,
-  onSuccess,
-  sourceContext,
-}) => {
+const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSuccess }) => {
   const modal = useCasesAddToExistingCaseModal({
     onClose,
     onSuccess,
-    sourceContext,
   });
 
   const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);

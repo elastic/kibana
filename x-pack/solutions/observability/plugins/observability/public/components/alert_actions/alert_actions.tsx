@@ -39,13 +39,14 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   openAlertInFlyout,
   parentAlert,
   services,
-  sourceContext,
+  caseContext,
   ...rest
 }) => {
   const {
     http: {
       basePath: { prepend },
     },
+
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
@@ -88,7 +89,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       services: {
         cases,
       },
-      sourceContext,
+      caseContext,
     });
 
   const closeActionsPopover = useCallback(() => {

@@ -128,7 +128,7 @@ export function RuleDetailsTabs({
                   additionalContext={{
                     observabilityRuleTypeRegistry,
                     config,
-                    sourceContext: 'observability_rule_details_page',
+                    caseContext: 'observability_rule_details_page',
                   }}
                   services={{
                     data,
