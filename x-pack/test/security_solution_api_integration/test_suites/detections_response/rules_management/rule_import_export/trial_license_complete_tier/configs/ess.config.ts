@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../config/ess/config.base.trial')
+    require.resolve('../../../configs/ess/trial.config')
   );
 
   return {
@@ -19,25 +19,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName:
         'Rules Management - Rule Import And Export Integration Tests - ESS Env - Trial License',
     },
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--logging.loggers=${JSON.stringify([
-          {
-            name: 'plugins.securitySolution',
-            level: 'debug',
-          },
-          {
-            name: 'plugins.fleet',
-            level: 'debug',
-          },
-        ])}`,
-      ],
-    },
-    // mochaReporter: {
-    //   ...functionalConfig.get('mochaReporter'),
-    //   captureLogOutput: false, // Alternative: DISABLE_CI_LOG_OUTPUT_CAPTURE=true
-    // },
   };
 }

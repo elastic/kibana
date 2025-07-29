@@ -1005,6 +1005,10 @@ export default ({ getService }: FtrProviderContext): void => {
               )}`
             );
 
+            log.debug({ a: 1 });
+            log.debug('HELLO', { b: 2 });
+            log.debug('TEST SUITE - importResult.body', importResult.body);
+
             expect(importResult.body).toMatchObject({
               success: true,
               success_count: 1,

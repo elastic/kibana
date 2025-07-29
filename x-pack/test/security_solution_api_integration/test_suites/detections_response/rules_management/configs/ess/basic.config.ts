@@ -9,14 +9,26 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../configs/ess/basic.config.ts')
+    require.resolve('../../../../../config/ess/config.base.basic')
   );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('..')],
-    junit: {
-      reportName: 'Rules management - Rule Management API Integration Tests - Basic License',
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'plugins.securitySolution',
+            level: 'debug',
+          },
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+          },
+        ])}`,
+      ],
     },
   };
 }
