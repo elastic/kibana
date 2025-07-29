@@ -20,7 +20,6 @@ import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
   appContextService,
   agentPolicyService,
-  packagePolicyService,
   licenseService,
 } from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
