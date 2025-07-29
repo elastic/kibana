@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiIcon,
   EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -31,6 +32,7 @@ export function ParentRelationshipAnalysis({
   sourceNode,
   destinationNode,
 }: ParentRelationshipAnalysisProps) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel paddingSize="m" color="subdued">
       <EuiTitle size="xs">
@@ -125,7 +127,7 @@ export function ParentRelationshipAnalysis({
                 }
               )}
             </p>
-            <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
+            <ul style={{ marginTop: euiTheme.size.s, paddingLeft: euiTheme.size.base }}>
               <li>
                 {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsNotFoundReason1', {
                   defaultMessage: 'An instrumentation issue preventing proper trace correlation',

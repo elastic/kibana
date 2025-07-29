@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
@@ -32,6 +33,12 @@ export function TraceCorrelationAnalysis({
   sourceNode,
   destinationNode,
 }: TraceCorrelationAnalysisProps) {
+  const { euiTheme } = useEuiTheme();
+
+  if (!traceId || !traceCorrelation) {
+    return null;
+  }
+
   const {
     found,
     foundInSourceNode,
@@ -39,10 +46,6 @@ export function TraceCorrelationAnalysis({
     sourceNodeDocumentCount,
     destinationNodeDocumentCount,
   } = traceCorrelation;
-
-  if (!traceId) {
-    return null;
-  }
 
   return (
     <EuiPanel paddingSize="m" color="subdued">
@@ -140,7 +143,7 @@ export function TraceCorrelationAnalysis({
                 }
               )}
             </p>
-            <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
+            <ul style={{ marginTop: euiTheme.size.s, paddingLeft: euiTheme.size.base }}>
               {!foundInSourceNode && (
                 <li>
                   {i18n.translate(

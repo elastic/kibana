@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-
+import { isEmpty } from 'lodash';
 import { downloadJson } from '../../../../utils/download_json';
 import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
 import { DiagnosticResults } from './diagnostic_results';
@@ -219,7 +219,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
           <EuiButton
-            disabled={!form.isValid}
+            disabled={!form.isValid || isLoading}
             data-test-subj="apmDiagnosticRunButton"
             onClick={handleRunDiagnostic}
           >
@@ -230,7 +230,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
           <EuiButton
             data-test-subj="diagnosticFlyoutDownloadReportButton"
             iconType="download"
-            isDisabled={!form.isValid}
+            isDisabled={!form.isValid || isLoading || isEmpty(data)}
             onClick={() =>
               downloadJson({
                 fileName: `diagnostic-tool-apm-service-map-${moment(Date.now()).format(

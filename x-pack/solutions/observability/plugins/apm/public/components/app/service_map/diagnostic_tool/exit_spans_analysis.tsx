@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiAccordion,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HighlightedExitSpansTable } from './diagnostic_highlighted_exit_spans_table';
@@ -35,6 +36,8 @@ export function ExitSpansAnalysis({
   destinationNode,
   sourceNode,
 }: ExitSpansAnalysisProps) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPanel paddingSize="m" color="subdued">
       <EuiTitle size="xs">
@@ -117,7 +120,7 @@ export function ExitSpansAnalysis({
                 }
               )}
             </p>
-            <ul style={{ marginTop: '8px', paddingLeft: '16px' }}>
+            <ul style={{ marginTop: euiTheme.size.s, paddingLeft: euiTheme.size.base }}>
               <li>
                 {i18n.translate('xpack.apm.serviceMap.diagnosticResults.exitSpansNotFoundReason1', {
                   defaultMessage: 'An instrumentation issue preventing proper span collection',

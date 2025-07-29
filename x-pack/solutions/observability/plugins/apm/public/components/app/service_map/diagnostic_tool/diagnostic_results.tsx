@@ -36,7 +36,6 @@ export function DiagnosticResults({
     sourceNodeDocumentCount: 0,
     destinationNodeDocumentCount: 0,
   };
-  const traceCorrelationResponse = data?.elasticsearchResponses?.traceCorrelationQuery;
 
   if (!sourceNode || !destinationNode) {
     return null;
@@ -68,7 +67,6 @@ export function DiagnosticResults({
         traceId={traceId}
         sourceNode={sourceNode}
         destinationNode={destinationNode}
-        traceCorrelationResponse={traceCorrelationResponse}
       />
 
       <EuiSpacer size="m" />
