@@ -40,6 +40,7 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/229861
+// Failing: See https://github.com/elastic/kibana/issues/229860
 describe.skip(
   'Machine Learning Detection Rules - Alert suppression',
   {
