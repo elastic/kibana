@@ -59,7 +59,7 @@ export class DraftGrokExpression {
     return this.expression$;
   };
 
-  public destroy() {
+  public destroy = () => {
     this.customPatternsSubscription.unsubscribe();
-  }
+  };
 }
