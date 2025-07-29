@@ -98,7 +98,9 @@ export const useEnhancedIntegrationCards = (
         applyCategoryBadgeAndStyling(card, {
           ...options,
           hasDataStreams: activeIntegrations.some(({ name }) => name === card.name),
-          returnPath: `${CONFIGURATIONS_PATH}/integrations/${IntegrationsFacets.available}`,
+          returnPath:
+            options?.returnPath ??
+            `${CONFIGURATIONS_PATH}/integrations/${IntegrationsFacets.available}`,
         })
       ),
     [sorted, options, activeIntegrations]
