@@ -410,8 +410,8 @@ const topNavStyles = {
         top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
 
-        '@media (max-width: 320px)': {
-          position: 'relative',
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          position: 'unset', // on smaller screens, the top nav should not be sticky
         },
       },
     }),
