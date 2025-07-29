@@ -182,7 +182,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                      defaultMessage: 'Infrastructure inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
