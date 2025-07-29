@@ -19,7 +19,7 @@ export function getLandingBreadcrumbs() {
   return [
     {
       text: i18n.translate('visualizations.listing.breadcrumb', {
-        defaultMessage: 'Visualize Library',
+        defaultMessage: 'Visualize library',
       }),
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
     },
