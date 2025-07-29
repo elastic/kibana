@@ -34,6 +34,7 @@ export const fetchGraph = async ({
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
+
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
   // Regex to match invalid characters in index patterns: upper case characters, \, /, ?, ", <, >, |, (space), #, or ,
   indexPatterns.forEach((indexPattern, idx) => {
@@ -73,6 +74,14 @@ export const fetchGraph = async ({
     "\\"id\\":\\"", _id, "\\"",
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
+    ${
+      // Incase we don't fetch from alerts index, ESQL will complain about missing field's mapping
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
+    "}"), ""),`
+        : ''
+    }
   "}")
     ${
       // ESQL complains about missing field's mapping when we don't fetch from alerts index
@@ -94,7 +103,7 @@ export const fetchGraph = async ({
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC, action`;
+| SORT isOrigin DESC, action, actorIds`;
 
   logger.trace(`Executing query [${query}]`);
 

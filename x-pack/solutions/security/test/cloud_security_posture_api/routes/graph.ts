@@ -10,6 +10,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { expect as expectExpect } from 'expect';
 import type { Agent } from 'supertest';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
@@ -202,6 +203,9 @@ export default function (providerContext: FtrProviderContext) {
           query: { match_all: {} },
           conflicts: 'proceed',
         });
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+        );
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
@@ -693,6 +697,46 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('nodes').length(3);
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
+      });
+
+      it('should return related alerts by default when fetching event', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            originEventIds: [{ id: 'kabcd1234efgh5678', isAlert: false }],
+            start: '2024-09-01T12:30:00.000Z||-30m',
+            end: '2024-09-01T12:30:00.000Z||+30m',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
+
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+          expect(node).to.have.property('color');
+          expect(node.color).equal(
+            node.shape === 'label' ? 'danger' : 'primary',
+            `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+          );
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(2);
+            expectExpect(node.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                type: 'alert',
+                alert: { ruleName: 'GCP IAM Custom Role Creation' },
+              })
+            );
+          }
+        });
+
+        response.body.edges.forEach((edge: EdgeDataModel) => {
+          expect(edge).to.have.property('color');
+          expect(edge.color).equal(
+            'danger',
+            `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+          );
+          expect(edge.type).equal('solid');
+        });
       });
     });
   });
