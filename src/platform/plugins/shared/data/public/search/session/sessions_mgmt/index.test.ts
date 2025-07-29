@@ -7,6 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CorePluginStaticAssets } from './plugin';
+import { APP } from '.';
 
-export const plugin = () => new CorePluginStaticAssets();
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  BACKGROUND_SEARCH_ENABLED: false,
+}));
+
+describe('Sessions management - APP', () => {
+  it('should return the id', () => {
+    expect(APP.id).toBe('search_sessions');
+  });
+
+  describe('when background search is disabled', () => {
+    it('should return the correct i18n name', () => {
+      expect(APP.getI18nName()).toBe('Search Sessions');
+    });
+  });
+});
