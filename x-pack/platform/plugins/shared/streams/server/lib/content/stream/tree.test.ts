@@ -229,5 +229,32 @@ describe('content pack stream helpers', () => {
         'Cannot change mapping of [custom] for [root]'
       );
     });
+
+    it('throws on duplicate query', () => {
+      const existing = asTree({
+        root: 'root',
+        streams: [
+          testContentPackEntry({
+            name: 'root',
+            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: one' } }],
+          }),
+        ],
+        include: { objects: { all: {} } },
+      });
+      const incoming = asTree({
+        root: 'root',
+        streams: [
+          testContentPackEntry({
+            name: 'root',
+            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: two' } }],
+          }),
+        ],
+        include: { objects: { all: {} } },
+      });
+
+      expect(() => mergeTrees({ existing, incoming })).toThrow(
+        `Query [one | title] already exists on [root]`
+      );
+    });
   });
 });
