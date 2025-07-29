@@ -69,10 +69,24 @@ const linkedDashboardView: TelemetryEvent = {
   },
 };
 
+const caseSelectedFromObservability: TelemetryEvent = {
+  eventType: TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY,
+  schema: {
+    caseContext: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The UI context where the case was selected from',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events: TelemetryEvent[] = [
   relatedAlertsLoaded,
   alertDetailsPageView,
   caseSelectedFromObservability,
   relatedAlertAddedToCase,
   linkedDashboardView,
+  caseSelectedFromObservability,
 ];
