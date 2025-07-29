@@ -195,7 +195,8 @@ export const toExpression = (
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
     titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
+    valueTextAlign: state.valueTextAlign ?? metricStateDefaults.valueTextAlign,
+    extraTextAlign: state.extraTextAlign ?? metricStateDefaults.extraTextAlign,
     iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),

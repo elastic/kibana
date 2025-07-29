@@ -41,7 +41,8 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
-  valuesTextAlign?: MetricStyle['valuesTextAlign'];
+  extraTextAlign?: MetricStyle['extraTextAlign'];
+  valueTextAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
   color?: string;

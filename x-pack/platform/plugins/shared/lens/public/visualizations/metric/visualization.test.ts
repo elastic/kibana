@@ -90,7 +90,8 @@ describe('metric visualization', () => {
     palette,
     showBar: false,
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    valueTextAlign: 'right',
+    extraTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
@@ -476,7 +477,10 @@ describe('metric visualization', () => {
                 "valueFontSize": Array [
                   "default",
                 ],
-                "valuesTextAlign": Array [
+                "valueTextAlign": Array [
+                  "right",
+                ],
+                "extraTextAlign": Array [
                   "right",
                 ],
               },
@@ -552,7 +556,10 @@ describe('metric visualization', () => {
                 "valueFontSize": Array [
                   "default",
                 ],
-                "valuesTextAlign": Array [
+                "valueTextAlign": Array [
+                  "right",
+                ],
+                "extraTextAlign": Array [
                   "right",
                 ],
               },
@@ -859,7 +866,10 @@ describe('metric visualization', () => {
               "valueFontSize": Array [
                 "default",
               ],
-              "valuesTextAlign": Array [
+              "valueTextAlign": Array [
+                "right",
+              ],
+              "extraTextAlign": Array [
                 "right",
               ],
             },
@@ -1090,7 +1100,8 @@ describe('metric visualization', () => {
         "layerType": "data",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
-        "valuesTextAlign": "right",
+        "valueTextAlign": "right",
+        "extraTextAlign": "right",
       }
     `);
   });

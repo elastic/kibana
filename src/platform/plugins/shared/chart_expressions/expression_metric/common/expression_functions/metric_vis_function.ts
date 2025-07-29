@@ -82,10 +82,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The alignment of the Title and Subtitle.',
       }),
     },
-    valuesTextAlign: {
+    valueTextAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.valuesTextAlign.help', {
-        defaultMessage: 'The alignment of the Primary and Secondary Metric.',
+      help: i18n.translate('expressionMetricVis.function.valueTextAlign.help', {
+        defaultMessage: 'The alignment of the Primary Metric.',
+      }),
+    },
+    extraTextAlign: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.extraTextAlign.help', {
+        defaultMessage: 'The alignment of the Secondary Metric.',
       }),
     },
     iconAlign: {
@@ -242,7 +248,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             palette: args.palette,
             progressDirection: args.progressDirection,
             titlesTextAlign: args.titlesTextAlign,
-            valuesTextAlign: args.valuesTextAlign,
+            valueTextAlign: args.valueTextAlign,
+            extraTextAlign: args.extraTextAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
             maxCols: args.maxCols,

@@ -49,7 +49,8 @@ export interface MetricArguments {
   secondaryTrendPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
-  valuesTextAlign: MetricStyle['valuesTextAlign'];
+  valueTextAlign: MetricStyle['valueTextAlign'];
+  extraTextAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
   color?: string;
