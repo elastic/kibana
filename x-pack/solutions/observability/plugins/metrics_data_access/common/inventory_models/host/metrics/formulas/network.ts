@@ -13,8 +13,8 @@ export const rx: SchemaBasedFormula = {
     defaultMessage: 'Network Inbound (RX)',
   }),
   value: {
-    ecs: 'counter_rate(max(system.network.in.bytes))',
-    semconv: "counter_rate(max(metrics.system.network.io, kql='direction: receive'))",
+    ecs: '8 * counter_rate(max(system.network.in.bytes))',
+    semconv: "8 * counter_rate(max(metrics.system.network.io, kql='direction: receive'))",
   },
   format: 'bits',
   decimals: 1,
@@ -25,8 +25,8 @@ export const tx: SchemaBasedFormula = {
     defaultMessage: 'Network Outbound (TX)',
   }),
   value: {
-    ecs: 'counter_rate(max(system.network.out.bytes))',
-    semconv: "counter_rate(max(metrics.system.network.io, kql='direction: transmit'))",
+    ecs: '8 * counter_rate(max(system.network.out.bytes))',
+    semconv: "8 * counter_rate(max(metrics.system.network.io, kql='direction: transmit'))",
   },
   format: 'bits',
   decimals: 1,
