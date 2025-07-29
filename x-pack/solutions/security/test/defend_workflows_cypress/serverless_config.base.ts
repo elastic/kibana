@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const svlSharedConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack-platform/serverless/config.base')
+    require.resolve('@kbn/test-suites-xpack-platform/serverless/shared/config.base')
   );
 
   return {
