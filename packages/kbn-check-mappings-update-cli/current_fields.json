@@ -1291,6 +1291,7 @@
     "description",
     "lastUpdatedBy",
     "name",
+    "spaceId",
     "status",
     "tags",
     "yaml"
