@@ -26,11 +26,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const end = new Date('2023-03-17T01:05:00.000Z').getTime();
 
   registry.when('Functions api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let functions: TopNFunctions;
       before(async () => {
@@ -52,10 +47,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it(`returns correct result`, async () => {
-        expect(functions.TopN.length).to.equal(5);
-        expect(functions.TotalCount).to.equal(3599);
-        expect(functions.selfCPU).to.equal(397);
-        expect(functions.totalCPU).to.equal(399);
+        expect(functions.TopN.length).to.equal(12669);
+        expect(functions.TotalCount).to.equal(112962);
+        expect(functions.selfCPU).to.equal(3599);
+        expect(functions.totalCPU).to.equal(112962);
         expectSnapshot(functions).toMatch();
       });
     });
