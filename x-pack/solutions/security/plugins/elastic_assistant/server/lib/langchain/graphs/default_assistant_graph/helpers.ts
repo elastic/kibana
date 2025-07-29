@@ -142,7 +142,6 @@ export const streamGraph = async ({
             (data.chunk?.content || data.output?.content) && 
             !didEnd
           ) {
-            console.log("here")
             push({ payload: "\n\n" as string, type: 'content' });
           }
         }
@@ -150,7 +149,6 @@ export const streamGraph = async ({
     };
 
     pushStreamUpdate().catch((err) => {
-      console.log(err)
       logger.error(`Error streaming graph: ${err}`);
       handleStreamEnd(err.message, true);
     });
