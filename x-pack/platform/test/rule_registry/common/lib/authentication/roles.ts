@@ -213,6 +213,28 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
   },
 };
 
+export const securitySolutionOnlyAllSpace2WithReadESIndices: Role = {
+  name: 'sec_only_all_space2_with_read_es_indices',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['read'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+        },
+        spaces: ['space2'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyReadSpacesAll: Role = {
   name: 'sec_only_read_spaces_all',
   privileges: {
