@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const archives = {
     ecommerce: {
-      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
     },
   };

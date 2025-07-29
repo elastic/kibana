@@ -1265,9 +1265,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # Visualizations
 /x-pack/test/functional/fixtures/kbn_archiver/rollup @elastic/kibana-visualizations # Assigned per the only uses are in lens and tsvb tests
 /x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/visualize/hybrid_visualization.ts#L20
-/x-pack/test/functional/es_archives/pre_calculated_histogram @elastic/kibana-visualizations # Assigned per usages
-/x-pack/test/functional/es_archives/hybrid/rollup @elastic/kibana-visualizations @elastic/search-kibana # Assigned per usage
-/x-pack/test/functional/es_archives/hybrid/logstash @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/visualize/hybrid_visualization.ts#L22
+/x-pack/platform/test/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-visualizations # Assigned per usages
+/x-pack/platform/test/fixtures/es_archives/hybrid/rollup @elastic/kibana-visualizations @elastic/search-kibana # Assigned per usage
+/x-pack/platform/test/fixtures/es_archives/hybrid/logstash @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/visualize/hybrid_visualization.ts#L22
 /x-pack/platform/test/fixtures/es_archives/graph @elastic/kibana-visualizations
 /x-pack/test/functional/es_archives/visualize @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
@@ -1326,7 +1326,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/lens/reporting/ @elastic/response-ops
-/x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
+/x-pack/platform/test/fixtures/es_archives/reporting/ @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
 /x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
 /x-pack/platform/test/reporting_functional/ @elastic/response-ops
@@ -1532,7 +1532,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # Elastic Stack Monitoring
 /x-pack/platform/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/platform/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
-/x-pack/test/functional/es_archives/monitoring @elastic/stack-monitoring
+/x-pack/platform/test/fixtures/es_archives/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/functional/services/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/functional/apps/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/api_integration/apis/monitoring @elastic/stack-monitoring
@@ -1735,7 +1735,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/api_integration/services/transform.ts @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/apps/aiops @elastic/ml-ui
 /x-pack/platform/test/functional/apps/transform/ @elastic/ml-ui @elastic/kibana-management
-/x-pack/test/functional/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
+/x-pack/platform/test/fixtures/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
@@ -1788,7 +1788,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/platform/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
-/x-pack/test/functional/es_archives/event_log_legacy_ids @elastic/appex-qa
+/x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
 /src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
@@ -2095,7 +2095,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 # Kibana Platform Security
 # security
-/x-pack/test/functional/es_archives/security @elastic/kibana-security
+/x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/spaces @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/security @elastic/kibana-security
 /x-pack/platform/test/ftr_apis/common/lib @elastic/kibana-security
@@ -2174,8 +2174,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/platform/plugins/shared/security/ @elastic/kibana-security
 
 # Response Ops team
-/x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
-/x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
+/x-pack/platform/test/fixtures/es_archives/rule_registry @elastic/response-ops
+/x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies @elastic/response-ops
 /x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/platform/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/platform/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
@@ -2240,7 +2240,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/alerts @elastic/response-ops
 /x-pack/test/functional/es_archives/observability/alerts @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/actions @elastic/response-ops
-/x-pack/test/functional/es_archives/rules_scheduled_task_id @elastic/response-ops
+/x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users @elastic/kibana-cases
@@ -2285,7 +2285,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
 /x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
-/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-management
+/x-pack/platform/test/fixtures/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management

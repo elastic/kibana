@@ -17,16 +17,16 @@
   "x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_disabled",
   "x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_enabled",
   "x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_uninstalled",
-  "x-pack/test/functional/es_archives/event_log_legacy_ids",
-  "x-pack/test/functional/es_archives/event_log_multiple_indicies",
+  "x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids",
+  "x-pack/platform/test/fixtures/es_archives/event_log_multiple_indicies",
   "x-pack/platform/test/fixtures/es_archives/fleet/agents",
-  "x-pack/test/functional/es_archives/rules_scheduled_task_id/rules",
-  "x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks",
+  "x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules",
+  "x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks",
   "x-pack/test/functional/es_archives/security_solution/import_rule_connector",
   "x-pack/test/functional/es_archives/security_solution/migrations",
   "x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14",
   "x-pack/test/functional/es_archives/security_solution/timelines/7.15.0",
   "x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space",
-  "x-pack/test/functional/es_archives/task_manager_removed_types",
-  "x-pack/test/functional/es_archives/task_manager_tasks"
+  "x-pack/platform/test/fixtures/es_archives/task_manager_removed_types",
+  "x-pack/platform/test/fixtures/es_archives/task_manager_tasks"
 ]
