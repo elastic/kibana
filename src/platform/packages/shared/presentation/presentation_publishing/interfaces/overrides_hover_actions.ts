@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { PublishingSubject } from '../publishing_subject';
 
 /**
  * An interface which determines whether the hover actions are overridden by the embeddable
  */
 export interface OverridesHoverActions {
-  overrideHoverActions$: BehaviorSubject<boolean>;
+  overrideHoverActions$: PublishingSubject<boolean>;
   OverriddenHoverActionsComponent: React.ComponentType;
 }
 

@@ -116,7 +116,7 @@ export const MarkdownFooter = ({
             <SaveButton onSave={onSave} />
           ) : (
             <EuiToolTip content={strings.applyButtonDisabledTooltip}>
-              <SaveButton onSave={onSave} />
+              <SaveButton onSave={onSave} disabled />
             </EuiToolTip>
           )}
         </EuiFlexItem>
@@ -125,7 +125,7 @@ export const MarkdownFooter = ({
   );
 };
 
-const SaveButton = ({ onSave }: { onSave: () => void }) => {
+const SaveButton = ({ onSave, disabled }: { onSave: () => void; disabled?: boolean }) => {
   return (
     <EuiButton
       data-test-subj="markdownEditorApplyButton"
@@ -134,7 +134,7 @@ const SaveButton = ({ onSave }: { onSave: () => void }) => {
       fill
       onClick={onSave}
       css={css({ minInlineSize: 'initial' })}
-      disabled={true}
+      disabled={disabled}
     >
       {strings.applyButton}
     </EuiButton>
