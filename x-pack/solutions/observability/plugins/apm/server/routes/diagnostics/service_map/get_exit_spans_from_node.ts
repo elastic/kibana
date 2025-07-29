@@ -73,7 +73,7 @@ export async function getExitSpansFromSourceNode({
 
   const apmExitSpans =
     response?.aggregations?.destination_resources?.buckets?.map((item: any) => {
-      const doc = item?.sample_doc?.hits?.hits?.[0]?._source;
+      const doc = item?.sample_docs?.hits?.hits?.[0]?._source;
       return {
         destinationService: doc?.span?.destination?.service?.resource ?? '',
         spanSubType: doc?.span?.subtype ?? '',
@@ -88,12 +88,13 @@ export async function getExitSpansFromSourceNode({
       };
     }) || [];
 
+  const matchingCount =
+    response?.aggregations?.matching_destination_resources?.sample_docs?.hits?.total?.value || 0;
   return {
     apmExitSpans,
     totalConnections: apmExitSpans.length,
     rawResponse: response,
-    hasMatchingDestinationResources:
-      response?.aggregations?.matching_destination_resources?.sample_docs?.hits?.total?.value > 0,
+    hasMatchingDestinationResources: matchingCount > 0,
   };
 }
 export async function getSourceSpanIds({
