@@ -28,8 +28,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
       await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+      );
 
       await ml.testResources.resetKibanaTimeZone();
     });
