@@ -62,6 +62,7 @@ export const getGraph = async ({
     end,
     originEventIds,
     indexPatterns,
+    spaceId,
     esQuery,
     isAssetInventoryEnabled,
   });

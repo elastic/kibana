@@ -701,7 +701,7 @@ export default function (providerContext: FtrProviderContext) {
       describe('Enrich graph with entity metadata', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
-          await esArchiver.loadIfNeeded(
+          await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
           );
         });
@@ -782,8 +782,6 @@ export default function (providerContext: FtrProviderContext) {
                   name: 'cloud_asset_inventory',
                   version: data.body.item.version,
                 },
-                'system',
-                'elastic_agent',
               ],
             })
             .expect(200);
