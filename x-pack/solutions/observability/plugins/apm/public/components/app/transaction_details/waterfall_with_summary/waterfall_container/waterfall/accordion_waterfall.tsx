@@ -200,7 +200,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
 
   return (
     <EuiAccordion
-      data-test-subj="accordionWaterfall"
+      data-test-subj="waterfallItem"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
