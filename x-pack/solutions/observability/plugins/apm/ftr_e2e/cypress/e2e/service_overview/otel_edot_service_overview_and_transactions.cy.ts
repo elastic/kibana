@@ -100,6 +100,43 @@ describe('Service Overview', () => {
       cy.contains('a', 'oteldemo.AdServiceEdotSynth/GetAds').click();
       cy.contains('h5', 'oteldemo.AdServiceEdotSynth/GetAds');
     });
+    it('shows transaction summary', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains(
+        'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
+      );
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
+    });
+    it('shows waterfall and transaction details flyout', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmWaterfallButton').should('exist');
+      cy.getByTestSubj('waterfall').should('exist');
+      cy.getByTestSubj('accordionWaterfall').should('exist');
+      cy.getByTestSubj('accordionWaterfall').click();
+      cy.contains('h4', 'Transaction details');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').contains(
+        'oteldemo.AdServiceEdotSynth/GetAds'
+      );
+      cy.getByTestSubj('apmServiceListAppLink').should('exist');
+      cy.getByTestSubj('apmServiceListAppLink').contains('adservice-edot-synth');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains(
+        'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
+      );
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
+    });
   });
 
   describe('errors', () => {
