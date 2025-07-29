@@ -24,7 +24,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DismissableElement, useDontShowMeAgain } from '../../hooks/use_dont_show_me_again';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { firstValueFrom } from 'rxjs';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../../types';
+
+const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
 
 interface OverrideWarningModalProps {
   onCancel: () => void;
@@ -35,13 +40,14 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
   onCancel,
   onContinue,
 }) => {
+  const {
+    services: { storage },
+  } = useKibana<KibanaContextExtra>();
   const [dontAskMeAgainCheck, setDontAskMeAgainCheck] = useState(false);
-
-  const { dontShowMeAgain } = useDontShowMeAgain();
 
   const continueHandler = () => {
     if (dontAskMeAgainCheck) {
-      dontShowMeAgain(DismissableElement.OVERRIDE_WARNING_MODAL);
+      storage.set(OVERRIDE_WARNING_MODAL_DISMISSED, true);
     }
     onContinue();
   };
@@ -101,4 +107,44 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
       </EuiModalFooter>
     </EuiModal>
   );
+};
+
+export const getOverrideConfirmation = async ({
+  overlays,
+  rendering,
+  storage,
+  indexUpdateService,
+}: KibanaContextExtra): Promise<boolean> => {
+  const columnsPendingToBeSaved = await firstValueFrom(
+    indexUpdateService.pendingColumnsToBeSaved$,
+    { defaultValue: [] }
+  );
+  const docsPendingToBeSaved = await firstValueFrom(indexUpdateService.savingDocs$, {
+    defaultValue: new Map(),
+  });
+
+  const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
+  const dontAskMeAgainCheck = Boolean(storage.get(OVERRIDE_WARNING_MODAL_DISMISSED));
+
+  return new Promise((resolve) => {
+    if (!hasPendingChanges || dontAskMeAgainCheck) {
+      resolve(true);
+    } else {
+      const session = overlays.openModal(
+        toMountPoint(
+          <OverrideWarningModal
+            onCancel={() => {
+              resolve(false);
+              session.close();
+            }}
+            onContinue={() => {
+              resolve(true);
+              session.close();
+            }}
+          />,
+          rendering
+        )
+      );
+    }
+  });
 };

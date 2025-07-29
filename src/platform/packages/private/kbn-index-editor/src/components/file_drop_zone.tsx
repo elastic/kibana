@@ -11,12 +11,10 @@ import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@el
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, PropsWithChildren, useCallback, useState } from 'react';
+import React, { type FC, PropsWithChildren, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
-import { DismissableElement, useDontShowMeAgain } from '../hooks/use_dont_show_me_again';
-import { OverrideWarningModal } from './modals/override_warning_modal';
+import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 import { KibanaContextExtra } from '../types';
@@ -43,16 +41,9 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   children,
   noResults,
 }) => {
-  const {
-    services: { indexUpdateService },
-  } = useKibana<KibanaContextExtra>();
-  const [showOverrideWarning, setShowOverrideWarning] = useState(false);
+  const { services } = useKibana<KibanaContextExtra>();
+  const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
-
-  const { isElementDismissed } = useDontShowMeAgain();
-
-  const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
-  const columnsPendingToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
   const isAnalyzing =
     uploadStatus.analysisStatus === STATUS.STARTED &&
@@ -67,11 +58,8 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         return;
       }
 
-      const dontAskMeAgainFlag = isElementDismissed(DismissableElement.OVERRIDE_WARNING_MODAL);
-      const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
-
-      if (hasPendingChanges && !dontAskMeAgainFlag) {
-        setShowOverrideWarning(true);
+      const overrideConfirmation = await getOverrideConfirmation(services);
+      if (!overrideConfirmation) {
         return;
       }
 
@@ -79,30 +67,16 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
       await fileUploadManager.addFiles(files);
     },
-    [
-      isElementDismissed,
-      docsPendingToBeSaved.size,
-      columnsPendingToBeSaved.length,
-      indexUpdateService,
-      fileUploadManager,
-    ]
+    [services, indexUpdateService, fileUploadManager]
   );
 
-  const { getRootProps, getInputProps, isDragActive, inputRef, acceptedFiles } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: onFilesSelected,
     accept: acceptedFileFormats,
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
   });
-
-  const overrideDataAndLoadFiles = useCallback(async () => {
-    setShowOverrideWarning(false);
-
-    indexUpdateService.discardUnsavedChanges();
-
-    await fileUploadManager.addFiles(acceptedFiles);
-  }, [acceptedFiles, fileUploadManager, indexUpdateService]);
 
   const onFileSelectorClick = useCallback(() => {
     // Clear the input value to allow re-selecting the same file
@@ -200,12 +174,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         {showLoadingOverlay ? loadingIndicator : null}
         <input {...getInputProps()} />
         {content}
-        {showOverrideWarning ? (
-          <OverrideWarningModal
-            onCancel={() => setShowOverrideWarning(false)}
-            onContinue={overrideDataAndLoadFiles}
-          />
-        ) : null}
       </div>
     </FileSelectorContext.Provider>
   );

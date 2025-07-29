@@ -49,6 +49,8 @@ export interface KibanaContextExtra {
   share: SharePluginStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
+  overlays: CoreStart['overlays'];
+  rendering: CoreStart['rendering'];
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   /** Custom service for indexing documents */
