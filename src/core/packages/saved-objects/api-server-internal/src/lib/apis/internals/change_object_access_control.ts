@@ -53,26 +53,17 @@ const isValidUserProfileId = (userProfileId: string): boolean => {
   return USER_PROFILE_REGEX.test(userProfileId);
 };
 
-export const changeObjectAccessControl = async (
-  params: ChangeAccessControlParams
-): Promise<SavedObjectsChangeAccessControlResponse> => {
-  const { namespace } = params.options;
-  const { actionType } = params;
-
-  // Extract owner for changeOwnership or accessMode for changeAccessMode
-  const newOwnerProfileUid =
-    actionType === 'changeOwnership' ? params.options.newOwnerProfileUid : undefined;
-  const accessMode = actionType === 'changeAccessMode' ? params.options.accessMode : undefined;
-  const {
-    registry,
-    allowedTypes,
-    client,
-    serializer,
-    getIndexForType,
-    objects,
-    securityExtension,
-  } = params;
-
+const validateChangeAccessControlParams = ({
+  actionType,
+  newOwnerProfileUid,
+  accessMode,
+  objects,
+}: {
+  actionType: ChangeAccessControlActionType;
+  newOwnerProfileUid?: string;
+  accessMode?: 'default' | 'read_only';
+  objects: SavedObjectsChangeAccessControlObject[];
+}) => {
   if (actionType === 'changeOwnership' && !newOwnerProfileUid) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'The "newOwnerProfileUid" field is required to change ownership of a saved object.'
@@ -105,7 +96,39 @@ export const changeObjectAccessControl = async (
       );
     }
   }
+};
 
+export const changeObjectAccessControl = async (
+  params: ChangeAccessControlParams
+): Promise<SavedObjectsChangeAccessControlResponse> => {
+  const { namespace } = params.options;
+  const { actionType } = params;
+
+  // Extract owner for changeOwnership or accessMode for changeAccessMode
+  const newOwnerProfileUid =
+    actionType === 'changeOwnership' ? params.options.newOwnerProfileUid : undefined;
+  const accessMode = actionType === 'changeAccessMode' ? params.options.accessMode : undefined;
+  const {
+    registry,
+    allowedTypes,
+    client,
+    serializer,
+    getIndexForType,
+    objects,
+    securityExtension,
+  } = params;
+
+  validateChangeAccessControlParams({
+    actionType,
+    newOwnerProfileUid,
+    accessMode,
+    objects,
+  });
+
+  /**
+   * We create a list of expected bulk get results, which will be used to
+   * perform the authorization checks and to build the bulk operation request.
+   */
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults: Array<
     Either<
@@ -141,6 +164,7 @@ export const changeObjectAccessControl = async (
     };
   }
 
+  // Only get the objects that are required for processing
   const bulkGetDocs = validObjects.map<estypes.MgetOperation>((x) => ({
     _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
     _index: getIndexForType(x.value.type),
