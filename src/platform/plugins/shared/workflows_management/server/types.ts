@@ -20,13 +20,18 @@ import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface WorkflowsPluginSetup {
   management: WorkflowsManagementApi;
 }
 
 export interface WorkflowsPluginStart {
-  runWorkflow(workflow: WorkflowExecutionEngineModel, params: Record<string, any>): Promise<string>;
+  runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    params: Record<string, any>,
+    spaceId: string
+  ): Promise<string>;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
@@ -34,6 +39,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {
@@ -41,4 +47,5 @@ export interface WorkflowsManagementPluginServerDependenciesSetup {
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
+  spaces?: SpacesPluginStart;
 }

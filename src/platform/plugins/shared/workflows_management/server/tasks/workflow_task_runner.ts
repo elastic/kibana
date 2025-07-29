@@ -43,7 +43,7 @@ export function createWorkflowTaskRunner({
   actionsClient: IUnsecuredActionsClient;
 }) {
   return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    const { workflowId } = taskInstance.params as WorkflowTaskParams;
+    const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
     return {
@@ -52,7 +52,7 @@ export function createWorkflowTaskRunner({
 
         try {
           // Get the workflow
-          const workflow = await workflowsService.getWorkflow(workflowId);
+          const workflow = await workflowsService.getWorkflow(workflowId, spaceId);
           if (!workflow) {
             throw new Error(`Workflow ${workflowId} not found`);
           }
@@ -60,6 +60,7 @@ export function createWorkflowTaskRunner({
           // Convert to execution model
           const executionGraph = convertToWorkflowGraph(workflow.definition);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
+            spaceId,
             id: workflow.id,
             name: workflow.name,
             status: workflow.status,
@@ -79,7 +80,8 @@ export function createWorkflowTaskRunner({
                 source: 'task-manager',
               },
               triggeredBy: 'scheduled', // <-- mark as scheduled
-            }
+            },
+            spaceId
           );
 
           logger.info(

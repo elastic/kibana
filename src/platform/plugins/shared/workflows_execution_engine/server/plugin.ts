@@ -107,13 +107,15 @@ export class WorkflowsExecutionEnginePlugin
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>
+      context: Record<string, any>,
+      spaceId: string
     ) => {
       const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
+        spaceId,
         id: workflowRunId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
@@ -203,7 +205,8 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
-    workflowRunId: workflowExecution.id,
+    spaceId,
+        workflowRunId: workflowExecution.id,
     workflow: workflowExecution.workflowDefinition,
     event: workflowExecution.context.event,
     logger,

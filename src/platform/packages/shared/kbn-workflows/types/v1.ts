@@ -25,6 +25,7 @@ export enum ExecutionStatus {
 }
 
 export interface EsWorkflowExecution {
+  spaceId: string;
   id: string;
   workflowId: string;
   status: ExecutionStatus;
@@ -57,6 +58,7 @@ export interface Provider {
 }
 
 export interface EsWorkflowStepExecution {
+  spaceId: string;
   id: string;
   stepId: string;
   workflowRunId: string;
@@ -79,6 +81,7 @@ export enum WorkflowStatus {
 }
 
 export interface WorkflowExecutionHistoryModel {
+  spaceId: string;
   id: string;
   workflowId?: string;
   workflowName?: string;
@@ -89,12 +92,14 @@ export interface WorkflowExecutionHistoryModel {
 }
 
 export interface WorkflowExecutionLogModel {
+  spaceId: string;
   timestamp: string;
   message: string;
   level: string;
 }
 
 export interface WorkflowExecutionDto {
+  spaceId: string;
   id: string;
   status: ExecutionStatus;
   startedAt: string;
@@ -122,6 +127,7 @@ export interface WorkflowExecutionListDto {
 // TODO: convert to actual elastic document spec
 
 export const EsWorkflowSchema = z.object({
+  spaceId: z.string(),
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
@@ -151,6 +157,7 @@ export interface UpdatedWorkflowResponseDto {
 }
 
 export interface WorkflowDetailDto {
+  spaceId: string;
   id: string;
   name: string;
   description?: string;
@@ -164,6 +171,7 @@ export interface WorkflowDetailDto {
 }
 
 export interface WorkflowListItemDto {
+  spaceId: string;
   id: string;
   name: string;
   description: string;
@@ -185,7 +193,7 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
+  extends Pick<EsWorkflow, 'spaceId' | 'id' | 'name' | 'status' | 'definition'> {
   /** Serialized graphlib.Graph */
   executionGraph?: any;
 }
