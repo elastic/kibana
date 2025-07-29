@@ -159,8 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/224780
-      describe.skip('KQL', () => {
+      describe('KQL', () => {
         it('should generate alerts with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
           const rule: QueryRuleCreateProps = {
             ...getRuleForAlertTesting(['myfa*']),
