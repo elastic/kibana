@@ -15,7 +15,7 @@ import { useSignificantEventsApi } from '../../hooks/use_significant_events_api'
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { Timeline, TimelineEvent } from '../timeline';
+import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
