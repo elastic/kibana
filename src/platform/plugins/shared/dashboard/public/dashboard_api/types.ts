@@ -115,7 +115,7 @@ export type DashboardApi = CanExpandPanels &
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
-    setFocusedPanelId: (id: string | undefined) => void;
+    setFocusedPanelId: (id: string | undefined, scrollTo?: boolean) => void;
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {

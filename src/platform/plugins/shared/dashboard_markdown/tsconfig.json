@@ -1,0 +1,18 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "common/**/*", "public/**/*"],
+  "kbn_references": [
+    "@kbn/css-utils",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/visualizations-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
+  ],
+  "exclude": ["target/**/*"]
+}

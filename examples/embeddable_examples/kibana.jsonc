@@ -17,7 +17,8 @@
       "charts",
       "fieldFormats",
       "developerExamples",
-      "dataViewFieldEditor"
+      "dataViewFieldEditor",
+      "visualizations",
     ],
     "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
   }
