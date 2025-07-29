@@ -20,7 +20,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   describe('lens serverless - group 1 - subgroup 1', function () {
     this.tags(['esGate']);
 
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {

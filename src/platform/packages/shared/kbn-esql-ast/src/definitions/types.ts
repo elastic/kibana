@@ -187,6 +187,13 @@ export interface FunctionParameter {
   mapParams?: string;
 }
 
+export interface ElasticsearchCommandDefinition {
+  type: string;
+  name: string;
+  license?: ESQLSignatureLicenseType;
+  observability_tier?: string;
+}
+
 /**
  * This is the return type of a function definition.
  *
@@ -391,6 +398,21 @@ export interface ValidationErrors {
   tooManyForks: {
     message: string;
     type: {};
+  };
+  licenseRequired: {
+    message: string;
+    type: {
+      name: string;
+      requiredLicense: string;
+    };
+  };
+  licenseRequiredForSignature: {
+    message: string;
+    type: {
+      name: string;
+      signatureDescription: string;
+      requiredLicense: string;
+    };
   };
 }
 
