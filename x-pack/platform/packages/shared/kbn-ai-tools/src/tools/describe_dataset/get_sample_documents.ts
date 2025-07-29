@@ -7,7 +7,7 @@
 
 import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { kqlQuery, rangeQuery } from '@kbn/es-query';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 
 export function getSampleDocuments({
   esClient,
@@ -43,7 +43,7 @@ export function getSampleDocuments({
       timeout,
       query: {
         bool: {
-          must: [...kqlQuery(kql), ...rangeQuery(start, end)],
+          must: [...kqlQuery(kql), ...dateRangeQuery(start, end)],
           should: [
             {
               function_score: {

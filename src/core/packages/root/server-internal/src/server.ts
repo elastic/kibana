@@ -45,7 +45,7 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
-import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
@@ -300,6 +300,11 @@ export class Server {
       elasticsearchService: elasticsearchServiceSetup,
     });
 
+    const httpRateLimiterSetup = this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
+
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
       metrics: metricsSetup,
@@ -336,6 +341,7 @@ export class Server {
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
       http: httpSetup,
+      httpRateLimiter: httpRateLimiterSetup,
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
     });
@@ -355,10 +361,6 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
-    this.httpRateLimiter.setup({
-      http: httpSetup,
-      metrics: metricsSetup,
-    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,

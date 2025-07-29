@@ -96,6 +96,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
               error={errorMessage}
             >
               <EuiComboBox
+                isInvalid={isInvalid}
                 data-test-subj="incidentTypeComboBox"
                 fullWidth
                 isClearable={true}

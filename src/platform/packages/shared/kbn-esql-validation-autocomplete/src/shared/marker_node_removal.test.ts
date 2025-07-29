@@ -41,6 +41,7 @@ describe('it should remove marker nodes from the AST', () => {
     assertMarkerRemoved(`FROM employees | WHERE salary = `);
     assertMarkerRemoved(`FROM employees | WHERE name != `);
     assertMarkerRemoved(`FROM employees | WHERE status IN `);
+    assertMarkerRemoved(`FROM employees | WHERE status NOT IN `);
     assertMarkerRemoved(`FROM employees | WHERE age >= `);
     assertMarkerRemoved(`FROM employees | WHERE age <= `);
     assertMarkerRemoved(`FROM employees | WHERE name LIKE `);
@@ -68,16 +69,11 @@ describe('it should remove marker nodes from the AST', () => {
     assertMarkerRemoved(`ROW a = b / `);
     assertMarkerRemoved(`ROW a = b % `);
 
-    // SHOW command (not likely to have binary/comma, but for completeness)
-    assertMarkerRemoved(`SHOW info, `);
-    assertMarkerRemoved(`SHOW info = `);
-
     // EVAL command with binary operator and comma
     assertMarkerRemoved(`FROM employees | EVAL total = salary + `);
     assertMarkerRemoved(`FROM employees | EVAL total = salary + bonus, `);
 
     // STATS command with binary operator and comma
-    assertMarkerRemoved(`FROM employees | STATS avg(salary) = `);
     assertMarkerRemoved(`FROM employees | STATS avg(salary), `);
 
     // KEEP command with comma

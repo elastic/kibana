@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-export function rangeQuery(
+export function dateRangeQuery(
   start?: number,
   end?: number,
   field = '@timestamp'

@@ -99,3 +99,10 @@ export const AUTHENTICATIONS_STACK_BY = [
   },
   sourceIpOption,
 ];
+
+export const ERROR_ENCODING_ESQL_QUERY = (
+  <FormattedMessage
+    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.errorEncodingEsqlQuery"
+    defaultMessage="Error encoding ES|QL query for Discover view"
+  />
+);

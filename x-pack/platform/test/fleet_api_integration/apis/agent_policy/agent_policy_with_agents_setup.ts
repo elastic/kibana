@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
           const name = `test-${Date.now()}`;
 
           const res = await supertest
-            .post(`/s/test/api/fleet/agent_policies?sys_monitoring=true`)
+            .post(`/api/fleet/agent_policies?sys_monitoring=true`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               name,

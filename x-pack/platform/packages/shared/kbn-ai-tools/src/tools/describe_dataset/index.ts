@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/es-query';
+import { dateRangeQuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocuments } from './get_sample_documents';
 import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
@@ -29,7 +29,7 @@ export async function describeDataset({
       fields: '*',
       index_filter: {
         bool: {
-          filter: rangeQuery(start, end),
+          filter: dateRangeQuery(start, end),
         },
       },
     }),

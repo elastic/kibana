@@ -52,9 +52,9 @@ export function SvlSearchNavigationServiceProvider({
         shouldLoginIfPrompted: false,
       });
     },
-    async navigateToSearchPlayground() {
+    async navigateToSearchPlayground(path?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('searchPlayground');
+        await PageObjects.common.navigateToApp('searchPlayground', { path });
         await testSubjects.existOrFail('svlPlaygroundPage', { timeout: 2000 });
       });
     },

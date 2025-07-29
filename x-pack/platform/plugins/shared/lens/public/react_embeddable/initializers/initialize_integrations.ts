@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import {
   getAggregateQueryMode,
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
+import type { Reference } from '@kbn/content-management-utils';
 import {
   SAVED_OBJECT_REF_NAME,
   type HasSerializableState,
