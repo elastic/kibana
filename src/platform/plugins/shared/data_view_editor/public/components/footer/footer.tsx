@@ -29,11 +29,12 @@ interface FooterProps {
   onDuplicate?: () => void;
   submittingType: SubmittingType | undefined;
   submitDisabled: boolean;
-  isEdit: boolean;
+  hasEditData: boolean;
   isPersisted: boolean;
   allowAdHoc: boolean;
   canSave: boolean;
   isManaged: boolean;
+  isDuplicatingManaged: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -47,6 +48,13 @@ const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButt
 const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
   defaultMessage: 'Save',
 });
+
+const duplicateButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutDuplicateButtonLabel',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
 
 const editUnpersistedButtonLabel = i18n.translate(
   'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
@@ -64,14 +72,19 @@ export const Footer = ({
   onSubmit,
   submittingType,
   submitDisabled,
-  isEdit,
+  hasEditData,
   allowAdHoc,
   isPersisted,
   canSave,
-  isManaged,
   onDuplicate,
+  isManaged,
+  isDuplicatingManaged,
 }: FooterProps) => {
-  const isEditingAdHoc = isEdit && !isPersisted;
+  const isEditingAdHoc = hasEditData && !isPersisted;
+
+  const isEditing = (canSave || isEditingAdHoc) && !isManaged;
+  const showDuplicateButton = (canSave || isEditingAdHoc) && isManaged && onDuplicate;
+
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -112,7 +125,7 @@ export const Footer = ({
               </EuiFlexItem>
             )}
 
-            {(canSave || isEditingAdHoc) && !isManaged && (
+            {isEditing && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
@@ -125,7 +138,7 @@ export const Footer = ({
                     (submittingType === SubmittingType.savingAsAdHoc && isEditingAdHoc)
                   }
                 >
-                  {isEdit
+                  {hasEditData && !isDuplicatingManaged
                     ? isPersisted
                       ? editButtonLabel
                       : editUnpersistedButtonLabel
@@ -134,10 +147,10 @@ export const Footer = ({
               </EuiFlexItem>
             )}
 
-            {(canSave || isEditingAdHoc) && isManaged && onDuplicate && (
+            {showDuplicateButton && (
               <EuiFlexItem grow={false}>
                 <EuiButton color="primary" onClick={onDuplicate}>
-                  {'Duplicate'}
+                  {duplicateButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}

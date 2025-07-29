@@ -393,7 +393,6 @@ export abstract class AbstractDataView {
       runtimeFieldMap: stringifyOrUndefined(this.runtimeFieldMap),
       name: this.name,
       allowHidden: this.allowHidden,
-      // managed: this.managed,
     };
   }
 

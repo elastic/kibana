@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useCallback, useMemo, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -72,7 +72,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
-  isEdit: boolean;
+  isDuplicatingManaged: boolean;
   onDuplicate?: () => void;
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
@@ -95,7 +95,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   getDataViewHelpText,
   dataViewEditorService,
   onDuplicate,
-  isEdit,
+  isDuplicatingManaged,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
   const isMobile = useIsWithinBreakpoints(['s', 'xs']);
@@ -105,7 +105,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
-  const isManaged = isEdit ? !!editData?.managed : false;
+  // Edit form is populated and disabled if the current data view is managed
+  // and the data view is not being duplicated
+  const isFormDisabled = !!editData?.managed && !isDuplicatingManaged;
+  const isEditingExisting = editData && !editData.managed && !isDuplicatingManaged;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -118,8 +121,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       ...(editData
         ? {
             title: editData.getIndexPattern(),
-            id: isEdit ? editData.id : undefined,
-            name: isEdit ? editData.name : undefined,
+            id: isDuplicatingManaged ? undefined : editData.id,
+            name: isDuplicatingManaged ? undefined : editData.name,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -155,7 +158,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.getIndexPattern() !== formData.title) {
+      if (isEditingExisting && editData.getIndexPattern() !== formData.title) {
         await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
@@ -189,13 +192,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   const namesNotAllowed = useMemo(() => {
-    // if form is popoluated but not editing an existing data view
-    // add the editData data view name to the not allowed names
-    if (!isEdit && editData) {
+    // When duplicating a managed data view, add the existing name
+    // to the not allowed names list
+    if (isDuplicatingManaged && editData) {
       return [editData.name, ...(existingDataViewNames || [])];
     }
     return existingDataViewNames || [];
-  }, [existingDataViewNames, isEdit, editData]);
+  }, [existingDataViewNames, isDuplicatingManaged, editData]);
 
   useDebounce(
     () => {
@@ -299,12 +302,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
             : SubmittingType.persisting
           : undefined
       }
-      isEdit={isEdit}
+      hasEditData={!!editData}
       isPersisted={Boolean(editData && editData.isPersisted())}
       allowAdHoc={allowAdHoc}
       canSave={canSave}
-      isManaged={isManaged}
+      isManaged={!!editData?.managed}
       onDuplicate={onDuplicate}
+      isDuplicatingManaged={isDuplicatingManaged}
     />
   );
 
@@ -313,9 +317,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2 id="dataViewEditorFlyoutTitle">{editData && isEdit ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">
+              {editData && !isDuplicatingManaged ? editorTitleEditMode : editorTitle}
+            </h2>
           </EuiTitle>
-          {showManagementLink && isEdit && editData && editData.id && (
+          {showManagementLink && !isDuplicatingManaged && editData && editData.id && (
             <EuiLink
               href={application.getUrlForApp('management', {
                 path: `/kibana/dataViews/dataView/${editData.id}`,
@@ -339,7 +345,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <NameField namesNotAllowed={namesNotAllowed} />
+                <NameField namesNotAllowed={namesNotAllowed} disabled={isFormDisabled} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
@@ -353,6 +359,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                     dataViewEditorService.indexPatternValidationProvider
                   }
                   titleHelpText={titleHelpText}
+                  disabled={isFormDisabled}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -363,12 +370,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   options$={dataViewEditorService.timestampFieldOptions$}
                   isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                   matchedIndices$={dataViewEditorService.matchedIndices$}
+                  disabled={isFormDisabled}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
             <AdvancedParamsContent
               disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={isEdit}
+              disableId={isFormDisabled}
               onAllowHiddenChange={() => {
                 form.getFields().title.validate();
               }}

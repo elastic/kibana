@@ -127,16 +127,13 @@ describe('DataView component', () => {
   });
 
   it('should render the add dataview menu if onDataViewCreated is given', async () => {
-    const addDataViewSpy = jest.fn();
     const component = mount(
-      wrapDataViewComponentInContext({ ...props, onDataViewCreated: addDataViewSpy }, false)
+      wrapDataViewComponentInContext({ ...props, onDataViewCreated: jest.fn() }, false)
     );
     findTestSubject(component, 'dataview-trigger').simulate('click');
     expect(component.find('[data-test-subj="dataview-create-new"]').at(0).text()).toContain(
       'Create a data view'
     );
-    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
-    expect(addDataViewSpy).toHaveBeenCalled();
   });
 
   it('should properly handle ad hoc data views', async () => {
@@ -168,6 +165,7 @@ describe('DataView component', () => {
         name: 'the-data-view',
         type: 'default',
         isAdhoc: true,
+        managed: undefined,
       },
     ]);
   });
@@ -201,6 +199,7 @@ describe('DataView component', () => {
         name: 'the-data-view-esql',
         type: 'esql',
         isAdhoc: true,
+        managed: undefined,
       },
     ]);
   });
@@ -240,7 +239,6 @@ describe('DataView component', () => {
         name: 'the-data-view',
         type: 'default',
         managed: true,
-        isManaged: true,
       },
     ]);
   });

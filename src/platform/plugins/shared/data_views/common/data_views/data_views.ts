@@ -972,7 +972,6 @@ export class DataViewsService {
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-    spec.managed = savedObject.managed;
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
     indexPattern.setEtag(etag);

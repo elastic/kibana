@@ -297,10 +297,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     };
   }, []);
 
-  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
-    closeDataViewEditor.current = ref;
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =
@@ -310,20 +306,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const createNewDataView = useMemo(
     () =>
       canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-              isEdit: true,
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
+        ? (dataView: DataView) => {
+            onDataViewCreated(dataView);
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [canEditDataView, onDataViewCreated, closeFieldListFlyout]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');

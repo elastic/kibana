@@ -58,7 +58,7 @@ const mappingConflictHeader = i18n.translate(
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
   {
-    defaultMessage: 'Security Data View',
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -210,7 +210,7 @@ export const EditIndexPattern = withRouter(
               )}
               {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
+                  <EuiBadge color="accent">{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag) => (

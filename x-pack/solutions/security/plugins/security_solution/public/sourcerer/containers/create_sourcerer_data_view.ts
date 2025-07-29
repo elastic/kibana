@@ -63,7 +63,6 @@ export const createSourcererDataView = async ({
           title: patternListAsTitle,
           timeFieldName: DEFAULT_TIME_FIELD,
           name: DEFAULT_SECURITY_DATA_VIEW,
-          managed: true,
         },
         // Override property - if a data view exists with the security solution pattern
         // delete it and replace it with our data view

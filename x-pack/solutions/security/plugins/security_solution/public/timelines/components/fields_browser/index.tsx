@@ -206,7 +206,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   );
 
   const createFieldButton = useCreateFieldButton({
-    isAllowed: hasFieldEditPermission && !!selectedDataViewId,
+    isAllowed: hasFieldEditPermission && !!selectedDataViewId && !dataView?.managed,
     loading: !dataView,
     openFieldEditor,
   });

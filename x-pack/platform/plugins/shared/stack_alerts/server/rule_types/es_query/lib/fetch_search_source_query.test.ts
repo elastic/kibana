@@ -839,6 +839,7 @@ describe('fetchSearchSourceQuery', () => {
           title: 'title',
           type: 'index-pattern',
           version: undefined,
+          managed: false,
         },
         true // skipFetchFields flag
       );
