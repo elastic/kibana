@@ -22,8 +22,6 @@ export function registerAnomalyDetectionRule(
   getStartServices: MlCoreSetup['getStartServices'],
   mlCapabilities: MlCapabilities
 ) {
-  const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
-
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
@@ -34,6 +32,7 @@ export function registerAnomalyDetectionRule(
       return docLinks.links.ml.alertingRules;
     },
     ruleParamsExpression: (props: RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>) => {
+      const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
       return (
         <MlAlertTrigger
           {...props}
