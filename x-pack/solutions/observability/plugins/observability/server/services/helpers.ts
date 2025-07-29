@@ -43,6 +43,8 @@ const PANEL_TYPE_TO_ATTR = {
 } satisfies Record<SuggestedDashboardsValidPanelType, unknown>;
 
 export type ReferencedPanelAttributes =
-  (typeof PANEL_TYPE_TO_ATTR)[keyof typeof PANEL_TYPE_TO_ATTR] & {
-    references: SavedObjectReference[];
-  };
+  (typeof PANEL_TYPE_TO_ATTR)[keyof typeof PANEL_TYPE_TO_ATTR];
+
+export type ReferencedPanelAttributesWithReferences = ReferencedPanelAttributes & {
+  references: SavedObjectReference[];
+};

@@ -12,6 +12,7 @@ import { InvestigateAlertsClient } from './investigate_alerts_client';
 import { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ReferencedPanelManager } from './referenced_panel_manager';
 
 describe('RelatedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;
@@ -69,7 +70,7 @@ describe('RelatedDashboardsClient', () => {
       dashboardClient,
       alertsClient,
       alertId,
-      soClientMock
+      new ReferencedPanelManager(logger, soClientMock)
     );
 
     jest.clearAllMocks();
@@ -367,10 +368,55 @@ describe('RelatedDashboardsClient', () => {
       await client.fetchDashboards({ page: 1 });
       expect(soClientMock.get).toHaveBeenCalledWith(PANEL_TYPE, PANEL_SO_ID);
       // @ts-ignore next-line
-      expect(client.referencedPanelsSOAttributesByPanelIndex.get(PANEL_INDEX)).toStrictEqual({
+      expect(client.referencedPanelManager.getByIndex(PANEL_INDEX)).toStrictEqual({
         ...PANEL_SO_ATTRIBUTES,
         references: [],
       });
+    });
+
+    it('should not refetch a referenced panel if it was fetched before', async () => {
+      const PANEL_SO_ID = 'panelSOId';
+      const PANEL_TYPE = 'lens';
+      const PANEL_INDEX = 'panelIndex';
+      const OTHER_PANEL_INDEX = 'otherPanelIndex';
+      const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
+      dashboardClient.search.mockResolvedValue({
+        contentTypeId: 'dashboard',
+        result: {
+          hits: [
+            {
+              id: 'dashboard1',
+              attributes: {
+                title: 'Dashboard 1',
+                panels: [
+                  { panelConfig: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE },
+                  { panelConfig: {}, panelIndex: OTHER_PANEL_INDEX, type: PANEL_TYPE },
+                ],
+              },
+              references: [
+                { name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID },
+                { name: OTHER_PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID },
+              ],
+            },
+          ],
+          pagination: { total: 1 },
+        },
+      });
+
+      soClientMock.get.mockResolvedValueOnce({
+        attributes: PANEL_SO_ATTRIBUTES,
+        type: PANEL_TYPE,
+        id: PANEL_SO_ID,
+        references: [],
+      });
+
+      // @ts-ignore next-line
+      await client.fetchDashboards({ page: 1 });
+      expect(soClientMock.get).toHaveBeenCalledTimes(1);
+      // @ts-ignore next-line
+      expect(client.referencedPanelManager.panelIndexToId.get(OTHER_PANEL_INDEX)).toBe(PANEL_SO_ID);
+      // @ts-ignore next-line
+      expect(client.referencedPanelManager.panelIndexToId.get(PANEL_INDEX)).toBe(PANEL_SO_ID);
     });
   });
 
@@ -431,7 +477,7 @@ describe('RelatedDashboardsClient', () => {
       expect(result.dashboards).toEqual([]);
     });
 
-    it('should use referencedPanelsSOAttributesByPanelIndex when panelConfig.attributes is missing', () => {
+    it('should get attributes from referencedPanelManager when panelConfig.attributes is missing', () => {
       const PANEL_INDEX = '123';
       const INDEX_ID = 'index1';
 
@@ -452,7 +498,7 @@ describe('RelatedDashboardsClient', () => {
 
       // populate fallback map with references for the panelIndex
       // @ts-ignore private field access for testing only
-      client.referencedPanelsSOAttributesByPanelIndex.set(PANEL_INDEX, {
+      client.referencedPanelManager.set(INDEX_ID, PANEL_INDEX, {
         // minimal shape needed for getPanelIndicesMap logic
         references: [{ name: 'indexpattern', id: INDEX_ID, type: 'type' }],
       });
@@ -487,7 +533,7 @@ describe('RelatedDashboardsClient', () => {
       expect(result.dashboards).toEqual([]);
     });
 
-    it('should use referencedPanelsSOAttributesByPanelIndex when panelConfig.attributes is missing', () => {
+    it('should get attributes from referencedPanelManager when panelConfig.attributes is missing', () => {
       const PANEL_INDEX = '456';
       const FIELD_NAME = 'field1';
 
@@ -507,7 +553,7 @@ describe('RelatedDashboardsClient', () => {
 
       // populate fallback state for the panel index
       // @ts-ignore testing private field
-      client.referencedPanelsSOAttributesByPanelIndex.set(PANEL_INDEX, {
+      client.referencedPanelManager.set('id', PANEL_INDEX, {
         state: {
           datasourceStates: {
             formBased: {

@@ -6,7 +6,7 @@
  */
 import { isEmpty, omit } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type {
@@ -22,25 +22,24 @@ import type {
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
 import {
-  ReferencedPanelAttributes,
   SuggestedDashboardsValidPanelType,
   isSuggestedDashboardsValidPanelType,
   isSuggestedDashboardsValidRuleTypeId,
 } from './helpers';
+import { ReferencedPanelManager } from './referenced_panel_manager';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 
 export class RelatedDashboardsClient {
   public dashboardsById = new Map<string, Dashboard>();
   private alert: AlertData | null = null;
-  private referencedPanelsSOAttributesByPanelIndex = new Map<string, ReferencedPanelAttributes>();
 
   constructor(
     private logger: Logger,
     private dashboardClient: IContentClient<Dashboard>,
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
-    private soClient: SavedObjectsClientContract
+    private referencedPanelManager: ReferencedPanelManager
   ) {}
 
   private getPanelIndicesMap: Record<
@@ -52,9 +51,7 @@ export class RelatedDashboardsClient {
         ? panel.panelConfig.attributes.references
         : undefined;
       if (!references && panel.panelIndex) {
-        references = this.referencedPanelsSOAttributesByPanelIndex.get(
-          panel.panelIndex
-        )?.references;
+        references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -73,7 +70,7 @@ export class RelatedDashboardsClient {
         ? panel.panelConfig.attributes.state
         : undefined;
       if (!state && panel.panelIndex) {
-        state = this.referencedPanelsSOAttributesByPanelIndex.get(panel.panelIndex)?.state;
+        state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
@@ -166,42 +163,6 @@ export class RelatedDashboardsClient {
     return sortedDashboards;
   }
 
-  private async fetchReferencedPanel({
-    dashboard,
-    panel,
-  }: {
-    dashboard: Dashboard;
-    panel: DashboardPanel;
-  }): Promise<void> {
-    const { panelIndex, type } = panel;
-    if (!panelIndex) return;
-
-    const panelReference = dashboard.references.find(
-      (r) => r.name.includes(panelIndex) && r.type === type
-    );
-
-    // A reference of the panel was not found
-    if (!panelReference) {
-      this.logger.error(
-        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
-      );
-      return;
-    }
-
-    try {
-      const so = await this.soClient.get<ReferencedPanelAttributes>(type, panelReference.id);
-      this.referencedPanelsSOAttributesByPanelIndex.set(panelIndex, {
-        ...so.attributes,
-        references: so.references,
-      });
-    } catch (error) {
-      // There was an error fetching the referenced saved object
-      this.logger.error(
-        `Error fetching panel with type ${type} and id ${panelReference.id}: ${error.message}`
-      );
-    }
-  }
-
   private async fetchDashboards({
     page,
     perPage = 20,
@@ -216,17 +177,15 @@ export class RelatedDashboardsClient {
       result: { hits },
     } = dashboards;
     for (const dashboard of hits) {
-      await Promise.all(
-        dashboard.attributes.panels.map(async (panel) => {
-          if (
-            isDashboardPanel(panel) &&
-            isEmpty(panel.panelConfig) &&
-            isSuggestedDashboardsValidPanelType(panel.type)
-          ) {
-            return this.fetchReferencedPanel({ dashboard, panel });
-          }
-        })
-      );
+      for (const panel of dashboard.attributes.panels) {
+        if (
+          isDashboardPanel(panel) &&
+          isSuggestedDashboardsValidPanelType(panel.type) &&
+          (isEmpty(panel.panelConfig) || !panel.panelConfig.attributes)
+        ) {
+          await this.referencedPanelManager.fetchReferencedPanel({ dashboard, panel });
+        }
+      }
       this.dashboardsById.set(dashboard.id, dashboard);
     }
 

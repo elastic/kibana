@@ -17,6 +17,7 @@ import { createObservabilityServerRoute } from '../create_observability_server_r
 import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
 import { AlertNotFoundError } from '../../common/errors/alert_not_found_error';
+import { ReferencedPanelManager } from '../../services/referenced_panel_manager';
 
 const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   endpoint: `GET ${ALERTS_API_URLS.INTERNAL_RELATED_DASHBOARDS}`,
@@ -47,13 +48,14 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
     const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
     const investigateAlertsClient = new InvestigateAlertsClient(alertsClient, rulesClient);
+    const referencedPanelManager = new ReferencedPanelManager(logger, savedObjects.client);
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
       dashboardClient,
       investigateAlertsClient,
       alertId,
-      savedObjects.client
+      referencedPanelManager
     );
     try {
       const { suggestedDashboards, linkedDashboards } =
