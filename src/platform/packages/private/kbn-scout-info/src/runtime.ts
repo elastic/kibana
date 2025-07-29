@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/paths';
-export * from './src/reporting';
-export * from './src/runtime';
+export const SCOUT_TARGET_TYPE: string = process.env.SCOUT_TARGET_TYPE || 'unknown';
+export const SCOUT_TARGET_MODE: string = process.env.SCOUT_TARGET_MODE || 'unknown';
