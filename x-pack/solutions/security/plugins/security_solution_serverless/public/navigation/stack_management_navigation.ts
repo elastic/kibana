@@ -168,7 +168,8 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
       ],
     },
     {
-      link: 'integrations',
+      id: SecurityPageName.configurationsIntegrations,
+      link: securityLink(SecurityPageName.configurationsIntegrations),
     },
     {
       cloudLink: 'billingAndSub',
