@@ -44,15 +44,15 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    await this.page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton').click();
+    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
   }
 
   async fillRoutingRuleName(name: string) {
-    await this.page.testSubj.locator('streamsAppRoutingStreamEntryNameField').fill(name);
+    await this.page.getByTestId('streamsAppRoutingStreamEntryNameField').fill(name);
   }
 
   async clickEditRoutingRule(streamName: string) {
-    await this.page.testSubj.locator(`routingRuleEditButton-${streamName}`).click();
+    await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
   async saveRoutingRule() {
@@ -84,7 +84,7 @@ export class StreamsApp {
   }
 
   async closeToast() {
-    await this.page.testSubj.locator('toastCloseButton').click();
+    await this.page.getByTestId('toastCloseButton').click();
     await expect(this.page.getByRole('log')).toBeHidden();
   }
 
@@ -99,20 +99,20 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.page.testSubj.locator('streamsAppConditionEditorFieldText').fill(field);
+      await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
     }
     if (value) {
-      await this.page.testSubj.locator('streamsAppConditionEditorValueText').fill(value);
+      await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
     }
     if (operator) {
-      await this.page.testSubj.locator('streamsAppConditionEditorOperator').selectOption(operator);
+      await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
     }
   }
 
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
     // Focus source item and activate DnD
-    await this.page.testSubj.locator(`routingRuleDragHandle-${sourceStream}`).focus();
+    await this.page.getByTestId(`routingRuleDragHandle-${sourceStream}`).focus();
     await this.page.keyboard.press('Space');
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
@@ -126,11 +126,11 @@ export class StreamsApp {
 
   // Expectation utility methods
   async expectRoutingRuleVisible(streamName: string) {
-    await expect(this.page.testSubj.locator(`routingRule-${streamName}`)).toBeVisible();
+    await expect(this.page.getByTestId(`routingRule-${streamName}`)).toBeVisible();
   }
 
   async expectRoutingRuleHidden(streamName: string) {
-    await expect(this.page.testSubj.locator(`routingRule-${streamName}`)).toBeHidden();
+    await expect(this.page.getByTestId(`routingRule-${streamName}`)).toBeHidden();
   }
 
   async expectRoutingOrder(expectedOrder: string[]) {
@@ -149,11 +149,11 @@ export class StreamsApp {
   }
 
   async expectStreamNameFieldVisible() {
-    await expect(this.page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.testSubj.locator('routingPreviewPanelWithResults')).toBeVisible();
+    await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
   }
 
   async expectToastVisible() {
@@ -175,7 +175,7 @@ export class StreamsApp {
   // Utility for data preview
   async getPreviewTableRows() {
     // Wait for the preview table to be rendered
-    await expect(this.page.testSubj.locator('euiDataGridBody')).toBeVisible();
+    await expect(this.page.getByTestId('euiDataGridBody')).toBeVisible();
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 

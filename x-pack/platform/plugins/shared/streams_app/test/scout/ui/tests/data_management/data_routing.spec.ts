@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../fixtures/generators';
 
-test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream data routing', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.enable();
   });
@@ -32,14 +32,14 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     test('should create a new routing rule successfully', async ({ page, pageObjects }) => {
-      await page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton').click();
+      await page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
 
       // Verify we're in the creating new rule state
-      await expect(page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+      await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
       await expect(page.getByText('Stream name')).toBeVisible();
 
       // Fill in the stream name
-      await page.testSubj.locator('streamsAppRoutingStreamEntryNameField').fill('logs.nginx');
+      await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('logs.nginx');
 
       // Set up routing condition
       await pageObjects.streams.fillConditionEditor({
@@ -66,7 +66,7 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
       await pageObjects.streams.cancelRoutingRule();
 
       // Verify we're back to idle state
-      await expect(page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeHidden();
+      await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeHidden();
     });
 
     test('should not let creating new routing rule while one is in progress', async ({
@@ -75,17 +75,13 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
     }) => {
       await pageObjects.streams.clickCreateRoutingRule();
 
-      await expect(
-        page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton')
-      ).toBeDisabled();
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeDisabled();
 
       // Cancel the operation
       await pageObjects.streams.cancelRoutingRule();
 
       // Verify we're back to idle state
-      await expect(
-        page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton')
-      ).toBeEnabled();
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEnabled();
     });
 
     test('should show validation errors for invalid stream names', async ({
@@ -105,7 +101,7 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
         await pageObjects.streams.expectToastVisible();
 
         // Should stay in creating state due to validation error
-        await expect(page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+        await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
       }
     });
 
@@ -119,7 +115,7 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
       await pageObjects.streams.gotoPartitioningTab('logs');
 
       // Create button should be disabled or show tooltip
-      const createButton = page.testSubj.locator('streamsAppStreamDetailRoutingAddRuleButton');
+      const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
       await expect(createButton).toBeHidden();
     });
   });
@@ -183,7 +179,7 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
       await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
 
       // Should now be editing the second rule
-      await expect(page.testSubj.locator('streamsAppConditionEditorValueText')).toHaveValue('info');
+      await expect(page.getByTestId('streamsAppConditionEditorValueText')).toHaveValue('info');
     });
 
     test('should remove routing rule with confirmation', async ({ page, pageObjects }) => {
@@ -294,7 +290,7 @@ test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
       await pageObjects.streams.expectToastVisible();
       await expect(page.getByText('Failed to fetch')).toBeVisible();
       await pageObjects.streams.closeToast();
-      await expect(page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+      await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
 
       // Restore network and retry
       await context.setOffline(false);
