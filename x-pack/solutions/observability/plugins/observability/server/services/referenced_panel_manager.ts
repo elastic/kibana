@@ -37,7 +37,7 @@ export class ReferencedPanelManager {
       return;
     }
 
-    if (this.hasById(panelReference.id)) {
+    if (this.panelsById.has(panelReference.id)) {
       this.connectPanelIndex(panelIndex, panelReference.id);
     } else {
       try {
@@ -64,10 +64,6 @@ export class ReferencedPanelManager {
   private set(panelId: string, panelIndex: string, panel: ReferencedPanelAttributesWithReferences) {
     this.panelsById.set(panelId, panel);
     this.panelIndexToId.set(panelIndex, panelId);
-  }
-
-  private hasById(panelId: string): boolean {
-    return this.panelsById.has(panelId);
   }
 
   private connectPanelIndex(panelIndex: string, panelId: string) {
