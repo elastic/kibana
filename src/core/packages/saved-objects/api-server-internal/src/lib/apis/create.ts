@@ -102,18 +102,18 @@ export const performCreate = async <T>(
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
 
-  if (!createdBy && options.accessControl?.accessMode === 'read_only') {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
-    );
-  }
-
-  const typeSupportsAccessControl = registry.supportsAccessControl(type);
   const accessMode = options.accessControl?.accessMode;
+  const typeSupportsAccessControl = registry.supportsAccessControl(type);
 
   if (!typeSupportsAccessControl && accessMode) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       `The "accessMode" field is not supported for saved objects of type "${type}".`
+    );
+  }
+
+  if (!createdBy && accessMode === 'read_only') {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Cannot create a saved object of type "${type}" with "read_only" access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
     );
   }
 
