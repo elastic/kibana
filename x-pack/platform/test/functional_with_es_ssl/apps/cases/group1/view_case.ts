@@ -1078,7 +1078,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Tabs - alerts linked to case', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/rule_registry/alerts'
+        );
         await cases.navigation.navigateToApp();
         const theCase = await cases.api.createCase();
         await cases.casesTable.waitForCasesToBeListed();
@@ -1098,7 +1100,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
-        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts/');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts/');
       });
 
       beforeEach(async () => {

@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('single metric job conversion to multi-metric job', function () {
     this.tags(['ml']);
     before(async () => {
-      await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esNode.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
