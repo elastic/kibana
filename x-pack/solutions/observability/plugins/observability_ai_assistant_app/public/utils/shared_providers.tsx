@@ -31,23 +31,21 @@ export function SharedProviders({
     return { theme$ };
   }, [theme$]);
 
-  return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaThemeProvider theme={theme}>
-        <KibanaContextProvider
-          services={{
-            ...coreStart,
-            ...pluginsStart,
-            plugins: {
-              start: pluginsStart,
-            },
-          }}
-        >
-          <RedirectAppLinks coreStart={coreStart}>
-            <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
-          </RedirectAppLinks>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </KibanaRenderContextProvider>
+  return coreStart.rendering.addContext(
+    <KibanaThemeProvider theme={theme}>
+      <KibanaContextProvider
+        services={{
+          ...coreStart,
+          ...pluginsStart,
+          plugins: {
+            start: pluginsStart,
+          },
+        }}
+      >
+        <RedirectAppLinks coreStart={coreStart}>
+          <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
+        </RedirectAppLinks>
+      </KibanaContextProvider>
+    </KibanaThemeProvider>
   );
 }
