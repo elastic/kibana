@@ -17,7 +17,6 @@ import {
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 
-// eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { USER } from '@kbn/test-suites-xpack-platform/functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');

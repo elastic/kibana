@@ -108,6 +108,8 @@ export function DependenciesInventoryTable() {
           },
         });
       }
+
+      return Promise.resolve();
     },
     // Disables exhaustive deps because the statistics api must only be called when the rendered items changed or when comparison is toggled or changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,7 +214,6 @@ export function DependenciesInventoryTable() {
   const showRandomSamplerBadge = data?.sampled && status === FETCH_STATUS.SUCCESS;
   const fetchingStatus =
     isPending(status) || isPending(timeseriesStatus) ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
-
   return (
     <>
       <div

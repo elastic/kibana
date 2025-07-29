@@ -23,7 +23,6 @@ import {
 } from '../../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

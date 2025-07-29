@@ -25,6 +25,7 @@ import {
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 export const createEventSignal = async ({
   sharedParams,
@@ -109,7 +110,16 @@ export const createEventSignal = async ({
       }
     }
 
-    const ids = Array.from(signalsQueryMap.keys());
+    const { matchedEvents, skippedIds } = validateCompleteThreatMatches(
+      signalsQueryMap,
+      threatMapping
+    );
+
+    if (skippedIds.length > 0) {
+      ruleExecutionLogger.debug(`Skipping not matched documents: ${skippedIds.join(', ')}`);
+    }
+
+    const ids = Array.from(matchedEvents.keys());
     const indexFilter = {
       query: {
         bool: {
@@ -136,7 +146,7 @@ export const createEventSignal = async ({
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalsQueryMap: matchedEvents,
       threatIndicatorPath,
       threatFilters,
       threatSearchParams,

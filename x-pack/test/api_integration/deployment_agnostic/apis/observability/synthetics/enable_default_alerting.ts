@@ -46,7 +46,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({
+        types: ['synthetics-monitor-multi-space'],
+      });
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
       httpMonitorJson = {
         ..._httpMonitorJson,

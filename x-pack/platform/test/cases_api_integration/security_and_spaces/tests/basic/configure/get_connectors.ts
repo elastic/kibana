@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 
 import { getCaseConnectors } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 

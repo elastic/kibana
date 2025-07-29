@@ -20,7 +20,6 @@ const secrets = {
   apiKey: 'apiKey',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function xsoarTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

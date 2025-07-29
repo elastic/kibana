@@ -25,7 +25,6 @@ import {
 } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function apiKeyBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -245,7 +244,6 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
           id: backfillId,
           provider: 'alerting',
           actions: new Map([['execute-backfill', { equal: schedule.length }]]),
-          collapseByExecutionUUid: true,
         });
       });
 

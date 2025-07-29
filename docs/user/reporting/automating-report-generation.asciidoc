@@ -2,7 +2,7 @@
 [[automating-report-generation]]
 == Automatically generate reports
 
-To automatically generate PDF and CSV reports, generate a POST URL, then submit the HTTP `POST` request using {watcher} or a script.
+To automatically generate PDF and CSV reports, generate a POST URL, then submit an HTTP `POST` request using {watcher} or a script. Alternatively, use {kib} to generate reports on a recurring schedule and share them with a list of emails that you specify.
 
 [float]
 [[create-a-post-url]]
@@ -10,15 +10,22 @@ To automatically generate PDF and CSV reports, generate a POST URL, then submit 
 
 Create the POST URL that triggers a report to generate PDF and CSV reports.
 
+[float]
+[[pdf-png-post-url]]
+==== PDF or PNG reports
+
 To create the POST URL for PDF reports:
 
-. Go to *Dashboards*, *Visualize Library*, or *Canvas*.
+. Go to *Dashboards*, *Visualize Library*, or *Canvas*. From the toolbar, do one of the following:
 
-. Open the dashboard, visualization, or **Canvas** workpad you want to view as a report.
+. Open the dashboard, visualization, or **Canvas** workpad you want to view as a report.
 
-* If you are using *Dashboard* or *Visualize Library*, from the toolbar, click *Share > Export*, select the PDF option then click *Copy POST URL*.
+** If you are using *Dashboard* or *Visualize Library*, from the toolbar, click the **Export** icon, then **PDF** or **PNG**. In the export flyout, copy the POST URL.
+** If you are using a *Canvas* workpad, from the toolbar, click *Share > PDF Reports*, then click *Advanced options > Copy POST URL*.
 
-* If you are using *Canvas*, from the toolbar, click *Share > PDF Reports*, then click *Advanced options > Copy POST URL*.
+[float]
+[[csv-post-url]]
+==== CSV reports
 
 To create the POST URL for CSV reports:
 
@@ -26,7 +33,7 @@ To create the POST URL for CSV reports:
 
 . Open the saved Discover session you want to share.
 
-. In the toolbar, click *Share > Export > Copy POST URL*.
+. In the toolbar, click the **Export** icon, then **CSV**. In the export flyout, copy the POST URL.
 
 [float]
 [[use-watcher]]
@@ -58,3 +65,89 @@ If you experience issues with the deprecated report URLs after you upgrade {kib}
 
 IMPORTANT:
 In earlier {kib} versions, you could use the `&sync` parameter to append to report URLs that held the request open until the document was fully generated. The `&sync` parameter is now unsupported. If you use the `&sync` parameter in Watcher, you must update the parameter.
+
+[float]
+[[schedule-report-generation]]
+=== Schedule and share reports
+
+preview::[]
+
+Save time by setting up a recurring task that automatically generates reports and shares them on a schedule that you choose. 
+
+[float]
+[[scheduled-reports-reqs]]
+==== Prerequisites
+
+* To generate PDF and PNG reports, your {kib} instance needs a minimum of 2GB of RAM. There is no minimum requirement for CSV reports.
+* To use the scheduled reports feature, your role needs <<grant-user-access, access to reporting>>.
+* (Optional) To view and manage other users' reports and schedules, your role needs `All` privileges for the **Manage Scheduled Reports** feature. You can set this by configuring your role's {kib} privileges. If your role doesn't have the **Manage Scheduled Reporting** feature privilege, you can only share reports with yourself.
+* Sharing reports outside of {kib} requires a default preconfigured email connector.
++
+** **{ech} or {serverless-short} users**: You do not need to set up a default preconfigured email connector. Kibana provides you with a built-in preconfigured email connector that uses the SMTP protocol to send emails. To view it, go to the **Connectors** page and find the Elastic-Cloud-SMTP connector.
+** **Self-managed users**: You must set up a default preconfigured email connector to send notifications outside of {kib}. To do this:
++
+. Open your `kibana.yml` file.
+. Add the `xpack.actions.preconfigured` {kib} setting. This setting specifies configuration details for the preconfigured connector that you're defining. 
+. Under the `xpack.actions.preconfigured` setting, define the email connector. Refer to <<preconfigured-email-configuration>> to learn about requirements for different email services and providers.
++
+NOTE: You must define preconfigured email connector details in the `kibana.yml` file. You cannot create a preconfigured email connector from the {kib} UI. 
++
+. Add the `notifications.connectors.default.email` {kib} setting, and provide the name of your email connector. The `notifications.connectors.default.email` setting specifies the default email connector to use when sending notifications. This is especially useful if you have multiple email connectors and want to set a default one. 
++
+The following example shows a modified `kibana.yml` file with a preconfigured email connector that's set as the default connector for email notifications:
++    
+[source,yaml]
+----
+xpack.actions.preconfigured:
+   my-email:
+      name: preconfigured-email-connector-type
+      actionTypeId: .email
+      config:
+         service: other
+         from: testsender@test.com
+         host: validhostname
+         port: 8080
+         secure: false
+         hasAuth: true
+      secrets:
+         user: testuser
+         password: passwordkeystorevalue
+
+notifications.connectors.default.email: my-email
+----
+
+* (Optional) To control who can receive email notifications from {kib}, add the <<action-settings, `xpack.actions.email.domain_allowlist` setting>> to your `kibana.yml` file. 
+
+[float]
+[[create-scheduled-report]]
+==== Create a schedule 
+. Open the saved Discover session, dashboard, or visualization you want to share. 
+. Click the **Export** icon, then **Schedule export**.
+. Enter the requested details, and (optional) enable **Print format** to generate the report in a printer-friendly format.
+. Set up a schedule for generating the report.
+
+    * **Date**: Choose when to start generating reports.
+    * **Timezone**: Specify a timezone for the schedule.
+    * **Repeat**: Choose how often you want to generate reports. 
+
+. (Optional) To share generated reports outside of {kib}, enable **Send by email** and enter a list of email addresses. Recipients will receive emails with the generated reports attached and on the schedule that you specified.
++
+NOTE: If your role doesn't have the **Manage Scheduled Reporting** feature privilege, you can only send reports to yourself. 
++
+. Click **Schedule exports** to save the schedule. 
+
+A message appears, indicating that the schedule is available on the **Reporting** page. From the **Reporting** page, click on the **Schedules** tab to view details for the newly-created schedule. 
+
+IMPORTANT: Note that you cannot edit or delete a schedule after you create it. To stop the schedule from running, you must disable it. Disabling a schedule permanently stops it from running. To restart it, you must create a new schedule. 
+
+[float]
+[[scheduled-reports-limitations]]
+==== Scheduled reports limitations
+
+The feature enables analysis of data in external tools, but it is not intended for bulk export or to backup {es} data. Issues with report generation and sharing are likely to happen in the following scenarios:
+
+* The limit for email attachments is 10 MB. {kib} might fail to attach reports that are larger than this size.
+* Scheduling too many reports at the same time might cause reports to be shared late or at an inconsistent schedule. {kib} Task Manager runs reporting tasks one at a time.
+* If your cluster is running many tasks in general, reports may be delayed.
+* Scheduling reports of Canvas workpads is not supported since Canvas workpads are in maintenance mode. 
+* Scheduling CSV reports of Lens visualizations is not supported. 

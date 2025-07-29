@@ -946,3 +946,52 @@ export const findInternalCaseUserActions = async ({
 
   return userActions;
 };
+
+export const deleteAllCaseAnalyticsItems = async (es: Client) => {
+  await Promise.all([
+    deleteCasesAnalytics(es),
+    deleteAttachmentsAnalytics(es),
+    deleteCommentsAnalytics(es),
+    deleteActivityAnalytics(es),
+  ]);
+};
+
+export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.internal.cases',
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.internal.cases-attachments',
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.internal.cases-comments',
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.internal.cases-activity',
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
