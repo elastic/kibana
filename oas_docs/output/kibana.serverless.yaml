@@ -9146,7 +9146,7 @@ paths:
               type: object
               properties:
                 objects:
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -57470,6 +57470,35 @@ components:
                     - level
                     - summary
                     - meta
+                http:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: Service status levels as human and machine readable values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: An unstructured set of extra metadata about this service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
                 savedObjects:
                   additionalProperties: false
                   type: object
@@ -59800,7 +59829,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59824,7 +59855,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59861,7 +59894,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59959,7 +59994,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59988,7 +60025,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60014,7 +60053,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60055,7 +60096,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60080,7 +60123,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
