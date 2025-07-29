@@ -9,25 +9,22 @@
 
 import React, { type FC } from 'react';
 import {
-  Navigation,
+  Navigation as NavigationComponent,
   NavigationKibanaProvider,
   type NavigationProps,
-  type NavigationKibanaDependencies,
+  type NavigationChromeDependencies,
 } from '@kbn/shared-ux-chrome-navigation';
 
-export interface Props {
-  navProps: NavigationProps;
-  deps: NavigationKibanaDependencies;
-}
+export type Props = NavigationProps & NavigationChromeDependencies;
 
-export const SideNavigation: FC<Props> = ({ navProps, deps }) => {
+export const Navigation: FC<Props> = ({ dataTestSubj$, navigationTree$, ...rest }) => {
   return (
-    <NavigationKibanaProvider {...deps}>
-      <Navigation {...navProps} />
+    <NavigationKibanaProvider {...rest}>
+      <NavigationComponent dataTestSubj$={dataTestSubj$} navigationTree$={navigationTree$} />
     </NavigationKibanaProvider>
   );
 };
 
 // We need to use the default export here because of the way React.lazy works
 // eslint-disable-next-line import/no-default-export
-export default SideNavigation;
+export default Navigation;
