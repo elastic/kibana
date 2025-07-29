@@ -225,7 +225,7 @@ const generateSignificantEventsRoute = createServerRoute({
     return fromRxjs(generatedSignificantEventDefinitions).pipe(
       map((query) => ({
         query,
-        type: 'generated_queries',
+        type: 'generated_query' as const,
       }))
     );
   },

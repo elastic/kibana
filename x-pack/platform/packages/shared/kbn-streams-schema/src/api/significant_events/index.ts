@@ -48,7 +48,7 @@ interface GeneratedSignificantEventQuery {
 }
 
 type SignificantEventsGenerateResponse = Observable<
-  ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>
+  ServerSentEventBase<'generated_query', { query: GeneratedSignificantEventQuery }>
 >;
 
 export type {

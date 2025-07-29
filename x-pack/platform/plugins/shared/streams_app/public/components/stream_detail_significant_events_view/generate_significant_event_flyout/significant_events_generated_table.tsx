@@ -17,6 +17,7 @@ import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { buildDiscoverParams } from '../utils/discover_helpers';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,
@@ -34,6 +35,7 @@ export function SignificantEventsGeneratedTable({
       start: { discover },
     },
   } = useKibana();
+  const { timeState } = useTimefilter();
 
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
@@ -44,7 +46,9 @@ export function SignificantEventsGeneratedTable({
       render: (_, query) => (
         <EuiLink
           target="_blank"
-          href={discover?.locator?.getRedirectUrl(buildDiscoverParams(query, definition))}
+          href={discover?.locator?.getRedirectUrl(
+            buildDiscoverParams(query, definition, timeState)
+          )}
         >
           {query.title}
         </EuiLink>
