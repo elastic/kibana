@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  describe('Discover rule creation', function () {
+    const esArchiver = getService('esArchiver');
+    const { common } = getPageObjects(['common', 'settings', 'shareSavedObjectsToSpace']);
+    const find = getService('find');
+
+    before('initialize tests', async () => {
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    });
+    after('clean up archives', async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+    });
+
+    it('navigate to Discover', () => {
+      return common.navigateToApp('discover');
+    });
+
+    it('begin creating rule', async () => {
+      await find.clickByButtonText('Alerts');
+      await find.clickByButtonText('Create search threshold rule');
+      await find.clickByButtonText('Details');
+    });
+
+    it('should have the "Related dashboards" section', async () => {
+      const linkedDashboardsElement = await find.byCssSelector(
+        '[data-test-subj="ruleLinkedDashboards"]'
+      );
+      expect(linkedDashboardsElement).to.be.ok();
+      expect(await linkedDashboardsElement.isDisplayed()).to.be(true);
+    });
+  });
+}
