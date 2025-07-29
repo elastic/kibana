@@ -274,9 +274,9 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                     }
                   )}
                   title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorTitle',
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
                     {
-                      defaultMessage: 'There are errors in the form.',
+                      defaultMessage: 'There are errors in the form',
                     }
                   )}
                 />
