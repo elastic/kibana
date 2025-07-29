@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesSimulateIndexTemplateResponse,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get, sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
@@ -19,12 +22,18 @@ export interface ConcreteIndexInfo {
   isWriteIndex: boolean;
 }
 
-interface UpdateIndexMappingsOpts {
+interface UpdateAliasIndexMappingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
-  validIndexPrefixes?: string[];
   concreteIndices: ConcreteIndexInfo[];
+}
+
+interface UpdateDataStreamIndexMappingsOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  totalFieldsLimit: number;
+  concreteIndexInfo: ConcreteIndexInfo;
 }
 
 interface UpdateIndexOpts {
@@ -32,7 +41,15 @@ interface UpdateIndexOpts {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   concreteIndexInfo: ConcreteIndexInfo;
+  simulatedMapping: MappingTypeMapping;
   attempt?: number;
+}
+
+interface UpdateTotalFieldLimitSettingOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  totalFieldsLimit: number;
+  concreteIndexInfo: ConcreteIndexInfo;
 }
 
 const MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS = 100;
@@ -42,7 +59,7 @@ const updateTotalFieldLimitSetting = async ({
   esClient,
   totalFieldsLimit,
   concreteIndexInfo,
-}: UpdateIndexOpts) => {
+}: UpdateTotalFieldLimitSettingOpts) => {
   const { index, alias } = concreteIndexInfo;
   try {
     await retryTransientEsErrors(
@@ -65,17 +82,15 @@ const updateTotalFieldLimitSetting = async ({
   }
 };
 
-// This will update the mappings of backing indices but *not* the settings. This
-// is due to the fact settings can be classed as dynamic and static, and static
-// updates will fail on an index that isn't closed. New settings *will* be applied as part
-// of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateUnderlyingMapping = async ({
+const simulateIndexMapping = async ({
   logger,
   esClient,
-  concreteIndexInfo,
-  attempt = 1,
-}: UpdateIndexOpts) => {
-  const { index, alias } = concreteIndexInfo;
+  index,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<MappingTypeMapping | undefined> => {
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
   try {
     simulatedIndexMapping = await retryTransientEsErrors(
@@ -84,18 +99,29 @@ const updateUnderlyingMapping = async ({
     );
   } catch (err) {
     logger.error(
-      `Ignored PUT mappings for ${alias}; error generating simulated mappings: ${err.message}`
+      `Ignored PUT mappings for ${index}; error generating simulated mappings: ${err.message}`
     );
     return;
   }
-
-  const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
-
-  if (simulatedMapping == null) {
-    logger.error(`Ignored PUT mappings for ${alias}; simulated mappings were empty`);
-    return;
+  const mapping = get(simulatedIndexMapping, ['template', 'mappings']);
+  if (mapping == null) {
+    logger.error(`Ignored PUT mappings for ${index}; simulated mappings were empty`);
   }
+  return mapping;
+};
 
+// This will update the mappings of backing indices but *not* the settings. This
+// is due to the fact settings can be classed as dynamic and static, and static
+// updates will fail on an index that isn't closed. New settings *will* be applied as part
+// of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
+const updateUnderlyingMapping = async ({
+  logger,
+  esClient,
+  concreteIndexInfo,
+  simulatedMapping,
+  attempt = 1,
+}: UpdateIndexOpts) => {
+  const { index, alias } = concreteIndexInfo;
   try {
     await retryTransientEsErrors(
       () => esClient.indices.putMapping({ index, ...simulatedMapping }),
@@ -121,6 +147,7 @@ const updateUnderlyingMapping = async ({
             logger,
             esClient,
             concreteIndexInfo,
+            simulatedMapping,
             totalFieldsLimit: newLimit,
             attempt: attempt + 1,
           });
@@ -140,53 +167,86 @@ const updateUnderlyingMapping = async ({
     throw err;
   }
 };
+
 /**
  * Updates the underlying mapping for any existing concrete indices
  */
-export const updateIndexMappings = async ({
+export const updateAliasIndexMappings = async ({
   logger,
   esClient,
   totalFieldsLimit,
   concreteIndices,
-  validIndexPrefixes,
-}: UpdateIndexMappingsOpts) => {
-  let validConcreteIndices = [];
-  if (validIndexPrefixes) {
-    for (const cIdx of concreteIndices) {
-      if (!validIndexPrefixes?.some((prefix: string) => cIdx.index.startsWith(prefix))) {
-        logger.warn(
-          `Found unexpected concrete index name "${
-            cIdx.index
-          }" while expecting index with one of the following prefixes: [${validIndexPrefixes.join(
-            ','
-          )}] Not updating mappings or settings for this index.`
-        );
-      } else {
-        validConcreteIndices.push(cIdx);
-      }
-    }
-  } else {
-    validConcreteIndices = concreteIndices;
-  }
-
+}: UpdateAliasIndexMappingsOpts) => {
   logger.debug(
-    `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
+    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
   );
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    validConcreteIndices.map((index) =>
+    concreteIndices.map((index) =>
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
+  const simulatedMapping = await simulateIndexMapping({
+    logger,
+    esClient,
+    index: concreteIndices[0].index,
+  });
 
+  if (simulatedMapping == null) {
+    return;
+  }
   // Update mappings of the found indices.
   await Promise.all(
-    validConcreteIndices.map((index) =>
-      updateUnderlyingMapping({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
+    concreteIndices.map((index) =>
+      updateUnderlyingMapping({
+        logger,
+        esClient,
+        totalFieldsLimit,
+        concreteIndexInfo: index,
+        simulatedMapping,
+      })
     )
   );
+};
+
+/**
+ * Updates the underlying mapping for any existing concrete indices
+ */
+export const updateDataStreamIndexMappings = async ({
+  logger,
+  esClient,
+  totalFieldsLimit,
+  concreteIndexInfo,
+}: UpdateDataStreamIndexMappingsOpts) => {
+  logger.debug(`Updating underlying mappings for data stream: ${concreteIndexInfo.alias}`);
+
+  // Update total field limit setting of found indices
+  // Other index setting changes are not updated at this time
+  await updateTotalFieldLimitSetting({
+    logger,
+    esClient,
+    totalFieldsLimit,
+    concreteIndexInfo,
+  });
+  const simulatedMapping = await simulateIndexMapping({
+    logger,
+    esClient,
+    index: concreteIndexInfo.alias,
+  });
+
+  if (simulatedMapping == null) {
+    return;
+  }
+
+  await updateUnderlyingMapping({
+    logger,
+    esClient,
+    totalFieldsLimit,
+    concreteIndexInfo,
+    simulatedMapping,
+  });
 };
 
 export interface CreateConcreteWriteIndexOpts {
@@ -210,10 +270,19 @@ interface SetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   concreteIndices: ConcreteIndexInfo[];
+  alias: string;
 }
 
-export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
-  const { logger, esClient, concreteIndices } = opts;
+export async function findOrSetConcreteWriteIndex(
+  opts: SetConcreteWriteIndexOpts
+): Promise<ConcreteIndexInfo> {
+  const { logger, esClient, concreteIndices, alias } = opts;
+  const concreteWriteIndex = concreteIndices.find((index) => index.isWriteIndex);
+  if (concreteWriteIndex) {
+    return concreteWriteIndex;
+  } else {
+    logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
+  }
   const lastIndex = concreteIndices.length - 1;
   const concreteIndex = sortBy(concreteIndices, ['index'])[lastIndex];
   logger.debug(
@@ -239,6 +308,7 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     logger.info(
       `Successfully set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
     );
+    return concreteIndex;
   } catch (error) {
     throw new Error(
       `Failed to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
