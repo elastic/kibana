@@ -417,7 +417,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -442,11 +442,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // validate that we have a `process_name`. We need this here because the schema for this command
     // specifically because `KillProcessRequestBody` allows 3 types of parameters.
     if (payload.command === 'kill-process') {
-      if (
-        !payload.parameters ||
-        !('process_name' in payload.parameters) ||
-        !payload.parameters.process_name
-      ) {
+      const parameters = (
+        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<ResponseActionParametersWithProcessName>
+      ).parameters;
+
+      if (!parameters || !('process_name' in parameters) || !parameters.process_name) {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
@@ -458,7 +458,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // RUN SCRIPT
     if (payload.command === 'runscript') {
-      const scriptId = (payload.parameters as SentinelOneRunScriptActionRequestParams).scriptId;
+      const parameters = (
+        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
+      ).parameters;
+      const scriptId = parameters?.scriptId;
 
       if (!scriptId) {
         throw new ResponseActionsClientError(
@@ -490,6 +493,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
 
@@ -545,6 +549,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 
@@ -931,6 +936,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'kill-process',
+      parameters: actionRequest.parameters as ResponseActionParametersWithProcessName,
       meta: { parentTaskId: '' },
     };
 
@@ -1005,6 +1011,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'running-processes',
       meta: { parentTaskId: '' },
     };
@@ -1080,6 +1087,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: actionRequest.parameters as SentinelOneRunScriptActionRequestParams,
       command: 'runscript',
     };
 
