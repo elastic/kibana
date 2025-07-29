@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe.only('conflicts', function () {
+  describe('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
