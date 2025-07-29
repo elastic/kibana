@@ -11,12 +11,13 @@ import { css } from '@emotion/react';
 import React, { Suspense, type FC } from 'react';
 import { EuiSkeletonRectangle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Props as NavigationProps } from './navigation';
 
-import type { Props as NavigationProps } from './side_navigation';
+export type { Props as NavigationProps } from './navigation';
 
-const SideNavComponentLazy = React.lazy(() => import('./side_navigation'));
+const NavigationComponentLazy = React.lazy(() => import('./navigation'));
 
-export const SideNavComponent: FC<NavigationProps> = (props) => {
+export const Navigation: FC<NavigationProps> = (props) => {
   const { euiTheme } = useEuiTheme();
   return (
     <Suspense
@@ -29,13 +30,13 @@ export const SideNavComponent: FC<NavigationProps> = (props) => {
           height={16}
           borderRadius="s"
           contentAriaLabel={i18n.translate(
-            'navigation.sideNavigation.loadingSolutionNavigationLabel',
+            'core.ui.chrome.sideNavigation.loadingSolutionNavigationLabel',
             { defaultMessage: 'Loading solution navigation' }
           )}
         />
       }
     >
-      <SideNavComponentLazy {...props} />
+      <NavigationComponentLazy {...props} />
     </Suspense>
   );
 };

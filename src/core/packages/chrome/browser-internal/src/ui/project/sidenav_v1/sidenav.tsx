@@ -7,26 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC } from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/css';
+import { Navigation, NavigationProps } from './navigation';
 
-interface Props {
+export interface ProjectSideNavV1Props extends NavigationProps {
   toggle: (isVisible: boolean) => void;
   isCollapsed$: Observable<boolean>;
 }
 
 const PANEL_WIDTH = 290;
 
-export const ProjectSideNavV1: FC<PropsWithChildren<Props>> = ({
-  children,
-  isCollapsed$,
+export const ProjectSideNavV1: FC<ProjectSideNavV1Props> = ({ isCollapsed$, toggle, ...rest }) => {
+  return (
+    <CollapsibleNavigationFlyout isCollapsed$={isCollapsed$} toggle={toggle}>
+      <Navigation {...rest} isCollapsed$={isCollapsed$} />
+    </CollapsibleNavigationFlyout>
+  );
+};
+
+const CollapsibleNavigationFlyout = ({
   toggle,
+  isCollapsed$,
+  children,
+}: {
+  toggle: (isVisible: boolean) => void;
+  isCollapsed$: Observable<boolean>;
+  children: React.ReactNode;
 }) => {
   const isCollapsed = useObservable(isCollapsed$, false);
-
   return (
     <EuiCollapsibleNavBeta
       data-test-subj="projectLayoutSideNav"
