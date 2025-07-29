@@ -20,13 +20,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
-  const selectedInferenceId: string | undefined = knowledgeBase.status.value?.currentInferenceId;
+  const selectedInferenceId = getMappedInferenceId(knowledgeBase.status.value?.currentInferenceId);
 
   const canInstallProductDoc = selectedInferenceId !== undefined;
 

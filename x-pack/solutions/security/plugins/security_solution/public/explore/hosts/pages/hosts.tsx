@@ -57,7 +57,6 @@ import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../common/components/page_loader';
 
@@ -119,12 +118,12 @@ const HostsComponent = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled
+    ? experimentalDataView.hasMatchedIndices()
+    : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -133,21 +132,23 @@ const HostsComponent = () => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
-    [globalFilters, sourcererDataView, uiSettings, query]
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, globalFilters]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),
-    [sourcererDataView, query, tabsFilters, uiSettings]
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, tabsFilters]
   );
 
   useInvalidFilterQuery({
@@ -195,7 +196,10 @@ const HostsComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar
+              id={InputsModelId.global}
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

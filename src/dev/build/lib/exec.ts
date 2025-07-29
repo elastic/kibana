@@ -42,7 +42,7 @@ const outputBufferedLogs = (
   logs: LogLine[] | undefined,
   success: boolean
 ) => {
-  log.write(`--- ${success ? '✅' : '❌'} ${build.getBuildDesc()} [${build.getBuildArch()}]`);
+  log.write(`--- ${success ? '✅' : '❌'} ${build.getBuildDesc()}`);
 
   log.indent(4, () => {
     logBuildCmd();
@@ -70,7 +70,7 @@ export async function exec(
   });
 
   if (bufferLogs) {
-    const isDockerBuild = cmd === './build_docker.sh';
+    const isDockerBuild = cmd.startsWith('./build_docker');
     const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
       map((chunk) => handleBufferChunk(chunk, level))
     );

@@ -47,6 +47,12 @@ describe('SynchronizationTaskRunner', () => {
 
   let taskRunner: SynchronizationTaskRunner;
 
+  const analyticsConfig = {
+    index: {
+      enabled: true,
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(newAttemptTime);
@@ -69,6 +75,8 @@ describe('SynchronizationTaskRunner', () => {
     esClient.reindex.mockResolvedValue({
       task: esReindexTaskId,
     });
+
+    esClient.indices.exists.mockResolvedValue(true);
   });
 
   afterAll(() => {
@@ -87,6 +95,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -175,6 +184,7 @@ describe('SynchronizationTaskRunner', () => {
         ...taskInstance,
         state: {},
       },
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -237,28 +247,6 @@ describe('SynchronizationTaskRunner', () => {
     });
   });
 
-  it('returns the previous state if the previous task is still running', async () => {
-    esClient.tasks.get.mockResolvedValueOnce({
-      completed: false,
-      task: {} as TasksTaskInfo,
-    });
-
-    const getESClient = async () => esClient;
-
-    taskRunner = new SynchronizationTaskRunner({
-      logger,
-      getESClient,
-      taskInstance,
-    });
-
-    const result = await taskRunner.run();
-
-    expect(esClient.reindex).not.toBeCalled();
-    expect(result).toEqual({
-      state: taskInstance.state,
-    });
-  });
-
   it('reindexes when the previous sync task failed', async () => {
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
@@ -272,6 +260,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -336,6 +325,54 @@ describe('SynchronizationTaskRunner', () => {
     });
   });
 
+  it('returns the previous state if the previous task is still running', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: false,
+      task: {} as TasksTaskInfo,
+    });
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toEqual({
+      state: taskInstance.state,
+    });
+  });
+
+  it('skips execution if the index does not exist', async () => {
+    esClient.indices.exists.mockResolvedValueOnce(false);
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.cluster.health).not.toBeCalled();
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toBe(undefined);
+
+    expect(logger.error).not.toBeCalled();
+    expect(logger.debug).toBeCalledWith(
+      '[.internal.cases] Destination index does not exist, skipping synchronization task.',
+      { tags: ['cai-synchronization', '.internal.cases'] }
+    );
+  });
+
   describe('Error handling', () => {
     it('calls throwRetryableError if the esClient throws a retryable error', async () => {
       esClient.tasks.get.mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error'));
@@ -346,6 +383,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -369,6 +407,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -381,6 +420,31 @@ describe('SynchronizationTaskRunner', () => {
         '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
         { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
+    });
+  });
+
+  describe('Analytics index disabled', () => {
+    const analyticsConfigDisabled = {
+      index: {
+        enabled: false,
+      },
+    };
+
+    it('does not call the reindex API if analytics is disabled', async () => {
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+        analyticsConfig: analyticsConfigDisabled,
+      });
+
+      await taskRunner.run();
+
+      expect(esClient.tasks.get).not.toBeCalled();
+      expect(esClient.cluster.health).not.toBeCalled();
+      expect(esClient.reindex).not.toBeCalled();
     });
   });
 });

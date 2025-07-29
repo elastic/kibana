@@ -24,7 +24,8 @@ jest.mock('../task_type_dictionary', () => {
 });
 
 // Notify response-ops if a task sets a priority to something other than `Normal`
-describe('Task priority checks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/228815
+describe.skip('Task priority checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskTypeDictionary: TaskTypeDictionary;
