@@ -52,7 +52,7 @@ export const DashboardMigrationLastExecution = z.object({
 export type DashboardMigrationData = z.infer<typeof DashboardMigrationData>;
 export const DashboardMigrationData = z.object({
   /**
-   * The rule migration name
+   * The dashboard migration name
    */
   name: NonEmptyString,
   /**
@@ -64,7 +64,7 @@ export const DashboardMigrationData = z.object({
    */
   created_at: NonEmptyString,
   /**
-   * The last execution of the rule migration task.
+   * The last execution of the dashboard migration task.
    */
   last_execution: DashboardMigrationLastExecution.optional(),
 });
@@ -76,7 +76,7 @@ export type DashboardMigration = z.infer<typeof DashboardMigration>;
 export const DashboardMigration = z
   .object({
     /**
-     * The rule migration id
+     * The dashboard migration id
      */
     id: NonEmptyString,
   })
@@ -136,7 +136,7 @@ export type DashboardMigrationStatusEnum = typeof DashboardMigrationStatus.enum;
 export const DashboardMigrationStatusEnum = DashboardMigrationStatus.enum;
 
 /**
- * The rule migration document object.
+ * The dashboard migration document object.
  */
 export type DashboardMigrationDashboardData = z.infer<typeof DashboardMigrationDashboardData>;
 export const DashboardMigrationDashboardData = z.object({
@@ -153,11 +153,11 @@ export const DashboardMigrationDashboardData = z.object({
    */
   created_by: NonEmptyString,
   /**
-   * The original rule to migrate.
+   * The original dashboard to migrate.
    */
   original_dashboard: OriginalDashboard,
   /**
-   * The status of the rule migration process.
+   * The status of the dashboard migration process.
    */
   status: DashboardMigrationStatus.default('pending'),
   /**
@@ -171,13 +171,13 @@ export const DashboardMigrationDashboardData = z.object({
 });
 
 /**
- * The rule migration document object.
+ * The dashboard migration document object.
  */
 export type DashboardMigrationDashboard = z.infer<typeof DashboardMigrationDashboard>;
 export const DashboardMigrationDashboard = z
   .object({
     /**
-     * The rule migration id
+     * The dashboard migration id
      */
     id: NonEmptyString,
   })
@@ -198,7 +198,7 @@ export type DashboardMigrationTaskStatusEnum = typeof DashboardMigrationTaskStat
 export const DashboardMigrationTaskStatusEnum = DashboardMigrationTaskStatus.enum;
 
 /**
- * The rule migration task stats object.
+ * The dashboard migration task stats object.
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
 export const DashboardMigrationTaskStats = z.object({
@@ -215,28 +215,28 @@ export const DashboardMigrationTaskStats = z.object({
    */
   status: DashboardMigrationTaskStatus,
   /**
-   * The rules migration stats.
+   * The dashboards migration stats.
    */
   dashboards: z
     .object({
       /**
-       * The total number of rules to migrate.
+       * The total number of dashboards to migrate.
        */
       total: z.number().int(),
       /**
-       * The number of rules that are pending migration.
+       * The number of dashboards that are pending migration.
        */
       pending: z.number().int(),
       /**
-       * The number of rules that are being migrated.
+       * The number of dashboards that are being migrated.
        */
       processing: z.number().int(),
       /**
-       * The number of rules that have been migrated successfully.
+       * The number of dashboards that have been migrated successfully.
        */
       completed: z.number().int(),
       /**
-       * The number of rules that have failed migration.
+       * The number of dashboards that have failed migration.
        */
       failed: z.number().int(),
     })
