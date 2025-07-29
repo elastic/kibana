@@ -22,7 +22,7 @@ disabled:
 
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
-  - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
+  - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
