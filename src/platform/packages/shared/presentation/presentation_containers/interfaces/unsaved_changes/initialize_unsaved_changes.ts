@@ -16,7 +16,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable, combineLatestWith, debounceTime, map, of } from 'rxjs';
-import { isEqual } from 'lodash';
+import { isEqual, sortBy } from 'lodash';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import { PresentationContainer } from '../presentation_container';
 const UNSAVED_CHANGES_DEBOUNCE = 100;
@@ -53,11 +53,17 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     map(([, lastSavedState]) => {
       const currentState = serializeState();
 
-      const equalRefs = checkRefEquality
-        ? isEqual(currentState.references, lastSavedState?.references)
-        : true;
+      // check ref equality
+      if (checkRefEquality) {
+        const lastSavedRefs = sortBy(lastSavedState?.references ?? [], 'id');
+        const currentRefs = sortBy(currentState?.references ?? [], 'id');
+        const equalRefs = isEqual(lastSavedRefs, currentRefs);
 
-      const equalRawState = areComparatorsEqual(
+        if (!equalRefs) return true;
+      }
+
+      // check state equality
+      return !areComparatorsEqual(
         getComparators(),
         lastSavedState?.rawState,
         currentState.rawState,
@@ -71,8 +77,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
           return `child: ${childLabel}, key: ${key}`;
         }
       );
-
-      return !equalRefs || !equalRawState;
     })
   );
 
