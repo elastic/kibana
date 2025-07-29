@@ -44,11 +44,12 @@ export const PrivMonUtils = (
     password: string;
   }) => {
     return await supertestWithoutAuth
-      .post('/api/entity_analytics/monitoring/engine/init')
+      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', namespace))
       .auth(username, password)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', API_VERSIONS.public.v1)
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
   };
 
   const bulkUploadUsersCsv = async (

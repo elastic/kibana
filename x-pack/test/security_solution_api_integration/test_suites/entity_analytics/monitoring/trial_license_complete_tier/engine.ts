@@ -113,11 +113,14 @@ export default ({ getService }: FtrProviderContext) => {
         await createPrivilegeTestUsers();
       });
       it('should allow init for user with full privileges', async () => {
+       
         const res = await privMonUtils.initPrivMonEngineWithoutAuth({
           username: READ_ALL_INDICES_ROLE.name,
           password: USER_PASSWORD,
         });
+        console.log('Init response:', res.body);
         expect(res.status).to.eql(200);
+
       });
     });
     describe('plain index sync', () => {
