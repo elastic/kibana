@@ -310,18 +310,24 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
 
   return (
     <EuiFormRow
-      label={i18n.LOGS_SAMPLE_LABEL}
+      label={
+        <>
+          {i18n.LOGS_SAMPLE_LABEL.MAIN}
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="xs">
+            {i18n.LOGS_SAMPLE_LABEL.SUBTEXT_PRETEXT + " "}
+            <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
+              {i18n.LOGS_SAMPLE_LABEL.SUBTEXT_INFO_LINK}
+            </EuiLink>
+          </EuiText>
+        </>
+      }
       helpText={sampleFileErrorMessage()}
       isInvalid={sampleFileError != null}
     >
       <>
         <EuiCallOut iconType="info" color="warning">
           {i18n.LOGS_SAMPLE_WARNING.MAIN}
-          <EuiSpacer size="s" />
-          {i18n.LOGS_SAMPLE_WARNING.INFO_PRETEXT}
-          <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
-            {i18n.LOGS_SAMPLE_WARNING.INFO_LINK}
-          </EuiLink>
         </EuiCallOut>
         <EuiSpacer size="s" />
 
