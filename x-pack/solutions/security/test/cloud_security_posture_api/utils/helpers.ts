@@ -8,10 +8,9 @@
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Agent } from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { CallbackHandler, Response } from 'superagent';
-import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
 
 /**
  * Checks if plugin initialization was done
@@ -48,46 +47,4 @@ export function result(status: number, logger?: ToolingLog): CallbackHandler {
       logger?.warning(`Error result ${err.text}`);
     }
   };
-}
-
-export class EsIndexDataProvider {
-  private es: EsClient;
-  private readonly index: string;
-
-  constructor(es: EsClient, index: string) {
-    this.es = es;
-    this.index = index;
-  }
-
-  async addBulk(docs: Array<Record<string, any>>, overrideTimestamp = true) {
-    const operations = docs.flatMap((doc) => [
-      { create: { _index: this.index } },
-      { ...doc, ...(overrideTimestamp ? { '@timestamp': new Date().toISOString() } : {}) },
-    ]);
-
-    const resp = await this.es.bulk({ refresh: 'wait_for', index: this.index, operations });
-    expect(resp.errors).eql(false, `Error in bulk indexing: ${JSON.stringify(resp)}`);
-
-    return resp;
-  }
-
-  async deleteAll() {
-    const indexExists = await this.es.indices.exists({ index: this.index });
-
-    if (indexExists) {
-      return this.es.deleteByQuery({
-        index: this.index,
-        query: { match_all: {} },
-        refresh: true,
-      });
-    }
-  }
-
-  async destroyIndex() {
-    const indexExists = await this.es.indices.exists({ index: this.index });
-
-    if (indexExists) {
-      return this.es.indices.delete({ index: this.index });
-    }
-  }
 }
