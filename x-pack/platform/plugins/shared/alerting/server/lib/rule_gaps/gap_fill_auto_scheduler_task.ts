@@ -13,6 +13,7 @@ import dateMath from '@kbn/datemath';
 import { getRuleIdsWithGaps } from '../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { findGaps } from './find_gaps';
 import { processGapsBatch } from '../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import { processGapsBatchFromRules } from '../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch_from_rules';
 import { partiallyUpdateRule } from '../../saved_objects/partially_update_rule';
 import type { RulesClient } from '../../rules_client/rules_client';
 import { gapStatus } from '../../../common/constants';
@@ -301,42 +302,20 @@ export function registerGapFillAutoSchedulerTask({
               gapsByRuleId[ruleId].push(gap);
             }
 
-            const results: Array<{
-              ruleId: string;
-              processedGaps: number;
-              status: 'success' | 'error';
-              error?: string;
-            }> = [];
+            // Collect all gaps from all rules
+            const allGaps = Object.values(gapsByRuleId).flat();
 
-            for (const ruleId of Object.keys(gapsByRuleId)) {
-              const ruleGaps = gapsByRuleId[ruleId];
-
-              try {
-                const processedGapResult = await processGapsBatch(rulesClient.context, {
-                  rule: { id: ruleId, name: 'ruleId' },
-                  range: {
-                    start: startDate.toISOString(),
-                    end: now.toISOString(),
-                  },
-                  gapsBatch: ruleGaps,
-                });
-
-                results.push({
-                  ruleId,
-                  processedGaps: ruleGaps.length,
-                  status: 'success',
-                });
-              } catch (error) {
-                results.push({
-                  ruleId,
-                  processedGaps: ruleGaps.length,
-                  status: 'error',
-                  error: error.message,
-                });
-
-                logger.error(`Failed to schedule backfill for rule ${ruleId}: ${error.message}`);
+            // Use bulk scheduling instead of processing rules individually
+            const {  results } = await processGapsBatchFromRules(
+              rulesClient.context,
+              {
+                gaps: allGaps,
+                range: {
+                  start: startDate.toISOString(),
+                  end: now.toISOString(),
+                },
               }
-            }
+            );
             const overallStatus = results.some((r) => r.status === 'error') ? 'error' : 'success';
             const overallError = results.find((r) => r.status === 'error')?.error;
 

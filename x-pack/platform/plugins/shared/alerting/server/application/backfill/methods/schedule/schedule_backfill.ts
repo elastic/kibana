@@ -33,7 +33,9 @@ import type { RawRule } from '../../../../types';
 export async function scheduleBackfill(
   context: RulesClientContext,
   params: ScheduleBackfillParams,
-  gaps?: Gap[]
+  // TODO: remove gaps params, just keep it for POC
+  gaps?: Gap[],
+  gapsByRuleId?: Map<string, Gap[]>
 ): Promise<ScheduleBackfillResults> {
   try {
     scheduleBackfillParamsSchema.validate(params);
@@ -166,6 +168,7 @@ export async function scheduleBackfill(
       );
     }),
     gaps,
+    gapsByRuleId,
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
     unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
