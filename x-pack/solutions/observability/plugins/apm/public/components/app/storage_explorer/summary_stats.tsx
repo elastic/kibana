@@ -142,7 +142,7 @@ export function SummaryStats({ data, loading, hasData }: Props) {
                 href={serviceInventoryLink}
               >
                 {i18n.translate('xpack.apm.storageExplorer.summary.serviceInventoryLink', {
-                  defaultMessage: 'Go to Service Inventory',
+                  defaultMessage: 'Go to Service inventory',
                 })}
               </EuiLink>
             </EuiFlexItem>
