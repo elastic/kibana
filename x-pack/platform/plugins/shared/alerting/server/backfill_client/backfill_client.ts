@@ -71,6 +71,7 @@ interface BulkQueueOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   eventLogger: IEventLogger | undefined;
   gaps?: Gap[];
+  gapsByRuleId?: Map<string, Gap[]>;
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -109,6 +110,7 @@ export class BackfillClient {
     internalSavedObjectsRepository,
     eventLogger,
     gaps,
+    gapsByRuleId,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -288,8 +290,11 @@ export class BackfillClient {
         for (let i = 0; i < backfillSOs.length; i += 10) {
           const chunk = backfillSOs.slice(i, i + 10);
           await Promise.all(
-            chunk.map((backfill) =>
-              updateGaps({
+            chunk.map((backfill) => {
+              // Get gaps for this specific rule, fallback to all gaps if not available
+              const ruleGaps = gapsByRuleId?.get(backfill.rule.id) || gaps || [];
+
+              return updateGaps({
                 backfillSchedule: backfill.schedule,
                 ruleId: backfill.rule.id,
                 start: new Date(backfill.start),
@@ -300,9 +305,9 @@ export class BackfillClient {
                 logger: this.logger,
                 backfillClient: this,
                 actionsClient,
-                gaps,
-              })
-            )
+                gaps: ruleGaps,
+              });
+            })
           );
         }
       } catch {
