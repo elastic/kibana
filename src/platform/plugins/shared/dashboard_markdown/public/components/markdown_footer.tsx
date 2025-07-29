@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   UseEuiTheme,
   euiCanAnimate,
   htmlIdGenerator,
@@ -59,6 +60,9 @@ const strings = {
   }),
   applyButton: i18n.translate('dashboardMarkdown.applyButton', {
     defaultMessage: 'Apply',
+  }),
+  applyButtonDisabledTooltip: i18n.translate('dashboardMarkdown.applyButtonDisabledTooltip', {
+    defaultMessage: 'No changes to save',
   }),
   markdownFooterHelpText: i18n.translate('dashboardMarkdown.footerHelpText', {
     defaultMessage: 'Press Apply to save your changes or Discard to cancel.',
@@ -108,19 +112,31 @@ export const MarkdownFooter = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="markdownEditorApplyButton"
-            size={'xs' as 's'}
-            color="primary"
-            fill
-            onClick={onSave}
-            css={css({ minInlineSize: 'initial' })}
-            disabled={!isSaveable}
-          >
-            {strings.applyButton}
-          </EuiButton>
+          {isSaveable ? (
+            <SaveButton onSave={onSave} />
+          ) : (
+            <EuiToolTip content={strings.applyButtonDisabledTooltip}>
+              <SaveButton onSave={onSave} />
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
+  );
+};
+
+const SaveButton = ({ onSave }: { onSave: () => void }) => {
+  return (
+    <EuiButton
+      data-test-subj="markdownEditorApplyButton"
+      size={'xs' as 's'}
+      color="primary"
+      fill
+      onClick={onSave}
+      css={css({ minInlineSize: 'initial' })}
+      disabled={true}
+    >
+      {strings.applyButton}
+    </EuiButton>
   );
 };

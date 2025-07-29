@@ -132,7 +132,7 @@ export const MarkdownEditor = ({
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useCaretPosition(editorRef, !isPreview);
-  const isSaveable = Boolean(value && value !== content);
+  const isSaveable = Boolean(value === '' || value !== content);
 
   return (
     <>

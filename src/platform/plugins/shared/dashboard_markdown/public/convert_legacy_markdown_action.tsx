@@ -61,7 +61,7 @@ const compatibilityCheck = (api: unknown): api is ConvertLegacyMarkdownApi =>
 
 export const getConvertLegacyMarkdownAction = () => ({
   id: CONVERT_LEGACY_MARKDOWN_ACTION_ID,
-  getIconType: () => 'editorCodeBlock',
+  getIconType: () => 'merge',
   showNotification: true,
   MenuItem: ActionMenuItem,
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
