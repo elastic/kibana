@@ -792,8 +792,6 @@ export class PrivilegeMonitoringDataClient {
       name: sourceName,
     });
 
-    console.log(`BADGER EXISTING SOURCES: ${JSON.stringify(existingSources)}`);
-
     if (existingSources.saved_objects.length > 0) {
       this.log('info', 'Default index source already exists, updating it.');
       const existingSource = existingSources.saved_objects[0];
