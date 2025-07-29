@@ -299,33 +299,28 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     if (!existsInStartingState) {
       // Check for conflicts
-      const dataStreamResponse = await this.getMatchingDataStream();
-      if (dataStreamResponse) {
-        if (dataStreamResponse.data_streams.length === 0) {
-          return {
-            isValid: false,
-            errors: [
-              new Error(
-                `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`
-              ),
-            ],
-          };
-        }
-
-        const existingDataStreamManagedByStreams =
-          dataStreamResponse.data_streams.length === 1 &&
-          dataStreamResponse.data_streams[0]._meta?.managed_by === 'streams';
-
-        if (!existingDataStreamManagedByStreams) {
-          return {
-            isValid: false,
-            errors: [
-              new Error(
-                `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`
-              ),
-            ],
-          };
-        }
+      const { existsAsIndex, existsAsManagedDataStream, existsAsDataStream } =
+        await this.getMatchingDataStream();
+      if (existsAsIndex) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`
+            ),
+          ],
+        };
+      }
+      if (existsAsDataStream && !existsAsManagedDataStream) {
+        // if the data stream exists, but is not managed by streams, we cannot create a wired stream with the same name
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`
+            ),
+          ],
+        };
       }
     }
 
@@ -418,11 +413,26 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
           name: this._definition.name,
         });
-      return response;
+
+      if (response.data_streams.length === 0) {
+        // the request didn't throw an error, but the data stream doesn't exist
+        // this means that the stream exists as an index, but not as a managed data stream
+        return { existsAsIndex: true, existsAsManagedDataStream: false };
+      }
+
+      const existsAsManagedDataStream =
+        response.data_streams.length === 1 &&
+        response.data_streams[0]._meta?.managed_by === 'streams';
+
+      const existsAsDataStream = response.data_streams.length > 0;
+
+      return { existsAsIndex: false, existsAsManagedDataStream, existsAsDataStream };
     } catch (error) {
       if (!isNotFoundError(error)) {
         throw error;
       }
+      // not found error means that the data stream doesn't exist at all
+      return { existsAsIndex: false, existsAsManagedDataStream: false, existsAsDataStream: false };
     }
   }
 
@@ -479,10 +489,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
     );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
-    const dataStreamResponse = await this.getMatchingDataStream();
-    const existingDataStreamManagedByStreams =
-      dataStreamResponse?.data_streams.length === 1 &&
-      dataStreamResponse?.data_streams[0]._meta?.managed_by === 'streams';
+    const { existsAsManagedDataStream } = await this.getMatchingDataStream();
 
     return [
       {
@@ -511,7 +518,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_index_template',
         request: generateIndexTemplate(this._definition.name),
       },
-      existingDataStreamManagedByStreams
+      existsAsManagedDataStream
         ? {
             type: 'upsert_write_index_or_rollover',
             request: {

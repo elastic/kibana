@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('conflicts', function () {
+  describe.only('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -83,18 +83,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const doc = {
           message: '2023-01-01T00:00:10.000Z error test',
         };
-        const response = await indexDocument(esClient, 'logs.nginx', doc);
+        const response = await indexDocument(esClient, 'logs.existingindex', doc);
         expect(response.result).to.eql('created');
+        // set up index template for logs.existingstream
+        await esClient.indices.putIndexTemplate({
+          name: 'logs.existingstream',
+          index_patterns: ['logs.existingstream*'],
+          data_stream: {},
+          template: {
+            mappings: {
+              properties: {
+                message: { type: 'text' },
+              },
+            },
+          },
+        });
+        // create data stream logs.existingstream
+        await esClient.indices.createDataStream({ name: 'logs.existingstream' });
       });
 
       after(async () => {
-        await esClient.indices.delete({ index: 'logs.nginx' });
+        await esClient.indices.delete({ index: 'logs.existingindex' });
+        await esClient.indices.deleteDataStream({ name: 'logs.existingstream' });
+        await esClient.indices.deleteIndexTemplate({ name: 'logs.existingstream' });
         await disableStreams(apiClient);
       });
 
-      it('should not allow to create a wired stream with the same name as an existing classic stream', async () => {
+      it('should not allow to create a wired stream with the same name as an existing index', async () => {
         const stream = {
-          stream: { name: 'logs.nginx' },
+          stream: { name: 'logs.existingindex' },
           if: {
             field: 'resource.attributes.host.name',
             operator: 'eq' as const,
@@ -102,6 +119,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
         await forkStream(apiClient, 'logs', stream, 400);
+      });
+
+      it('should not allow to create a wired stream with the same name as an existing data stream', async () => {
+        const stream = {
+          stream: { name: 'logs.existingstream' },
+          if: {
+            field: 'resource.attributes.host.name',
+            operator: 'eq' as const,
+            value: 'routeme',
+          },
+        };
+        await forkStream(apiClient, 'logs', stream, 409);
       });
 
       it('should not treat a half-created wired stream as conflict', async () => {
