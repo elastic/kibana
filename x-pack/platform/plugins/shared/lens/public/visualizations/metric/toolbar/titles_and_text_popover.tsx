@@ -62,9 +62,9 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
       )}
 
       <ValuesAlignmentOption
-        value={state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign}
-        onChange={(valuesTextAlign) => {
-          setState({ ...state, valuesTextAlign });
+        value={state.valueTextAlign ?? metricStateDefaults.valueTextAlign}
+        onChange={(valueTextAlign) => {
+          setState({ ...state, valueTextAlign });
         }}
       />
 
@@ -177,7 +177,7 @@ function ValueFontSizeOption({
 }
 
 const alignmentOptions: Array<{
-  id: MetricStyle['titlesTextAlign'] | MetricStyle['valuesTextAlign'];
+  id: MetricStyle['titlesTextAlign'] | MetricStyle['valueTextAlign'];
   label: string;
 }> = [
   {
@@ -251,8 +251,8 @@ function ValuesAlignmentOption({
   value,
   onChange,
 }: {
-  value: MetricStyle['valuesTextAlign'];
-  onChange: (alignment: MetricStyle['valuesTextAlign']) => void;
+  value: MetricStyle['valueTextAlign'];
+  onChange: (alignment: MetricStyle['valueTextAlign']) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.valuesAlignment', {
     defaultMessage: 'Values alignment',
@@ -287,7 +287,7 @@ function ValuesAlignmentOption({
         options={alignmentOptions}
         idSelected={value}
         onChange={(alignment) => {
-          onChange(alignment as MetricStyle['valuesTextAlign']);
+          onChange(alignment as MetricStyle['valueTextAlign']);
         }}
       />
     </EuiFormRow>
@@ -295,7 +295,7 @@ function ValuesAlignmentOption({
 }
 
 const iconAlignmentOptions: Array<{
-  id: MetricStyle['titlesTextAlign'] | MetricStyle['valuesTextAlign'];
+  id: MetricStyle['titlesTextAlign'] | MetricStyle['valueTextAlign'];
   label: string;
 }> = [
   {
