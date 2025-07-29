@@ -217,8 +217,16 @@ export const changeObjectAccessControl = async (
     }
 
     const currentSource = doc._source;
-    // @ts-expect-error MultiGetHit._source is optional
-    const versionProperties = getExpectedVersionProperties(undefined, doc);
+    const docWithSource = {
+      _id: doc._id,
+      _index: doc._index,
+      _version: doc._version,
+      _seq_no: doc._seq_no,
+      _primary_term: doc._primary_term,
+      _source: currentSource!,
+    };
+
+    const versionProperties = getExpectedVersionProperties(undefined, docWithSource);
 
     const expectedResult = {
       type,
