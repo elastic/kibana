@@ -47,10 +47,6 @@ const getSecurityEssProductFeaturesConfig = (): SecurityProductFeaturesConfig =>
   },
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-    privileges: {
-      all: { api: [`${APP_ID}-writeGlobalArtifacts`] },
-    },
-
     subFeatureIds: [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       SecuritySubFeatureId.trustedApplications,
@@ -59,24 +55,26 @@ const getSecurityEssProductFeaturesConfig = (): SecurityProductFeaturesConfig =>
       SecuritySubFeatureId.globalArtifactManagement,
     ],
 
-    featureConfigModifier: endpointArtifactManagementFeatureConfigModifier,
+    featureConfigModifier: (featureConfig) => {
+      // When endpointArtifactManagement PLI is enabled, the replacedBy to the siemV3 feature needs to
+      // account for the privileges of the sub-features that are introduced by it.
+      updateGlobalArtifactManagerPrivileges(featureConfig);
+    },
   },
 });
 
-// When endpointArtifactManagement PLI is enabled, the replacedBy for the siemV3 feature needs to
-// account for the privileges of the sub-features that are introduced by it.
-export const endpointArtifactManagementFeatureConfigModifier: FeatureConfigModifier = (
-  featureConfig
-) => {
+export const updateGlobalArtifactManagerPrivileges: FeatureConfigModifier = (featureConfig) => {
+  if (!['siem', 'siemV2'].includes(featureConfig.id)) {
+    return;
+  }
+
   const replacedBy = featureConfig.privileges?.all?.replacedBy;
   if (!replacedBy) {
     return;
   }
 
   if ('default' in replacedBy) {
-    const v3Default = replacedBy.default.find(
-      ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
-    );
+    const v3Default = replacedBy.default.find(({ feature }) => feature === SECURITY_FEATURE_ID_V3);
     if (v3Default) {
       // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
       v3Default.privileges = [
@@ -87,9 +85,7 @@ export const endpointArtifactManagementFeatureConfigModifier: FeatureConfigModif
   }
 
   if ('minimal' in replacedBy) {
-    const v3Minimal = replacedBy.minimal.find(
-      ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
-    );
+    const v3Minimal = replacedBy.minimal.find(({ feature }) => feature === SECURITY_FEATURE_ID_V3);
     if (v3Minimal) {
       // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
       v3Minimal.privileges = [
@@ -98,4 +94,8 @@ export const endpointArtifactManagementFeatureConfigModifier: FeatureConfigModif
       ];
     }
   }
+
+  // Add the global artifact management API privilege to the all privileges of siem and siemV2 features for backwards compatibility
+  // No need to add the ui capability since they are automatically added by the Kibana features framework via the `replacedBy` field.
+  featureConfig.privileges?.all.api?.push(`${APP_ID}-writeGlobalArtifacts`);
 };

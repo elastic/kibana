@@ -43,10 +43,6 @@ const getSecurityProductFeaturesConfig = (): SecurityProductFeaturesConfig => ({
   },
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-    privileges: {
-      all: { api: [`${APP_ID}-writeGlobalArtifacts`] },
-    },
-
     subFeatureIds: [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       SecuritySubFeatureId.trustedApplications,
@@ -55,15 +51,19 @@ const getSecurityProductFeaturesConfig = (): SecurityProductFeaturesConfig => ({
       SecuritySubFeatureId.globalArtifactManagement,
     ],
 
-    featureConfigModifier: endpointArtifactManagementFeatureConfigModifier,
+    featureConfigModifier: (featureConfig) => {
+      // When endpointArtifactManagement PLI is enabled, the replacedBy for the siemV3 feature needs to
+      // account for the privileges of the sub-features that are introduced by it.
+      updateGlobalArtifactManagerPrivileges(featureConfig);
+    },
   },
 });
 
-// When endpointArtifactManagement PLI is enabled, the replacedBy for the siemV3 feature needs to
-// account for the privileges of the sub-features that are introduced by it.
-export const endpointArtifactManagementFeatureConfigModifier: FeatureConfigModifier = (
-  featureConfig
-) => {
+export const updateGlobalArtifactManagerPrivileges: FeatureConfigModifier = (featureConfig) => {
+  if (!['siem', 'siemV2'].includes(featureConfig.id)) {
+    return;
+  }
+
   const replacedBy = featureConfig.privileges?.all?.replacedBy;
   if (!replacedBy || !('default' in replacedBy)) {
     return;
@@ -85,4 +85,8 @@ export const endpointArtifactManagementFeatureConfigModifier: FeatureConfigModif
       'endpoint_exceptions_all',
     ];
   }
+
+  // Add the global artifact management API privilege to the all privileges of siem and siemV2 features for backwards compatibility
+  // No need to add the ui capability since they are automatically added by the Kibana features framework via the `replacedBy` field.
+  featureConfig.privileges?.all.api?.push(`${APP_ID}-writeGlobalArtifacts`);
 };

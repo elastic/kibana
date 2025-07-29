@@ -10,7 +10,7 @@ import type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '@kbn/features-plugin/common';
-import type { RecursivePartial } from '@kbn/utility-types';
+import type { RecursivePartial, RecursiveWritable } from '@kbn/utility-types';
 import type {
   ProductFeatureAssistantKey,
   ProductFeatureAttackDiscoveryKey,
@@ -32,7 +32,10 @@ export type ProductFeatureKeys = ProductFeatureKeyType[];
 export type BaseKibanaFeatureConfig = Omit<KibanaFeatureConfig, 'subFeatures'>;
 export type SubFeaturesPrivileges = RecursivePartial<SubFeaturePrivilegeConfig>;
 
-export type FeatureConfigModifier = (config: KibanaFeatureConfig) => void;
+export type MutableKibanaFeatureConfig = RecursiveWritable<KibanaFeatureConfig>;
+export type MutableSubFeatureConfig = RecursiveWritable<SubFeatureConfig>;
+
+export type FeatureConfigModifier = (config: MutableKibanaFeatureConfig) => void;
 
 export type ProductFeatureKibanaConfig<T extends string = string> =
   RecursivePartial<BaseKibanaFeatureConfig> & {

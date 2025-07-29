@@ -111,6 +111,12 @@ export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 export type Writable<T> = {
   -readonly [K in keyof T]: T[K];
 };
+/**
+ *  Makes an object with readonly properties mutable.
+ */
+export type RecursiveWritable<T> = {
+  -readonly [K in keyof T]: RecursiveWritable<T[K]>;
+};
 
 /**
  * XOR for some properties applied to a type

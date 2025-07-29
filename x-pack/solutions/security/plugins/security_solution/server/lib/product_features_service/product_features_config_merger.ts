@@ -13,6 +13,8 @@ import type {
   BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
   FeatureConfigModifier,
+  MutableKibanaFeatureConfig,
+  MutableSubFeatureConfig,
 } from '@kbn/security-solution-features';
 
 export class ProductFeaturesConfigMerger<T extends string = string> {
@@ -33,7 +35,7 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     kibanaSubFeatureIds: T[],
     productFeaturesConfigs: ProductFeatureKibanaConfig[]
   ): KibanaFeatureConfig {
-    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
+    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as MutableKibanaFeatureConfig;
 
     const enabledSubFeaturesIndexed = Object.fromEntries(
       kibanaSubFeatureIds.map((id) => [id, true])
@@ -47,7 +49,7 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         subFeatureIds,
         featureConfigModifier,
         ...productFeatureConfigToMerge
-      } = cloneDeep(productFeatureConfig);
+      } = productFeatureConfig;
 
       subFeatureIds?.forEach((subFeatureId) => {
         enabledSubFeaturesIndexed[subFeatureId] = true;
@@ -65,10 +67,10 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     });
 
     // generate sub features configs from enabled sub feature ids, preserving map order
-    const mergedKibanaSubFeatures: SubFeatureConfig[] = [];
+    const mergedKibanaSubFeatures: MutableSubFeatureConfig[] = [];
     this.subFeaturesMap.forEach((subFeature, id) => {
       if (enabledSubFeaturesIndexed[id]) {
-        mergedKibanaSubFeatures.push(cloneDeep(subFeature));
+        mergedKibanaSubFeatures.push(cloneDeep(subFeature) as MutableSubFeatureConfig);
       }
     });
 
@@ -84,7 +86,7 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
       modifier(mergedKibanaFeatureConfig);
     });
 
-    return mergedKibanaFeatureConfig;
+    return Object.freeze(mergedKibanaFeatureConfig) as KibanaFeatureConfig;
   }
 
   /**
