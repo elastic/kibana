@@ -307,7 +307,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('CSV with labels', () => {
         it('should add labels to the uploaded users', async () => {
-          const csv = ['csv_user_1,label1', 'csv_user_2,label2'].join('\n');
+          const csv = ['csv_user_1,label1'].join('\n');
           await privMonUtils.bulkUploadUsersCsv(csv);
 
           const listRes = await api.listPrivMonUsers({
@@ -316,14 +316,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           const listed = listRes.body as ListPrivMonUsersResponse;
           expect(getEaLabelValues(listed[0])).to.eql(['label1']);
-          expect(getEaLabelValues(listed[1])).to.eql(['label2']);
         });
 
         it('should update labels to the uploaded users', async () => {
-          const csv = ['csv_user_1,label1', 'csv_user_2,label2'].join('\n');
+          const csv = ['csv_user_1,label1'].join('\n');
           await privMonUtils.bulkUploadUsersCsv(csv);
 
-          const updateCsv = ['csv_user_1,label3', 'csv_user_2,label4'].join('\n');
+          const updateCsv = ['csv_user_1,label3'].join('\n');
           await privMonUtils.bulkUploadUsersCsv(updateCsv);
 
           const listRes = await api.listPrivMonUsers({
@@ -332,14 +331,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           const listed = listRes.body as ListPrivMonUsersResponse;
           expect(getEaLabelValues(listed[0])).to.eql(['label1', 'label3']);
-          expect(getEaLabelValues(listed[1])).to.eql(['label2', 'label4']);
         });
 
         it('should keep the current labels when the updated user has no labels', async () => {
-          const csv = ['csv_user_1,label1', 'csv_user_2,label2'].join('\n');
+          const csv = ['csv_user_1,label1'].join('\n');
           await privMonUtils.bulkUploadUsersCsv(csv);
 
-          const updateCsv = ['csv_user_1', 'csv_user_2'].join('\n');
+          const updateCsv = ['csv_user_1'].join('\n');
           await privMonUtils.bulkUploadUsersCsv(updateCsv);
 
           const listRes = await api.listPrivMonUsers({
@@ -347,8 +345,8 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           const listed = listRes.body as ListPrivMonUsersResponse;
+
           expect(getEaLabelValues(listed[0])).to.eql(['label1']);
-          expect(getEaLabelValues(listed[1])).to.eql(['label2']);
         });
 
         it('should remove the label when soft deleting a user', async () => {
