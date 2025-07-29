@@ -21,7 +21,7 @@ export class EsArchivePathBuilder {
    * List of archives that have been relocated to the new path.
    * Add more archive prefixes as needed.
    */
-  private static readonly RELOCATED_ARCHIVES = ['auditbeat'];
+  private static readonly RELOCATED_ARCHIVES = ['auditbeat', 'filebeat'];
 
   getPath(resourceUri: string): string {
     // Check if resourceUri matches any relocated archive prefix
