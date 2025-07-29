@@ -18,17 +18,18 @@ export {
 } from './inventory_models';
 
 export {
-  InventoryMetricRT,
+  InventoryTsvbTypeKeysRT,
   InventoryFormatterTypeRT,
   InventoryVisTypeRT,
   ItemTypeRT,
   SnapshotMetricTypeRT,
   SnapshotMetricTypeKeys,
+  DataSchemaFormat,
 } from './inventory_models/types';
 
 export type {
   InventoryItemType,
-  InventoryMetric,
+  InventoryTsvbType,
   InventoryFormatterType,
   InventoryVisType,
   MetricsUIAggregation,
@@ -36,8 +37,6 @@ export type {
   TSVBMetricModelCreator,
   TSVBMetricModel,
 } from './inventory_models/types';
-
-export type { AggregationsCatalog, FormulasCatalog } from './inventory_models/shared/metrics/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';

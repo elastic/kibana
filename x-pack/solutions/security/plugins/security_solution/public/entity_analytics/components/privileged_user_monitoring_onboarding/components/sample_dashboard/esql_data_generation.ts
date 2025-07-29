@@ -56,10 +56,9 @@ export const generateListESQLQuery =
   };
 
 export const generateVisualizationESQLQuery =
-  (esqlSource: EsqlQueryOrInvalidFields) => (stackByField: string) => {
-    return map<string, string>(
+  (esqlSource: EsqlQueryOrInvalidFields) =>
+  (stackByField: string, timerange: { from: string; to: string }) =>
+    map<string, string>(
       (src) => `${src}
-        | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-        | STATS results = COUNT(*) by timestamp, ${stackByField}`
+        | STATS results = COUNT(*) by timestamp = BUCKET(@timestamp, 30, "${timerange.from}", "${timerange.to}"), ${stackByField}`
     )(esqlSource);
-  };
