@@ -57,12 +57,6 @@ export const DashboardMigration = z
   .merge(DashboardMigrationData);
 
 /**
- * Additional properties specific to the vendor
- */
-export type OriginalDashboardVendorProperties = z.infer<typeof OriginalDashboardVendorProperties>;
-export const OriginalDashboardVendorProperties = SplunkOriginalDashboardProperties;
-
-/**
  * The raw dashboard object from different vendors
  */
 export type OriginalDashboard = z.infer<typeof OriginalDashboard>;
@@ -96,9 +90,9 @@ export const OriginalDashboard = z.object({
    */
   format: z.string(),
   /**
-   * Additional properties specific to the vendor
+   * Additional properties specific to the splunk
    */
-  vendor_properties: OriginalDashboardVendorProperties.optional(),
+  splunk_properties: SplunkOriginalDashboardProperties.optional(),
 });
 
 /**

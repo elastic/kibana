@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         format: 'xml',
         vendor: 'splunk',
         last_updated: defaultOriginalDashboardExports.result.updated,
-        vendor_properties: {
+        splunk_properties: {
           app: defaultOriginalDashboardExports.result['eai:acl.app'],
           owner: defaultOriginalDashboardExports.result['eai:acl.owner'],
           sharing: defaultOriginalDashboardExports.result['eai:acl.sharing'],

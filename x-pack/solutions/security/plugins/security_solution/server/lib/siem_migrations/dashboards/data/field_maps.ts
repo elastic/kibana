@@ -40,8 +40,8 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
   'original_dashboard.format': { type: 'keyword', required: true },
   'original_dashboard.vendor': { type: 'keyword', required: true },
   'original_dashboard.last_updated': { type: 'date', required: true },
-  'original_dashboard.vendor_properties': { type: 'object', required: true },
-  'original_dashboard.vendor_properties.app': { type: 'keyword', required: true },
-  'original_dashboard.vendor_properties.sharing': { type: 'keyword', required: true },
-  'original_dashboard.vendor_properties.owner': { type: 'keyword', required: true },
+  'original_dashboard.splunk_properties': { type: 'object', required: true },
+  'original_dashboard.splunk_properties.app': { type: 'keyword', required: true },
+  'original_dashboard.splunk_properties.sharing': { type: 'keyword', required: true },
+  'original_dashboard.splunk_properties.owner': { type: 'keyword', required: true },
 };
