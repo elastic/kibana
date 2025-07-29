@@ -67,6 +67,5 @@
     "@kbn/test-suites-src",
     "@kbn/openapi-common",
     "@kbn/response-ops-rule-params",
-    "@kbn/test-suites-xpack",
   ]
 }
