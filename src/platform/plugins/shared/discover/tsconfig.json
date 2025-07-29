@@ -114,7 +114,5 @@
     "@kbn/controls-plugin",
     "@kbn/esql-types"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
