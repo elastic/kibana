@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,
         securitySolutionCasesV3: 0,
+        observabilityManageRules: 0,
         securitySolutionAssistant: 0,
         securitySolutionAttackDiscovery: 0,
         securitySolutionTimeline: 0,
