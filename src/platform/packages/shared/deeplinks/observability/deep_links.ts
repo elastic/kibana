@@ -111,6 +111,7 @@ export type DeepLinkId =
   | `${ApmApp}:${ApmLinkId}`
   | `${SyntheticsApp}:${SyntheticsLinkId}`
   | `${UptimeApp}:${UptimeLinkId}`
+  | `${MetricsApp}:${ObltProfilingApp}:${ProfilingLinkId}`
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`;

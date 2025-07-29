@@ -210,7 +210,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal profiling',
+                    defaultMessage: 'Universal Profiling',
                   }
                 ),
                 children: [
