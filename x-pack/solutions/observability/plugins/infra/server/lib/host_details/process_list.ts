@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   TIMESTAMP_FIELD,
   PROCESS_COMMANDLINE_FIELD,
@@ -15,7 +16,6 @@ import type {
   ProcessListAPIRequest,
   ProcessListAPIQueryAggregation,
 } from '../../../common/http_api';
-import type { ESSearchClient } from '../metrics/types';
 import type { InfraSourceConfiguration } from '../sources';
 
 const mandatoryFieldsFilter = MANDATORY_PROCESS_FIELDS.map((field) => ({
