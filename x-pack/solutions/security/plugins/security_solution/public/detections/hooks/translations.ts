@@ -164,7 +164,7 @@ export const BULK_ACTION_CLOSE_SELECTED_AS_NONE = i18n.translate(
 export const BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.bulkActions.closeSelectedAsDuplicate',
   {
-    defaultMessage: 'Deplicate',
+    defaultMessage: 'Duplicate',
   }
 );
 
