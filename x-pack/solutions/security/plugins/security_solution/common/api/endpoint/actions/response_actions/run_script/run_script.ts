@@ -99,3 +99,7 @@ export type MSDefenderRunScriptActionRequestParams = TypeOf<
   typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
 >;
 export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
+
+export type SentinelOneRunScriptActionRequestParams = TypeOf<
+  typeof SentinelOneRunScriptActionRequestParamsSchema
+>;
