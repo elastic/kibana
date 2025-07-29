@@ -112,6 +112,13 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
+export const BULK_ACTION_CLOSING_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closingPanelTitle',
+  {
+    defaultMessage: 'Select a reason for closing',
+  }
+);
+
 export const BULK_ACTION_CLOSE_SELECTED_AS_NONE = i18n.translate(
   'xpack.securitySolution.bulkActions.closeSelectedAsNone',
   {
