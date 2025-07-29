@@ -153,7 +153,7 @@ Dashboards and Visualizations::
 * Adds the ability to create {esql} controls by typing a question mark (`?`) when editing an {esql} visualization's query ({kibana-pull}216839[#216839]).
 * Adds a **Compare to** badge for Metric charts in **Lens** ({kibana-pull}214811[#214811]).
 Data ingestion and Fleet::
-* Enables the `enableAutomaticAgentUpgrades` feature flag ({kibana-pull}219932[#219932]).
+* Enables the automatic agent upgrades feature in {fleet} ({kibana-pull}219932[#219932]).
 * Adds support for Cloud Connectors in CSPM ({kibana-pull}212200[#212200]).
 Discover::
 * Adds an **Attributes** tab to the document viewer when exploring OTel documents in the Observability solution view ({kibana-pull}222391[#222391]).
