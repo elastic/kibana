@@ -744,6 +744,7 @@ export class HttpServer {
               reason: 'Route serves static assets',
             },
           },
+          excludeFromRateLimiter: true,
         },
         auth: false,
         cache: {
