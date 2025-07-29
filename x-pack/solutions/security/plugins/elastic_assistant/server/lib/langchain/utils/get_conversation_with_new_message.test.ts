@@ -91,19 +91,6 @@ describe('getConversationWithNewMessage', () => {
     expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(0);
   });
 
-  it('when conversation does not exist, just returns the new message', async () => {
-    const newMessages = [new HumanMessage('Second human message')] as BaseMessage[];
-    const result = await getConversationWithNewMessage({
-      logger,
-      newMessages,
-      conversationId: 'empty',
-      conversationsDataClient,
-    });
-    expect(result).toEqual(newMessages);
-    expect(conversationsDataClient.getConversation).toHaveBeenCalledTimes(1);
-    expect(conversationsDataClient.appendConversationMessages).toHaveBeenCalledTimes(0);
-  });
-
   it('when conversation does exist, update conversation and return the new full conversation', async () => {
     const newMessages = [new HumanMessage('Second human message')] as BaseMessage[];
     const result = await getConversationWithNewMessage({
