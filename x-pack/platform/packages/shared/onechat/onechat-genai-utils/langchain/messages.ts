@@ -68,7 +68,9 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
     throw new Error('No artifact attached to tool message');
   }
   if (!isArray(message.artifact.results)) {
-    throw new Error('No results array attached to artifact');
+    throw new Error(
+      `No results array attached to artifact. Received message= ${JSON.stringify(message)}`
+    );
   }
 
   return message.artifact as RunToolReturn;

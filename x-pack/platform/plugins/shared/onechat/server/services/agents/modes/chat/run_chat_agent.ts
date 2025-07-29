@@ -71,13 +71,7 @@ export const runChatAgent: RunChatAgentFn = async (
     customInstructions,
   });
 
-  logger.debug(
-    `Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId} initialMessages: ${JSON.stringify(
-      initialMessages,
-      null,
-      2
-    )}`
-  );
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages },
