@@ -14,6 +14,8 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import type { FailedAttemptError } from 'p-retry';
+import pRetry from 'p-retry';
 import type { DeepReadonly } from 'utility-types';
 import {
   type PostDeletePackagePoliciesResponse,
@@ -113,8 +115,11 @@ export class CspPlugin
     plugins.fleet
       .fleetSetupCompleted()
       .then(async () => {
-        const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-          CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+        const packageInfo = await pRetry(
+          () => plugins.fleet.packageService.asInternalUser.getInstallation(
+            CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+          ),
+          getRetryOptions(this.logger, 'getInstallation')
         );
 
         // If package is installed we want to make sure all needed assets are installed
@@ -308,4 +313,20 @@ const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
 const isTransformAssetIncluded = (integrationVersion: string): boolean => {
   const majorVersion = semver.major(integrationVersion);
   return majorVersion >= 3;
+};
+
+const getRetryOptions = (logger: Logger, operation: string) => {
+  // should retry on the order of 2s, 4s, 8s, 16s
+  // see: https://github.com/tim-kos/node-retry#retryoperationoptions
+  return {
+    minTimeout: 2000,
+    maxTimeout: 16000,
+    retries: 4,
+    factor: 2,
+    randomize: true,
+    onFailedAttempt: (err: FailedAttemptError) => {
+      const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
+      logger.warn(message);
+    },
+  };
 };
