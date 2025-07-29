@@ -206,7 +206,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to use does not match condition for indicator match rules
    */
-  doesNotMatchForIndicatorMatchRuleEnabled: false,
+  doesNotMatchForIndicatorMatchRuleEnabled: true, // enabled for PR testing purposes only. Will be set to false before merge
 
   /**
    * Enables the new data ingestion hub
