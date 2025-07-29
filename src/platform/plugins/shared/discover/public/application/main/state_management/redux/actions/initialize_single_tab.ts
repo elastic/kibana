@@ -9,7 +9,7 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, isObject } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   internalStateSlice,
@@ -37,6 +37,7 @@ import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
+import type { TabState } from '../types';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -91,6 +92,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     }
 
     let tabInitialAppState: DiscoverAppState | undefined;
+    let tabInitialInternalState: TabState['initialInternalState'] | undefined;
 
     if (TABS_ENABLED && !wasTabInitialized) {
       const tabState = selectTab(getState(), tabId);
@@ -109,6 +111,10 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
       if (tabState.initialAppState) {
         tabInitialAppState = cloneDeep(tabState.initialAppState);
+      }
+
+      if (tabState.initialInternalState) {
+        tabInitialInternalState = cloneDeep(tabState.initialInternalState);
       }
     }
 
@@ -151,6 +157,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
             visContext: persistedTab.visContext,
           }
         : undefined;
+
     const urlState = cleanupUrlState(
       {
         ...tabInitialAppState,
@@ -158,20 +165,36 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       },
       services.uiSettings
     );
+
     const initialQuery = urlState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
+
+    const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
+    const initialAdHocDataViewSpec = isObject(initialDataViewIdOrSpec)
+      ? initialDataViewIdOrSpec
+      : undefined;
+
     const persistedTabDataView = persistedTabSavedSearch?.searchSource.getField('index');
+    const dataViewId = isDataViewSource(urlState?.dataSource)
+      ? urlState?.dataSource.dataViewId
+      : persistedTabDataView?.id;
+
+    const tabHasInitialAdHocDataViewSpec =
+      dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
     const peristedTabHasAdHocDataView = Boolean(
       persistedTabDataView && !persistedTabDataView.isPersisted()
     );
+
     const { initializationState, defaultProfileAdHocDataViewIds } = getState();
     const profileDataViews = runtimeStateManager.adHocDataViews$
       .getValue()
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
+
     const profileDataViewsExist = profileDataViews.length > 0;
     const locationStateHasDataViewSpec = Boolean(dataViewSpec);
     const canAccessWithoutPersistedDataView =
       isEsqlMode ||
+      tabHasInitialAdHocDataViewSpec ||
       peristedTabHasAdHocDataView ||
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
@@ -196,10 +219,9 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
-        dataViewId: isDataViewSource(urlState?.dataSource)
-          ? urlState?.dataSource.dataViewId
-          : persistedTabDataView?.id,
-        dataViewSpec,
+        dataViewId,
+        locationDataViewSpec: dataViewSpec,
+        initialAdHocDataViewSpec,
         savedSearch: persistedTabSavedSearch,
         isEsqlMode,
         services,
