@@ -55,6 +55,7 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           );
           return res.ok();
         } catch (error) {
+          logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);
           return res.badRequest({
             body: `Error creating dashboards for migration ID ${migrationId}: ${error.message}`,
           });
