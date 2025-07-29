@@ -6,15 +6,17 @@
  */
 
 import numeral from '@elastic/numeral';
+import { flattenObject } from '@kbn/object-utils';
 import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getFormattedGroups, getEcsGroupsFromFlattenGrouping } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
@@ -122,14 +124,8 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           window: windowDef,
         } = result;
 
-        const instances = instanceId.split(',');
-        const groups =
-          instanceId !== ALL_VALUE
-            ? [slo.groupBy].flat().reduce<Group[]>((resultGroups, groupByItem, index) => {
-                resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-                return resultGroups;
-              }, [])
-            : undefined;
+        const groupingsFlattened = flattenObject(groupings ?? {});
+        const groups = getFormattedGroups(groupingsFlattened);
 
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
@@ -168,17 +164,17 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             actionGroup,
             state: {
               alertState: AlertStates.ALERT,
-              grouping: groupings,
             },
             payload: {
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
               [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
-              ...getEcsGroups(groups),
+              ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
             },
           });
 
@@ -226,8 +222,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         `/app/observability/slos/${slo.id}${urlQuery}`
       );
 
-      const recoveredAlertState = recoveredAlert.alert.getState();
-
       const context = {
         timestamp: startedAt.toISOString(),
         viewInAppUrl,
@@ -235,7 +229,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         sloId: slo.id,
         sloName: slo.name,
         sloInstanceId: alertId,
-        grouping: recoveredAlertState?.grouping,
+        grouping: recoveredAlert.hit?.[ALERT_GROUPING],
       };
 
       alertsClient.setAlertData({

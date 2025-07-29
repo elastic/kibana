@@ -186,6 +186,9 @@ export function registerChatRoutes({
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            // This disables response buffering on proxy servers
+            'X-Accel-Buffering': 'no',
           },
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,

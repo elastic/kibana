@@ -8,27 +8,21 @@
  */
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 export const extractConnectorIds = async (
-  workflow: WorkflowExecutionEngineModel,
   actionsClient: IUnsecuredActionsClient
 ): Promise<Record<string, Record<string, any>>> => {
-  const connectorNames = workflow.definition.workflow.steps
-    .filter((step) => step.type.endsWith('-connector'))
-    // TODO: fix this
-    .map((step) => (step as any)['connector-id']!);
-  const distinctConnectorNames = Array.from(new Set(connectorNames));
   const allConnectors = await actionsClient.getAll('default');
   const connectorNameIdMap = new Map<string, string>(
     allConnectors.map((connector) => [connector.name, connector.id])
   );
 
-  return distinctConnectorNames.reduce((acc, name) => {
-    const connectorId = connectorNameIdMap.get(name);
+  return allConnectors.reduce((acc, connector) => {
+    const connectorId = connectorNameIdMap.get(connector.name);
     if (connectorId) {
-      acc['connector.' + name] = {
+      acc[connector.name] = {
         id: connectorId,
+        // TODO: secrets?
       };
     }
     return acc;

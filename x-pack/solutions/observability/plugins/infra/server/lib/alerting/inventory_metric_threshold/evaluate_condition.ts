@@ -51,9 +51,17 @@ export const evaluateCondition = async ({
 }): Promise<Record<string, ConditionResult>> => {
   const { metric, customMetric } = condition;
 
+  const from = await calculateFromBasedOnMetric(
+    executionTimestamp,
+    condition,
+    nodeType,
+    metric,
+    customMetric
+  );
+
   const timerange = {
     to: executionTimestamp.valueOf(),
-    from: calculateFromBasedOnMetric(executionTimestamp, condition, nodeType, metric, customMetric),
+    from,
     interval: `${condition.timeSize}${condition.timeUnit}`,
     forceInterval: true,
   } as InfraTimerangeInput;

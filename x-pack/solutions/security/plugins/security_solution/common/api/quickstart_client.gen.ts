@@ -651,7 +651,7 @@ If a record already exists for the specified entity, that record is overwritten 
       .request<CreateEntitySourceResponse>({
         path: '/api/entity_analytics/monitoring/entity_source',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -867,7 +867,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       .request({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
       })
@@ -1478,7 +1478,7 @@ finalize it.
       .request<GetEntitySourceResponse>({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -2043,7 +2043,7 @@ providing you with the most current and effective threat detection capabilities.
       .request<ListEntitySourcesResponse>({
         path: '/api/entity_analytics/monitoring/entity_source/list',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
 
@@ -2612,7 +2612,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .request<UpdateEntitySourceResponse>({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,

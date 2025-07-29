@@ -11364,9 +11364,7 @@
         "label": "streamIntoObservable",
         "description": [],
         "signature": [
-          "(readable: ",
-          "Readable",
-          ") => ",
+          "(readable: NodeJS.AsyncIterator<string, any, any>) => ",
           "Observable",
           "<any>"
         ],
@@ -11382,7 +11380,7 @@
             "label": "readable",
             "description": [],
             "signature": [
-              "Readable"
+              "NodeJS.AsyncIterator<string, any, any>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/util/stream_into_observable.ts",
             "deprecated": false,

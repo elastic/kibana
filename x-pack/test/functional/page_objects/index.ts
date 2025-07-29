@@ -45,7 +45,6 @@ import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
-import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
@@ -95,7 +94,6 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   tagManagement: TagManagementPageObject,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
-  uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
 };

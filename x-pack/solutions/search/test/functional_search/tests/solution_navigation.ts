@@ -94,7 +94,7 @@ export default function searchSolutionNavigation({
         {
           deepLinkId: 'searchPlayground',
           breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'svlPlaygroundPage',
+          pageTestSubject: 'playgroundsListPage',
         },
         {
           deepLinkId: 'enterpriseSearchContent:connectors',

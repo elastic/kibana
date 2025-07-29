@@ -19,7 +19,7 @@ export const useIndicesRedirect = (
   indicesStatus?: IndicesStatusResponse,
   userPrivileges?: UserStartPrivilegesResponse
 ) => {
-  const { application, http } = useKibana().services;
+  const { application, http, sampleDataIngest } = useKibana().services;
   const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   const usageTracker = useUsageTracker();
@@ -51,6 +51,10 @@ export const useIndicesRedirect = (
       return;
     }
     if (indicesStatus.indexNames.length === 1) {
+      if (sampleDataIngest?.isSampleIndex(indicesStatus.indexNames[0])) {
+        return;
+      }
+
       navigateToIndexDetails(application, http, indicesStatus.indexNames[0]);
       setHasDoneRedirect(true);
       usageTracker.click(AnalyticsEvents.startCreateIndexCreatedRedirect);
@@ -61,6 +65,7 @@ export const useIndicesRedirect = (
   }, [
     application,
     http,
+    sampleDataIngest,
     indicesStatus,
     lastStatus,
     setHasDoneRedirect,

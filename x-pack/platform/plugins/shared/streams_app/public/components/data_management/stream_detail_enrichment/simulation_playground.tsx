@@ -42,9 +42,6 @@ export const SimulationPlayground = () => {
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
-  const isLoading = useSimulatorSelector(
-    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
-  );
 
   return (
     <>
@@ -59,7 +56,6 @@ export const SimulationPlayground = () => {
                   <EuiButtonIcon
                     iconType="refresh"
                     onClick={refreshSimulation}
-                    isLoading={isLoading}
                     aria-label={i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
                       { defaultMessage: 'Refresh data preview' }
@@ -91,7 +87,7 @@ export const SimulationPlayground = () => {
           <EuiFlexItem grow={false}>
             <DataSourcesList />
           </EuiFlexItem>
-          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+          <ProgressBar />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="m" />
@@ -99,4 +95,12 @@ export const SimulationPlayground = () => {
       {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
     </>
   );
+};
+
+const ProgressBar = () => {
+  const isLoading = useSimulatorSelector(
+    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
+  );
+
+  return isLoading && <EuiProgress size="xs" color="accent" position="absolute" />;
 };

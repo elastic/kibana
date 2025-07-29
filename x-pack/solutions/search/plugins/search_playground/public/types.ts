@@ -276,3 +276,8 @@ export interface SavedPlaygroundRouterParameters {
   pageMode?: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
 }
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
+}

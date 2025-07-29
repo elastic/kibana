@@ -38,5 +38,5 @@ export const observabilitySolutionSetting: Omit<
     [AIAssistantType.Never]: HIDE_ASSISTANT,
   },
   requiresPageReload: true,
-  solution: 'oblt',
+  solutionViews: ['classic', 'oblt'],
 };

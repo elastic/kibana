@@ -7,3 +7,4 @@
 
 export * from './processor_state_machine';
 export * from './types';
+export * from './utils';

@@ -11,12 +11,7 @@ import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../common/components/guided_onboarding_tour/tour_config';
+
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
@@ -72,14 +67,7 @@ export const CellValue = memo(function RenderCellValue({
   userProfiles,
 }: RenderCellValueProps) {
   const { notifications } = useKibana().services;
-  const isTourAnchor = useMemo(
-    () =>
-      columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-      isDetectionsAlertsTable(tableType) &&
-      rowIndex === 0 &&
-      !isDetails,
-    [columnId, isDetails, rowIndex, tableType]
-  );
+
   const cellValueContext = useContext(AlertTableCellContext);
 
   if (!cellValueContext) {
@@ -145,35 +133,28 @@ export const CellValue = memo(function RenderCellValue({
 
   const CellRenderer = useMemo(() => {
     return (
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        step={AlertsCasesTourSteps.pointToAlertName}
-        tourId={SecurityStepId.alertsCases}
-      >
-        <DefaultCellRenderer
-          browserFields={browserFields}
-          columnId={columnId}
-          data={finalData}
-          ecsData={ecsAlert}
-          eventId={eventId}
-          header={myHeader}
-          isDetails={isDetails}
-          isExpandable={isExpandable}
-          isExpanded={isExpanded}
-          linkValues={linkValues ?? localLinkValues}
-          rowIndex={rowIndex}
-          colIndex={colIndex}
-          rowRenderers={rowRenderers ?? defaultRowRenderers}
-          setCellProps={setCellProps}
-          scopeId={sourcererScope}
-          truncate={truncate}
-          asPlainText={false}
-          context={userProfiles}
-        />
-      </GuidedOnboardingTourStep>
+      <DefaultCellRenderer
+        browserFields={browserFields}
+        columnId={columnId}
+        data={finalData}
+        ecsData={ecsAlert}
+        eventId={eventId}
+        header={myHeader}
+        isDetails={isDetails}
+        isExpandable={isExpandable}
+        isExpanded={isExpanded}
+        linkValues={linkValues ?? localLinkValues}
+        rowIndex={rowIndex}
+        colIndex={colIndex}
+        rowRenderers={rowRenderers ?? defaultRowRenderers}
+        setCellProps={setCellProps}
+        scopeId={sourcererScope}
+        truncate={truncate}
+        asPlainText={false}
+        context={userProfiles}
+      />
     );
   }, [
-    isTourAnchor,
     browserFields,
     columnId,
     finalData,

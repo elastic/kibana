@@ -16,7 +16,6 @@ import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
-
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,

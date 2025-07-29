@@ -11,7 +11,7 @@ import { EuiTitle } from '@elastic/eui';
 import { SPAN_ID_FIELD, SPAN_NAME_FIELD } from '@kbn/discover-utils';
 import React from 'react';
 import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 
 export interface SpanSummaryTitleProps {
   spanName?: string;

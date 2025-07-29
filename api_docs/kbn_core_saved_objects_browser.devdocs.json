@@ -50,14 +50,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/application/types.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
           },

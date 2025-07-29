@@ -42,8 +42,6 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-analytics-server",
     "@kbn/features-plugin",
-    "@kbn/utils",
-    "@kbn/fleet-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/es-query",
     "@kbn/traced-es-client",

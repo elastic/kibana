@@ -683,7 +683,27 @@ const countOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -704,6 +724,16 @@ const countOverTimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
           optional: false,
         },
       ],
@@ -992,6 +1022,16 @@ const maxOverTimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -1106,6 +1146,16 @@ const minOverTimeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [

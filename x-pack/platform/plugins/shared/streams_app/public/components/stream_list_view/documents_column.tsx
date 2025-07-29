@@ -30,6 +30,8 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
+import { getFormattedError } from '../../util/errors';
 
 export function DocumentsColumn({
   indexPattern,
@@ -105,6 +107,7 @@ export function DocumentsColumn({
     [streamsRepositoryClient, indexPattern, minInterval],
     {
       withTimeRange: true,
+      disableToastOnError: true,
     }
   );
 
@@ -130,6 +133,20 @@ export function DocumentsColumn({
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
+  const noDocCountData = histogramQueryFetch.error ? '' : <EuiI18nNumber value={docCount} />;
+
+  const noHistogramData = histogramQueryFetch.error ? (
+    <TooltipOrPopoverIcon
+      dataTestSubj="streamsDocCount-error"
+      icon="warning"
+      title={getFormattedError(histogramQueryFetch.error).message}
+      mode="popover"
+      iconColor="danger"
+    />
+  ) : (
+    <EuiIcon type="visLine" size="m" />
+  );
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -149,13 +166,7 @@ export function DocumentsColumn({
               text-align: right;
             `}
           >
-            {hasData ? (
-              <EuiI18nNumber value={docCount} />
-            ) : (
-              i18n.translate('xpack.streams.documentsColumn.noDataLabel', {
-                defaultMessage: 'N/A',
-              })
-            )}
+            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
@@ -192,7 +203,7 @@ export function DocumentsColumn({
                 ))}
               </Chart>
             ) : (
-              <EuiIcon type="visLine" size="m" />
+              noHistogramData
             )}
           </EuiFlexItem>
         </>

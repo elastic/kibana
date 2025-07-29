@@ -128,6 +128,7 @@ export interface SpanDocumentOverview
   'transaction.name'?: string;
   duration?: number;
   kind?: string;
+  'resource.attributes.telemetry.sdk.language'?: string;
 }
 
 export interface TraceFields {

@@ -21,6 +21,7 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
 } from '../../common/types/saved_objects';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -603,11 +604,12 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         ...options,
+        perPage: 10000,
       });
 
       expect(soClient.find).toHaveBeenLastCalledWith({
         type: legacySyntheticsMonitorTypeSingle,
-        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true' },
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true', perPage: 10000 },
       });
 
       expect(result).toStrictEqual(mockFindResult);
@@ -632,7 +634,8 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         search: 'test',
-        perPage: 5000,
+        perPage: 10000,
+        page: 1,
       });
     });
   });
@@ -809,6 +812,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 
@@ -836,6 +840,7 @@ describe('MonitorConfigRepository', () => {
         search: 'test',
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        searchFields: MONITOR_SEARCH_FIELDS,
       });
     });
 

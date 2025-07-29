@@ -276,6 +276,8 @@ export function createSearchBar({
             filtersForSuggestions={props.filtersForSuggestions}
             prependFilterBar={props.prependFilterBar}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            esqlEditorInitialState={props.esqlEditorInitialState}
+            onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

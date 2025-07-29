@@ -20,6 +20,7 @@ export enum FETCH_STATUS {
   SUCCESS = 'success',
   FAILURE = 'failure',
   NOT_INITIATED = 'not_initiated',
+  PENDING = 'pending',
 }
 
 export interface FetcherOptions {
@@ -45,7 +46,9 @@ interface FetcherResult<TReturn> {
 }
 
 export const isPending = (fetchStatus: FETCH_STATUS) =>
-  fetchStatus === FETCH_STATUS.LOADING || fetchStatus === FETCH_STATUS.NOT_INITIATED;
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED ||
+  fetchStatus === FETCH_STATUS.PENDING;
 export const isFailure = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.FAILURE;
 export const isSuccess = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.SUCCESS;
 

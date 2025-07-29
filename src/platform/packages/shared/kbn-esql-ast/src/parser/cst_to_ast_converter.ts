@@ -12,7 +12,7 @@ import * as cst from '../antlr/esql_parser';
 import * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
-import { getPosition, parseIdentifier, nonNullable } from './helpers';
+import { getPosition, nonNullable } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
@@ -786,7 +786,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = this.createLiteralString(stringContext);
+      const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
       command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
@@ -834,7 +834,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = this.createLiteralString(stringContext);
+      const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
     }
@@ -1192,7 +1192,7 @@ export class CstToAstConverter {
         inferenceId = Builder.identifier('', { incomplete: true });
       } else {
         withIncomplete = false;
-        inferenceId = this.createIdentifierOrParam(ctx._inferenceId)!;
+        inferenceId = this.fromIdentifierOrParam(ctx._inferenceId)!;
       }
     }
 
@@ -1661,7 +1661,7 @@ export class CstToAstConverter {
             if (arg) {
               fn.args.push(arg);
 
-              const literal = this.createLiteralString(regex.string_());
+              const literal = this.toStringLiteral(regex.string_());
 
               fn.args.push(literal);
             }
@@ -1864,7 +1864,7 @@ export class CstToAstConverter {
       );
     }
 
-    return this.createLiteralString(ctx);
+    return this.toStringLiteral(ctx);
   }
 
   // ----------------------------------------------------- expression: "column"
@@ -1879,8 +1879,7 @@ export class CstToAstConverter {
         const ID_PATTERN = identifierPattern.ID_PATTERN();
 
         if (ID_PATTERN) {
-          const name = parseIdentifier(ID_PATTERN.getText());
-          const node = Builder.identifier({ name }, this.createParserFields(identifierPattern));
+          const node = this.fromNodeToIdentifier(ID_PATTERN);
 
           args.push(node);
         } else {
@@ -1896,7 +1895,7 @@ export class CstToAstConverter {
 
       for (const item of list) {
         if (item instanceof cst.IdentifierOrParameterContext) {
-          const node = this.createIdentifierOrParam(item);
+          const node = this.fromIdentifierOrParam(item);
 
           if (node) {
             args.push(node);
@@ -2080,7 +2079,7 @@ export class CstToAstConverter {
     const identifierOrParameter = functionName.identifierOrParameter();
 
     if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.createIdentifierOrParam(identifierOrParameter);
+      const operator = this.fromIdentifierOrParam(identifierOrParameter);
 
       if (operator) {
         node.operator = operator;
@@ -2134,7 +2133,7 @@ export class CstToAstConverter {
   private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
     const keyCtx = ctx._key;
     const valueCtx = ctx._value;
-    const key = this.createLiteralString(keyCtx) as ast.ESQLStringLiteral;
+    const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
     const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
     const entry = Builder.expression.entry(key, value, {
       location: getPosition(ctx.start, ctx.stop),
@@ -2161,35 +2160,33 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {
-      return this.createLiteralString(ctx.string_());
-    } else if (
-      ctx instanceof cst.NumericArrayLiteralContext ||
-      ctx instanceof cst.BooleanArrayLiteralContext ||
-      ctx instanceof cst.StringArrayLiteralContext
-    ) {
-      return this.toList(ctx);
+      return this.toStringLiteral(ctx.string_());
+    } else if (ctx instanceof cst.NumericArrayLiteralContext) {
+      return this.fromNumericArrayLiteral(ctx);
+    } else if (ctx instanceof cst.BooleanArrayLiteralContext) {
+      return this.fromBooleanArrayLiteral(ctx);
+    } else if (ctx instanceof cst.StringArrayLiteralContext) {
+      return this.fromStringArrayLiteral(ctx);
     } else if (ctx instanceof cst.InputParameterContext && ctx.children) {
-      // TODO: Make a method out of this.
-      const values: ast.ESQLLiteral[] = [];
-
-      for (const child of ctx.children) {
-        const param = this.toParam(child);
-        if (param) values.push(param);
-      }
-
-      return values;
+      return this.fromInputParameter(ctx);
+    } else {
+      return this.fromParserRuleToUnknown(ctx);
     }
-
-    return this.fromParserRuleToUnknown(ctx);
   }
 
   // ------------------------------------------- constant expression: "literal"
 
+  /**
+   * @deprecated
+   * @todo This method should not exist, the two call sites should be replaced
+   *     by a more specific implementation.
+   */
   private toLiteral(
     type: ast.ESQLLiteral['literalType'],
     node: antlr.TerminalNode | null
   ): ast.ESQLLiteral {
     if (!node) {
+      // TODO: This should not return a *broken) literal.
       return {
         type: 'literal',
         name: 'unknown',
@@ -2197,7 +2194,7 @@ export class CstToAstConverter {
         value: 'unknown',
         literalType: type,
         location: { min: 0, max: 0 },
-        incomplete: false,
+        incomplete: false, // TODO: Should be true?
       } as ast.ESQLLiteral;
     }
 
@@ -2237,7 +2234,19 @@ export class CstToAstConverter {
     ) as Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral;
   }
 
-  private createLiteralString(
+  private fromNumericValue(
+    ctx: cst.NumericValueContext
+  ): ast.ESQLDecimalLiteral | ast.ESQLIntegerLiteral {
+    const integerCtx = ctx.integerValue();
+
+    if (integerCtx) {
+      return this.toNumericLiteral(integerCtx, 'integer');
+    }
+
+    return this.toNumericLiteral(ctx.decimalValue()!, 'double');
+  }
+
+  private toStringLiteral(
     ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
   ): ast.ESQLStringLiteral {
     const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
@@ -2260,6 +2269,21 @@ export class CstToAstConverter {
       },
       this.createParserFields(ctx)
     );
+  }
+
+  private fromInputParameter(ctx: cst.InputParameterContext): ast.ESQLLiteral[] {
+    const values: ast.ESQLLiteral[] = [];
+    const children = ctx.children;
+
+    if (children) {
+      for (const child of children) {
+        const param = this.toParam(child);
+
+        if (param) values.push(param);
+      }
+    }
+
+    return values;
   }
 
   private toParam(ctx: antlr.ParseTree): ast.ESQLParam | undefined {
@@ -2290,30 +2314,25 @@ export class CstToAstConverter {
 
   // ---------------------------------------------- constant expression: "list"
 
-  private toList(
-    ctx:
-      | cst.NumericArrayLiteralContext
-      | cst.BooleanArrayLiteralContext
-      | cst.StringArrayLiteralContext
-  ): ast.ESQLList {
-    const values: ast.ESQLLiteral[] = [];
+  private fromNumericArrayLiteral(ctx: cst.NumericArrayLiteralContext): ast.ESQLList {
+    const values = ctx.numericValue_list().map((childCtx) => this.fromNumericValue(childCtx));
+    const parserFields = this.createParserFields(ctx);
 
-    for (const numericValue of ctx.getTypedRuleContexts(cst.NumericValueContext)) {
-      const isDecimal =
-        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
-      const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(this.toNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
-    }
-    for (const booleanValue of ctx.getTypedRuleContexts(cst.BooleanValueContext)) {
-      values.push(this.getBooleanValue(booleanValue)!);
-    }
-    for (const string of ctx.getTypedRuleContexts(cst.StringContext)) {
-      const literal = this.createLiteralString(string);
+    return Builder.expression.list.literal({ values }, parserFields);
+  }
 
-      values.push(literal);
-    }
+  private fromBooleanArrayLiteral(ctx: cst.BooleanArrayLiteralContext): ast.ESQLList {
+    const values = ctx.booleanValue_list().map((childCtx) => this.getBooleanValue(childCtx)!);
+    const parserFields = this.createParserFields(ctx);
 
-    return Builder.expression.list.literal({ values }, this.createParserFields(ctx));
+    return Builder.expression.list.literal({ values }, parserFields);
+  }
+
+  private fromStringArrayLiteral(ctx: cst.StringArrayLiteralContext): ast.ESQLList {
+    const values = ctx.string__list().map((childCtx) => this.toStringLiteral(childCtx)!);
+    const parserFields = this.createParserFields(ctx);
+
+    return Builder.expression.list.literal({ values }, parserFields);
   }
 
   // -------------------------------------- constant expression: "timeInterval"
@@ -2323,25 +2342,25 @@ export class CstToAstConverter {
   ): ast.ESQLTimeInterval {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
-
-    return {
-      type: 'timeInterval',
-      quantity: Number(value),
+    const parserFields = this.createParserFields(ctx);
+    const qualifiedInteger = Builder.expression.literal.qualifiedInteger(
+      Number(value),
       unit,
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      name: value + ' ' + unit,
-      incomplete: Boolean(ctx.exception),
-    };
+      parserFields
+    );
+
+    return qualifiedInteger;
   }
 
   // ---------------------------------------- constant expression: "identifier"
 
-  private createIdentifierOrParam(ctx: cst.IdentifierOrParameterContext) {
+  private fromIdentifierOrParam(
+    ctx: cst.IdentifierOrParameterContext
+  ): ast.ESQLIdentifier | ast.ESQLParam | undefined {
     const identifier = ctx.identifier();
 
     if (identifier) {
-      return this.createIdentifier(identifier);
+      return this.fromIdentifier(identifier);
     }
 
     const parameter = ctx.parameter() ?? ctx.doubleParameter();
@@ -2351,10 +2370,25 @@ export class CstToAstConverter {
     }
   }
 
-  private createIdentifier(identifier: cst.IdentifierContext): ast.ESQLIdentifier {
-    const text = identifier.getText();
-    const name = parseIdentifier(text);
+  private fromIdentifier(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
+    const node = ctx.QUOTED_IDENTIFIER() || ctx.UNQUOTED_IDENTIFIER() || ctx.start;
 
-    return Builder.identifier({ name }, this.createParserFields(identifier));
+    return this.fromNodeToIdentifier(node);
+  }
+
+  private fromNodeToIdentifier(node: antlr.TerminalNode): ast.ESQLIdentifier {
+    let name = node.getText();
+    const firstChar = name[0];
+    const lastChar = name[name.length - 1];
+    const isQuoted = firstChar === '`' && lastChar === '`';
+
+    if (isQuoted) {
+      name = name.slice(1, -1).replace(/``/g, '`');
+    }
+
+    const parserFields = this.createParserFieldsFromToken(node.symbol);
+    const identifier = Builder.identifier({ name }, parserFields);
+
+    return identifier;
   }
 }

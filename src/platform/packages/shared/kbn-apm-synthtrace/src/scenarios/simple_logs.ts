@@ -57,6 +57,18 @@ const MESSAGE_LOG_LEVELS = [
     message: '[err] Incorrect spelling of log level Error',
     level: 'dummy',
   },
+  {
+    message: '[trac] Incorrect spelling of log level Trace',
+    level: 'trace',
+  },
+  {
+    message: '[inf] Incorrect spelling of log level Info',
+    level: 'info',
+  },
+  {
+    message: '[fat] Incorrect spelling of log level Fatal',
+    level: 'fatal',
+  },
 ];
 
 const logMessagesLength = MESSAGE_LOG_LEVELS.length;

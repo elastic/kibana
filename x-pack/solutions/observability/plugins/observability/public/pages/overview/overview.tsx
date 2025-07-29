@@ -22,6 +22,10 @@ import {
   useFetcher,
 } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useMemo } from 'react';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
@@ -47,7 +51,13 @@ export function OverviewPage() {
     observabilityAIAssistant,
     kibanaVersion,
     serverless: isServerless,
+    share,
   } = useKibana().services;
+
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const onboardingHref = onboardingLocator?.useUrl({});
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { euiTheme } = useEuiTheme();
@@ -215,7 +225,12 @@ export function OverviewPage() {
             </p>
           }
           actions={
-            <EuiButton data-test-subj="o11yOverviewPageAddDataButton" color="primary" fill>
+            <EuiButton
+              data-test-subj="o11yOverviewPageAddDataButton"
+              color="primary"
+              fill
+              href={onboardingHref}
+            >
               {i18n.translate('xpack.observability.overview.emptyState.action', {
                 defaultMessage: 'Add data',
               })}

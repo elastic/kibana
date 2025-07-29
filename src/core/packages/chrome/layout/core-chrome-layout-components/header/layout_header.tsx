@@ -22,12 +22,8 @@ export interface LayoutHeaderProps {
  */
 export const LayoutHeader = ({ children }: LayoutHeaderProps) => {
   return (
-    <header
-      css={styles.root}
-      className="kbnChromeLayoutHeader"
-      data-test-subj="kbnChromeLayoutHeader"
-    >
+    <div css={styles.root} className="kbnChromeLayoutHeader" data-test-subj="kbnChromeLayoutHeader">
       {children}
-    </header>
+    </div>
   );
 };

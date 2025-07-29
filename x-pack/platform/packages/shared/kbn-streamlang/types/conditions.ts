@@ -11,19 +11,49 @@ import { createIsNarrowSchema } from '@kbn/streams-schema';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
+type StringOrNumberOrBoolean = string | number | boolean;
+
+type OperatorKey = keyof Omit<ShorthandBinaryFilterCondition, 'field'>;
+
+export const OPERATORS: OperatorKey[] = [
+  'eq',
+  'neq',
+  'lt',
+  'lte',
+  'gt',
+  'gte',
+  'contains',
+  'startsWith',
+  'endsWith',
+  'range',
+];
+
+export interface RangeCondition {
+  gt?: StringOrNumberOrBoolean;
+  gte?: StringOrNumberOrBoolean;
+  lt?: StringOrNumberOrBoolean;
+  lte?: StringOrNumberOrBoolean;
+}
 export interface ShorthandBinaryFilterCondition {
   field: string;
-  eq?: string | number | boolean;
-  neq?: string | number | boolean;
-  lt?: string | number | boolean;
-  lte?: string | number | boolean;
-  gt?: string | number | boolean;
-  gte?: string | number | boolean;
-  contains?: string | number | boolean;
-  startsWith?: string | number | boolean;
-  endsWith?: string | number | boolean;
+  eq?: StringOrNumberOrBoolean;
+  neq?: StringOrNumberOrBoolean;
+  lt?: StringOrNumberOrBoolean;
+  lte?: StringOrNumberOrBoolean;
+  gt?: StringOrNumberOrBoolean;
+  gte?: StringOrNumberOrBoolean;
+  contains?: StringOrNumberOrBoolean;
+  startsWith?: StringOrNumberOrBoolean;
+  endsWith?: StringOrNumberOrBoolean;
+  range?: RangeCondition;
 }
 
+export const rangeConditionSchema = z.object({
+  gt: stringOrNumberOrBoolean.optional(),
+  gte: stringOrNumberOrBoolean.optional(),
+  lt: stringOrNumberOrBoolean.optional(),
+  lte: stringOrNumberOrBoolean.optional(),
+});
 // Shorthand binary: field + one of the operator keys
 export const shorthandBinaryFilterConditionSchema = z
   .object({
@@ -37,32 +67,25 @@ export const shorthandBinaryFilterConditionSchema = z
     contains: stringOrNumberOrBoolean.optional(),
     startsWith: stringOrNumberOrBoolean.optional(),
     endsWith: stringOrNumberOrBoolean.optional(),
+    range: rangeConditionSchema.optional(),
   })
   .refine(
     (obj) =>
       // At least one operator must be present
-      Object.keys(obj).some((key) =>
-        ['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith'].includes(key)
-      ),
+      Object.keys(obj).some((key) => OPERATORS.includes(key as OperatorKey)),
     { message: 'At least one operator must be specified' }
   );
 
 export interface ShorthandUnaryFilterCondition {
   field: string;
-  exists?: true;
-  notExists?: true;
+  exists?: boolean;
 }
 
-// Shorthand unary: field + exists or notExists
-export const shorthandUnaryFilterConditionSchema = z
-  .object({
-    field: NonEmptyString,
-    exists: z.literal(true).optional(),
-    notExists: z.literal(true).optional(),
-  })
-  .refine((obj) => obj.exists === true || obj.notExists === true, {
-    message: 'Must specify exists: true or notExists: true',
-  });
+// Shorthand unary
+export const shorthandUnaryFilterConditionSchema = z.object({
+  field: NonEmptyString,
+  exists: z.boolean().optional(),
+});
 
 export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition;
 
@@ -87,10 +110,15 @@ export interface NeverCondition {
   never: {};
 }
 
+export interface NotCondition {
+  not: Condition;
+}
+
 export type Condition =
   | FilterCondition
   | AndCondition
   | OrCondition
+  | NotCondition
   | NeverCondition
   | AlwaysCondition;
 
@@ -99,6 +127,7 @@ export const conditionSchema: z.Schema<Condition> = z.lazy(() =>
     filterConditionSchema,
     andConditionSchema,
     orConditionSchema,
+    notConditionSchema,
     neverConditionSchema,
     alwaysConditionSchema,
   ])
@@ -108,6 +137,7 @@ export const andConditionSchema = z.object({ and: z.array(conditionSchema) });
 export const orConditionSchema = z.object({ or: z.array(conditionSchema) });
 export const neverConditionSchema = z.object({ never: z.strictObject({}) });
 export const alwaysConditionSchema = z.object({ always: z.strictObject({}) });
+export const notConditionSchema = z.object({ not: z.lazy(() => conditionSchema) });
 
 export const isBinaryFilterCondition = createIsNarrowSchema(
   conditionSchema,
@@ -123,5 +153,6 @@ export const isAndCondition = createIsNarrowSchema(conditionSchema, andCondition
 export const isOrCondition = createIsNarrowSchema(conditionSchema, orConditionSchema);
 export const isNeverCondition = createIsNarrowSchema(conditionSchema, neverConditionSchema);
 export const isAlwaysCondition = createIsNarrowSchema(conditionSchema, alwaysConditionSchema);
+export const isNotCondition = createIsNarrowSchema(conditionSchema, notConditionSchema);
 
 export const isCondition = createIsNarrowSchema(z.unknown(), conditionSchema);

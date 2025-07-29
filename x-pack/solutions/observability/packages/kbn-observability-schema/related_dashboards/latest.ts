@@ -7,9 +7,10 @@
 
 export { type RelevantPanel, relevantPanelSchema } from './schema/relevant_panel/v1';
 export {
-  type RelatedDashboard,
+  type LinkedDashboard,
   type SuggestedDashboard,
-  relatedDashboardSchema,
+  type RelatedDashboard,
+  linkedDashboardSchema,
   suggestedDashboardSchema,
 } from './schema/related_dashboard/v1';
 export {

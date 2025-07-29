@@ -7,13 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../../types';
-import { nginx as nginxRequiredMetrics } from '../../shared/metrics/required_metrics';
-
-export { podSnapshotMetricTypes } from './metrics';
-
-export const pod: InventoryModel<typeof metrics> = {
-  id: 'pod',
+import { createInventoryModel } from '../../shared/create_inventory_model';
+export const pod = createInventoryModel('pod', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
     defaultMessage: 'Kubernetes Pods',
   }),
@@ -33,12 +28,4 @@ export const pod: InventoryModel<typeof metrics> = {
     ip: 'kubernetes.pod.ip',
   },
   metrics,
-  requiredMetrics: [
-    'podOverview',
-    'podCpuUsage',
-    'podMemoryUsage',
-    'podNetworkTraffic',
-    ...nginxRequiredMetrics,
-  ],
-  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
-};
+});

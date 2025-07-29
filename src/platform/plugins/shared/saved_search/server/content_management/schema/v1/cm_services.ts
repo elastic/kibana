@@ -16,99 +16,9 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-import {
-  MIN_SAVED_SEARCH_SAMPLE_SIZE,
-  MAX_SAVED_SEARCH_SAMPLE_SIZE,
-} from '../../../../common/constants';
+import { SCHEMA_SEARCH_MODEL_VERSION_6 } from '../../../saved_objects/schema';
 
-const sortSchema = schema.arrayOf(schema.string(), { maxSize: 2 });
-
-const savedSearchAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    sort: schema.oneOf([sortSchema, schema.arrayOf(sortSchema)]),
-    columns: schema.arrayOf(schema.string()),
-    description: schema.string(),
-    grid: schema.object({
-      columns: schema.maybe(
-        schema.recordOf(
-          schema.string(),
-          schema.object({
-            width: schema.maybe(schema.number()),
-          })
-        )
-      ),
-    }),
-    hideChart: schema.maybe(schema.boolean()),
-    isTextBasedQuery: schema.maybe(schema.boolean()),
-    usesAdHocDataView: schema.maybe(schema.boolean()),
-    kibanaSavedObjectMeta: schema.object({
-      searchSourceJSON: schema.string(),
-    }),
-    viewMode: schema.maybe(
-      schema.oneOf([
-        schema.literal('documents'),
-        schema.literal('patterns'),
-        schema.literal('aggregated'),
-      ])
-    ),
-    hideAggregatedPreview: schema.maybe(schema.boolean()),
-    rowHeight: schema.maybe(schema.number()),
-    headerRowHeight: schema.maybe(schema.number()),
-    hits: schema.maybe(schema.number()),
-    timeRestore: schema.maybe(schema.boolean()),
-    timeRange: schema.maybe(
-      schema.object({
-        from: schema.string(),
-        to: schema.string(),
-      })
-    ),
-    refreshInterval: schema.maybe(
-      schema.object({
-        pause: schema.boolean(),
-        value: schema.number(),
-      })
-    ),
-    rowsPerPage: schema.maybe(schema.number()),
-    sampleSize: schema.maybe(
-      schema.number({
-        min: MIN_SAVED_SEARCH_SAMPLE_SIZE,
-        max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
-      })
-    ),
-    density: schema.maybe(
-      schema.oneOf([
-        schema.literal('compact'),
-        schema.literal('normal'),
-        schema.literal('expanded'),
-      ])
-    ),
-    breakdownField: schema.maybe(schema.string()),
-    visContext: schema.maybe(
-      schema.oneOf([
-        // existing value
-        schema.object({
-          // unified histogram state
-          suggestionType: schema.string(),
-          requestData: schema.object({
-            dataViewId: schema.maybe(schema.string()),
-            timeField: schema.maybe(schema.string()),
-            timeInterval: schema.maybe(schema.string()),
-            breakdownField: schema.maybe(schema.string()),
-          }),
-          // lens attributes
-          attributes: schema.recordOf(schema.string(), schema.any()),
-        }),
-        // cleared previous value
-        schema.object({}),
-      ])
-    ),
-    version: schema.maybe(schema.number()),
-  },
-  { unknowns: 'forbid' }
-);
-
-const savedSearchSavedObjectSchema = savedObjectSchema(savedSearchAttributesSchema);
+const savedSearchSavedObjectSchema = savedObjectSchema(SCHEMA_SEARCH_MODEL_VERSION_6);
 
 const savedSearchCreateOptionsSchema = schema.maybe(
   schema.object({
@@ -146,7 +56,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchCreateOptionsSchema,
       },
       data: {
-        schema: savedSearchAttributesSchema,
+        schema: SCHEMA_SEARCH_MODEL_VERSION_6,
       },
     },
     out: {
@@ -161,7 +71,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: savedSearchUpdateOptionsSchema,
       },
       data: {
-        schema: savedSearchAttributesSchema,
+        schema: SCHEMA_SEARCH_MODEL_VERSION_6,
       },
     },
   },
