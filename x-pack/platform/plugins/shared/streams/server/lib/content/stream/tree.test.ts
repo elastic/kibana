@@ -225,7 +225,9 @@ describe('content pack stream helpers', () => {
         include: { objects: { all: {} } },
       });
 
-      expect(() => mergeTrees({ existing, incoming })).toThrow('Cannot change mapping of [custom] for [root]');
+      expect(() => mergeTrees({ existing, incoming })).toThrow(
+        'Cannot change mapping of [custom] for [root]'
+      );
     });
   });
 });
