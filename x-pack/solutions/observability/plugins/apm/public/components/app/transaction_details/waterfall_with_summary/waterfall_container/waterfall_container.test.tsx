@@ -29,7 +29,8 @@ describe('WaterfallContainer', () => {
     const { getAllByRole } = renderWithTheme(<Example />);
     const buttons = await waitFor(() => getAllByRole('button'));
     const parentItem = buttons[1];
-    const childItem = buttons[3];
+    const childItem = buttons[2];
+
     await userEvent.click(parentItem);
 
     expect(parentItem).toHaveAttribute('aria-expanded', 'false');
