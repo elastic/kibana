@@ -22,11 +22,10 @@ export const getPrivilegedMonitorUsersJoin = (
   | RENAME event_timestamp AS @timestamp
   | WHERE user.is_privileged == true`;
 
-export type EsqlQueryOrInvalidFields =
-  | E.Right<string>
-  | E.Left<
-      { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined }
-    >;
+export type EsqlQueryOrInvalidFields = E.Either<
+  { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined },
+  string
+>;
 export const getPrivilegeMonitrUsersJoinNoTimestamp = (
   namespace: string
 ) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
