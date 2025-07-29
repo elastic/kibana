@@ -43,7 +43,6 @@ export function createRepositoryEsClient(client: ElasticsearchClient): Repositor
         }
       },
     });
-
     return acc;
   }, {} as RepositoryEsClient);
 }
