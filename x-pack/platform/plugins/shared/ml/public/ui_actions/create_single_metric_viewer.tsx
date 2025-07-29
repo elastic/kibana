@@ -18,7 +18,6 @@ import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableSingleMetricViewerUserInput } from '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout';
-import type { SingleMetricViewerEmbeddableUserInput } from '../embeddables/types';
 
 export type CreateSingleMetricViewerPanelActionContext = EmbeddableApiContext & {
   embeddable: SingleMetricViewerEmbeddableApi;
@@ -101,32 +100,3 @@ export function createAddSingleMetricViewerPanelAction(
     },
   };
 }
-
-// try {
-//   const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
-//     '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout'
-//   );
-//   const { mlApiProvider } = await import('../application/services/ml_api_service');
-//   const httpService = new HttpService(coreStart.http);
-//   const mlApi: MlApi = mlApiProvider(httpService);
-
-//   const initialState = await resolveEmbeddableSingleMetricViewerUserInput(
-//     coreStart,
-//     context.embeddable, nie
-//     context.embeddable.uuid, nie
-//     { data, share },
-//     mlApi
-//   );
-
-//   presentationContainerParent.addNewPanel({
-//     panelType: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-//     serializedState: {
-//       rawState: {
-//         ...initialState,
-//         title: initialState.panelTitle,
-//       },
-//     },
-//   });
-// } catch (e) {
-//   return Promise.reject();
-// }

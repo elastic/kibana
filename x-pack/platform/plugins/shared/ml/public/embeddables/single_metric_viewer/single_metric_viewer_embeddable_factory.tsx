@@ -128,21 +128,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
               );
             },
           });
-
-          // const [coreStart, { data, share }, { mlApi }] = services;
-          // const result = await resolveEmbeddableSingleMetricViewerUserInput(
-          //   coreStart,
-          //   parentApi,
-          //   uuid,
-          //   { data, share },
-          //   mlApi,
-          //   {
-          //     ...titleManager.getLatestState(),
-          //     ...singleMetricManager.getLatestState(),
-          //   }
-          // );
-
-          // singleMetricManager.api.updateUserInput(result);
         },
         ...titleManager.api,
         ...timeRangeManager.api,
