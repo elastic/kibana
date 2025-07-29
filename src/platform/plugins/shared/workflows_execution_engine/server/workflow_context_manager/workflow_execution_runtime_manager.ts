@@ -195,6 +195,7 @@ export class WorkflowExecutionRuntimeManager {
       id: this.workflowExecution.id,
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
+      workflowId: this.workflowExecution.workflowId,
     };
     await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
     this.workflowExecution = {
@@ -228,6 +229,8 @@ export class WorkflowExecutionRuntimeManager {
   private async updateWorkflowState(): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
+      workflowId: this.workflowExecution.workflowId,
+      startedAt: this.workflowExecution.startedAt,
     };
 
     if (this.isWorkflowFinished()) {
