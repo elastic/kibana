@@ -35,7 +35,11 @@ interface GenerateSignificantEventFlyoutProps {
 
 export function GenerateSignificantEventFlyout(props: GenerateSignificantEventFlyoutProps) {
   return (
-    <EuiFlyout onClose={() => props.onClose?.()} size="m">
+    <EuiFlyout
+      aria-labelledby="generateSignificantEventFlyout"
+      onClose={() => props.onClose?.()}
+      size="m"
+    >
       <SignificantEventFlyoutContents {...props} />
     </EuiFlyout>
   );
