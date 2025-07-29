@@ -1,0 +1,40 @@
+version: 1
+workflow:
+  name: "Phishing Alert Investigation"
+  description: "Investigate a reported phishing email with parallel analysis and AI summary."
+  enabled: true
+  triggers:
+    - type: triggers.elastic.manual
+  steps:
+    - name: Parallel analysis
+      type: parallel
+      branches:
+        - name: URL scan
+          steps:
+            - name: Scan URL
+              type: url_scan
+        - name: Classification
+          steps:
+            - name: Classify text
+              type: classify_text
+    - name: Merge results
+      type: merge
+      sources:
+        - "Parallel analysis.URL scan"
+        - "Parallel analysis.Classification"
+      steps:
+        - name: AI summary
+          type: ai_summary
+        - name: Decision
+          type: if
+          condition: "{{steps.ai_summary.is_malicious}}"
+          steps:
+            - name: Create case
+              type: create_case
+            - name: Add to case
+              type: add_to_case
+          else:
+            - name: Add note
+              type: add_note
+            - name: Close alert
+              type: close_alert

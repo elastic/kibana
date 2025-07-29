@@ -60,7 +60,14 @@ export interface RuleTaskRunResult {
   state: RuleTaskState;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
+  shouldDeleteTask?: boolean;
 }
+
+export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
+  state: {},
+  schedule: undefined,
+  shouldDeleteTask: true,
+});
 
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export interface RunRuleResult {

@@ -22,6 +22,37 @@ export enum LogLevelCoalescedValue {
   fatal = 'fatal',
 }
 
+// Severity ranking: lower index => higher severity
+// The order is based on RFC 5424 (“The Syslog Protocol”, section 6.2.1)
+export const severityOrder: LogLevelCoalescedValue[] = [
+  LogLevelCoalescedValue.emergency,
+  LogLevelCoalescedValue.alert,
+  LogLevelCoalescedValue.fatal,
+  LogLevelCoalescedValue.critical,
+  LogLevelCoalescedValue.error,
+  LogLevelCoalescedValue.warning,
+  LogLevelCoalescedValue.notice,
+  LogLevelCoalescedValue.info,
+  LogLevelCoalescedValue.debug,
+  LogLevelCoalescedValue.trace,
+];
+
+export const logLevelSynonyms: Record<string, LogLevelCoalescedValue> = {
+  emerg: LogLevelCoalescedValue.emergency,
+  panic: LogLevelCoalescedValue.emergency,
+  fat: LogLevelCoalescedValue.fatal,
+  crit: LogLevelCoalescedValue.critical,
+  err: LogLevelCoalescedValue.error,
+  eror: LogLevelCoalescedValue.error,
+  warn: LogLevelCoalescedValue.warning,
+  information: LogLevelCoalescedValue.info,
+  informational: LogLevelCoalescedValue.info,
+  inf: LogLevelCoalescedValue.info,
+  dbg: LogLevelCoalescedValue.debug,
+  dbug: LogLevelCoalescedValue.debug,
+  trac: LogLevelCoalescedValue.trace,
+};
+
 export const getLogLevelCoalescedValue = (
   logLevel: string | string[] | unknown
 ): LogLevelCoalescedValue | undefined => {
@@ -32,6 +63,12 @@ export const getLogLevelCoalescedValue = (
   }
 
   const logLevelLowerCase = logLevelUnfolded.trim().toLowerCase();
+
+  // Logic to handle common spelling mistakes with log levels
+  const alias = logLevelSynonyms[logLevelLowerCase];
+  if (alias) {
+    return alias;
+  }
 
   if (logLevelLowerCase.startsWith('trace')) {
     return LogLevelCoalescedValue.trace;
