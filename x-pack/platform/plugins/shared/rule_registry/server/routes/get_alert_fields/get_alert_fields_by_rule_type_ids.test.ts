@@ -33,7 +33,6 @@ describe('getAlertFieldsByRuleTypeIds', () => {
       getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
         return Promise.resolve({
           fields: [],
-          alertFields: {},
         });
       }),
     });

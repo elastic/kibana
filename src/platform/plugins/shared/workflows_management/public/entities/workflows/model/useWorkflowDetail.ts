@@ -11,10 +11,11 @@ import { useQuery } from '@tanstack/react-query';
 import { WorkflowDetailDto } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export function useWorkflowDetail(id: string) {
+export function useWorkflowDetail(id: string | null) {
   const { http } = useKibana().services;
 
   return useQuery<WorkflowDetailDto>({
+    enabled: !!id,
     queryKey: ['workflows', id],
     queryFn: () => http!.get(`/api/workflows/${id}`),
   });

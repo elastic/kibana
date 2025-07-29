@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [connectorUiOptions, setConnectorUiOptions] = useLocalStorage<
     Record<string, { deploymentMethod: 'docker' | 'source' | null }>
   >('search:connector-ui-options', {});
@@ -58,6 +60,8 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
 
   return isDeleteModalVisible ? (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         !isCrawler
           ? i18n.translate('xpack.enterpriseSearch.content.connectors.deleteModal.title', {
