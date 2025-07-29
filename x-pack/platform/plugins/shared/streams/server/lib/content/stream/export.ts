@@ -17,21 +17,14 @@ export function prepareStreamsForExport({
   tree: StreamTree;
   inheritedFields: FieldDefinition;
 }): ContentPackStream[] {
-  const queue = [tree];
-  const streams: ContentPackStream[] = [];
-  while (queue.length > 0) {
-    const stream = queue.shift()!;
-    streams.push(asExportedObject(tree.name, stream, inheritedFields));
-    queue.push(...stream.children);
-  }
-  return streams;
+  return asExportedObjects(tree.name, tree, inheritedFields);
 }
 
-function asExportedObject(
+function asExportedObjects(
   root: string,
   tree: StreamTree,
   inheritedFields: FieldDefinition
-): ContentPackStream {
+): ContentPackStream[] {
   const name = tree.name === root ? ROOT_STREAM_ID : withoutRootPrefix(root, tree.name);
 
   const streamFields = tree.request.stream.ingest.wired.fields;
@@ -42,18 +35,21 @@ function asExportedObject(
     destination: withoutRootPrefix(root, destination),
   }));
 
-  return {
-    type: 'stream' as const,
-    name,
-    request: {
-      ...tree.request,
-      stream: {
-        ...tree.request.stream,
-        ingest: {
-          ...tree.request.stream.ingest,
-          wired: { ...tree.request.stream.ingest.wired, routing, fields },
+  return [
+    {
+      type: 'stream' as const,
+      name,
+      request: {
+        ...tree.request,
+        stream: {
+          ...tree.request.stream,
+          ingest: {
+            ...tree.request.stream.ingest,
+            wired: { ...tree.request.stream.ingest.wired, routing, fields },
+          },
         },
       },
     },
-  };
+    ...tree.children.flatMap((child) => asExportedObjects(root, child, inheritedFields)),
+  ];
 }

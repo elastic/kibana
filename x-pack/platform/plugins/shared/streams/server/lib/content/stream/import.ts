@@ -16,12 +16,9 @@ export function prepareStreamsForImport({
   existing: StreamTree;
   incoming: StreamTree;
 }): ContentPackStream[] {
-  const queue = [mergeTrees({ existing, incoming })];
-  const streams: ContentPackStream[] = [];
-  while (queue.length > 0) {
-    const stream = queue.shift()!;
-    streams.push(omit(stream, 'children'));
-    queue.push(...stream.children);
-  }
-  return streams;
+  return flattenTree(mergeTrees({ existing, incoming }));
+}
+
+function flattenTree(tree: StreamTree): ContentPackStream[] {
+  return [omit(tree, 'children'), ...tree.children.flatMap(flattenTree)];
 }
