@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import React from 'react';
 import { act, fireEvent, render, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
@@ -187,8 +180,9 @@ describe('SampleLogsInput', () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
         });
 
-        it('should render error message', () => {
-          expect(result.queryByText(errorMessage)).toBeInTheDocument();
+        it('should render error message', async () => {
+          const errorRegex = new RegExp(errorMessage.trim());
+          expect(await result.findByText(errorRegex)).toBeInTheDocument();
         });
 
         it('should set the integrationSetting correctly', () => {
@@ -305,8 +299,10 @@ describe('SampleLogsInput', () => {
       jsonParseSpy.mockRestore();
     });
 
-    it('should raise an appropriate error', () => {
-      expect(result.queryByText('This logs sample file is too large to parse')).toBeInTheDocument();
+    it('should raise an appropriate error', async () => {
+      expect(
+        await result.findByText('This logs sample file is too large to parse', { exact: false })
+      ).toBeInTheDocument();
     });
   });
 
@@ -356,9 +352,11 @@ describe('SampleLogsInput', () => {
       fileReaderSpy.mockRestore();
     });
 
-    it('should set the error message accordingly', () => {
+    it('should set the error message accordingly', async () => {
       expect(
-        result.queryByText(`An error occurred when reading logs sample: ${mockedMessage}`)
+        await result.findByText(`An error occurred when reading logs sample: ${mockedMessage}`, {
+          exact: false,
+        })
       ).toBeInTheDocument();
     });
   });
