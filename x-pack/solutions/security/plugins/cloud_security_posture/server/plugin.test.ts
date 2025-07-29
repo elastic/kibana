@@ -123,6 +123,51 @@ describe('Cloud Security Posture Plugin', () => {
       expect(spy).toHaveBeenCalledTimes(0);
     });
 
+    it('should retry getInstallation on failures', async () => {
+      let callCount = 0;
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
+        async (): Promise<Installation | undefined> => {
+          callCount++;
+          if (callCount < 3) {
+            throw new Error('ES connection failed');
+          }
+          return {} as jest.Mocked<Installation>;
+        }
+      );
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(3);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle getInstallation complete failure after retries', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
+        async (): Promise<Installation | undefined> => {
+          throw new Error('ES connection failed persistently');
+        }
+      );
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert - should retry 5 times total (initial + 4 retries)
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(5);
+      expect(spy).toHaveBeenCalledTimes(0);
+    });
+
     it('should not initialize when other package is created', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
