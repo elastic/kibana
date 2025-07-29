@@ -21,4 +21,5 @@ export const tlsFormatters: TLSFormatMap = {
   [ConfigKey.TLS_KEY_PASSPHRASE]: tlsValueToStringFormatter,
   [ConfigKey.TLS_VERIFICATION_MODE]: tlsValueToStringFormatter,
   [ConfigKey.TLS_VERSION]: tlsArrayToYamlFormatter,
+  [ConfigKey.TLS_CIPHER_SUITES]: tlsArrayToYamlFormatter,
 };
