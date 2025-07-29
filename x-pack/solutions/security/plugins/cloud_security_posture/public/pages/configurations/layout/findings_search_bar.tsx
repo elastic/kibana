@@ -11,12 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
-import {
-  CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-common';
 import { useRefresh } from '@kbn/cloud-security-posture/src/hooks/use_refresh';
-import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import type { FindingsBaseURLQuery } from '../../../common/types';
@@ -29,6 +24,7 @@ interface FindingsSearchBarProps {
   loading: boolean;
   placeholder?: string;
   query: SearchBarQueryProps;
+  refreshQueryKey: string;
 }
 
 export const FindingsSearchBar = ({
@@ -38,6 +34,7 @@ export const FindingsSearchBar = ({
   placeholder = i18n.translate('xpack.csp.findings.searchBar.searchPlaceholder', {
     defaultMessage: 'Search findings (eg. rule.section : "API Server" )',
   }),
+  refreshQueryKey,
 }: FindingsSearchBarProps) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -49,15 +46,6 @@ export const FindingsSearchBar = ({
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const { dataView } = useDataViewContext();
-
-  const misconfigurationRefreshQueryKey = CDR_MISCONFIGURATIONS_INDEX_PATTERN;
-
-  const vulnerabilityRefreshQueryKey = CDR_VULNERABILITIES_INDEX_PATTERN;
-
-  const refreshQueryKey =
-    dataView.id === CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX + '-default'
-      ? vulnerabilityRefreshQueryKey
-      : misconfigurationRefreshQueryKey;
 
   const { refresh, isRefreshing } = useRefresh(refreshQueryKey);
 
