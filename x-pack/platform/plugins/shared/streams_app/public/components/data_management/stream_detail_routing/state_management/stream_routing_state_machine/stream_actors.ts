@@ -132,12 +132,12 @@ export const createStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    const error = getFormattedError(event.error);
-    toasts.addError(error, {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate('xpack.streams.failedToSave', {
         defaultMessage: 'Failed to save',
       }),
-      toastMessage: error.message,
+      toastMessage: formattedError.message,
       toastLifeTimeMs: 5000,
     });
   };
