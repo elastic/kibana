@@ -11,10 +11,15 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiConfirmModal,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiInMemoryTable,
+  EuiLink,
+  EuiPopover,
   EuiSkeletonLoading,
   EuiSkeletonText,
+  EuiTableSelectionType,
   EuiText,
   Search,
   useEuiTheme,
@@ -22,11 +27,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import { isEsqlTool } from '@kbn/onechat-common/tools';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
@@ -53,27 +60,261 @@ import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql/esql_to
 import { OnechatEsqlToolFormData } from './esql/form/types/esql_tool_form_types';
 import { OnechatToolTags } from './tags/tool_tags';
 
+const ToolId = ({
+  tool,
+  editTool,
+}: {
+  tool: ToolDefinitionWithSchema;
+  editTool: (toolId: string) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const toolIdStyle = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      {isEsqlTool(tool) ? (
+        <EuiLink onClick={() => editTool(tool.id)}>
+          <EuiText size="s" css={toolIdStyle}>
+            {tool.id}
+          </EuiText>
+        </EuiLink>
+      ) : (
+        <EuiText size="s" css={toolIdStyle}>
+          {tool.id}
+        </EuiText>
+      )}
+      <EuiText size="s" color="subdued">
+        {truncateAtNewline(tool.description)}
+      </EuiText>
+    </EuiFlexGroup>
+  );
+};
+
+const ToolQuickActions = ({
+  tool,
+  editTool,
+  deleteTool,
+}: {
+  tool: ToolDefinitionWithSchema;
+  editTool: (toolId: string) => void;
+  deleteTool: (toolId: string) => void;
+}) => {
+  return (
+    <EuiFlexGroup
+      css={css`
+        visibility: hidden;
+      `}
+      className="tool-quick-actions"
+      gutterSize="s"
+      alignItems="center"
+      component="span"
+    >
+      <EuiButtonIcon
+        iconType="documentEdit"
+        onClick={() => {
+          editTool(tool.id);
+        }}
+        aria-label={i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
+          defaultMessage: 'Edit',
+        })}
+      />
+      <EuiButtonIcon
+        iconType="trash"
+        color="danger"
+        onClick={() => {
+          deleteTool(tool.id);
+        }}
+        aria-label={i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
+          defaultMessage: 'Delete',
+        })}
+      />
+    </EuiFlexGroup>
+  );
+};
+
+const ToolContextMenu = ({
+  tool,
+  editTool,
+  deleteTool,
+  testTool,
+  cloneTool,
+}: {
+  tool: ToolDefinitionWithSchema;
+  editTool: (toolId: string) => void;
+  deleteTool: (toolId: string) => void;
+  testTool: (toolId: string) => void;
+  cloneTool: (toolId: string) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const editMenuItem = (
+    <EuiContextMenuItem
+      icon="documentEdit"
+      key="edit"
+      size="s"
+      onClick={() => {
+        editTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
+        defaultMessage: 'Edit',
+      })}
+    </EuiContextMenuItem>
+  );
+
+  const deleteMenuItem = (
+    <EuiContextMenuItem
+      icon="trash"
+      key="delete"
+      size="s"
+      css={css`
+        color: ${euiTheme.colors.textDanger};
+      `}
+      onClick={() => {
+        deleteTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
+        defaultMessage: 'Delete',
+      })}
+    </EuiContextMenuItem>
+  );
+
+  const testMenuItem = (
+    <EuiContextMenuItem
+      icon="eye"
+      key="test"
+      size="s"
+      onClick={() => {
+        testTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.onechat.tools.testToolButtonLabel', {
+        defaultMessage: 'Test',
+      })}
+    </EuiContextMenuItem>
+  );
+
+  const cloneMenuItem = (
+    <EuiContextMenuItem
+      icon="copy"
+      key="clone"
+      size="s"
+      onClick={() => {
+        cloneTool(tool.id);
+        setIsOpen(false);
+      }}
+    >
+      {i18n.translate('xpack.onechat.tools.cloneToolButtonLabel', {
+        defaultMessage: 'Clone',
+      })}
+    </EuiContextMenuItem>
+  );
+
+  const menuItems = isEsqlTool(tool)
+    ? [editMenuItem, testMenuItem, cloneMenuItem, deleteMenuItem]
+    : [testMenuItem];
+
+  return (
+    <EuiPopover
+      id={`${tool}_context-menu`}
+      panelPaddingSize="s"
+      button={
+        <EuiButtonIcon
+          iconType="boxesHorizontal"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={i18n.translate('xpack.onechat.tools.toolContextMenuButtonLabel', {
+            defaultMessage: 'Tool context menu',
+          })}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+    >
+      <EuiContextMenuPanel size="s" items={menuItems} />
+    </EuiPopover>
+  );
+};
+
+const TableHeader = ({
+  isLoading,
+  pageIndex,
+  tools,
+}: {
+  isLoading: boolean;
+  pageIndex: number;
+  tools: ToolDefinitionWithSchema[];
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup
+      css={css`
+        margin-block: ${euiTheme.size.s} ${euiTheme.size.m};
+      `}
+    >
+      <EuiSkeletonLoading
+        isLoading={isLoading}
+        loadingContent={
+          <EuiSkeletonText
+            css={css`
+              display: inline-block;
+              width: 200px;
+            `}
+            lines={1}
+            size="xs"
+          />
+        }
+        loadedContent={
+          <EuiText size="xs">
+            <p>
+              <FormattedMessage
+                id="xpack.onechat.tools.toolsTableSummary"
+                defaultMessage="Showing {start}-{end} of {total} {tools}"
+                values={{
+                  start: <strong>{pageIndex * 10 + 1}</strong>,
+                  end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
+                  total: tools.length,
+                  tools: (
+                    <strong>
+                      {i18n.translate('xpack.onechat.tools.toolsLabel', {
+                        defaultMessage: 'Tools',
+                      })}
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        }
+      />
+    </EuiFlexGroup>
+  );
+};
+
 const getColumns = ({
   deleteTool,
   editTool,
+  testTool,
+  cloneTool,
 }: {
   deleteTool: (toolId: string) => void;
   editTool: (toolId: string) => void;
+  testTool: (toolId: string) => void;
+  cloneTool: (toolId: string) => void;
 }): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => [
   {
     name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'ID' }),
     sortable: ({ id }: ToolDefinitionWithSchema) => id,
     width: '60%',
-    render: (tool: ToolDefinitionWithSchema) => (
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiText size="s">
-          <strong>{tool.id}</strong>
-        </EuiText>
-        <EuiText size="s" color="subdued">
-          {truncateAtNewline(tool.description)}
-        </EuiText>
-      </EuiFlexGroup>
-    ),
+    render: (tool: ToolDefinitionWithSchema) => <ToolId tool={tool} editTool={editTool} />,
   },
   {
     field: 'type',
@@ -105,32 +346,21 @@ const getColumns = ({
   },
   {
     width: '100px',
-    align: 'center',
-    render: ({ id }: ToolDefinitionWithSchema) => {
-      return (
-        <EuiFlexGroup gutterSize="s" justifyContent="center">
-          <EuiButtonIcon
-            iconType="documentEdit"
-            onClick={() => {
-              editTool(id);
-            }}
-            aria-label={i18n.translate('xpack.onechat.tools.editToolButtonLabel', {
-              defaultMessage: 'Edit tool',
-            })}
-          />
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={() => {
-              deleteTool(id);
-            }}
-            aria-label={i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
-              defaultMessage: 'Delete tool',
-            })}
-          />
-        </EuiFlexGroup>
-      );
-    },
+    align: 'right',
+    render: (tool: ToolDefinitionWithSchema) => (
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+        {isEsqlTool(tool) && (
+          <ToolQuickActions tool={tool} editTool={editTool} deleteTool={deleteTool} />
+        )}
+        <ToolContextMenu
+          tool={tool}
+          editTool={editTool}
+          deleteTool={deleteTool}
+          testTool={testTool}
+          cloneTool={cloneTool}
+        />
+      </EuiFlexGroup>
+    ),
   },
 ];
 
@@ -274,7 +504,13 @@ export const OnechatTools = () => {
   const isEditingTool = isEditToolFlyoutOpen;
 
   const columns = useMemo(
-    () => getColumns({ deleteTool, editTool: openEditToolFlyout }),
+    () =>
+      getColumns({
+        deleteTool,
+        editTool: openEditToolFlyout,
+        testTool: noop, // TODO: Integrate tool testing flyout
+        cloneTool: noop, // TODO: Integrate tool cloning
+      }),
     [deleteTool, openEditToolFlyout]
   );
 
@@ -288,11 +524,15 @@ export const OnechatTools = () => {
       })
     : undefined;
 
+  const selection: EuiTableSelectionType<ToolDefinitionWithSchema> = {
+    selectable: isEsqlTool,
+  };
+
   const search: Search = {
     box: {
       incremental: true,
       placeholder: i18n.translate('xpack.onechat.tools.searchToolsPlaceholder', {
-        defaultMessage: 'Search tools...',
+        defaultMessage: 'Search',
       }),
     },
   };
@@ -328,48 +568,15 @@ export const OnechatTools = () => {
       />
       <KibanaPageTemplate.Section>
         <EuiInMemoryTable
+          css={css`
+            .euiTableRow:hover {
+              .tool-quick-actions {
+                visibility: visible;
+              }
+            }
+          `}
           childrenBetween={
-            <EuiFlexGroup
-              css={css`
-                margin-block: ${euiTheme.size.s} ${euiTheme.size.m};
-              `}
-            >
-              <EuiSkeletonLoading
-                isLoading={isLoadingTools}
-                loadingContent={
-                  <EuiSkeletonText
-                    css={css`
-                      display: inline-block;
-                      width: 200px;
-                    `}
-                    lines={1}
-                    size="xs"
-                  />
-                }
-                loadedContent={
-                  <EuiText size="xs">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.onechat.tools.toolsTableSummary"
-                        defaultMessage="Showing {start}-{end} of {total} {tools}"
-                        values={{
-                          start: <strong>{pageIndex * 10 + 1}</strong>,
-                          end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
-                          total: tools.length,
-                          tools: (
-                            <strong>
-                              {i18n.translate('xpack.onechat.tools.toolsLabel', {
-                                defaultMessage: 'Tools',
-                              })}
-                            </strong>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiText>
-                }
-              />
-            </EuiFlexGroup>
+            <TableHeader isLoading={isLoadingTools} pageIndex={pageIndex} tools={tools} />
           }
           loading={isLoadingTools}
           columns={columns}
@@ -387,6 +594,7 @@ export const OnechatTools = () => {
             pageSize: 10,
             showPerPageOptions: false,
           }}
+          selection={selection}
           sorting={{
             sort: {
               field: 'id',
