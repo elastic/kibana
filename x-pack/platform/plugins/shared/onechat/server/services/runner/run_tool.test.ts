@@ -17,6 +17,7 @@ import {
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
+import { ToolResultType } from '@kbn/onechat-server/src/tool_result';
 
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
@@ -116,7 +117,9 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
+    tool.handler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { test: true, over: 9000 } }],
+    });
 
     const result = await runTool({
       toolExecutionParams: params,
@@ -137,8 +140,8 @@ describe('runTool', () => {
       },
     };
 
-    tool.handler.mockImplementation((toolParams, context) => {
-      return { result: 'foo' };
+    tool.handler.mockImplementation(() => {
+      return { results: [{ type: ToolResultType.other, data: { value: 42 } }] };
     });
 
     await runTool({
@@ -177,7 +180,7 @@ describe('runTool', () => {
         type: 'test-event',
         data: { foo: 'bar' },
       });
-      return { result: 42 };
+      return { results: [{ type: ToolResultType.other, data: { foo: 'bar' } }] };
     });
 
     await runTool({

@@ -42,8 +42,7 @@ export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObje
  */
 export interface ExecutableTool<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>,
-  TResult = unknown
+  TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
@@ -52,7 +51,7 @@ export interface ExecutableTool<
   /**
    * Run handler that can be used to execute the tool.
    */
-  execute: ExecutableToolHandlerFn<z.infer<TSchema>, TResult>;
+  execute: ExecutableToolHandlerFn<z.infer<TSchema>>;
 }
 
 /**
@@ -66,9 +65,9 @@ export type ExecutableToolHandlerParams<TParams = Record<string, unknown>> = Omi
 /**
  * Execution handler for {@link ExecutableTool}
  */
-export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult = unknown> = (
+export type ExecutableToolHandlerFn<TParams = Record<string, unknown>> = (
   params: ExecutableToolHandlerParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}

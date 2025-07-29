@@ -104,12 +104,12 @@ export const convertGraphEvents = ({
           const toolResultEvents: ToolResultEvent[] = [];
           for (const toolMessage of toolMessages) {
             const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
-            const toolReturn = extractToolReturn(toolMessage);
+            const toolResults = extractToolReturn(toolMessage);
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? 'unknown',
-                result: JSON.stringify(toolReturn.result),
+                result: JSON.stringify(toolResults),
               })
             );
           }
