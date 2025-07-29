@@ -180,8 +180,8 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        ['["test message 1"]', 'The logs sample file contains non-object entries'],
-        ['[]', 'The logs sample file is empty'],
+        ['["test message 1"]', 'The logs sample file contains non-object entries. Having issues? '],
+        ['[]', 'The logs sample file is empty. Having issues? '],
       ])('with logs content %s', (logsSample, errorMessage) => {
         beforeEach(async () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
@@ -243,17 +243,29 @@ describe('SampleLogsInput', () => {
       });
     });
 
+    const AUTOMATIC_IMPORT_DOCUMENTATION_URL = 'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
+
     describe('when the file is invalid', () => {
       describe.each([
-        ['"test message 1"', 'The logs sample file contains non-object entries'],
-        ['', 'The logs sample file is empty'],
-      ])('with logs content %s', (logsSample, errorMessage) => {
+        ['"test message 1"', 'The logs sample file contains non-object entries', 'Refer to the documentation for supported log formats'],
+        ['[]', 'The logs sample file is empty', 'Refer to the documentation for supported log formats'],
+      ])('with logs content %s', (logsSample, errorMessage, errorDocsLinkText) => {
         beforeEach(async () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
         });
 
-        it('should render error message', () => {
-          expect(result.queryByText(errorMessage)).toBeInTheDocument();
+        it('should render error message', async () => {
+          const errorRegex = new RegExp(errorMessage, 'i');
+          expect(await result.findByText(errorRegex)).toBeInTheDocument();
+        });
+
+        it('should render the documentation link', async () => {
+          const docLink = await result.findByRole('link', {
+            name: new RegExp(errorDocsLinkText, 'i'),
+          });
+
+          expect(docLink).toHaveAttribute('href', AUTOMATIC_IMPORT_DOCUMENTATION_URL);
+          expect(docLink).toHaveAttribute('target', '_blank');
         });
 
         it('should set the integrationSetting correctly', () => {

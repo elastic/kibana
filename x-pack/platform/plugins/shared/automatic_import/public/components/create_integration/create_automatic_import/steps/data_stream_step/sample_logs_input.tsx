@@ -299,7 +299,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
     return (
       <EuiText color="danger" size="xs">
         <span>
-          {`${sampleFileError}. ${i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX}`}
+          {`${sampleFileError}. ${i18n.LOGS_SAMPLE_ERROR.HELP_TEXT_PREFIX} `}
           <EuiLink href={AUTOMATIC_IMPORT_DOCUMENTATION_URL} target="_blank" external>
             {i18n.LOGS_SAMPLE_ERROR.DOCUMENTATION_LINK_TEXT}
           </EuiLink>

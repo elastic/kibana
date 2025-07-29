@@ -148,7 +148,7 @@ export const LOGS_SAMPLE_LABEL = {
   SUBTEXT_PRETEXT: i18n.translate(
     'xpack.automaticImport.step.dataStream.logsSample.warningInfoPretext',
     {
-      defaultMessage: 'For more information about supported log formats, ',
+      defaultMessage: 'Supported log formats, ',
     }
   ),
   SUBTEXT_INFO_LINK: i18n.translate(
