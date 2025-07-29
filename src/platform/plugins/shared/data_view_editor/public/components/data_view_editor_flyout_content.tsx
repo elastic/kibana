@@ -110,6 +110,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   // Edit form is populated and disabled if the current data view is managed
   // and the data view is not being duplicated
   const isFormDisabled = !!editData?.managed && !isDuplicatingManaged;
+  const isEditingExisting = editData && !editData.managed && !isDuplicatingManaged;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -159,7 +160,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && !editData.managed && editData.getIndexPattern() !== formData.title) {
+      if (isEditingExisting && editData.getIndexPattern() !== formData.title) {
         await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,

@@ -72,7 +72,7 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
-   * if set to true a duplicate button is shown
+   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
    */
   onDuplicate?: () => void;
   /**

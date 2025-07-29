@@ -139,22 +139,23 @@ export function ChangeDataView({
     );
   };
   const onDuplicate = useCallback(async () => {
-    const dataView = await dataViews.get(currentDataViewId!);
+    if (!currentDataViewId || !onDataViewCreated) {
+      return;
+    }
+    const dataView = await dataViews.get(currentDataViewId);
     const editData = new DataView({
       spec: { title: dataView.getIndexPattern() },
       fieldFormats: {} as FieldFormatsStartCommon,
     });
 
-    if (onDataViewCreated) {
-      dataViewEditor.openEditor({
-        editData,
-        onSave: (newDataView) => {
-          onDataViewCreated(newDataView);
-        },
-        allowAdHocDataView: true,
-        isDuplicatingManaged: true,
-      });
-    }
+    dataViewEditor.openEditor({
+      editData,
+      onSave: (newDataView) => {
+        onDataViewCreated(newDataView);
+      },
+      allowAdHocDataView: true,
+      isDuplicatingManaged: true,
+    });
   }, [currentDataViewId, dataViews, dataViewEditor, onDataViewCreated]);
 
   const onEdit = useCallback(async () => {

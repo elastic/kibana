@@ -395,7 +395,6 @@ export const LensTopNavMenu = ({
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -487,7 +486,6 @@ export const LensTopNavMenu = ({
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
-      closeDataViewEditor.current?.();
     };
   }, []);
 
@@ -1102,32 +1100,24 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          if (isOnTextBasedMode) {
-            dispatch(
-              switchAndCleanDatasource({
-                newDatasourceId: 'formBased',
-                visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataView?.id,
-              })
-            );
-          }
-          dispatchChangeIndexPattern(dataView);
-          setCurrentIndexPattern(dataView);
+  const createNewDataView = useCallback(
+    async (dataView: DataView) => {
+      if (dataView.id) {
+        if (isOnTextBasedMode) {
+          dispatch(
+            switchAndCleanDatasource({
+              newDatasourceId: 'formBased',
+              visualizationId: visualization?.activeId,
+              currentIndexPatternId: dataView?.id,
+            })
+          );
         }
-      },
-      allowAdHocDataView: true,
-    });
-  }, [
-    dataViewEditor,
-    dispatch,
-    dispatchChangeIndexPattern,
-    isOnTextBasedMode,
-    visualization?.activeId,
-  ]);
+        dispatchChangeIndexPattern(dataView);
+        setCurrentIndexPattern(dataView);
+      }
+    },
+    [dispatch, dispatchChangeIndexPattern, isOnTextBasedMode, visualization?.activeId]
+  );
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {

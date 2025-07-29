@@ -80,7 +80,6 @@ const registerCreateDataViewRouteFactory =
                 data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
                 index_pattern:
                   serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
-                managed: schema.maybe(schema.boolean({ defaultValue: false })),
               }),
             },
             response: {

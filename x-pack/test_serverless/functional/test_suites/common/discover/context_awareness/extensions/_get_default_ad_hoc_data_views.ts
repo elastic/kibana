@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataViews.getSelectedName()).not.to.be('Example profile data view');
       await dataViews.switchTo('Example profile data view');
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataViews.isManaged()).to.be(true);
+      expect(await dataViews.isManaged()).to.be(false);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.have.length(7);
       expect(
         await (await dataGrid.getCellElementByColumnName(0, '@timestamp')).getVisibleText()
