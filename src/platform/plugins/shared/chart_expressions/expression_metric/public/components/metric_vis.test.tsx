@@ -73,7 +73,8 @@ const defaultMetricParams: MetricVisParam = {
   progressDirection: 'vertical',
   maxCols: 5,
   titlesTextAlign: 'left',
-  valuesTextAlign: 'right',
+  valueTextAlign: 'right',
+  extraTextAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
   secondaryTrend: {
@@ -1207,7 +1208,8 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
-            valuesTextAlign: 'right',
+            valueTextAlign: 'right',
+            extraTextAlign: 'right',
             secondaryTrend: {
               visuals: undefined,
               baseline: undefined,

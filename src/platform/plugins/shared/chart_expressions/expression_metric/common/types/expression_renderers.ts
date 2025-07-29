@@ -36,7 +36,8 @@ export interface MetricVisParam {
   palette?: PaletteOutput<CustomPaletteState>;
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
-  valuesTextAlign: MetricStyle['valuesTextAlign'];
+  valueTextAlign: MetricStyle['valueTextAlign'];
+  extraTextAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
   maxCols: number;

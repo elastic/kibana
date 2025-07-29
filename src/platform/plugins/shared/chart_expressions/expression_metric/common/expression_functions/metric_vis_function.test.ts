@@ -27,7 +27,8 @@ describe('interpreter/functions#metricVis', () => {
     maxCols: 1,
     inspectorTableId: 'random-id',
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    valueTextAlign: 'right',
+    extraTextAlign: 'right',
     iconAlign: 'left',
     valueFontSize: 'default',
   };

@@ -44,7 +44,8 @@ describe('TitlesAndTextPopover', () => {
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    valueTextAlign: 'right',
+    extraTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
@@ -128,7 +129,7 @@ describe('TitlesAndTextPopover', () => {
     ]);
   });
 
-  it('should set valuesTextAlign', async () => {
+  it('should set valueTextAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
@@ -139,7 +140,7 @@ describe('TitlesAndTextPopover', () => {
     valueAlignBtnGroup.select('Left');
     valueAlignBtnGroup.select('Right');
 
-    expect(mockSetState.mock.calls.map(([s]) => s.valuesTextAlign)).toEqual([
+    expect(mockSetState.mock.calls.map(([s]) => s.valueTextAlign)).toEqual([
       'center',
       'left',
       'right',
