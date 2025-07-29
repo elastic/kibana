@@ -46,9 +46,7 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   async find(query?: ListEntitySourcesRequestQuery) {
-    const scopedSoClient = this.dependencies.soClient.asScopedToNamespace(
-      this.dependencies.namespace
-    );
+    const scopedSoClient = this.dependencies.soClient;
     return scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
       filter: this.getQueryFilters(query),

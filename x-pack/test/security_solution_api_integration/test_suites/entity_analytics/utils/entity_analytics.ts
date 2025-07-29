@@ -14,10 +14,12 @@ import {
   ENTITY_ANALYTICS_INTERNAL_RUN_MIGRATIONS_ROUTE,
   API_VERSIONS,
 } from '@kbn/security-solution-plugin/common/constants';
+import { ToolingLog } from '@kbn/tooling-log';
 import { routeWithNamespace } from '../../../config/services/detections_response';
 
 export const entityAnalyticsRouteHelpersFactory = (
   supertest: SuperTest.Agent,
+  log: ToolingLog,
   namespace?: string
 ) => ({
   runMigrations: async () =>
@@ -27,5 +29,17 @@ export const entityAnalyticsRouteHelpersFactory = (
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
+      // log the response to help with debugging without changing the test behavior
+      .expect((response) => {
+        if (response.status !== 200) {
+          log.error(
+            `Failed to run migrations: body: ${JSON.stringify(
+              response.body
+            )}, status: ${JSON.stringify(response.status)}`
+          );
+        }
+
+        return response;
+      })
       .expect(200),
 });

@@ -13,7 +13,7 @@ import type { PrivMonBulkUser } from '../../types';
  *
  * For each user:
  * - If the user already exists (has an ID), generates an `update` operation using a Painless script
- *   to append the index name to `labels.source_indices` and ensure `'index'` is listed in `labels.sources`.
+ *   to append the source id to `labels.source_ids` and ensure `'index'` is listed in `labels.sources`.
  * - If the user is new, generates an `index` operation to create a new document with default labels.
  *
  * Logs key steps during operation generation and returns the bulk operations array, ready for submission to the ES Bulk API.
@@ -41,29 +41,31 @@ export const bulkUpsertOperationsFactory =
           {
             script: {
               source: `
-              if (!ctx._source.labels.source_indices.contains(params.index)) {
-                ctx._source.labels.source_indices.add(params.index);
+              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
+                ctx._source.labels.source_ids.add(params.source_id);
               }
               if (!ctx._source.labels.sources.contains("index")) {
                 ctx._source.labels.sources.add("index");
               }
+
+              ctx._source.user.is_privileged = true;
             `,
               params: {
-                index: user.indexName,
+                source_id: user.sourceId,
               },
             },
           }
         );
       } else {
         // New user — create
-        dataClient.log('info', `Creating new user: ${user.username} with index: ${user.indexName}`);
+        dataClient.log('info', `Creating new user: ${user.username}`);
         ops.push(
           { index: { _index: userIndexName } },
           {
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
-              source_indices: [user.indexName],
+              source_ids: [user.sourceId],
             },
           }
         );

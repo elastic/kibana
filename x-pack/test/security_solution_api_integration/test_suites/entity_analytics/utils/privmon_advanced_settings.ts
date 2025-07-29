@@ -8,14 +8,20 @@
 import { ENABLE_PRIVILEGED_USER_MONITORING_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { KbnClient } from '@kbn/test';
 
-export const enablePrivmonSetting = async (kibanaServer: KbnClient) => {
-  await kibanaServer.uiSettings.update({
-    [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: true,
-  });
+export const enablePrivmonSetting = async (kibanaServer: KbnClient, space?: string) => {
+  await kibanaServer.uiSettings.update(
+    {
+      [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: true,
+    },
+    { space }
+  );
 };
 
-export const disablePrivmonSetting = async (kibanaServer: KbnClient) => {
-  await kibanaServer.uiSettings.update({
-    [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: false,
-  });
+export const disablePrivmonSetting = async (kibanaServer: KbnClient, space?: string) => {
+  await kibanaServer.uiSettings.update(
+    {
+      [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: false,
+    },
+    { space }
+  );
 };
