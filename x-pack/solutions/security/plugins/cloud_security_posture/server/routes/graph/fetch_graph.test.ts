@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery } from './types';
-import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../../../common/constants';
+import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -30,7 +30,7 @@ describe('fetchGraph', () => {
         {
           config: {
             match: {
-              name: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+              name: getEnrichPolicyId(),
             },
           },
         },
@@ -58,6 +58,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: invalidIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined,
     };
 
@@ -74,6 +75,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
     };
 
@@ -109,6 +111,7 @@ describe('fetchGraph', () => {
       originEventIds,
       showUnknownTarget: true,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery,
     };
 
@@ -142,7 +145,7 @@ describe('fetchGraph', () => {
         {
           config: {
             match: {
-              name: GENERIC_ENTITY_INDEX_ENRICH_POLICY,
+              name: getEnrichPolicyId(),
             },
           },
         },
@@ -158,6 +161,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
       isAssetInventoryEnabled: true,
     };
@@ -168,9 +172,9 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
     expect(query).toContain(`WITH actorEntityName = entity.name, actorEntityType = entity.type`);
-    expect(query).toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
     expect(query).toContain(`WITH targetEntityName = entity.name, targetEntityType = entity.type`);
 
     expect(query).toContain('EVAL actorDocData = CONCAT');
@@ -202,6 +206,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
       isAssetInventoryEnabled: true,
     };
@@ -212,11 +217,11 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
     expect(query).not.toContain(
       `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
     );
-    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
     expect(query).not.toContain(
       `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
     );
@@ -236,6 +241,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
       isAssetInventoryEnabled: false,
     };
@@ -246,11 +252,11 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON actor.entity.id`);
+    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
     expect(query).not.toContain(
       `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
     );
-    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY} ON target.entity.id`);
+    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
     expect(query).not.toContain(
       `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
     );
@@ -274,6 +280,7 @@ describe('fetchGraph', () => {
       originEventIds: [] as OriginEventId[],
       showUnknownTarget: false,
       indexPatterns: validIndexPatterns,
+      spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
       isAssetInventoryEnabled: true,
     };
@@ -286,7 +293,7 @@ describe('fetchGraph', () => {
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
 
-    expect(query).not.toContain(`ENRICH ${GENERIC_ENTITY_INDEX_ENRICH_POLICY}`);
+    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 });

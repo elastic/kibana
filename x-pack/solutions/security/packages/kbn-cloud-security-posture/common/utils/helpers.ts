@@ -8,6 +8,7 @@ import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
+import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../constants';
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -194,4 +195,9 @@ export const buildEntityAlertsQuery = ({
       },
     },
   };
+};
+
+export const getEnrichPolicyId = (namespace: string = 'default'): string => {
+  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
+  return GENERIC_ENTITY_INDEX_ENRICH_POLICY.replace('<namespace>', namespace);
 };

@@ -9,7 +9,7 @@
  * Entity type mapping configuration
  * Each entry maps a set of entity type values to an icon name
  */
-export interface EntityTypeMapping {
+interface EntityTypeMapping {
   /** The icon name to use for matching entity types */
   icon: string;
   /** Array of entity type values that should map to this icon */
