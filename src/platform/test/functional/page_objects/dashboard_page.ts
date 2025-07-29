@@ -800,11 +800,7 @@ export class DashboardPageObject extends FtrService {
     if (errorEmbeddables.length > 0) {
       await this.browser.setWindowSize(1920, 1080);
       await sleep(1000); // wait for the window resize to take effect
-      await this.screenshots.take(
-        'dashboard_errored_embeddables',
-        undefined,
-        screenshotDirectories
-      );
+      await this.screenshots.take(`dashboard_errored_embeddables_${performance.now()}`);
     }
     expect(errorEmbeddables.length).to.be(0);
   }
