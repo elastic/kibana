@@ -50,3 +50,7 @@ const connectors = [
 
 export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
 export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
+export {
+  convertToWorkflowGraph,
+  convertToSerializableGraph,
+} from './lib/build_execution_graph/build_execution_graph';

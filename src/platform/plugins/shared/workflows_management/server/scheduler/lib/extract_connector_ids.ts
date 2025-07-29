@@ -8,13 +8,15 @@
  */
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { graphlib } from '@dagrejs/dagre';
 
 export const extractConnectorIds = async (
-  workflow: WorkflowExecutionEngineModel,
+  workflowGraph: graphlib.Graph,
   actionsClient: IUnsecuredActionsClient
 ): Promise<Record<string, Record<string, any>>> => {
-  const connectorNames = workflow.definition.workflow.steps
+  const connectorNames = workflowGraph
+    .nodes()
+    .map((nodeId) => workflowGraph.node(nodeId) as any)
     .filter((step) => step.type.endsWith('-connector'))
     // TODO: fix this
     .map((step) => (step as any)['connector-id']!);

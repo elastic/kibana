@@ -11,8 +11,10 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import { convertToSerializableGraph, convertToWorkflowGraph } from '../../common';
 
 export interface WorkflowTaskParams {
   workflowId: string;
@@ -54,18 +56,17 @@ export function createWorkflowTaskRunner({
           }
 
           // Convert to execution model
-          const workflowExecutionModel = {
+          const executionGraph = convertToWorkflowGraph(workflow);
+          const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
             status: workflow.status,
             definition: workflow.definition,
+            executionGraph: convertToSerializableGraph(executionGraph),
           };
 
           // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(
-            workflowExecutionModel,
-            actionsClient
-          );
+          const connectorCredentials = await extractConnectorIds(executionGraph, actionsClient);
 
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(
