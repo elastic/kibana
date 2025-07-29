@@ -146,18 +146,11 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiLoadingStrings.ariaLabel\\": \\"Loading\\",
     \\"euiMark.highlightStart\\": \\"highlight start\\",
     \\"euiMark.highlightEnd\\": \\"highlight end\\",
-    \\"euiMarkdownEditorFooter.closeButton\\": \\"Close\\",
     \\"euiMarkdownEditorFooter.uploadingFiles\\": \\"Click to upload files\\",
     \\"euiMarkdownEditorFooter.openUploadModal\\": \\"Open upload files modal\\",
     \\"euiMarkdownEditorFooter.unsupportedFileType\\": \\"File type not supported\\",
     \\"euiMarkdownEditorFooter.showSyntaxErrors\\": \\"Show errors\\",
-    \\"euiMarkdownEditorFooter.showMarkdownHelp\\": \\"Show markdown help\\",
     \\"euiMarkdownEditorFooter.errorsTitle\\": \\"Errors\\",
-    \\"euiMarkdownEditorFooter.syntaxTitle\\": \\"Syntax help\\",
-    \\"euiMarkdownEditorFooter.mdSyntaxLink\\": \\"GitHub flavored markdown\\",
-    \\"euiMarkdownEditorFooter.syntaxModalDescriptionPrefix\\": \\"This editor uses\\",
-    \\"euiMarkdownEditorFooter.syntaxModalDescriptionSuffix\\": \\"You can also utilize these additional syntax plugins to add rich content to your text.\\",
-    \\"euiMarkdownEditorFooter.syntaxPopoverDescription\\": \\"This editor uses\\",
     \\"euiMarkdownEditorToolbar.editor\\": \\"Editor\\",
     \\"euiMarkdownEditorToolbar.previewMarkdown\\": \\"Preview\\",
     \\"euiModal.closeModal\\": \\"Closes this modal window\\",
@@ -296,7 +289,14 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiSaturation.roleDescription\\": \\"HSV color mode saturation and value 2-axis slider.\\",
     \\"euiHue.ariaValueText\\": \\"Hue\\",
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
-    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\"
+    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
+    \\"euiMarkdownEditorHelpButton.mdSyntaxLink\\": \\"GitHub flavored markdown\\",
+    \\"euiMarkdownEditorHelpButton.syntaxTitle\\": \\"Syntax help\\",
+    \\"euiMarkdownEditorHelpButton.showMarkdownHelp\\": \\"Show markdown help\\",
+    \\"euiMarkdownEditorHelpButton.syntaxModalDescriptionPrefix\\": \\"This editor uses\\",
+    \\"euiMarkdownEditorHelpButton.syntaxModalDescriptionSuffix\\": \\"You can also utilize these additional syntax plugins to add rich content to your text.\\",
+    \\"euiMarkdownEditorHelpButton.closeButton\\": \\"Close\\",
+    \\"euiMarkdownEditorHelpButton.syntaxPopoverDescription\\": \\"This editor uses\\"
   }
 }"
 `;
