@@ -5030,10 +5030,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugin-static-assets-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_static_assets":
-  version "0.0.0"
-  uid ""
-
 "@kbn/core-plugins-base-server-internal@link:src/core/packages/plugins/base-server-internal":
   version "0.0.0"
   uid ""
@@ -5799,6 +5795,10 @@
   uid ""
 
 "@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
   version "0.0.0"
   uid ""
 

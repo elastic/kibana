@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge } from 'lodash';
+import { merge, isPlainObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
@@ -31,6 +31,7 @@ import type {
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
+  AnyObject,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
@@ -505,5 +506,33 @@ export class TelemetryTimelineFetcher {
     const startOfDay = now.startOf('day').toISOString();
     const endOfDay = now.endOf('day').toISOString();
     return { startOfDay, endOfDay };
+  }
+}
+
+const contiguousDotRegex = new RegExp('\\.{2,}');
+
+export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T {
+  return Object.entries(object).reduce<AnyObject>((accum, [key, value]) => {
+    if (Array.isArray(value) && value.every((v) => isPlainObject(v))) {
+      _set(
+        accum,
+        key,
+        value.map((v) => unflatten(v))
+      );
+    } else if (isPlainObject(value)) {
+      _set(accum, key, unflatten(value as AnyObject));
+    } else {
+      _set(accum, key, value);
+    }
+    return accum;
+  }, {}) as T;
+}
+
+function _set(object: AnyObject, key: string, value: unknown) {
+  if (key.startsWith('.') || key.endsWith('.') || contiguousDotRegex.test(key)) {
+    // Preserve original keys with dots used in non-path representations (e.g. '.kibana_field_name')
+    object[key] = value;
+  } else {
+    set(object, key, value);
   }
 }
