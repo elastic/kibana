@@ -358,10 +358,10 @@ export default function Expressions(props: Props) {
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnQueryChange = useCallback(debounce(onQueryChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onQueryChange,
-  ]);
+  const debouncedOnQueryChange = useMemo(
+    () => debounce(onQueryChange, FILTER_TYPING_DEBOUNCE_MS),
+    [onQueryChange]
+  );
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
