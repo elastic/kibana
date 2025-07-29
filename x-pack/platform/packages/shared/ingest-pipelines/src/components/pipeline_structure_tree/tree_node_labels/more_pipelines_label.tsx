@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface MorePipelinesLabelProps {
   count: number;
@@ -17,11 +17,10 @@ interface MorePipelinesLabelProps {
 export const MorePipelinesLabel = ({ count, onClick }: MorePipelinesLabelProps) => {
   return (
     <EuiLink color="primary" onClick={onClick} data-test-subj="morePipelinesNodeLabel">
-      <FormattedMessage
-        id="ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel"
-        defaultMessage="+{count} more {count, plural,one {pipeline} other {pipelines}}"
-        values={{ count }}
-      />
+      {i18n.translate('ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel', {
+        defaultMessage: '+{count} more {count, plural,one {pipeline} other {pipelines}}',
+        values: { count },
+      })}
     </EuiLink>
   );
 };

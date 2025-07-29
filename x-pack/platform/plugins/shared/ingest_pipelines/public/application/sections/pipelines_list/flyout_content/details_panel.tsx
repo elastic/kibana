@@ -36,7 +36,7 @@ export interface Props {
 export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
   return (
     <EuiSplitPanel.Inner>
-      <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
+      <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="detailsPanelTitle">
         <h2>{pipeline.name}</h2>
       </EuiTitle>
 

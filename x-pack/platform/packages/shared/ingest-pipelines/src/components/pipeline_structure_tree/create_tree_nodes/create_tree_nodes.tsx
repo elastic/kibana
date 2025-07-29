@@ -43,7 +43,7 @@ export const createTreeNodesFromPipelines = (
   };
 
   if (level === MAX_TREE_LEVEL) {
-    if (treeNode.children) {
+    if (treeNode.children.length > 0) {
       const morePipelinesNode = {
         id: `${treeNode.pipelineName}-moreChildrenPipelines`,
         label: (

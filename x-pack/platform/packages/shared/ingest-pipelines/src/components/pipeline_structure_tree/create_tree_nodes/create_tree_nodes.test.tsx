@@ -87,7 +87,7 @@ describe('createTreeNodesFromPipelines', () => {
     expect(node.className).toContain('--active');
   });
 
-  it('adds a "+ more pipelines" tree node which calls clickMorePipelines when called ', () => {
+  it('adds a "+ more pipelines" label when max depth is reached', () => {
     const clickTreeNode = jest.fn();
     const clickMorePipelines = jest.fn();
 
@@ -111,10 +111,41 @@ describe('createTreeNodesFromPipelines', () => {
 
     const root = deepTree(MAX_TREE_LEVEL + 1);
     const node = createTreeNodesFromPipelines(root, '', clickTreeNode, clickMorePipelines);
+
+    // Traverse to the level that contains the "more pipelines" node
+    let current = node;
+    for (let i = 0; i < MAX_TREE_LEVEL - 1; i++) {
+      current = current.children![0];
+    }
+
+    const finalLevelChildren = current.children!;
+    expect(finalLevelChildren).toHaveLength(1);
+    expect(finalLevelChildren[0].id).toMatch(/-moreChildrenPipelines$/);
+  });
+
+  it('calls clickMorePipelines when "+ more pipelines" is clicked', () => {
+    const clickTreeNode = jest.fn();
+    const clickMorePipelines = jest.fn();
+    const pipeline: PipelineTreeNode = {
+      pipelineName: 'test-pipeline',
+      isManaged: false,
+      isDeprecated: false,
+      children: [
+        {
+          pipelineName: 'child',
+          isManaged: true,
+          isDeprecated: true,
+          children: [],
+        },
+      ],
+    };
+
+    const node = createTreeNodesFromPipelines(pipeline, '', clickTreeNode, clickMorePipelines, 5);
     const { getByTestId } = renderTreeNode(node);
 
-    expect(getByTestId('morePipelinesNodeLabel')).toBeInTheDocument();
+    // Expand root to display the "More pipelines" node
+    fireEvent.click(getByTestId('pipelineTreeNodeLink-test-pipeline'));
     fireEvent.click(getByTestId('morePipelinesNodeLabel'));
-    expect(clickMorePipelines).toHaveBeenCalledWith('node-5');
+    expect(clickMorePipelines).toHaveBeenCalledWith('test-pipeline');
   });
 });
