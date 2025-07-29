@@ -95,7 +95,10 @@ describe('EsqlDashboardPanel', () => {
   it('calls generateVisualizationQuery with the selected stackBy option', () => {
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
-    expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith('option1');
+    expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith(
+      'option1',
+      mockProps.timerange
+    );
   });
 
   it('renders the table with the provided columns', () => {
