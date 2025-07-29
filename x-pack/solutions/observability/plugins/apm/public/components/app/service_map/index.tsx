@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
-import { apmEnableServiceMapApiV2, enableDiagnosticMode } from '@kbn/observability-plugin/common';
+import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { Subscription } from 'rxjs';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
