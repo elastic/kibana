@@ -66,12 +66,12 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 
 **Data ingestion and Fleet**:
 * Adds support for bulk agent migration using the **Bulk actions** menu in the agent list table [#224334]({{kib-pull}}224334).
-* Enables the `Tabular integrations` UI feature flag [#222842]({{kib-pull}}222842).
+* Enables the tabular integrations feature in {{fleet}} [#222842]({{kib-pull}}222842).
 * Adds support for single agent migration using the **Actions** menu in {{fleet}}. Users can provide a remote cluster URL and enrollment token, as well as customize parameters for the migration [#222111]({{kib-pull}}222111).
 * Adds an API endpoint to migrate a single agent to another cluster using a URL and enrollment token. Tamper-protected and {{fleet}}-managed agents are not supported and return a `403` response if attempted [#220601]({{kib-pull}}220601).
 * Adds a new integration flyout component [#220229]({{kib-pull}}220229).
-* Enables the `enableSyncIntegrationsOnRemote` feature flag [#220215]({{kib-pull}}220215).
-* Enables the `enableAutomaticAgentUpgrades` feature flag [#219932]({{kib-pull}}219932).
+* Enables the sync integrations on remote clusters feature in Fleet [#220215]({{kib-pull}}220215).
+* Enables the automatic agent upgrades feature in Fleet [#219932]({{kib-pull}}219932).
 * Adds edit functionality for custom integration READMEs. Editing a README automatically increments the integration version and updates all associated policies [#215259]({{kib-pull}}215259).
 * Adds SSL fields to agent binary source settings [#213211]({{kib-pull}}213211).
 * Adds support for Cloud Connectors in CSPM [#212200]({{kib-pull}}212200).
