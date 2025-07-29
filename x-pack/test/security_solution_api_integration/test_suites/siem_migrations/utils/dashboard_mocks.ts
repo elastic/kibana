@@ -8,13 +8,13 @@
 export const defaultOriginalDashboardExports = {
   preview: false,
   result: {
-    id: 'https://127.0.0.1:8089/servicesNS/nobody/SplunkEnterpriseSecuritySuite/data/ui/views/access_analyzer',
-    label: 'Access Analyzer',
-    title: 'access_analyzer',
-    description: 'Description of Access Analyzer',
+    id: 'some_id',
+    label: 'Sample Dashboard label',
+    title: 'sample_dashboard_label',
+    description: 'Description of a Sample Dashboard',
     'eai:data':
-      '<view template="SplunkEnterpriseSecuritySuite:/templates/udf_generic.html" type="html">\n  <label>Access Analyzer</label>\n  <description>Description of Access Analyzer</description>\n</view>',
-    'eai:acl.app': 'SplunkEnterpriseSecuritySuite',
+      '<view template="some_template:/templates/udf_generic.html" type="html">\n  <label>Sample Dashboard</label>\n  <description>Description of Sample Dashboard</description>\n</view>',
+    'eai:acl.app': 'SomeApp',
     'eai:acl.sharing': 'global',
     'eai:acl.owner': 'nobody',
     updated: '2025-07-23T14:33:10+00:00',
