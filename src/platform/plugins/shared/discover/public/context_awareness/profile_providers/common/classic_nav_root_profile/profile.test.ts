@@ -57,6 +57,7 @@ describe('classicNavRootProfileProvider', () => {
           name: 'All logs',
           timeFieldName: '@timestamp',
           title: 'logs-*',
+          managed: true,
         },
       ]);
     });

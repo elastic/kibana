@@ -326,7 +326,6 @@ export interface GetFieldsOptions {
   includeEmptyFields?: boolean;
   abortSignal?: AbortSignal;
   runtimeMappings?: estypes.MappingRuntimeFields;
-  // managed?: boolean;
 }
 
 /**
@@ -386,6 +385,7 @@ export type TypeMeta = {
 export enum DataViewType {
   DEFAULT = 'default',
   ROLLUP = 'rollup',
+  MANAGED = 'managed',
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;

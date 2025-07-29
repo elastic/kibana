@@ -27,7 +27,6 @@ describe('useSavedDataViews', () => {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should not be filtered out
         title: 'Default View',
         name: 'default_view',
-        managed: true,
       },
       {
         id: DEFAULT_ALERT_DATA_VIEW_ID, // This should be filtered out
@@ -55,7 +54,6 @@ describe('useSavedDataViews', () => {
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
 
-    // Expect the default view to be filtered out
     expect(result.current).toHaveLength(4);
 
     // Expect the custom views to be correctly transformed

@@ -26,7 +26,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -34,27 +35,14 @@ import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
-const mapDataViewListItem = (
-  dataView: DataView,
-  partial: Partial<DataViewListItemEnhanced>
-): DataViewListItemEnhanced => ({
-  title: dataView.title,
-  name: dataView.name,
-  id: dataView.id!,
-  type: dataView.type,
-  ...partial,
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => ({
+  title: adHocDataView.title,
+  name: adHocDataView.name,
+  id: adHocDataView.id!,
+  type: adHocDataView.type,
+  isAdhoc: true,
+  managed: adHocDataView.managed,
 });
-
-const mapAdHocDataView = (adHocDataView: DataView) => {
-  if (adHocDataView.managed) {
-    return mapDataViewListItem(adHocDataView, { isManaged: true });
-  }
-  return mapDataViewListItem(adHocDataView, { isAdhoc: true });
-};
-
-const mapManagedDataView = (managedDataView: DataViewListItem) => {
-  return { ...managedDataView, isManaged: true };
-};
 
 const shrinkableContainerCss = css`
   min-width: 0;
@@ -104,14 +92,13 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const availableDataViewRefs = savedDataViews
+      const savedDataViewRefs = savedDataViews
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
-      const savedDataViewRefs = availableDataViewRefs.filter((dataView) => !dataView.managed);
-      const managedDataViewRefs = savedDataViews?.filter((dataView) => dataView.managed === true).map(mapManagedDataView) ?? [];
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
-      setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs, ...managedDataViewRefs]);
+      setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs]);
     };
+
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
@@ -153,17 +140,64 @@ export function ChangeDataView({
     );
   };
   const onDuplicate = useCallback(async () => {
-    const dataView = await dataViews.get(currentDataViewId!);
+    if (!currentDataViewId || !onDataViewCreated) {
+      return;
+    }
+    const dataView = await dataViews.get(currentDataViewId);
+    const editData = new DataView({
+      spec: { title: dataView.getIndexPattern() },
+      fieldFormats: {} as FieldFormatsStartCommon,
+    });
+
+    dataViewEditor.openEditor({
+      editData,
+      onSave: (newDataView) => {
+        onDataViewCreated(newDataView);
+      },
+      allowAdHocDataView: true,
+      isDuplicatingManaged: true,
+    });
+  }, [currentDataViewId, dataViews, dataViewEditor, onDataViewCreated]);
+
+  const onEdit = useCallback(async () => {
     if (onEditDataView) {
+      const dataView = await dataViews.get(currentDataViewId!);
       dataViewEditor.openEditor({
         editData: dataView,
         onSave: (updatedDataView) => {
           onEditDataView(updatedDataView);
         },
+        onDuplicate,
+        getDataViewHelpText,
+      });
+    } else {
+      application.navigateToApp('management', {
+        path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+      });
+    }
+    closePopover();
+  }, [
+    currentDataViewId,
+    dataViews,
+    onEditDataView,
+    dataViewEditor,
+    application,
+    closePopover,
+    onDuplicate,
+    getDataViewHelpText,
+  ]);
+
+  const onCreate = useCallback(() => {
+    if (onDataViewCreated) {
+      dataViewEditor.openEditor({
+        onSave: (newDataView) => {
+          onDataViewCreated(newDataView);
+        },
         allowAdHocDataView: true,
       });
     }
-  }, [currentDataViewId, dataViews, onEditDataView, dataViewEditor]);
+    closePopover();
+  }, [onDataViewCreated, dataViewEditor, closePopover]);
 
   const items = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -187,25 +221,7 @@ export function ChangeDataView({
             key="manage"
             icon="indexSettings"
             data-test-subj="indexPattern-manage-field"
-            onClick={async () => {
-              if (onEditDataView) {
-                const dataView = await dataViews.get(currentDataViewId!);
-                dataViewEditor.openEditor({
-                  editData: dataView,
-                  onSave: (updatedDataView) => {
-                    onEditDataView(updatedDataView);
-                  },
-                  onDuplicate,
-                  isEdit: true,
-                  getDataViewHelpText,
-                });
-              } else {
-                application.navigateToApp('management', {
-                  path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-                });
-              }
-              closePopover();
-            }}
+            onClick={onEdit}
           >
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
               defaultMessage: 'Manage this data view',
@@ -245,10 +261,7 @@ export function ChangeDataView({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => {
-                  closePopover();
-                  onDataViewCreated();
-                }}
+                onClick={onCreate}
                 size="xs"
                 iconType="plusInCircleFilled"
                 iconSide="left"
@@ -278,21 +291,20 @@ export function ChangeDataView({
 
     return panelItems;
   }, [
-    application,
     closePopover,
     currentDataViewId,
     dataViewEditor,
-    dataViews,
     dataViewsList,
     euiTheme.size.s,
     onAddField,
     onChangeDataView,
     onCreateDefaultAdHocDataView,
+    onCreate,
     onDataViewCreated,
+    onEdit,
     onEditDataView,
     searchListInputId,
     selectableProps,
-    getDataViewHelpText,
   ]);
 
   return (

@@ -76,16 +76,12 @@ export const DiscoverTopNav = ({
   }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
       if (closeFieldEditor.current) {
         closeFieldEditor.current();
-      }
-      if (closeDataViewEditor.current) {
-        closeDataViewEditor.current();
       }
     };
   }, []);
@@ -118,13 +114,6 @@ export const DiscoverTopNav = ({
     () => (canEditDataView && editField ? () => editField() : undefined),
     [editField, canEditDataView]
   );
-
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: stateContainer.actions.onDataViewCreated,
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, stateContainer]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;
@@ -187,14 +176,14 @@ export const DiscoverTopNav = ({
       },
       currentDataViewId: dataView?.id,
       onAddField: addField,
-      onDataViewCreated: createNewDataView,
+      onDataViewCreated: stateContainer.actions.onDataViewCreated,
       onCreateDefaultAdHocDataView: stateContainer.actions.createAndAppendAdHocDataView,
       onChangeDataView: stateContainer.actions.onChangeDataView,
       adHocDataViews,
       savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
-  }, [adHocDataViews, addField, createNewDataView, dataView, savedDataViews, stateContainer]);
+  }, [adHocDataViews, addField, dataView, savedDataViews, stateContainer]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
