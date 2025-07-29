@@ -17,7 +17,7 @@ import { AuthType } from '../../../common/auth/constants';
 import type { ConnectorTypeConfigType, ConnectorTypeSecretsType } from './types';
 
 interface GetOAuth2AxiosConfigParams {
-  actionId: string;
+  connectorId: string;
   config: ConnectorTypeConfigType;
   secrets: ConnectorTypeSecretsType;
   services: Services;
@@ -25,7 +25,7 @@ interface GetOAuth2AxiosConfigParams {
   logger: Logger;
 }
 const getOAuth2AxiosConfig = async ({
-  actionId,
+  connectorId,
   config,
   secrets,
   services: { connectorTokenClient },
@@ -34,8 +34,18 @@ const getOAuth2AxiosConfig = async ({
 }: GetOAuth2AxiosConfigParams) => {
   const { accessTokenUrl, clientId, scope, additionalFields, headers } = config;
   const { clientSecret } = secrets;
+
+  // `additionalFields` should be parseable, we do check API schema validation and in
+  // action config validation step.
+  let parsedAdditionalFields;
+  try {
+    parsedAdditionalFields = additionalFields ? JSON.parse(additionalFields) : undefined;
+  } catch (error) {
+    logger.error(`Error parsing additional fields for connectorId: "${connectorId}"`);
+  }
+
   const accessToken = await getOAuthClientCredentialsAccessToken({
-    connectorId: actionId,
+    connectorId,
     logger,
     configurationUtilities,
     oAuthScope: scope,
@@ -43,8 +53,7 @@ const getOAuth2AxiosConfig = async ({
       secrets: { clientSecret: clientSecret! },
       config: {
         clientId: clientId!,
-        // TODO: Could this be executed before the validation? parse is dangerous here
-        ...(additionalFields ? { additionalFields: JSON.parse(additionalFields!) } : {}),
+        ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
       },
     },
     tokenUrl: accessTokenUrl!,
@@ -52,13 +61,13 @@ const getOAuth2AxiosConfig = async ({
   });
 
   if (!accessToken) {
-    throw new Error(`Unable to retrieve new access token for connectorId: ${actionId}`);
+    throw new Error(`Unable to retrieve new access token for connectorId: ${connectorId}`);
   }
-  logger.debug(`Successfully retrieved access token for connectorId: "${actionId}"`);
+  logger.debug(`Successfully retrieved access token for connectorId: "${connectorId}"`);
 
   const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
     connectorTokenClient,
-    connectorId: actionId,
+    connectorId,
   });
   const axiosInstance = axios.create();
   axiosInstance.interceptors.response.use(onFulfilled, onRejected);
@@ -101,7 +110,7 @@ const getDefaultAxiosConfig = ({ config, secrets, headers }: GetDefaultAxiosConf
 export interface GetAxiosConfigParams {
   config: ConnectorTypeConfigType;
   secrets: ConnectorTypeSecretsType;
-  actionId: string;
+  connectorId: string;
   logger: Logger;
   services: Services;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -109,14 +118,14 @@ export interface GetAxiosConfigParams {
 export const getAxiosConfig = ({
   config,
   secrets,
-  actionId,
+  connectorId,
   services,
   configurationUtilities,
   logger,
 }: GetAxiosConfigParams) => {
   if (config.authType === AuthType.OAuth2ClientCredentials) {
     return getOAuth2AxiosConfig({
-      actionId,
+      connectorId,
       logger,
       configurationUtilities,
       services,

@@ -188,7 +188,7 @@ export async function executor(
   const { body: data } = params;
 
   const { axiosInstance, headers, sslOverrides } = await getAxiosConfig({
-    actionId,
+    connectorId: actionId,
     services,
     config,
     secrets: execOptions.secrets,
