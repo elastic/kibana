@@ -128,6 +128,8 @@ export const changeObjectAccessControl = async (
   /**
    * We create a list of expected bulk get results, which will be used to
    * perform the authorization checks and to build the bulk operation request.
+   * Valid objects will then be used for rewriting back to the index once authz and access control
+   * checks are done and valid.
    */
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults: Array<
