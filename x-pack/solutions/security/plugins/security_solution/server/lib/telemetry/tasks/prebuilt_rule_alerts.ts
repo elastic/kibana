@@ -11,15 +11,17 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
+import { TELEMETRY_CHANNEL_DETECTION_ALERTS, DETECTION_RULE_TYPE_ESQL } from '../constants';
 import {
   batchTelemetryRecords,
   processK8sUsernames,
   newTelemetryLogger,
   getPreviousDailyTaskTimestamp,
   safeValue,
+  unflatten,
 } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
+import type { AllowlistFields } from '../filterlists/types';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
@@ -65,6 +67,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           return 0;
         }
 
+        const unflattenedFilterList = unflatten<AllowlistFields>(filterList.prebuiltRulesAlerts);
         for await (const alerts of receiver.fetchPrebuiltRuleAlertsBatch(
           index,
           taskExecutionPeriod.last ?? 'now-1h',
@@ -77,7 +80,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
           const processedAlerts = alerts.map(
             (event: TelemetryEvent): TelemetryEvent =>
-              copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
+              event['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
+                ? copyAllowlistedFields(unflattenedFilterList, unflatten<TelemetryEvent>(event))
+                : copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
           );
 
           const sanitizedAlerts = processedAlerts.map(
