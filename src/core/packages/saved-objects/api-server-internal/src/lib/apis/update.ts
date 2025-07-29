@@ -119,7 +119,7 @@ export const executeUpdate = async <T>(
       existingNamespaces,
       ...(accessControl && {
         accessControl,
-      })
+      }),
       objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },
