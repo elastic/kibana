@@ -489,23 +489,26 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                 });
 
-                const chatPrompt = await chatPromptFactory(DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE, {
-                  prompt: defaultSystemPrompt,
-                  contentReferencesStore,
-                  kbClient: dataClients?.kbDataClient,
-                  conversationMessages: [new HumanMessage(evaluationInput.input)],
-                  logger,
-                  formattedTime: getFormattedTime({
-                    uiSettingsDateFormatTimezone: await ctx.core.uiSettings.client.get<string>(
-                      DEFAULT_DATE_FORMAT_TZ
-                    ),
-                    screenContextTimezone: 'UTC',
-                  }),
-                  actionsClient,
-                  savedObjectsClient,
-                  connectorId,
-                  llmType,
-                });
+                const chatPrompt = await chatPromptFactory(
+                  DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE,
+                  {
+                    prompt: defaultSystemPrompt,
+                    contentReferencesStore,
+                    kbClient: dataClients?.kbDataClient,
+                    conversationMessages: [new HumanMessage(evaluationInput.input)],
+                    logger,
+                    formattedTime: getFormattedTime({
+                      uiSettingsDateFormatTimezone: await ctx.core.uiSettings.client.get<string>(
+                        DEFAULT_DATE_FORMAT_TZ
+                      ),
+                      screenContextTimezone: 'UTC',
+                    }),
+                    actionsClient,
+                    savedObjectsClient,
+                    connectorId,
+                    llmType,
+                  }
+                );
 
                 const result = await graph.invoke(
                   {
