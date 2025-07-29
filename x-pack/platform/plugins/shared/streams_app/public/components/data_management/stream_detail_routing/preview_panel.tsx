@@ -180,7 +180,7 @@ const RuleCreationPanel = () => {
     );
   } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow>
+      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <PreviewMatches

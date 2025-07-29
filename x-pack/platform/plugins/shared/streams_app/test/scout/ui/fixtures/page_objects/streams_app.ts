@@ -85,6 +85,7 @@ export class StreamsApp {
 
   async closeToast() {
     await this.page.testSubj.locator('toastCloseButton').click();
+    await expect(this.page.getByRole('log')).toBeHidden();
   }
 
   // Condition editor utility methods
@@ -108,12 +109,19 @@ export class StreamsApp {
     }
   }
 
-  // Drag and drop utility methods
-  async dragRoutingRule(sourceStream: string, targetStream: string) {
-    await this.page.testSubj.locator(`routingRuleDragHandle-${sourceStream}`).hover();
-    await this.page.mouse.down();
-    await this.page.testSubj.locator(`routingRule-${targetStream}`).hover();
-    await this.page.mouse.up();
+  // Drag and drop utility methods, use with keyboard to test accessibility
+  async dragRoutingRule(sourceStream: string, steps: number) {
+    // Focus source item and activate DnD
+    await this.page.testSubj.locator(`routingRuleDragHandle-${sourceStream}`).focus();
+    await this.page.keyboard.press('Space');
+    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
+    let absoluteSteps = Math.abs(steps);
+    while (absoluteSteps > 0) {
+      this.page.keyboard.press(arrowButton);
+      absoluteSteps--;
+    }
+    // Release DnD
+    await this.page.keyboard.press('Space');
   }
 
   // Expectation utility methods
@@ -125,23 +133,64 @@ export class StreamsApp {
     await expect(this.page.testSubj.locator(`routingRule-${streamName}`)).toBeHidden();
   }
 
+  async expectRoutingOrder(expectedOrder: string[]) {
+    // Wait for the routing rules to be rendered before getting their locators
+    await expect(this.page.locator('[data-test-subj^="routingRule-"]')).toHaveCount(3);
+    const rulesLocators = await this.page.testSubj.locator('^routingRule-').all();
+
+    const actualOrder = await Promise.all(
+      rulesLocators.map(async (ruleLocator) => {
+        const testSubj = await ruleLocator.getAttribute('data-test-subj');
+        return testSubj?.replace('routingRule-', '');
+      })
+    );
+
+    expect(actualOrder).toStrictEqual(expectedOrder);
+  }
+
   async expectStreamNameFieldVisible() {
     await expect(this.page.testSubj.locator('streamsAppRoutingStreamEntryNameField')).toBeVisible();
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.testSubj.locator('routingPreviewPanel')).toBeVisible();
+    await expect(this.page.testSubj.locator('routingPreviewPanelWithResults')).toBeVisible();
   }
 
   async expectToastVisible() {
-    await expect(this.page.testSubj.locator('toastCloseButton')).toBeVisible();
+    await expect(this.page.getByRole('log')).toBeVisible();
   }
 
   async saveRuleOrder() {
-    await this.page.getByRole('button', { name: 'Save order' }).click();
+    await this.page.getByRole('button', { name: 'Change routing' }).click();
   }
 
   async cancelRuleOrder() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.page.getByRole('button', { name: 'Cancel changes' }).click();
+    await this.page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Discard unsaved changes' })
+      .click();
+  }
+
+  // Utility for data preview
+  async getPreviewTableRows() {
+    // Wait for the preview table to be rendered
+    await expect(this.page.testSubj.locator('euiDataGridBody')).toBeVisible();
+    return this.page.locator('[class="euiDataGridRow"]').all();
+  }
+
+  async expectCellValue({
+    columnName,
+    rowIndex,
+    value,
+  }: {
+    columnName: string;
+    rowIndex: number;
+    value: string;
+  }) {
+    const cellContent = this.page.locator(
+      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
+    );
+    await expect(cellContent).toContainText(value);
   }
 }
