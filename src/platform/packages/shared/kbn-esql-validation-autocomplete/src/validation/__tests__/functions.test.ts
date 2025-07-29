@@ -824,4 +824,179 @@ describe('function validation', () => {
       // @TODO — test function aliases
     });
   });
+
+  describe('License-based validation', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.GROUPING,
+          name: 'platinum_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'text',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+          license: 'PLATINUM',
+        },
+        {
+          type: FunctionDefinitionTypes.AGG,
+          name: 'platinum_partial_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_shape',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'cartesian_shape',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+        },
+      ]);
+    });
+
+    it('Should Validate Platinum Functions With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        []
+      );
+    });
+
+    it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.', 'Unknown column [wrongField]']
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_FUNCTION_MOCK(PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0])))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        []
+      );
+    });
+
+    it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        [
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(0))',
+        [
+          'Argument of [to_cartesianshape] must be [cartesian_point], found value [0] type [integer]',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(PLATINUM_FUNCTION_MOCK()))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
+        'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
+        'Argument of [platinum_partial_function_mock] must be [cartesian_point], found value [0] type [integer]',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [
+        'Unknown column [WrongField]',
+      ]);
+    });
+  });
 });
