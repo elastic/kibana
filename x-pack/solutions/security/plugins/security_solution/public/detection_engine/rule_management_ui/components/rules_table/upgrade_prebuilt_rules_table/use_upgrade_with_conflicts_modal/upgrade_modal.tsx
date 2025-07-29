@@ -13,6 +13,7 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import { ConfirmRulesUpgrade } from './use_upgrade_modal';
@@ -40,10 +41,18 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
     [onConfirm]
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal data-test-subj="upgradeConflictsModal" onClose={onCancel}>
+    <EuiModal
+      data-test-subj="upgradeConflictsModal"
+      onClose={onCancel}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.UPGRADE_CONFLICTS_MODAL_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {i18n.UPGRADE_CONFLICTS_MODAL_TITLE}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

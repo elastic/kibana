@@ -27,11 +27,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const end = new Date('2023-03-17T01:00:30.000Z').getTime();
 
   registry.when('Flamegraph api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let flamegraph: BaseFlameGraph;
       before(async () => {
