@@ -115,7 +115,7 @@ function assertNoConflicts(existing: ContentPackStream, incoming: ContentPackStr
     if (
       existing.request.stream.ingest.wired.routing.some((rule) => rule.destination === destination)
     ) {
-      throw new ContentPackConflictError(`Child stream [${destination}] already exists`);
+      throw new ContentPackConflictError(`[${destination}] already exists`);
     }
   }
 
@@ -123,14 +123,18 @@ function assertNoConflicts(existing: ContentPackStream, incoming: ContentPackStr
   for (const [field, fieldConfig] of Object.entries(incoming.request.stream.ingest.wired.fields)) {
     const existingField = existing.request.stream.ingest.wired.fields[field];
     if (existingField && !isEqual(existingField, fieldConfig)) {
-      throw new ContentPackConflictError(`Cannot change mapping of [${field}]`);
+      throw new ContentPackConflictError(
+        `Cannot change mapping of [${field}] for [${existing.name}]`
+      );
     }
   }
 
   // queries
-  for (const { id } of incoming.request.queries) {
+  for (const { id, title } of incoming.request.queries) {
     if (existing.request.queries.some((query) => query.id === id)) {
-      throw new ContentPackConflictError(`Query [${id}] already exists`);
+      throw new ContentPackConflictError(
+        `Query [${id} | ${title}] already exists on [${existing.name}]`
+      );
     }
   }
 }

@@ -488,7 +488,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
         );
 
         // fails when field configuration changes
@@ -594,7 +594,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Child stream [logs.overlapping.child] already exists'
+          '[logs.overlapping.child] already exists'
         );
       });
     });
