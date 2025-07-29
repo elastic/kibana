@@ -41,16 +41,12 @@ interface Inputs {
   llmType: string | undefined;
 }
 
-export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<
-  {
-    systemPrompt: string;
-    knowledgeHistory: string;
-    messages: BaseMessage[];
-  }>([
-    ['system', "{systemPrompt}"],
-    new MessagesPlaceholder("messages"),
-  ]);
-  
+export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessages<{
+  systemPrompt: string;
+  knowledgeHistory: string;
+  messages: BaseMessage[];
+}>([['system', '{systemPrompt}'], new MessagesPlaceholder('messages')]);
+
 const KNOWLEDGE_HISTORY_PREFIX = 'Knowledge History:';
 const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
 
@@ -64,9 +60,12 @@ const formatKnowledgeHistory = <T extends { text: string }>(knowledgeHistory: T[
  * Factory that creates a ChatPromptValueInterface from a ChatPromptTemplate with the given inputs.
  * This should be used to create the initial messages state for the graph.
  */
-export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues>, inputs: Inputs): Promise<ChatPromptValueInterface> => {
-
-  const knowledgeHistoryPromise: Promise<DocumentEntry[]> = inputs.kbClient?.getRequiredKnowledgeBaseDocumentEntries() ?? Promise.resolve([]);
+export const chatPromptFactory = async (
+  chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues>,
+  inputs: Inputs
+): Promise<ChatPromptValueInterface> => {
+  const knowledgeHistoryPromise: Promise<DocumentEntry[]> =
+    inputs.kbClient?.getRequiredKnowledgeBaseDocumentEntries() ?? Promise.resolve([]);
 
   const knowledgeHistory = await knowledgeHistoryPromise;
   const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(inputs.contentReferencesStore));
