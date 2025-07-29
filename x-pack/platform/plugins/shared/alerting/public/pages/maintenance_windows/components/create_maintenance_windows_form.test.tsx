@@ -194,11 +194,19 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('should show warning to inform user that multiple solution categories are not available', async () => {
+  it('should show warning correctly to inform user that multiple solution categories are not available', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
     expect(
       await screen.findByTestId('maintenanceWindowSolutionCategoryRemovedCallout')
     ).toBeInTheDocument();
+  });
+
+  it('should hide warning correctly when no scope query', async () => {
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    expect(
+      screen.queryByTestId('maintenanceWindowSolutionCategoryRemovedCallout')
+    ).not.toBeInTheDocument();
   });
 });

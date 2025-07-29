@@ -83,7 +83,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
         useFetchAlertsFieldsWithNewApi({
           http: mockHttpClient,
           toasts: mockToasts,
-          ruleTypeIds: ['logs'],
+          ruleTypeIds: ['logs', 'siem.esqlRule', 'siem.eqlRule'],
         }),
       {
         wrapper,
@@ -91,6 +91,9 @@ describe('useFetchAlertsFieldsNewApi', () => {
     );
 
     expect(mockHttpGet).toHaveBeenCalledTimes(1);
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/fields', {
+      query: { rule_type_ids: ['logs', 'siem.esqlRule', 'siem.eqlRule'] },
+    });
     expect(result.current.data).toEqual(emptyData);
   });
 
@@ -116,10 +119,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
     expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 
     rerender({ ruleTypeIds: [], enabled: true });
-
-    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
-
-    rerender({ ruleTypeIds: ['apm'] });
 
     expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
@@ -149,31 +148,6 @@ describe('useFetchAlertsFieldsNewApi', () => {
     });
 
     rerender();
-
-    await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(result.current.data).toEqual({
-        fields: [
-          {
-            name: 'fakeCategory',
-          },
-        ],
-      });
-    });
-  });
-
-  it('should fetch for siem rule types', async () => {
-    const { result } = renderHook(
-      () =>
-        useFetchAlertsFieldsWithNewApi({
-          http: mockHttpClient,
-          toasts: mockToasts,
-          ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'],
-        }),
-      {
-        wrapper,
-      }
-    );
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);

@@ -39,6 +39,30 @@ const httpMock = {
   post: jest.fn(),
 } as unknown as HttpStart;
 
+const onFiltersUpdatedMock = jest.fn();
+const filters: Filter[] = [
+  {
+    meta: {
+      negate: false,
+      alias: null,
+      disabled: false,
+      type: 'custom',
+      key: 'query',
+    },
+    query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
+    $state: { store: FilterStateStore.APP_STATE },
+  },
+];
+const newUnifiedSearchBarMock = jest.fn().mockImplementation((props) => (
+  <button
+    data-test-subj="filtersSubmitButton"
+    onClick={() => props.onFiltersUpdated(filters)}
+    type="button"
+  >
+    {'Hello world'}
+  </button>
+));
+
 describe('AlertsSearchBar', () => {
   beforeEach(() => {
     mockUseAlertsDataView.mockReturnValue({
@@ -104,31 +128,6 @@ describe('AlertsSearchBar', () => {
 
   describe('With useAlertsDataView', () => {
     it('calls onFiltersUpdated correctly', async () => {
-      const onFiltersUpdatedMock = jest.fn();
-      const filters: Filter[] = [
-        {
-          meta: {
-            negate: false,
-            alias: null,
-            disabled: false,
-            type: 'custom',
-            key: 'query',
-          },
-          query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-          $state: { store: FilterStateStore.APP_STATE },
-        },
-      ];
-
-      const newUnifiedSearchBarMock = jest.fn().mockImplementation((props) => (
-        <button
-          data-test-subj="filtersSubmitButton"
-          onClick={() => props.onFiltersUpdated(filters)}
-          type="button"
-        >
-          {'Hello world'}
-        </button>
-      ));
-
       render(
         <AlertsSearchBar
           rangeFrom="now/d"
@@ -339,31 +338,6 @@ describe('AlertsSearchBar', () => {
     });
 
     it('calls onFiltersUpdated correctly', async () => {
-      const onFiltersUpdatedMock = jest.fn();
-      const filters: Filter[] = [
-        {
-          meta: {
-            negate: false,
-            alias: null,
-            disabled: false,
-            type: 'custom',
-            key: 'query',
-          },
-          query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-          $state: { store: FilterStateStore.APP_STATE },
-        },
-      ];
-
-      const newUnifiedSearchBarMock = jest.fn().mockImplementation((props) => (
-        <button
-          data-test-subj="filtersSubmitButton"
-          onClick={() => props.onFiltersUpdated(filters)}
-          type="button"
-        >
-          {'Hello world'}
-        </button>
-      ));
-
       render(
         <AlertsSearchBar
           rangeFrom="now/d"

@@ -44,13 +44,12 @@ import {
 } from '@kbn/alerting-plugin/server';
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { FieldDescriptor } from '@kbn/data-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
-import type { BrowserFields, GetBrowserFieldsResponse } from '@kbn/alerting-types';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
@@ -164,13 +163,6 @@ interface SearchAlertsParams {
   consumers?: string[];
   runtimeMappings?: MappingRuntimeFields;
 }
-const INDEX_FILTER = {
-  range: {
-    '@timestamp': {
-      gte: 'now-90d',
-    },
-  },
-};
 
 /**
  * Provides apis to interact with alerts as data

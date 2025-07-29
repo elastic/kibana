@@ -126,7 +126,7 @@ export const useAlertsDataView = ({
   } = useFetchAlertsFieldsQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch fields when ruleTypeIds includes Security Solution
+      // Don't fetch fields when ruleTypeIds includes Security Solution or using new api to fetch fields
       enabled: !!ruleTypeIds.length && !includesSecurity && !enableNewAPIForFields,
     }
   );

@@ -52,7 +52,7 @@ export const AlertsSearchBar = ({
     enableNewAPIForFields,
   });
 
-  const { data: alertFields } = useFetchAlertsFieldsWithNewApi(
+  const { data: { fields: alertFields } = {} } = useFetchAlertsFieldsWithNewApi(
     { http, ruleTypeIds, toasts },
     {
       enabled: enableNewAPIForFields,
@@ -68,11 +68,11 @@ export const AlertsSearchBar = ({
       return [dataView];
     }
 
-    if (alertFields?.fields.length) {
+    if (alertFields?.length) {
       return [
         {
           title: ruleTypeIds.length ? ruleTypeIds.join(',') : DEFAULT_INDEX_PATTERN_TITLE,
-          fields: alertFields.fields,
+          fields: alertFields,
         },
       ];
     }

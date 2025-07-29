@@ -402,16 +402,18 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </UseField>
           </EuiFlexItem>
         </>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="xl" />
-          <EuiCallOut
-            data-test-subj="maintenanceWindowSolutionCategoryRemovedCallout"
-            title={i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_TITLE}
-            color="warning"
-          >
-            <p>{i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_SUBTITLE}</p>
-          </EuiCallOut>
-        </EuiFlexItem>
+        {isScopedQueryEnabled ? (
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <EuiCallOut
+              data-test-subj="maintenanceWindowSolutionCategoryRemovedCallout"
+              title={i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_TITLE}
+              color="warning"
+            >
+              <p>{i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_SUBTITLE}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
         <EuiSpacer size="s" />
       </EuiFlexGroup>
 
