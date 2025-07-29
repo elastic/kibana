@@ -26,14 +26,14 @@ export const DataViewEditor = ({
   editData,
   allowAdHocDataView,
   onDuplicate,
-  isEdit,
+  isDuplicatingManaged,
 }: DataViewEditorPropsWithServices) => {
   const { Provider: KibanaReactContextProvider } =
     createKibanaReactContext<DataViewEditorContext>(services);
 
   return (
     <KibanaReactContextProvider>
-      <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
+      <EuiFlyout aria-label="Data view editor" onClose={() => {}} hideCloseButton={true} size="l">
         <DataViewEditorLazy
           onSave={onSave}
           onCancel={onCancel}
@@ -42,7 +42,7 @@ export const DataViewEditor = ({
           editData={editData}
           allowAdHocDataView={allowAdHocDataView}
           onDuplicate={onDuplicate}
-          isEdit={isEdit}
+          isDuplicatingManaged={isDuplicatingManaged}
         />
       </EuiFlyout>
     </KibanaReactContextProvider>

@@ -314,7 +314,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               onSave: async (dataView) => {
                 onDataViewCreated(dataView);
               },
-              isEdit: true,
             });
             if (setDataViewEditorRef) {
               setDataViewEditorRef(ref);

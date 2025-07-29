@@ -33,6 +33,7 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
+  disabled?: boolean;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -145,6 +146,7 @@ export const TitleField = ({
   matchedIndices$,
   rollupIndicesCapabilities,
   indexPatternValidationProvider,
+  disabled,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -185,6 +187,7 @@ export const TitleField = ({
           >
             <EuiFieldText
               isInvalid={isInvalid}
+              disabled={disabled}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 let query = e.target.value;

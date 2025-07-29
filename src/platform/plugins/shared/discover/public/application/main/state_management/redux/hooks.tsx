@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy } from 'lodash';
 import {
   type TypedUseSelectorHook,
   type ReactReduxContextValue,
@@ -99,12 +98,9 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
-  const originalAdHocDataViews = useAdHocDataViews();
+  const adHocDataViews = useAdHocDataViews();
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-
   return useMemo(() => {
-    const adHocDataViews = differenceBy(originalAdHocDataViews, savedDataViews, 'id');
-
     return { savedDataViews, adHocDataViews };
-  }, [originalAdHocDataViews, savedDataViews]);
+  }, [adHocDataViews, savedDataViews]);
 };

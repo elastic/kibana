@@ -76,9 +76,9 @@ export interface DataViewEditorProps {
    */
   onDuplicate?: () => void;
   /**
-   * if set to true an existing data view is being edited
+   * if editing a managed data view and onDuplicate is defined, a duplicate button is shown
    */
-  isEdit?: boolean;
+  isDuplicatingManaged?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -144,6 +144,7 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
 export interface TimestampOption {
   display: string;
   fieldName?: string;
+  isDisabled?: boolean;
 }
 
 export interface MatchedIndicesSet {
