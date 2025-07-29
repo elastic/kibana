@@ -439,7 +439,7 @@ export class AlertingEventLogger {
     );
   }
 
-  private logEventWithFixedUuid(event: IEvent, id?: string) {
+  private logEventWithFixedUuid(event: IEvent) {
     this.eventLogger.logEvent(event, uuid.v4());
   }
 }
