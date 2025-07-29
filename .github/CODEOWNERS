@@ -1269,7 +1269,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/fixtures/es_archives/hybrid/rollup @elastic/kibana-visualizations @elastic/search-kibana # Assigned per usage
 /x-pack/platform/test/fixtures/es_archives/hybrid/logstash @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/visualize/hybrid_visualization.ts#L22
 /x-pack/platform/test/fixtures/es_archives/graph @elastic/kibana-visualizations
-/x-pack/test/functional/es_archives/visualize @elastic/kibana-visualizations
+/x-pack/platform/test/fixtures/es_archives/visualize @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/managed_content/managed_content.ts#L38
 /src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
