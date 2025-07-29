@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('logs essentials only', function () {
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./dataset_quality'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }
