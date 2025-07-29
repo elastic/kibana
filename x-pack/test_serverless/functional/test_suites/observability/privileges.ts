@@ -67,8 +67,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       ]);
     });
 
-    // analytics section still appears due to One Chat
-    it.skip('should not show analytics section', async () => {
+    it('should not show analytics section', async () => {
       await pageObjects.svlCustomRolesPage.assertFeatureCategoryAnalyticsDoesNotExist();
     });
   });
