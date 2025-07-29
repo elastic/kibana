@@ -37,8 +37,9 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: Pick<
     GraphInputs,
-    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'newMessages' | 'isStream'
+    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'isStream'
   >;
+  newMessages: BaseMessage[];
   model: BaseChatModel;
   conversationsDataClient?: AIAssistantConversationsDataClient;
   telemetryParams?: TelemetryParams;
@@ -54,6 +55,7 @@ export async function generateChatTitle({
   model,
   telemetryParams,
   telemetry,
+  newMessages,
 }: GenerateChatTitleParams): Promise<void> {
   if (!state.conversationId) {
     return;
@@ -91,7 +93,7 @@ export async function generateChatTitle({
       .withConfig({ runName: 'Generate Chat Title' });
 
     const chatTitle = await graph.invoke({
-      newMessages: state.newMessages,
+      newMessages: newMessages,
     });
     logger.debug(`chatTitle: ${chatTitle}`);
 

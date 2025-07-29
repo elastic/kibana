@@ -25,7 +25,6 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
-  inferenceChatModelDisabled?: boolean;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -53,7 +52,6 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-  inferenceChatModelDisabled = false,
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
@@ -127,7 +125,7 @@ export const streamGraph = async ({
         if ((tags || []).includes(AGENT_NODE_TAG)) {
           if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
             const msg = data.chunk as AIMessageChunk;
-            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+            if (!didEnd && !msg.tool_call_chunks?.length && msg.content && msg.content.length) {
               push({ payload: msg.content as string, type: 'content' });
             }
           }
@@ -138,12 +136,13 @@ export const streamGraph = async ({
           ) {
             handleStreamEnd(data.output.content);
           } else if (
-            // This is the end of one model invocation but more message will follow as there are tool calls. Add a newline separator to the stream to visually separate the chunks.
+            // This is the end of one model invocation but more message will follow as there are tool calls. If this chunk contains text content, add a newline separator to the stream to visually separate the chunks.
             event === 'on_chat_model_end' &&
             data.output.lc_kwargs?.tool_calls?.length &&
-            data.chunk.content &&
+            (data.chunk?.content || data.output?.content) && 
             !didEnd
           ) {
+            console.log("here")
             push({ payload: "\n\n" as string, type: 'content' });
           }
         }
@@ -151,6 +150,7 @@ export const streamGraph = async ({
     };
 
     pushStreamUpdate().catch((err) => {
+      console.log(err)
       logger.error(`Error streaming graph: ${err}`);
       handleStreamEnd(err.message, true);
     });

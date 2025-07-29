@@ -23,12 +23,7 @@ export interface GraphInputs {
    * The entire conversation history, including the new messages.
    */
   messages: BaseMessage[];
-  /**
-   * The new messages that are being added to the conversation. 
-   */
-  newMessages: BaseMessage[];
   isRegeneration: boolean;
-  provider: string;
   responseLanguage?: string;
 }
 

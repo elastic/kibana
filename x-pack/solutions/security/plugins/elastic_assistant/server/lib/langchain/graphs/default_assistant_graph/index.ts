@@ -64,7 +64,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai' && !isOssModel;
   const llmClass = getLlmClass(llmType);
 
   /**
@@ -277,9 +276,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isStream,
     isOssModel,
     messages: chatPrompt.messages,
-    newMessages,
     isRegeneration: newMessages.length === 0,
-    provider: provider ?? '',
   };
 
   // make a fire and forget async call to generateChatTitle
@@ -294,6 +291,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       state: {
         ...inputs,
       },
+      newMessages,
       model,
       telemetryParams,
       telemetry,
@@ -307,7 +305,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
-      inferenceChatModelDisabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
       onLlmResponse,
