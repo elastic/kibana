@@ -116,9 +116,10 @@ export class CspPlugin
       .fleetSetupCompleted()
       .then(async () => {
         const packageInfo = await pRetry(
-          () => plugins.fleet.packageService.asInternalUser.getInstallation(
-            CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-          ),
+          () =>
+            plugins.fleet.packageService.asInternalUser.getInstallation(
+              CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+            ),
           getRetryOptions(this.logger, 'getInstallation')
         );
 
