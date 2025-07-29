@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiCheckbox, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql } from '@kbn/streams-schema';
+import { StreamQuery } from '@kbn/streams-schema';
 
 export function StreamQueriesList({
   definition,
@@ -16,9 +16,9 @@ export function StreamQueriesList({
   setSelectedQueries,
   disabled,
 }: {
-  definition: { name: string; queries: StreamQueryKql[] };
-  selectedQueries: Array<{ id: string }>;
-  setSelectedQueries: (queries: Array<{ id: string }>) => void;
+  definition: { name: string; queries: StreamQuery[] };
+  selectedQueries: StreamQuery[];
+  setSelectedQueries: (queries: StreamQuery[]) => void;
   disabled?: boolean;
 }) {
   return (
@@ -39,7 +39,7 @@ export function StreamQueriesList({
             field: 'select',
             name: '',
             width: '40px',
-            render: (_, item: StreamQueryKql) => {
+            render: (_, item: StreamQuery) => {
               return (
                 <EuiCheckbox
                   id={`stream-checkbox-${item.id}`}
@@ -47,7 +47,7 @@ export function StreamQueriesList({
                   checked={selectedQueries.some(({ id }) => id === item.id)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedQueries([...selectedQueries, { id: item.id }]);
+                      setSelectedQueries([...selectedQueries, item]);
                     } else {
                       setSelectedQueries(selectedQueries.filter(({ id }) => id !== item.id));
                     }
@@ -59,7 +59,7 @@ export function StreamQueriesList({
           {
             field: 'title',
             name: '',
-            render: (_, item: StreamQueryKql) => (
+            render: (_, item: StreamQuery) => (
               <EuiFlexItem grow={false}>
                 <span>
                   {item.title} ({item.kql.query})

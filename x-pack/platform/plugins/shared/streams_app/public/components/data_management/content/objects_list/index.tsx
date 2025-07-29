@@ -26,6 +26,7 @@ import {
   ROOT_STREAM_ID,
 } from '@kbn/content-packs-schema';
 import {
+  StreamQuery,
   Streams,
   getAncestors,
   getAncestorsAndSelf,
@@ -70,7 +71,7 @@ export function ContentPackObjectsList({
   const isSignificantEventsEnabled = !!significantEvents?.available;
 
   const [selectedItems, setSelectedItems] = useState<
-    Record<string, { selected: boolean; queries: Array<{ id: string }> }>
+    Record<string, { selected: boolean; queries: StreamQuery[] }>
   >({
     [ROOT_STREAM_ID]: { selected: true, queries: definition.queries },
   });
@@ -97,7 +98,7 @@ export function ContentPackObjectsList({
       ...rows.reduce((selection, { name, request }) => {
         selection[name] = { selected: true, queries: request.queries };
         return selection;
-      }, {} as Record<string, { selected: boolean; queries: Array<{ id: string }> }>),
+      }, {} as Record<string, { selected: boolean; queries: StreamQuery[] }>),
     });
 
     return { rootEntry: root, descendants: rows };
@@ -256,7 +257,7 @@ export function ContentPackObjectsList({
 
 function buildIncludedObjects(
   parent: string,
-  selection: Record<string, { selected: boolean; queries: Array<{ id: string }> }>
+  selection: Record<string, { selected: boolean; queries: StreamQuery[] }>
 ): ContentPackIncludedObjects {
   const children = Object.keys(selection).filter((key) => {
     if (!selection[key].selected) {
@@ -271,7 +272,7 @@ function buildIncludedObjects(
 
   return {
     objects: {
-      queries: selection[parent].queries,
+      queries: selection[parent].queries.map((query) => ({ id: query.id })),
       routing: children.map((child) => ({
         destination: child,
         ...buildIncludedObjects(child, selection),
@@ -281,7 +282,7 @@ function buildIncludedObjects(
 }
 
 function toIncludedObjects(
-  selection: Record<string, { selected: boolean; queries: Array<{ id: string }> }>
+  selection: Record<string, { selected: boolean; queries: StreamQuery[] }>
 ): ContentPackIncludedObjects {
   return buildIncludedObjects(ROOT_STREAM_ID, selection);
 }
