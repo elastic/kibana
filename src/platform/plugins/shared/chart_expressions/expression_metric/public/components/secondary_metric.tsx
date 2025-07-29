@@ -53,23 +53,23 @@ export function SecondaryMetric({
     trendConfig?.borderColor ? css({ border: `1px solid ${trendConfig.borderColor}` }) : undefined,
   ];
 
-  const valueNode = secondaryMetricInfo.badgeColor ? (
-    <EuiBadge
-      color={secondaryMetricInfo.badgeColor}
-      aria-label={secondaryMetricInfo.description}
-      css={badgeCss}
-      data-test-subj="expressionMetricVis-secondaryMetric-badge"
-    >
-      {secondaryMetricInfo.value}
-    </EuiBadge>
-  ) : (
-    <span aria-label={secondaryMetricInfo.description}>{secondaryMetricInfo.value}</span>
-  );
-
   return (
     <span css={styles.wrapper} data-test-subj="metric-secondary-element">
-      {secondaryMetricInfo.label && <span css={[styles.prefix]}>{secondaryMetricInfo.label}</span>}
-      <span css={styles.value}>{valueNode}</span>
+      {secondaryMetricInfo.label && <span css={[styles.label]}>{secondaryMetricInfo.label}</span>}
+      <span css={styles.value}>
+        {secondaryMetricInfo.badgeColor ? (
+          <EuiBadge
+            color={secondaryMetricInfo.badgeColor}
+            aria-label={secondaryMetricInfo.description}
+            css={badgeCss}
+            data-test-subj="expressionMetricVis-secondaryMetric-badge"
+          >
+            {secondaryMetricInfo.value}
+          </EuiBadge>
+        ) : (
+          <span aria-label={secondaryMetricInfo.description}>{secondaryMetricInfo.value}</span>
+        )}
+      </span>
     </span>
   );
 }
@@ -83,7 +83,7 @@ const styles = {
     overflow: 'hidden',
     whiteSpace: 'nowrap',
   }),
-  prefix: css({
+  label: css({
     flex: '0 1 auto',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
