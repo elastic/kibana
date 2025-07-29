@@ -7,7 +7,7 @@
 
 import { termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { TRACE_ID } from '@kbn/apm-types';
+import { SERVICE_NAME, TRACE_ID } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 
 export async function getTraceCorrelation({
@@ -29,7 +29,7 @@ export async function getTraceCorrelation({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    track_total_hits: false,
+    track_total_hits: true,
     size: 0,
     query: {
       bool: {
@@ -40,15 +40,10 @@ export async function getTraceCorrelation({
       source_node_traces: {
         filter: {
           term: {
-            SERVICE_NAME: sourceNode,
+            [SERVICE_NAME]: sourceNode,
           },
         },
         aggs: {
-          doc_count: {
-            value_count: {
-              field: TRACE_ID,
-            },
-          },
           sample_docs: {
             top_hits: {
               size: 5,
@@ -59,15 +54,10 @@ export async function getTraceCorrelation({
       destination_node_traces: {
         filter: {
           term: {
-            SERVICE_NAME: destinationNode,
+            [SERVICE_NAME]: destinationNode,
           },
         },
         aggs: {
-          doc_count: {
-            value_count: {
-              field: TRACE_ID,
-            },
-          },
           sample_docs: {
             top_hits: {
               size: 5,
@@ -78,28 +68,17 @@ export async function getTraceCorrelation({
     },
   });
 
-  const sourceNodeCount = response.aggregations?.source_node_traces?.doc_count?.value || 0;
+  const sourceNodeCount =
+    response.aggregations?.source_node_traces?.sample_docs?.hits?.total?.value || 0;
   const destinationNodeCount =
-    response.aggregations?.destination_node_traces?.doc_count?.value || 0;
-
-  const sourceNodeDocs = response.aggregations?.source_node_traces?.sample_docs?.hits?.hits || [];
-  const destinationNodeDocs =
-    response.aggregations?.destination_node_traces?.sample_docs?.hits?.hits || [];
+    response.aggregations?.destination_node_traces?.sample_docs?.hits?.total?.value || 0;
 
   return {
-    traceId,
-    analysis: {
-      foundInSourceNode: sourceNodeCount > 0,
-      foundInDestinationNode: destinationNodeCount > 0,
-      foundInBothNodes: sourceNodeCount > 0 && destinationNodeCount > 0,
-      sourceNodeDocumentCount: sourceNodeCount,
-      destinationNodeDocumentCount: destinationNodeCount,
-    },
-    sampleDocuments: {
-      sourceNode: sourceNodeDocs.map((hit: any) => hit._source),
-      destinationNode: destinationNodeDocs.map((hit: any) => hit._source),
-    },
-
+    foundInSourceNode: 0,
+    foundInDestinationNode: destinationNodeCount > 0,
+    foundInBothNodes: destinationNodeCount > 0,
+    sourceNodeDocumentCount: sourceNodeCount,
+    destinationNodeDocumentCount: destinationNodeCount,
     rawResponse: response,
   };
 }

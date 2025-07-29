@@ -178,5 +178,5 @@ export async function getDestinationParentIds({
     },
   });
 
-  return { response, hasParent: response.hits.hits.length > 0 };
+  return { rawResponse: response, hasParent: response.hits.hits.length > 0 };
 }
