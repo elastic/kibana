@@ -9,7 +9,6 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
-import { DATE_RANGE, generateLogsData } from '../../fixtures/generators';
 
 test.describe('Stream data retention', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
