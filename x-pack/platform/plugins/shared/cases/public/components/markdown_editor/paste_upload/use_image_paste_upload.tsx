@@ -8,10 +8,7 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useReducer } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import type {
-  DoneNotification,
-  UploadState,
-} from '@kbn/shared-ux-file-upload/src/upload_state';
+import type { DoneNotification, UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { createUploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import type { MarkdownEditorRef } from '../types';
 import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from '../translations';
