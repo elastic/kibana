@@ -38,7 +38,7 @@ components:
 
     MigrationStatus:
       type: string
-      description: The status of each Dashboard migration.
+      description: The status of migration.
       enum: # should match SiemMigrationsStatus enum at ../constants.ts
         - pending
         - processing
