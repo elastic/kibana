@@ -149,7 +149,6 @@
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin",
     "@kbn/controls-constants",
-    "@kbn/controls-plugin",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
     "@kbn/visualizations-plugin",
