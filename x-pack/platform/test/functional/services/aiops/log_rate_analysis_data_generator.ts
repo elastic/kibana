@@ -233,7 +233,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'farequote_with_spike':
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
           await es.updateByQuery({
             index: 'ft_farequote',
@@ -337,7 +337,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'farequote_with_spike':
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
           break;
 
         case 'artificial_logs_with_spike':

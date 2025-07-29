@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/unmapped_fields.json',
     },
     logs: {
-      data: 'x-pack/test/functional/es_archives/logstash_functional',
+      data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
       savedObjects: 'x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting/logs',
     },
     nanos: {

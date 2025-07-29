@@ -76,12 +76,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   const initLogs = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     await kibanaServer.importExport.load(logsSOPath);
   };
   const teardownLogs = async () => {
     await kibanaServer.importExport.unload(logsSOPath);
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {
