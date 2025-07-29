@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { MIGRATION_ID_NOT_FOUND } from '../../../common/translations';
@@ -16,7 +15,7 @@ import { MIGRATION_ID_NOT_FOUND } from '../../../common/translations';
  * if found, it adds the migration to the context.
  *
  * */
-export const withExistingMigration = <
+export const withExistingDashboardMigration = <
   P extends { migration_id: string },
   Q = unknown,
   B = unknown,

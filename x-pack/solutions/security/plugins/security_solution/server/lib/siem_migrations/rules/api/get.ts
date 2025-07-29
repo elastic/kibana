@@ -14,7 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from '../../common/utils/audit';
 import { authz } from '../../common/utils/authz';
 import { withLicense } from '../../common/utils/with_license';
-import { MIGRATION_ID_NOT_FOUND } from './util/with_existing_migration_id';
+import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,

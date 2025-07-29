@@ -13,7 +13,8 @@ import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/utils/with_license';
 import { authz } from '../../common/utils/authz';
-import { MIGRATION_ID_NOT_FOUND } from '../../rules/api/util/with_existing_migration_id';
+import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
+import { withExistingDashboardMigration } from './utils/use_existing_dashboard_migration';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,35 +34,41 @@ export const registerSiemDashboardMigrationsStatsRoute = (
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<GetDashboardMigrationStatsResponse>> => {
-          const migrationId = req.params.migration_id;
-          try {
-            const ctx = await context.resolve(['securitySolution']);
-            const dashboardMigrationClient =
-              ctx.securitySolution.getSiemDashboardMigrationsClient();
+        withExistingDashboardMigration(
+          async (
+            context,
+            req,
+            res
+          ): Promise<IKibanaResponse<GetDashboardMigrationStatsResponse>> => {
+            const migrationId = req.params.migration_id;
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const dashboardMigrationClient =
+                ctx.securitySolution.getSiemDashboardMigrationsClient();
 
-            const stats = await dashboardMigrationClient.data.dashboards.getStats(migrationId);
-            const migration = await dashboardMigrationClient.data.migrations.get(migrationId);
-            if (!migration) {
-              return res.notFound({
-                body: MIGRATION_ID_NOT_FOUND(migrationId),
+              const stats = await dashboardMigrationClient.data.dashboards.getStats(migrationId);
+              const migration = await dashboardMigrationClient.data.migrations.get(migrationId);
+              if (!migration) {
+                return res.notFound({
+                  body: MIGRATION_ID_NOT_FOUND(migrationId),
+                });
+              }
+
+              if (stats.dashboards?.total === 0) {
+                return res.noContent();
+              }
+              return res.ok({
+                body: {
+                  ...stats,
+                  name: migration.name,
+                },
               });
+            } catch (err) {
+              logger.error(err);
+              return res.badRequest({ body: err.message });
             }
-
-            if (stats.dashboards?.total === 0) {
-              return res.noContent();
-            }
-            return res.ok({
-              body: {
-                ...stats,
-                name: migration.name,
-              },
-            });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
           }
-        }
+        )
       )
     );
 };

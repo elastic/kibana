@@ -13,8 +13,8 @@ import { SIEM_DASHBOARD_MIGRATION_PATH } from '../../../../../common/siem_migrat
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from '../../common/utils/authz';
 import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { MIGRATION_ID_NOT_FOUND } from '../../rules/api/util/with_existing_migration_id';
 import { withLicense } from '../../common/utils/with_license';
+import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemDashboardMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
