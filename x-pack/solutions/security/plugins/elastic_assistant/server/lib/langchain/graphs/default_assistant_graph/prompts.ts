@@ -41,7 +41,7 @@ export const DefaultAssistantGraphPromptTemplate = ChatPromptTemplate.fromMessag
     systemPrompt: string;
     knowledgeHistory: string;
     messages: BaseMessage[];
-  }, any>([
+  }>([
     ['system', "{systemPrompt}"],
     new MessagesPlaceholder("messages"),
   ]);
@@ -59,7 +59,7 @@ const formatKnowledgeHistory = <T extends { text: string }>(knowledgeHistory: T[
  * Factory that creates a ChatPromptValueInterface from a ChatPromptTemplate with the given inputs.
  * This should be used to create the initial messages state for the graph.
  */
-export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues, any>, inputs: Inputs): Promise<ChatPromptValueInterface> => {
+export const chatPromptFactory = async (chatPromptTemplate: ChatPromptTemplate<ChatPromptTemplateInputValues>, inputs: Inputs): Promise<ChatPromptValueInterface> => {
 
   const knowledgeHistoryPromise: Promise<DocumentEntry[]> = inputs.kbClient?.getRequiredKnowledgeBaseDocumentEntries() ?? Promise.resolve([]);
 
