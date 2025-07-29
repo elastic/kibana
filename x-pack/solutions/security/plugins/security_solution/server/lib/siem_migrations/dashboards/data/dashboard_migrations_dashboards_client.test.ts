@@ -29,7 +29,7 @@ const getSampleSplunkDashboard: () => SplunkOriginalDashboardExport = () => ({
   },
 });
 
-describe('Create Dashboards in Migration client', () => {
+describe('Dashboard Migrations Dashboards client', () => {
   let dashboardMigrationDataDashboardsClient: DashboardMigrationsDataDashboardsClient;
 
   const sampleMigrationId = uuidv4();
@@ -168,16 +168,21 @@ describe('Create Dashboards in Migration client', () => {
         dashboards: { pending: 3, processing: 0, completed: 0, failed: 0, total: 4 },
         created_at: 1622548800000,
         last_updated_at: 1622635200000,
+        status: 'ready',
       });
     });
 
     describe('errors', () => {
       it('should handle errors during stats retrieval', async () => {
-        esClientMock.asInternalUser.search.mockRejectedValue(new Error('Stats error'));
+        const error = 'Stats error';
+        esClientMock.asInternalUser.search.mockRejectedValue(new Error(error));
 
         await expect(
           dashboardMigrationDataDashboardsClient.getStats(sampleMigrationId)
-        ).rejects.toThrow('Stats error');
+        ).rejects.toThrow(error);
+        expect(logger.error).toHaveBeenCalledWith(
+          `Error getting dashboard migration stats: ${error}`
+        );
       });
     });
   });

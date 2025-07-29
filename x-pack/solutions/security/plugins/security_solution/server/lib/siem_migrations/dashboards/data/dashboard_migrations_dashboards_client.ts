@@ -26,7 +26,7 @@ import {
 const BULK_MAX_SIZE = 500 as const;
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
-  /** Indexes an array of rule migrations to be processed */
+  /** Indexes an array of dashboards to be processed as a part of single migration */
   async create(
     migrationId: string,
     originalDashboards: SplunkOriginalDashboardExport[]
@@ -92,7 +92,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
       .catch((error) => {
-        this.logger.error(`Error getting rule migrations stats: ${error.message}`);
+        this.logger.error(`Error getting dashboard migration stats: ${error.message}`);
         throw error;
       });
 
