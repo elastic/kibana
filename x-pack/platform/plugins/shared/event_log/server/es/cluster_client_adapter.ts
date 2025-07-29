@@ -42,6 +42,10 @@ export interface Doc {
   internalFields?: InternalFields;
 }
 
+export type DocWithOptionalId = Doc & {
+  id?: string;
+};
+
 type Wait = () => Promise<boolean>;
 
 export interface ConstructorOpts {
@@ -133,6 +137,7 @@ export interface QueryEventsBySavedObjectSearchAfterResult {
 export class ClusterClientAdapter<
   TDoc extends {
     body: AliasAny;
+    id?: string;
     index: string;
     internalFields?: InternalFields;
   } = Doc
@@ -239,7 +244,12 @@ export class ClusterClientAdapter<
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: {} });
+      if (doc.id) {
+        bulkBody.push({ create: { _id: doc.id } });
+      } else {
+        bulkBody.push({ create: {} });
+      }
+
       bulkBody.push(doc.body);
     }
 
