@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
-import { FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
+import { FieldDefinition } from '@kbn/streams-schema';
 import { filterQueries, filterRouting, includedObjectsFor } from './helpers';
 import { ContentPackConflictError } from '../error';
 import { baseFields } from '../../streams/component_templates/logs_layer';
@@ -69,21 +69,21 @@ export function mergeTrees({
   existing: StreamTree;
   incoming: StreamTree;
 }): StreamTree {
-  const existingRouting = existing.request.stream.ingest.wired.routing;
-  const incomingRouting = incoming.request.stream.ingest.wired.routing;
-  assertNoConflictingRouting(existingRouting, incomingRouting);
+  assertNoConflicts(existing, incoming);
 
-  const existingFields = existing.request.stream.ingest.wired.fields;
-  const incomingFields = Object.keys(incoming.request.stream.ingest.wired.fields)
-    .filter((field) => !baseFields[field])
-    .reduce((fields, field) => {
-      fields[field] = incoming.request.stream.ingest.wired.fields[field];
-      return fields;
-    }, {} as FieldDefinition);
-  assertNoConflictingFields(existingFields, incomingFields);
-
-  const mergedRouting = [...existingRouting, ...incomingRouting];
-  const mergedFields = { ...existingFields, ...incomingFields };
+  const mergedRouting = [
+    ...existing.request.stream.ingest.wired.routing,
+    ...incoming.request.stream.ingest.wired.routing,
+  ];
+  const mergedFields = {
+    ...existing.request.stream.ingest.wired.fields,
+    ...Object.keys(incoming.request.stream.ingest.wired.fields)
+      .filter((field) => !baseFields[field])
+      .reduce((fields, field) => {
+        fields[field] = incoming.request.stream.ingest.wired.fields[field];
+        return fields;
+      }, {} as FieldDefinition),
+  };
   const mergedQueries = [...existing.request.queries, ...incoming.request.queries];
   const mergedChildren = [...existing.children, ...incoming.children];
 
@@ -109,18 +109,28 @@ export function mergeTrees({
   };
 }
 
-function assertNoConflictingRouting(existing: RoutingDefinition[], incoming: RoutingDefinition[]) {
-  for (const { destination } of incoming) {
-    if (existing.some((rule) => rule.destination === destination)) {
+function assertNoConflicts(existing: ContentPackStream, incoming: ContentPackStream) {
+  // routing
+  for (const { destination } of incoming.request.stream.ingest.wired.routing) {
+    if (
+      existing.request.stream.ingest.wired.routing.some((rule) => rule.destination === destination)
+    ) {
       throw new ContentPackConflictError(`Child stream [${destination}] already exists`);
     }
   }
-}
 
-function assertNoConflictingFields(existing: FieldDefinition, incoming: FieldDefinition) {
-  for (const [field, fieldConfig] of Object.entries(incoming)) {
-    if (existing[field] && !isEqual(existing[field], fieldConfig)) {
+  // fields
+  for (const [field, fieldConfig] of Object.entries(incoming.request.stream.ingest.wired.fields)) {
+    const existingField = existing.request.stream.ingest.wired.fields[field];
+    if (existingField && !isEqual(existingField, fieldConfig)) {
       throw new ContentPackConflictError(`Cannot change mapping of [${field}]`);
+    }
+  }
+
+  // queries
+  for (const { id } of incoming.request.queries) {
+    if (existing.request.queries.some((query) => query.id === id)) {
+      throw new ContentPackConflictError(`Query [${id}] already exists`);
     }
   }
 }
