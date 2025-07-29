@@ -232,7 +232,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       id: string;
       newOwnerProfileUid: SavedObjectAccessControl['owner'];
     }>,
-    options: SavedObjectsChangeAccessControlOptions<T>
+    options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeOwnership(objects, options);
   }
@@ -244,7 +244,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       id: string;
       newAccessMode?: SavedObjectAccessControl['accessMode'];
     }>,
-    options: SavedObjectsChangeAccessControlOptions<T>
+    options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeAccessMode(objects, options);
   }

@@ -448,7 +448,7 @@ export interface SavedObjectsClientContract {
    */
   changeOwnership<T = unknown>(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions<T>
+    options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 
   /**
@@ -460,6 +460,6 @@ export interface SavedObjectsClientContract {
    */
   changeAccessMode<T = unknown>(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions<T>
+    options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

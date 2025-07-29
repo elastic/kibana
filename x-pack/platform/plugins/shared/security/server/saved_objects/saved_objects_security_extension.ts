@@ -23,12 +23,11 @@ import type {
   AuthorizationTypeMap,
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
-  AuthorizeBulkChangeOwnershipParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkDeleteParams,
   AuthorizeBulkGetParams,
   AuthorizeBulkUpdateParams,
-  AuthorizeChangeAccessModeParams,
+  AuthorizeChangeAccessControlParams,
   AuthorizeCheckConflictsParams,
   AuthorizeCreateParams,
   AuthorizeDeleteParams,
@@ -1131,7 +1130,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   async authorizeChangeAccessControl<A extends string>(
-    params: AuthorizeChangeAccessModeParams,
+    params: AuthorizeChangeAccessControlParams,
     operation: 'changeAccessMode' | 'changeOwnership'
   ): Promise<CheckAuthorizationResult<A>> {
     const action =
@@ -1148,7 +1147,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   async internalAuthorizeChangeAccessControl<A extends string>(
-    params: AuthorizeBulkChangeOwnershipParams,
+    params: AuthorizeChangeAccessControlParams,
     action: SecurityAction
   ): Promise<CheckAuthorizationResult<A>> {
     if (!this.typeRegistry) {

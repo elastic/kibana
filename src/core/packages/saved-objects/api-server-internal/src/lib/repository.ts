@@ -587,9 +587,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.changeOwnership}
    */
-  async changeOwnership<T = unknown>(
+  async changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeOwnershipOptions<T> = {}
+    options: SavedObjectsChangeOwnershipOptions = {}
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
   }
@@ -597,9 +597,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.changeAccessMode}
    */
-  async changeAccessMode<T = unknown>(
+  async changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessModeOptions<T> = {}
+    options: SavedObjectsChangeAccessModeOptions = {}
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
   }
