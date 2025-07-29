@@ -6,7 +6,7 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-const TIMESTAMP_FIELD = '@timestamp';
+import { TIMESTAMP_FIELD } from '../../../common/constants';
 import type { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
 import type {
   ESSearchClient,
