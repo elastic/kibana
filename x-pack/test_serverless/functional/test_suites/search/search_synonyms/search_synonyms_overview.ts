@@ -61,10 +61,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         });
 
-        await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickCreateSynonymsSetButton();
+        await retry.tryForTime(5000, async () => {
+          await browser.refresh();
+          await pageObjects.searchSynonyms.SynonymsSetsListPage.clickCreateSynonymsSetButton();
+        });
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.setSynonymsSetName(
           'overwrite-test'
         );
+
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickOverwriteCheckbox();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();

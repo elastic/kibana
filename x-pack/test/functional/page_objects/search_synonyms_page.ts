@@ -52,6 +52,10 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         SYNONYMS_SET_ITEM_RULE_COUNT: 'synonyms-set-item-rule-count',
         PAGINATION_NEXT_BUTTON: 'pagination-button-next',
         PAGE_PREVIOUS_BUTTON: 'pagination-button-previous',
+        CREATE_SYNONYMS_SET_BUTTON: 'searchSynonymsSearchSynonymsOverviewCreateButton',
+      },
+      async clickCreateSynonymsSetButton() {
+        await testSubjects.click(this.TEST_IDS.CREATE_SYNONYMS_SET_BUTTON, 2000);
       },
       async getSynonymsSetsList() {
         const table = await testSubjects.find(this.TEST_IDS.SYNONYMS_SET_TABLE);
