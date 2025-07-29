@@ -22,10 +22,10 @@ export default ({ getService }: FtrProviderContext) => {
     const rulesService = getService('rules');
 
     describe('Without data', function () {
-      it('navigate and open alerts section', async () => {
+      it('navigates to onboarding page if click on add data', async () => {
         await observability.overview.common.navigateToOverviewPageWithoutAlerts();
         await observability.overview.common.waitForOverviewNoDataPrompt();
-        await observability.overview.common.clickNoDataPrompt();
+        await observability.overview.common.clickAddDataButton();
         const url = await browser.getCurrentUrl();
         expect(url).to.contain('observabilityOnboarding');
       });

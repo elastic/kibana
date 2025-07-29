@@ -94,7 +94,7 @@ export function ObservabilityOverviewCommonProvider({
     });
   };
 
-  const clickNoDataPrompt = async () => {
+  const clickAddDataButton = async () => {
     await testSubjects.click('o11yOverviewPageAddDataButton');
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -110,6 +110,6 @@ export function ObservabilityOverviewCommonProvider({
     navigateToOverviewPage,
     openAlertsSectionAndWaitToAppear,
     waitForOverviewNoDataPrompt,
-    clickNoDataPrompt,
+    clickAddDataButton,
   };
 }
