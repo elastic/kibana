@@ -37,7 +37,7 @@ import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
 import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
-import { saveEditedRule, visitEditRulePage } from '../../../../../tasks/edit_rule';
+import { saveEditedRule, visitRuleEditPage } from '../../../../../tasks/edit_rule';
 import { DISABLED_SNOOZE_BADGE } from '../../../../../screens/rule_snoozing';
 import { TOOLTIP } from '../../../../../screens/common';
 
@@ -180,7 +180,7 @@ describe.skip('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerles
 
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
-        visitEditRulePage(rule.id);
+        visitRuleEditPage(rule.id);
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');

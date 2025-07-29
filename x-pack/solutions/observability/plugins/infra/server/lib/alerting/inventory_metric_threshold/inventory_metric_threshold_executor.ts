@@ -25,6 +25,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { convertToBuiltInComparators, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import type {
   InventoryMetricConditions,
@@ -36,7 +37,6 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
-import type { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,

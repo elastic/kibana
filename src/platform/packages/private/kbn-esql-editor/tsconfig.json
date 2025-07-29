@@ -37,7 +37,8 @@
     "@kbn/field-types",
     "@kbn/licensing-plugin",
     "@kbn/i18n-react",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/restorable-state"
   ],
   "exclude": [
     "target/**/*",
