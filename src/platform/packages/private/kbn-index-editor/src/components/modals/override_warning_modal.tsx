@@ -26,7 +26,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { firstValueFrom } from 'rxjs';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextExtra } from '../../types';
 
 const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
@@ -34,15 +33,14 @@ const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
 interface OverrideWarningModalProps {
   onCancel: () => void;
   onContinue: () => void;
+  storage: Storage;
 }
 
 export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
   onCancel,
   onContinue,
+  storage,
 }) => {
-  const {
-    services: { storage },
-  } = useKibana<KibanaContextExtra>();
   const [dontAskMeAgainCheck, setDontAskMeAgainCheck] = useState(false);
 
   const continueHandler = () => {
@@ -78,7 +76,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id="dismiss-discard-starred-query-modal"
-              label={i18n.translate('esqlEditor.discardStarredQueryModal.dismissButtonLabel', {
+              label={i18n.translate('esqlEditor.overrideWarningModal.dismissButtonLabel', {
                 defaultMessage: "Don't ask me again",
               })}
               checked={dontAskMeAgainCheck}
@@ -89,16 +87,18 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty onClick={onCancel} color="primary">
-                  {i18n.translate('esqlEditor.overrideWarningModal.cancelLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
+                  <FormattedMessage
+                    id="esqlEditor.overrideWarningModal.cancelLabel"
+                    defaultMessage="Cancel"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton fill onClick={continueHandler}>
-                  {i18n.translate('esqlEditor.overrideWarningModal.continue', {
-                    defaultMessage: 'Continue',
-                  })}
+                  <FormattedMessage
+                    id="esqlEditor.overrideWarningModal.continue"
+                    defaultMessage="Continue"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -141,6 +141,7 @@ export const getOverrideConfirmation = async ({
               resolve(true);
               session.close();
             }}
+            storage={storage}
           />,
           rendering
         )
