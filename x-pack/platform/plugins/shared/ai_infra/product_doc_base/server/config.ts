@@ -11,7 +11,7 @@ import { internalElserInferenceId } from '../common/consts';
 
 const configSchema = schema.object({
   artifactRepositoryUrl: schema.string({
-    defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
+    defaultValue: 'https://storage.googleapis.com/kibana-ai-assistant-kb-artifacts-dev',
   }),
   elserInferenceId: schema.string({
     defaultValue: internalElserInferenceId,
