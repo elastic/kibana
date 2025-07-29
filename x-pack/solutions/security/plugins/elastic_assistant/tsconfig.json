@@ -90,7 +90,6 @@
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
     "@kbn/inference-common",
-    "@kbn/elastic-assistant-plugin"
   ],
   "exclude": [
     "target/**/*",
