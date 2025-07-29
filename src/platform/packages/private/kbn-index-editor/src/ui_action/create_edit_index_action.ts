@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FileUploadManager } from '@kbn/file-upload';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
@@ -51,8 +52,10 @@ export function createEditLookupIndexContentAction(
         { index: { mode: 'lookup' } }
       );
 
+      const storage = new Storage(localStorage);
+
       try {
-        createFlyout({ ...dependencies, indexUpdateService, fileManager }, context);
+        createFlyout({ ...dependencies, indexUpdateService, fileManager, storage }, context);
       } catch (e) {
         return Promise.reject(e);
       }

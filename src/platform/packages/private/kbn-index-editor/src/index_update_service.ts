@@ -73,7 +73,7 @@ type Action =
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
-  | { type: 'discard-unsaved-changes' }
+  | { type: 'discard-unsaved-values' }
   | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
@@ -135,7 +135,7 @@ export class IndexUpdateService {
           // Clear the buffer after save
           // TODO check for update response
           return [];
-        case 'discard-unsaved-changes':
+        case 'discard-unsaved-values':
           return [];
         case 'edit-column':
           // if a column name has changed, we need to update the values added with the previous name.
@@ -566,12 +566,9 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.next(value);
   }
 
-  public deleteUnsavedColumns() {
-    this._actions$.next({ type: 'discard-unsaved-columns' });
-  }
-
   public discardUnsavedChanges() {
-    this._actions$.next({ type: 'discard-unsaved-changes' });
+    this._actions$.next({ type: 'discard-unsaved-values' });
+    this._actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public destroy() {

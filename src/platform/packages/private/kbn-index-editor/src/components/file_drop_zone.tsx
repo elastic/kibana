@@ -11,12 +11,15 @@ import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@el
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, type FC } from 'react';
+import React, { type FC, PropsWithChildren, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
+import { KibanaContextExtra } from '../types';
 
-const acceptedFiles = ['.csv'];
+const acceptedFileFormats = ['.csv'];
 
 export interface FileSelectorContextType {
   onFileSelectorClick: () => void;
@@ -38,6 +41,8 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   children,
   noResults,
 }) => {
+  const { services } = useKibana<KibanaContextExtra>();
+  const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
   const isAnalyzing =
@@ -49,16 +54,25 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
-      if (files && files.length > 0) {
-        await fileUploadManager.addFiles(files);
+      if (!files?.length) {
+        return;
       }
+
+      const overrideConfirmation = await getOverrideConfirmation(services);
+      if (!overrideConfirmation) {
+        return;
+      }
+
+      indexUpdateService.discardUnsavedChanges();
+
+      await fileUploadManager.addFiles(files);
     },
-    [fileUploadManager]
+    [services, indexUpdateService, fileUploadManager]
   );
 
   const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
     onDrop: onFilesSelected,
-    accept: acceptedFiles,
+    accept: acceptedFileFormats,
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,

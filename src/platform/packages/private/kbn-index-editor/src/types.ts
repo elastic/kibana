@@ -16,6 +16,7 @@ import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugi
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { FileUploadManager } from '@kbn/file-upload';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
 export interface EditLookupIndexContentContext {
@@ -38,6 +39,7 @@ export interface EditLookupIndexFlyoutDeps {
 }
 
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
+  storage: Storage;
   indexUpdateService: IndexUpdateService;
   fileManager: FileUploadManager;
 };
@@ -47,6 +49,8 @@ export interface KibanaContextExtra {
   share: SharePluginStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
+  overlays: CoreStart['overlays'];
+  rendering: CoreStart['rendering'];
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   /** Custom service for indexing documents */
@@ -59,4 +63,5 @@ export interface KibanaContextExtra {
   // Additional services
   fileUpload: FileUploadPluginStart;
   messageImporter: MessageImporter;
+  storage: Storage;
 }
