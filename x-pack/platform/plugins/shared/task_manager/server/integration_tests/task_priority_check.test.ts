@@ -49,17 +49,16 @@ describe('Task priority checks', () => {
   });
 
   it('detects tasks with priority definitions', async () => {
-    const taskTypes = taskTypeDictionary.getAllDefinitions();
-    const taskTypesWithPriority = taskTypes
-      .map((taskType: TaskDefinition) =>
-        !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
-      )
-      .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
-
     await retry(async () => {
-      expect(taskTypesWithPriority.length).toEqual(2);
-    });
+      const taskTypes = taskTypeDictionary.getAllDefinitions();
+      const taskTypesWithPriority = taskTypes
+        .map((taskType: TaskDefinition) =>
+          !!taskType.priority ? { taskType: taskType.type, priority: taskType.priority } : null
+        )
+        .filter((tt: { taskType: string; priority: TaskPriority } | null) => null != tt);
 
-    expect(taskTypesWithPriority).toMatchSnapshot();
+      expect(taskTypesWithPriority.length).toEqual(2);
+      expect(taskTypesWithPriority).toMatchSnapshot();
+    });
   });
 });
