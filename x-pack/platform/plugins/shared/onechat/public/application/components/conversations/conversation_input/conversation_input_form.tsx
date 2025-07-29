@@ -8,31 +8,35 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
-  onSubmit: (message: string) => void;
+  message: string;
+  setMessage: (message: string) => void;
+  onSubmit: () => void;
 }
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
-  const [message, setMessage] = useState<string>('');
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
+  message,
+  setMessage,
+  onSubmit,
+}) => {
   const { euiTheme } = useEuiTheme();
   const disabled = !message.trim();
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (disabled) {
       return;
     }
-    onSubmit(message);
-    setMessage('');
-  }, [message, onSubmit, disabled]);
+    onSubmit();
+  };
 
   const contentStyles = css`
     ${fullHeightStyles}
@@ -43,7 +47,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.border.color};
+    border-color: ${euiTheme.colors.borderBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     &:focus-within {
       border-bottom-color: ${euiTheme.colors.primary};
