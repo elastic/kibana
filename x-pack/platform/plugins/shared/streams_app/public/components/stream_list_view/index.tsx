@@ -44,6 +44,7 @@ export function StreamListView() {
       });
       return streams;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, timeState.start, timeState.end]
   );
 
