@@ -6,8 +6,8 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import type { MetricsAPIResponse, MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../common/constants';
+import type { MetricsAPIRequest, MetricsAPIResponse } from '../../../common/http_api/metrics_api';
 import type {
   ESSearchClient,
   MetricsESResponse,
@@ -23,7 +23,7 @@ import { calculatedInterval } from './lib/calculate_interval';
 
 const DEFAULT_LIMIT = 9;
 
-export const query = async (
+export const fetchMetrics = async (
   search: ESSearchClient,
   rawOptions: MetricsAPIRequest
 ): Promise<MetricsAPIResponse> => {
@@ -37,6 +37,14 @@ export const query = async (
     },
   };
   const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
+  const groupInstanceFilter =
+    options.groupInstance?.reduce<Array<Record<string, unknown>>>((acc, group, index) => {
+      const key = options.groupBy?.[index];
+      if (key && group) {
+        acc.push({ term: { [key]: group } });
+      }
+      return acc;
+    }, []) ?? [];
   const filter: Array<Record<string, any>> = [
     {
       range: {
@@ -48,6 +56,7 @@ export const query = async (
       },
     },
     ...(options.groupBy?.map((field) => ({ exists: { field } })) ?? []),
+    ...groupInstanceFilter,
   ];
 
   const params = {
