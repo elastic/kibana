@@ -23,13 +23,13 @@ export default ({ getService }: FtrProviderContext) => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const kibanaServer = getService('kibanaServer');
     before(async () => {
-      await enablePrivmonSetting(kibanaServer);
       await dataView.create('security-solution');
-      await privMonUtils.initPrivMonEngine();
     });
 
     beforeEach(async () => {
       await enablePrivmonSetting(kibanaServer);
+      await api.deleteMonitoringEngine({ query: { data: true } });
+      await privMonUtils.initPrivMonEngine();
     });
 
     after(async () => {
@@ -304,6 +304,71 @@ export default ({ getService }: FtrProviderContext) => {
         expect(listRes.status).eql(200);
         expect(listRes.body.length).to.be(1);
       });
+
+      describe('CSV with labels', () => {
+        it('should add labels to the uploaded users', async () => {
+          const csv = ['csv_user_1,label1'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(csv);
+
+          const listRes = await api.listPrivMonUsers({
+            query: {},
+          });
+
+          const listed = listRes.body as ListPrivMonUsersResponse;
+          expect(getEaLabelValues(listed[0])).to.eql(['label1']);
+        });
+
+        it('should update labels to the uploaded users', async () => {
+          const csv = ['csv_user_1,label1'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(csv);
+
+          const updateCsv = ['csv_user_1,label3'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+
+          const listRes = await api.listPrivMonUsers({
+            query: {},
+          });
+
+          const listed = listRes.body as ListPrivMonUsersResponse;
+          expect(getEaLabelValues(listed[0])).to.eql(['label1', 'label3']);
+        });
+
+        it('should keep the current labels when the updated user has no labels', async () => {
+          const csv = ['csv_user_1,label1'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(csv);
+
+          const updateCsv = ['csv_user_1'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+
+          const listRes = await api.listPrivMonUsers({
+            query: {},
+          });
+
+          const listed = listRes.body as ListPrivMonUsersResponse;
+
+          expect(getEaLabelValues(listed[0])).to.eql(['label1']);
+        });
+
+        it('should remove the label when soft deleting a user', async () => {
+          const csv = ['csv_user_1,label1'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(csv);
+
+          const updateCsv = ['csv_user_2,label2'].join('\n');
+          await privMonUtils.bulkUploadUsersCsv(updateCsv);
+
+          const listRes = await api.listPrivMonUsers({
+            query: { kql: `user.name: csv_user_1` },
+          });
+
+          const listed = listRes.body as ListPrivMonUsersResponse;
+          expect(listed[0].user?.is_privileged).to.eql(false);
+          expect(getEaLabelValues(listed[0])).to.eql([]);
+        });
+      });
     });
   });
+};
+
+const getEaLabelValues = (user: ListPrivMonUsersResponse[number]) => {
+  return user.entity_analytics_monitoring?.labels?.map((l) => l.value) || [];
 };
