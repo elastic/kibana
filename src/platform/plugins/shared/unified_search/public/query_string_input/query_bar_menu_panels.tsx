@@ -340,13 +340,6 @@ export function useQueryBarMenuPanels({
     }
   };
 
-  const onQueryStringChange = (value: string) => {
-    onQueryChange({
-      query: { query: value, language },
-      dateRange: getDateRange(),
-    });
-  };
-
   const onSelectLanguage = (lang: string) => {
     http.post('/internal/kql_opt_in_stats', {
       version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -357,7 +350,10 @@ export function useQueryBarMenuPanels({
     storage.set(storageKey!, lang);
 
     const newQuery = { query: '', language: lang };
-    onQueryStringChange(newQuery.query);
+    onQueryChange({
+      query: newQuery,
+      dateRange: getDateRange(),
+    });
     onQueryBarSubmit({
       query: { query: fromUser(newQuery.query), language: newQuery.language },
       dateRange: getDateRange(),
