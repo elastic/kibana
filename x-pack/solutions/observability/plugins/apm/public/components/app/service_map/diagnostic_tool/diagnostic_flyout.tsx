@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { isEmpty } from 'lodash';
 import moment from 'moment';
 import {
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -31,10 +31,9 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
-import type { DiagnosticFormState, NodeSelection } from './types';
+import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/get_service_map_nodes';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
@@ -42,28 +41,20 @@ interface DiagnosticFlyoutProps {
   selectedNode: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition;
 }
 
-function checkForForbiddenServiceNames(form: DiagnosticFormState | null): string[] {
-  if (!form) return [];
+function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
+  if (!form?.destinationNode || !form.sourceNode) return false;
 
-  const forbiddenNamesSet = new Set<string>();
-
-  const checkNode = (node?: NodeSelection | null) => {
-    if (node?.field === SERVICE_NAME && node.value) {
-      for (const name of FORBIDDEN_SERVICE_NAMES) {
-        if (node.value.includes(name)) {
-          forbiddenNamesSet.add(name);
-        }
-      }
-    }
-  };
-
-  checkNode(form.sourceNode);
-  checkNode(form.destinationNode);
-
-  return Array.from(forbiddenNamesSet);
+  if (
+    FORBIDDEN_SERVICE_NAMES.includes(form.destinationNode) ||
+    FORBIDDEN_SERVICE_NAMES.includes(form.sourceNode)
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -97,7 +88,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     []
   );
 
-  const forbiddenNames = useMemo(() => checkForForbiddenServiceNames(form), [form]);
+  const hasForbiddenNames = useMemo(() => checkForForbiddenServiceNames(form), [form]);
 
   const handleRunDiagnostic = async () => {
     setIsLoading(true);
@@ -167,7 +158,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         style={{
           overflowY: 'auto',
           maxHeight: 'calc(100vh - 200px)',
-          padding: '16px',
+          padding: euiTheme.size.base,
         }}
       >
         <DiagnosticConfigurationForm
@@ -176,7 +167,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         />
         <EuiSpacer size="m" />
 
-        {forbiddenNames.length > 0 && (
+        {hasForbiddenNames && (
           <EuiCallOut
             title={i18n.translate(
               'xpack.apm.serviceMap.diagnosticFlyout.forbiddenServiceNamesTitle',
@@ -194,7 +185,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
                   defaultMessage:
                     'The following reserved words cannot be used in the service map: {forbiddenNames}. These are reserved keywords that may cause issues with service map functionality.',
                   values: {
-                    forbiddenNames: forbiddenNames.map((name) => `"${name}"`).join(', '),
+                    forbiddenNames: FORBIDDEN_SERVICE_NAMES.map((name) => `"${name}"`).join(', '),
                   },
                 }
               )}
