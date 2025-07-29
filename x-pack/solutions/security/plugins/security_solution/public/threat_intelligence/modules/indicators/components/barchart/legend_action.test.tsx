@@ -12,7 +12,7 @@ import { timestampToIsoString } from './utils';
 
 jest.mock('./utils');
 
-const announceFn = jest.fn;
+const announceFn = jest.fn();
 
 describe('IndicatorBarchartLegendAction', () => {
   const mockDate = '14182940000';

@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
@@ -23,7 +23,7 @@ import { TestProvidersComponent } from '../../../mocks/test_providers';
 
 jest.mock('../../indicators/hooks/use_filters_context');
 
-const announceFn = jest.fn;
+const announceFn = jest.fn();
 
 const mockIndicator: Indicator = generateMockIndicator();
 const mockField: string = 'threat.feed.name';
@@ -114,5 +114,20 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
     expect(getByTestId(CHILD_COMPONENT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should call announceFn when the contextMenu item is clicked', () => {
+    const { getByTestId } = render(
+      <FilterOutContextMenu
+        onAnnounce={announceFn}
+        data={mockIndicator}
+        field={mockField}
+        data-test-subj={TEST_ID}
+      />,
+      { wrapper: TestProvidersComponent }
+    );
+
+    fireEvent.click(getByTestId(TEST_ID));
+    expect(announceFn).toHaveBeenCalled();
   });
 });
