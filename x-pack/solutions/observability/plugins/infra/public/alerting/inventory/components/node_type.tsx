@@ -72,6 +72,9 @@ export const NodeTypeExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiSelect
+          aria-label={i18n.translate('xpack.infra.nodeTypeExpression.select.ariaLabel', {
+            defaultMessage: '',
+          })}
           data-test-subj="forExpressionSelect"
           value={value}
           fullWidth

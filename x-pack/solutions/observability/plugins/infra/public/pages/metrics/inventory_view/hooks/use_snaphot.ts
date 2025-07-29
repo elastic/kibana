@@ -17,15 +17,14 @@ import type {
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
-  filterQuery?: string | null | symbol;
+  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries'> {
   currentTime: number;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
 }
 
 export function useSnapshot(
-  props: Omit<UseSnapshotRequest, 'schema'>,
+  props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
   const config = usePluginConfig();
@@ -73,7 +72,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     accountId = '',
     currentTime,
     dropPartialBuckets = true,
-    filterQuery = '',
+    kuery: filterQuery,
     groupBy = null,
     includeTimeseries = true,
     metrics,
@@ -88,7 +87,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
   return {
     accountId,
     dropPartialBuckets,
-    filterQuery: filterQuery as string,
+    kuery: filterQuery,
     groupBy,
     includeTimeseries,
     metrics,

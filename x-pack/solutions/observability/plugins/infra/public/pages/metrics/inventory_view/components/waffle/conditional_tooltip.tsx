@@ -50,15 +50,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${model.fields.id}": ${node.id}`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,

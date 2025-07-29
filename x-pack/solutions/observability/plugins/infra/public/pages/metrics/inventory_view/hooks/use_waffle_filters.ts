@@ -7,7 +7,6 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { useState, useMemo, useCallback, useEffect } from 'react';
-
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -18,8 +17,6 @@ import {
   inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
-import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 
 const validateKuery = (expression: string) => {
   try {
@@ -36,8 +33,6 @@ export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
 };
 
 export const useWaffleFilters = () => {
-  const { metricsView } = useMetricsDataViewContext();
-
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
@@ -50,11 +45,6 @@ export const useWaffleFilters = () => {
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
   const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
-
-  const filterQueryAsJson = useMemo(
-    () => convertKueryToElasticSearchQuery(urlState.expression, metricsView?.dataViewReference),
-    [metricsView?.dataViewReference, urlState.expression]
-  );
 
   const applyFilterQueryFromKueryExpression = useCallback(
     (expression: string) => {
@@ -79,12 +69,11 @@ export const useWaffleFilters = () => {
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
-  useEffect(() => prefillContext.setFilterQuery(state.expression), [prefillContext, state]);
+  useEffect(() => prefillContext.setKuery(state.expression), [prefillContext, state]);
 
   return {
     filterQuery: urlState,
     filterQueryDraft,
-    filterQueryAsJson,
     applyFilterQuery,
     setFilterQueryDraftFromKueryExpression: setFilterQueryDraft,
     applyFilterQueryFromKueryExpression,
@@ -93,7 +82,6 @@ export const useWaffleFilters = () => {
   };
 };
 
-// temporary
 export type WaffleFiltersState = InventoryFiltersState;
 const encodeUrlState = inventoryFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>

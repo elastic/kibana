@@ -35,7 +35,7 @@ export const MetricsAPIRequestRT = rt.intersection([
     modules: rt.array(rt.string),
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
     limit: rt.union([rt.number, rt.null]),
-    filters: rt.array(rt.UnknownRecord),
+    filters: rt.UnknownRecord,
     dropPartialBuckets: rt.boolean,
     alignDataToEnd: rt.boolean,
   }),
