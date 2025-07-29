@@ -44,9 +44,15 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
+
+enum SuppressionBehaviorOnAlertClosure {
+  RestartWindow = 'restart-suppression',
+  ContinueWindow = 'continue-until-window-ends'
+}
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -342,6 +348,40 @@ export const initUiSettings = (
       requiresPageReload: false,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
+    },
+    [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel', {
+        defaultMessage: 'Default suppression behavior on alert closure',
+      }),
+      value: SuppressionBehaviorOnAlertClosure.RestartWindow,
+      description: i18n.translate('xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription', {
+        defaultMessage: '<p>If an alert is closed while suppression is active, you can choose whether suppression continues or resets.</p>',
+      }),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(SuppressionBehaviorOnAlertClosure.RestartWindow),
+        schema.literal(SuppressionBehaviorOnAlertClosure.ContinueWindow),
+      ]),
+      options: [
+        SuppressionBehaviorOnAlertClosure.RestartWindow,
+        SuppressionBehaviorOnAlertClosure.ContinueWindow,
+      ],
+      optionLabels: {
+        [SuppressionBehaviorOnAlertClosure.RestartWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+          {
+            defaultMessage: 'Restart suppression',
+          }
+        ),
+        [SuppressionBehaviorOnAlertClosure.ContinueWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+          {
+            defaultMessage: 'Continue suppression until window ends',
+          }
+        ),
+      },
+      category: [APP_ID],
+      requiresPageReload: false,
     },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
