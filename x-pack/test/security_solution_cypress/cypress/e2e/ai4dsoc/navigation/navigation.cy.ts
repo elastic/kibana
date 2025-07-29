@@ -147,9 +147,9 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       cy.get(AI_SOC_NAVIGATION).should('exist');
 
       visibleLinks.forEach((link) => {
-        cy.get(`[id="${link}"]`).click();
+        cy.getByTestSubjContains(`nav-item-id-${link}`).click();
         cy.url().should('include', `/${link}`);
-        cy.get(`[id="${link}"]`).click();
+        cy.getByTestSubjContains(`nav-item-id-${link}`).click();
 
         // Assert that the page contains the expected content
         linkedPagesAssertions[link]();

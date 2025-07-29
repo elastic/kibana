@@ -168,7 +168,7 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
       ],
     },
     {
-      id: SecurityPageName.configurationsIntegrations,
+      id: `external-integrations`,
       link: securityLink(SecurityPageName.configurationsIntegrations),
     },
     {
