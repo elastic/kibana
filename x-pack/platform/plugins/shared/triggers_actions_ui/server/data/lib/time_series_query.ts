@@ -15,7 +15,7 @@ import {
   getDateRangeInfo,
   isCountAggregation,
   isGroupAggregation,
-} from '../../../common';
+} from '../../../common/data';
 
 import type {
   TimeSeriesQuery,

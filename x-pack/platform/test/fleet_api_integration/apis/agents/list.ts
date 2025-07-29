@@ -321,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/api/fleet/fleet_server_hosts`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          id: 'default-agentless-fleet-server-host',
+          id: 'fleet-default-fleet-server-host',
           name: 'Default',
           is_default: true,
           host_urls: ['https://test.com:8080', 'https://test.com:8081'],

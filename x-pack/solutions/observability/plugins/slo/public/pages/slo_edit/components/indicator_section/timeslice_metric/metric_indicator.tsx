@@ -256,6 +256,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: Metri
                   )}
                 >
                   <EuiSelect
+                    isInvalid={fieldState.invalid}
                     {...field}
                     data-test-subj="timesliceMetricComparatorSelection"
                     disabled={!indexPattern}

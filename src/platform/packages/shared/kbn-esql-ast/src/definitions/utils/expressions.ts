@@ -89,11 +89,11 @@ export function buildPartialMatcher(str: string) {
   }
 
   // Return the final regex pattern
-  return new RegExp(pattern + '$', 'i');
+  return pattern;
 }
 
-const isNullMatcher = buildPartialMatcher('is nul');
-const isNotNullMatcher = buildPartialMatcher('is not nul');
+const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
+const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
 
 // --- Expression types helpers ---
 
