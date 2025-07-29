@@ -30,6 +30,7 @@ export const functions = {
         defaultMessage: 'BUCKET',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -63,6 +64,7 @@ export const functions = {
         defaultMessage: 'CATEGORIZE',
       }),
       preview: false,
+      license: { name: 'PLATINUM', isSignatureSpecific: false, paramsWithLicense: [] },
       description: (
         <Markdown
           openLinksInNewTab

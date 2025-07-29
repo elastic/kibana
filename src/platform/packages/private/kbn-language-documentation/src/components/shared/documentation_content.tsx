@@ -10,8 +10,32 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import { EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
+
+interface LicenseInfo {
+  name: string;
+  isSignatureSpecific: boolean;
+  paramsWithLicense: string[];
+}
+
+function createLicenseTooltip(license: LicenseInfo): string {
+  let tooltip = i18n.translate('languageDocumentation.licenseRequiredTooltip', {
+    defaultMessage: 'This feature requires {license} license',
+    values: { license: license.name },
+  });
+
+  if (license.isSignatureSpecific && license.paramsWithLicense.length > 0) {
+    tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
+      defaultMessage: ' only for specific values: {params}',
+      values: { license: license.name, params: license.paramsWithLicense.join(', ') },
+    })}`;
+  }
+
+  tooltip += `.`;
+
+  return tooltip;
+}
 
 interface DocumentationContentProps {
   searchText: string;
@@ -19,7 +43,12 @@ interface DocumentationContentProps {
   filteredGroups?: Array<{
     label: string;
     description?: string;
-    options: Array<{ label: string; description?: JSX.Element | undefined; preview?: boolean }>;
+    options: Array<{
+      label: string;
+      description: JSX.Element | undefined;
+      preview: boolean;
+      license: LicenseInfo | undefined;
+    }>;
   }>;
   sections?: LanguageDocumentationSections;
 }
@@ -88,24 +117,45 @@ function DocumentationContent({
                         }
                       }}
                     >
-                      {helpItem.preview && (
-                        <EuiBetaBadge
+                      {(helpItem.preview || helpItem.license) && (
+                        <EuiFlexGroup
+                          gutterSize="s"
                           css={css`
                             margin-bottom: ${theme.euiTheme.size.s};
                           `}
-                          label={i18n.translate('languageDocumentation.technicalPreviewLabel', {
-                            defaultMessage: 'Technical Preview',
-                          })}
-                          size="s"
-                          color="subdued"
-                          tooltipContent={i18n.translate(
-                            'languageDocumentation.technicalPreviewTooltip',
-                            {
-                              defaultMessage:
-                                'This functionality is experimental and not supported. It may change or be removed at any time.',
-                            }
+                        >
+                          {helpItem.preview && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBetaBadge
+                                label={i18n.translate(
+                                  'languageDocumentation.technicalPreviewLabel',
+                                  {
+                                    defaultMessage: 'Technical Preview',
+                                  }
+                                )}
+                                size="s"
+                                color="subdued"
+                                tooltipContent={i18n.translate(
+                                  'languageDocumentation.technicalPreviewTooltip',
+                                  {
+                                    defaultMessage:
+                                      'This functionality is experimental and not supported. It may change or be removed at any time.',
+                                  }
+                                )}
+                              />
+                            </EuiFlexItem>
                           )}
-                        />
+                          {helpItem.license && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBetaBadge
+                                label={helpItem.license.name}
+                                tooltipContent={createLicenseTooltip(helpItem.license)}
+                                color="subdued"
+                                size="s"
+                              />
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
                       )}
                       {helpItem.description}
                     </article>

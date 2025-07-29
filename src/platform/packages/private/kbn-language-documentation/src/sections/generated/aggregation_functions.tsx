@@ -30,6 +30,7 @@ export const functions = {
         defaultMessage: 'AVG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -58,6 +59,7 @@ export const functions = {
         defaultMessage: 'COUNT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -89,6 +91,7 @@ export const functions = {
         defaultMessage: 'COUNT_DISTINCT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -120,6 +123,7 @@ export const functions = {
         defaultMessage: 'MAX',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -148,6 +152,7 @@ export const functions = {
         defaultMessage: 'MEDIAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -181,6 +186,7 @@ export const functions = {
         defaultMessage: 'MEDIAN_ABSOLUTE_DEVIATION',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -216,6 +222,7 @@ export const functions = {
         defaultMessage: 'MIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -244,6 +251,7 @@ export const functions = {
         defaultMessage: 'PERCENTILE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -277,6 +285,7 @@ export const functions = {
         defaultMessage: 'SAMPLE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -308,6 +317,7 @@ export const functions = {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -339,6 +349,11 @@ export const functions = {
         defaultMessage: 'ST_EXTENT_AGG',
       }),
       preview: true,
+      license: {
+        name: 'PLATINUM',
+        isSignatureSpecific: true,
+        paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+      },
       description: (
         <Markdown
           openLinksInNewTab
@@ -371,6 +386,7 @@ export const functions = {
         defaultMessage: 'STD_DEV',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -402,6 +418,7 @@ export const functions = {
         defaultMessage: 'SUM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -430,6 +447,7 @@ export const functions = {
         defaultMessage: 'TOP',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -458,6 +476,7 @@ export const functions = {
         defaultMessage: 'VALUES',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -493,6 +512,7 @@ export const functions = {
         defaultMessage: 'WEIGHTED_AVG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
