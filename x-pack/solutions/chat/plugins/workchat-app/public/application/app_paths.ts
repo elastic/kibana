@@ -10,22 +10,12 @@
  */
 export const appPaths = {
   home: '/',
-  chat: {
-    new: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/chat`,
-    conversation: ({ agentId, conversationId }: { agentId: string; conversationId: string }) =>
-      `/assistants/${agentId}/chat/${conversationId}`,
+  dataSources: {
+    list: '/data-sources',
+    edit: ({ id }: { id: string }) => `/data-sources/${id}/edit`,
   },
-  assistants: {
-    list: '/assistants',
-    create: '/assistants/create',
-    edit: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/edit`,
-    workflow: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/workflow`,
-  },
-
-  tools: {
-    list: '/tools',
-    create: '/tools/create',
-    catalog: '/tools/catalog',
-    edit: ({ integrationId }: { integrationId: string }) => `/tools/${integrationId}/edit`,
+  dataConnections: {
+    list: '/data-connections',
+    edit: ({ id }: { id: string }) => `/data-connections/${id}/edit`,
   },
 };

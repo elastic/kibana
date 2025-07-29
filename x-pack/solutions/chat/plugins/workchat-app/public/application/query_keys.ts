@@ -9,25 +9,12 @@
  * Query keys for react-query
  */
 export const queryKeys = {
-  conversations: {
-    all: ['conversations'] as const,
-    byAgent: (agentId: string) => ['conversations', 'list', { agentId }],
-    byId: (conversationId: string) => ['conversations', conversationId],
+  dataSources: {
+    list: ['dataSources', 'list'] as const,
+    byId: (id: string) => ['dataSources', id] as const,
   },
-  agents: {
-    all: ['agents'] as const,
-    list: ['agents', 'list'] as const,
-    details: (agentId: string) => ['agents', { id: agentId }],
-  },
-  connectors: {
-    all: ['connectors'] as const,
-    list: ['connectors', 'list'] as const,
-  },
-  integrations: {
-    all: ['integrations'] as const,
-    list: ['integrations', 'list'] as const,
-  },
-  users: {
-    current: ['users', 'current'] as const,
+  dataConnections: {
+    list: ['dataConnections', 'list'] as const,
+    byId: (id: string) => ['dataConnections', id] as const,
   },
 };

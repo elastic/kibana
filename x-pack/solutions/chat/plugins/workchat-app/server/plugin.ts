@@ -13,10 +13,8 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import { registerTypes } from './saved_objects';
 import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
-import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
 import { AppLogger } from './utils';
@@ -38,7 +36,6 @@ export class WorkChatAppPlugin
 {
   private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
-  private readonly integrationRegistry = new IntegrationRegistry();
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
@@ -64,16 +61,14 @@ export class WorkChatAppPlugin
       },
     });
 
-    registerTypes({ savedObjects: core.savedObjects });
-
     registerFeatures({ features: setupDeps.features });
 
     return {
-      integrations: {
-        register: (tool) => {
-          return this.integrationRegistry.register(tool);
-        },
-      },
+      // integrations: {
+      //   register: (tool) => {
+      //     return this.integrationRegistry.register(tool);
+      //   },
+      // },
     };
   }
 
@@ -86,7 +81,7 @@ export class WorkChatAppPlugin
       config: this.config,
       loggerFactory: this.loggerFactory,
       pluginsDependencies,
-      integrationRegistry: this.integrationRegistry,
+      // integrationRegistry: this.integrationRegistry,
     });
 
     return {};

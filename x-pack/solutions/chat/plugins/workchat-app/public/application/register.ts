@@ -17,6 +17,7 @@ export const registerApp = ({
   core: CoreSetup<WorkChatAppPluginStartDependencies>;
   getServices: () => WorkChatServices;
 }) => {
+  console.log('registerApp', WORKCHAT_APP_ID);
   core.application.register({
     id: WORKCHAT_APP_ID,
     appRoute: `/app/${WORKCHAT_APP_ID}`,
@@ -25,10 +26,7 @@ export const registerApp = ({
     status: AppStatus.accessible,
     title: 'WorkChat',
     updater$: undefined,
-    deepLinks: [
-      { id: 'agents', path: '/assistants', title: 'Assistants' },
-      { id: 'integrations', path: '/tools', title: 'Tools' },
-    ],
+    deepLinks: [],
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();

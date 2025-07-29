@@ -35,11 +35,16 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             },
           },
           {
-            link: 'workchat:agents',
-            spaceBefore: 'l',
-          },
-          {
-            link: 'workchat:integrations',
+            children: [
+              { link: 'onechat:conversations' },
+              { link: 'onechat:tools' },
+              { link: 'onechat:agents' },
+            ],
+            id: 'chat',
+            title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
+              defaultMessage: 'Chat',
+            }),
+            renderAs: 'accordion',
           },
         ],
       },

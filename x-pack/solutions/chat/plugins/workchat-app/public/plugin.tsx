@@ -34,6 +34,7 @@ export class WorkChatAppPlugin
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
   ): WorkChatAppPluginSetup {
+    console.log('setup', 'workchat-app');
     registerApp({
       core,
       getServices: () => {
@@ -57,26 +58,26 @@ export class WorkChatAppPlugin
     { http }: CoreStart,
     pluginsStart: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
-    const conversationService = new ConversationService({
-      http,
-    });
-    const chatService = new ChatService({
-      http,
-    });
-    const agentService = new AgentService({
-      http,
-    });
-    const integrationService = new IntegrationService({
-      http,
-    });
+    // const conversationService = new ConversationService({
+    //   http,
+    // });
+    // const chatService = new ChatService({
+    //   http,
+    // });
+    // const agentService = new AgentService({
+    //   http,
+    // });
+    // const integrationService = new IntegrationService({
+    //   http,
+    // });
 
-    this.services = {
-      chatService,
-      agentService,
-      conversationService,
-      integrationService,
-      integrationRegistry: this.integrationRegistry,
-    };
+    // this.services = {
+    //   chatService,
+    //   agentService,
+    //   conversationService,
+    //   integrationService,
+    //   integrationRegistry: this.integrationRegistry,
+    // };
 
     return {};
   }

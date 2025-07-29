@@ -18,7 +18,6 @@ import type { WorkChatServices } from '../services';
 import type { WorkChatAppPluginStartDependencies } from '../types';
 import { WorkChatServicesContext } from './context/workchat_services_context';
 import { WorkchatAppRoutes } from './routes';
-import { InitialMessageProvider } from './context/initial_message_context';
 
 export const mountApp = async ({
   core,
@@ -41,13 +40,11 @@ export const mountApp = async ({
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <WorkChatServicesContext.Provider value={services}>
-              <InitialMessageProvider>
-                <RedirectAppLinks coreStart={core}>
-                  <Router history={history}>
-                    <WorkchatAppRoutes />
-                  </Router>
-                </RedirectAppLinks>
-              </InitialMessageProvider>
+              <RedirectAppLinks coreStart={core}>
+                <Router history={history}>
+                  <WorkchatAppRoutes />
+                </Router>
+              </RedirectAppLinks>
             </WorkChatServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>
