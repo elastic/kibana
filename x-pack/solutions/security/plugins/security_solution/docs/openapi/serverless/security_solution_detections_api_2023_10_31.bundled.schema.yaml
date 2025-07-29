@@ -7458,6 +7458,7 @@ components:
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
     ReasonEnum:
+      description: The reason for closing the alerts
       enum:
         - FALSE_POSITIVE
         - DUPLICATE
@@ -8773,14 +8774,13 @@ components:
             List of alert ids. Use field `_id` on alert document or
             `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
           items:
+            format: nonempty
+            minLength: 1
             type: string
           minItems: 1
           type: array
         status:
-          enum:
-            - open
-            - acknowledged
-          type: string
+          $ref: '#/components/schemas/AlertStatus'
       required:
         - signal_ids
         - status
