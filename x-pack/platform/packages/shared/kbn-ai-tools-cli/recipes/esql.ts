@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { runRecipe } from '@kbn/inference-cli';
-import { answerAsEsqlExpert } from '@kbn/ai-tools';
+import { executeAsEsqlAgent } from '@kbn/ai-tools';
 import moment from 'moment';
 import { inspect } from 'util';
 
@@ -26,7 +26,7 @@ runRecipe(
 
     const start = now.clone().subtract(1, 'days').valueOf();
 
-    const response = await answerAsEsqlExpert({
+    const response = await executeAsEsqlAgent({
       start,
       end,
       esClient,
