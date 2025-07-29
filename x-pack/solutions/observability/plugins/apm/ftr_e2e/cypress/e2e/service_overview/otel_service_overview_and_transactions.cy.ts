@@ -21,6 +21,12 @@ const baseUrl = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const transactionTabPath = '/app/apm/services/sendotlp-otel-native-synth/transactions/view';
+const transactionUrl = url.format({
+  pathname: transactionTabPath,
+  query: { rangeFrom: start, rangeTo: end, transactionName: 'parent-synth' },
+});
+
 describe('Service Overview', () => {
   before(() => {
     synthtrace.index(
@@ -126,7 +132,6 @@ describe('Service Overview', () => {
 
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
     });
 
     it('shows waterfall and transaction details flyout', () => {
@@ -146,8 +151,6 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 

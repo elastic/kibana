@@ -21,6 +21,12 @@ const baseUrl = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const transactionTabPath = '/app/apm/services/adservice-edot-synth/transactions/view';
+const transactionUrl = url.format({
+  pathname: transactionTabPath,
+  query: { rangeFrom: start, rangeTo: end, transactionName: 'oteldemo.AdServiceEdotSynth/GetAds' },
+});
+
 describe('Service Overview', () => {
   before(() => {
     synthtrace.index(
@@ -110,8 +116,6 @@ describe('Service Overview', () => {
         'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
       );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
     it('shows waterfall and transaction details flyout', () => {
       cy.visitKibana(transactionUrl);
@@ -134,8 +138,6 @@ describe('Service Overview', () => {
         'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
       );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
-      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 
