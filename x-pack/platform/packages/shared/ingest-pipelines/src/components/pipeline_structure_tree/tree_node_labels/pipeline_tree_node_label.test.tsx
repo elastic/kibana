@@ -11,13 +11,13 @@ import { PipelineTreeNodeLabel } from './pipeline_tree_node_label';
 
 describe('PipelineTreeNodeLabel', () => {
   it('renders the pipeline name as a link', () => {
-    const setSelected = jest.fn();
+    const onClick = jest.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="test-pipeline"
         isManaged={false}
         isDeprecated={false}
-        setSelected={setSelected}
+        onClick={onClick}
       />
     );
 
@@ -26,28 +26,28 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('calls setSelected when pipeline name is clicked', () => {
-    const setSelected = jest.fn();
+    const onClick = jest.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="clickable-pipeline"
         isManaged={false}
         isDeprecated={false}
-        setSelected={setSelected}
+        onClick={onClick}
       />
     );
 
     fireEvent.click(getByTestId('pipelineTreeNodeLink-clickable-pipeline'));
-    expect(setSelected).toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalled();
   });
 
   it('renders managed icon when isManaged is true', () => {
-    const setSelected = jest.fn();
+    const onClick = jest.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="managed-pipeline"
         isManaged={true}
         isDeprecated={false}
-        setSelected={setSelected}
+        onClick={onClick}
       />
     );
 
@@ -55,13 +55,13 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('renders deprecated icon when isDeprecated is true', () => {
-    const setSelected = jest.fn();
+    const onClick = jest.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="deprecated-pipeline"
         isManaged={false}
         isDeprecated={true}
-        setSelected={setSelected}
+        onClick={onClick}
       />
     );
 
@@ -69,13 +69,13 @@ describe('PipelineTreeNodeLabel', () => {
   });
 
   it('renders both managed and deprecated icons when both flags are true', () => {
-    const setSelected = jest.fn();
+    const onClick = jest.fn();
     const { getByTestId } = render(
       <PipelineTreeNodeLabel
         pipelineName="both"
         isManaged={true}
         isDeprecated={true}
-        setSelected={setSelected}
+        onClick={onClick}
       />
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -31,7 +31,9 @@ export const PipelineTreeNodeLabel = ({
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
       responsive={false}
     >
-      <EuiFlexItem grow={8 + (!isDeprecated + !isManaged)}>
+      <EuiFlexItem
+        grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
+      >
         <EuiLink
           color="text"
           onClick={onClick}

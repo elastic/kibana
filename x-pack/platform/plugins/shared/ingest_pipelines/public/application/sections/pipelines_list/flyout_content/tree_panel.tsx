@@ -14,7 +14,7 @@ import { useKibana } from '../../../../shared_imports';
 
 interface Props {
   pipelineTree: PipelineTreeNode;
-  setTreeRootStack: (newStack: string[]) => void;
+  setTreeRootStack: React.Dispatch<React.SetStateAction<string[]>>;
   selectedPipeline: string | undefined;
   clickTreeNode: (name: string) => void;
   isExtension: boolean;
@@ -23,7 +23,7 @@ interface Props {
 export const TreePanel = React.memo(
   ({ pipelineTree, selectedPipeline, clickTreeNode, setTreeRootStack, isExtension }: Props) => {
     const {
-      services: { history, api, documentation },
+      services: { history, documentation },
     } = useKibana();
 
     const pushTreeStack = useCallback(
