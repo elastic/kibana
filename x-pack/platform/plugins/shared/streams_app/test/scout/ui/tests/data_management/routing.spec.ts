@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../fixtures/generators';
 
-test.describe.only('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream Detail Routing', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.enable();
   });
