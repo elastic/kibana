@@ -27,10 +27,11 @@ export interface AllCasesSelectorModalProps {
   onRowClick?: (theCase?: CaseUI) => void;
   onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
   onCreateCaseClicked?: () => void;
+  alertIds?: string[];
 }
 
 export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
-  ({ hiddenStatuses, onRowClick, onClose }) => {
+  ({ hiddenStatuses, onRowClick, onClose, alertIds }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const { euiTheme } = useEuiTheme();
     const closeModal = useCallback(() => {
@@ -67,6 +68,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
               hiddenStatuses={hiddenStatuses}
               isSelectorView={true}
               onRowClick={onClick}
+              alertIds={alertIds}
             />
           </EuiModalBody>
           <EuiModalFooter>
