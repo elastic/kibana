@@ -14,7 +14,6 @@ import type {
   KibanaNoDataPageServices,
   KibanaNoDataPageProps,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import {
   NoDataViewsPromptStorybookMock,
@@ -26,10 +25,9 @@ import {
   NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
 
-type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;
 type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasUserDataView' | 'hasESData'>;
 
-export type Params = ArgumentParams<PropArguments, ServiceArguments> &
+export type Params = ArgumentParams<ServiceArguments> &
   NoDataCardStorybookParams &
   NoDataViewsPromptStorybookParams;
 
@@ -39,20 +37,10 @@ const noDataCardMock = new NoDataCardStorybookMock();
 export class StorybookMock extends AbstractStorybookMock<
   KibanaNoDataPageProps,
   KibanaNoDataPageServices,
-  PropArguments,
+  {},
   ServiceArguments
 > {
-  propArguments = {
-    solution: {
-      control: { control: 'text' },
-      defaultValue: 'Observability',
-    },
-    logo: {
-      control: { control: 'radio' },
-      options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
-      defaultValue: undefined,
-    },
-  };
+  propArguments = {};
 
   serviceArguments = {
     hasESData: {
@@ -68,10 +56,7 @@ export class StorybookMock extends AbstractStorybookMock<
   dependencies = [noDataViewsMock, noDataCardMock];
 
   getProps(params: Params) {
-    const { logo, solution } = params;
     const noDataConfig = {
-      solution: solution || 'Analytics',
-      logo: logo || 'logoKibana',
       action: {
         elasticAgent: {
           title: 'Add Integrations',
