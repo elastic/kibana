@@ -774,13 +774,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
 
     // Replace the original test cases with:
-    testNumberOfChecksLocationThresholdUngrouped({
+    void testNumberOfChecksLocationThresholdUngrouped({
       numberOfChecks: 1,
       ruleName: 'When down from 2 locations',
       testSuiteName: 'NumberOfChecks - Location threshold > 1 - ungrouped - 2 down locations',
     });
 
-    testNumberOfChecksLocationThresholdUngrouped({
+    void testNumberOfChecksLocationThresholdUngrouped({
       numberOfChecks: 5,
       recoveryMode: 'firstUp',
       ruleName: 'When down from 2 locations - recoveryMode: firstUp',
@@ -969,7 +969,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
 
     // Replace the first test suite
-    testTimeWindowLocationThresholdGrouped({
+    void testTimeWindowLocationThresholdGrouped({
       downThreshold: 5,
       ruleName: 'Status based on checks in a time window',
       testSuiteName: 'TimeWindow - Location threshold = 1 - grouped by location - 1 down location',
@@ -978,7 +978,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     // Replace the second test suite
-    testTimeWindowLocationThresholdGrouped({
+    void testTimeWindowLocationThresholdGrouped({
       downThreshold: 1,
       recoveryMode: 'firstUp',
       ruleName: 'Status based on checks in a time window - firstUp recovery mode',
