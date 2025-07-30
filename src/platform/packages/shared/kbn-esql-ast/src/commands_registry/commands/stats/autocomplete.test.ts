@@ -389,7 +389,7 @@ describe('STATS Autocomplete', () => {
           ],
           mockCallbacks,
           mockContext,
-          25
+          36
         );
       });
 
@@ -536,7 +536,19 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on space after grouping field', async () => {
-        await statsExpectSuggestions('from a | stats a=c by d ', [', ', '| ']);
+        await statsExpectSuggestions('from a | stats a=c by keywordField ', [
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS_BY,
+            'any',
+            {
+              operators: true,
+              skipAssign: true,
+            },
+            ['keyword']
+          ),
+        ]);
       });
 
       test('after comma "," in grouping fields', async () => {
@@ -609,15 +621,39 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on space after expression right hand side operand', async () => {
-        await statsExpectSuggestions('from a | stats avg(b) by doubleField % 2 ', [', ', '| ']);
+        await statsExpectSuggestions('from a | stats avg(b) by doubleField % 2 ', [
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS_BY,
+            'any',
+            {
+              operators: true,
+              skipAssign: true,
+            },
+            ['double']
+          ),
+        ]);
 
         await statsExpectSuggestions(
           'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) ',
-          [', ', '| ']
+          [
+            ', ',
+            '| ',
+            ...getFunctionSignaturesByReturnType(
+              Location.STATS_BY,
+              'any',
+              {
+                operators: true,
+                skipAssign: true,
+              },
+              ['date']
+            ),
+          ]
         );
       });
 
-      test('on space within bucket()', async () => {
+      test('within bucket()', async () => {
         const expectedFields = getFieldNamesByType([
           'date',
           'date_nanos',
@@ -627,7 +663,7 @@ describe('STATS Autocomplete', () => {
           expectedFields.map((name) => ({ label: name, text: name }))
         );
         await statsExpectSuggestions(
-          'from a | stats avg(b) by BUCKET(, 50, ?_tstart, ?_tend)',
+          'FROM a | STATS COUNT() BY BUCKET(, 50, ?_tstart, ?_tend)',
           [
             // Note there's no space or comma in the suggested field names
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
@@ -641,10 +677,10 @@ describe('STATS Autocomplete', () => {
           ],
           mockCallbacks,
           mockContext,
-          32
+          33
         );
         await statsExpectSuggestions(
-          'from a | stats avg(b) by BUCKET( , 50, ?_tstart, ?_tend)',
+          'FROM a | STATS COUNT() BY BUCKET( , 50, ?_tstart, ?_tend)',
           [
             // Note there's no space or comma in the suggested field names
             ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
@@ -658,7 +694,7 @@ describe('STATS Autocomplete', () => {
           ],
           mockCallbacks,
           mockContext,
-          32
+          33
         );
         const expectedFields1 = getFieldNamesByType([
           'integer',
@@ -683,7 +719,7 @@ describe('STATS Autocomplete', () => {
           ],
           mockCallbacks,
           mockContext,
-          43
+          43 // at the second argument of the bucket function
         );
       });
 
