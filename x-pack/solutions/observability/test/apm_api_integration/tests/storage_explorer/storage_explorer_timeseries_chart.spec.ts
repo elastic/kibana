@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Storage Explorer timeseries chart when data is not loaded',
+    'Storage explorer timeseries chart when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177539
-  registry.when('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
+  registry.when('Storage explorer timeseries chart', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       let body: StorageTimeSeries;
       let status: number;
