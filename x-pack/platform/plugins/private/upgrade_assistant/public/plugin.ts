@@ -53,11 +53,8 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const a = await coreSetup.getStartServices();
-          console.log('upgrade assistant setup', a);
-          const [coreStart, { data, reindexService }] = a;
+          const [coreStart, { data, reindexService }] = await coreSetup.getStartServices();
 
-          console.log('upgrade assistant mount', reindexService);
           const {
             chrome: { docTitle },
           } = coreStart;
