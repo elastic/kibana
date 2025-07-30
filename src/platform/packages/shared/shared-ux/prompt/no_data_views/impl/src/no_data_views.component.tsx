@@ -41,7 +41,7 @@ const PromptAddDataViews = ({
 >) => {
   const icon = <DataViewIllustration />;
 
-  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.createDataView', {
+  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.createDataViewText', {
     defaultMessage: 'Create a data view',
   });
 
@@ -79,9 +79,12 @@ const PromptAddDataViews = ({
         ) : (
           <EuiToolTip
             position="right"
-            content={i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewTooltip', {
-              defaultMessage: `You don't have permission to create data views. Ask your administrator for the required permissions.`,
-            })}
+            content={i18n.translate(
+              'sharedUXPackages.noDataViewsPrompt.addDataViewTooltipNoPrivilege',
+              {
+                defaultMessage: `You don't have permission to create data views. Ask your administrator for the required permissions.`,
+              }
+            )}
           >
             <EuiButton disabled data-test-subj="createDataViewButton">
               {i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewButtonLabel', {
@@ -111,13 +114,13 @@ const PromptTryEsql = ({
 
   const icon = <EsqlIllustration />;
 
-  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.tryEsql', {
+  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.esqlPanel.title', {
     defaultMessage: 'Query your data with ES|QL',
   });
 
   const cardDescription = i18n.translate('sharedUXPackages.noDataViewsPrompt.esqlExplanation', {
     defaultMessage:
-      'ES|QL is a next-generation piped query language and compute engine developed by Elastic for filtering, ',
+      'ES|QL is a next-generation piped query language and compute engine developed by Elastic for filtering, transforming, and analyzing data. ES|QL helps streamline your workflows for fast, efficient data processing.',
   });
 
   return (
@@ -175,7 +178,7 @@ export const NoDataViewsPrompt = ({
         <EuiTitle size="l">
           <EuiTextAlign textAlign="center">
             <h2>
-              {i18n.translate('sharedUXPackages.noDataViewsPrompt.title', {
+              {i18n.translate('sharedUXPackages.noDataViewsPrompt.youHaveData', {
                 defaultMessage: 'How do you want to explore your data?',
               })}
             </h2>

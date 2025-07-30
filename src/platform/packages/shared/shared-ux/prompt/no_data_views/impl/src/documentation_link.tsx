@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { EuiLink, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -23,16 +22,15 @@ export function DocumentationLink({ href, ['data-test-subj']: dataTestSubj }: Pr
     <dl>
       <EuiTitle size="xxs">
         <dt className="eui-displayInline">
-          <FormattedMessage
-            id="sharedUXPackages.noDataViewsPrompt.learnMore"
-            defaultMessage="Want to learn more?"
-          />
+          {i18n.translate('sharedUXPackages.prompt.noData.readDocsTitle', {
+            defaultMessage: 'Read the documentation',
+          })}
         </dt>
       </EuiTitle>
       &emsp;
       <dd className="eui-displayInline">
         <EuiLink href={docsLink} target="_blank" data-test-subj={dataTestSubj} external>
-          {i18n.translate('sharedUXPackages.prompt.noData.readDocs', {
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.readDocumentation', {
             defaultMessage: 'Read the docs',
           })}
         </EuiLink>
