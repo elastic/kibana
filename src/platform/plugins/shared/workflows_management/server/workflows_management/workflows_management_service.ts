@@ -474,7 +474,9 @@ export class WorkflowsService {
         total: typeof response.hits.total === 'number' 
           ? response.hits.total 
           : response.hits.total?.value || 0,
-        logs: response.hits.hits.map((hit: any) => hit._source),
+        logs: response.hits.hits
+          .map((hit: any) => hit._source)
+          .filter((source: any) => source && source['@timestamp']), // Filter out invalid entries
       };
     } catch (error) {
       this.logger.error('Failed to search workflow logs', error);
