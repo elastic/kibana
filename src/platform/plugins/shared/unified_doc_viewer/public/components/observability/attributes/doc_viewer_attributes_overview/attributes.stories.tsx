@@ -35,22 +35,16 @@ export const RedisSpan: Story = {
   play: async ({ canvas, userEvent, step }) => {
     const searchInput = canvas.getByPlaceholderText('Search attributes names or values');
     await step('Check initial visibility', async () => {
-      await expect(canvas.getByText('server.port'), "'server.port' is visible").toBeInTheDocument();
-      await expect(
-        canvas.getByText('server.address'),
-        "'server.address' is visible"
-      ).toBeInTheDocument();
+      await expect(canvas.getByText('server.port')).toBeInTheDocument();
+      await expect(canvas.getByText('server.address')).toBeInTheDocument();
     });
     await step('Enter "port" in the search box', async () => {
       await userEvent.clear(searchInput);
       await userEvent.type(searchInput, 'port');
     });
     await step('Check visibility after search', async () => {
-      await expect(canvas.getByText('server.port'), "'server.port' is visible").toBeInTheDocument();
-      await expect(
-        canvas.queryByText('server.address'),
-        "'server.address' is not visible"
-      ).not.toBeInTheDocument();
+      await expect(canvas.getByText('server.port')).toBeInTheDocument();
+      await expect(canvas.queryByText('server.address')).not.toBeInTheDocument();
     });
     await step('Clear the search input', async () => {
       await userEvent.clear(searchInput);
