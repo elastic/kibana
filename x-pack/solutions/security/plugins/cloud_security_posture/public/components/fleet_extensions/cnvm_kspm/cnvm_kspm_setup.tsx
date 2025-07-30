@@ -193,7 +193,7 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
                   }}
                   data-test-subj="namespaceInput"
                   labelId="xpack.csp.fleetIntegration.namespaceLabel"
-                  helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                  helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
                 />
               </EuiAccordion>
             </>
