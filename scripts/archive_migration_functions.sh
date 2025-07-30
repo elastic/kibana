@@ -39,12 +39,26 @@ list_stragglers() {
   echo
 
   echo "### X-PACK"
+  # Search in x-pack/platform/test/fixtures/es_archives
   while read -r y; do
     local b=$(grep -l '"index": ".kibana' "$y")
     if [ -n "$b" ]; then
       echo "${b%/mappings.json}"
     fi
-  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+  done <<<"$(find x-pack/platform/test/fixtures/es_archives -name mappings.json)"
+
+  # Also search in x-pack/solutions/{solution}/test/fixtures/es_archives for each solution
+  for solution in search security chat observability; do
+    solution_dir="x-pack/solutions/${solution}/test/fixtures/es_archives"
+    if [ -d "$solution_dir" ]; then
+      while read -r y; do
+        local b=$(grep -l '"index": ".kibana' "$y")
+        if [ -n "$b" ]; then
+          echo "${b%/mappings.json}"
+        fi
+      done <<<"$(find "$solution_dir" -name mappings.json)"
+    fi
+  done
 
 }
 
