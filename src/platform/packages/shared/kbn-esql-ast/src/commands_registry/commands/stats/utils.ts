@@ -81,7 +81,7 @@ export const getPosition = (command: ESQLCommand, innerText: string): CaretPosit
     return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg)) {
+  if (isAssignment(lastCommandArg) && !/,\s*$/.test(innerText)) {
     return 'expression_after_assignment';
   }
 
