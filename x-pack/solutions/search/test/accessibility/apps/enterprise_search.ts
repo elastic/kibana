@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const kibanaServer = getService('kibanaServer');
 
-  // constantly failing in 9.1 after SKA tests relocation
+  // test constantly fails in 9.1 after SKA tests relocation
   describe.skip('Enterprise Search Accessibility', () => {
     // NOTE: These accessibility tests currently only run against Enterprise Search in Kibana
     // without a sidecar Enterprise Search service/host configured, and as such only test
