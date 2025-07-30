@@ -10,8 +10,6 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type { WorkflowsManagementConfig } from './config';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
