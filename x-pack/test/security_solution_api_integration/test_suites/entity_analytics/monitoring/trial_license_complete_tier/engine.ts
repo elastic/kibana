@@ -185,4 +185,3 @@ export default ({ getService }: FtrProviderContext) => {
     });
   });
 };
-
