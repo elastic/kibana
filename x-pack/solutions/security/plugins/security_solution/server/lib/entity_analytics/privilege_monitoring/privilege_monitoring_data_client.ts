@@ -78,7 +78,7 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-import type { MonitoringSyncIntervalConfig, BulkProcessingResults } from '../types';
+import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
 
 interface PrivilegeMonitoringClientOpts {
@@ -202,7 +202,7 @@ export class PrivilegeMonitoringDataClient {
         },
       });
     }
-
+    console.log(`DESCRIPTOR`, descriptor);
     return descriptor;
   }
 
@@ -469,8 +469,8 @@ export class PrivilegeMonitoringDataClient {
       action === PrivilegeMonitoringEngineActions.CREATE
         ? AUDIT_TYPE.CREATION
         : PrivilegeMonitoringEngineActions.DELETE
-        ? AUDIT_TYPE.DELETION
-        : AUDIT_TYPE.CHANGE;
+          ? AUDIT_TYPE.DELETION
+          : AUDIT_TYPE.CHANGE;
 
     const category = AUDIT_CATEGORY.DATABASE;
 
