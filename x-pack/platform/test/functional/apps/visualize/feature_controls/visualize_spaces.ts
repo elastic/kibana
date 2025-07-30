@@ -20,8 +20,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visualize spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/visualize/default');
     });
 
     describe('space with no features disabled', () => {
@@ -53,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Visualize Library');
+        expect(navLinks).to.contain('Visualize library');
       });
 
       it(`can view existing Visualization`, async () => {
@@ -97,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Visualize Library');
+        expect(navLinks).not.to.contain('Visualize library');
       });
 
       it(`create new visualization shows 404`, async () => {
