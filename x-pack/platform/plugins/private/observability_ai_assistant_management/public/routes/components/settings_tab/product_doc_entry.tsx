@@ -18,11 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useGetProductDoc, ProductDocStatus } from '../../../hooks/use_get_product_doc';
+import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
-const statusToButtonTextMap: Record<Exclude<ProductDocStatus, 'error'> | 'loading', string> = {
+const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
   installing: i18n.translate(
     'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
     { defaultMessage: 'Installing...' }

@@ -20,8 +20,6 @@ import { useInstallProductDoc } from './use_install_product_doc';
  * @param inferenceId - The ID of the inference for which to get the product documentation status.
  * @returns An object containing the status of the product documentation, loading state, and methods to install and uninstall the product documentation.
  */
-export type ProductDocStatus = InstallationStatus | 'uninstalling';
-
 export function useGetProductDoc(inferenceId: string | undefined) {
   const { productDocBase } = useKibana().services;
 
@@ -43,7 +41,21 @@ export function useGetProductDoc(inferenceId: string | undefined) {
     refetch();
   }, [inferenceId, isInstalling, isUninstalling, refetch]);
 
-  const status: ProductDocStatus | undefined = useMemo(() => {
+  // poll the status if when is installing or uninstalling
+  useEffect(() => {
+    if (!(data?.overall === 'installing' || data?.overall === 'uninstalling')) {
+      return;
+    }
+
+    const interval = setInterval(refetch, 5000);
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refetch, data?.overall]);
+
+  const status: InstallationStatus | undefined = useMemo(() => {
     if (!inferenceId || data?.inferenceId !== inferenceId) {
       return undefined;
     }
