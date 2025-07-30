@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'line':
         return 'Zeile';
       case 'pie':
-        return 'Kreisdiagramm';
+        return 'Torte';
       case 'treemap':
         return 'Treemap';
       case 'heatmap':
@@ -167,14 +167,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'Linear':
         return 'Linear';
       case 'Records':
+        return 'Aufzeichnungen';
       case 'records':
         return 'Einträge';
       case 'moving_average':
-        return 'Bewegungsdurchschnitt';
+        return 'Gleitender Durchschnitt';
       case 'average':
         return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
       case 'max':
-        return field ? `${field} Maximum` : 'Maximum';
+        // return field ? `${field} Maximum` : 'Maximum';
+        return field ? `Maximal ${field}` : 'Maximum';
       case 'terms':
         return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
       case 'sum':
@@ -647,6 +649,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'cumulative_sum',
         keepOpen: true,
       });
+
       await lens.configureReference({
         field: termTranslator('Records'),
       });
