@@ -147,6 +147,16 @@ export const internalStateSlice = createSlice({
         tab.lastPersistedGlobalState = action.payload.globalState || {};
       }),
 
+    setTabGlobalState: (
+      state,
+      action: TabAction<{
+        globalState: TabState['lastPersistedGlobalState'];
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.lastPersistedGlobalState = action.payload.globalState;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<{
