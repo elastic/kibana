@@ -1051,6 +1051,79 @@ describe('createConcreteWriteIndex', () => {
         );
         expect(clusterClient.indices.updateAliases).toHaveBeenCalled();
       });
+
+      it('should roll over if updating write index mapping fails', async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockResolvedValue({
+          acknowledged: true,
+        });
+        clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
+
+        await expect(
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).resolves.toBe(undefined);
+
+        if (useDataStream) {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for data stream: .alerts-test.alerts-default, updating write index (.alerts-test-index) mappings instead'
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of data stream: .alerts-test.alerts-default, rolling over instead'
+          );
+        } else {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
+          );
+        }
+        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
+      });
+
+      it('should throw if rolling over fails', async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockResolvedValue({
+          acknowledged: true,
+        });
+        clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
+        clusterClient.indices.rollover.mockRejectedValue(new Error('generic rollover error'));
+
+        await expect(
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic rollover error"`);
+
+        if (useDataStream) {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for data stream: .alerts-test.alerts-default, updating write index (.alerts-test-index) mappings instead'
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of data stream: .alerts-test.alerts-default, rolling over instead'
+          );
+        } else {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
+          );
+        }
+        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
+      });
     });
   }
 });

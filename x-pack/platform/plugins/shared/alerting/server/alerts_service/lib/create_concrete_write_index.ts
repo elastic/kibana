@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  IndicesSimulateIndexTemplateResponse,
-  MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
@@ -22,11 +19,12 @@ export interface ConcreteIndexInfo {
   isWriteIndex: boolean;
 }
 
-interface UpdateAliasIndexMappingsOpts {
+interface UpdateIndexMappingsAndSettingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   concreteIndices: ConcreteIndexInfo[];
+  simulatedMapping: MappingTypeMapping | undefined;
 }
 
 interface UpdateDataStreamIndexMappingsOpts {
@@ -80,34 +78,6 @@ const updateTotalFieldLimitSetting = async ({
     );
     throw err;
   }
-};
-
-const simulateIndexMapping = async ({
-  logger,
-  esClient,
-  index,
-}: {
-  logger: Logger;
-  esClient: ElasticsearchClient;
-  index: string;
-}): Promise<MappingTypeMapping | undefined> => {
-  let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
-  try {
-    simulatedIndexMapping = await retryTransientEsErrors(
-      () => esClient.indices.simulateIndexTemplate({ name: index }),
-      { logger }
-    );
-  } catch (err) {
-    logger.error(
-      `Ignored PUT mappings for ${index}; error generating simulated mappings: ${err.message}`
-    );
-    return;
-  }
-  const mapping = get(simulatedIndexMapping, ['template', 'mappings']);
-  if (mapping == null) {
-    logger.error(`Ignored PUT mappings for ${index}; simulated mappings were empty`);
-  }
-  return mapping;
 };
 
 // This will update the mappings of backing indices but *not* the settings. This
@@ -171,15 +141,22 @@ const updateUnderlyingMapping = async ({
 /**
  * Updates the underlying mapping for any existing concrete indices
  */
-export const updateAliasIndexMappings = async ({
+export const updateIndexMappingsAndSettings = async ({
   logger,
   esClient,
   totalFieldsLimit,
   concreteIndices,
-}: UpdateAliasIndexMappingsOpts) => {
+  simulatedMapping,
+}: UpdateIndexMappingsAndSettingsOpts) => {
   logger.debug(
     `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
   );
+
+  if (simulatedMapping == null) {
+    throw new Error(
+      'Failed to update index mappings and settings: simulated index mapping not found'
+    );
+  }
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
@@ -188,15 +165,7 @@ export const updateAliasIndexMappings = async ({
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
-  const simulatedMapping = await simulateIndexMapping({
-    logger,
-    esClient,
-    index: concreteIndices[0].index,
-  });
 
-  if (simulatedMapping == null) {
-    return;
-  }
   // Update mappings of the found indices.
   await Promise.all(
     concreteIndices.map((index) =>
@@ -209,44 +178,6 @@ export const updateAliasIndexMappings = async ({
       })
     )
   );
-};
-
-/**
- * Updates the underlying mapping for any existing concrete indices
- */
-export const updateDataStreamIndexMappings = async ({
-  logger,
-  esClient,
-  totalFieldsLimit,
-  concreteIndexInfo,
-}: UpdateDataStreamIndexMappingsOpts) => {
-  logger.debug(`Updating underlying mappings for data stream: ${concreteIndexInfo.alias}`);
-
-  // Update total field limit setting of found indices
-  // Other index setting changes are not updated at this time
-  await updateTotalFieldLimitSetting({
-    logger,
-    esClient,
-    totalFieldsLimit,
-    concreteIndexInfo,
-  });
-  const simulatedMapping = await simulateIndexMapping({
-    logger,
-    esClient,
-    index: concreteIndexInfo.alias,
-  });
-
-  if (simulatedMapping == null) {
-    return;
-  }
-
-  await updateUnderlyingMapping({
-    logger,
-    esClient,
-    totalFieldsLimit,
-    concreteIndexInfo,
-    simulatedMapping,
-  });
 };
 
 export interface CreateConcreteWriteIndexOpts {
