@@ -9,18 +9,18 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 import {
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_CHAINING,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-} from '../../common';
+} from '@kbn/controls-constants';
+import { ControlGroupSavedObjectState, SerializableControlGroupState } from './types';
 
 export const getDefaultControlGroupState = (): SerializableControlGroupState => ({
   panels: {},
-  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-  chainingSystem: DEFAULT_CONTROL_CHAINING,
+  labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
+  chainingSystem: DEFAULT_CONTROLS_CHAINING,
   autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
   ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 });
