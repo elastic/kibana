@@ -10,10 +10,9 @@ import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
 
+import type { InstrumentaionsMap } from '@elastic/opentelemetry-node/types/instrumentations';
+import { resources, getInstrumentations } from '@elastic/opentelemetry-node/sdk';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getInstrumentations } from '@elastic/opentelemetry-node/sdk';
-
-import { api, resources } from '@elastic/opentelemetry-node/sdk';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 
@@ -48,42 +47,35 @@ export const initTelemetry = (
   });
 
   if (telemetryConfig.enabled) {
+    const desiredInstrumentations = new Set<keyof InstrumentaionsMap>();
+
     if (telemetryConfig.tracing.enabled) {
       initTracing({ resource, tracingConfig: telemetryConfig.tracing });
     }
 
     if (telemetryConfig.metrics.enabled) {
       initMetrics({ resource, metricsConfig: telemetryConfig.metrics });
+
+      // Provides metrics about the Event Loop, GC Collector, and Heap stats.
+      desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');
+      // HTTP Server and Client durations
+      desiredInstrumentations.add('@opentelemetry/instrumentation-http');
+      // Undici client's request duration
+      desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
+      // OpenAI operation duration and number of tokens used
+      desiredInstrumentations.add('@elastic/opentelemetry-instrumentation-openai');
     }
 
-    if (telemetryConfig.metrics.enabled || telemetryConfig.tracing.enabled) {
-      // register EDOT auto-instrumentations (node-runtime, http, hapi, and more)
+    if (desiredInstrumentations.size > 0) {
+      // register opted-in EDOT auto-instrumentations (node-runtime, http, hapi, and more)
       // https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/nodejs/supported-technologies#instrumentations
-      // Only register them if any of the metrics or tracing are enabled. Otherwise, there's no point in adding them (at least for now).
-      registerInstrumentations({
-        instrumentations: getInstrumentations(),
-      });
+
+      // We want to be selective for now to avoid potential conflicts with the Elastic APM agent (hapi is a good example)
+      const instrumentations = getInstrumentations().filter((instrumentation) =>
+        desiredInstrumentations.has(instrumentation.instrumentationName as keyof InstrumentaionsMap)
+      );
+
+      registerInstrumentations({ instrumentations });
     }
   }
-
-  /** Testing bits below... to be removed before sending for review */
-
-  // scope.name
-  const meter = api.metrics.getMeter('my plugin');
-
-  // metrics.my-own-counter: value
-  const counter = meter.createCounter('my-own-counter');
-
-  // metrics.my-own-counter: 1; attributes.myTag: myValue
-  counter.add(1, { myTag: 'myValue' });
-
-  // const log = console;
-  //
-  // api.diag.setLogger(
-  //   {
-  //     ...log,
-  //     verbose: (...args: any[]) => log.trace(...args),
-  //   },
-  //   api.DiagLogLevel.INFO
-  // );
 };
