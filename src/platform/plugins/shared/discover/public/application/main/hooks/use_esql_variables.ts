@@ -8,6 +8,7 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
@@ -17,7 +18,6 @@ import {
   useInternalStateDispatch,
 } from '../state_management/redux';
 import { CONTROLS_STORAGE_KEY } from '../../../../common/constants';
-import type { DiscoverServices } from '../../../build_services';
 
 /**
  * @param panels - The control panels state, which may be null.
@@ -64,30 +64,33 @@ const getEsqlVariablesFromState = (
  * and a function to retrieve control creation options.
  */
 
+interface ESQLControlSessionStorage {
+  [key: string]: ControlPanelsState<ESQLControlState>;
+}
+
 export const useESQLVariables = ({
   isEsqlMode,
   controlGroupAPI,
   currentEsqlVariables,
   stateContainer,
-  storage,
   onTextLangQueryChange,
 }: {
   isEsqlMode: boolean;
   controlGroupAPI?: ControlGroupRendererApi;
   currentEsqlVariables?: ESQLControlVariable[];
   stateContainer: DiscoverStateContainer;
-  storage: DiscoverServices['storage'];
   onTextLangQueryChange: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   onCancelControl: () => void;
-  getControlCreationOptions: (initialState: {
-    initialChildControlState?: ControlPanelsState;
-  }) => Promise<{ initialState: ControlPanelsState }>;
+  activePanels?: ControlPanelsState<ESQLControlState>;
 } => {
   const dispatch = useInternalStateDispatch();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
 
+  const [controlsState, setControlsState] = useSessionStorage<
+    ESQLControlSessionStorage | undefined
+  >(CONTROLS_STORAGE_KEY);
   // Effect to subscribe to control group input changes
   useEffect(() => {
     // Only proceed if in ESQL mode and controlGroupAPI is available
@@ -101,9 +104,19 @@ export const useESQLVariables = ({
 
         // Persist control state to storage or remove if empty
         if (Object.keys(esqlControlState).length === 0) {
-          storage.remove(`${CONTROLS_STORAGE_KEY}:${currentTabId}`);
+          if (controlsState?.[currentTabId]) {
+            const updatedControlsState = { ...controlsState };
+            delete updatedControlsState[currentTabId];
+            setControlsState(updatedControlsState);
+          }
         } else {
-          storage.set(`${CONTROLS_STORAGE_KEY}:${currentTabId}`, esqlControlState);
+          if (!controlsState || !isEqual(controlsState[currentTabId], esqlControlState)) {
+            const updatedControlsState = {
+              ...controlsState,
+              [currentTabId]: esqlControlState,
+            };
+            setControlsState(updatedControlsState);
+          }
         }
 
         const newVariables = getEsqlVariablesFromState(esqlControlState);
@@ -120,10 +133,11 @@ export const useESQLVariables = ({
   }, [
     controlGroupAPI,
     currentEsqlVariables,
+    controlsState,
+    setControlsState,
     dispatch,
     isEsqlMode,
     stateContainer,
-    storage,
     currentTabId,
   ]);
 
@@ -155,20 +169,9 @@ export const useESQLVariables = ({
   // Callback for canceling control changes (currently a no-op, but kept for API consistency)
   const onCancelControl = useCallback(() => {}, []); // No dependencies as it does nothing for now
 
-  // Callback to provide initial options for control creation
-  const getControlCreationOptions = useCallback(
-    async (initialState: { initialChildControlState?: ControlPanelsState }) => {
-      const activePanels = storage.get(`${CONTROLS_STORAGE_KEY}:${currentTabId}`);
-
-      return {
-        initialState: {
-          ...initialState,
-          initialChildControlState: activePanels ?? initialState.initialChildControlState,
-        },
-      };
-    },
-    [storage, currentTabId]
-  );
-
-  return { onSaveControl, onCancelControl, getControlCreationOptions };
+  return {
+    onSaveControl,
+    onCancelControl,
+    activePanels: controlsState ? controlsState[currentTabId] : undefined,
+  };
 };

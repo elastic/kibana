@@ -85,12 +85,11 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   // ES|QL variables management
-  const { onSaveControl, onCancelControl, getControlCreationOptions } = useESQLVariables({
+  const { onSaveControl, onCancelControl, activePanels } = useESQLVariables({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupAPI,
-    storage: services.storage,
     onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
   });
 
@@ -310,25 +309,15 @@ export const DiscoverTopNav = ({
             <ControlGroupRenderer
               onApiAvailable={setControlGroupAPI}
               timeRange={timeRange}
-              getCreationOptions={async (initialState, builder) => {
-                // const panels = services.storage.get(`${CONTROLS_STORAGE_KEY}:${activeTabId}`);
-                // console.log(panels);
-                // const activeControlIds = stateContainer.appState.getState().esqlControlsIds;
-
-                // const activeControls = activeControlIds
-                //   ? Object.fromEntries(
-                //       activeControlIds.map((id) => [id, panels?.[id] ?? undefined])
-                //     )
-                //   : undefined;
-
-                // return {
-                //   initialState: {
-                //     ...initialState,
-                //     initialChildControlState:
-                //       activeControls ?? initialState.initialChildControlState,
-                //   },
-                // };
-                return await getControlCreationOptions(initialState);
+              getCreationOptions={async (initialState) => {
+                const initialChildControlState =
+                  activePanels ?? initialState.initialChildControlState ?? {};
+                return {
+                  initialState: {
+                    ...initialState,
+                    initialChildControlState,
+                  },
+                };
               }}
               viewMode="edit"
             />
