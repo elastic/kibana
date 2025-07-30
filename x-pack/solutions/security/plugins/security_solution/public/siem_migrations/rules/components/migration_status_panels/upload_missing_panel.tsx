@@ -22,9 +22,9 @@ import type { RuleMigrationResourceBase } from '../../../../../common/siem_migra
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import * as i18n from './translations';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import type { RuleMigrationStats } from '../../types';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 
 interface RuleMigrationsUploadMissingPanelProps {
   migrationStats: RuleMigrationStats;
@@ -63,7 +63,7 @@ const RuleMigrationsUploadMissingPanelContent =
     ({ migrationStats, topSpacerSize, missingResources }) => {
       const { euiTheme } = useEuiTheme();
       const { telemetry } = useKibana().services.siemMigrations.rules;
-      const { openFlyout } = useRuleMigrationDataInputContext();
+      const { openFlyout } = useMigrationDataInputContext();
 
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);

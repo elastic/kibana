@@ -11,8 +11,8 @@ import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../co
 import { GetRuleMigrationTranslationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
+import { authz } from '../../common/utils/authz';
+import { withLicense } from '../../common/utils/with_license';
 import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsTranslationStatsRoute = (

@@ -8,7 +8,7 @@
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { reducer, initialState } from './common/api_request_reducer';
+import { initialState, asyncReducer } from '../../../common/utils/api_request_reducer';
 
 export const RULES_DATA_INPUT_STOP_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.stopMigrationSuccess',
@@ -24,7 +24,7 @@ export type OnSuccess = () => void;
 
 export const useStopMigration = (onSuccess?: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(asyncReducer, initialState);
 
   const stopMigration = useCallback<StopMigration>(
     (migrationId) => {

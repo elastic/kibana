@@ -17,10 +17,10 @@ import {
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
-import { SiemMigrationAuditLogger } from '../util/audit';
-import { authz } from '../util/authz';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/utils/authz';
 import { processLookups } from '../util/lookups';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/utils/with_license';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,

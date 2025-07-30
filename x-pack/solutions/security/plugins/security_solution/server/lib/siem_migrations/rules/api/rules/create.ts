@@ -16,10 +16,10 @@ import {
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { AddRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger } from '../util/audit';
-import { authz } from '../util/authz';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/utils/authz';
 import { withExistingMigration } from '../util/with_existing_migration_id';
-import { withLicense } from '../util/with_license';
+import { withLicense } from '../../../common/utils/with_license';
 
 export const registerSiemRuleMigrationsCreateRulesRoute = (
   router: SecuritySolutionPluginRouter,

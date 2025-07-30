@@ -11,7 +11,7 @@ import type { RuleMigrationTaskStats } from '../../../../../../../../../common/s
 import type { OnMigrationCreated } from '../../../../types';
 import { RulesFileUpload } from './rules_file_upload';
 import {
-  useCreateMigration,
+  useCreateRuleMigration,
   type OnSuccess,
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
@@ -38,7 +38,11 @@ export const useRulesFileUploadStep = ({
     },
     [onMigrationCreated]
   );
-  const { createMigration, isLoading, error } = useCreateMigration(onSuccess);
+  const {
+    createRuleMigration: createMigration,
+    isLoading,
+    error,
+  } = useCreateRuleMigration(onSuccess);
 
   const uploadStepStatus = useMemo(() => {
     if (isLoading) {

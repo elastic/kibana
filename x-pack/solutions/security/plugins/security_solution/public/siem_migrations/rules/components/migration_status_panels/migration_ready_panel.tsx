@@ -20,19 +20,19 @@ import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { RuleMigrationsLastError } from './last_error';
 import { MigrationPanelTitle } from './migration_panel_title';
 import { PanelText } from '../../../../common/components/panel_text';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const { openFlyout } = useRuleMigrationDataInputContext();
+  const { openFlyout } = useMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceBase[]>([]);
   const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
