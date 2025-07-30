@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { TaskDefinition, TaskPriority } from '../task';
-import { setupTestServers } from './lib';
+import { setupTestServers, retry } from './lib';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
