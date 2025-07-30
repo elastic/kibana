@@ -951,7 +951,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
+      describe('migrate pre-8.0 action connector ids', () => {
         const defaultSpaceActionConnectorId = '61b17790-544e-11ec-a349-11361cc441c4';
         const space714ActionConnectorId = '51b17790-544e-11ec-a349-11361cc441c4';
 
