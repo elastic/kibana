@@ -29,6 +29,8 @@ export const TASK_METRICS_CHANNEL = 'task-metrics';
 
 export const DEFAULT_DIAGNOSTIC_INDEX = '.logs-endpoint.diagnostic.collection-*' as const;
 
+export const DETECTION_RULE_TYPE_ESQL = 'esql';
+
 export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {
     advanced: {

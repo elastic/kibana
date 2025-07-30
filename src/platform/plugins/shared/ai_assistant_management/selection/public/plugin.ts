@@ -82,12 +82,16 @@ export class AIAssistantManagementPlugin
       order: 1,
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
+        const securityAIAssistantEnabled = !!management?.sections.section.kibana
+          .getAppsEnabled()
+          .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
 
         return mountManagementSection({
           core,
           mountParams,
           kibanaBranch: this.kibanaBranch,
           buildFlavor: this.buildFlavor,
+          securityAIAssistantEnabled,
         });
       },
     });
