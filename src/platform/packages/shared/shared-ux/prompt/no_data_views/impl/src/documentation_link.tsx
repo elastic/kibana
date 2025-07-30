@@ -22,8 +22,8 @@ export function DocumentationLink({ href, ['data-test-subj']: dataTestSubj }: Pr
     <dl>
       <EuiTitle size="xxs">
         <dt className="eui-displayInline">
-          {i18n.translate('sharedUXPackages.prompt.noData.readDocsTitle', {
-            defaultMessage: 'Read the documentation',
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.learnMore', {
+            defaultMessage: 'Want to learn more?',
           })}
         </dt>
       </EuiTitle>
