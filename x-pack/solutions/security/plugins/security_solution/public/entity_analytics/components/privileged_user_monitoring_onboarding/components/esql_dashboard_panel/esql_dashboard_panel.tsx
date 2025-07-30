@@ -48,7 +48,10 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
 }: {
   title: ReactNode;
   stackByField: string;
-  generateVisualizationQuery: (stackByValue: string, timerange: { from: string; to: string }) => string;
+  generateVisualizationQuery: (
+    stackByValue: string,
+    timerange: { from: string; to: string }
+  ) => string;
   generateTableQuery: (
     sortField: keyof TableItemType,
     sortDirection: 'asc' | 'desc',
