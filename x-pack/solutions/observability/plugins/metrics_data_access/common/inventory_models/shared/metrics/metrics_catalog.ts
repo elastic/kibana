@@ -6,6 +6,7 @@
  */
 
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import { DataSchemaFormat } from './types';
 import type {
   AggregationConfig,
   BaseMetricsCatalog,
@@ -13,7 +14,6 @@ import type {
   MetricConfigEntry,
   MetricConfigMap,
   ResolvedMetricMap,
-  SchemaTypes,
   SchemaWrappedEntry,
 } from './types';
 
@@ -21,10 +21,31 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
   implements BaseMetricsCatalog<TConfig>
 {
   private readonly catalog: ResolvedMetricMap<TConfig>;
+  private readonly includeLegacyMetrics: boolean;
+  private readonly legacyMetrics: Set<keyof TConfig>;
+  private readonly _schema: DataSchemaFormat;
 
-  constructor(configCatalog: TConfig, private readonly schema: SchemaTypes = 'ecs') {
+  constructor(
+    configCatalog: TConfig,
+    schema: DataSchemaFormat = DataSchemaFormat.ECS,
+    options?: {
+      includeLegacyMetrics?: boolean;
+      legacyMetrics?: Array<keyof TConfig>;
+    }
+  ) {
+    this._schema = schema;
+    const { includeLegacyMetrics = true, legacyMetrics = [] } = options ?? {};
+
+    this.includeLegacyMetrics = includeLegacyMetrics;
+    this.legacyMetrics = new Set(legacyMetrics);
+
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
+
+  public get schema(): DataSchemaFormat {
+    return this._schema;
+  }
+
   get<K extends keyof ResolvedMetricMap<TConfig>>(key: K): ResolvedMetricMap<TConfig>[K];
   get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined;
   get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined {
@@ -43,6 +64,10 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
     const catalog = Object.entries(configCatalog).reduce((acc, [key, config]) => {
       const typedKey = key as keyof TConfig;
 
+      if (!this.includeLegacyMetrics && this.legacyMetrics.has(typedKey)) {
+        return acc;
+      }
+
       if (this.isAggregationWithSchemaVariation(config)) {
         acc[typedKey] = config[this.schema] as any;
       } else if (this.isFormulaWithSchemaVariation(config)) {
@@ -50,7 +75,7 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
           ...config,
           value: config.value[this.schema],
         } as any;
-      } else if (this.schema === 'ecs') {
+      } else {
         acc[typedKey] = config as any;
       }
 

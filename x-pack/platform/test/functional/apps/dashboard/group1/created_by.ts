@@ -24,7 +24,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -83,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await securityService.user.delete(USERNAME_1);
       await securityService.user.delete(USERNAME_2);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
