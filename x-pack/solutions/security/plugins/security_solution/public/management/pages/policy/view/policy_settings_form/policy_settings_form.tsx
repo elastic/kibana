@@ -115,8 +115,6 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
           />
           <EuiSpacer size="l" />
 
-          {renderDeviceControlSection()}
-
           <RansomwareProtectionCard {...props} data-test-subj={getTestId('ransomware')} />
           <EuiSpacer size="l" />
 
@@ -128,6 +126,8 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
           <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
           <EuiSpacer size="l" />
+
+          {renderDeviceControlSection()}
         </>
       )}
 

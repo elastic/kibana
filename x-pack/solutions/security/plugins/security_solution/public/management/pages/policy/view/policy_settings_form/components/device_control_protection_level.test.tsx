@@ -60,7 +60,8 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
   it('should render expected options', () => {
     const { getByTestId } = render();
-
+    expect(getByTestId('test-execute_onlyRadio'));
+    expect(getByTestId('test-read_onlyRadio'));
     expect(getByTestId('test-auditRadio'));
     expect(getByTestId('test-blockRadio'));
   });

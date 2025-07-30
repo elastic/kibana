@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
-import type { EuiFlexItemProps } from '@elastic/eui';
 import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +35,20 @@ const BLOCK_LABEL = i18n.translate(
   }
 );
 
+const READ_ONLY_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.deviceControl.readOnly',
+  {
+    defaultMessage: 'Read Only',
+  }
+);
+
+const EXECUTE_ONLY_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.deviceControl.executeOnly',
+  {
+    defaultMessage: 'Execute',
+  }
+);
+
 export type DeviceControlProtectionLevelProps = PolicyFormComponentCommonProps & {
   osList: ImmutableArray<DeviceControlOSes>;
 };
@@ -49,19 +62,24 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
       Array<{
         id: DeviceControlAccessLevel;
         label: string;
-        flexGrow: EuiFlexItemProps['grow'];
       }>
     > = useMemo(() => {
       return [
         {
+          id: DeviceControlAccessLevelEnum.execute_only,
+          label: EXECUTE_ONLY_LABEL,
+        },
+        {
           id: DeviceControlAccessLevelEnum.audit,
           label: AUDIT_LABEL,
-          flexGrow: 1,
+        },
+        {
+          id: DeviceControlAccessLevelEnum.read_only,
+          label: READ_ONLY_LABEL,
         },
         {
           id: DeviceControlAccessLevelEnum.block,
           label: BLOCK_LABEL,
-          flexGrow: 5,
         },
       ];
     }, []);
@@ -106,11 +124,11 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
           />
         </SettingCardHeader>
         <EuiSpacer size="xs" />
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xl" wrap responsive={false}>
           {isEditMode ? (
-            radios.map(({ label, id, flexGrow }) => {
+            radios.map(({ label, id }) => {
               return (
-                <EuiFlexItem grow={flexGrow} key={id}>
+                <EuiFlexItem grow={false} key={id}>
                   <DeviceControlAccessRadio
                     policy={policy}
                     onChange={onChange}
