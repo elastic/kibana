@@ -18,8 +18,7 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/225982
-  describe.skip('find gaps', () => {
+  describe('find gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const searchStart = '2024-01-01T00:00:00.000Z';
     const searchEnd = '2024-01-31T00:00:00.000Z';

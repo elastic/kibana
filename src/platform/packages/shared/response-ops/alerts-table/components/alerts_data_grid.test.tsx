@@ -41,6 +41,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 jest.mock('../hooks/use_case_view_navigation');
 
 const cellActionOnClickMockedFn = jest.fn();
+const mockOnChangeVisibleColumns = jest.fn();
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 
@@ -432,6 +433,36 @@ describe('AlertsDataGrid', () => {
           `field-${columnToHide.id}-checkbox`
         );
         expect(columnCheckbox).toBeChecked();
+      });
+
+      it('should toggle column visibility on via column selector dropdown on a hidden column', async () => {
+        const columnToDisplay = mockColumns[0].id;
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
+            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+          />
+        );
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        fireEvent.click(columnSelectorBtn);
+
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToDisplay}`
+        );
+
+        fireEvent.click(columnVisibilityToggle);
+
+        expect(mockOnChangeVisibleColumns).toHaveBeenLastCalledWith([
+          'kibana.alert.rule.name',
+          'kibana.alert.reason',
+          'kibana.alert.status',
+          'kibana.alert.case_ids',
+        ]);
       });
     });
 

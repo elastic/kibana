@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiToolTip,
+  EuiContextMenuItem,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import { useSyntheticsSettingsContext } from '../../contexts';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
-import { CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS } from '../common/components/permissions';
+import {
+  CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS,
+  NoPermissionsTooltip,
+} from '../common/components/permissions';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
@@ -60,6 +72,54 @@ export const RunTestManually = () => {
         {RUN_TEST_LABEL}
       </EuiButton>
     </EuiToolTip>
+  );
+};
+
+export const RunTestManuallyContextItem = () => {
+  const dispatch = useDispatch();
+
+  const { monitor } = useSelectedMonitor();
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor?.config_id));
+
+  const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
+
+  const { canSave } = useSyntheticsSettingsContext();
+
+  const { space } = useKibanaSpace();
+
+  const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
+
+  return (
+    <NoPermissionsTooltip
+      content={content}
+      canEditSynthetics={canSave}
+      canUsePublicLocations={canUsePublicLocations}
+    >
+      <EuiContextMenuItem
+        data-test-subj="syntheticsRunTestManuallyButton"
+        color="success"
+        disabled={!canUsePublicLocations || !canSave}
+        onClick={() => {
+          if (monitor) {
+            const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
+            dispatch(
+              manualTestMonitorAction.get({
+                configId: monitor.config_id,
+                name: monitor.name,
+                ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+              })
+            );
+          }
+        }}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {testInProgress ? <EuiLoadingSpinner size="s" /> : <EuiIcon type="beaker" size="s" />}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiContextMenuItem>
+    </NoPermissionsTooltip>
   );
 };
 
