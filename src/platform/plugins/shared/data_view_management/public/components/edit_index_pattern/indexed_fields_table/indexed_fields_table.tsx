@@ -18,7 +18,6 @@ import { StartServices } from '../../../types';
 interface IndexedFieldsTableProps {
   fields: DataViewField[];
   indexPattern: DataView;
-  isMobile: boolean;
   fieldFilter?: string;
   indexedFieldTypeFilter: string[];
   schemaFieldTypeFilter: string[];
@@ -195,7 +194,6 @@ export class IndexedFieldsTable extends Component<
       <div>
         <Table
           indexPattern={indexPattern}
-          isMobile={this.props.isMobile}
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldNames) => this.props.helpers.deleteField(fieldNames)}

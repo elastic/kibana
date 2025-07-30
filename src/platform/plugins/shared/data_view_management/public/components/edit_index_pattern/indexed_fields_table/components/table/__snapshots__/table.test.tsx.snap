@@ -201,12 +201,6 @@ exports[`Table should render normally 1`] = `
             "onClick": [Function],
             "type": "icon",
           },
-        ],
-        "name": "",
-        "width": "40px",
-      },
-      Object {
-        "actions": Array [
           Object {
             "available": [Function],
             "data-test-subj": "deleteField",
@@ -217,8 +211,8 @@ exports[`Table should render normally 1`] = `
             "type": "icon",
           },
         ],
-        "name": "",
-        "width": "40px",
+        "name": "Actions",
+        "width": "80px",
       },
     ]
   }

@@ -24,7 +24,6 @@ import {
   FilterChecked,
   EuiToolTip,
   EuiButton,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
@@ -221,7 +220,6 @@ export const Tabs: React.FC<TabsProps> = ({
     dataViewMgmtService.state$,
     scriptedFieldLangsSelector
   );
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
@@ -538,7 +536,6 @@ export const Tabs: React.FC<TabsProps> = ({
                     fields={fields}
                     compositeRuntimeFields={compositeRuntimeFields}
                     indexPattern={indexPattern}
-                    isMobile={isMobile}
                     fieldFilter={fieldFilter}
                     fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                     indexedFieldTypeFilter={filteredIndexedFieldTypeFilter}
@@ -621,7 +618,6 @@ export const Tabs: React.FC<TabsProps> = ({
       getFilterSection,
       history,
       indexPattern,
-      isMobile,
       filteredIndexedFieldTypeFilter,
       filteredSchemaFieldTypeFilter,
       scriptedFieldLanguageFilter,

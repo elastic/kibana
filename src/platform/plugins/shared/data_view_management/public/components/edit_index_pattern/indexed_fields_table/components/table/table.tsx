@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import React, { PureComponent } from 'react';
 import { OverlayModalStart } from '@kbn/core/public';
 import { FieldDescription } from '@kbn/field-utils';
@@ -208,7 +207,6 @@ const conflictType = i18n.translate(
 
 interface IndexedFieldProps {
   indexPattern: DataView;
-  isMobile: boolean;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string[]) => void;
@@ -385,26 +383,6 @@ const getConflictBtn = (
   );
 };
 
-const getDeleteAction = (deleteField: (fieldName: string[]) => void) =>
-  ({
-    name: deleteLabel,
-    description: deleteDescription,
-    icon: 'trash',
-    onClick: (field: IndexedFieldItem) => {
-      const toDelete = [field.name];
-      // If the field is a runtime field with sub-fields, add them to the delete list.
-      if (field.spec?.runtimeField?.fields) {
-        const childFieldNames = Object.keys(field.spec.runtimeField.fields).map(
-          (key) => `${field.name}.${key}`
-        );
-        toDelete.push(...childFieldNames);
-      }
-      deleteField(toDelete);
-    },
-    type: 'icon',
-    'data-test-subj': 'deleteField',
-  } as const as Action<IndexedFieldItem>);
-
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 class TableClass extends PureComponent<
@@ -499,7 +477,7 @@ class TableClass extends PureComponent<
         render: (value: string) => this.renderBooleanTemplate(value, isExcludedAriaLabel),
       },
       {
-        name: '',
+        name: 'Actions',
         actions: [
           {
             name: editLabel,
@@ -511,21 +489,26 @@ class TableClass extends PureComponent<
             available: (field) => field.isUserEditable,
           },
           {
-            ...getDeleteAction(deleteField),
-            available: (field) => showDelete(field) && Boolean(this.props.isMobile),
+            name: deleteLabel,
+            description: deleteDescription,
+            icon: 'trash',
+            onClick: (field: IndexedFieldItem) => {
+              const toDelete = [field.name];
+              // If the field is a runtime field with sub-fields, add them to the delete list.
+              if (field.spec?.runtimeField?.fields) {
+                const childFieldNames = Object.keys(field.spec.runtimeField.fields).map(
+                  (key) => `${field.name}.${key}`
+                );
+                toDelete.push(...childFieldNames);
+              }
+              deleteField(toDelete);
+            },
+            type: 'icon',
+            'data-test-subj': 'deleteField',
+            available: (field) => showDelete(field),
           },
         ],
-        width: '40px',
-      },
-      {
-        name: '',
-        actions: [
-          {
-            ...getDeleteAction(deleteField),
-            available: (field) => showDelete(field) && !Boolean(this.props.isMobile),
-          },
-        ],
-        width: '40px',
+        width: '80px',
       },
     ];
 
