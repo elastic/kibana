@@ -838,7 +838,7 @@ export const deleteSuccess = async (
     result: 'deleted',
   } as estypes.DeleteResponse);
   const result = await repository.delete(type, id, options);
-  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  expect(client.get).toHaveBeenCalledTimes(1);
   return result;
 };
 
