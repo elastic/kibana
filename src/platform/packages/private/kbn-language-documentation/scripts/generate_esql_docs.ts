@@ -11,7 +11,7 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { FunctionDefinition } from '@kbn/esql-ast';
+import { FunctionDefinition, Signature } from '@kbn/esql-ast';
 import { functions } from '../src/sections/generated/scalar_functions';
 
 interface LicenseInfo {
@@ -20,50 +20,88 @@ interface LicenseInfo {
   paramsWithLicense: string[];
 }
 
-function createLicenseInfo(
-  licenseName: string | undefined,
+interface MultipleLicenseInfo {
+  licenses: LicenseInfo[];
+  hasMultipleLicenses: boolean;
+}
+
+function getLicenseInfo(
   fnDefinition: FunctionDefinition | undefined
-): LicenseInfo | undefined {
-  if (!licenseName) {
+): MultipleLicenseInfo | undefined {
+  if (!fnDefinition) {
     return undefined;
   }
 
-  if (fnDefinition?.license) {
-    return {
-      name: licenseName,
+  // Case 1: A top-level license exists. This takes precedence over all signature-specific licenses.
+  if (fnDefinition.license) {
+    const licenseInfo: LicenseInfo = {
+      name: fnDefinition.license,
       isSignatureSpecific: false,
       paramsWithLicense: [],
     };
+    return {
+      licenses: [licenseInfo],
+      hasMultipleLicenses: false,
+    };
   }
 
-  if (fnDefinition?.signatures) {
-    const licensedSignatures = fnDefinition.signatures.filter((sig) => sig.license === licenseName);
+  // Case 2: Licenses are defined at the signature level.
+  const licensesMap = aggregateLicensesFromSignatures(fnDefinition.signatures);
 
-    if (licensedSignatures.length > 0) {
-      // Extract parameter types from licensed signatures
-      const paramTypes = new Set<string>();
-      licensedSignatures.forEach((sig) => {
-        sig.params?.forEach((param) => {
-          if (param.type) {
-            paramTypes.add(param.type);
-          }
-        });
+  if (licensesMap.size === 0) {
+    return undefined;
+  }
+
+  const licenses = transformLicenseMap(licensesMap);
+
+  return {
+    licenses,
+    hasMultipleLicenses: licenses.length > 1,
+  };
+}
+
+/**
+ * Aggregates licenses from an array of signatures into a map.
+ * The map's key is the license name, and the value is a Set of associated parameter types.
+ */
+function aggregateLicensesFromSignatures(signatures: Signature[]): Map<string, Set<string>> {
+  const licensesMap = new Map<string, Set<string>>();
+
+  for (const sig of signatures) {
+    if (sig.license) {
+      if (!licensesMap.has(sig.license)) {
+        licensesMap.set(sig.license, new Set<string>());
+      }
+      const paramTypes = licensesMap.get(sig.license)!;
+      sig.params?.forEach((param) => {
+        if (param.type) {
+          paramTypes.add(param.type);
+        }
       });
-
-      const paramsWithLicense = Array.from(paramTypes);
-      return {
-        name: licenseName,
-        isSignatureSpecific: !!paramsWithLicense.length,
-        paramsWithLicense,
-      };
     }
   }
+
+  return licensesMap;
+}
+
+/**
+ * Transforms the aggregated license map into the final array of LicenseInfo objects.
+ */
+function transformLicenseMap(licensesMap: Map<string, Set<string>>): LicenseInfo[] {
+  return Array.from(licensesMap.entries()).map(([name, paramsSet]) => {
+    const paramsWithLicense = Array.from(paramsSet);
+    return {
+      name,
+      isSignatureSpecific: paramsWithLicense.length > 0,
+      paramsWithLicense,
+    };
+  });
 }
 
 interface DocsSectionContent {
   description: string;
   preview: boolean;
-  license: LicenseInfo | undefined;
+  license: MultipleLicenseInfo | undefined;
 }
 
 (function () {
@@ -172,22 +210,11 @@ function loadFunctionDocs({
       // Find corresponding function definition for license information
       const fnDefinition = fnDefinitionMap.get(baseFunctionName);
 
-      // find the license information
-      let license = fnDefinition?.license;
-      if (!license && fnDefinition?.signatures) {
-        // Find the first signature with a license.
-        // We suppose all signatures with license have the same license.
-        const licensedSignature = fnDefinition.signatures.find((sig) => sig.license);
-        if (licensedSignature) {
-          license = licensedSignature.license;
-        }
-      }
-
       // Add the function name and content to the map
       docs.set(functionName, {
         description: content,
         preview: functionDefinition.preview,
-        license: createLicenseInfo(license, fnDefinition),
+        license: getLicenseInfo(fnDefinition),
       });
     }
   }

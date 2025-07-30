@@ -350,9 +350,14 @@ export const functions = {
       }),
       preview: true,
       license: {
-        name: 'PLATINUM',
-        isSignatureSpecific: true,
-        paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+        licenses: [
+          {
+            name: 'PLATINUM',
+            isSignatureSpecific: true,
+            paramsWithLicense: ['cartesian_shape', 'geo_shape'],
+          },
+        ],
+        hasMultipleLicenses: false,
       },
       description: (
         <Markdown

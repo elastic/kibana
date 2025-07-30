@@ -64,7 +64,10 @@ export const functions = {
         defaultMessage: 'CATEGORIZE',
       }),
       preview: false,
-      license: { name: 'PLATINUM', isSignatureSpecific: false, paramsWithLicense: [] },
+      license: {
+        licenses: [{ name: 'PLATINUM', isSignatureSpecific: false, paramsWithLicense: [] }],
+        hasMultipleLicenses: false,
+      },
       description: (
         <Markdown
           openLinksInNewTab

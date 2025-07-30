@@ -15,8 +15,21 @@ import type { LanguageDocumentationSections } from '../../types';
 
 interface LicenseInfo {
   name: string;
-  isSignatureSpecific: boolean;
-  paramsWithLicense: string[];
+  isSignatureSpecific?: boolean;
+  paramsWithLicense?: string[];
+}
+
+interface MultipleLicenseInfo {
+  licenses: LicenseInfo[];
+  hasMultipleLicenses: boolean;
+}
+
+// Helper function to get licenses array from either format
+function getLicensesArray(license: MultipleLicenseInfo | undefined): LicenseInfo[] {
+  if (license && Array.isArray(license.licenses)) {
+    return license.licenses;
+  }
+  return [];
 }
 
 function createLicenseTooltip(license: LicenseInfo): string {
@@ -25,7 +38,7 @@ function createLicenseTooltip(license: LicenseInfo): string {
     values: { license: license.name },
   });
 
-  if (license.isSignatureSpecific && license.paramsWithLicense.length > 0) {
+  if (license.isSignatureSpecific && license?.paramsWithLicense?.length) {
     tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
       defaultMessage: ' only for specific values: {params}',
       values: { license: license.name, params: license.paramsWithLicense.join(', ') },
@@ -47,7 +60,7 @@ interface DocumentationContentProps {
       label: string;
       description: JSX.Element | undefined;
       preview: boolean;
-      license: LicenseInfo | undefined;
+      license: MultipleLicenseInfo | undefined;
     }>;
   }>;
   sections?: LanguageDocumentationSections;
@@ -145,16 +158,16 @@ function DocumentationContent({
                               />
                             </EuiFlexItem>
                           )}
-                          {helpItem.license && (
-                            <EuiFlexItem grow={false}>
+                          {getLicensesArray(helpItem.license).map((license) => (
+                            <EuiFlexItem key={license.name} grow={false}>
                               <EuiBetaBadge
-                                label={helpItem.license.name}
-                                tooltipContent={createLicenseTooltip(helpItem.license)}
+                                label={license.name}
+                                tooltipContent={createLicenseTooltip(license)}
                                 color="subdued"
                                 size="s"
                               />
                             </EuiFlexItem>
-                          )}
+                          ))}
                         </EuiFlexGroup>
                       )}
                       {helpItem.description}
