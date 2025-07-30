@@ -41,7 +41,7 @@ function createLicenseTooltip(license: LicenseInfo): string {
   if (license.isSignatureSpecific && license?.paramsWithLicense?.length) {
     tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
       defaultMessage: ' only for specific values: {params}',
-      values: { license: license.name, params: license.paramsWithLicense.join(', ') },
+      values: { params: license.paramsWithLicense.join(', ') },
     })}`;
   }
 
@@ -58,9 +58,9 @@ interface DocumentationContentProps {
     description?: string;
     options: Array<{
       label: string;
-      description: JSX.Element | undefined;
-      preview: boolean;
-      license: MultipleLicenseInfo | undefined;
+      description?: JSX.Element | undefined;
+      preview?: boolean;
+      license?: MultipleLicenseInfo | undefined;
     }>;
   }>;
   sections?: LanguageDocumentationSections;
