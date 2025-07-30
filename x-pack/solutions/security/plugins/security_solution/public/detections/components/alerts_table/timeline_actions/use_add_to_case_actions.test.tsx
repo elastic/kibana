@@ -12,16 +12,10 @@ import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  sampleCase,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+
 import type { AlertTableContextMenuItem } from '../types';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 
-jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
 
 const refetch = jest.fn();
@@ -70,12 +64,6 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
 
 describe('useAddToCaseActions', () => {
   beforeEach(() => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: 1,
-      incrementStep: () => null,
-      isTourShown: () => false,
-    });
-
     useKibanaMock.mockReturnValue({
       services: {
         cases: {
@@ -126,38 +114,6 @@ describe('useAddToCaseActions', () => {
     expect(open).toHaveBeenCalledWith({
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
     });
-  });
-
-  it('should call useCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
-    const incrementStep = jest.fn();
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: AlertsCasesTourSteps.addAlertToCase,
-      incrementStep,
-      isTourShown: () => true,
-    });
-    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
-      wrapper: TestProviders,
-    });
-    act(() => {
-      result.current.handleAddToNewCaseClick();
-    });
-    expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
-      headerContent: <CasesTourSteps />,
-    });
-    expect(incrementStep).toHaveBeenCalled();
-  });
-
-  it('should prefill useCasesAddToNewCaseFlyout with tour step when step is active', () => {
-    (useTourContext as jest.Mock).mockReturnValue({
-      activeStep: AlertsCasesTourSteps.addAlertToCase,
-      incrementStep: () => null,
-      isTourShown: () => true,
-    });
-    renderHook(() => useAddToCaseActions(defaultProps), {
-      wrapper: TestProviders,
-    });
-    expect(addToNewCase.mock.calls[0][0].initialValue).toEqual(sampleCase);
   });
 
   it('should not prefill useCasesAddToNewCaseFlyout with tour step when step is not active', () => {
