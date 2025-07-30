@@ -36,31 +36,14 @@ import {
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import { GetWorkflowsParams } from './workflows_management_api';
 
-// Simple logger interface for workflows
-interface IWorkflowEventLogger {
-  logInfo(message: string, meta?: any): void;
-  logError(message: string, error?: Error, meta?: any): void;
-}
-
-// Simple logger implementation
-class SimpleWorkflowLogger implements IWorkflowEventLogger {
-  constructor(
-    private logger: Logger,
-    private enableConsoleLogging: boolean = false
-  ) {}
-
-  logInfo(message: string, meta?: any): void {
-    if (this.enableConsoleLogging) {
-      this.logger.info(`🔄 WORKFLOW: ${message}`, meta);
-    }
-  }
-
-  logError(message: string, error?: Error, meta?: any): void {
-    if (this.enableConsoleLogging) {
-      this.logger.error(`🔄 WORKFLOW: ${message}`, { error, ...meta });
-    }
-  }
-}
+// Import from execution engine
+import { 
+  WorkflowEventLoggerService,
+  type LogSearchResult 
+} from '../../../workflows_execution_engine/server/workflow_event_logger/workflow_event_logger_service';
+import type { 
+  IWorkflowEventLogger 
+} from '../../../workflows_execution_engine/server/workflow_event_logger/workflow_event_logger';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -69,7 +52,7 @@ export class WorkflowsService {
   private getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private workflowsExecutionIndex: string;
   private stepsExecutionIndex: string;
-  private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
+  private workflowEventLoggerService: WorkflowEventLoggerService | null = null;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -99,8 +82,14 @@ export class WorkflowsService {
     this.esClient = await esClientPromise;
     this.logger.debug('Elasticsearch client initialized');
 
-    // Initialize simple workflow event logger
-    this.workflowEventLoggerService = new SimpleWorkflowLogger(this.logger, enableConsoleLogging);
+    // Initialize workflow event logger service
+    this.workflowEventLoggerService = new WorkflowEventLoggerService({
+      esClient: this.esClient,
+      logger: this.logger,
+      indexName: workflowExecutionLogsIndex,
+      enableConsoleLogging,
+    });
+    await this.workflowEventLoggerService.initialize();
 
     // Create required indices with proper mappings (workflows are now saved objects)
     await Promise.all([
@@ -409,7 +398,7 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService;
+    return this.workflowEventLoggerService.createWorkflowLogger(workflowId, workflowName);
   }
 
   public getExecutionLogger(
@@ -420,7 +409,7 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService;
+    return this.workflowEventLoggerService.createExecutionLogger(workflowId, executionId, workflowName);
   }
 
   public getStepLogger(
@@ -434,24 +423,27 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService;
+    return this.workflowEventLoggerService.createStepLogger(
+      workflowId, 
+      executionId, 
+      stepId, 
+      stepName, 
+      stepType, 
+      workflowName
+    );
   }
 
-  public async getExecutionLogs(executionId: string) {
-    // Simple implementation - in a real scenario you'd search the logs index
-    this.logger.debug('Search execution logs called', { executionId });
-    return {
-      total: 0,
-      logs: [],
-    };
+  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('Workflow event logger service not initialized');
+    }
+    return this.workflowEventLoggerService.getExecutionLogs(executionId);
   }
 
-  public async getStepLogs(executionId: string, stepId: string) {
-    // Simple implementation - in a real scenario you'd search the logs index
-    this.logger.debug('Search step logs called', { executionId, stepId });
-    return {
-      total: 0,
-      logs: [],
-    };
+  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('Workflow event logger service not initialized');
+    }
+    return this.workflowEventLoggerService.getStepLogs(executionId, stepId);
   }
 }
