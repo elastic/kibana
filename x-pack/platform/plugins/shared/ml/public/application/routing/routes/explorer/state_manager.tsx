@@ -17,7 +17,7 @@ import { ML_JOB_ID } from '@kbn/ml-anomaly-utils/constants';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
