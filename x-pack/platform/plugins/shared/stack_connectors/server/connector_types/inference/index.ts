@@ -15,6 +15,7 @@ import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common/src/service_providers';
 import {
   INFERENCE_CONNECTOR_TITLE,
   INFERENCE_CONNECTOR_ID,
@@ -46,6 +47,113 @@ const deleteInferenceEndpoint = async (
     );
     throw e;
   }
+};
+
+export const getInferenceConnectorTypes = (): Array<SubActionConnectorType<Config, Secrets>> => {
+  const providerIds = Object.keys(SERVICE_PROVIDERS);
+  return providerIds.map((provider) => {
+    const providerDef = SERVICE_PROVIDERS[provider];
+    console.log('PROVIDER DEF', providerDef);
+    const connector: SubActionConnectorType<Config, Secrets> = {
+      id: provider,
+      name: providerDef.name,
+      getService: (params) => new InferenceConnector(params),
+      schema: {
+        config: ConfigSchema,
+        secrets: SecretsSchema,
+      },
+      validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
+      supportedFeatureIds: [
+        GenerativeAIForSecurityConnectorFeatureId,
+        GenerativeAIForSearchPlaygroundConnectorFeatureId,
+        GenerativeAIForObservabilityConnectorFeatureId,
+      ],
+      minimumLicenseRequired: 'enterprise' as const,
+      preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
+        const esClient = services.scopedClusterClient.asInternalUser;
+        try {
+          const taskSettings = config?.taskTypeConfig
+            ? {
+                ...unflattenObject(config?.taskTypeConfig),
+              }
+            : {};
+          const serviceSettings = {
+            ...unflattenObject(config?.providerConfig ?? {}),
+            ...unflattenObject(secrets?.providerSecrets ?? {}),
+          };
+
+          let inferenceExists = false;
+          try {
+            await esClient?.inference.get({
+              inference_id: config?.inferenceId,
+              task_type: config?.taskType as InferenceTaskType,
+            });
+            inferenceExists = true;
+          } catch (e) {
+            /* throws error if inference endpoint by id does not exist */
+          }
+          if (!isUpdate && inferenceExists) {
+            throw new Error(
+              `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
+            );
+          }
+
+          if (isUpdate && inferenceExists && config && config.provider) {
+            // TODO: replace, when update API for inference endpoint exists
+            await deleteInferenceEndpoint(
+              config.inferenceId,
+              config.taskType as InferenceTaskType,
+              logger,
+              esClient
+            );
+          }
+
+          await esClient?.inference.put({
+            inference_id: config?.inferenceId ?? '',
+            task_type: config?.taskType as InferenceTaskType,
+            inference_config: {
+              service: config!.provider,
+              service_settings: serviceSettings,
+              task_settings: taskSettings,
+            },
+          });
+          logger.debug(
+            `Inference endpoint for task type "${config?.taskType}" and inference id ${
+              config?.inferenceId
+            } was successfuly ${isUpdate ? 'updated' : 'created'}`
+          );
+        } catch (e) {
+          logger.warn(
+            `Failed to ${isUpdate ? 'update' : 'create'} inference endpoint for task type "${
+              config?.taskType
+            }" and inference id ${config?.inferenceId}. Error: ${e.message}`
+          );
+          throw e;
+        }
+      },
+      postSaveHook: async ({ config, logger, services, wasSuccessful, isUpdate }) => {
+        if (!wasSuccessful && !isUpdate) {
+          const esClient = services.scopedClusterClient.asInternalUser;
+          await deleteInferenceEndpoint(
+            config.inferenceId,
+            config.taskType as InferenceTaskType,
+            logger,
+            esClient
+          );
+        }
+      },
+      postDeleteHook: async ({ config, logger, services }) => {
+        const esClient = services.scopedClusterClient.asInternalUser;
+        await deleteInferenceEndpoint(
+          config.inferenceId,
+          config.taskType as InferenceTaskType,
+          logger,
+          esClient
+        );
+      },
+    };
+    return connector;
+  });
 };
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({

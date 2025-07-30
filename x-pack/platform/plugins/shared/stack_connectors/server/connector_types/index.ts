@@ -18,10 +18,10 @@ import { getResilientConnectorType } from './resilient';
 import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
-import { getConnectorType as getOpenAIConnectorType } from './openai';
-import { getConnectorType as getBedrockConnectorType } from './bedrock';
-import { getConnectorType as getGeminiConnectorType } from './gemini';
-import { getConnectorType as getInferenceConnectorType } from './inference';
+// import { getConnectorType as getOpenAIConnectorType } from './openai';
+// import { getConnectorType as getBedrockConnectorType } from './bedrock';
+// import { getConnectorType as getGeminiConnectorType } from './gemini';
+import { getInferenceConnectorTypes } from './inference';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -109,9 +109,9 @@ export function registerConnectorTypes({
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());
-  actions.registerSubActionConnectorType(getOpenAIConnectorType());
-  actions.registerSubActionConnectorType(getBedrockConnectorType());
-  actions.registerSubActionConnectorType(getGeminiConnectorType());
+  // actions.registerSubActionConnectorType(getOpenAIConnectorType());
+  // actions.registerSubActionConnectorType(getBedrockConnectorType());
+  // actions.registerSubActionConnectorType(getGeminiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
@@ -124,7 +124,9 @@ export function registerConnectorTypes({
     actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
   if (!experimentalFeatures.inferenceConnectorOff) {
-    actions.registerSubActionConnectorType(getInferenceConnectorType());
+    for (const connector of getInferenceConnectorTypes()) {
+      actions.registerSubActionConnectorType(connector);
+    }
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {
     actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());

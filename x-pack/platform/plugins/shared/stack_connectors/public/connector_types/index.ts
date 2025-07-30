@@ -15,7 +15,7 @@ import { getJiraConnectorType } from './jira';
 import { getOpenAIConnectorType } from './openai';
 import { getBedrockConnectorType } from './bedrock';
 import { getGeminiConnectorType } from './gemini';
-import { getInferenceConnectorType } from './inference';
+import { getInferenceConnectorTypes } from './inference';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getPagerDutyConnectorType } from './pagerduty';
 import { getResilientConnectorType } from './resilient';
@@ -85,7 +85,9 @@ export function registerConnectorTypes({
     connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
   if (!ExperimentalFeaturesService.get().inferenceConnectorOff) {
-    connectorTypeRegistry.register(getInferenceConnectorType());
+    for (const connector of getInferenceConnectorTypes()) {
+      connectorTypeRegistry.register(connector);
+    }
   }
   if (ExperimentalFeaturesService.get().microsoftDefenderEndpointOn) {
     connectorTypeRegistry.register(getMicrosoftDefenderEndpointConnectorType());
