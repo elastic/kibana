@@ -22,10 +22,13 @@ export const useSearchHomePageRedirect = () => {
   const skipGlobalEmptyState = useMemo(() => {
     return localStorage.getItem(GLOBAL_EMPTY_STATE_SKIP_KEY) === 'true';
   }, []);
-  const { data: indicesStatus } = useIndicesStatusQuery(undefined, !skipGlobalEmptyState);
+  const { data: indicesStatus, isLoading } = useIndicesStatusQuery(
+    undefined,
+    !skipGlobalEmptyState
+  );
 
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
-  return useEffect(() => {
+  useEffect(() => {
     if (hasDoneRedirect || skipGlobalEmptyState) {
       return;
     }
@@ -58,4 +61,8 @@ export const useSearchHomePageRedirect = () => {
     userPrivileges,
     skipGlobalEmptyState,
   ]);
+
+  return {
+    isLoading: skipGlobalEmptyState ? false : isLoading,
+  };
 };
