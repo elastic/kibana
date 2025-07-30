@@ -360,14 +360,14 @@ export const VisualizeListing = () => {
       chrome.setBreadcrumbs([
         {
           text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize Library',
+            defaultMessage: 'Visualize library',
           }),
         },
       ]);
     }
 
     chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
+      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
@@ -378,7 +378,7 @@ export const VisualizeListing = () => {
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
 
   const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize Library',
+    defaultMessage: 'Visualize library',
   });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
