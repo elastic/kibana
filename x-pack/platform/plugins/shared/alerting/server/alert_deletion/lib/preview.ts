@@ -32,7 +32,7 @@ export const previewTask = async (
 
   const ruleTypes = context.ruleTypeRegistry.getFilteredTypes({
     categories: categoryIds,
-    excludeInternallyManaged: false,
+    excludeInternallyManaged: true,
   });
 
   const indices = context.getAlertIndicesAlias(ruleTypes, spaceId);
