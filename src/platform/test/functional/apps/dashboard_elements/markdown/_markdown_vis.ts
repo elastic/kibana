@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-
   // TODO: replace these
   describe.skip('markdown app', () => {
     before(async function () {
