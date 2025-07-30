@@ -10,7 +10,9 @@
 import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { graphlib } from '@dagrejs/dagre';
 import { RunStepResult } from '../step/step_base';
+import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
   workflowRunId: string;
@@ -24,11 +26,15 @@ export interface ContextManagerInit {
   logger?: Logger;
   workflowEventLoggerIndex?: string;
   esClient?: ElasticsearchClient;
+  workflowExecutionGraph: graphlib.Graph;
+  workflowState: WorkflowExecutionRuntimeManager;
 }
 
 export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private esClient: IScopedClusterClient;
+  private workflowExecutionGraph: graphlib.Graph;
+  private workflowState: WorkflowExecutionRuntimeManager;
   // private workflowLogger: IWorkflowEventLogger | null = null;
   // private currentStepId: string | null = null;
   // // Store original parameters for recreating logger
@@ -47,7 +53,8 @@ export class WorkflowContextManager {
     };
 
     this.esClient = this.createEsClient(init.esApiKey);
-
+    this.workflowExecutionGraph = init.workflowExecutionGraph;
+    this.workflowState = init.workflowState;
     // Store original parameters for recreating logger
     // this.originalEsClient = init.esClient || null;
     // this.originalLogger = init.logger || null;
@@ -77,7 +84,35 @@ export class WorkflowContextManager {
   }
 
   public getContext(): Record<string, any> {
-    return { ...this.context };
+    const stepContex: Record<string, any> = {
+      ...this.context,
+    };
+
+    const visited = new Set<string>();
+    const collectPredecessors = (nodeId: string) => {
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+
+      stepContex[nodeId] = {};
+      const stepResult = this.workflowState.getStepResult(nodeId);
+      if (stepResult) {
+        stepContex[nodeId] = stepResult.output;
+      }
+
+      const stepState = this.workflowState.getStepState(nodeId);
+      if (stepState) {
+        stepContex[nodeId] = stepState;
+      }
+
+      const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
+      preds.forEach((predId) => collectPredecessors(predId));
+    };
+
+    const currentNodeId = this.workflowState.getCurrentStep()?.id;
+    const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
+    directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
+
+    return stepContex;
   }
 
   public updateContext(updates: Record<string, any>): void {

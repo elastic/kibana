@@ -12,11 +12,11 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
-export const WORKFLOWS_INDEX = '.workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
 export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
 
+// TODO: remove this...
 const connectors = [
   {
     type: 'console',
@@ -27,6 +27,7 @@ const connectors = [
       },
     ],
   },
+  // TODO: this should be fetched from the action type registry
   {
     type: 'slack.sendMessage',
     params: [
@@ -35,8 +36,6 @@ const connectors = [
         type: 'string' as const,
       },
     ],
-    // TODO: fetch from ActionsClient.getAll()
-    availableConnectorIds: ['keep-playground', 'keep-demo'],
   },
   {
     type: 'delay',
@@ -51,3 +50,7 @@ const connectors = [
 
 export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
 export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
+export {
+  convertToWorkflowGraph,
+  convertToSerializableGraph,
+} from './lib/build_execution_graph/build_execution_graph';

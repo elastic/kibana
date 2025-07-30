@@ -899,7 +899,6 @@ describe('solution navigations', () => {
     icon: 'logoSolution2',
     homePage: 'app2',
     navigationTree$: of({ body: [{ type: 'navItem', link: 'app2' }] }),
-    sideNavComponent: () => null,
   };
 
   const solution3: SolutionNavigationDefinition<any> = {
@@ -985,10 +984,7 @@ describe('solution navigations', () => {
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).not.toBeNull();
-      // sideNavComponentGetter should not be exposed to consumers
-      expect('sideNavComponent' in activeSolution!).toBe(false);
-      const { sideNavComponent, ...rest } = solution2;
-      expect(activeSolution).toEqual(rest);
+      expect(activeSolution).toEqual(solution2);
     }
 
     projectNavigation.changeActiveSolutionNavigation('es'); // Set **after** the navs are registered
