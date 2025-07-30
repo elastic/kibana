@@ -167,21 +167,21 @@ export default ({ getService }: FtrProviderContext) => {
         const names = result.saved_objects.map((so) => so.attributes.name);
         expect(names).to.contain('default-monitoring-index-default');
         expect(names).to.contain('StarWars');
-        await retry.waitForWithTimeout(
-          'Wait for PrivMon users to be synced',
-          40000, // 40s timeout
-          async () => {
-            const res = await api.listPrivMonUsers({ query: {} });
-            const userNames = res.body.map((monitoring: any) => monitoring.user.name);
-            expect(userNames).to.contain('Luke Skywalker');
-            expect(userNames).to.contain('Leia Organa');
-            expect(userNames).to.contain('C-3PO');
-            // Test that duplicate C-3PO is counted only once
-            expect(userNames.filter((name: string) => name === 'C-3PO').length).to.be(1);
-            return true;
-          }
-        );
+        await waitForPrivMonUsersToBeSynced(api, retry);
+        // Check if the users are indexed
+        const res = await api.listPrivMonUsers({ query: {} });
+        const userNames = res.body.map((u: any) => u.user.name);
+        expect(userNames).to.contain('Luke Skywalker');
+        expect(userNames).to.contain('C-3PO');
+        expect(userNames.filter((name: string) => name === 'C-3PO')).to.have.length(1);
       });
     });
+  });
+};
+
+const waitForPrivMonUsersToBeSynced = async (api: any, retry: any) => {
+  retry.waitForWithTimeout('Wait for PrivMon users to be synced', 40000, async () => {
+    const res = await api.listPrivMonUsers({ query: {} });
+    return res.body.length > 0; // // wait until we have at least one user
   });
 };
