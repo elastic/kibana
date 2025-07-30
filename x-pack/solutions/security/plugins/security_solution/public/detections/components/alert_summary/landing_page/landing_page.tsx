@@ -21,8 +21,8 @@ import {
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IntegrationCard } from './integration_card';
-import imageSrcLight from './alert_summary_light.png';
-import imageSrcDark from './alert_summary_dark.png';
+import imageSrcLight from './alert_summary_light.jpg';
+import imageSrcDark from './alert_summary_dark.jpg';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.title', {
@@ -110,11 +110,13 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
           <EuiFlexItem>
             <EuiImage
               data-test-subj={LANDING_PAGE_IMAGE_TEST_ID}
-              size="original"
               role="presentation"
               alt={IMAGE_TITLE}
               src={imageSrc}
               margin={'xl'}
+              css={css`
+                width: 800px;
+              `}
             />
           </EuiFlexItem>
           <EuiFlexItem>
