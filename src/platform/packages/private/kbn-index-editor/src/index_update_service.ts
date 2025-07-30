@@ -13,7 +13,11 @@ import type {
   BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
-import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import {
+  type DataPublicPluginStart,
+  type ISearchSource,
+  KBN_FIELD_TYPES,
+} from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
@@ -41,6 +45,7 @@ import {
   timer,
   withLatestFrom,
   firstValueFrom,
+  catchError,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { parsePrimitive } from './utils';
@@ -80,11 +85,18 @@ export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
 export class IndexUpdateService {
   constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
+    this._searchSource = this.data.search.searchSource.createEmpty();
     this.listenForUpdates();
   }
 
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
+
+  private readonly _query$ = new BehaviorSubject<string>('');
+  public readonly query$: Observable<string> = this._query$.asObservable();
+  public setQuery(queryString: string) {
+    this._query$.next(queryString);
+  }
 
   // Indicated if the index exists (has been created) in Elasticsearch.
   private _indexCrated$ = new BehaviorSubject<boolean>(false);
@@ -122,6 +134,8 @@ export class IndexUpdateService {
   private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
   private readonly _subscription = new Subscription();
+
+  private readonly _searchSource: ISearchSource;
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
@@ -359,34 +373,36 @@ export class IndexUpdateService {
         this.dataView$.pipe(take(1)),
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
+        // Query updates
+        this._query$.pipe(debounceTime(500)),
         this._refreshSubject$,
       ])
         .pipe(
           skipWhile(() => !this.isIndexCreated()),
-          tap(() => {
+          tap(([dataView, timeRangeEmit, query]) => {
             this._isFetching$.next(true);
+
+            const timeRangeFilter = this.data.query.timefilter.timefilter.createFilter(
+              dataView,
+              this.data.query.timefilter.timefilter.getTime()
+            ) as Filter;
+            this._searchSource.setField('index', dataView);
+            this._searchSource.setField('filter', [timeRangeFilter]);
+            this._searchSource.setField('size', DOCS_PER_FETCH);
+            this._searchSource.setField('query', { language: 'kuery', query });
           }),
-          switchMap(([dataView, timeRangeEmit]) => {
-            return from(
-              this.data.search.searchSource.create({
-                index: dataView.toSpec(),
-                size: DOCS_PER_FETCH,
-              })
-            ).pipe(
-              tap((searchSource) => {
-                const timeRangeFilter = this.data.query.timefilter.timefilter.createFilter(
-                  dataView,
-                  this.data.query.timefilter.timefilter.getTime()
-                ) as Filter;
-                searchSource.setField('filter', [timeRangeFilter]);
-              })
-            );
-          }),
-          switchMap((searchSource) => {
+          switchMap(() => {
             // Set the query to match all documents
-            return searchSource.fetch$({
-              disableWarningToasts: true,
-            });
+            return this._searchSource
+              .fetch$({
+                disableWarningToasts: true,
+              })
+              .pipe(
+                catchError((e) => {
+                  // query might be invalid, so we return an empty response
+                  return of({ rawResponse: { hits: { hits: [], total: 0 } } });
+                })
+              );
           }),
           withLatestFrom(this.dataView$)
         )

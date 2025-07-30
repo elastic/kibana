@@ -22,11 +22,12 @@
       "contentManagement",
       "share",
       "fileUpload",
-      "fieldFormats"
+      "fieldFormats",
+      "unifiedSearch"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ]
   }
 }

@@ -26,6 +26,7 @@ import { registerIndexEditorActions } from '@kbn/index-editor';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -56,6 +57,7 @@ interface EsqlPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface EsqlPluginStart {
@@ -92,6 +94,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       fileUpload,
       fieldFormats,
       share,
+      unifiedSearch,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -129,6 +132,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldFormats,
       fileUpload,
+      unifiedSearch,
     });
 
     const variablesService = new EsqlVariablesService();

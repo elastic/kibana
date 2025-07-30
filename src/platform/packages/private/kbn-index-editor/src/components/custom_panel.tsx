@@ -17,8 +17,17 @@ import { KibanaContextExtra } from '../types';
 
 export const CustomPanel = () => {
   const {
-    services: { share, data, indexUpdateService },
+    services: {
+      share,
+      data,
+      indexUpdateService,
+      unifiedSearch: {
+        ui: { QueryStringInput },
+      },
+    },
   } = useKibana<KibanaContextExtra>();
+
+  const query = useObservable(indexUpdateService.query$, '');
 
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const dataView = useObservable(indexUpdateService.dataView$);
@@ -45,10 +54,31 @@ export const CustomPanel = () => {
 
   return (
     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+      <EuiFlexItem grow>
+        {dataView ? (
+          <QueryStringInput
+            disableLanguageSwitcher
+            timeRangeForSuggestionsOverride={false}
+            indexPatterns={[dataView]}
+            appName={'discover'}
+            query={{ language: 'kuery', query }}
+            onChange={(queryUpdate) => {
+              indexUpdateService.setQuery(queryUpdate.query as string);
+            }}
+            onSubmit={(queryUpdate) => {
+              indexUpdateService.setQuery(queryUpdate.query as string);
+            }}
+            submitOnBlur
+            isClearable
+            autoSubmit
+            bubbleSubmitEvent={false}
+          />
+        ) : null}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          display="fill"
-          size={'s'}
+          display="base"
+          size={'m'}
           color={'text'}
           onClick={() => {
             indexUpdateService.refresh();
@@ -64,8 +94,7 @@ export const CustomPanel = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          fill
-          size={'s'}
+          size={'m'}
           color={'text'}
           href={discoverLink}
           target="_blank"

@@ -31,6 +31,7 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
         uiActions: deps.uiActions,
         fieldFormats: deps.fieldFormats,
         fileUpload: deps.fileUpload,
+        unifiedSearch: deps.unifiedSearch,
       });
     }
   );
