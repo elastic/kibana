@@ -11,11 +11,11 @@ import React from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 describe('Options list control', () => {
   const mountComponent = ({

@@ -10,11 +10,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { take } from 'lodash';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from '../constants';
 
 const allOptions = [

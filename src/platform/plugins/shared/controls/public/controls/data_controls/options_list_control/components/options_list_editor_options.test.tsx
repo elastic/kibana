@@ -13,9 +13,9 @@ import { BehaviorSubject } from 'rxjs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 
 import type { DefaultDataControlState } from '../../../../../common';
-import type { OptionsListControlState } from '../../../../../common/options_list';
 import type { ControlGroupApi } from '../../../../control_group/types';
 import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
 import type { CustomOptionsComponentProps } from '../../types';
