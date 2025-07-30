@@ -586,7 +586,7 @@ const draggableStyles = {
   },
   keyboardHandler: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
-    const focusRing = euiFocusRing(themeContext);
+    const focusRing = euiFocusRing(themeContext); // returns a string
 
     return css({
       top: 0,
