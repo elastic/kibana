@@ -105,11 +105,6 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  /**
-   * @TODO check
-   * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword not /
-   */
-
   const suggest = async (query: string) => {
     const correctedQuery = correctQuerySyntax(query);
     const { ast } = parse(correctedQuery, { withFormatting: true });
@@ -686,6 +681,13 @@ describe('STATS Autocomplete', () => {
               ['date']
             ),
           ]
+        );
+      });
+
+      test('after NOT keyword', async () => {
+        await statsExpectSuggestions(
+          'FROM logs-apache_error | STATS count() by keywordField <= textField NOT ',
+          ['LIKE $0', 'RLIKE $0', 'IN $0']
         );
       });
 

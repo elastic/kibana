@@ -295,7 +295,7 @@ async function getExpressionSuggestions({
     );
   }
 
-  if (!expressionRoot) {
+  if (!expressionRoot && !/not\s+$/i.test(innerText)) {
     suggestions.push(...emptySuggestions);
   }
 
