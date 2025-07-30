@@ -865,6 +865,68 @@ describe('Fetch', () => {
       await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'bar' });
       expect(usedSpy).toHaveBeenCalledTimes(2);
     });
+
+    it('should intercept the actual fetch call', async () => {
+      const fetch = jest.fn().mockImplementation(async (next, options) => ({
+        ...(await next(options)),
+        body: { foo: 'baz' },
+      }));
+      fetchInstance.intercept({ fetch });
+
+      await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'baz' });
+      expect(fetch).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/my/path',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should call fetch interceptors in order', async () => {
+      const fetch1 = jest.fn().mockImplementation(async (next) => ({
+        ...(await next({ path: '/fetch1' })),
+        body: { foo: 'baz1' },
+      }));
+      const fetch2 = jest.fn().mockImplementation(async (next) => ({
+        ...(await next({ path: '/fetch2' })),
+        body: { foo: 'baz2' },
+      }));
+      fetchInstance.intercept({ fetch: fetch1 });
+      fetchInstance.intercept({ fetch: fetch2 });
+
+      await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'baz1' });
+      expect(fetch1).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/my/path',
+        }),
+        expect.anything()
+      );
+      expect(fetch2).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          path: '/fetch1',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should halt fetch interceptors', async () => {
+      const fetch1 = jest.fn().mockImplementation((next, options, controller) => {
+        controller.halt();
+        return next(options);
+      });
+      const fetch2 = jest.fn().mockImplementation((next, options) => next(options));
+      fetchInstance.intercept({ fetch: fetch1 });
+      fetchInstance.intercept({ fetch: fetch2 });
+
+      fetchInstance.fetch('/my/path');
+      await new Promise(process.nextTick);
+
+      expect(fetch1).toHaveBeenCalled();
+      expect(fetch2).not.toHaveBeenCalled();
+    });
   });
 
   describe('rawResponse', () => {
