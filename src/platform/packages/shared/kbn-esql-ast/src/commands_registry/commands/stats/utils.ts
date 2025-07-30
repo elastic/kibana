@@ -24,29 +24,6 @@ import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
-
-function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
-
-function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
-  node: T | undefined
-) {
-  if (!node) {
-    return;
-  }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
-    return {
-      ...node,
-      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
-    };
-  }
-  return node;
-}
 
 /**
  * Position of the caret in the sort command:
@@ -190,10 +167,9 @@ export const rightAfterColumn = (
   columnExists: (name: string) => boolean
 ): boolean => {
   return (
-    isColumn(expressionRoot) && columnExists(expressionRoot.parts.join('.'))
-    // this prevents the branch from being entered for something like "BY column"
-    // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
-    // /(?:by|,)\s+\S+$/i.test(innerText)
+    isColumn(expressionRoot) &&
+    columnExists(expressionRoot.parts.join('.')) &&
+    /(?:by|,)\s+\S+$/i.test(innerText)
   );
 };
 

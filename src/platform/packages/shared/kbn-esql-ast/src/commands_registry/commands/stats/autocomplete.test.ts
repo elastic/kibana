@@ -501,14 +501,9 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on partial column name', async () => {
-        const expected = [
-          ' = ',
-          getDateHistogramCompletionItem().text,
-          ...allEvalFunctionsForStats,
-          ...allGroupingFunctions,
-        ];
+        const expected = [...allEvalFunctionsForStats, ...allGroupingFunctions];
 
-        await statsExpectSuggestions('from a | stats a=max(b) BY keywor/', [
+        await statsExpectSuggestions('from a | stats a=max(b) BY keywor', [
           ...expected,
           ...getFieldNamesByType('any'),
         ]);
@@ -521,13 +516,11 @@ describe('STATS Autocomplete', () => {
 
       test('on complete column name', async () => {
         await statsExpectSuggestions('from a | stats a=max(b) by integerField', [
-          ' = ',
           'integerField | ',
           'integerField, ',
         ]);
 
         await statsExpectSuggestions('from a | stats a=max(b) by keywordField, integerField', [
-          ' = ',
           'integerField | ',
           'integerField, ',
         ]);

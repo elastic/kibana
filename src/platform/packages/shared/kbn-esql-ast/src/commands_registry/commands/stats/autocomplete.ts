@@ -37,7 +37,7 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
-import { getPosition, getCommaAndPipe } from './utils';
+import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
@@ -278,16 +278,22 @@ async function getExpressionSuggestions({
   suggestColumns?: boolean;
   ignoredColumns?: string[];
 }): Promise<ISuggestionItem[]> {
-  const suggestions = await suggestForExpression({
-    innerText,
-    expressionRoot,
-    location,
-    context,
-    getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
-    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-    advanceCursorAfterInitialColumn: advanceCursorAfterInitialField,
-    ignoredColumnsForEmptyExpression: ignoredColumns,
-  });
+  const suggestions: ISuggestionItem[] = [];
+
+  if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
+    suggestions.push(
+      ...(await suggestForExpression({
+        innerText,
+        expressionRoot,
+        location,
+        context,
+        getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        advanceCursorAfterInitialColumn: advanceCursorAfterInitialField,
+        ignoredColumnsForEmptyExpression: ignoredColumns,
+      }))
+    );
+  }
 
   if (!expressionRoot) {
     suggestions.push(...emptySuggestions);
