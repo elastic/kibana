@@ -8,7 +8,7 @@
  */
 
 import { SOContentStorage } from './saved_object_content_storage';
-import { CMCrudTypes } from './types';
+import { ContentManagementCrudTypes } from './types';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 import { schema } from '@kbn/config-schema';
@@ -20,7 +20,14 @@ import { getContentManagementServicesTransforms } from '@kbn/object-versioning';
 import { savedObjectSchema, objectTypeToGetResultSchema, createResultSchema } from './schema';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import type { SavedObject } from '@kbn/core/server';
+import type { RequestHandlerContext, SavedObject } from '@kbn/core/server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+
+interface MockAttributes {
+  title: string;
+  description: string | null;
+}
+type MockCrudTypes = ContentManagementCrudTypes<'content-id', MockAttributes, {}, {}, {}>;
 
 const testAttributesSchema = schema.object(
   {
@@ -76,7 +83,7 @@ export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = 
 
 const transforms = getContentManagementServicesTransforms(cmServicesDefinition, 1);
 
-class TestSOContentStorage extends SOContentStorage<CMCrudTypes> {
+class TestSOContentStorage extends SOContentStorage<MockCrudTypes> {
   constructor({
     throwOnResultValidationError,
     logger,
@@ -94,12 +101,12 @@ class TestSOContentStorage extends SOContentStorage<CMCrudTypes> {
 
 const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
   storage = storage ?? new TestSOContentStorage();
+  const mockRequest = mockRouter.createFakeKibanaRequest({});
   const requestHandlerCoreContext = coreMock.createRequestHandlerContext();
-
-  const requestHandlerContext = {
+  const requestHandlerContext = jest.mocked<RequestHandlerContext>({
     core: Promise.resolve(requestHandlerCoreContext),
     resolve: jest.fn(),
-  };
+  });
 
   return {
     get: (mockSavedObject: SavedObject) => {
@@ -110,6 +117,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.get(
         {
+          request: mockRequest,
           requestHandlerContext,
           version: {
             request: 1,
@@ -122,11 +130,12 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
         mockSavedObject.id
       );
     },
-    create: (mockSavedObject: SavedObject<{}>) => {
+    create: (mockSavedObject: SavedObject<MockAttributes>) => {
       requestHandlerCoreContext.savedObjects.client.create.mockResolvedValue(mockSavedObject);
 
       return storage!.create(
         {
+          request: mockRequest,
           requestHandlerContext,
           version: {
             request: 1,
@@ -140,11 +149,12 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
         {}
       );
     },
-    update: (mockSavedObject: SavedObject<{}>) => {
+    update: (mockSavedObject: SavedObject<MockAttributes>) => {
       requestHandlerCoreContext.savedObjects.client.update.mockResolvedValue(mockSavedObject);
 
       return storage!.update(
         {
+          request: mockRequest,
           requestHandlerContext,
           version: {
             request: 1,
@@ -159,7 +169,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
         {}
       );
     },
-    search: (mockSavedObject: SavedObject<{}>) => {
+    search: (mockSavedObject: SavedObject<MockAttributes>) => {
       requestHandlerCoreContext.savedObjects.client.find.mockResolvedValue({
         saved_objects: [{ ...mockSavedObject, score: 100 }],
         total: 1,
@@ -169,6 +179,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.search(
         {
+          request: mockRequest,
           requestHandlerContext,
           version: {
             request: 1,
@@ -182,9 +193,10 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
         {}
       );
     },
-    mSearch: async (mockSavedObject: SavedObject<{}>) => {
+    mSearch: async (mockSavedObject: SavedObject<MockAttributes>) => {
       return storage!.mSearch!.toItemResult(
         {
+          request: mockRequest,
           requestHandlerContext,
           version: {
             request: 1,
