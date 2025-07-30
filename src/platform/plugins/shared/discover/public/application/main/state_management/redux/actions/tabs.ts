@@ -105,6 +105,13 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
 
       const tab: TabState = {
         ...DEFAULT_TAB_STATE,
+        ...{
+          lastPersistedGlobalState: {
+            timeRange: services.timefilter.getTime(),
+            refreshInterval: services.timefilter.getRefreshInterval(),
+            filters: services.filterManager.getGlobalFilters(),
+          },
+        },
         ...existingTab,
         ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
