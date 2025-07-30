@@ -33,5 +33,11 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
 };
 
 export const Default: StoryFn<{}> = () => {
-  return <AddSignificantEventFlyout definition={logsStreamDefinition} />;
+  return (
+    <AddSignificantEventFlyout
+      definition={logsStreamDefinition}
+      onClose={() => {}}
+      onSave={async (queries) => {}}
+    />
+  );
 };

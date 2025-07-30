@@ -40,7 +40,7 @@ export function SignificantEventsGeneratedTable({
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
       field: 'title',
-      name: i18n.translate('xpack.streams.streamDetailView.generateSignificantEvents.titleColumn', {
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
       render: (_, query) => (
@@ -56,7 +56,7 @@ export function SignificantEventsGeneratedTable({
     },
     {
       field: 'kql',
-      name: i18n.translate('xpack.streams.streamDetailView.generateSignificantEvents.queryColumn', {
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
         defaultMessage: 'Query',
       }),
       render: (_, item: StreamQueryKql) => (
@@ -81,7 +81,7 @@ export function SignificantEventsGeneratedTable({
       columns={columns}
       selection={selection}
       noItemsMessage={i18n.translate(
-        'xpack.streams.streamDetailView.generateSignificantEvents.noQueriesMessage',
+        'xpack.streams.addSignificantEventFlyout.aiFlow.noQueriesMessage',
         { defaultMessage: 'No significant events queries generated' }
       )}
     />

@@ -46,7 +46,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
       {aiFeatures && !aiFeatures.enabled ? (
         <EuiToolTip
           content={i18n.translate(
-            'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabledTooltip',
+            'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledTooltip',
             {
               defaultMessage:
                 'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
@@ -61,7 +61,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
               )}
             >
               {i18n.translate(
-                'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabled',
+                'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabled',
                 { defaultMessage: 'Enable AI Assistant features' }
               )}
             </EuiLink>
@@ -69,7 +69,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
             <EuiText>
               <h3>
                 {i18n.translate(
-                  'xpack.streams.streamDetailView.generateSignificantEvents.aiAssistantNotEnabledAskAdmin',
+                  'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledAskAdmin',
                   { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
                 )}
               </h3>
@@ -101,7 +101,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
               error: (error) => {
                 notifications.showErrorDialog({
                   title: i18n.translate(
-                    'xpack.streams.streamDetailView.generateSignificantEvents.generateErrorToastTitle',
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
                     { defaultMessage: `Could not generate significant events queries` }
                   ),
                   error,
@@ -111,7 +111,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
               complete: () => {
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
-                    'xpack.streams.streamDetailView.generateSignificantEvents.generateSuccessToastTitle',
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
                     { defaultMessage: `Generated significant events queries successfully` }
                   ),
                 });
@@ -122,13 +122,12 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
         >
           {isGenerating
             ? i18n.translate(
-                'xpack.streams.streamDetailView.generateSignificantEvents.generatingButtonLabel',
+                'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
                 { defaultMessage: 'Generating...' }
               )
-            : i18n.translate(
-                'xpack.streams.streamDetailView.generateSignificantEvents.generateButtonLabel',
-                { defaultMessage: 'Generate' }
-              )}
+            : i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel', {
+                defaultMessage: 'Generate',
+              })}
         </EuiButton>
       </EuiFlexGroup>
 

@@ -63,9 +63,15 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('xpack.streams.streamDetailView.addSignificantEventFlyout', {
-              defaultMessage: 'Add significant events',
-            })}
+            {isEditMode
+              ? i18n.translate(
+                  'xpack.streams.streamDetailView.addSignificantEventFlyout.editTitle',
+                  { defaultMessage: 'Edit significant events' }
+                )
+              : i18n.translate(
+                  'xpack.streams.streamDetailView.addSignificantEventFlyout.createTitle',
+                  { defaultMessage: 'Add significant events' }
+                )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -101,7 +107,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
           <EuiButton color="text" onClick={() => onClose()}>
             {i18n.translate(
               'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',

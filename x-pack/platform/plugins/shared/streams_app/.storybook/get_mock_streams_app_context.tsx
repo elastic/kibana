@@ -10,11 +10,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { IUnifiedSearchPluginServices, SearchBar } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { merge } from 'lodash';
@@ -56,6 +57,14 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     refresh: jest.fn(),
   });
 
+  const license$ = new Subject<Partial<ILicense>>();
+  license$.next({
+    type: 'enterprise',
+    isAvailable: true,
+    isActive: true,
+    hasAtLeast: (type: string) => type === 'enterprise',
+  });
+
   return {
     appParams,
     core,
@@ -87,7 +96,9 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         savedObjectsTagging: {},
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-        licensing: {},
+        licensing: {
+          license$,
+        },
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},
@@ -97,6 +108,9 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
           },
         },
         observabilityAIAssistant: {
+          service: {
+            isEnabled: () => true,
+          },
           useGenAIConnectors: () => {
             return {
               loading: false,
