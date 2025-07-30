@@ -35,7 +35,7 @@ export interface Props {
 
 export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
   return (
-    <EuiSplitPanel.Inner>
+    <EuiSplitPanel.Inner style={{ overflowY: 'auto' }}>
       <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="detailsPanelTitle">
         <h2>{pipeline.name}</h2>
       </EuiTitle>

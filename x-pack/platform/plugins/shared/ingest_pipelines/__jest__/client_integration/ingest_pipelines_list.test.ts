@@ -64,7 +64,7 @@ describe('<PipelinesList />', () => {
       deprecated: true,
     };
 
-    const pipelines = [pipeline1, pipeline2, pipeline3];
+    const pipelines = [pipeline1, pipeline2, pipeline3] as Pipeline[];
 
     httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
 
@@ -321,7 +321,7 @@ describe('<PipelinesList />', () => {
             testBed = await setup(httpSetup, `?pipeline=${pipelineName}`);
           });
 
-          const { exists, component, find } = testBed;
+          const { exists, component } = testBed;
 
           component.update();
 
