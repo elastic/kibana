@@ -30,7 +30,7 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
   /**
    * Single name for the current solution, used to auto-generate the title, logo, description, and button label
    */
-  solution: string;
+  // solution: string;
   /**
    * Required in "kibana" flavor to set the docs link for the whole solution, otherwise optional
    */
@@ -38,7 +38,7 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
   /**
    * Optionally replace the auto-generated logo
    */
-  logo?: string;
+  // logo?: string;
   /**
    * Optionally replace the auto-generated page title (h1)
    */
