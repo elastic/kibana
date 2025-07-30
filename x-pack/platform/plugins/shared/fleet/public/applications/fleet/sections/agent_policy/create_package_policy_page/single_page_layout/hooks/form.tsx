@@ -206,7 +206,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges,
   setNewAgentPolicy,
   setSelectedPolicyTab,
-  hideAgentlessSelector,
+  isAddIntegrationFlyout,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -218,7 +218,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges: boolean;
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
-  hideAgentlessSelector?: boolean;
+  isAddIntegrationFlyout?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -348,7 +348,7 @@ export function useOnSubmit({
         isFetchingBasePackage.current = false;
       }
     }
-    if (!isInitialized) {
+    if (!isInitialized || isAddIntegrationFlyout) {
       // Fetch agent policies
       init();
     }
@@ -362,6 +362,7 @@ export function useOnSubmit({
     packagePolicy.package?.name,
     integration,
     setIntegration,
+    isAddIntegrationFlyout,
   ]);
 
   useEffect(() => {
@@ -391,7 +392,7 @@ export function useOnSubmit({
     packageInfo,
     packagePolicy,
     integrationToEnable,
-    hideAgentlessSelector,
+    hideAgentlessSelector: isAddIntegrationFlyout,
   });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
