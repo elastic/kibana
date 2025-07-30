@@ -9,7 +9,7 @@ import { collectValues as collect } from './field_utils';
 import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions } from './common';
 
-export const HOST_DEFINITION_VERSION = '1.1.0';
+export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
 export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
@@ -45,13 +45,5 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.type' }),
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
-  ],
-  pipeline: [
-    {
-      set: {
-        field: 'entity.type',
-        value: 'Host',
-      },
-    },
   ],
 };

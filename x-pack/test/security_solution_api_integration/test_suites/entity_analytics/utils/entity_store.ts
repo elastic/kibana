@@ -149,20 +149,20 @@ export const EntityStoreUtils = (
     }
   };
 
-  const expectEngineAssetsExist = async (entityType: EntityType, version = '1.0.0') => {
+  const expectEngineAssetsExist = async (entityType: EntityType) => {
     await expectTransformExists(`entities-v1-latest-security_${entityType}_${namespace}`);
     await expectEnrichPolicyExists(
-      `entity_store_field_retention_${entityType}_${namespace}_v${version}`
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
     );
     await expectComponentTemplateExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineExists(`security_${entityType}_${namespace}-latest@platform`);
     await expectEntitiesIndexExists(entityType, namespace);
   };
 
-  const expectEngineAssetsDoNotExist = async (entityType: EntityType, version = '1.0.0') => {
+  const expectEngineAssetsDoNotExist = async (entityType: EntityType) => {
     await expectTransformNotFound(`entities-v1-latest-security_${entityType}_${namespace}`);
     await expectEnrichPolicyNotFound(
-      `entity_store_field_retention_${entityType}_${namespace}_v${version}`
+      `entity_store_field_retention_${entityType}_${namespace}_v1.0.0`
     );
     await expectComponentTemplateNotFound(`security_${entityType}_${namespace}-latest@platform`);
     await expectIngestPipelineNotFound(`security_${entityType}_${namespace}-latest@platform`);

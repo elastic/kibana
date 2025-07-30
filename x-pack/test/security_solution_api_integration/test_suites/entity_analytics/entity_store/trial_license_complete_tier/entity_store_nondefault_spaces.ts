@@ -44,12 +44,12 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['user']);
-        await utils.expectEngineAssetsExist('user', '1.1.0');
+        await utils.expectEngineAssetsExist('user');
       });
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
-        await utils.expectEngineAssetsExist('host', '1.1.0');
+        await utils.expectEngineAssetsExist('host');
       });
     });
 
@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('host', '1.1.0');
+        await utils.expectEngineAssetsDoNotExist('host');
       });
 
       it('should delete the user entity engine', async () => {
@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('user', '1.1.0');
+        await utils.expectEngineAssetsDoNotExist('user');
       });
     });
   });

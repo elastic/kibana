@@ -1011,7 +1011,7 @@ Object {
   ],
   "name": "Security 'host' Entity Store Definition",
   "type": "host",
-  "version": "1.1.0",
+  "version": "1.0.0",
 }
 `;
 
@@ -1437,7 +1437,7 @@ Object {
   ],
   "name": "Security 'user' Entity Store Definition",
   "type": "user",
-  "version": "1.1.0",
+  "version": "1.0.0",
 }
 `;
 
