@@ -65,8 +65,8 @@ export const unmappedFieldsRoute = createServerRoute({
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
 
-    if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
-      Object.keys(streamDefinition.ingest.unwired.field_overrides || {}).forEach((name) =>
+    if (Streams.ClassicStream.Definition.is(streamDefinition)) {
+      Object.keys(streamDefinition.ingest.classic.field_overrides || {}).forEach((name) =>
         mappedFields.add(name)
       );
     }

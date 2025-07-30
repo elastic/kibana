@@ -48,8 +48,8 @@ export function createUpsertStreamActor({
                 ...input.definition.stream.ingest,
                 processing: input.processors.map(processorConverter.toAPIDefinition),
                 ...(input.fields && {
-                  unwired: {
-                    ...input.definition.stream.ingest.unwired,
+                  classic: {
+                    ...input.definition.stream.ingest.classic,
                     field_overrides: input.fields,
                   },
                 }),

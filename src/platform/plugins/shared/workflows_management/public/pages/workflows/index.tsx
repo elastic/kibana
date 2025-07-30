@@ -33,6 +33,8 @@ export function WorkflowsPage() {
   const { refetch } = useWorkflows();
   const { createWorkflow } = useWorkflowActions();
 
+  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
+
   chrome!.setBreadcrumbs([
     {
       text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
@@ -78,13 +80,15 @@ export function WorkflowsPage() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
-              <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
-                <FormattedMessage
-                  id="workflows.createWorkflowButton"
-                  defaultMessage="Create workflow"
-                  ignoreTag
-                />
-              </EuiButton>
+              {canCreateWorkflow && (
+                <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
+                  <FormattedMessage
+                    id="workflows.createWorkflowButton"
+                    defaultMessage="Create workflow"
+                    ignoreTag
+                  />
+                </EuiButton>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

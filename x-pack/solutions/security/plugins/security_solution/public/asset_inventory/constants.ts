@@ -13,6 +13,7 @@ export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';
 export const QUERY_KEY_GROUPING_DATA = 'asset-inventory-grouping-data';
+export const QUERY_KEY_ASSET_INVENTORY = 'asset-inventory-query-key';
 
 export const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 

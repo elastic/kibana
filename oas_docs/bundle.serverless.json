@@ -136,6 +136,44 @@
                     ],
                     "type": "object"
                   },
+                  "http": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "detail": {
+                        "description": "Human readable detail of the service status.",
+                        "type": "string"
+                      },
+                      "documentationUrl": {
+                        "description": "A URL to further documentation regarding this service.",
+                        "type": "string"
+                      },
+                      "level": {
+                        "description": "Service status levels as human and machine readable values.",
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
+                        ],
+                        "type": "string"
+                      },
+                      "meta": {
+                        "additionalProperties": {},
+                        "description": "An unstructured set of extra metadata about this service.",
+                        "type": "object"
+                      },
+                      "summary": {
+                        "description": "A human readable summary of the service status.",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
+                    "type": "object"
+                  },
                   "savedObjects": {
                     "additionalProperties": false,
                     "properties": {
@@ -51689,7 +51727,7 @@
                                           "ingest": {
                                             "additionalProperties": false,
                                             "properties": {
-                                              "unwired": {
+                                              "classic": {
                                                 "additionalProperties": false,
                                                 "properties": {
                                                   "field_overrides": {
@@ -51803,7 +51841,7 @@
                                               }
                                             },
                                             "required": [
-                                              "unwired"
+                                              "classic"
                                             ],
                                             "type": "object"
                                           }
@@ -57822,7 +57860,7 @@
                           },
                           {
                             "properties": {
-                              "unwired": {
+                              "classic": {
                                 "additionalProperties": false,
                                 "properties": {
                                   "field_overrides": {
@@ -57936,7 +57974,7 @@
                               }
                             },
                             "required": [
-                              "unwired"
+                              "classic"
                             ],
                             "type": "object"
                           }

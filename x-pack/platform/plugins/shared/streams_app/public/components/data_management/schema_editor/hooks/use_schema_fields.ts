@@ -88,7 +88,7 @@ export const useSchemaFields = ({
     const mappedFields: SchemaField[] = Object.entries(
       Streams.WiredStream.GetResponse.is(definition)
         ? definition.stream.ingest.wired.fields
-        : definition.stream.ingest.unwired.field_overrides || {}
+        : definition.stream.ingest.classic.field_overrides || {}
     ).map(([name, field]) => ({
       name,
       type: field.type,
@@ -149,7 +149,7 @@ export const useSchemaFields = ({
         const nextFieldDefinitionConfig = convertToFieldDefinitionConfig(field);
         const persistedFieldDefinitionConfig = Streams.WiredStream.GetResponse.is(definition)
           ? definition.stream.ingest.wired.fields[field.name]
-          : definition.stream.ingest.unwired.field_overrides?.[field.name];
+          : definition.stream.ingest.classic.field_overrides?.[field.name];
 
         if (!hasChanges(persistedFieldDefinitionConfig, nextFieldDefinitionConfig)) {
           throw new Error('The field is not different, hence updating is not necessary.');
@@ -175,10 +175,10 @@ export const useSchemaFields = ({
                       },
                     }
                   : {
-                      unwired: {
-                        ...definition.stream.ingest.unwired,
+                      classic: {
+                        ...definition.stream.ingest.classic,
                         field_overrides: {
-                          ...definition.stream.ingest.unwired.field_overrides,
+                          ...definition.stream.ingest.classic.field_overrides,
                           [field.name]: nextFieldDefinitionConfig,
                         },
                       },
@@ -215,7 +215,7 @@ export const useSchemaFields = ({
       try {
         const persistedFieldDefinitionConfig = Streams.WiredStream.GetResponse.is(definition)
           ? definition.stream.ingest.wired.fields[fieldName]
-          : definition.stream.ingest.unwired.field_overrides?.[fieldName];
+          : definition.stream.ingest.classic.field_overrides?.[fieldName];
 
         if (!persistedFieldDefinitionConfig) {
           throw new Error('The field is not mapped, hence it cannot be unmapped.');
@@ -238,10 +238,10 @@ export const useSchemaFields = ({
                       },
                     }
                   : {
-                      unwired: {
-                        ...definition.stream.ingest.unwired,
+                      classic: {
+                        ...definition.stream.ingest.classic,
                         field_overrides: omit(
-                          definition.stream.ingest.unwired.field_overrides,
+                          definition.stream.ingest.classic.field_overrides,
                           fieldName
                         ),
                       },

@@ -79,9 +79,9 @@ export function validateSystemFields(definition: Streams.WiredStream.Definition)
   }
 }
 
-export function validateUnwiredFields(definition: Streams.UnwiredStream.Definition) {
+export function validateClassicFields(definition: Streams.ClassicStream.Definition) {
   if (
-    Object.values(definition.ingest.unwired.field_overrides || {}).some(
+    Object.values(definition.ingest.classic.field_overrides || {}).some(
       (field) => field.type === 'system'
     )
   ) {
