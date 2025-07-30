@@ -897,6 +897,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat @elastic/workchat-eng
 x-pack/platform/packages/shared/onechat/onechat-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/onechat/onechat-common @elastic/workchat-eng
 x-pack/platform/packages/shared/onechat/onechat-genai-utils @elastic/workchat-eng
