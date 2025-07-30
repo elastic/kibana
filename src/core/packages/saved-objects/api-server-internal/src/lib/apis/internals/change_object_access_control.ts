@@ -13,6 +13,7 @@ import {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
+  SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import type {
@@ -251,16 +252,11 @@ export const changeObjectAccessControl = async (
     }
 
     const currentSource = doc._source;
-    const docWithSource = {
-      _id: doc._id,
-      _index: doc._index,
-      _version: doc._version,
-      _seq_no: doc._seq_no,
-      _primary_term: doc._primary_term,
-      _source: currentSource!,
-    };
 
-    const versionProperties = getExpectedVersionProperties(undefined, docWithSource);
+    const versionProperties = getExpectedVersionProperties(
+      undefined,
+      doc as unknown as SavedObjectsRawDoc
+    );
 
     const expectedResult = {
       type,
