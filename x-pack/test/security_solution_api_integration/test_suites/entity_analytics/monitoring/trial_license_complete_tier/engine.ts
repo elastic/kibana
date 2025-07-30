@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  PrivMonRolesUtils,
-  READ_ALL_INDICES_ROLE,
-  READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
-  USER_PASSWORD,
-} from './roles_utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
+import {
+  PrivMonRolesUtils,
+  READ_ALL_INDICES_ROLE,
+  USER_PASSWORD,
+  READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
+} from './role_utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
@@ -55,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await privMonRolesUtils.createPrivilegeTestUsers();
       });
+
       after(async () => {
         await privMonRolesUtils.deletePrivilegeTestUsers();
       });
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(res.status).to.eql(200);
       });
-      it('should not allow init for user without full privileges', async () => {
+      it('should return forbidden for user without correct kibana privileges ', async () => {
         const res = await privMonUtils.initPrivMonEngineWithoutAuth({
           username: READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE.name,
           password: USER_PASSWORD,
