@@ -8,12 +8,9 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  type ControlWidth,
-  type DefaultDataControlState,
-} from '../../common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
+import type { DefaultDataControlState } from '../../common';
 import { OptionsListControlState } from '../../common/options_list';
 import { mockDataControlState, mockOptionsListControlState } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
