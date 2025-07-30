@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import {
-  aws as awsRequiredMetrics,
-  nginx as nginxRequireMetrics,
-} from '../shared/metrics/required_metrics';
 import { createInventoryModel } from '../shared/create_inventory_model';
 
 export const host = createInventoryModel('host', {
@@ -38,21 +34,4 @@ export const host = createInventoryModel('host', {
     cloudProvider: 'cloud.provider',
   },
   metrics,
-  requiredMetrics: [
-    'hostSystemOverview',
-    'hostCpuUsageTotal',
-    'hostCpuUsage',
-    'hostLoad',
-    'hostMemoryUsage',
-    'hostNetworkTraffic',
-    'hostK8sOverview',
-    'hostK8sCpuCap',
-    'hostK8sMemoryCap',
-    'hostK8sDiskCap',
-    'hostK8sPodCap',
-    ...awsRequiredMetrics,
-    ...nginxRequireMetrics,
-  ],
-  tooltipMetrics: ['cpuV2', 'memory', 'txV2', 'rxV2', 'cpu', 'tx', 'rx'],
-  legacyMetrics: ['cpu', 'tx', 'rx'],
 });
