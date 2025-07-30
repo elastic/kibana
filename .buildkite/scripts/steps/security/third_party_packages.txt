@@ -1,0 +1,2 @@
+dom-to-image-more
+jspdf
