@@ -29,6 +29,7 @@ import {
   getVulnMgmtCloudFormationDefaultValue,
   isPostureInput,
 } from './utils';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 
 const getSelectedOption = (
   options: NewPackagePolicyInput[],
@@ -145,8 +146,6 @@ interface UseLoadFleetExtensionProps {
   isEditPage: boolean;
   packageInfo: PackageInfo;
   integrationToEnable?: CloudSecurityPolicyTemplate;
-  isSubscriptionLoading: boolean;
-  isSubscriptionValid: boolean;
 }
 
 const DEFAULT_INPUT_TYPE = {
@@ -159,12 +158,10 @@ export const useLoadFleetExtension = ({
   newPolicy,
   onChange,
   isEditPage,
-  isSubscriptionLoading,
-  isSubscriptionValid,
   packageInfo,
   integrationToEnable,
 }: UseLoadFleetExtensionProps) => {
-  const { cloud } = useKibana().services;
+  const { cloud, uiSettings } = useKibana().services;
   const isServerless = !!cloud.serverless.projectType;
   const integration =
     integrationToEnable &&
@@ -181,6 +178,10 @@ export const useLoadFleetExtension = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
+
+  const getIsSubscriptionValid = useIsSubscriptionStatusValid();
+  const isSubscriptionValid = !!getIsSubscriptionValid.data;
+  const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
 
   const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
     enabled: canFetchIntegration,
@@ -225,7 +226,7 @@ export const useLoadFleetExtension = ({
     setIsLoading(false);
   }
 
-  if ((isSubscriptionValid && !isValidRef.current) || (!isValidRef.current && isServerless)) {
+  if ((!!isSubscriptionValid && !isValidRef.current) || (!isValidRef.current && isServerless)) {
     isValidRef.current = true;
   }
 
@@ -240,6 +241,7 @@ export const useLoadFleetExtension = ({
   }
 
   return {
+    cloud,
     isLoading,
     isValid: isValidRef.current,
     isSubscriptionValid,
@@ -247,5 +249,6 @@ export const useLoadFleetExtension = ({
     setEnabledPolicyInput,
     updatePolicy,
     setIsValid,
+    uiSettings,
   };
 };

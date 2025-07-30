@@ -34,7 +34,6 @@ import { POLICY_TEMPLATE_FORM_DTS } from './utils';
 import { PolicyTemplateSelector } from './policy_template_selectors';
 import { CnvmKspmSetup } from './cnvm_kspm/cnvm_kspm_setup';
 import { useLoadFleetExtension } from './use_load_fleet_extension';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 
 const EditScreenStepTitle = () => (
   <>
@@ -83,20 +82,23 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setIntegrationToEnable(CSPM_POLICY_TEMPLATE);
     }
 
-    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
-    const isSubscriptionValid = !!getIsSubscriptionValid.data;
-    const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
-
-    const { isLoading, setEnabledPolicyInput, updatePolicy, input, setIsValid, isValid } =
-      useLoadFleetExtension({
-        newPolicy,
-        onChange,
-        isEditPage,
-        packageInfo,
-        integrationToEnable: integrationToEnable as 'cspm' | 'kspm' | 'vuln_mgmt' | undefined,
-        isSubscriptionValid,
-        isSubscriptionLoading,
-      });
+    const {
+      cloud,
+      input,
+      isLoading,
+      isSubscriptionValid,
+      isValid,
+      setEnabledPolicyInput,
+      setIsValid,
+      uiSettings,
+      updatePolicy,
+    } = useLoadFleetExtension({
+      newPolicy,
+      onChange,
+      isEditPage,
+      packageInfo,
+      integrationToEnable: integrationToEnable as 'cspm' | 'kspm' | 'vuln_mgmt' | undefined,
+    });
 
     if (isLoading) {
       return (
@@ -161,6 +163,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             namespaceSupportEnabled={true}
             setIsValid={setIsValid}
             isValid={isValid}
+            cloud={cloud}
+            uiSettings={uiSettings}
           />
         )}
 

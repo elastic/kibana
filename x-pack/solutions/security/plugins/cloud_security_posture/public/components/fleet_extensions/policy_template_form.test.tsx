@@ -45,6 +45,7 @@ import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
   CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
   CIS_AZURE_OPTION_TEST_SUBJ,
   CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
@@ -1599,6 +1600,10 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Agentless', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
@@ -1693,6 +1698,10 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
 
+      await waitFor(() =>
+        expect(getByTestId(AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ)).toBeInTheDocument()
+      );
+
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
         'option'
@@ -1700,7 +1709,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
           expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
@@ -1849,7 +1858,7 @@ describe('<CspPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
           expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );

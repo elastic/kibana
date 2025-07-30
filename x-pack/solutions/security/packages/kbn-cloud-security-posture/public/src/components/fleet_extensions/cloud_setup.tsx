@@ -15,7 +15,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
 import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
 import { PolicyTemplateInputSelector } from './policy_template_selectors';
@@ -45,6 +47,7 @@ const EditScreenStepTitle = () => (
   </>
 );
 interface CloudSetupProps {
+  cloud: ICloudSetup;
   defaultSetupTechnology?: SetupTechnology;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   integrationToEnable?: CloudSecurityPolicyTemplate;
@@ -61,10 +64,12 @@ interface CloudSetupProps {
   packageInfo: PackageInfo;
   setIsValid: (valid: boolean) => void;
   validationResults?: PackagePolicyValidationResults;
+  uiSettings: IUiSettingsClient;
 }
 
 export const CloudSetup = memo<CloudSetupProps>(
   ({
+    cloud,
     defaultSetupTechnology,
     handleSetupTechnologyChange,
     integrationToEnable,
@@ -77,6 +82,7 @@ export const CloudSetup = memo<CloudSetupProps>(
     packageInfo,
     setIsValid,
     validationResults,
+    uiSettings,
   }: CloudSetupProps) => {
     const {
       input,
@@ -88,7 +94,6 @@ export const CloudSetup = memo<CloudSetupProps>(
       isServerless,
       showCloudConnectors,
       hasInvalidRequiredVars,
-      cloud,
     } = useLoadCloudSetup({
       newPolicy,
       onChange,
@@ -99,6 +104,8 @@ export const CloudSetup = memo<CloudSetupProps>(
       isAgentlessEnabled,
       defaultSetupTechnology,
       integrationToEnable,
+      cloud,
+      uiSettings,
     });
 
     const { euiTheme } = useEuiTheme();

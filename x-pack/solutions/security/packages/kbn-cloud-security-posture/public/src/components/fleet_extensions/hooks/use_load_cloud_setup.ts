@@ -10,7 +10,6 @@ import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/service
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
-import { useKibana } from './use_kibana';
 import { CloudSecurityPolicyTemplate, PostureInput } from '../types';
 import {
   SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
@@ -24,6 +23,8 @@ import {
   isPostureInput,
 } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 
 const assert: (condition: unknown, msg?: string) => asserts condition = (
   condition: unknown,
@@ -67,6 +68,8 @@ interface UseLoadCloudSetupProps {
   defaultSetupTechnology?: SetupTechnology;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
+  uiSettings: IUiSettingsClient;
+  cloud: CloudSetup;
 }
 
 // const DEFAULT_INPUT_TYPE = {
@@ -80,12 +83,12 @@ export const useLoadCloudSetup = ({
   isEditPage,
   packageInfo,
   integrationToEnable,
-  setIntegrationToEnable,
   defaultSetupTechnology,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
+  uiSettings,
+  cloud,
 }: UseLoadCloudSetupProps) => {
-  const { cloud, uiSettings } = useKibana().services;
   const isServerless = !!cloud.serverless.projectType;
   const integration =
     integrationToEnable &&
@@ -117,9 +120,6 @@ export const useLoadCloudSetup = ({
     defaultSetupTechnology,
   });
 
-  // console.log('useLoadCloudSetup', setupTechnology);
-  // console.log('defaultSetupTechnology', defaultSetupTechnology);
-
   const shouldRenderAgentlessSelector =
     (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
@@ -134,10 +134,6 @@ export const useLoadCloudSetup = ({
     !!cloudConnectorRemoteRoleTemplate &&
     semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
-  /**
-   * - Updates policy inputs by user selection
-   * - Updates hidden policy vars
-   */
   const setEnabledPolicyInput = useCallback(
     (inputType: PostureInput) => {
       const inputVars = getPostureInputHiddenVars(
@@ -161,7 +157,6 @@ export const useLoadCloudSetup = ({
     updateSetupTechnology,
     shouldRenderAgentlessSelector,
     showCloudConnectors,
-    cloud,
     hasInvalidRequiredVars,
   };
 };
