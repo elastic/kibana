@@ -85,9 +85,12 @@ export const COMPARED = i18n.translate('xpack.securitySolution.aiValue.compared'
   defaultMessage: 'Compared to the previous period:',
 });
 
-export const NON_SUSPICIOUS = i18n.translate('xpack.securitySolution.aiValue.falsePositives', {
-  defaultMessage: 'Non-suspicious alerts',
-});
+export const NON_SUSPICIOUS_ALERTS = i18n.translate(
+  'xpack.securitySolution.aiValue.falsePositives',
+  {
+    defaultMessage: 'Non-suspicious alerts',
+  }
+);
 
 export const TOTAL_ALERTS_PROCESSED = i18n.translate(
   'xpack.securitySolution.aiValue.totalAlertsProcessed',
@@ -98,6 +101,10 @@ export const TOTAL_ALERTS_PROCESSED = i18n.translate(
 
 export const ESCALATED = i18n.translate('xpack.securitySolution.aiValue.escalated', {
   defaultMessage: 'Escalated',
+});
+
+export const NON_SUSPICIOUS = i18n.translate('xpack.securitySolution.aiValue.nonSuspicious', {
+  defaultMessage: 'non-suspicious',
 });
 
 export const ESCALATED_ALERTS = i18n.translate('xpack.securitySolution.aiValue.escalatedAlerts', {
@@ -138,19 +145,19 @@ export const EXECUTIVE_GREETING = (username: string) =>
 export const EXECUTIVE_MESSAGE_START = i18n.translate(
   'xpack.securitySolution.aiValue.executiveMessageStart',
   {
-    defaultMessage: 'Elastic AI SOC Engine continues to deliver measurable ROI:',
+    defaultMessage: 'The Elastic AI SOC Engine continues to deliver measurable impact, driving ',
   }
 );
 
 export const EXECUTIVE_COST_SAVINGS_LABEL = i18n.translate(
   'xpack.securitySolution.aiValue.executiveCostSavingsLabel',
   {
-    defaultMessage: 'cost savings',
+    defaultMessage: 'in cost savings',
   }
 );
 
 export const EXECUTIVE_AND = i18n.translate('xpack.securitySolution.aiValue.executiveAnd', {
-  defaultMessage: 'and',
+  defaultMessage: 'and reclaiming',
 });
 
 export const EXECUTIVE_AND_A = i18n.translate('xpack.securitySolution.aiValue.executiveAndA', {
@@ -160,7 +167,7 @@ export const EXECUTIVE_AND_A = i18n.translate('xpack.securitySolution.aiValue.ex
 export const EXECUTIVE_HOURS_SAVED_LABEL = i18n.translate(
   'xpack.securitySolution.aiValue.executiveHoursSavedLabel',
   {
-    defaultMessage: 'analyst hours saved',
+    defaultMessage: 'analyst hours',
   }
 );
 
@@ -170,9 +177,33 @@ export const EXECUTIVE_MESSAGE_END = (timeRange: string) =>
     values: { timeRange },
   });
 
+export const EXECUTIVE_FILTERING = i18n.translate(
+  'xpack.securitySolution.aiValue.executiveFiltering',
+  {
+    defaultMessage:
+      'These results are based on AI-powered alert filtering that prevents analysts from spending time on non-suspicious alerts.',
+  }
+);
+
 export const EXECUTIVE_CALC = i18n.translate('xpack.securitySolution.aiValue.executiveCalc', {
   defaultMessage:
-    'These results are based on automating alert triage, using an average review time of',
+    'Here’s how it works: alerts identified as part of attack discoveries are classified as ',
+});
+
+export const EXECUTIVE_CALC2 = i18n.translate('xpack.securitySolution.aiValue.executiveCalc2', {
+  defaultMessage:
+    'By automatically filtering out non-suspicious alerts, the AI SOC reduces triage workload at scale. Cost savings are calculated by multiplying the number of non-suspicious alerts by an average review time of',
+});
+
+export const EXECUTIVE_SUSPICIOUS = i18n.translate(
+  'xpack.securitySolution.aiValue.executiveCalcEscalated',
+  {
+    defaultMessage: '(i.e., suspicious), while all others are considered',
+  }
+);
+
+export const EXECUTIVE_CONVERT = i18n.translate('xpack.securitySolution.aiValue.executiveConvert', {
+  defaultMessage: 'converting that time to hours, and applying a',
 });
 
 export const MINUTES_PER_ALERT = (minutes: string) =>
@@ -199,7 +230,7 @@ export const EXECUTIVE_MESSAGE_SECOND = i18n.translate(
   'xpack.securitySolution.aiValue.executiveMessageSecond',
   {
     defaultMessage:
-      'By reducing the manual burden of high-volume alert review, the AI SOC enhances efficiency, lowers operational costs, and enables teams to focus on higher-value security work. At the same time, it increases threat detection coverage — helping organizations respond faster, with fewer resources.',
+      'The result: leaner SOC operations, increased threat coverage, and more time for analysts to focus on what matters most — investigating real threats.',
   }
 );
 

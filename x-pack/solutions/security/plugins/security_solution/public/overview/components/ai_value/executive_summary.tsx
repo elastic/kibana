@@ -131,16 +131,22 @@ export const ExecutiveSummary: React.FC<Props> = ({
                 <p>
                   {i18n.EXECUTIVE_MESSAGE_START} <strong>{costSavings}</strong>{' '}
                   {i18n.EXECUTIVE_COST_SAVINGS_LABEL} {i18n.EXECUTIVE_AND}{' '}
-                  <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
-                  {i18n.EXECUTIVE_HOURS_SAVED_LABEL}{' '}
+                  <strong>
+                    {formatThousands(valueMetrics.hoursSaved)} {i18n.EXECUTIVE_HOURS_SAVED_LABEL}
+                  </strong>{' '}
                   {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(getTimeRangeAsDays({ from, to })))}{' '}
-                  {i18n.EXECUTIVE_CALC}{' '}
-                  <strong>{i18n.MINUTES_PER_ALERT(`${minutesPerAlert}`)}</strong>{' '}
-                  {i18n.EXECUTIVE_AND_A}{' '}
+                  {i18n.EXECUTIVE_FILTERING}
+                  <EuiSpacer size="m" />
+                  {i18n.EXECUTIVE_CALC} <strong>{i18n.ESCALATED.toLowerCase()}</strong>{' '}
+                  {i18n.EXECUTIVE_SUSPICIOUS} <strong>{i18n.NON_SUSPICIOUS}</strong>
+                  {'. '}
+                  {i18n.EXECUTIVE_CALC2}{' '}
+                  <strong>{i18n.MINUTES_PER_ALERT(`${minutesPerAlert}`)}</strong>
+                  {', '}
+                  {i18n.EXECUTIVE_CONVERT}{' '}
                   <strong>{i18n.ANALYST_RATE(`$${analystHourlyRate}`)}</strong>
                   {'.'}
-                  <br />
-                  <br />
+                  <EuiSpacer size="m" />
                   {i18n.EXECUTIVE_MESSAGE_SECOND}
                 </p>
               )}

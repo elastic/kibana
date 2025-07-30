@@ -46,7 +46,7 @@ export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMet
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
-              <p>{i18n.NON_SUSPICIOUS}</p>
+              <p>{i18n.NON_SUSPICIOUS_ALERTS}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
