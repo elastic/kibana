@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const getGapFillAutoSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -38,12 +39,7 @@ export const getGapFillAutoSchedulerLogsRoute = (
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
@@ -64,23 +60,16 @@ export const getGapFillAutoSchedulerLogsRoute = (
 
           const eventLogClient = await rulesClient.getEventLogClient();
 
-          console.log('formattedSort', JSON.stringify(formattedSort, null, 2));
-
-          // Use the task as a saved object - tasks ARE saved objects with type 'task'
-          const result = await eventLogClient.findEventsBySavedObjectIds(
-            'task', // Task saved object type
-            [taskId], // Task ID as the saved object ID
-            {
-              page,
-              per_page: perPage,
-              start,
-              end,
-              sort: formattedSort,
-              filter: filter
-                ? `(${filter}) AND event.action:gap-fill-auto-schedule`
-                : 'event.action:gap-fill-auto-schedule',
-            }
-          );
+          const result = await eventLogClient.findEventsBySavedObjectIds('task', [taskId], {
+            page,
+            per_page: perPage,
+            start,
+            end,
+            sort: formattedSort,
+            filter: filter
+              ? `(${filter}) AND event.action:gap-fill-auto-schedule`
+              : 'event.action:gap-fill-auto-schedule',
+          });
 
           return res.ok({
             body: {

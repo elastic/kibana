@@ -15,7 +15,6 @@ import {
   EuiTitle,
   EuiText,
   EuiFieldNumber,
-  EuiTextArea,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -37,9 +36,10 @@ import { KibanaServices } from '../common/lib/kibana';
 
 interface GapAutoFillConfig {
   name: string;
-  amountOfGapsToProcessPerRun: number;
+  maxAmountOfGapsToProcessPerRun: number;
+  maxAmountOfRulesToProcessPerRun: number;
   amountOfRetries: number;
-  excludeRuleIds: string[];
+  rulesFilter: string;
   gapFillRange: string;
   schedule: {
     interval: string;
@@ -118,29 +118,8 @@ interface EventLogResponse {
   perPage: number;
 }
 
-export const GapAutoFillSettings: React.FC = () => {
-  const [autoFill, setAutoFill] = useState<GapAutoFill | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [enabled, setEnabled] = useState(false);
-  const [name, setName] = useState('');
-  const [amountOfGapsToProcessPerRun, setAmountOfGapsToProcessPerRun] = useState(100);
-  const [amountOfRetries, setAmountOfRetries] = useState(3);
-  const [excludeRuleIds, setExcludeRuleIds] = useState('');
-  const [gapFillRange, setGapFillRange] = useState('now-7d');
-  const [schedule, setSchedule] = useState('1m');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [originalValues, setOriginalValues] = useState({
-    name: '',
-    amountOfGapsToProcessPerRun: 100,
-    amountOfRetries: 3,
-    excludeRuleIds: '',
-    gapFillRange: 'now-7d',
-    schedule: '1m',
-  });
-
-  // Event log state
+// Event Logs Component
+const EventLogsComponent: React.FC<{ autoFillId: string }> = ({ autoFillId }) => {
   const [eventLogs, setEventLogs] = useState<GapFillEventLog[]>([]);
   const [eventLogsLoading, setEventLogsLoading] = useState(false);
   const [eventLogsError, setEventLogsError] = useState<string | null>(null);
@@ -150,15 +129,13 @@ export const GapAutoFillSettings: React.FC = () => {
     total: 0,
   });
 
-  const AUTO_FILL_ID = 'default';
-
   // Fetch event logs
   const fetchEventLogs = useCallback(async () => {
     setEventLogsLoading(true);
     setEventLogsError(null);
     try {
       const response = await KibanaServices.get().http.get<EventLogResponse>(
-        `/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}/logs`
+        `/internal/alerting/rules/gaps/auto_fill_scheduler/${autoFillId}/logs`
       );
       setEventLogs(response.data);
       setEventLogsPagination((prev) => ({ ...prev, total: response.total }));
@@ -167,19 +144,104 @@ export const GapAutoFillSettings: React.FC = () => {
     } finally {
       setEventLogsLoading(false);
     }
-  }, [eventLogsPagination.page, eventLogsPagination.perPage]);
+  }, [autoFillId]);
+
+  // Fetch event logs when component mounts
+  useEffect(() => {
+    fetchEventLogs();
+  }, [fetchEventLogs]);
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="s">
+        <h3>{'Event Logs'}</h3>
+      </EuiTitle>
+
+      {eventLogsLoading && <EuiLoadingSpinner size="m" />}
+      {eventLogsError && <EuiCallOut color="danger" title={eventLogsError} />}
+
+      {!eventLogsLoading && eventLogs.length === 0 && (
+        <EuiText size="s" color="subdued">
+          {'No event logs found.'}
+        </EuiText>
+      )}
+
+      {!eventLogsLoading && eventLogs.length > 0 && (
+        <EuiTable compressed>
+          <EuiTableHeader>
+            <EuiTableRow>
+              <EuiTableHeaderCell>{'Timestamp'}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{'Action'}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{'Status'}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{'Message'}</EuiTableHeaderCell>
+            </EuiTableRow>
+          </EuiTableHeader>
+          <EuiTableBody>
+            {eventLogs.map((log) => (
+              <EuiTableRow key={log._id}>
+                <EuiTableRowCell>{new Date(log['@timestamp']).toLocaleString()}</EuiTableRowCell>
+                <EuiTableRowCell>{log.event.action}</EuiTableRowCell>
+                <EuiTableRowCell>
+                  <EuiBadge
+                    color={
+                      log.kibana.auto_gap_fill.execution.status === 'success' ? 'success' : 'danger'
+                    }
+                  >
+                    {log.kibana.auto_gap_fill.execution.status}
+                  </EuiBadge>
+                </EuiTableRowCell>
+                <EuiTableRowCell>{log.message}</EuiTableRowCell>
+              </EuiTableRow>
+            ))}
+          </EuiTableBody>
+        </EuiTable>
+      )}
+
+      {eventLogsPagination.total > eventLogsPagination.perPage && <EuiSpacer size="s" />}
+      {eventLogsPagination.total > eventLogsPagination.perPage && (
+        <EuiPagination
+          pageCount={Math.ceil(eventLogsPagination.total / eventLogsPagination.perPage)}
+          activePage={eventLogsPagination.page - 1}
+          onPageClick={(page) => setEventLogsPagination((prev) => ({ ...prev, page: page + 1 }))}
+          compressed
+        />
+      )}
+    </>
+  );
+};
+
+export const GapAutoFillSettings: React.FC = () => {
+  const [autoFill, setAutoFill] = useState<GapAutoFill | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [enabled, setEnabled] = useState(false);
+  const [name, setName] = useState('');
+  const [maxAmountOfGapsToProcessPerRun, setMaxAmountOfGapsToProcessPerRun] = useState(100);
+  const [maxAmountOfRulesToProcessPerRun, setMaxAmountOfRulesToProcessPerRun] = useState(50);
+  const [amountOfRetries, setAmountOfRetries] = useState(3);
+  const [rulesFilter, setRulesFilter] = useState('');
+  const [gapFillRange, setGapFillRange] = useState('now-7d');
+  const [schedule, setSchedule] = useState('1m');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [originalValues, setOriginalValues] = useState({
+    name: '',
+    maxAmountOfGapsToProcessPerRun: 100,
+    maxAmountOfRulesToProcessPerRun: 100,
+    amountOfRetries: 3,
+    rulesFilter: '',
+    gapFillRange: 'now-7d',
+    schedule: '1m',
+  });
+
+  const AUTO_FILL_ID = 'default';
 
   // Fetch auto fill on mount
   useEffect(() => {
     fetchAutoFill();
   }, []);
-
-  // Fetch event logs when auto fill is loaded
-  useEffect(() => {
-    if (autoFill) {
-      fetchEventLogs();
-    }
-  }, [autoFill, fetchEventLogs]);
 
   const fetchAutoFill = async () => {
     setLoading(true);
@@ -194,16 +256,18 @@ export const GapAutoFillSettings: React.FC = () => {
       const config = data.state?.config;
       if (config) {
         setName(config.name || 'Gap Auto-Fill');
-        setAmountOfGapsToProcessPerRun(config.amountOfGapsToProcessPerRun || 100);
+        setMaxAmountOfGapsToProcessPerRun(config.maxAmountOfGapsToProcessPerRun || 100);
+        setMaxAmountOfRulesToProcessPerRun(config.maxAmountOfRulesToProcessPerRun || 50);
         setAmountOfRetries(config.amountOfRetries || 3);
-        setExcludeRuleIds(config.excludeRuleIds?.join('\n') || '');
+        setRulesFilter(config.rulesFilter || '');
         setGapFillRange(config.gapFillRange || 'now-7d');
         setSchedule(config.schedule?.interval || '1m');
       } else {
         setName('Gap Auto-Fill');
-        setAmountOfGapsToProcessPerRun(100);
+        setMaxAmountOfGapsToProcessPerRun(100);
+        setMaxAmountOfRulesToProcessPerRun(50);
         setAmountOfRetries(3);
-        setExcludeRuleIds('');
+        setRulesFilter('');
         setGapFillRange('now-7d');
         setSchedule('1m');
       }
@@ -214,9 +278,10 @@ export const GapAutoFillSettings: React.FC = () => {
         setAutoFill(null);
         setEnabled(false);
         setName('Gap Auto-Fill');
-        setAmountOfGapsToProcessPerRun(100);
+        setMaxAmountOfGapsToProcessPerRun(100);
+        setMaxAmountOfRulesToProcessPerRun(50);
         setAmountOfRetries(3);
-        setExcludeRuleIds('');
+        setRulesFilter('');
         setGapFillRange('now-7d');
         setSchedule('1m');
       } else {
@@ -238,12 +303,13 @@ export const GapAutoFillSettings: React.FC = () => {
         await KibanaServices.get().http.post('/internal/alerting/rules/gaps/auto_fill_scheduler', {
           body: JSON.stringify({
             name: 'Gap Auto-Fill',
-            amountOfGapsToProcessPerRun: 100,
+            maxAmountOfGapsToProcessPerRun: 100,
+            maxAmountOfRulesToProcessPerRun: 50,
             amountOfRetries: 3,
-            excludeRuleIds: [],
+            rulesFilter: '',
             gapFillRange: 'now-7d',
             schedule: {
-              interval: '1h',
+              interval: '1m',
             },
           }),
         });
@@ -251,9 +317,12 @@ export const GapAutoFillSettings: React.FC = () => {
         await fetchAutoFill();
       } else {
         // Auto fill exists - toggle enable/disable
-        await KibanaServices.get().http.put(`/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`, {
-          body: JSON.stringify({ enabled: !enabled }),
-        });
+        await KibanaServices.get().http.put(
+          `/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`,
+          {
+            body: JSON.stringify({ enabled: !enabled }),
+          }
+        );
         setEnabled(!enabled);
       }
     } catch (err) {
@@ -267,9 +336,10 @@ export const GapAutoFillSettings: React.FC = () => {
   const handleEdit = () => {
     setOriginalValues({
       name,
-      amountOfGapsToProcessPerRun,
+      maxAmountOfGapsToProcessPerRun,
+      maxAmountOfRulesToProcessPerRun,
       amountOfRetries,
-      excludeRuleIds,
+      rulesFilter,
       gapFillRange,
       schedule,
     });
@@ -279,9 +349,10 @@ export const GapAutoFillSettings: React.FC = () => {
   // Cancel editing mode
   const handleCancel = () => {
     setName(originalValues.name);
-    setAmountOfGapsToProcessPerRun(originalValues.amountOfGapsToProcessPerRun);
+    setMaxAmountOfGapsToProcessPerRun(originalValues.maxAmountOfGapsToProcessPerRun);
+    setMaxAmountOfRulesToProcessPerRun(originalValues.maxAmountOfRulesToProcessPerRun);
     setAmountOfRetries(originalValues.amountOfRetries);
-    setExcludeRuleIds(originalValues.excludeRuleIds);
+    setRulesFilter(originalValues.rulesFilter);
     setGapFillRange(originalValues.gapFillRange);
     setSchedule(originalValues.schedule);
     setIsEditing(false);
@@ -294,23 +365,22 @@ export const GapAutoFillSettings: React.FC = () => {
     setSaving(true);
     setError(null);
     try {
-      const excludeRuleIdsArray = excludeRuleIds
-        .split('\n')
-        .map((id) => id.trim())
-        .filter((id) => id.length > 0);
-
-      await KibanaServices.get().http.put(`/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`, {
-        body: JSON.stringify({
-          name,
-          amountOfGapsToProcessPerRun,
-          amountOfRetries,
-          excludeRuleIds: excludeRuleIdsArray,
-          gapFillRange,
-          schedule: {
-            interval: schedule,
-          },
-        }),
-      });
+      await KibanaServices.get().http.put(
+        `/internal/alerting/rules/gaps/auto_fill_scheduler/${AUTO_FILL_ID}`,
+        {
+          body: JSON.stringify({
+            name,
+            maxAmountOfGapsToProcessPerRun,
+            maxAmountOfRulesToProcessPerRun,
+            amountOfRetries,
+            rulesFilter,
+            gapFillRange,
+            schedule: {
+              interval: schedule,
+            },
+          }),
+        }
+      );
       setIsEditing(false);
     } catch (err) {
       setError('Failed to update auto fill configuration');
@@ -362,25 +432,22 @@ export const GapAutoFillSettings: React.FC = () => {
                 <EuiDescriptionListTitle>{'Name'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{name}</EuiDescriptionListDescription>
 
-                <EuiDescriptionListTitle>{'Gaps per run'}</EuiDescriptionListTitle>
+                <EuiDescriptionListTitle>{'Max gaps per run'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {amountOfGapsToProcessPerRun}
+                  {maxAmountOfGapsToProcessPerRun}
+                </EuiDescriptionListDescription>
+
+                <EuiDescriptionListTitle>{'Max rules per run'}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {maxAmountOfRulesToProcessPerRun}
                 </EuiDescriptionListDescription>
 
                 <EuiDescriptionListTitle>{'Retries'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{amountOfRetries}</EuiDescriptionListDescription>
 
-                <EuiDescriptionListTitle>{'Exclude Rule IDs'}</EuiDescriptionListTitle>
+                <EuiDescriptionListTitle>{'Rules Filter'}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {excludeRuleIds ? (
-                    <EuiText size="s">
-                      {excludeRuleIds.split('\n').map((id, index) => (
-                        <div key={index}>{id.trim()}</div>
-                      ))}
-                    </EuiText>
-                  ) : (
-                    'None'
-                  )}
+                  {rulesFilter || 'None'}
                 </EuiDescriptionListDescription>
 
                 <EuiDescriptionListTitle>{'Gap Fill Range'}</EuiDescriptionListTitle>
@@ -409,11 +476,25 @@ export const GapAutoFillSettings: React.FC = () => {
 
               <EuiSpacer size="s" />
 
-              <EuiFormRow label="Gaps per run">
+              <EuiFormRow label="Max gaps per run">
                 <EuiFieldNumber
-                  value={amountOfGapsToProcessPerRun}
+                  value={maxAmountOfGapsToProcessPerRun}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAmountOfGapsToProcessPerRun(Number(e.target.value))
+                    setMaxAmountOfGapsToProcessPerRun(Number(e.target.value))
+                  }
+                  disabled={saving}
+                  min={1}
+                  max={1000}
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="s" />
+
+              <EuiFormRow label="Max rules per run">
+                <EuiFieldNumber
+                  value={maxAmountOfRulesToProcessPerRun}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setMaxAmountOfRulesToProcessPerRun(Number(e.target.value))
                   }
                   disabled={saving}
                   min={1}
@@ -437,13 +518,12 @@ export const GapAutoFillSettings: React.FC = () => {
 
               <EuiSpacer size="s" />
 
-              <EuiFormRow label="Exclude Rule IDs (one per line)">
-                <EuiTextArea
-                  value={excludeRuleIds}
-                  onChange={(e) => setExcludeRuleIds(e.target.value)}
+              <EuiFormRow label="Rules Filter">
+                <EuiFieldText
+                  value={rulesFilter}
+                  onChange={(e) => setRulesFilter(e.target.value)}
                   disabled={saving}
-                  rows={3}
-                  placeholder="Enter rule IDs to exclude from auto-fill processing"
+                  placeholder="Enter KQL filter for rules (e.g., alert.name: *test*)"
                 />
               </EuiFormRow>
 
@@ -538,67 +618,7 @@ export const GapAutoFillSettings: React.FC = () => {
             )}
           </EuiText>
 
-          <EuiSpacer size="m" />
-
-          <EuiTitle size="s">
-            <h3>{'Event Logs'}</h3>
-          </EuiTitle>
-
-          {eventLogsLoading && <EuiLoadingSpinner size="m" />}
-          {eventLogsError && <EuiCallOut color="danger" title={eventLogsError} />}
-
-          {!eventLogsLoading && eventLogs.length === 0 && (
-            <EuiText size="s" color="subdued">
-              {'No event logs found.'}
-            </EuiText>
-          )}
-
-          {!eventLogsLoading && eventLogs.length > 0 && (
-            <EuiTable compressed>
-              <EuiTableHeader>
-                <EuiTableRow>
-                  <EuiTableHeaderCell>{'Timestamp'}</EuiTableHeaderCell>
-                  <EuiTableHeaderCell>{'Action'}</EuiTableHeaderCell>
-                  <EuiTableHeaderCell>{'Status'}</EuiTableHeaderCell>
-                  <EuiTableHeaderCell>{'Message'}</EuiTableHeaderCell>
-                </EuiTableRow>
-              </EuiTableHeader>
-              <EuiTableBody>
-                {eventLogs.map((log) => (
-                  <EuiTableRow key={log._id}>
-                    <EuiTableRowCell>
-                      {new Date(log['@timestamp']).toLocaleString()}
-                    </EuiTableRowCell>
-                    <EuiTableRowCell>{log.event.action}</EuiTableRowCell>
-                    <EuiTableRowCell>
-                      <EuiBadge
-                        color={
-                          log.kibana.auto_gap_fill.execution.status === 'success'
-                            ? 'success'
-                            : 'danger'
-                        }
-                      >
-                        {log.kibana.auto_gap_fill.execution.status}
-                      </EuiBadge>
-                    </EuiTableRowCell>
-                    <EuiTableRowCell>{log.message}</EuiTableRowCell>
-                  </EuiTableRow>
-                ))}
-              </EuiTableBody>
-            </EuiTable>
-          )}
-
-          {eventLogsPagination.total > eventLogsPagination.perPage && <EuiSpacer size="s" />}
-          {eventLogsPagination.total > eventLogsPagination.perPage && (
-            <EuiPagination
-              pageCount={Math.ceil(eventLogsPagination.total / eventLogsPagination.perPage)}
-              activePage={eventLogsPagination.page - 1}
-              onPageClick={(page) =>
-                setEventLogsPagination((prev) => ({ ...prev, page: page + 1 }))
-              }
-              compressed
-            />
-          )}
+          <EventLogsComponent autoFillId={AUTO_FILL_ID} />
         </>
       )}
     </EuiPanel>

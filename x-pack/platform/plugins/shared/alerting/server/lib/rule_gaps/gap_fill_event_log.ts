@@ -21,9 +21,10 @@ export interface GapFillEventLogData {
     duration_ms: number;
     config: {
       name: string;
-      amountOfGapsToProcessPerRun: number;
+      maxAmountOfGapsToProcessPerRun: number;
+      maxAmountOfRulesToProcessPerRun: number;
       amountOfRetries: number;
-      excludeRuleIds: string[];
+      rulesFilter: string;
       schedule: {
         interval: string;
       };

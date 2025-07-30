@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const getAutoFillSchedulerRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -23,12 +24,7 @@ export const getAutoFillSchedulerRoute = (
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
@@ -40,7 +36,6 @@ export const getAutoFillSchedulerRoute = (
           if (!task) {
             return res.notFound({ body: { message: `Task with id ${id} not found` } });
           }
-          // Return relevant task info
           return res.ok({
             body: {
               ...task,
@@ -59,4 +54,4 @@ export const getAutoFillSchedulerRoute = (
       })
     )
   );
-}; 
+};
