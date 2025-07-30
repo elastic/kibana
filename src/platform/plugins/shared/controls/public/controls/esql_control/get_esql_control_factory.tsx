@@ -10,7 +10,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';

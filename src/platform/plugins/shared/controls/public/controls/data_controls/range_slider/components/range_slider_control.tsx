@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { RangeValue } from '../types';
+import type { RangeValue } from '@kbn/controls-schemas';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';

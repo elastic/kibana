@@ -14,15 +14,14 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
+import type { OptionsListControlState, RangeSliderControlState } from '@kbn/controls-schemas';
 import {
   type ControlGroupRuntimeState,
   type ControlPanelsState,
   type DefaultDataControlState,
 } from '../../../common';
-import type { OptionsListControlState } from '../../../common/options_list';
 import { dataViewsService } from '../../services/kibana_services';
 import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
-import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
 
@@ -57,7 +56,7 @@ export const controlGroupStateBuilder = {
   },
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: RangesliderControlState,
+    controlState: RangeSliderControlState,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {

@@ -9,8 +9,8 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState, SerializedControlState } from '../../common';
-import { OptionsListControlState } from '../../common/options_list';
 import { SerializableControlGroupState } from './types';
 
 export const makeControlOrdersZeroBased = (state: SerializableControlGroupState) => {

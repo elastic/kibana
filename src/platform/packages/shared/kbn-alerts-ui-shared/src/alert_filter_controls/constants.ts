@@ -8,7 +8,7 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import type { OptionsListControlState } from '@kbn/controls-plugin/public';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import type { FilterControlConfig } from './types';
 

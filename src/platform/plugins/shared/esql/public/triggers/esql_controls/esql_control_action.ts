@@ -12,7 +12,8 @@ import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/pub
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';

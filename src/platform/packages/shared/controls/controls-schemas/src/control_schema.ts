@@ -28,10 +28,8 @@ export const controlWidthSchema = schema.oneOf(
   }
 );
 
-export const controlSchema = schema.object(
+export const baseControlSchema = schema.object(
   {
-    type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-    controlConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     id: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the control.' },
@@ -52,3 +50,33 @@ export const controlSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+// TODO width and grow should be specified in the control, not the control state.
+// This is a temporary workaround to support existing types.
+// This should be removed before the public API release.
+export const deprecatedDefaultControlState = schema.object(
+  {
+    width: schema.maybe(controlWidthSchema),
+    grow: schema.maybe(schema.boolean()),
+  },
+  {
+    meta: {
+      deprecated: true,
+      description: 'Width and grow should be specified in the control, not the control state',
+    },
+  }
+);
+
+export const dataControlState = deprecatedDefaultControlState.extends({
+  dataViewId: schema.string({
+    meta: { description: 'ID of the data view associated with the control.' },
+  }),
+  fieldName: schema.string({
+    meta: { description: 'Name of the field associated with the control.' },
+  }),
+  title: schema.maybe(
+    schema.string({
+      meta: { description: 'Title of the control.' },
+    })
+  ),
+});

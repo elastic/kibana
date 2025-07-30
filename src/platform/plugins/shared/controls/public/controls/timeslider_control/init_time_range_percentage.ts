@@ -9,13 +9,14 @@
 
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
+import type { TimeSliderControlState } from '@kbn/controls-schemas';
 import { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
-import { Timeslice, TimesliderControlState } from './types';
+import { Timeslice } from './types';
 
 export const timeRangePercentageComparators: StateComparators<
   Pick<
-    TimesliderControlState,
+    TimeSliderControlState,
     'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
   >
 > = {
@@ -24,7 +25,7 @@ export const timeRangePercentageComparators: StateComparators<
 };
 
 export function initTimeRangePercentage(
-  state: TimesliderControlState,
+  state: TimeSliderControlState,
   onReset: (
     timesliceStartAsPercentageOfTimeRange: number | undefined,
     timesliceEndAsPercentageOfTimeRange: number | undefined
@@ -62,7 +63,7 @@ export function initTimeRangePercentage(
       timesliceStartAsPercentageOfTimeRange$,
       timesliceEndAsPercentageOfTimeRange$
     ).pipe(map(() => undefined)),
-    reinitializeState: (lastSaved?: TimesliderControlState) => {
+    reinitializeState: (lastSaved?: TimeSliderControlState) => {
       timesliceStartAsPercentageOfTimeRange$.next(lastSaved?.timesliceStartAsPercentageOfTimeRange);
       timesliceEndAsPercentageOfTimeRange$.next(lastSaved?.timesliceEndAsPercentageOfTimeRange);
       onReset(

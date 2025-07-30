@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ControlGroupRuntimeState,
-  OptionsListControlState,
-  ControlPanelState,
-} from '@kbn/controls-plugin/public';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
+import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/controls-plugin/public';
 
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { FilterControlConfig } from './types';

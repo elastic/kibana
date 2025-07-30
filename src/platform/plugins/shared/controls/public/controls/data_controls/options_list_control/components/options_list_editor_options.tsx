@@ -11,11 +11,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 
-import type {
-  OptionsListControlState,
-  OptionsListSearchTechnique,
-} from '../../../../../common/options_list';
+import type { OptionsListSearchTechnique } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';
 import { CustomOptionsComponentProps } from '../../types';
