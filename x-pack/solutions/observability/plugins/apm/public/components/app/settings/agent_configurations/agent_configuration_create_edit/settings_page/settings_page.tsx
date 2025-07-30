@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
@@ -61,6 +62,18 @@ export function SettingsPage({
   const [isSaving, setIsSaving] = useState(false);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  const settingsDefinitionsByAgent = useMemo(
+    () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
+    [newConfig.agent_name]
+  );
+
+  const unknownAgentSettings = useMemo(() => {
+    const agentSettingKeys = settingsDefinitionsByAgent.map((setting) => setting.key);
+    return Object.fromEntries(
+      Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key))
+    );
+  }, [settingsDefinitionsByAgent, newConfig.settings]);
 
   const isFormValid = useMemo(() => {
     return (
@@ -189,7 +202,15 @@ export function SettingsPage({
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            <>
+              {renderSettings({
+                unsavedChanges,
+                newConfig,
+                setNewConfig,
+                settingsDefinitionsByAgent,
+              })}
+              <pre>{JSON.stringify(unknownAgentSettings, null, 2)}</pre>
+            </>
           )}
         </form>
       </EuiForm>
@@ -216,33 +237,30 @@ function renderSettings({
   newConfig,
   unsavedChanges,
   setNewConfig,
+  settingsDefinitionsByAgent,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+  settingsDefinitionsByAgent: SettingDefinition[];
 }) {
-  return (
-    settingDefinitions
-
-      // filter out agent specific items that are not applicable
-      // to the selected service
-      .filter(filterByAgent(newConfig.agent_name as AgentName))
-      .map((setting) => (
-        <SettingFormRow
-          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
-          key={setting.key}
-          setting={setting}
-          value={newConfig.settings[setting.key]}
-          onChange={(key, value) => {
-            setNewConfig((prev) => ({
-              ...prev,
-              settings: {
-                ...prev.settings,
-                [key]: value,
-              },
-            }));
-          }}
-        />
-      ))
-  );
+  // filter out agent specific items that are not applicable
+  // to the selected service
+  return settingsDefinitionsByAgent.map((setting) => (
+    <SettingFormRow
+      isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
+      key={setting.key}
+      setting={setting}
+      value={newConfig.settings[setting.key]}
+      onChange={(key, value) => {
+        setNewConfig((prev) => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            [key]: value,
+          },
+        }));
+      }}
+    />
+  ));
 }
