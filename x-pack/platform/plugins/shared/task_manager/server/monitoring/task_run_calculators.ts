@@ -74,8 +74,7 @@ export function filterOutliers(values: number[]): number[] {
   const p25 = stats.percentile(values, 0.25);
   const p75 = stats.percentile(values, 0.75);
   const iqr = p75 - p25;
-  const lowerBound = p25 - 1.5 * iqr;
   const upperBound = p75 + 1.5 * iqr;
 
-  return values.filter((v) => v >= lowerBound && v <= upperBound);
+  return values.filter((v) => v <= upperBound);
 }
