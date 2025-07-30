@@ -7,19 +7,18 @@
 
 import moment from 'moment';
 import { timerange, log, LogDocument } from '@kbn/apm-synthtrace-client';
-import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
+import { SynthtraceFixture } from '@kbn/scout-oblt';
 
 export async function generateFrequentErrorLogs({
   logsSynthtraceEsClient,
   dataset,
   errorMessages,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   errorMessages: Record<string, number>;
 }) {
   const timeRange = timerange(moment().subtract(1, 'day'), moment());
-  const logStreams = [];
   const timeRangeInSeconds = 24 * 60 * 60;
 
   for (const [msg, count] of Object.entries(errorMessages)) {
@@ -35,10 +34,9 @@ export async function generateFrequentErrorLogs({
           tags: ['test-data', 'frequent-errors'],
         })
     );
-    logStreams.push(logStream);
-  }
 
-  await logsSynthtraceEsClient.index(logStreams);
+    await logsSynthtraceEsClient.index(logStream);
+  }
 }
 
 export async function generateNginxLatencyLogs({
@@ -47,7 +45,7 @@ export async function generateNginxLatencyLogs({
   count,
   services,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   count: number;
   services: string[];
@@ -72,12 +70,9 @@ export async function generateNginxLatencyLogs({
       .overrides({ tags: ['test-data', 'nginx-latency'] });
   });
 
-  await logsSynthtraceEsClient.index([logStream]);
+  await logsSynthtraceEsClient.index(logStream);
 }
 
-/**
- * Generate logs for a service with a controllable error ratio across a time window.
- */
 export async function generateServiceErrorRateLogs({
   logsSynthtraceEsClient,
   dataset,
@@ -86,7 +81,7 @@ export async function generateServiceErrorRateLogs({
   intervalMinutes = 5,
   errorRatio = 0.5,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   serviceName: string;
   hours?: number;
@@ -106,19 +101,16 @@ export async function generateServiceErrorRateLogs({
       .message(isError ? 'Simulated error' : 'Request OK');
   });
 
-  await logsSynthtraceEsClient.index([logStream]);
+  await logsSynthtraceEsClient.index(logStream);
 }
 
-/**
- * Generate one or more logs indicating Kubernetes pod restarts within the last 24 h.
- */
 export async function generatePodRestartLogs({
   logsSynthtraceEsClient,
   podName = 'web-123',
   restartCount = 2,
   minutesAgo = 60,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   podName?: string;
   restartCount?: number;
   minutesAgo?: number;
@@ -128,7 +120,7 @@ export async function generatePodRestartLogs({
     moment().subtract(minutesAgo - 1, 'minutes')
   );
 
-  const stream = range.interval('1m').generator((ts) =>
+  const logStream = range.interval('1m').generator((ts) =>
     log
       .create()
       .timestamp(ts.valueOf())
@@ -141,12 +133,9 @@ export async function generatePodRestartLogs({
       } as any)
   );
 
-  await logsSynthtraceEsClient.index([stream]);
+  await logsSynthtraceEsClient.index(logStream);
 }
 
-/**
- * Generate a single log entry containing a specific trace / correlation id.
- */
 export async function generateCorrelationIdLog({
   logsSynthtraceEsClient,
   dataset = 'my_test_app',
@@ -154,7 +143,7 @@ export async function generateCorrelationIdLog({
   correlationId = 'abc123',
   minutesAgo = 10,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset?: string;
   serviceName?: string;
   correlationId?: string;
@@ -165,7 +154,7 @@ export async function generateCorrelationIdLog({
     moment().subtract(minutesAgo - 1, 'minutes')
   );
 
-  const stream = range.interval('1m').generator((ts) =>
+  const logStream = range.interval('1m').generator((ts) =>
     log
       .create()
       .timestamp(ts.valueOf())
@@ -176,7 +165,7 @@ export async function generateCorrelationIdLog({
       .overrides({ 'trace.id': correlationId } as any)
   );
 
-  await logsSynthtraceEsClient.index([stream]);
+  await logsSynthtraceEsClient.index(logStream);
 }
 
 export async function generateApacheErrorSpikeLogs({
@@ -184,7 +173,7 @@ export async function generateApacheErrorSpikeLogs({
   dataset,
   errorMessage,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   errorMessage: string;
 }) {
@@ -221,7 +210,8 @@ export async function generateApacheErrorSpikeLogs({
         })
     );
 
-  await logsSynthtraceEsClient.index([baselineLogs, spikeLogs]);
+  await logsSynthtraceEsClient.index(baselineLogs);
+  await logsSynthtraceEsClient.index(spikeLogs);
 }
 
 export async function generateUniqueUserLoginLogs({
@@ -230,12 +220,11 @@ export async function generateUniqueUserLoginLogs({
   userPool,
   days,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   userPool: string[];
   days: number;
 }) {
-  const logStreams = [];
   const timeRangeInSeconds = 24 * 60 * 60;
 
   for (let day = 0; day < days; day++) {
@@ -264,21 +253,17 @@ export async function generateUniqueUserLoginLogs({
         .logLevel('info')
         .overrides(overrides as unknown as Partial<LogDocument>);
     });
-    logStreams.push(logStream);
-  }
 
-  await logsSynthtraceEsClient.index(logStreams);
+    await logsSynthtraceEsClient.index(logStream);
+  }
 }
 
-/**
- * Generates Nginx logs with a distribution of HTTP status codes.
- */
 export async function generateHttpStatusLogs({
   logsSynthtraceEsClient,
   dataset,
   count,
 }: {
-  logsSynthtraceEsClient: Pick<SynthtraceEsClient<LogDocument>, 'index' | 'clean'>;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
   dataset: string;
   count: number;
 }) {
@@ -307,5 +292,5 @@ export async function generateHttpStatusLogs({
       } as any);
   });
 
-  await logsSynthtraceEsClient.index([logStream]);
+  await logsSynthtraceEsClient.index(logStream);
 }

@@ -145,7 +145,7 @@ describe('ES|QL query generation', () => {
       it('generates a query to show top 20 error messages', async () => {
         await evaluateEsqlQuery({
           question:
-            'From logs-my_app-*, show the 20 most frequent error messages in the last six hours. Log levels have lowercase values (e.g. "error").',
+            'From logs-my_app-*, show the 20 most frequent error messages in the last six hours.',
           expected: `FROM logs-my_app-*
           | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
           | STATS error_count = COUNT(*) BY message
@@ -166,7 +166,7 @@ describe('ES|QL query generation', () => {
       it('count all error logs by dataset', async () => {
         await evaluateEsqlQuery({
           question:
-            'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset. Log levels have lowercase values (e.g. "error").',
+            'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset.',
           expected: `FROM logs-*
           | WHERE @timestamp >= NOW() - 24 hours AND log.level == "error"
           | STATS error_count = COUNT(*) BY data_stream.dataset
@@ -182,7 +182,7 @@ describe('ES|QL query generation', () => {
       it('generates a query for hourly error rate for a service', async () => {
         await evaluateEsqlQuery({
           question:
-            'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it. Log levels have lowercase values (e.g. "error").',
+            'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it.',
           expected: `FROM logs-*
           | WHERE @timestamp >= NOW() - 6 hours AND service.name == "my-service"
           | EVAL is_error = CASE(log.level == "error", 1, 0)
@@ -249,7 +249,7 @@ describe('ES|QL query generation', () => {
       it('generates a query to calculate the apache error count by time interval', async () => {
         await evaluateEsqlQuery({
           question:
-            'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies. Log levels have lowercase values (e.g. "error").',
+            'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies.',
           expected: `FROM logs-apache.error-*
           | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
           | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
@@ -478,8 +478,7 @@ describe('ES|QL query generation', () => {
 
       it('finds top network conversations by total bytes', async () => {
         await evaluateEsqlQuery({
-          question:
-            'What are the top 5 network conversations by total bytes transferred? Ignore null values for client.ip and server.ip',
+          question: 'What are the top 5 network conversations by total bytes transferred?',
           expected: `FROM packetbeat-*
           | WHERE client.ip IS NOT NULL AND server.ip IS NOT NULL
           | EVAL total_bytes = destination.bytes + source.bytes

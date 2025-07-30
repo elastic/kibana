@@ -19,7 +19,7 @@ export async function generatePacketbeatData({
   indexName: string;
 }) {
   await esClient.indices.create({
-    index: 'packetbeat-8.11.3',
+    index: indexName,
     mappings: {
       properties: {
         '@timestamp': {

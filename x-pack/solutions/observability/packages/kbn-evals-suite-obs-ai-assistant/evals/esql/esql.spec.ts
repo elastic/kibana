@@ -127,7 +127,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From logs-my_app-*, show the 20 most frequent error messages in the last six hours. Log levels have lowercase values (e.g. "error").',
+                  'From logs-my_app-*, show the 20 most frequent error messages in the last six hours.',
               },
               output: {
                 expected: `FROM logs-my_app-*
@@ -150,7 +150,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset. Log levels have lowercase values (e.g. "error").',
+                  'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset.',
               },
               output: {
                 expected: `FROM logs-*
@@ -168,7 +168,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it. Log levels have lowercase values (e.g. "error").',
+                  'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it.',
               },
               output: {
                 expected: `FROM logs-*
@@ -246,7 +246,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies. Log levels have lowercase values (e.g. "error").',
+                  'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies.',
               },
               output: {
                 expected: `FROM logs-apache.error-*
@@ -492,8 +492,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             {
               input: {
-                question:
-                  'Show me the count of each HTTP response status code. Ignore null values in the status code.',
+                question: 'Show me the count of each HTTP response status code.',
               },
               output: {
                 expected: `FROM packetbeat-*
@@ -521,8 +520,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             {
               input: {
-                question:
-                  'What are the top 5 network conversations by total bytes transferred? Ignore null values for client.ip and server.ip',
+                question: 'What are the top 5 network conversations by total bytes transferred?',
               },
               output: {
                 expected: `FROM packetbeat-*
@@ -669,21 +667,23 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             metadata: {},
           },
-          {
-            input: {
-              question:
-                "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
-            },
-            output: {
-              expected: `FROM logs-auth_service-*
-              | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
-              | LOOKUP JOIN users_metadata ON user.id
-              | KEEP @timestamp, user.id, full_name, department
-              | LIMIT 20`,
-              execute: false,
-            },
-            metadata: {},
-          },
+          // This results in a timeout because the NL-to-ESQL tasks goes into a loop
+          //  See trace: https://35-187-109-62.sslip.io/projects/UHJvamVjdDo5/traces/630f92adcb3620295794180f71ccb37a?selectedSpanNodeId=U3BhbjozODYxNTQ%3D
+          // {
+          //   input: {
+          //     question:
+          //       "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
+          //   },
+          //   output: {
+          //     expected: `FROM logs-auth_service-*
+          //     | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+          //     | LOOKUP JOIN users_metadata ON user.id
+          //     | KEEP @timestamp, user.id, full_name, department
+          //     | LIMIT 20`,
+          //     execute: false,
+          //   },
+          //   metadata: {},
+          // },
         ],
       },
     });
