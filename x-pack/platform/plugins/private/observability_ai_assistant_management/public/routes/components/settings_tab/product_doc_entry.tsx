@@ -17,18 +17,49 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
+import { useGetProductDoc, ProductDocStatus } from '../../../hooks/use_get_product_doc';
+
+const statusToButtonTextMap: Record<Exclude<ProductDocStatus, 'error'> | 'loading', string> = {
+  installing: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
+    { defaultMessage: 'Installing...' }
+  ),
+  uninstalling: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallingText',
+    { defaultMessage: 'Uninstalling...' }
+  ),
+  installed: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
+    { defaultMessage: 'Uninstall' }
+  ),
+  uninstalled: i18n.translate(
+    'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
+    { defaultMessage: 'Install' }
+  ),
+  loading: i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.loadingText', {
+    defaultMessage: 'Loading...',
+  }),
+};
 
 export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
   const selectedInferenceId = getMappedInferenceId(knowledgeBase.status.value?.currentInferenceId);
 
-  const canInstallProductDoc = selectedInferenceId !== undefined;
+  const canInstallProductDoc =
+    selectedInferenceId !== undefined &&
+    !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
+    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.READY;
 
-  const { status, installProductDoc, uninstallProductDoc } = useGetProductDoc(selectedInferenceId);
+  const {
+    status,
+    isLoading: isStatusLoading,
+    installProductDoc,
+    uninstallProductDoc,
+  } = useGetProductDoc(selectedInferenceId);
 
   const onClickInstall = useCallback(() => {
     if (!selectedInferenceId) {
@@ -63,36 +94,16 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
   }, [overlays, uninstallProductDoc, selectedInferenceId]);
 
   const buttonText = useMemo(() => {
-    switch (status) {
-      case 'installing':
-        return i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
-          { defaultMessage: 'Installing...' }
-        );
-      case 'uninstalling':
-        return i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.uninstallingText',
-          { defaultMessage: 'Uninstalling...' }
-        );
-      case 'loading':
-        return i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.loadingText', {
-          defaultMessage: 'Loading...',
-        });
-      case 'installed':
-        return i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
-          { defaultMessage: 'Uninstall' }
-        );
-      case 'uninstalled':
-      default:
-        return i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-          { defaultMessage: 'Install' }
-        );
+    if (!status || status === 'error' || !canInstallProductDoc) {
+      return statusToButtonTextMap.uninstalled;
     }
-  }, [status]);
+    if (isStatusLoading) {
+      return statusToButtonTextMap.loading;
+    }
+    return statusToButtonTextMap[status];
+  }, [status, isStatusLoading, canInstallProductDoc]);
 
-  const isLoading = status === 'loading' || status === 'installing' || status === 'uninstalling';
+  const isLoading = isStatusLoading || status === 'installing' || status === 'uninstalling';
 
   const content = useMemo(() => {
     if (status === 'installed') {
