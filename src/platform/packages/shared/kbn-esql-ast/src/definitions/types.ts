@@ -299,10 +299,6 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; value: string; supportedOptions: string };
   };
-  shadowFieldType: {
-    message: string;
-    type: { field: string; fieldType: string; newType: string };
-  };
   unsupportedColumnTypeForCommand: {
     message: string;
     type: { command: string; type: string; givenType: string; column: string };

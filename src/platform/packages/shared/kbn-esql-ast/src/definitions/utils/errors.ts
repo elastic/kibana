@@ -110,15 +110,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name, argType: out.argType },
         }),
       };
-    case 'shadowFieldType':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.typeOverwrite', {
-          defaultMessage:
-            'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
-          values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
-        }),
-        type: 'warning',
-      };
     case 'unsupportedColumnTypeForCommand':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand', {
