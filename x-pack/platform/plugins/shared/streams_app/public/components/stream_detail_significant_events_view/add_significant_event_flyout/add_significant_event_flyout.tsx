@@ -44,6 +44,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       ...query,
     },
   ]);
+  const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const parsedQueries = useMemo(() => {
@@ -72,6 +73,9 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
               isEditMode={isEditMode}
               setQuery={(next: StreamQueryKql) => setQueries([next])}
               query={queries[0]}
+              setCanSave={(next: boolean) => {
+                setCanSave(next);
+              }}
               definition={definition}
             />
           )}
@@ -94,7 +98,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
             color="primary"
             fill
             iconType="plusInCircle"
-            disabled={isSubmitting || !parsedQueries.success}
+            disabled={isSubmitting || !parsedQueries.success || !canSave}
             isLoading={isSubmitting}
             onClick={() => {
               if (!parsedQueries.success) {

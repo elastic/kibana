@@ -47,6 +47,7 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
       type="bar"
       annotations={annotations}
       xFormatter={xFormatter}
+      compressed
     />
   );
 }

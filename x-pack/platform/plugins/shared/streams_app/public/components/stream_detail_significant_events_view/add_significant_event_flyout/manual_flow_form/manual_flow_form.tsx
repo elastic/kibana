@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
@@ -33,9 +33,10 @@ interface Props {
   setQuery: (query: StreamQueryKql) => void;
   query: StreamQueryKql;
   isEditMode: boolean;
+  setCanSave: (canSave: boolean) => void;
 }
 
-export function ManualFlowForm({ definition, query, setQuery, isEditMode }: Props) {
+export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCanSave }: Props) {
   const {
     dependencies: {
       start: { data },
@@ -74,6 +75,12 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode }: Prop
           : {},
     };
   }, [validation, touched]);
+
+  useEffect(() => {
+    const isValid = !validation.title && !validation.kql;
+    const isTouched = touched.title || touched.kql;
+    setCanSave(isValid && isTouched);
+  }, [validation, setCanSave, touched.title, touched.kql]);
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
@@ -170,7 +177,6 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode }: Prop
               { defaultMessage: 'What are you looking for?' }
             )}
             indexPatterns={dataViewsFetch.value}
-            submitOnBlur
           />
         </EuiFormRow>
       </EuiForm>
