@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { isNotNullish } from '@opentelemetry/sdk-metrics-base/build/src/utils';
-
 import { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
+import { isNotNullish } from '../../common/utils/is_not_nullish';
 
 // TODO add safety to prevent an OOM error if the query results are too enough
 

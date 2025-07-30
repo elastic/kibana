@@ -7,16 +7,16 @@
 
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { BasicMetricValueRT } from '@kbn/metrics-data-access-plugin/server';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
-import type { InfraAssetMetadataType } from '../../../../../common/http_api';
+import type { InfraEntityMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
 import {
-  getFilterByIntegration,
+  getFilterForEntityType,
   getInventoryModelAggregations,
   getDocumentsFilter,
 } from '../helpers/query';
-import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async ({
   infraMetricsClient,
@@ -27,16 +27,18 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
+  schema,
 }: Pick<
   GetHostParameters,
-  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics'
+  'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'
 > & {
   hostNames: string[];
   apmDocumentSources?: TimeRangeMetadata['sources'];
 }) => {
-  const metricAggregations = getInventoryModelAggregations(
+  const metricAggregations = await getInventoryModelAggregations(
     'host',
-    metrics.map((metric) => metric)
+    metrics.map((metric) => metric),
+    schema
   );
 
   const documentsFilter = await getDocumentsFilter({
@@ -44,6 +46,7 @@ export const getAllHosts = async ({
     apmDocumentSources,
     from,
     to,
+    schema,
   });
 
   const response = await infraMetricsClient.search({
@@ -60,7 +63,7 @@ export const getAllHosts = async ({
     aggs: {
       // find hosts with metrics that are monitored by the system integration.
       monitoredHosts: {
-        filter: getFilterByIntegration('system'),
+        filter: getFilterForEntityType('host'),
         aggs: {
           names: {
             terms: {
@@ -130,7 +133,7 @@ export const getAllHosts = async ({
       const metadata = (bucket?.metadata.top ?? [])
         .flatMap((top) => Object.entries(top.metrics))
         .map(([key, value]) => ({
-          name: key as InfraAssetMetadataType,
+          name: key as InfraEntityMetadataType,
           value: typeof value === 'string' && value.trim().length === 0 ? null : value,
         }));
 

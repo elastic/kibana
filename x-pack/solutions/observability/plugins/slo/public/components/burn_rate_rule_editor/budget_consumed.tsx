@@ -56,6 +56,7 @@ export function BudgetConsumed({
       isInvalid={hasError}
     >
       <EuiFieldNumber
+        isInvalid={hasError}
         fullWidth
         step={0.01}
         min={0.01}

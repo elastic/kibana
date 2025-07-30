@@ -12,6 +12,11 @@ import { PipelineStructureTree } from './pipeline_structure_tree';
 const meta: Meta<typeof PipelineStructureTree> = {
   component: PipelineStructureTree,
   title: 'Ingest Pipelines/Pipeline Structure Tree',
+  argTypes: {
+    isExtension: {
+      name: 'Is the tree an extension of the main tree?',
+    },
+  },
 };
 
 export default meta;
@@ -81,5 +86,6 @@ const pipelineTree = {
 export const Primary: Story = {
   args: {
     pipelineTree,
+    isExtension: false,
   },
 };

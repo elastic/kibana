@@ -9,7 +9,7 @@ import React from 'react';
 import { ConversationTitle } from './conversation_title';
 import { ConversationActions } from './conversation_actions';
 import { ConversationGrid } from './conversation_grid';
-import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
+import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 import { useConversation } from '../../hooks/use_conversation';
 
 interface ConversationHeaderProps {

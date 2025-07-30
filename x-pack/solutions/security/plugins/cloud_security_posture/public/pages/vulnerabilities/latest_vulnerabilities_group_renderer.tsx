@@ -18,8 +18,9 @@ import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
+import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
-import { VulnerabilitiesGroupingAggregation } from './hooks/use_grouped_vulnerabilities';
 import { VULNERABILITIES_GROUPING_COUNTER } from './test_subjects';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT, VULNERABILITIES } from './translations';
 import {
@@ -72,7 +73,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     `}
                     title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
+                    {getGroupPanelTitle(bucket, 'resourceName')}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -93,9 +94,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle(bucket, 'accountName')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
@@ -114,9 +113,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>{bucket.key_as_string}</strong>
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle(bucket)}</EuiText>
               </EuiFlexItem>
               {description && (
                 <EuiFlexItem>

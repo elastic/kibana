@@ -20,7 +20,9 @@ import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
+  ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
@@ -97,6 +99,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getTimeseriesIndices: [],
   getEditorExtensions: [],
   getInferenceEndpoints: [],
+  getLicense: [],
 };
 
 /**
@@ -163,13 +166,24 @@ async function validateAst(
     joinIndices: joinIndices?.indices || [],
   };
 
+  const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
   for (const [_, command] of rootCommands.entries()) {
-    const commandMessages = validateCommand(command, references, rootCommands);
+    const commandMessages = validateCommand(command, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 
   const parserErrors = parsingResult.errors;
 
+  /**
+   * Some changes to the grammar deleted the literal names for some tokens.
+   * This is a workaround to restore the literals that were lost.
+   *
+   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+   */
   for (const error of parserErrors) {
     error.message = error.message.replace(/\bLP\b/, "'('");
     error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
@@ -184,7 +198,8 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst
+  ast: ESQLAst,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -195,6 +210,24 @@ function validateCommand(
 
   if (!commandDefinition) {
     return messages;
+  }
+
+  // Check license requirements for the command
+  if (callbacks?.hasMinimumLicenseRequired) {
+    const license = commandDefinition.metadata.license;
+
+    if (license && !callbacks.hasMinimumLicenseRequired(license.toLowerCase() as ESQLLicenseType)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'licenseRequired',
+          values: {
+            name: command.name.toUpperCase(),
+            requiredLicense: license.toUpperCase(),
+          },
+          locations: command.location,
+        })
+      );
+    }
   }
 
   const context = {
@@ -208,7 +241,7 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    messages.push(...commandDefinition.methods.validate(command, ast, context));
+    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
   }
 
   // no need to check for mandatory options passed

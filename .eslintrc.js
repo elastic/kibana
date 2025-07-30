@@ -773,7 +773,6 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -788,14 +787,18 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
-        'x-pack/test/upgrade_assistant_integration/**/*',
+        'x-pack/platform/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
+        'x-pack/platform/test/serverless/shared/config*.ts',
+        'x-pack/platform/test/serverless/*/test_suites/**/*',
+        'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
         'x-pack/test/security_solution_api_integration/**/config*.ts',
+        '**/playwright.config.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -1111,7 +1114,7 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
+              '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
@@ -1609,7 +1612,7 @@ module.exports = {
       settings: {
         playwright: {
           globalAliases: {
-            test: ['test', 'spaceTest'],
+            test: ['test', 'spaceTest', 'apiTest'],
           },
         },
       },
@@ -1812,7 +1815,7 @@ module.exports = {
         'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
-        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
@@ -2113,8 +2116,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
@@ -2280,7 +2283,7 @@ module.exports = {
         // Ideally, we need to classify the solution specific ones to reduce CI times
         'x-pack/test_serverless/**',
         'x-pack/test/**',
-        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',

@@ -47,6 +47,7 @@ export const KeywordSearch: React.FC = () => {
       }
     ),
     dataTestSubj: 'createKeywordIndexButton',
+    workflow: 'default',
   };
 
   return <AISearchWorkflow capability={keywordSearchText} />;
