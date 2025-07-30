@@ -341,13 +341,34 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
   totalAgents: schema.number(),
 });
 
+export const OTelCollectorPipelineIDSchema = schema.oneOf([
+  schema.literal('logs'),
+  schema.literal('metrics'),
+  schema.literal('traces'),
+  schema.string(),
+]);
+
+export const OTelCollectorPipelineSchema = schema.maybe(
+  schema.object({
+    receivers: schema.maybe(schema.arrayOf(schema.string())),
+    processors: schema.maybe(schema.arrayOf(schema.string())),
+    exporters: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
 export const OtelCollectorConfigSchema = {
-  extensions: schema.maybe(schema.any()),
-  receivers: schema.maybe(schema.any()),
-  processors: schema.maybe(schema.any()),
-  service: schema.maybe(schema.any()),
-  connectors: schema.maybe(schema.any()),
-  exporters: schema.maybe(schema.any()),
+  extensions: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  receivers: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  processors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  connectors: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  exporters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  service: schema.maybe(
+    schema.object({
+      extensions: schema.maybe(schema.arrayOf(schema.string())),
+      pipelines: schema.maybe(
+        schema.recordOf(OTelCollectorPipelineIDSchema, OTelCollectorPipelineSchema)
+      ),
+    })
+  ),
 };
 
 export const FullAgentPolicyResponseSchema = schema.object({
