@@ -13,6 +13,7 @@ import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 import { removePrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
+export type EngineStatusService = ReturnType<typeof EngineStatusService>;
 export const EngineStatusService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract

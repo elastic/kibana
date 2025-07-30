@@ -26,6 +26,7 @@ import {
 } from '../saved_objects';
 import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
 
+export type InitialisationService = ReturnType<typeof InitialisationService>;
 export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
   const { taskManager } = deps;
@@ -114,7 +115,6 @@ export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient)
       deps.telemetry?.reportEvent(PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
         error: e.message,
       });
-
       await descriptorClient.update({
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
         error: {
@@ -123,6 +123,8 @@ export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient)
           action: 'init',
         },
       });
+
+      return { status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR };
     }
 
     return descriptor;
