@@ -28,7 +28,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
-import { getTimeRangeAsDays } from '../components/ai_value/utils';
+import { getTimeRangeAsDays } from '../components/ai_value/metrics';
 
 /**
  * The dashboard includes key performance metrics such as:

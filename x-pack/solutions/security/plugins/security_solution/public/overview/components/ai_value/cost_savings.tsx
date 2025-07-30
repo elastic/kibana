@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { formatDollars } from './metrics';
+import { getTimeRangeAsDays, formatDollars } from './metrics';
 import { ComparePercentageBadge } from './compare_percentage_badge';
-import { getTimeRangeAsDays } from './utils';
 import { CostSavingsMetric } from './cost_savings_metric';
 import * as i18n from './translations';
 

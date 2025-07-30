@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { formatNumber } from '@elastic/eui';
+import moment from 'moment/moment';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 // Define AlertData type if not already imported
@@ -81,14 +82,20 @@ export const formatThousands = (value: number) =>
 export const formatPercent = (value: number) =>
   `${formatNumber(roundTo(value, 2), { format: '0.00' })}%`;
 
-function roundTo(value: number, decimals: number) {
-  const factor = 10 ** decimals;
-  return Math.round(value * factor) / factor;
-}
-
 export const getFormattedPercChange = (currentCount: number, previousCount: number): string => {
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
 
   const isNegative = percentageChange.charAt(0) === '-';
   return isNegative ? percentageChange.slice(1) : percentageChange;
 };
+
+export const getTimeRangeAsDays = ({ from, to }: { from: string; to: string }): string => {
+  const duration = moment.duration(moment(to).diff(moment(from)));
+  const days = duration.asDays();
+  return days < 1 ? `${roundTo(days, 2)}` : `${Math.round(days)}`;
+};
+
+function roundTo(value: number, decimals: number) {
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}

@@ -19,8 +19,13 @@ import { css } from '@emotion/react';
 import { CostSavings } from './cost_savings';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 import { ComparePercentage } from './compare_percentage';
-import { getTimeRangeAsDays } from './utils';
-import { formatDollars, formatPercent, formatThousands, getFormattedPercChange } from './metrics';
+import {
+  getTimeRangeAsDays,
+  formatDollars,
+  formatPercent,
+  formatThousands,
+  getFormattedPercChange,
+} from './metrics';
 import * as i18n from './translations';
 import type { ValueMetrics } from './metrics';
 import logo from './logo.svg';
