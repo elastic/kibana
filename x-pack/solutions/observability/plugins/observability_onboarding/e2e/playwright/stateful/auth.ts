@@ -7,11 +7,12 @@
 
 import { test as ess_auth, expect } from '@playwright/test';
 import { STORAGE_STATE } from '../playwright.config';
-import { waitForOneOf, isServerless } from '../lib/helpers';
+import { waitForOneOf } from '../lib/helpers';
 import { log } from '../lib/logger';
 import { assertEnv } from '../lib/assert_env';
 
 const isLocalCluster = process.env.CLUSTER_ENVIRONMENT === 'local';
+const isServerless = process.env.CLUSTER_ENVIRONMENT === 'serverless';
 
 ess_auth('Authentication', async ({ page }) => {
   assertEnv(process.env.KIBANA_BASE_URL, 'KIBANA_BASE_URL is not defined.');
@@ -19,8 +20,6 @@ ess_auth('Authentication', async ({ page }) => {
   assertEnv(process.env.KIBANA_PASSWORD, 'KIBANA_PASSWORD is not defined.');
 
   await page.goto(process.env.KIBANA_BASE_URL);
-  log.info('Detecting login flow...');
-
   if (isServerless) {
     log.info('Using serverless login flow');
     await loginServerless(page);

@@ -11,8 +11,6 @@ import { SpaceSelector } from '../stateful/pom/components/space_selector.compone
 
 type WaitForRes = [locatorIndex: number, locator: Locator];
 
-export const isServerless = process.env.CLUSTER_ENVIRONMENT?.toLowerCase() === 'serverless';
-
 export async function waitForOneOf(locators: Locator[]): Promise<WaitForRes> {
   const res = await Promise.race([
     ...locators.map(async (locator, index): Promise<WaitForRes> => {
