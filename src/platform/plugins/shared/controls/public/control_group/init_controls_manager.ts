@@ -17,16 +17,15 @@ import type {
   PresentationContainer,
 } from '@kbn/presentation-containers';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { ControlWidth, ControlsGroupState } from '@kbn/controls-schemas';
+import { DEFAULT_CONTROL_WIDTH, DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
-  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
-  ControlWidth,
   DefaultControlState,
   DefaultDataControlState,
 } from '../../common';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../common';
 import type { DefaultControlApi } from '../controls/types';
 import type { ControlGroupApi } from './types';
 
@@ -142,7 +141,7 @@ export function initControlsManager(
     serializeControls: () => {
       const references: Reference[] = [];
 
-      const controls: ControlGroupSerializedState['controls'] = [];
+      const controls: ControlsGroupState['controls'] = [];
 
       controlsInOrder$.getValue().forEach(({ id }, index) => {
         const controlApi = getControlApi(id);
