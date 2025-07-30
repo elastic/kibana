@@ -72,7 +72,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     accountId = '',
     currentTime,
     dropPartialBuckets = true,
-    kuery: filterQuery,
+    kuery,
     groupBy = null,
     includeTimeseries = true,
     metrics,
@@ -87,7 +87,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
   return {
     accountId,
     dropPartialBuckets,
-    kuery: filterQuery,
+    kuery,
     groupBy,
     includeTimeseries,
     metrics,

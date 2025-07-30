@@ -93,6 +93,13 @@ export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) =
     [options.metric]
   );
 
+  const onDrilldown = useCallback(
+    (expression: string) => {
+      applyFilterQuery(expression);
+    },
+    [applyFilterQuery]
+  );
+
   useEffect(() => {
     setShowLoading(true);
   }, [options.metric, nodeType]);
@@ -160,7 +167,7 @@ export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) =
                   loading={loading}
                   showLoading={showLoading}
                   reload={reload}
-                  onDrilldown={applyFilterQuery}
+                  onDrilldown={onDrilldown}
                   currentTime={currentTime}
                   view={view}
                   autoBounds={autoBounds}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
@@ -47,27 +47,27 @@ export const useWaffleTime = () => {
     urlStateKey: 'waffleTime',
   });
 
-  const [state, setState] = useState<WaffleTimeState>(urlState);
-
   useEffect(() => {
-    setUrlState(state);
-  }, [setUrlState, state]);
+    if (currentView) {
+      setUrlState(mapInventoryViewToState(currentView));
+    }
+  }, [currentView, setUrlState]);
 
   const { currentTime, isAutoReloading } = urlState;
 
   const startAutoReload = useCallback(() => {
-    setState((previous) => ({ ...previous, isAutoReloading: true, currentTime: Date.now() }));
-  }, [setState]);
+    setUrlState((previous) => ({ ...previous, isAutoReloading: true, currentTime: Date.now() }));
+  }, [setUrlState]);
 
   const stopAutoReload = useCallback(() => {
-    setState((previous) => ({ ...previous, isAutoReloading: false }));
-  }, [setState]);
+    setUrlState((previous) => ({ ...previous, isAutoReloading: false }));
+  }, [setUrlState]);
 
   const jumpToTime = useCallback(
     (time: number) => {
-      setState((previous) => ({ ...previous, currentTime: time }));
+      setUrlState((previous) => ({ ...previous, currentTime: time }));
     },
-    [setState]
+    [setUrlState]
   );
 
   const currentTimeRange = {
@@ -83,7 +83,7 @@ export const useWaffleTime = () => {
     startAutoReload,
     stopAutoReload,
     jumpToTime,
-    setWaffleTimeState: setState,
+    setWaffleTimeState: setUrlState,
   };
 };
 

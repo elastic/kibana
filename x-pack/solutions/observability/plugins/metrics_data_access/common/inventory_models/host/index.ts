@@ -18,42 +18,6 @@ import {
   SYSTEM_INTEGRATION,
 } from '../../constants';
 
-const getFilterForEntityType = (args?: {
-  schema?: DataSchemaFormat;
-}): estypes.QueryDslQueryContainer[] => {
-  const { schema = DataSchemaFormat.ECS } = args ?? {};
-  return [
-    {
-      bool:
-        schema === DataSchemaFormat.ECS
-          ? {
-              should: [
-                {
-                  term: {
-                    [EVENT_MODULE]: SYSTEM_INTEGRATION,
-                  },
-                },
-                {
-                  term: {
-                    [METRICSET_MODULE]: SYSTEM_INTEGRATION,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter: [
-                {
-                  term: {
-                    [DATASTREAM_DATASET]: HOST_METRICS_RECEIVER_OTEL,
-                  },
-                },
-              ],
-            },
-    },
-  ];
-};
-
 export const host = createInventoryModel('host', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.host.displayName', {
     defaultMessage: 'Hosts',
@@ -82,5 +46,37 @@ export const host = createInventoryModel('host', {
     cloudProvider: 'cloud.provider',
   },
   metrics,
-  nodeFilter: getFilterForEntityType,
+  nodeFilter: (args?: { schema?: DataSchemaFormat }): estypes.QueryDslQueryContainer[] => {
+    const { schema = DataSchemaFormat.ECS } = args ?? {};
+    return [
+      {
+        bool:
+          schema === DataSchemaFormat.ECS
+            ? {
+                should: [
+                  {
+                    term: {
+                      [EVENT_MODULE]: SYSTEM_INTEGRATION,
+                    },
+                  },
+                  {
+                    term: {
+                      [METRICSET_MODULE]: SYSTEM_INTEGRATION,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              }
+            : {
+                filter: [
+                  {
+                    term: {
+                      [DATASTREAM_DATASET]: HOST_METRICS_RECEIVER_OTEL,
+                    },
+                  },
+                ],
+              },
+      },
+    ];
+  },
 });

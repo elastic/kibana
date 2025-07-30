@@ -67,10 +67,11 @@ describe('useWaffleFilters', () => {
       expression: 'foo',
       kind: 'kuery',
     } as WaffleFiltersState;
+
     act(() => {
-      result.current.applyFilterQuery(newQuery);
+      result.current.applyFilterQuery(newQuery.expression);
     });
     rerender();
-    expect(PREFILL.filterQuery).toEqual(newQuery.expression);
+    expect(PREFILL.filterQuery).toEqual(newQuery);
   });
 });

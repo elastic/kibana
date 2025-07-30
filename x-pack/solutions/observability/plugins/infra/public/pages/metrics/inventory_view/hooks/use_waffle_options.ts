@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -97,97 +97,100 @@ export const useWaffleOptions = () => {
     urlStateKey: 'waffleOptions',
   });
 
-  const [state, setState] = useState<WaffleOptionsState>(urlState);
-
-  useEffect(() => setUrlState(state), [setUrlState, state]);
+  useEffect(() => {
+    if (currentView) {
+      setUrlState(mapInventoryViewToState(currentView));
+    }
+  }, [currentView, setUrlState]);
 
   const changeMetric = useCallback(
-    (metric: SnapshotMetricInput) => setState((previous) => ({ ...previous, metric })),
-    [setState]
+    (metric: SnapshotMetricInput) => setUrlState((previous) => ({ ...previous, metric })),
+    [setUrlState]
   );
 
   const changeGroupBy = useCallback(
-    (groupBy: SnapshotGroupBy) => setState((previous) => ({ ...previous, groupBy })),
-    [setState]
+    (groupBy: SnapshotGroupBy) => setUrlState((previous) => ({ ...previous, groupBy })),
+    [setUrlState]
   );
 
   const changeNodeType = useCallback(
-    (nodeType: InventoryItemType) => setState((previous) => ({ ...previous, nodeType })),
-    [setState]
+    (nodeType: InventoryItemType) => setUrlState((previous) => ({ ...previous, nodeType })),
+    [setUrlState]
   );
 
   const changeView = useCallback(
-    (view: string) => setState((previous) => ({ ...previous, view: view as InventoryViewOptions })),
-    [setState]
+    (view: string) =>
+      setUrlState((previous) => ({ ...previous, view: view as InventoryViewOptions })),
+    [setUrlState]
   );
 
   const changeCustomOptions = useCallback(
     (customOptions: Array<{ text: string; field: string }>) =>
-      setState((previous) => ({ ...previous, customOptions })),
-    [setState]
+      setUrlState((previous) => ({ ...previous, customOptions })),
+    [setUrlState]
   );
 
   const changeAutoBounds = useCallback(
-    (autoBounds: boolean) => setState((previous) => ({ ...previous, autoBounds })),
-    [setState]
+    (autoBounds: boolean) => setUrlState((previous) => ({ ...previous, autoBounds })),
+    [setUrlState]
   );
 
   const changeBoundsOverride = useCallback(
     (boundsOverride: { min: number; max: number }) =>
-      setState((previous) => ({ ...previous, boundsOverride })),
-    [setState]
+      setUrlState((previous) => ({ ...previous, boundsOverride })),
+    [setUrlState]
   );
 
   const changeAccount = useCallback(
-    (accountId: string) => setState((previous) => ({ ...previous, accountId })),
-    [setState]
+    (accountId: string) => setUrlState((previous) => ({ ...previous, accountId })),
+    [setUrlState]
   );
 
   const changeRegion = useCallback(
-    (region: string) => setState((previous) => ({ ...previous, region })),
-    [setState]
+    (region: string) => setUrlState((previous) => ({ ...previous, region })),
+    [setUrlState]
   );
 
   const changeCustomMetrics = useCallback(
     (customMetrics: SnapshotCustomMetricInput[]) => {
-      setState((previous) => ({ ...previous, customMetrics }));
+      setUrlState((previous) => ({ ...previous, customMetrics }));
     },
-    [setState]
+    [setUrlState]
   );
 
   const changeLegend = useCallback(
     (legend: WaffleLegendOptions) => {
-      setState((previous) => ({ ...previous, legend }));
+      setUrlState((previous) => ({ ...previous, legend }));
     },
-    [setState]
+    [setUrlState]
   );
 
   const changeSort = useCallback(
     (sort: WaffleSortOption) => {
-      setState((previous) => ({ ...previous, sort }));
+      setUrlState((previous) => ({ ...previous, sort }));
     },
-    [setState]
+    [setUrlState]
   );
 
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
     const { setNodeType, setMetric, setCustomMetrics, setAccountId, setRegion } = inventoryPrefill;
-    setNodeType(state.nodeType);
-    setMetric(state.metric);
-    setCustomMetrics(state.customMetrics);
+    setNodeType(urlState.nodeType);
+    setMetric(urlState.metric);
+    setCustomMetrics(urlState.customMetrics);
     // only shows for AWS when there are accounts info
-    setAccountId(state.accountId);
+    setAccountId(urlState.accountId);
     // only shows for AWS when there are regions info
-    setRegion(state.region);
-  }, [state, inventoryPrefill]);
+    setRegion(urlState.region);
+  }, [urlState, inventoryPrefill]);
 
   const changeTimelineOpen = useCallback(
-    (timelineOpen: boolean) => setState((previous) => ({ ...previous, timelineOpen })),
-    [setState]
+    (timelineOpen: boolean) => setUrlState((previous) => ({ ...previous, timelineOpen })),
+    [setUrlState]
   );
 
   return {
-    ...state,
+    ...urlState,
     changeMetric,
     changeGroupBy,
     changeNodeType,
@@ -201,7 +204,7 @@ export const useWaffleOptions = () => {
     changeLegend,
     changeSort,
     changeTimelineOpen,
-    setWaffleOptionsState: setState,
+    setWaffleOptionsState: setUrlState,
   };
 };
 

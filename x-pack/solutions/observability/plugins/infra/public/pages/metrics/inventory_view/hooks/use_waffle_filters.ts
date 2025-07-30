@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -19,15 +19,6 @@ import {
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useInventoryViewsContext } from './use_inventory_views';
-
-const validateKuery = (expression: string) => {
-  try {
-    fromKueryExpression(expression);
-  } catch (err) {
-    return false;
-  }
-  return true;
-};
 
 export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
   kind: 'kuery',
@@ -48,44 +39,41 @@ export const useWaffleFilters = () => {
     urlStateKey: 'waffleFilter',
   });
 
-  const [state, setState] = useState<InventoryFiltersState>(urlState);
-
-  useEffect(() => setUrlState(state), [setUrlState, state]);
-
-  const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
-
-  const applyFilterQueryFromKueryExpression = useCallback(
-    (expression: string) => {
-      setState((previous) => ({
-        ...previous,
-        kind: 'kuery',
-        expression,
-      }));
-    },
-    [setState]
-  );
-
-  const applyFilterQuery = useCallback((filterQuery: InventoryFiltersState) => {
-    setState(filterQuery);
-    setFilterQueryDraft(filterQuery.expression);
+  const isValidKuery = useCallback((expression: string) => {
+    try {
+      fromKueryExpression(expression);
+    } catch (err) {
+      return false;
+    }
+    return true;
   }, []);
 
-  const isFilterQueryDraftValid = useMemo(
-    () => validateKuery(filterQueryDraft),
-    [filterQueryDraft]
+  useEffect(() => {
+    if (currentView) {
+      setUrlState(mapInventoryViewToState(currentView));
+    }
+  }, [currentView, setUrlState]);
+
+  const applyFilterQuery = useCallback(
+    (query: string) => {
+      if (isValidKuery(query)) {
+        setUrlState({ kind: 'kuery', expression: query });
+      }
+    },
+    [isValidKuery, setUrlState]
   );
 
   const { inventoryPrefill } = useAlertPrefillContext();
   const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
-  useEffect(() => prefillContext.setKuery(state.expression), [prefillContext, state]);
+  useEffect(
+    () => prefillContext.setKuery(urlState.expression),
+    [prefillContext, urlState.expression]
+  );
 
   return {
     filterQuery: urlState,
-    filterQueryDraft,
     applyFilterQuery,
-    setFilterQueryDraftFromKueryExpression: setFilterQueryDraft,
-    applyFilterQueryFromKueryExpression,
-    isFilterQueryDraftValid,
+    isValidKuery,
     setWaffleFiltersState: applyFilterQuery,
   };
 };
