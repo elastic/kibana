@@ -29,6 +29,7 @@ export const registerBootstrapRoute = ({
       options: {
         tags: ['api'],
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: false,
     },
@@ -59,6 +60,7 @@ export const registerBootstrapRoute = ({
         authRequired: 'optional',
         tags: ['api'],
         access: 'public',
+        excludeFromRateLimiter: true,
       },
       validate: false,
     },

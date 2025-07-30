@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiAutoSizer,
   EuiSkeletonRectangle,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
@@ -54,7 +53,7 @@ export const GridColumn = ({
 
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3}>
+      <EuiFlexGrid gutterSize="l" columns={3} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
           <EuiFlexItem key={index} grow={3}>
             <EuiSkeletonRectangle height="160px" width="100%" />
@@ -66,7 +65,13 @@ export const GridColumn = ({
 
   if (!list.length) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="emptyState" style={emptyStateStyles}>
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={3}
+        data-test-subj="emptyState"
+        style={emptyStateStyles}
+        alignItems="start"
+      >
         <EuiFlexItem grow={3}>
           <EuiText>
             <p>
@@ -100,7 +105,7 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGroup gutterSize="m" responsive={true}>
+            <EuiFlexGrid columns={3} gutterSize="l" alignItems="start">
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
@@ -116,7 +121,7 @@ export const GridColumn = ({
                   <PackageCard {...item} showLabels={showCardLabels} />
                 </EuiFlexItem>
               ))}
-            </EuiFlexGroup>
+            </EuiFlexGrid>
             <EuiSpacer size="m" />
           </div>
         )}
@@ -151,7 +156,7 @@ export const GridColumn = ({
               isScrolling={isScrolling}
               onScroll={onChildScroll}
               overscanRowCount={2}
-              rowCount={list.length / 3}
+              rowCount={Math.ceil(list.length / 3)}
               deferredMeasurementCache={rowMeasurementCache.current}
               rowHeight={rowMeasurementCache.current.rowHeight}
               rowRenderer={rowRenderer}

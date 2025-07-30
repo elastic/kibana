@@ -117,8 +117,8 @@ export const flyoutCreateDrilldownAction: ActionDefinition<EmbeddableApiContext>
       flyoutProps: {
         'data-test-subj': 'createDrilldownFlyout',
         'aria-labelledby': 'drilldownFlyoutTitleAriaId',
+        focusedPanelId: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
       },
-      uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
     });
   },
 };

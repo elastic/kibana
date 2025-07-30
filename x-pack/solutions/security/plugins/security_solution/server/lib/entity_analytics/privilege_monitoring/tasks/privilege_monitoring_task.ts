@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
+import { type Logger, type AnalyticsServiceSetup, type AuditLogger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -211,6 +211,47 @@ export const startPrivilegeMonitoringTask = async ({
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`
     );
+    throw e;
+  }
+};
+
+export const removePrivilegeMonitoringTask = async ({
+  taskManager,
+  namespace,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  logger: Logger;
+}) => {
+  const taskId = getTaskId(namespace);
+  try {
+    await taskManager.removeIfExists(taskId);
+    logger.info(`Removed privilege monitoring task with id ${taskId}`);
+  } catch (e) {
+    logger.warn(
+      `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
+    );
+    throw e;
+  }
+};
+
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+
+  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  try {
+    await taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };
