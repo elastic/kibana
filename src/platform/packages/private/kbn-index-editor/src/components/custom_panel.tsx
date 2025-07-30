@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +27,7 @@ export const CustomPanel = () => {
     },
   } = useKibana<KibanaContextExtra>();
 
-  const query = useObservable(indexUpdateService.query$, '');
+  const [localQuery, setLocalQuery] = useState<string>('');
 
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const dataView = useObservable(indexUpdateService.dataView$);
@@ -61,9 +61,9 @@ export const CustomPanel = () => {
             timeRangeForSuggestionsOverride={false}
             indexPatterns={[dataView]}
             appName={'discover'}
-            query={{ language: 'kuery', query }}
+            query={{ language: 'kuery', query: localQuery }}
             onChange={(queryUpdate) => {
-              indexUpdateService.setQuery(queryUpdate.query as string);
+              setLocalQuery(queryUpdate.query as string);
             }}
             onSubmit={(queryUpdate) => {
               indexUpdateService.setQuery(queryUpdate.query as string);

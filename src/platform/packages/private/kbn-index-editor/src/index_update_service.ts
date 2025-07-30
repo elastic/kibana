@@ -374,7 +374,7 @@ export class IndexUpdateService {
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         // Query updates
-        this._query$.pipe(debounceTime(500)),
+        this._query$,
         this._refreshSubject$,
       ])
         .pipe(
