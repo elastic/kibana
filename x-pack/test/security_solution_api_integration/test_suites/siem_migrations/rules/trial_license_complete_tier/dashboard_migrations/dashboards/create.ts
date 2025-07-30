@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
       migrationId = response.body.migration_id;
     });
 
-    it('should create migrations with provided id', async () => {
+    it('should create dashboards in provided migrationId id', async () => {
       await dashboardMigrationRoutes.addDashboardsToMigration({
         migrationId,
         body: [defaultOriginalDashboardExports],
@@ -40,6 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(actualIndexedData.hits.hits.length).toBe(1);
       const doc = actualIndexedData.hits.hits[0]._source;
+
       expect(doc).toBeDefined();
       expect(doc?.migration_id).toBe(migrationId);
       expect(doc?.status).toBe('pending');

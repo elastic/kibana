@@ -57,7 +57,7 @@ export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataB
                 format: 'xml',
                 vendor: 'splunk',
                 last_updated: originalDashboard.updated,
-                vendor_properties: {
+                splunk_properties: {
                   app: originalDashboard['eai:acl.app'],
                   owner: originalDashboard['eai:acl.owner'],
                   sharing: originalDashboard['eai:acl.sharing'],

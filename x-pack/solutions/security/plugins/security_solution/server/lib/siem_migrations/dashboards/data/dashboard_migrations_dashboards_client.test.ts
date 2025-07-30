@@ -82,7 +82,7 @@ describe('Dashboard Migrations Dashboards client', () => {
               format: 'xml',
               vendor: 'splunk',
               last_updated: sampleDashboard.result.updated,
-              vendor_properties: {
+              splunk_properties: {
                 app: sampleDashboard.result['eai:acl.app'],
                 sharing: sampleDashboard.result['eai:acl.sharing'],
                 owner: sampleDashboard.result['eai:acl.owner'],
