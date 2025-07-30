@@ -20,7 +20,7 @@ import {
   FLEET_SYSTEM_PACKAGE,
 } from '../../common';
 
-import type { AgentPolicy, NewAgentPolicy } from '../types';
+import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy } from '../types';
 
 import { AgentlessAgentCreateOverProvisionnedError } from '../errors';
 
@@ -217,4 +217,125 @@ export async function createAgentPolicyWithPackages({
   }
 
   return agentPolicy;
+}
+
+interface CreateAgentAndPackagePoliciesParams {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  newPolicy: NewAgentPolicy;
+  newPackagePolicies: NewPackagePolicy[];
+  hasFleetServer?: boolean;
+  withSysMonitoring: boolean;
+  monitoringEnabled?: string[];
+  spaceId: string;
+  user?: AuthenticatedUser;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+  force?: boolean;
+}
+
+export async function createAgentPolicyAndPackagePolicies({
+  soClient,
+  esClient,
+  newPolicy,
+  newPackagePolicies,
+  hasFleetServer,
+  withSysMonitoring,
+  monitoringEnabled,
+  spaceId,
+  user,
+  authorizationHeader,
+  force,
+}: CreateAgentAndPackagePoliciesParams) {
+  const logger = appContextService.getLogger().get('createAgentPolicyAndPackagePolicies');
+
+  const agentPolicy = await createAgentPolicyWithPackages({
+    soClient,
+    esClient,
+    newPolicy,
+    hasFleetServer,
+    withSysMonitoring,
+    monitoringEnabled,
+    spaceId,
+    user,
+    authorizationHeader,
+    force,
+  });
+
+  const createdPackagePolicyIds = [];
+
+  try {
+    for (const newPackagePolicy of newPackagePolicies) {
+      // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
+      const {
+        policy_id: agentPolicyId,
+        policy_ids: agentPolicyIds,
+        ...restOfPackagePolicy
+      } = newPackagePolicy;
+
+      // Warn if the requested agent policy ID does not match the created agent policy ID
+      if (agentPolicyId && agentPolicyId !== agentPolicy.id) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${agentPolicy.id} instead of requested id ${agentPolicyId}`
+        );
+      }
+      if (
+        agentPolicyIds &&
+        agentPolicyIds.length > 0 &&
+        (!agentPolicyIds.includes(agentPolicy.id) || agentPolicyIds.length > 1)
+      ) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${
+            agentPolicy.id
+          } instead of requested id(s) ${agentPolicyIds.join(',')}`
+        );
+      }
+
+      const newPackagePolicyWithPolicyIds = {
+        ...restOfPackagePolicy,
+        policy_ids: [agentPolicy.id],
+      };
+
+      const packagePolicy = await packagePolicyService.create(
+        soClient,
+        esClient,
+        newPackagePolicyWithPolicyIds,
+        {
+          spaceId,
+          user,
+          bumpRevision: false,
+          authorizationHeader,
+          force,
+        }
+      );
+
+      createdPackagePolicyIds.push(packagePolicy.id);
+    }
+
+    return agentPolicyService.get(soClient, agentPolicy.id);
+  } catch (e) {
+    // If there is an error creating package policies, delete any created package policy
+    // and the parent agent policy
+    const internalSOClient = appContextService.getInternalUserSOClient();
+    const internalESClient = appContextService.getInternalUserESClient();
+
+    if (createdPackagePolicyIds.length > 0) {
+      await packagePolicyService.delete(
+        internalSOClient,
+        internalESClient,
+        createdPackagePolicyIds,
+        {
+          force: true,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
+    }
+    if (agentPolicy) {
+      await agentPolicyService.delete(internalSOClient, internalESClient, agentPolicy.id, {
+        force: true,
+      });
+    }
+
+    // Rethrow
+    throw e;
+  }
 }
