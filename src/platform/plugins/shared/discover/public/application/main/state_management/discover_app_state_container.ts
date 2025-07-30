@@ -20,13 +20,18 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { IKbnUrlStateStorage, ISyncStateRef } from '@kbn/kibana-utils-plugin/public';
+import type {
+  IKbnUrlStateStorage,
+  INullableBaseStateContainer,
+  ISyncStateRef,
+} from '@kbn/kibana-utils-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
-import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { type GlobalQueryStateFromUrl, connectToQueryState } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { distinctUntilChanged, from, map } from 'rxjs';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -41,9 +46,10 @@ import {
   isEsqlSource,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions } from './redux';
+import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
+import { internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
+import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
   /**
@@ -316,21 +322,70 @@ export const getDiscoverAppStateContainer = ({
       }
     );
 
+    const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } =
+      startAppStateUrlSync();
+
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncGlobalQueryStateWithUrl(
+    const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
+      const tabState = selectTab(state, tabId);
+      const { timeRange: time, refreshInterval, filters } = tabState.lastPersistedGlobalState;
+
+      return { time, refreshInterval, filters };
+    };
+
+    const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
+      get: () => getGlobalState(internalState.getState()),
+      set: (state) => {
+        if (!state) {
+          return;
+        }
+
+        const { time: timeRange, refreshInterval, filters } = state;
+
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.setTabGlobalState)({
+            globalState: {
+              timeRange,
+              refreshInterval,
+              filters,
+            },
+          })
+        );
+      },
+      state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
+    };
+
+    const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryState(
       data.query,
-      stateStorage
+      globalStateContainer,
+      {
+        refreshInterval: true,
+        time: true,
+        filters: FilterStateStore.GLOBAL_STATE,
+      }
     );
 
-    const { start, stop } = startAppStateUrlSync();
+    const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
+      syncState({
+        storageKey: GLOBAL_STATE_URL_KEY,
+        stateContainer: globalStateContainer,
+        stateStorage,
+      });
 
     // current state need to be pushed to url
-    replaceUrlState({}).then(() => start());
+    Promise.all([
+      replaceUrlState({}),
+      stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
+    ]).then(() => {
+      startSyncingAppStateWithUrl();
+      startSyncingGlobalStateWithUrl();
+    });
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();
+      stopSyncingQueryGlobalStateWithStateContainer();
+      stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
-      stop();
     };
   };
 
