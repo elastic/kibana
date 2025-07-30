@@ -12,7 +12,6 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
@@ -86,11 +85,12 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   // ES|QL variables management
-  const { onSaveControl, onCancelControl } = useESQLVariables({
+  const { onSaveControl, onCancelControl, getControlCreationOptions } = useESQLVariables({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupAPI,
+    storage: services.storage,
     onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
   });
 
@@ -311,15 +311,24 @@ export const DiscoverTopNav = ({
               onApiAvailable={setControlGroupAPI}
               timeRange={timeRange}
               getCreationOptions={async (initialState, builder) => {
-                const stateStorage = stateContainer.stateStorage;
-                const panels = stateStorage.get<ControlPanelsState>('controlPanels');
+                // const panels = services.storage.get(`${CONTROLS_STORAGE_KEY}:${activeTabId}`);
+                // console.log(panels);
+                // const activeControlIds = stateContainer.appState.getState().esqlControlsIds;
 
-                return {
-                  initialState: {
-                    ...initialState,
-                    initialChildControlState: panels ?? initialState.initialChildControlState,
-                  },
-                };
+                // const activeControls = activeControlIds
+                //   ? Object.fromEntries(
+                //       activeControlIds.map((id) => [id, panels?.[id] ?? undefined])
+                //     )
+                //   : undefined;
+
+                // return {
+                //   initialState: {
+                //     ...initialState,
+                //     initialChildControlState:
+                //       activeControls ?? initialState.initialChildControlState,
+                //   },
+                // };
+                return await getControlCreationOptions(initialState);
               }}
               viewMode="edit"
             />

@@ -37,3 +37,5 @@ export const TABS_STATE_URL_KEY = '_t';
  * Product feature IDs
  */
 export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
+
+export const CONTROLS_STORAGE_KEY = 'discover:controlPanels';

@@ -158,6 +158,11 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+
+  // /**
+  //  * Ids of ESQL controls that are currently in use
+  //  */
+  // esqlControlsIds?: string[];
 }
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
