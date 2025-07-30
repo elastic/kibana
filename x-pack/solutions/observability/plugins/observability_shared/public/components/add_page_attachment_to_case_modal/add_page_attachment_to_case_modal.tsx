@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { EuiConfirmModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,12 +13,14 @@ import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { useChatService } from '../../hooks/use_chat_service';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
   pageAttachmentState: PageAttachmentPersistedState;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  notifications: NotificationsStart;
   cases: CasesPublicStart;
   onCloseModal: () => void;
 }
@@ -27,6 +29,7 @@ export function AddPageAttachmentToCaseModal({
   pageAttachmentState,
   cases,
   observabilityAIAssistant,
+  notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const getCasesContext = cases?.ui.getCasesContext;
@@ -53,6 +56,7 @@ export function AddPageAttachmentToCaseModal({
     }
     return canUseCases();
   }, [canUseCases]);
+
   const hasCasesPermissions =
     casesPermissions.read && casesPermissions.update && casesPermissions.push;
   const CasesContext = useMemo(() => {
@@ -62,6 +66,20 @@ export function AddPageAttachmentToCaseModal({
     return getCasesContext();
   }, [getCasesContext]);
 
+  useEffect(() => {
+    if (!hasCasesPermissions) {
+      notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.observabilityShared.cases.addPageToCaseModal.noPermissionsTitle',
+          {
+            defaultMessage:
+              'Insufficient privileges to add page to case. Please contact your admin.',
+          }
+        ),
+      });
+    }
+  }, [hasCasesPermissions, notifications.toasts]);
+
   return hasCasesPermissions ? (
     <CasesContext permissions={casesPermissions} owner={['observability']}>
       {ObservabilityAIAssistantChatServiceContext && chatService ? (
@@ -70,12 +88,14 @@ export function AddPageAttachmentToCaseModal({
             pageAttachmentState={pageAttachmentState}
             cases={cases}
             observabilityAIAssistant={observabilityAIAssistant}
+            notifications={notifications}
             onCloseModal={onCloseModal}
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : (
         <AddToCaseButtonContent
           pageAttachmentState={pageAttachmentState}
+          notifications={notifications}
           cases={cases}
           onCloseModal={onCloseModal}
         />
@@ -88,6 +108,7 @@ function AddToCaseButtonContent({
   pageAttachmentState,
   cases,
   observabilityAIAssistant,
+  notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
@@ -155,6 +176,7 @@ function AddToCaseButtonContent({
               comment={comment}
               setIsLoading={setIsCommentLoading}
               observabilityAIAssistant={observabilityAIAssistant}
+              notifications={notifications}
             />
           </EuiModalBody>
         </EuiConfirmModal>

@@ -113,7 +113,6 @@ export const usePageSummary = ({
 
   return {
     summary,
-    setSummary,
     abortController: abortControllerRef.current,
     screenContexts: formattedScreenContexts,
     generateSummary,

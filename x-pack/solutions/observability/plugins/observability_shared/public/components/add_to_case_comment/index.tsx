@@ -26,6 +26,7 @@ export function AddToCaseComment({
   onCommentChange,
   setIsLoading,
   observabilityAIAssistant,
+  notifications,
 }: AddToCaseCommentProps) {
   const handleStreamingUpdate = useCallback(
     (partialSummary: string) => {
@@ -53,11 +54,26 @@ export function AddToCaseComment({
     }
   }, [isObsAIAssistantEnabled, isLoading, setIsLoading]);
 
+  useEffect(() => {
+    if (errors.length > 0) {
+      errors.forEach((error) => {
+        notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.observabilityShared.cases.addPageToCaseModal.errorGeneratingSummary',
+            {
+              defaultMessage: 'Could not initialize AI-generated summary',
+            }
+          ),
+        });
+      });
+    }
+  }, [errors, notifications]);
+
   const input = (
     <EuiTextArea
       data-test-subj="syntheticsAddToCaseCommentTextArea"
       placeholder={i18n.translate(
-        'xpack.observabilityShared.cases.addToCaseModal.commentPlaceholder',
+        'xpack.observabilityShared.cases.addPageToCaseModal.commentPlaceholder',
         {
           defaultMessage: 'Add a comment (optional)',
         }
@@ -76,13 +92,13 @@ export function AddToCaseComment({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.observabilityShared.cases.addToCaseModal.commentLabel', {
+        label={i18n.translate('xpack.observabilityShared.cases.addPageToCaseModal.commentLabel', {
           defaultMessage: 'Add a comment (optional)',
         })}
         helpText={
           showAIEnhancedExperience ? (
             <FormattedMessage
-              id="xpack.observabilityShared.cases.addToCaseModal.commentHelpText"
+              id="xpack.observabilityShared.cases.addPageToCaseModal.commentHelpText"
               defaultMessage="{icon} Initial comment AI generated. AI can be wrong or incomplete. Please review and edit as necessary."
               values={{ icon: <EuiIcon type="sparkles" /> }}
             />

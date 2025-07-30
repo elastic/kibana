@@ -8,14 +8,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AddPageAttachmentToCaseModal } from './add_page_attachment_to_case_modal';
 import { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { AddPageAttachmentToCaseModal } from './add_page_attachment_to_case_modal';
 
 const mockCases: Partial<CasesPublicStart> = mockCasesContract();
 
 describe('AddPageAttachmentToCaseModal', () => {
+  const notifications = notificationServiceMock.createStartContract();
   const pageAttachmentState: PageAttachmentPersistedState = {
     type: 'example',
     url: {
@@ -61,6 +63,7 @@ describe('AddPageAttachmentToCaseModal', () => {
           pageAttachmentState={pageAttachmentState}
           cases={mockCases as CasesPublicStart}
           onCloseModal={jest.fn()}
+          notifications={notifications}
         />
       </IntlProvider>
     );
@@ -80,6 +83,7 @@ describe('AddPageAttachmentToCaseModal', () => {
         pageAttachmentState={pageAttachmentState}
         cases={mockCases as CasesPublicStart}
         onCloseModal={jest.fn()}
+        notifications={notifications}
       />
     );
 
@@ -95,6 +99,7 @@ describe('AddPageAttachmentToCaseModal', () => {
           pageAttachmentState={pageAttachmentState}
           cases={mockCases as CasesPublicStart}
           onCloseModal={onCloseModalMock}
+          notifications={notifications}
         />
       </IntlProvider>
     );
@@ -115,6 +120,7 @@ describe('AddPageAttachmentToCaseModal', () => {
           pageAttachmentState={pageAttachmentState}
           cases={mockCases as CasesPublicStart}
           onCloseModal={jest.fn()}
+          notifications={notifications}
         />
       </IntlProvider>
     );
@@ -137,6 +143,7 @@ describe('AddPageAttachmentToCaseModal', () => {
           pageAttachmentState={pageAttachmentState}
           cases={mockCases as CasesPublicStart}
           onCloseModal={jest.fn()}
+          notifications={notifications}
         />
       </IntlProvider>
     );
@@ -159,5 +166,27 @@ describe('AddPageAttachmentToCaseModal', () => {
         type: 'persistableState',
       },
     ]);
+  });
+
+  it('should trigger a warning toast if hasCasesPermissions is false', () => {
+    const addWarningMock = jest.spyOn(notifications.toasts, 'addWarning');
+    mockCases.helpers!.canUseCases = jest.fn().mockImplementationOnce(() => ({
+      read: true,
+      update: true,
+      push: false,
+    }));
+
+    render(
+      <AddPageAttachmentToCaseModal
+        pageAttachmentState={{} as any}
+        cases={mockCases as any}
+        notifications={notifications}
+        onCloseModal={jest.fn()}
+      />
+    );
+
+    expect(addWarningMock).toHaveBeenCalledWith({
+      title: expect.stringContaining('Insufficient privileges to add page to case'),
+    });
   });
 });
