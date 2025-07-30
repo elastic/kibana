@@ -12,6 +12,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -1299,6 +1300,28 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+      },
+    },
+    [CLOUD_CONNECTOR_SAVED_OBJECT_TYPE]: {
+      name: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          name: { type: 'keyword' },
+          cloudProvider: { type: 'keyword' },
+          vars: { type: 'flattened' },
+          packagePolicyCount: { type: 'integer' },
+          created_at: { type: 'date' },
+          created_by: { type: 'keyword' },
+          updated_at: { type: 'date' },
+          updated_by: { type: 'keyword' },
         },
       },
     },
