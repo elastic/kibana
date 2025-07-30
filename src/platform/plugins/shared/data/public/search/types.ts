@@ -69,7 +69,6 @@ export interface ISearchStart {
   showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
   /**
    * Shows a flyout with a table to manage search sessions.
-   * @param params locators - the locators to use for generating URLs
    */
   showSearchSessionsFlyout: () => void;
   /**
