@@ -56,6 +56,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({
 
   return (
     <div
+      data-test-subj="time-saved-metric-container"
       css={css`
         height: 100%;
         > * {

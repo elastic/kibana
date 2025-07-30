@@ -63,7 +63,6 @@ export const ExecutiveSummary: React.FC<Props> = ({
   const { data: currentUserProfile } = useGetCurrentUserProfile();
 
   const isSmall = useIsWithinMaxBreakpoint('l');
-  // const isSmall = useIsWithinBreakpoints(['l']);
   const costSavings = useMemo(
     () => formatDollars(valueMetrics.costSavings),
     [valueMetrics.costSavings]
@@ -93,6 +92,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
 
   return (
     <div
+      data-test-subj="executiveSummaryContainer"
       css={css`
         background: linear-gradient(
             112deg,
@@ -105,20 +105,29 @@ export const ExecutiveSummary: React.FC<Props> = ({
         min-height: 200px;
       `}
     >
-      <EuiFlexGroup direction={isSmall ? 'column' : 'row'}>
+      <EuiFlexGroup
+        direction={isSmall ? 'column' : 'row'}
+        data-test-subj="executiveSummaryFlexGroup"
+      >
         <EuiFlexItem
           css={css`
             min-width: 350px;
           `}
+          data-test-subj="executiveSummaryMainInfo"
         >
           <span>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              data-test-subj="executiveSummaryGreetingGroup"
+            >
               <EuiFlexItem grow={false}>
-                <EuiIcon type="logoElastic" size="m" />
+                <EuiIcon type="logoElastic" size="m" data-test-subj="executiveSummaryLogo" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">
-                  <p>
+                  <p data-test-subj="executiveSummaryGreeting">
                     {i18n.EXECUTIVE_GREETING(
                       currentUserProfile?.user?.full_name ??
                         currentUserProfile?.user?.username ??
@@ -133,7 +142,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
 
             <EuiText size="s">
               {hasAttackDiscoveries && (
-                <p>
+                <p data-test-subj="executiveSummaryMessage">
                   {i18n.EXECUTIVE_MESSAGE_START} <strong>{costSavings}</strong>{' '}
                   {i18n.EXECUTIVE_COST_SAVINGS_LABEL} {i18n.EXECUTIVE_AND}{' '}
                   <strong>
@@ -141,7 +150,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   </strong>{' '}
                   {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(getTimeRangeAsDays({ from, to })))}{' '}
                   {i18n.EXECUTIVE_FILTERING}
-                  <EuiSpacer size="m" />
+                  <br />
                   {i18n.EXECUTIVE_CALC} <strong>{i18n.ESCALATED.toLowerCase()}</strong>{' '}
                   {i18n.EXECUTIVE_SUSPICIOUS} <strong>{i18n.NON_SUSPICIOUS}</strong>
                   {'. '}
@@ -151,11 +160,15 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   {i18n.EXECUTIVE_CONVERT}{' '}
                   <strong>{i18n.ANALYST_RATE(`$${analystHourlyRate}`)}</strong>
                   {'.'}
-                  <EuiSpacer size="m" />
+                  <br />
                   {i18n.EXECUTIVE_MESSAGE_SECOND}
                 </p>
               )}
-              {!hasAttackDiscoveries && <p>{i18n.EXECUTIVE_MESSAGE_NO_ATTACKS}</p>}
+              {!hasAttackDiscoveries && (
+                <p data-test-subj="executiveSummaryNoAttacks">
+                  {i18n.EXECUTIVE_MESSAGE_NO_ATTACKS}
+                </p>
+              )}
             </EuiText>
 
             <EuiSpacer size="m" />
@@ -168,8 +181,9 @@ export const ExecutiveSummary: React.FC<Props> = ({
                     padding: 0 !important;
                     margin: 0 !important;
                   `}
+                  data-test-subj="executiveSummaryStatsList"
                 >
-                  <li css={LI_PADDING}>
+                  <li css={LI_PADDING} data-test-subj="executiveSummaryCostSavingsStat">
                     <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
                     <strong>{costSavings}</strong> {i18n.EXECUTIVE_COST_SAVINGS_DESC}
                     {'. '}
@@ -181,7 +195,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       timeRange={getTimeRangeAsDays({ from, to })}
                     />
                   </li>
-                  <li css={LI_PADDING}>
+                  <li css={LI_PADDING} data-test-subj="executiveSummaryAlertFilteringStat">
                     <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
                     <strong>{formatPercent(valueMetrics.filteredAlertsPerc)}</strong>{' '}
                     {i18n.EXECUTIVE_ALERT_FILTERING_DESC}
@@ -194,7 +208,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       timeRange={getTimeRangeAsDays({ from, to })}
                     />
                   </li>
-                  <li css={LI_PADDING}>
+                  <li css={LI_PADDING} data-test-subj="executiveSummaryHoursSavedStat">
                     <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
                     <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
                     {i18n.EXECUTIVE_HOURS_SAVED_DESC}
@@ -207,7 +221,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       timeRange={getTimeRangeAsDays({ from, to })}
                     />
                   </li>
-                  <li css={LI_PADDING}>
+                  <li css={LI_PADDING} data-test-subj="executiveSummaryThreatsDetectedStat">
                     <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
                     <strong>{attackDiscoveryStat}</strong>{' '}
                     {hasAttackDiscoveryComparison
@@ -240,6 +254,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
               min-width: 300px;
             `}
             grow={isSmall}
+            data-test-subj="executiveSummarySideStats"
           >
             <EuiFlexGroup direction={isSmall ? 'row' : 'column'}>
               <EuiFlexItem>

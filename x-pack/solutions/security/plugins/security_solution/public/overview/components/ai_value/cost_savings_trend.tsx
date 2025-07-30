@@ -53,7 +53,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
+    <EuiPanel paddingSize="l" hasBorder hasShadow={false} data-test-subj="cost-savings-trend-panel">
       <EuiTitle size="s">
         <h3>{i18n.COST_SAVINGS_TREND}</h3>
       </EuiTitle>
