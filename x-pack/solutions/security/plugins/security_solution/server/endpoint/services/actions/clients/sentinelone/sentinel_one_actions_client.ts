@@ -243,7 +243,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    // ensure all MS agent ids were found
+    // ensure all agent ids were found
     for (const agentId of agentIds) {
       if (!agentIdsFound.includes(agentId)) {
         throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
@@ -461,11 +461,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const parameters = (
         payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
       ).parameters;
-      const scriptId = parameters?.scriptId;
+      const scriptId = (parameters?.scriptId ?? '').trim();
 
       if (!scriptId) {
         throw new ResponseActionsClientError(
-          `[parameters.scriptId] is required for [runscript] response action`
+          `[parameters.scriptId]: missing parameter or value is empty`
         );
       }
 
@@ -1076,7 +1076,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
     ) {
       throw new ResponseActionsClientError(
-        `'runscript' response action not supported for [${this.agentType}]`
+        `'runscript' response action not supported for [${this.agentType}]. Feature disabled`
       );
     }
 

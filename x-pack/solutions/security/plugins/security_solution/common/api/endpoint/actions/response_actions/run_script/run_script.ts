@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
+import type { DeepMutable } from '../../../../../endpoint/types';
 
 const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
 const getNonEmptyString = (fieldName: string) =>
@@ -95,11 +96,20 @@ export const RunScriptActionRequestSchema = {
   }),
 };
 
+type RunScriptActionRequestParameters = DeepMutable<
+  TypeOf<typeof RunScriptActionRequestSchema.body>['parameters']
+>;
+
 export type MSDefenderRunScriptActionRequestParams = TypeOf<
   typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
 >;
-export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
 
-export type SentinelOneRunScriptActionRequestParams = TypeOf<
-  typeof SentinelOneRunScriptActionRequestParamsSchema
+export type RunScriptActionRequestBody<
+  TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters
+> = Omit<TypeOf<typeof RunScriptActionRequestSchema.body>, 'parameters'> & {
+  parameters: TParams;
+};
+
+export type SentinelOneRunScriptActionRequestParams = DeepMutable<
+  TypeOf<typeof SentinelOneRunScriptActionRequestParamsSchema>
 >;
