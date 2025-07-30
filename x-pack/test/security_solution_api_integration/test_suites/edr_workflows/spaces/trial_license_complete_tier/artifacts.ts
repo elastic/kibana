@@ -140,7 +140,9 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
     });
 
-    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
+    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).filter(
+      (k) => k !== 'trustedDevices'
+    ); // Todo: Enable once trustedDevices are implemented.
 
     for (const artifactList of artifactLists) {
       const listInfo =

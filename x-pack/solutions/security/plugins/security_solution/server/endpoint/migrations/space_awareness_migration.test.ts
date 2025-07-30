@@ -147,13 +147,15 @@ describe('Space awareness migration', () => {
           executeFunctionOnStream: expect.any(Function),
           listId: [
             'endpoint_trusted_apps',
+            'endpoint_trusted_devices',
             'endpoint_event_filters',
             'endpoint_host_isolation_exceptions',
             'endpoint_blocklists',
             'endpoint_list',
           ],
-          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
+          namespaceType: ['agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic', 'agnostic'],
           filter: [
+            `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
             `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`,
