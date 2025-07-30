@@ -2039,30 +2039,108 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledTimes(2);
       });
 
+<<<<<<< HEAD:x-pack/plugins/task_manager/server/task_running/task_runner.test.ts
       test('emits TaskEvent when a task run throws an error and has timed out', async () => {
         fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+=======
+      test('emits TaskEvent when a recurring task run throws an error due to timeout', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+>>>>>>> 0f0767be609 ([Response Ops][Task Manager] Update task status to `idle` after timeout (#223162)):x-pack/platform/plugins/shared/task_manager/server/task_running/task_runner.test.ts
         const id = _.random(1, 20).toString();
-        const error = new Error('Dangit!');
+        const error = new Error('Task was cancelled');
         const onTaskEvent = jest.fn();
+        let wasCancelled = false;
         const { runner, instance } = await readyToRunStageSetup({
           onTaskEvent,
           instance: {
             id,
+            schedule: { interval: '1s' },
           },
           definitions: {
             bar: {
               title: 'Bar!',
-              timeout: `1s`,
+              timeout: `15s`,
               createTaskRunner: () => ({
                 async run() {
-                  throw error;
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                  if (wasCancelled) {
+                    throw error;
+                  }
+                },
+                async cancel() {
+                  wasCancelled = true;
                 },
               }),
             },
           },
         });
+<<<<<<< HEAD:x-pack/plugins/task_manager/server/task_running/task_runner.test.ts
         fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
         await runner.run();
+=======
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.RetryScheduled,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('testtest emits TaskEvent when an ad-hoc task run throws an error due to timeout', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const error = new Error('Task was cancelled');
+        const onTaskEvent = jest.fn();
+        let wasCancelled = false;
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                  if (wasCancelled) {
+                    throw error;
+                  }
+                },
+                async cancel() {
+                  wasCancelled = true;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+>>>>>>> 0f0767be609 ([Response Ops][Task Manager] Update task status to `idle` after timeout (#223162)):x-pack/platform/plugins/shared/task_manager/server/task_running/task_runner.test.ts
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -2073,6 +2151,101 @@ describe('TaskManagerRunner', () => {
                 task: instance,
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.Failed,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('emits TaskEvent when a recurring task run times out without throwing error', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1s' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                persistence: TaskPersistence.Recurring,
+                task: instance,
+                result: TaskRunResult.Success,
+                isExpired: true,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(2);
+      });
+
+      test('emits TaskEvent when an ad-hoc task run times out without throwing error', async () => {
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
+        const id = _.random(1, 20).toString();
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: { id },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `15s`,
+              createTaskRunner: () => ({
+                async run() {
+                  const promise = new Promise((r) => setTimeout(r, 20000));
+                  jest.advanceTimersByTime(20000);
+                  await promise;
+                },
+              }),
+            },
+          },
+        });
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
+        const promise = runner.run();
+        await Promise.resolve();
+        await runner.cancel();
+        await promise;
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asOk({
+                persistence: TaskPersistence.NonRecurring,
+                task: instance,
+                result: TaskRunResult.Success,
                 isExpired: true,
               })
             )
@@ -2277,30 +2450,35 @@ describe('TaskManagerRunner', () => {
       });
     });
 
-    test('does not update saved object if task expires', async () => {
+    test('does not update saved object if recurring task expires without throwing error and timeout is greater than schedule', async () => {
       const id = _.random(1, 20).toString();
       const onTaskEvent = jest.fn();
-      const error = new Error('Dangit!');
-      const { runner, store, usageCounter, logger } = await readyToRunStageSetup({
+      const { runner, store, usageCounter } = await readyToRunStageSetup({
         onTaskEvent,
         instance: {
           id,
           startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '1s' },
         },
         definitions: {
           bar: {
             title: 'Bar!',
-            timeout: '1m',
+            timeout: '15s',
             createTaskRunner: () => ({
               async run() {
-                return { error, state: {}, runAt: moment().add(1, 'm').toDate() };
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
               },
             }),
           },
         },
       });
 
-      await runner.run();
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
 
       expect(store.partialUpdate).not.toHaveBeenCalled();
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
@@ -2308,9 +2486,174 @@ describe('TaskManagerRunner', () => {
         counterType: 'taskManagerTaskRunner',
         incrementBy: 1,
       });
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Skipping reschedule for task bar \"${id}\" due to the task expiring`
+    });
+
+    test('does not update saved object if recurring task throws error due to expiration and timeout is greater than schedule', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      let wasCancelled = false;
+      const { runner, store, usageCounter } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '1s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+                if (wasCancelled) {
+                  throw new Error('Task was cancelled');
+                }
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).not.toHaveBeenCalled();
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    });
+
+    test('updates saved object if recurring task expires without throwing error and schedule is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+        usageCounter,
+      } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '30s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        {
+          id: expect.any(String),
+          ownerId: null,
+          retryAt: null,
+          runAt: expect.any(Date),
+          startedAt: null,
+          status: 'idle',
+          version: undefined,
+        },
+        {
+          validate: true,
+          doc: taskInstance,
+        }
       );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    });
+
+    test('updates saved object if recurring task throws error due to expiration and schedule is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      let wasCancelled = false;
+      const {
+        instance: taskInstance,
+        runner,
+        store,
+        usageCounter,
+      } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '30s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+                if (wasCancelled) {
+                  throw new Error('Task was cancelled');
+                }
+              },
+              async cancel() {
+                wasCancelled = true;
+              },
+            }),
+          },
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        {
+          id: expect.any(String),
+          ownerId: null,
+          retryAt: null,
+          runAt: expect.any(Date),
+          startedAt: null,
+          status: 'idle',
+          version: undefined,
+        },
+        {
+          validate: true,
+          doc: taskInstance,
+        }
+      );
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'taskManagerUpdateSkippedDueToTaskExpiration',
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
     });
 
     test('Prints debug logs on task start/end', async () => {
