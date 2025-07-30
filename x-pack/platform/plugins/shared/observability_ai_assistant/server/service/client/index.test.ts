@@ -193,7 +193,7 @@ describe('Observability AI Assistant client', () => {
       user: {
         name: 'johndoe',
       },
-      scopes: ['all'],
+      scopes: ['observability'],
     });
   }
 
