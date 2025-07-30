@@ -108,8 +108,6 @@ describe('STATS Autocomplete', () => {
   /**
    * @TODO check
    * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword not /
-   * | STATS COUNT(*) + 1 BY col0 = aws.s3.bucket.name != aws.s3.operation.keyword, /
-   * | STATS COUNT() * COUNT(), col0 = COUNT() WHERE aws.s3.object.key != aws.s3.object.key /
    */
 
   const suggest = async (query: string) => {
@@ -409,6 +407,28 @@ describe('STATS Autocomplete', () => {
         ]);
       });
 
+      test('expressions with aggregates', async () => {
+        await statsExpectSuggestions('from a | stats col0 = min(integerField) ', [
+          'BY ',
+          'WHERE ',
+          '| ',
+          ', ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            'any',
+            { operators: true, skipAssign: true },
+            ['integer']
+          ),
+        ]);
+        await statsExpectSuggestions('from a | stats col0 = min(integerField) + ', [
+          ...getFunctionSignaturesByReturnType(Location.STATS, ['integer', 'double', 'long'], {
+            scalar: true,
+            agg: true,
+            grouping: true,
+          }),
+        ]);
+      });
+
       describe('...WHERE expression...', () => {
         it('suggests fields and functions in empty expression', async () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE ', [
@@ -537,6 +557,22 @@ describe('STATS Autocomplete', () => {
 
       test('on space after grouping field', async () => {
         await statsExpectSuggestions('from a | stats a=c by keywordField ', [
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS_BY,
+            'any',
+            {
+              operators: true,
+              skipAssign: true,
+            },
+            ['keyword']
+          ),
+        ]);
+      });
+
+      test('on space after grouping function', async () => {
+        await statsExpectSuggestions('from a | stats a=c by CATEGORIZE(keywordField) ', [
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
