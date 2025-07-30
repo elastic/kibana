@@ -48,7 +48,7 @@ SOR->>SOR: Perform action
 
 C->>SOR: Change Access Control(owner or accessMode)
 SOR->>SE: authorizeChangeAccessControl
-SE->>ACS: Enforce accessControl logic
+SE->>ACS: Enforce accessControl logic (owner or admin with privilege)
 ACS->>SE: List of objects requiring further rbac checks
 SE->>SE: Regular RBAC privilege checks - throws if failure
 SE->>SOR: Authorization Result
