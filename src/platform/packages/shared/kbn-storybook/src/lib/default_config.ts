@@ -43,7 +43,7 @@ const IGNORE_GLOBS = [
 
 export const defaultConfig: StorybookConfig = {
   addons: [
-    //    '@kbn/storybook/preset',
+    '@kbn/storybook/preset',
     '@storybook/addon-a11y',
     '@storybook/addon-webpack5-compiler-babel',
     '@storybook/addon-jest',

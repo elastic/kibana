@@ -16,7 +16,7 @@ module.exports = {
   // webpackFinal: (config) => {
   //   return webpackConfig({ config });
   // },
-  // previewAnnotations: (entry) => {
-  //   return [...entry, require.resolve('./src/lib/preview')];
-  // },
+  previewAnnotations: (entry) => {
+    return [...entry, require.resolve('./src/lib/preview')];
+  },
 };
