@@ -115,6 +115,7 @@ export const useFindAttackDiscoveries = ({
       end,
       http,
       ids,
+      includeUniqueAlertIds,
       page,
       perPage,
       search,
