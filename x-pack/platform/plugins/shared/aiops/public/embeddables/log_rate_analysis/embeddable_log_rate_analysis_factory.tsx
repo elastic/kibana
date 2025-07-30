@@ -137,6 +137,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
             core: coreStart,
             parentApi,
             flyoutProps: {
+              hideCloseButton: true,
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {

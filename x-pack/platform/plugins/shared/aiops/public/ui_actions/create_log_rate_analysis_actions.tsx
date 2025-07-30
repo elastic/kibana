@@ -76,6 +76,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
         core: coreStart,
         parentApi: context.embeddable,
         flyoutProps: {
+          hideCloseButton: true,
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {

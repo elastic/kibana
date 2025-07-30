@@ -28,11 +28,8 @@ export function EmbeddableLogRateAnalysisUserInput({
   initialState?: LogRateAnalysisEmbeddableState;
 }) {
   const hasChanged = React.useRef(false);
-  // Detects if the flyout was closed via "X" (not Confirm or Cancel) to clean up the panel preview state
-  const hasConfirmed = React.useRef(false);
-  const hasCanceled = React.useRef(false);
 
-  const cleanPreviewIfNotConfirmed = React.useCallback(() => {
+  const cancelChanges = () => {
     if (isNewPanel && deletePanel) {
       deletePanel();
       onCancel();
@@ -40,25 +37,6 @@ export function EmbeddableLogRateAnalysisUserInput({
       logRateAnalysisControlsApi.updateUserInput(initialState);
       onCancel();
     }
-  }, [isNewPanel, deletePanel, onCancel, logRateAnalysisControlsApi, initialState]);
-
-  React.useEffect(() => {
-    return () => {
-      if (hasConfirmed.current || hasCanceled.current) {
-        return;
-      }
-      cleanPreviewIfNotConfirmed();
-    };
-  }, [cleanPreviewIfNotConfirmed]);
-
-  const cancelChanges = () => {
-    hasCanceled.current = true;
-    cleanPreviewIfNotConfirmed();
-  };
-
-  const confirmChanges = (nextUpdate: LogRateAnalysisEmbeddableState) => {
-    hasConfirmed.current = true;
-    onConfirm(nextUpdate);
   };
 
   const preview = async (nextUpdate: LogRateAnalysisEmbeddableState) => {
@@ -73,7 +51,7 @@ export function EmbeddableLogRateAnalysisUserInput({
       dataViews={pluginStart.data.dataViews}
       IndexPatternSelect={pluginStart.unifiedSearch.ui.IndexPatternSelect}
       initialInput={initialState}
-      onCreate={confirmChanges}
+      onCreate={onConfirm}
       onCancel={cancelChanges}
       onPreview={preview}
       isNewPanel={isNewPanel}
