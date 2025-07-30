@@ -13,7 +13,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { IUnifiedSearchPluginServices, SearchBar } from '@kbn/unified-search-plugin/public';
@@ -57,13 +57,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     refresh: jest.fn(),
   });
 
-  const license$ = new Subject<Partial<ILicense>>();
-  license$.next({
-    type: 'enterprise',
-    isAvailable: true,
-    isActive: true,
-    hasAtLeast: (type: string) => type === 'enterprise',
-  });
+  jest.spyOn(core.pricing, 'isFeatureAvailable').mockReturnValue(true);
 
   return {
     appParams,
@@ -96,9 +90,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         savedObjectsTagging: {},
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-        licensing: {
-          license$,
-        },
+        licensing: licensingMock.createStart(),
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},

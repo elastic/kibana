@@ -177,6 +177,7 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCan
               { defaultMessage: 'What are you looking for?' }
             )}
             indexPatterns={dataViewsFetch.value}
+            submitOnBlur
           />
         </EuiFormRow>
       </EuiForm>

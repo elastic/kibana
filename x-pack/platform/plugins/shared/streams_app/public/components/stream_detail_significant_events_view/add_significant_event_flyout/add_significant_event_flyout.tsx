@@ -117,7 +117,6 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
           <EuiButton
             color="primary"
             fill
-            iconType="plusInCircle"
             disabled={isSubmitting || !parsedQueries.success || !canSave}
             isLoading={isSubmitting}
             onClick={() => {

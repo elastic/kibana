@@ -21,20 +21,20 @@ export function useAIFeatures() {
   const license = useObservable(licensing.license$);
   const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
 
-  if (
-    !isAIAvailableForTier ||
-    !observabilityAIAssistant ||
-    !genAiConnectors ||
-    genAiConnectors.loading
-  ) {
+  if (!observabilityAIAssistant || !genAiConnectors || genAiConnectors.loading) {
     return null;
   }
 
   const selectedConnector = genAiConnectors.selectedConnector;
   const couldBeEnabled = Boolean(
-    license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save
+    isAIAvailableForTier &&
+      license?.hasAtLeast('enterprise') &&
+      core.application.capabilities.actions?.save
   );
-  const enabled = observabilityAIAssistant.service.isEnabled() && Boolean(selectedConnector);
+  const enabled =
+    isAIAvailableForTier &&
+    observabilityAIAssistant.service.isEnabled() &&
+    Boolean(selectedConnector);
 
   return {
     enabled,

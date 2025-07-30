@@ -41,3 +41,20 @@ export const Default: StoryFn<{}> = () => {
     />
   );
 };
+
+export const Edit: StoryFn<{}> = () => {
+  return (
+    <AddSignificantEventFlyout
+      definition={logsStreamDefinition}
+      onClose={() => {}}
+      onSave={async (queries) => {}}
+      query={{
+        id: '123',
+        title: 'Operational Event: Service Lifecycle - LockScreenActivity',
+        kql: {
+          query: 'message:"cmp=com.tencent.qqmusic/.business.lockscreen.LockScreenActivity"',
+        },
+      }}
+    />
+  );
+};

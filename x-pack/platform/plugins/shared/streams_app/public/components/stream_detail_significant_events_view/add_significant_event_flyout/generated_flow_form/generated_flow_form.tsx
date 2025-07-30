@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiLink, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
@@ -43,6 +43,14 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.generatedFlowFormTitle', {
+            defaultMessage: 'Suggested significant events',
+          })}
+        </h3>
+      </EuiTitle>
+
       {aiFeatures && !aiFeatures.enabled ? (
         <EuiToolTip
           content={i18n.translate(
