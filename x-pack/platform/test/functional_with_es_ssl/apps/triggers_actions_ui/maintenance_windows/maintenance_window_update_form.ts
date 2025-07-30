@@ -78,7 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show callout when update a maintenance window with old chosen solutions', async () => {
       const createdMaintenanceWindow = await createMaintenanceWindow({
-        name: 'Test Maintenance Window',
+        name: 'Test Maintenance Window 2',
         getService,
         overwrite: {
           r_rule: {
@@ -108,6 +108,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(
         await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsWarning')
       ).to.contain('Support for multiple solution categories is removed.');
+    });
+
+    it('should show a callout warning when editing a maintenance window', async () => {
+      const createdMaintenanceWindow = await createMaintenanceWindow({
+        name: 'New Maintenance Window',
+        getService,
+        overwrite: {
+          scoped_query: { kql: '_id : * ', filters: [] },
+          category_ids: ['management'],
+        },
+      });
+
+      objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
+
+      await browser.refresh();
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('New Maintenance Window');
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-edit');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('createMaintenanceWindowForm');
+      });
+
+      await testSubjects.existOrFail('maintenanceWindowSolutionCategoryRemovedCallout');
+      await testSubjects.existOrFail('maintenanceWindowScopeQuery');
+
+      // Turn on repeat
+      await (await testSubjects.find('createMaintenanceWindowRepeatSwitch')).click();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('recurringScheduleRepeatSelect');
+      });
+
+      await (await testSubjects.find('create-submit')).click();
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(`Updated maintenance window 'New Maintenance Window'`);
+      });
     });
   });
 };
