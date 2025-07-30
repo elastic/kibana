@@ -15,6 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 // This is a Cypress module and only used by Cypress, so disabling "should" be safe
 // eslint-disable-next-line import/no-nodejs-modules
 import { mkdir } from 'node:fs/promises';
+import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
 import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   deleteIndexedEndpointHeartbeats,
@@ -58,6 +59,7 @@ import type {
   CreateUserAndRoleCyTaskOptions,
   LogItTaskOptions,
   CaptureHostVmAgentDiagnosticsOptions,
+  ExecuteCommandOnHostOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -597,6 +599,33 @@ ${s1Info.status}
 `);
         return { filePath: response.filePath };
       });
+    },
+
+    /**
+     * Runs a command on the given hostname, which is expected to be a hostname running on a vm.
+     *
+     * IMPORTANT: command execution failures on the host will NOT cause this task to fail/throw.
+     *            Ensure that the `stderr` is checked if wanting to determine success/failure of
+     *            command execution on the host machine.
+     * @param options
+     * @param options.hostname
+     * @param command.command
+     */
+    executeCommandOnHost: async ({
+      hostname,
+      command,
+    }: ExecuteCommandOnHostOptions): Promise<HostVmExecResponse> => {
+      const { log } = await stackServicesPromise;
+      return getHostVmClient(hostname)
+        .exec(command)
+        .catch((e) => {
+          log.warning(`command [${command}] execution on host [${hostname}] failed: ${e}]`);
+          return {
+            stdout: '',
+            stderr: e.message,
+            exitCode: 1,
+          };
+        });
     },
   });
 };

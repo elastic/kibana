@@ -9,30 +9,33 @@ import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
-import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
+import { type EditorBaseProps, type MarkdownEditorRef } from './types';
+import { scaledMarkdownImages } from '../utils';
 
-interface MarkdownEditorProps {
-  ariaLabel: string;
-  dataTestSubj?: string;
-  editorId: string;
+interface MarkdownEditorProps extends EditorBaseProps {
   height?: number;
   onChange: (content: string) => void;
-  disabledUiPlugins?: string[] | undefined;
   value: string;
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
 
-export interface MarkdownEditorRef {
-  textarea: HTMLTextAreaElement | null;
-  replaceNode: ContextShape['replaceNode'];
-  toolbar: HTMLDivElement | null;
-}
-
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
+  (
+    {
+      ariaLabel,
+      'data-test-subj': dataTestSubj,
+      editorId,
+      height,
+      onChange,
+      value,
+      disabledUiPlugins,
+      errors,
+    },
+    ref
+  ) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState<Array<string | Error>>([]);
     const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
@@ -69,6 +72,8 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     return (
       <EuiMarkdownEditor
+        // prevent images from displaying at full scale
+        css={scaledMarkdownImages}
         ref={editorRef}
         aria-label={ariaLabel}
         editorId={editorId}
@@ -78,7 +83,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
         onParse={onParse}
-        errors={markdownErrorMessages}
+        errors={[...markdownErrorMessages, ...(errors ?? [])]}
         data-test-subj={dataTestSubj}
         height={height}
       />

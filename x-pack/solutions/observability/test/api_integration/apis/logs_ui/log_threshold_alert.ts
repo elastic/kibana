@@ -162,6 +162,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              env: 'dev',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -240,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
                 name: 'host-01',
               },
             },
+            { 'host.name': 'host-01' },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -358,6 +362,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              env: 'dev',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(true)).to.be(true);
         });
@@ -499,6 +506,9 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             undefined,
+            {
+              'event.category': 'web',
+            },
           ]);
           expect(alertsClient.setAlertLimitReached.calledOnceWith(false)).to.be(true);
         });

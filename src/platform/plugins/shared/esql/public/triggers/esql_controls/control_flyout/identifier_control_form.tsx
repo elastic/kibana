@@ -25,6 +25,7 @@ import {
   EsqlControlType,
   type ESQLControlState,
   type ControlWidthOptions,
+  ESQLControlVariable,
 } from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
@@ -36,6 +37,7 @@ interface IdentifierControlFormProps {
   variableType: ESQLVariableType;
   variableName: string;
   queryString: string;
+  esqlVariables: ESQLControlVariable[];
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
@@ -47,6 +49,7 @@ export function IdentifierControlForm({
   initialState,
   queryString,
   cursorPosition,
+  esqlVariables,
   setControlState,
   search,
 }: IdentifierControlFormProps) {
@@ -78,6 +81,7 @@ export function IdentifierControlForm({
         const queryForFields = getQueryForFields(queryString, cursorPosition);
         getESQLQueryColumnsRaw({
           esqlQuery: queryForFields,
+          variables: esqlVariables,
           search,
         }).then((columns) => {
           if (isMounted()) {
@@ -109,6 +113,7 @@ export function IdentifierControlForm({
       cursorPosition,
       isMounted,
       queryString,
+      esqlVariables,
       search,
       variableType,
     ]

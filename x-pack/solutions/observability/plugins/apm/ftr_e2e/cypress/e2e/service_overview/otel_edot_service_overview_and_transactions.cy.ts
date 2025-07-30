@@ -124,8 +124,8 @@ describe('Service Overview', () => {
 
       cy.getByTestSubj('apmWaterfallButton').should('exist');
       cy.getByTestSubj('waterfall').should('exist');
-      cy.getByTestSubj('waterfallItem').should('exist');
-      cy.getByTestSubj('waterfallItem').click();
+      cy.getByTestSubj('accordionWaterfall').should('exist');
+      cy.getByTestSubj('accordionWaterfall').click();
       cy.contains('h4', 'Transaction details');
       cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
       cy.getByTestSubj('apmTransactionDetailLinkLink').contains(

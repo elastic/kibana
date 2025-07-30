@@ -33,13 +33,13 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerless check_privileges', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
       await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
       await deleteAllAlerts(supertest, log, es);
     });

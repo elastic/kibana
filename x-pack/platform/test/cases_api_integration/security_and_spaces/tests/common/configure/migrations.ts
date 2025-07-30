@@ -22,11 +22,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('migrations', () => {
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       describe('owner field', () => {

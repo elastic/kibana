@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
-import { ICommandContext } from '../../types';
+import { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';
@@ -17,7 +17,8 @@ import { errors } from '../../../definitions/utils';
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
@@ -32,7 +33,7 @@ export const validate = (
     });
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   for (const arg of command.args.flat()) {
     if (!Array.isArray(arg) && arg.type === 'query') {

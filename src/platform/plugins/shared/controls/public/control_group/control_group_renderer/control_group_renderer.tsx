@@ -14,14 +14,12 @@ import { cloneDeep } from 'lodash';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 
 import type { ControlGroupApi } from '../..';
-import {
-  CONTROL_GROUP_TYPE,
-  type ControlGroupRuntimeState,
-  type ControlGroupSerializedState,
-} from '../../../common';
+import type { ControlGroupRuntimeState } from '../../../common';
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
@@ -131,9 +129,9 @@ export const ControlGroupRenderer = ({
   }, []);
 
   return !isStateLoaded ? null : (
-    <EmbeddableRenderer<ControlGroupSerializedState, ControlGroupApi>
+    <EmbeddableRenderer<ControlsGroupState, ControlGroupApi>
       maybeId={id}
-      type={CONTROL_GROUP_TYPE}
+      type={CONTROLS_GROUP_TYPE}
       getParentApi={() => ({
         reload$,
         dataLoading$,

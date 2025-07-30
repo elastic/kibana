@@ -25,6 +25,7 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   getAlertingAuthorization: (_: KibanaRequest) => Promise.resolve(alertingAuthMock),
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
+  getEsClientScoped: (_: KibanaRequest) => Promise.resolve({} as ElasticsearchClient),
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
   getRuleList: jest.fn(),
@@ -58,6 +59,7 @@ describe('AlertsClientFactory', () => {
       getRuleList: alertsClientFactoryParams.getRuleList,
       getRuleType: alertsClientFactoryParams.getRuleType,
       getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
+      esClientScoped: {},
     });
   });
 

@@ -8,13 +8,14 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
 export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
 export function initializeControlGroupManager(
-  initialState: ControlGroupSerializedState | undefined,
+  initialState: ControlsGroupState | undefined,
   getReferences: (id: string) => Reference[]
 ) {
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
@@ -39,7 +40,7 @@ export function initializeControlGroupManager(
                   ignoreValidations: false,
                 },
                 labelPosition: 'oneLine',
-              } as ControlGroupSerializedState),
+              } as ControlsGroupState),
           references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
         };
       },

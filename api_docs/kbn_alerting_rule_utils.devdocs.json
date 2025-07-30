@@ -164,7 +164,7 @@
         "label": "getFormattedGroups",
         "description": [],
         "signature": [
-          "(grouping?: Record<string, string> | undefined) => ",
+          "(grouping?: Record<string, unknown> | undefined) => ",
           {
             "pluginId": "@kbn/alerting-rule-utils",
             "scope": "common",
@@ -186,7 +186,7 @@
             "label": "grouping",
             "description": [],
             "signature": [
-              "Record<string, string> | undefined"
+              "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
             "deprecated": false,

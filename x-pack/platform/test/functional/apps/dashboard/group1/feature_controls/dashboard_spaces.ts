@@ -20,7 +20,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('spaces', () => {
     const customSpace = 'custom_space';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
     });
 
     describe('space with no features disabled', () => {

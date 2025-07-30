@@ -138,6 +138,7 @@ export const ActionTypeMenu = ({
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
+          role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
@@ -172,7 +173,15 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="xl" columns={3}>
+      <EuiFlexGrid
+        gutterSize="xl"
+        columns={3}
+        role="list"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel',
+          { defaultMessage: 'Available connector types' }
+        )}
+      >
         {cardNodes}
       </EuiFlexGrid>
     </div>

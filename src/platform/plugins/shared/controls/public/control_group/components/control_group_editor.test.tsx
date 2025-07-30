@@ -16,7 +16,7 @@ import { ControlGroupApi } from '../..';
 import { DefaultControlApi } from '../../controls/types';
 import { ControlGroupEditor } from './control_group_editor';
 import { initializeEditorStateManager } from '../initialize_editor_state_manager';
-import { DEFAULT_CONTROL_LABEL_POSITION } from '../../../common';
+import { DEFAULT_CONTROLS_LABEL_POSITION } from '@kbn/controls-constants';
 
 describe('render', () => {
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -31,7 +31,7 @@ describe('render', () => {
       chainingSystem: 'HIERARCHICAL',
       autoApplySelections: true,
       ignoreParentSettings: undefined,
-      labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+      labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
     }),
   };
 

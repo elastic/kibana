@@ -373,11 +373,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const CASE_ID = 'e49ad6e0-cf9d-11eb-a603-13e7747d215c';
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       it('adds the owner field', async () => {
@@ -495,13 +497,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       let userActions: UserActions;
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/cases/migrations/7.13_user_actions'
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13_user_actions'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/cases/migrations/7.13_user_actions'
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13_user_actions'
         );
       });
 

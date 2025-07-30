@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('/internal/transform/transforms', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await createTransform('transform-test-get-1');
       await createTransform('transform-test-get-2');

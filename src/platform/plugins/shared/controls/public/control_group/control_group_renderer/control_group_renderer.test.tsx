@@ -15,7 +15,7 @@ import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-pub
 import { act, render, waitFor } from '@testing-library/react';
 
 import { ControlGroupRendererApi } from '.';
-import { CONTROL_GROUP_TYPE } from '../..';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { getControlGroupEmbeddableFactory } from '../get_control_group_factory';
 import { ControlGroupRenderer, ControlGroupRendererProps } from './control_group_renderer';
 
@@ -47,7 +47,7 @@ describe('control group renderer', () => {
 
   beforeAll(() => {
     const embeddable = embeddablePluginMock.createSetupContract();
-    embeddable.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
+    embeddable.registerReactEmbeddableFactory(CONTROLS_GROUP_TYPE, async () => {
       return factory;
     });
   });

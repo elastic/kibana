@@ -253,7 +253,9 @@ export class SecurityPageObject extends FtrService {
   async initTests() {
     this.log.debug('SecurityPage:initTests');
     await this.kibanaServer.savedObjects.cleanStandardList();
-    await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    await this.esArchiver.loadIfNeeded(
+      'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+    );
     await this.browser.setWindowSize(1600, 1000);
   }
 

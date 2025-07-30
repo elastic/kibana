@@ -8,14 +8,15 @@
  */
 import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
@@ -37,7 +38,7 @@ export const validate = (
     );
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };
