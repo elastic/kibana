@@ -65,6 +65,7 @@ export const DEFAULT_CONDITION = {
   groupBy: 'locationId',
   downThreshold: 3,
   locationsThreshold: 1,
+  recoveryMode: 'firstUp' as const,
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);

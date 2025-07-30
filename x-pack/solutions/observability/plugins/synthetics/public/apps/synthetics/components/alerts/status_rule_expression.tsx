@@ -77,6 +77,19 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
     [ruleParams?.condition, setRuleParams]
   );
 
+  const onFirstUpRecoveryModeChange = useCallback(
+    (isChecked: boolean) => {
+      let newCondition = ruleParams?.condition ?? DEFAULT_CONDITION;
+      newCondition = {
+        ...newCondition,
+        recoveryMode: isChecked ? 'firstUp' : 'conditionNotMet',
+      };
+
+      setRuleParams('condition', newCondition);
+    },
+    [ruleParams?.condition, setRuleParams]
+  );
+
   return (
     <>
       <EuiHorizontalRule size="half" margin="xs" />
@@ -157,7 +170,20 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
           onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
         />
       </EuiFlexItem>
-
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={FIRST_UP_RECOVERY_MODE_SWITCH_LABEL}
+            checked={ruleParams.condition?.recoveryMode === 'firstUp'}
+            onChange={(e) => onFirstUpRecoveryModeChange(e.target.checked)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={FIRST_UP_RECOVERY_MODE_TOOLTIP} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="l" />
     </>
   );
@@ -192,5 +218,18 @@ const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
   'xpack.synthetics.statusRule.euiSwitch.alertOnNoData',
   {
     defaultMessage: "Alert me if there's no data",
+  }
+);
+
+const FIRST_UP_RECOVERY_MODE_SWITCH_LABEL = i18n.translate(
+  'xpack.synthetics.statusRule.euiSwitch.firstUpRecoveryMode',
+  {
+    defaultMessage: 'Recover the alert as soon as the monitor is up',
+  }
+);
+const FIRST_UP_RECOVERY_MODE_TOOLTIP = i18n.translate(
+  'xpack.synthetics.statusRule.tooltip.firstUpRecoveryMode',
+  {
+    defaultMessage: 'If not selected, the alert will recover when the condition is no longer met',
   }
 );

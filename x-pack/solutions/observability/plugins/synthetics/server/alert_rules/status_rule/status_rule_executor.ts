@@ -12,7 +12,10 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import {
+  type StatusRuleCondition,
+  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
+} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
@@ -48,6 +51,8 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
+
+const DEFAULT_RECOVERY_MODE: NonNullable<StatusRuleCondition['recoveryMode']> = 'conditionNotMet';
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -361,10 +366,16 @@ export class StatusRuleExecutor {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
+    const recoveryMode = this.params?.condition?.recoveryMode ?? DEFAULT_RECOVERY_MODE;
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+        // Skip scheduling if recoveryMode is 'firstUp' and latest ping is up
+        if (recoveryMode === 'firstUp' && (statusConfig.ping.summary?.up ?? 0) > 0) {
+          return;
+        }
+
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: [statusConfig],
           locationsThreshold,
@@ -393,6 +404,12 @@ export class StatusRuleExecutor {
       const downConfigsById = getConfigsByIds(downConfigs);
 
       for (const [configId, configs] of downConfigsById) {
+        const totalLocationsNo = configs.length;
+        const upLocationsNo = configs.filter((c) => (c.ping.summary?.up ?? 0) > 0).length;
+        if (recoveryMode === 'firstUp' && upLocationsNo > totalLocationsNo - locationsThreshold) {
+          continue;
+        }
+
         const doesMonitorMeetLocationThreshold = getDoesMonitorMeetLocationThreshold({
           matchesByLocation: configs,
           locationsThreshold,
