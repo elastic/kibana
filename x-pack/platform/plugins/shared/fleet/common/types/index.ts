@@ -104,7 +104,7 @@ export interface FleetConfigType {
   autoInstallContentPackages?: {
     taskInterval?: string;
   };
-  agentStatusChange: {
+  agentStatusChange?: {
     taskInterval?: string;
   };
   integrationsHomeOverride?: string;
