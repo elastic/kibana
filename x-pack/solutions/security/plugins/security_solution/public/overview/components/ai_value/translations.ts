@@ -276,7 +276,7 @@ export const EXECUTIVE_THREATS_DETECTED_DESC = (isIncrease: boolean) =>
   });
 
 export const EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE = i18n.translate(
-  'xpack.securitySolution.aiValue.executiveThreatsDetectedDesc',
+  'xpack.securitySolution.aiValue.executiveThreatsDetectedDescNoCompare',
   {
     defaultMessage: 'real threats detected, improving detection coverage',
   }

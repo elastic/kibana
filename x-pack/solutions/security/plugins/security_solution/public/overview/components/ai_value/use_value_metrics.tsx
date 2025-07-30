@@ -150,28 +150,23 @@ export const useValueMetrics = ({
       }),
     [analystHourlyRate, data?.total, alertCount, filteredAlertsCount, minutesPerAlert]
   );
-  const valueMetricsCompare = useMemo(() => {
-    console.log('valueMetricsCompare args', {
+  const valueMetricsCompare = useMemo(
+    () =>
+      getValueMetrics({
+        analystHourlyRate,
+        attackDiscoveryCount: compareAdData?.total ?? 0,
+        totalAlerts: alertCountCompare,
+        escalatedAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
+        minutesPerAlert,
+      }),
+    [
+      alertCountCompare,
       analystHourlyRate,
-      attackDiscoveryCount: compareAdData?.total ?? 0,
-      totalAlerts: alertCountCompare,
-      escalatedAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
+      compareAdData?.total,
+      filteredAlertsCountCompare,
       minutesPerAlert,
-    });
-    return getValueMetrics({
-      analystHourlyRate,
-      attackDiscoveryCount: compareAdData?.total ?? 0,
-      totalAlerts: alertCountCompare,
-      escalatedAlertsCount: alertCountCompare - filteredAlertsCountCompare ?? 0,
-      minutesPerAlert,
-    });
-  }, [
-    alertCountCompare,
-    analystHourlyRate,
-    compareAdData?.total,
-    filteredAlertsCountCompare,
-    minutesPerAlert,
-  ]);
+    ]
+  );
 
   return {
     attackAlertIds: data?.unique_alert_ids ?? [],
