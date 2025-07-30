@@ -389,7 +389,6 @@ export class HeadlessChromiumDriver {
           errorReason: 'Aborted',
           requestId,
         });
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
@@ -441,7 +440,6 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
