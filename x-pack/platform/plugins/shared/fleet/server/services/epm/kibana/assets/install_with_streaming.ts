@@ -78,7 +78,7 @@ export async function installKibanaAssetsWithStreaming({
 
     if (
       soType === KibanaSavedObjectType.alert &&
-      !appContextService.getExperimentalFeatures().enableAlertRuleTemplateSupport
+      !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
     ) {
       return;
     }

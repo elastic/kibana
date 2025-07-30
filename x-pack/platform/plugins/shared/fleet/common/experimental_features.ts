@@ -18,7 +18,7 @@ const _allowedExperimentalValues = {
   enableAgentMigrations: false,
   enablePackageRollback: false,
   enableAutoInstallContentPackages: false,
-  enableAlertRuleTemplateSupport: false,
+  enableAgentStatusAlerting: false,
 };
 
 /**

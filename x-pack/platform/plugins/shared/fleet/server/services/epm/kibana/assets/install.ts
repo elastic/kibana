@@ -401,7 +401,7 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
 
       if (
         soType === KibanaSavedObjectType.alert &&
-        !appContextService.getExperimentalFeatures().enableAlertRuleTemplateSupport
+        !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
       ) {
         return;
       }
