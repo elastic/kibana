@@ -54,6 +54,7 @@ interface AdditionalOptionsFieldsProps {
   selectedTaskType?: string;
   taskTypeOptions: TaskTypeOption[];
   isEdit?: boolean;
+  allowContextWindowLength?: boolean;
 }
 
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
@@ -64,6 +65,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,
   isEdit,
+  allowContextWindowLength,
 }) => {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
@@ -71,7 +73,9 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   const contextWindowLengthSettings = useMemo(
     () =>
-      taskTypeOptions?.some(option => option.id === CHAT_COMPLETION_TASK_TYPE) || (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE) ? (
+      (taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
+        (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE)) &&
+      allowContextWindowLength ? (
         <>
           <EuiTitle size="xxs" data-test-subj="context-window-length-details-label">
             <h4>
@@ -128,7 +132,14 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           <EuiSpacer size="m" />
         </>
       ) : null,
-    [selectedTaskType, setFieldValue, config.provider, config.contextWindowLength, isEdit]
+    [
+      selectedTaskType,
+      setFieldValue,
+      config.contextWindowLength,
+      isEdit,
+      allowContextWindowLength,
+      taskTypeOptions,
+    ]
   );
 
   const taskTypeSettings = useMemo(

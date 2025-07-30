@@ -68,21 +68,27 @@ export function isProviderForSolutions(
 }
 
 interface InferenceServicesProps {
+  config: {
+    isEdit?: boolean;
+    enforceAdaptiveAllocations?: boolean;
+    currentSolution?: SolutionView;
+    isPreconfigured?: boolean;
+    allowContextWindowLength?: boolean;
+  };
   http: HttpSetup;
   toasts: IToasts;
-  isEdit?: boolean;
-  enforceAdaptiveAllocations?: boolean;
-  isPreconfigured?: boolean;
-  currentSolution?: SolutionView;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
-  isEdit,
-  enforceAdaptiveAllocations,
-  isPreconfigured,
-  currentSolution,
+  config: {
+    allowContextWindowLength,
+    isEdit,
+    enforceAdaptiveAllocations,
+    isPreconfigured,
+    currentSolution,
+  },
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -524,6 +530,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
+            allowContextWindowLength={allowContextWindowLength}
           />
           <EuiSpacer size="m" />
           <EuiHorizontalRule margin="xs" />
