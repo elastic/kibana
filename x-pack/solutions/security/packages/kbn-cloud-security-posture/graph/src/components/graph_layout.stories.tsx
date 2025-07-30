@@ -19,9 +19,10 @@ import type {
 } from '.';
 import { Graph } from '.';
 
-const meta: Meta<typeof Graph> = {
-  component: Graph,
-  render: ({ nodes, edges, interactive }: GraphData) => {
+type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
+
+const meta = {
+  render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
       <ThemeProvider theme={{ darkMode: false }}>
         <Graph
@@ -29,9 +30,9 @@ const meta: Meta<typeof Graph> = {
             height: 100%;
             width: 100%;
           `}
-          nodes={nodes}
-          edges={edges}
-          interactive={interactive}
+          nodes={nodes ?? []}
+          edges={edges ?? []}
+          interactive={interactive ?? false}
         />
       </ThemeProvider>
     );
@@ -44,16 +45,10 @@ const meta: Meta<typeof Graph> = {
     interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<Partial<GraphPropsAndCustomArgs>>;
 
 export default meta;
 type Story = StoryObj<typeof Graph>;
-
-interface GraphData {
-  nodes: NodeViewModel[];
-  edges: EdgeViewModel[];
-  interactive: boolean;
-}
 
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
@@ -199,7 +194,7 @@ export const SimpleAPIMock: Story = {
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
         shape: 'hexagon',
-        icon: 'questionInCircle',
+        icon: 'question',
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
@@ -253,7 +248,7 @@ export const GroupWithWarningAPIMock: Story = {
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
         shape: 'hexagon',
-        icon: 'questionInCircle',
+        icon: 'question',
       },
       {
         id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
@@ -326,6 +321,91 @@ export const GroupWithWarningAPIMock: Story = {
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
         targetShape: 'group',
         color: 'primary',
+      },
+    ],
+  },
+};
+
+export const GroupWithAlertAPIMock: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        shape: 'group',
+      },
+      {
+        id: 'admin@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'projects/your-project-id/roles/customRole',
+        color: 'primary',
+        shape: 'hexagon',
+      },
+      {
+        id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        label: 'google.iam.admin.v1.CreateRole',
+        color: 'danger',
+        shape: 'label',
+        parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+      {
+        id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        label: 'google.iam.admin.v1.UpdateRole',
+        color: 'primary',
+        shape: 'label',
+        parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(admin@example.com)-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source: 'admin@example.com',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target: 'projects/your-project-id/roles/customRole',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'danger',
+        type: 'solid',
+      },
+      {
+        id: 'a(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole))',
+        source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        target:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        color: 'subdued',
+        type: 'solid',
+      },
+      {
+        id: 'a(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole))-b(grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole)))',
+        source:
+          'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)',
+        target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
+        color: 'subdued',
+        type: 'solid',
       },
     ],
   },
@@ -543,6 +623,39 @@ export const GraphLargeStackedEdgeCases: Story = {
           color: 'danger',
           shape: 'label',
         })),
+    ]),
+  },
+};
+
+const VARIANT_STACK_SIZES_NODES = 8;
+
+export const VariantStackSizes: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...(Array(VARIANT_STACK_SIZES_NODES)
+        .fill(0)
+        .map((id, idx) => ({
+          id: String.fromCharCode(97 + idx), // 'a', 'b', 'c', ...
+          label: String.fromCharCode(97 + idx).toUpperCase(),
+          color: 'primary',
+          shape: 'ellipse',
+        })) satisfies EnhancedNodeViewModel[]),
+      ...Array(VARIANT_STACK_SIZES_NODES - 1)
+        .fill(0)
+        .map<EnhancedNodeViewModel[]>((_v, idx) =>
+          Array(idx + 1)
+            .fill(0)
+            .map<EnhancedNodeViewModel>((_, idx2) => ({
+              id: `${String.fromCharCode(97 + idx)}-${String.fromCharCode(97 + idx + 1)}`,
+              source: String.fromCharCode(97 + idx),
+              target: String.fromCharCode(97 + idx + 1),
+              label: `${idx2}`,
+              color: 'primary',
+              shape: 'label',
+            }))
+        )
+        .flat(),
     ]),
   },
 };

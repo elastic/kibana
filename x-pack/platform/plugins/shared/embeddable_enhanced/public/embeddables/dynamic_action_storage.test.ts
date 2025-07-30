@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DynamicActionStorage, DynamicActionStorageApi } from './dynamic_action_storage';
 // use real const to make test fail in case someone accidentally changes it
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { DynamicActionsSerializedState } from '../plugin';
+import { DynamicActionsSerializedState } from './types';
 import { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 
 const getApi = (): DynamicActionStorageApi => {

@@ -109,6 +109,7 @@ export interface FilterOptions {
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
   showRulesWithGaps?: boolean;
   gapSearchRange?: GapRangeValue;
+  includeRuleTypes?: Type[];
 }
 
 export interface FetchRulesResponse {

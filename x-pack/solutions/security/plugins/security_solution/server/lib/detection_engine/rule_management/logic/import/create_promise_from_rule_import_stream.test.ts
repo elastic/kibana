@@ -244,7 +244,9 @@ describe('createPromiseFromRuleImportStream', () => {
       interval: '5m',
       type: 'query',
     });
-    expect(resultOrError[1].message).toEqual(`Expected property name or '}' in JSON at position 1`);
+    expect(resultOrError[1].message).toEqual(
+      `Expected property name or '}' in JSON at position 1 (line 1 column 2)`
+    );
     expect(resultOrError[2]).toEqual({
       rule_id: 'rule-2',
       output_index: '.siem-signals',

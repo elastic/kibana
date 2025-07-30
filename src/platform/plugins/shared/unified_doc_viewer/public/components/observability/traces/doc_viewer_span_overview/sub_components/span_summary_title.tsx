@@ -11,13 +11,14 @@ import { EuiTitle } from '@elastic/eui';
 import { SPAN_ID_FIELD, SPAN_NAME_FIELD } from '@kbn/discover-utils';
 import React from 'react';
 import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 
 export interface SpanSummaryTitleProps {
   spanName?: string;
   formattedSpanName?: string;
   spanId: string;
   formattedSpanId: string;
+  showActions?: boolean;
 }
 
 export const SpanSummaryTitle = ({
@@ -25,11 +26,38 @@ export const SpanSummaryTitle = ({
   spanId,
   formattedSpanId,
   formattedSpanName,
+  showActions = true,
 }: SpanSummaryTitleProps) => {
+  const FieldContent = ({
+    children,
+    field,
+    title,
+    value,
+  }: {
+    children: React.ReactNode;
+    field: string;
+    title: string;
+    value: string;
+    showActions: boolean;
+  }) => {
+    return showActions ? (
+      <FieldHoverActionPopover title={title} value={value} field={field}>
+        <>{children}</>
+      </FieldHoverActionPopover>
+    ) : (
+      <>{children}</>
+    );
+  };
+
   return spanName ? (
     <>
       <div>
-        <FieldHoverActionPopover title={spanName} value={spanName} field={SPAN_NAME_FIELD}>
+        <FieldContent
+          title={spanName}
+          value={spanName}
+          field={SPAN_NAME_FIELD}
+          showActions={showActions}
+        >
           <EuiTitle size="xs">
             <h2>
               <HighlightField
@@ -40,17 +68,17 @@ export const SpanSummaryTitle = ({
               />
             </h2>
           </EuiTitle>
-        </FieldHoverActionPopover>
+        </FieldContent>
       </div>
-      <FieldHoverActionPopover title={spanId} value={spanId} field={SPAN_ID_FIELD}>
+      <FieldContent title={spanId} value={spanId} field={SPAN_ID_FIELD} showActions={showActions}>
         <HighlightField value={spanId} formattedValue={formattedSpanId} />
-      </FieldHoverActionPopover>
+      </FieldContent>
     </>
   ) : (
-    <FieldHoverActionPopover title={spanId} value={spanId} field={SPAN_ID_FIELD}>
+    <FieldContent title={spanId} value={spanId} field={SPAN_ID_FIELD} showActions={showActions}>
       <EuiTitle size="xs">
         <HighlightField value={spanId} formattedValue={formattedSpanId} as="h2" />
       </EuiTitle>
-    </FieldHoverActionPopover>
+    </FieldContent>
   );
 };

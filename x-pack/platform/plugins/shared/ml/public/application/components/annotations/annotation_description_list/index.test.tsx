@@ -9,21 +9,24 @@ import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.jso
 
 import moment from 'moment-timezone';
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { AnnotationDescriptionList } from '.';
+import type { Annotation } from '../../../../../common/types/annotations';
 
 describe('AnnotationDescriptionList', () => {
   beforeEach(() => {
     moment.tz.setDefault('UTC');
   });
+
   afterEach(() => {
     moment.tz.setDefault('Browser');
   });
 
   test('Initialization with annotation.', () => {
-    // @ts-expect-error mock data is too loosely typed
-    const wrapper = shallowWithIntl(<AnnotationDescriptionList annotation={mockAnnotations[0]} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(
+      <AnnotationDescriptionList annotation={mockAnnotations[0] as Annotation} />
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

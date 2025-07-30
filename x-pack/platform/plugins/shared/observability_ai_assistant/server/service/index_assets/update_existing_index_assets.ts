@@ -30,7 +30,7 @@ export async function updateExistingIndexAssets({
   });
 
   if (!doesKbIndexExist && !doesConversationIndexExist) {
-    logger.warn('Index assets do not exist. Aborting updating index assets');
+    logger.debug('Index assets do not exist. Aborting updating index assets');
     return;
   }
 

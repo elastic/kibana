@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type {
-  BoundChatCompleteOptions,
-  BoundInferenceClient,
-  InferenceClient,
-} from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { BoundOptions } from '@kbn/inference-common';
 import { bindChatComplete } from '../chat_complete';
 import { bindPrompt } from '../prompt';
 import { bindOutput } from '../output';
 
 export const bindClient = (
   unboundClient: InferenceClient,
-  boundParams: BoundChatCompleteOptions
+  boundParams: BoundOptions
 ): BoundInferenceClient => {
   return {
     ...unboundClient,

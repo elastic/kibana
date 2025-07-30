@@ -15,3 +15,13 @@ export interface AlertDetailsSource {
 export interface AlertDetailsAppSectionProps {
   setSources: React.Dispatch<React.SetStateAction<AlertDetailsSource[] | undefined>>;
 }
+
+export const TAB_IDS = [
+  'overview',
+  'metadata',
+  'related_alerts',
+  'investigation_guide',
+  'related_dashboards',
+] as const;
+
+export type TabId = (typeof TAB_IDS)[number];

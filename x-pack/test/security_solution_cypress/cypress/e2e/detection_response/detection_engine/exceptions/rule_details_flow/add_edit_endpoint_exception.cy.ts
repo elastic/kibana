@@ -51,7 +51,7 @@ import {
 // https://github.com/elastic/kibana/issues/187279
 describe(
   'Add endpoint exception from rule details',
-  { tags: ['@ess', '@serverless, @skipInServerlessMKI'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const NEW_ITEM_NAME = 'Exception item-EDITED';

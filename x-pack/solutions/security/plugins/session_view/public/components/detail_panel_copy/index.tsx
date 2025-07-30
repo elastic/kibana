@@ -35,7 +35,12 @@ export const DetailPanelCopy = ({
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={textToCopy} display={display}>
+      <EuiCopy
+        textToCopy={textToCopy}
+        tooltipProps={{
+          display,
+        }}
+      >
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}

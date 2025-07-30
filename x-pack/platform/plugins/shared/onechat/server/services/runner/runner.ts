@@ -67,11 +67,9 @@ export class RunnerManager {
           }
         }
       },
-      runAgent: <TParams = Record<string, unknown>, TResult = unknown>(
-        agentExecutionParams: ScopedRunnerRunAgentParams<TParams>
-      ): Promise<RunAgentReturn<TResult>> => {
+      runAgent: (agentExecutionParams: ScopedRunnerRunAgentParams): Promise<RunAgentReturn> => {
         try {
-          return runAgent<TParams, TResult>({ agentExecutionParams, parentManager: this });
+          return runAgent({ agentExecutionParams, parentManager: this });
         } catch (e) {
           if (isOnechatError(e)) {
             throw e;

@@ -21,8 +21,7 @@
       "stackConnectors",
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "esUiShared",
+      "kibanaUtils"
     ]
   }
 }

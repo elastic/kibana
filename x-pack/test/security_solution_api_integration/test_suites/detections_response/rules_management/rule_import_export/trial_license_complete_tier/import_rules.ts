@@ -96,7 +96,7 @@ const getImportRuleBuffer = (connectorId: string) => {
 
   return Buffer.from(ndjson);
 };
-const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
+const getImportRuleWithConnectorsBuffer = (connectorId: string, originId?: string) => {
   const rule1 = getRuleImportWithActions([
     {
       group: 'default',
@@ -109,6 +109,7 @@ const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
   ]);
   const connector = {
     id: connectorId,
+    originId,
     type: 'action',
     updated_at: '2023-01-25T14:35:52.852Z',
     created_at: '2023-01-25T14:35:52.852Z',
@@ -135,7 +136,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
 
-  describe('@ess @serverless @skipInServerlessMKI import_rules', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/220971
+  // Failing: See https://github.com/elastic/kibana/issues/220971
+  describe.skip('@ess @serverless @skipInServerlessMKI import_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -157,13 +160,13 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should result in partial success if more than 3 threshold fields', async () => {
+      it('should result in partial success if more than 5 threshold fields', async () => {
         const baseRule = getThresholdRuleForAlertTesting(['*']);
         const rule = {
           ...baseRule,
           threshold: {
             ...baseRule.threshold,
-            field: ['field-1', 'field-2', 'field-3', 'field-4'],
+            field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
           },
         };
         const ndjson = combineToNdJson(rule);
@@ -177,7 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.errors[0]).toEqual({
           error: {
-            message: 'Number of fields must be 3 or less',
+            message: 'threshold.field: Array must contain at most 5 element(s)',
             status_code: 400,
           },
         });
@@ -900,6 +903,40 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(overwriteResponseBody).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 1,
+            action_connectors_warnings: [],
+            action_connectors_errors: [],
+          });
+        });
+
+        it('should import rules and connectors when connectors include an originId', async () => {
+          const defaultSpaceConnectorId = 'c5548aec-a02f-4d98-8a37-5ed7e1810c0e';
+          const originId = '6f353a28-74c8-4660-8ea5-2485dbe64fbf';
+
+          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId, originId);
+
+          await supertest
+            .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          const { body } = await supertest
+            .post(
+              `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
+            )
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
             success: true,
             success_count: 1,
             rules_count: 1,

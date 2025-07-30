@@ -52,6 +52,7 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
 import { initializeEditApi } from './initialize_edit_api';
+import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -71,7 +72,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      initialState.rawState
+      initialState
     );
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
@@ -158,14 +159,14 @@ export const getVisualizeEmbeddableFactory: (deps: {
       linkedToLibraryArg: boolean
     ) => {
       return serializeState({
-        serializedVis: serializedVis$.value,
+        serializedVis: vis$.getValue().serialize(),
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary: linkedToLibraryArg,
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
-        ...(dynamicActionsManager?.getLatestState() ?? {}),
+        serializeDynamicActions: dynamicActionsManager?.serializeState,
         ...timeRangeManager.getLatestState(),
       });
     };
@@ -306,7 +307,18 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
       canUnlinkFromLibrary: () => Promise.resolve(linkedToLibrary),
-      checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
+      checkForDuplicateTitle: async (
+        newTitle: string,
+        isTitleDuplicateConfirmed: boolean,
+        onTitleDuplicate: () => void
+      ) => {
+        await checkForDuplicateTitle(
+          { title: newTitle, lastSavedTitle: '' },
+          false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate
+        );
+      },
       getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
     });

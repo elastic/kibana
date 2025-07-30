@@ -13,6 +13,11 @@
 export const modelVersionVirtualMajor = 10;
 
 /**
+ * The initial model version (starting point for SO types that have NOT yet defined any modelVersions)
+ */
+export const initialModelVersion = '10.0.0';
+
+/**
  * The stack version where all types will be forced to switch to using the model version system.
  */
 export const globalSwitchToModelVersionAt = '8.10.0';

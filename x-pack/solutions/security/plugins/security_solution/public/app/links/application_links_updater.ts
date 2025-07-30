@@ -57,13 +57,6 @@ class ApplicationLinksUpdater {
   }
 
   /**
-   * Returns the current links value
-   */
-  public getLinksValue(): AppLinkItems {
-    return this.linksSubject$.getValue();
-  }
-
-  /**
    * Returns the current normalized links value
    */
   public getNormalizedLinksValue(): NormalizedLinks {

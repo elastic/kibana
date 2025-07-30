@@ -11,7 +11,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 import { HomeApp } from './components/home_app';
@@ -38,7 +37,7 @@ export const renderApp = async (
       );
 
     render(
-      <KibanaRenderContextProvider {...coreStart}>
+      coreStart.rendering.addContext(
         <RedirectAppLinks
           coreStart={{
             application: coreStart.application,
@@ -50,7 +49,7 @@ export const renderApp = async (
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>
         </RedirectAppLinks>
-      </KibanaRenderContextProvider>,
+      ),
       element
     );
   });

@@ -125,7 +125,7 @@ export const GRAPHS_LABEL = i18n.translate(
 export const GRAPHS_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.graphsDescription',
   {
-    defaultMessage: 'Select the different graphs to evaluate the dataset against.',
+    defaultMessage: 'Select a graph to evaluate the dataset against.',
   }
 );
 

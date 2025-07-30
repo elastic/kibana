@@ -10,7 +10,8 @@ import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
-import { DataViewManagerScopeName } from '../../constants';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 
 const mockDataViewsService = {
   getDataViewLazy: jest.fn(),
@@ -36,6 +37,10 @@ const mockedState: RootState = {
       status: 'pristine',
     },
     detections: {
+      dataViewId: null,
+      status: 'pristine',
+    },
+    explore: {
       dataViewId: null,
       status: 'pristine',
     },
@@ -65,6 +70,9 @@ const mockedState: RootState = {
         },
       ],
       status: 'pristine',
+      signalIndex: { name: '', isOutdated: false },
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     },
   },
 };

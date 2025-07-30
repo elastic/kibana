@@ -74,6 +74,10 @@ describe('Connector type config checks', () => {
             oAuthScope: 'some-scope',
             apiUrl: 'https://_face_api_.com',
           };
+        } else if (connectorTypeId === '.bedrock') {
+          connectorConfig = {
+            apiUrl: 'https://_face_api_.com',
+          };
         }
 
         const subActions = getService({

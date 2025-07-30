@@ -130,6 +130,10 @@ export const CaseAttributesRt = rt.intersection([
   rt.exact(
     rt.partial({
       incremental_id: rt.union([rt.number, rt.null]),
+      in_progress_at: rt.union([rt.string, rt.null]),
+      time_to_acknowledge: rt.union([rt.number, rt.null]),
+      time_to_investigate: rt.union([rt.number, rt.null]),
+      time_to_resolve: rt.union([rt.number, rt.null]),
     })
   ),
 ]);

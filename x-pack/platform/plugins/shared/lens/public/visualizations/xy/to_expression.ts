@@ -36,9 +36,12 @@ import {
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
 
-import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
+import {
+  LayerTypes,
+  FittingFunctions,
+  PointVisibilityOptions,
+} from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
   State as XYState,
@@ -343,6 +346,7 @@ export const buildXYExpression = (
     emphasizeFitting: state.emphasizeFitting ?? true,
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
+    pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:

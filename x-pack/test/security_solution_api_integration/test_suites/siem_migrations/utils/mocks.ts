@@ -18,6 +18,7 @@ import {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { INDEX_PATTERN as SIEM_MIGRATIONS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
+import { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
 
 const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
@@ -152,6 +153,19 @@ export const statsOverrideCallbackFactory = ({
   return overrideCallback;
 };
 
+const getDefaultMigrationDoc: () => Omit<StoredSiemMigration, 'id'> = () => ({
+  name: 'Default Migration',
+  created_by: SOME_USER_ID,
+  created_at: new Date().toISOString(),
+  last_execution: {
+    is_aborted: false,
+    started_at: new Date().toISOString(),
+    ended_at: null,
+    skip_prebuilt_rules_matching: false,
+    connector_id: 'preconfigured-bedrock',
+  },
+});
+
 export const createMigrationRules = async (
   es: Client,
   rules: RuleMigrationRuleData[]
@@ -170,8 +184,7 @@ export const createMigrationRules = async (
   const createMigrationOperations = Array.from(migrationIdsToBeCreated).flatMap((migrationId) => [
     { create: { _index: SIEM_MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
     {
-      created_by: SOME_USER_ID,
-      created_at: new Date().toISOString(),
+      ...getDefaultMigrationDoc(),
     },
   ]);
 

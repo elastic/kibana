@@ -199,7 +199,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiFormRow fullWidth>
               <EuiCallOut
                 color="primary"
-                iconType="iInCircle"
+                iconType="info"
                 size="s"
                 title={i18n.translate(
                   'xpack.security.management.editRole.spacePrivilegeForm.privilegeCombinationMsg.title',

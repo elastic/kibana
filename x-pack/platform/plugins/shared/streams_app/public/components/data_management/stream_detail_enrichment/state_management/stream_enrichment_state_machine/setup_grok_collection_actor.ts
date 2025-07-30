@@ -9,7 +9,7 @@ import type { GrokCollection } from '@kbn/grok-ui';
 import { fromPromise } from 'xstate5';
 
 export function setupGrokCollectionActor() {
-  return fromPromise<void, { grokCollection: GrokCollection }>(async ({ input, signal }) => {
+  return fromPromise<void, { grokCollection: GrokCollection }>(async ({ input }) => {
     await input.grokCollection.setup();
   });
 }

@@ -91,15 +91,20 @@ export default function ({ getService }: FtrProviderContext) {
       const { report } = reportManager.assignReports([counterEvent]);
 
       await sendReport(report);
-      await retry.waitForWithTimeout('reported events to be stored into ES', 8000, async () => {
-        const savedObjects = await fetchUsageCountersObjects();
+      // Wait for the report to be query-able in ES since sending report uses (refresh = false)
+      await retry.tryWithRetries(
+        'reported events to be stored into ES',
+        async () => {
+          const savedObjects = await fetchUsageCountersObjects();
 
-        const countTypeEvents = getCounter(savedObjects, eventName, METRIC_TYPE.COUNT);
+          const countTypeEvents = getCounter(savedObjects, eventName, METRIC_TYPE.COUNT);
 
-        expect(countTypeEvents.length).to.eql(1);
-        expect(countTypeEvents[0].attributes.count).to.eql(1);
-        return true;
-      });
+          expect(countTypeEvents.length).to.eql(1);
+          expect(countTypeEvents[0].attributes.count).to.eql(1);
+          return true;
+        },
+        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
+      );
     });
 
     it('supports multiple events', async () => {
@@ -115,33 +120,38 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
 
       await sendReport(report);
-      await retry.waitForWithTimeout('reported events to be stored into ES', 8000, async () => {
-        const savedObjects = await fetchUsageCountersObjects();
-        const firstEventWithCountTypeEvents = getCounter(
-          savedObjects,
-          firstUniqueEventName,
-          METRIC_TYPE.COUNT
-        );
-        expect(firstEventWithCountTypeEvents.length).to.eql(1);
-        expect(firstEventWithCountTypeEvents[0].attributes.count).to.eql(1);
+      // Wait for the report to be query-able in ES since sending report uses (refresh = false)
+      await retry.tryWithRetries(
+        'reported events to be stored into ES',
+        async () => {
+          const savedObjects = await fetchUsageCountersObjects();
+          const firstEventWithCountTypeEvents = getCounter(
+            savedObjects,
+            firstUniqueEventName,
+            METRIC_TYPE.COUNT
+          );
+          expect(firstEventWithCountTypeEvents.length).to.eql(1);
+          expect(firstEventWithCountTypeEvents[0].attributes.count).to.eql(1);
 
-        const firstEventWithClickTypeEvents = getCounter(
-          savedObjects,
-          firstUniqueEventName,
-          METRIC_TYPE.CLICK
-        );
-        expect(firstEventWithClickTypeEvents.length).to.eql(1);
-        expect(firstEventWithClickTypeEvents[0].attributes.count).to.eql(2);
+          const firstEventWithClickTypeEvents = getCounter(
+            savedObjects,
+            firstUniqueEventName,
+            METRIC_TYPE.CLICK
+          );
+          expect(firstEventWithClickTypeEvents.length).to.eql(1);
+          expect(firstEventWithClickTypeEvents[0].attributes.count).to.eql(2);
 
-        const secondEventWithCountTypeEvents = getCounter(
-          savedObjects,
-          secondUniqueEventName,
-          METRIC_TYPE.COUNT
-        );
-        expect(secondEventWithCountTypeEvents.length).to.eql(1);
-        expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
-        return true;
-      });
+          const secondEventWithCountTypeEvents = getCounter(
+            savedObjects,
+            secondUniqueEventName,
+            METRIC_TYPE.COUNT
+          );
+          expect(secondEventWithCountTypeEvents.length).to.eql(1);
+          expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
+          return true;
+        },
+        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
+      );
     });
   });
 }

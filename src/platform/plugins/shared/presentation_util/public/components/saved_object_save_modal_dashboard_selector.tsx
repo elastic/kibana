@@ -149,11 +149,11 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="Items added to the Visualize Library are available to all dashboards. Edits to a library item appear everywhere it is used."
+                    defaultMessage="Items added to the Visualize library are available to all dashboards. Edits to a library item appear everywhere it is used."
                   />
                 }
               />

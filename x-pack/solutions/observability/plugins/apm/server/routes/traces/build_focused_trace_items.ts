@@ -6,27 +6,27 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { TraceDoc, TraceItems } from './get_trace_items';
-
-interface Child {
-  traceDoc: TraceDoc;
-  children?: Child[];
-}
+import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 
 const MAX_NUMBER_OF_CHILDREN = 2;
+
+interface Child {
+  traceDoc: TraceItem;
+  children?: Child[];
+}
 
 export function buildChildrenTree({
   initialTraceDoc,
   itemsGroupedByParentId,
   maxNumberOfChildren,
 }: {
-  initialTraceDoc: TraceDoc;
-  itemsGroupedByParentId: Record<string, TraceDoc[]>;
+  initialTraceDoc: TraceItem;
+  itemsGroupedByParentId: Record<string, TraceItem[]>;
   maxNumberOfChildren: number;
 }) {
   let _processedItemsCount = 0;
-  function findChildren(traceDoc: TraceDoc) {
-    const id = getId(traceDoc);
+  function findChildren(traceDoc: TraceItem) {
+    const id = traceDoc.id;
     if (!id) {
       return [];
     }
@@ -49,9 +49,9 @@ export function buildChildrenTree({
 }
 
 export interface FocusedTraceItems {
-  rootTransaction: TraceDoc;
-  parentDoc?: TraceDoc;
-  focusedTraceDoc: TraceDoc;
+  rootDoc: TraceItem;
+  parentDoc?: TraceItem;
+  focusedTraceDoc: TraceItem;
   focusedTraceTree: Child[];
 }
 
@@ -59,13 +59,11 @@ export function buildFocusedTraceItems({
   traceItems,
   docId,
 }: {
-  traceItems: TraceItems;
+  traceItems: TraceItem[];
   docId: string;
 }): FocusedTraceItems | undefined {
-  const { traceDocs } = traceItems;
-
-  const itemsById = traceDocs.reduce<Record<string, TraceDoc>>((acc, curr) => {
-    const id = getId(curr);
+  const itemsById = traceItems.reduce<Record<string, TraceItem>>((acc, curr) => {
+    const id = curr.id;
     if (!id) {
       return acc;
     }
@@ -77,12 +75,11 @@ export function buildFocusedTraceItems({
   if (!focusedTraceDoc) {
     return undefined;
   }
-  const parentDoc = focusedTraceDoc.parent?.id ? itemsById[focusedTraceDoc.parent?.id] : undefined;
+  const parentDoc = focusedTraceDoc.parentId ? itemsById[focusedTraceDoc.parentId] : undefined;
 
-  const itemsGroupedByParentId = traceDocs.reduce<Record<string, TraceDoc[]>>((acc, curr) => {
-    const parentId = curr.parent?.id;
-    const isRootTransaction = !parentId;
-    if (isRootTransaction) {
+  const itemsGroupedByParentId = traceItems.reduce<Record<string, TraceItem[]>>((acc, curr) => {
+    const parentId = curr.parentId;
+    if (!parentId) {
       acc.root = [curr];
       return acc;
     }
@@ -93,7 +90,10 @@ export function buildFocusedTraceItems({
     return acc;
   }, {});
 
-  const rootTransaction = itemsGroupedByParentId.root?.[0];
+  const rootDoc = itemsGroupedByParentId.root?.[0];
+  if (!rootDoc) {
+    return undefined;
+  }
 
   const focusedTraceTree = buildChildrenTree({
     initialTraceDoc: focusedTraceDoc,
@@ -102,11 +102,9 @@ export function buildFocusedTraceItems({
   });
 
   return {
-    rootTransaction,
+    rootDoc,
     parentDoc,
     focusedTraceDoc,
     focusedTraceTree,
   };
 }
-
-const getId = (traceDoc: TraceDoc) => traceDoc.span?.id ?? traceDoc.transaction?.id;

@@ -22,3 +22,4 @@ export const AGENT_STATUS_FIELD_NAME = 'agent.status';
 export const QUARANTINED_PATH_FIELD_NAME = 'quarantined.path';
 export const REASON_FIELD_NAME = 'kibana.alert.reason';
 export const EVENT_SUMMARY_FIELD_NAME = 'eventSummary';
+export const EVENT_SOURCE_FIELD_NAME = 'kibana.alert.ancestors.id';

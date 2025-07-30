@@ -62,14 +62,14 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(omit(newConfiguration, ['updated_at'])).toEqual(
+    expect(omit(newConfiguration, ['updated_at', 'created_at'])).toEqual(
       omit(
         {
           ...originalMonitorConfiguration,
           hash: '',
           revision: 2,
         },
-        ['updated_at']
+        ['updated_at', 'created_at']
       )
     );
   });
@@ -88,7 +88,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     // hash is always reset to empty string when monitor is edited
     // this ensures that when the monitor is pushed again, the monitor
     // config in the process takes precedence
-    expect(omit(newConfiguration, ['updated_at'])).toEqual(
+    expect(omit(newConfiguration, ['updated_at', 'created_at'])).toEqual(
       omit(
         {
           ...originalMonitorConfiguration,
@@ -104,7 +104,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
           },
           enabled: !originalMonitorConfiguration?.enabled,
         },
-        ['updated_at']
+        ['updated_at', 'created_at']
       )
     );
   });
@@ -112,13 +112,13 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   step('Monitor can be re-pushed and overwrite any changes', async () => {
     await addTestMonitorProject(params.kibanaUrl, monitorName);
     const repushedConfiguration = await services.getMonitor(monitorId);
-    expect(omit(repushedConfiguration, ['updated_at'])).toEqual(
+    expect(omit(repushedConfiguration, ['updated_at', 'created_at'])).toEqual(
       omit(
         {
           ...originalMonitorConfiguration,
           revision: 4,
         },
-        ['updated_at']
+        ['updated_at', 'created_at']
       )
     );
   });

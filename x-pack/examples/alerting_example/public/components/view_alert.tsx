@@ -71,7 +71,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
         <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alerts) ? (
-        <EuiCallOut title="No Alerts!" color="warning" iconType="help">
+        <EuiCallOut title="No Alerts!" color="warning" iconType="question">
           <p>This Rule doesn&apos;t have any active alerts at the moment.</p>
         </EuiCallOut>
       ) : (

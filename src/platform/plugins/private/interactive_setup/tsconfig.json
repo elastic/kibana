@@ -25,6 +25,7 @@
     "@kbn/core-preboot-server",
     "@kbn/security-hardening",
     "@kbn/react-kibana-context-render",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

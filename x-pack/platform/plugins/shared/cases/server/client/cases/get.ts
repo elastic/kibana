@@ -103,7 +103,7 @@ export const getCasesByAlertID = async (
       return [];
     }
 
-    const commentStats = await attachmentService.getter.getCaseCommentStats({
+    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
     });
 
@@ -188,7 +188,7 @@ export const get = async (
     });
 
     if (!includeComments) {
-      const commentStats = await attachmentService.getter.getCaseCommentStats({
+      const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
       });
       return decodeOrThrow(CaseRt)(

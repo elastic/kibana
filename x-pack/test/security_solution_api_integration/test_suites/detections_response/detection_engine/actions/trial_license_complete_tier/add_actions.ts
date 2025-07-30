@@ -9,7 +9,8 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getCases, waitForCases } from '../../../../../../cases_api_integration/common/lib/api';
+import { getCases } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
+import { waitForCases } from '../../../utils/cases';
 import {
   deleteAllRules,
   waitForRuleSuccess,
@@ -43,7 +44,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless @serverlessQA @ess add_actions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/221309
+  describe.skip('@serverless @serverlessQA @ess add_actions', () => {
     describe('adding actions', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);

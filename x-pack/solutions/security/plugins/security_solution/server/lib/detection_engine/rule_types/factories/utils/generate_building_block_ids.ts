@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { createHash } from 'crypto';
-import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_ANCESTORS } from '../../../../../../common/field_maps/field_names';
 
 /**
@@ -16,7 +16,7 @@ import { ALERT_ANCESTORS } from '../../../../../../common/field_maps/field_names
  * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
  * @param buildingBlocks The full list of building blocks in the sequence.
  */
-export const generateBuildingBlockIds = (buildingBlocks: BaseFieldsLatest[]): string[] => {
+export const generateBuildingBlockIds = (buildingBlocks: DetectionAlertLatest[]): string[] => {
   const baseHashString = buildingBlocks.reduce(
     (baseString, block) =>
       baseString

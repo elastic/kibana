@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
+import { ASSET_FIELDS, DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
 import { GroupWrapper } from './grouping/asset_inventory_grouping';
 import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
 import { AssetInventoryDataTable } from './asset_inventory_data_table';
@@ -82,9 +82,9 @@ const GroupWithURLPagination = ({
     <GroupWrapper
       data={groupData}
       grouping={grouping}
-      renderChildComponent={(childFilters) => (
+      renderChildComponent={(currentGroupFilters) => (
         <GroupContent
-          currentGroupFilters={childFilters}
+          currentGroupFilters={currentGroupFilters}
           state={state}
           groupingLevel={1}
           selectedGroupOptions={selectedGroupOptions}
@@ -112,6 +112,44 @@ interface GroupContentProps {
   groupSelectorComponent?: JSX.Element;
 }
 
+/**
+ * This function is used to modify the filters for the asset inventory grouping
+ * It is needed because the asset.criticality field has a soft delete mechanism
+ * So asset.criticality = "deleted" should be excluded from the grouping
+ * (treated as a missing value)
+ */
+const groupFilterMap = (filter: Filter | null): Filter | null => {
+  const query = filter?.query;
+  if (query?.bool?.should?.[0]?.bool?.must_not?.exists?.field === ASSET_FIELDS.ASSET_CRITICALITY) {
+    return {
+      meta: filter?.meta ?? { alias: null, disabled: false, negate: false },
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              should: [
+                { term: { [ASSET_FIELDS.ASSET_CRITICALITY]: 'deleted' } },
+                { bool: { must_not: { exists: { field: ASSET_FIELDS.ASSET_CRITICALITY } } } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      },
+    };
+  }
+  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
+};
+
+const filterTypeGuard = (filter: Filter | null): filter is Filter => filter !== null;
+
+const mergeCurrentAndParentFilters = (
+  currentGroupFilters: Filter[],
+  parentGroupFilters: string | undefined
+) => {
+  return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
+};
+
 const GroupContent = ({
   currentGroupFilters,
   state,
@@ -122,16 +160,21 @@ const GroupContent = ({
 }: GroupContentProps) => {
   if (groupingLevel < selectedGroupOptions.length) {
     const nextGroupingLevel = groupingLevel + 1;
+
+    const newParentGroupFilters = mergeCurrentAndParentFilters(
+      currentGroupFilters,
+      parentGroupFilters
+    )
+      .map(groupFilterMap)
+      .filter(filterTypeGuard);
+
     return (
       <GroupWithLocalPagination
         state={state}
         groupingLevel={nextGroupingLevel}
         selectedGroup={selectedGroupOptions[groupingLevel]}
         selectedGroupOptions={selectedGroupOptions}
-        parentGroupFilters={JSON.stringify([
-          ...currentGroupFilters,
-          ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-        ])}
+        parentGroupFilters={JSON.stringify(newParentGroupFilters)}
         groupSelectorComponent={groupSelectorComponent}
       />
     );
@@ -162,10 +205,12 @@ const GroupWithLocalPagination = ({
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
 
+  const groupFilters = parentGroupFilters ? JSON.parse(parentGroupFilters) : [];
+
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
-    groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
+    groupFilters,
   });
 
   /**
@@ -180,13 +225,14 @@ const GroupWithLocalPagination = ({
     <GroupWrapper
       data={groupData}
       grouping={grouping}
-      renderChildComponent={(childFilters) => (
+      renderChildComponent={(currentGroupFilters) => (
         <GroupContent
-          currentGroupFilters={childFilters}
+          currentGroupFilters={currentGroupFilters.map(groupFilterMap).filter(filterTypeGuard)}
           state={state}
           groupingLevel={groupingLevel}
           selectedGroupOptions={selectedGroupOptions}
           groupSelectorComponent={groupSelectorComponent}
+          parentGroupFilters={JSON.stringify(groupFilters)}
         />
       )}
       activePageIndex={subgroupPageIndex}
@@ -207,6 +253,13 @@ interface DataTableWithLocalPagination {
   parentGroupFilters?: string;
 }
 
+const getDataGridFilter = (filter: Filter | null) => {
+  if (!filter) return null;
+  return {
+    ...(filter?.query ?? {}),
+  };
+};
+
 const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
@@ -215,12 +268,11 @@ const DataTableWithLocalPagination = ({
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
-  const combinedFilters = [
-    ...currentGroupFilters,
-    ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-  ]
-    .map(({ query }) => (query?.match_phrase || query?.bool?.should ? query : null))
-    .filter(Boolean);
+  const combinedFilters = mergeCurrentAndParentFilters(currentGroupFilters, parentGroupFilters)
+    .map(groupFilterMap)
+    .filter(filterTypeGuard)
+    .map(getDataGridFilter)
+    .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
 
   const newState: AssetInventoryURLStateResult = {
     ...state,

@@ -100,7 +100,7 @@ export function WebCoreVitalsTitle({
                     aria-label={helpAriaLabel}
                     onClick={() => setIsBrowserPopoverOpen(true)}
                     color={'text'}
-                    iconType={'questionInCircle'}
+                    iconType={'question'}
                   />
                 }
                 closePopover={closeBrowserPopover}

@@ -105,7 +105,7 @@ describe('<ResponseSection />', () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <TestProvider>
-          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <DocumentDetailsContext.Provider value={{ ...mockContextValue, isRulePreview: true }}>
             <ResponseSection />
           </DocumentDetailsContext.Provider>
         </TestProvider>

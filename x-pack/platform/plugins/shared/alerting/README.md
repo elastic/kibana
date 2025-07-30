@@ -14,24 +14,30 @@ Table of Contents
 	- [Terminology](#terminology)
 	- [Usage](#usage)
 	- [Alerting API Keys](#alerting-api-keys)
-	- [Plugin Status](#plugin-status)
 	- [Rule Types](#rule-types)
 		- [Methods](#methods)
-		- [Alerts as Data](#alerts-as-data)
 		- [Executor](#executor)
-		- [Action variables](#action-variables)
+		- [Alerts as Data](#alerts-as-data)
+		- [Action Variables](#action-variables)
+		- [useSavedObjectReferences Hooks](#usesavedobjectreferences-hooks)
 	- [Recovered Alerts](#recovered-alerts)
 	- [Licensing](#licensing)
 	- [Documentation](#documentation)
 	- [Tests](#tests)
 		- [Example](#example)
 	- [Role Based Access-Control](#role-based-access-control)
-	- [Alerting Navigation](#alert-navigation)
+		- [Subfeature privileges](#subfeature-privileges)
+		- [`read` privileges vs. `all` privileges](#read-privileges-vs-all-privileges)
+	- [Alert Navigation](#alert-navigation)
+		- [registerNavigation](#registernavigation)
+		- [registerDefaultNavigation](#registerdefaultnavigation)
+		- [Balancing both APIs side by side](#balancing-both-apis-side-by-side)
 	- [Internal HTTP APIs](#internal-http-apis)
 		- [`GET /internal/alerting/rule/{id}/state`: Get rule state](#get-internalalertingruleidstate-get-rule-state)
-		- [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleidalertsummary-get-rule-alert-summary)
-		- [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-internalalertingruleidupdateapikey-update-rule-api-key)
+		- [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleid_alert_summary-get-rule-alert-summary)
+		- [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-apialertingruleid_update_api_key-update-rule-api-key)
 	- [Alert Factory](#alert-factory)
+		- [When should I use `setContext`?](#when-should-i-use-setcontext)
 	- [Templating Actions](#templating-actions)
 		- [Examples](#examples)
 
@@ -102,6 +108,7 @@ The following table describes the properties of the `options` object.
 |alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
+|internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
 
 ### Executor
 

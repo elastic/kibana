@@ -184,6 +184,9 @@ export class CoreAppsService {
       {
         path: '/app/{id}/{any*}',
         validate: false,
+        options: {
+          excludeFromRateLimiter: true,
+        },
         security: {
           authz: {
             enabled: false,
@@ -297,7 +300,7 @@ export class CoreAppsService {
    * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
    * @param router {@link IRouter}
    * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
-   * @private
+   * @internal
    */
   private registerInternalCoreSettingsRoute(
     router: IRouter,

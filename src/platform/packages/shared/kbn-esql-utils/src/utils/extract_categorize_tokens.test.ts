@@ -48,5 +48,6 @@ describe('extractCategorizeTokens()', () => {
     expect(extractCategorizeTokens(regexString4)).toStrictEqual(['someString']);
     const regexString5 = 'justAString'; // No '.*?' or '.+?'
     expect(extractCategorizeTokens(regexString5)).toStrictEqual(['justAString']);
+    expect(extractCategorizeTokens('.*?foo\\.bar.*?')).toEqual(['foo.bar']);
   });
 });

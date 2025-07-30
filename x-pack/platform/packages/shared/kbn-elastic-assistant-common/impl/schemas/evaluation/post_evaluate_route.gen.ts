@@ -21,7 +21,7 @@ import { ScreenContext } from '../common_attributes.gen';
 
 export type PostEvaluateBody = z.infer<typeof PostEvaluateBody>;
 export const PostEvaluateBody = z.object({
-  graphs: z.array(z.string()),
+  graphs: z.array(z.string()).min(1).max(1),
   datasetName: z.string(),
   evaluatorConnectorId: z.string().optional(),
   connectorIds: z.array(z.string()),

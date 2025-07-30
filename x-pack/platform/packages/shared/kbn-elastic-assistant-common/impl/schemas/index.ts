@@ -75,4 +75,6 @@ export * from './prompts/find_prompts_route.gen';
 export * from './alert_summary/bulk_crud_alert_summary_route.gen';
 export * from './alert_summary/find_alert_summary_route.gen';
 
+export * from './security_ai_prompts/find_prompts_route.gen';
+
 export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';

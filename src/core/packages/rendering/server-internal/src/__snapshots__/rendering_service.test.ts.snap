@@ -40,6 +40,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -126,6 +127,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -208,6 +210,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -294,6 +297,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -376,6 +380,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -458,6 +463,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -544,6 +550,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -626,6 +633,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -708,6 +716,90 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
+    "overrides": Object {},
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "logging": Any<Object>,
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "name": "borealis",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService preboot() render() renders initial feature flags 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
+  "assetsHrefBase": "http://foo.bar:1773",
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -795,6 +887,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -881,6 +974,9 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {
+      "my-initial-flag": 1234,
+    },
     "overrides": Object {},
   },
   "i18n": Object {
@@ -968,6 +1064,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1059,6 +1156,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1141,6 +1239,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1228,6 +1327,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1319,6 +1419,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1406,6 +1507,7 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {},
   },
   "i18n": Object {
@@ -1493,9 +1595,100 @@ Object {
     ],
   },
   "featureFlags": Object {
+    "initialFeatureFlags": Object {},
     "overrides": Object {
       "my-overridden-flag": 1234,
     },
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "logging": Any<Object>,
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "name": "borealis",
+    "stylesheetPaths": Object {
+      "dark": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+      "default": Array [
+        "/style-1.css",
+        "/style-2.css",
+      ],
+    },
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders initial feature flags 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "apmConfig": Object {
+    "stubApmConfig": true,
+  },
+  "assetsHrefBase": "/mock-server-basepath",
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_build_flavor": "default",
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "buildShaShort": "XXXXXX",
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "featureFlags": Object {
+    "initialFeatureFlags": Object {
+      "my-initial-flag": 1234,
+    },
+    "overrides": Object {},
   },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",

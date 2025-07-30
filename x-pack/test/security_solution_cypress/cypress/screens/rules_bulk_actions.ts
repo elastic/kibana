@@ -102,6 +102,19 @@ export const RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX =
 export const RULES_BULK_EDIT_INVESTIGATION_FIELDS_WARNING =
   '[data-test-subj="bulkEditRulesInvestigationFieldsWarning"]';
 
+// ALERT SUPPRESSION
+export const ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="alertSuppressionBulkEditRule"]';
+
+export const SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="setAlertSuppressionBulkEditRule"]';
+
+export const SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM =
+  '[data-test-subj="setAlertSuppressionForThresholdBulkEditRule"]';
+
+export const DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM =
+  '[data-test-subj="deleteAlertSuppressionBulkEditRule"]';
+
 // ENABLE/DISABLE
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
@@ -119,4 +132,9 @@ export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
 // SCHEDULE MANUAL RULE RUN
 export const BULK_MANUAL_RULE_RUN_BTN = '[data-test-subj="scheduleRuleRunBulk"]';
 
+// SCHEDULE BULK FILL GAPS
+export const BULK_FILL_RULE_GAPS_BTN = '[data-test-subj="scheduleFillGaps"]';
+
 export const BULK_MANUAL_RULE_RUN_WARNING_MODAL = '[data-test-subj="bulkActionConfirmationModal"]';
+
+export const BULK_FILL_RULE_GAPS_WARNING_MODAL = '[data-test-subj="bulkActionConfirmationModal"]';

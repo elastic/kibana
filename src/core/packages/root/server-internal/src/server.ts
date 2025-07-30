@@ -45,7 +45,7 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
-import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
@@ -207,9 +207,9 @@ export class Server {
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
-      this.capabilities.preboot({ http: httpPreboot });
-
       this.pricing.preboot({ http: httpPreboot });
+
+      this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
 
@@ -300,6 +300,11 @@ export class Server {
       elasticsearchService: elasticsearchServiceSetup,
     });
 
+    const httpRateLimiterSetup = this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+    });
+
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
       metrics: metricsSetup,
@@ -336,6 +341,7 @@ export class Server {
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
       http: httpSetup,
+      httpRateLimiter: httpRateLimiterSetup,
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
     });
@@ -355,10 +361,6 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
-    this.httpRateLimiter.setup({
-      http: httpSetup,
-      metrics: metricsSetup,
-    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
@@ -395,6 +397,13 @@ export class Server {
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
+    /**
+     * This is a necessary step to ensure that the pricing service is ready to be used.
+     * It must be called after all plugins have been setup.
+     * This guarantee that all plugins checking for a feature availability with isFeatureAvailable
+     * in the server setup contract get the right access to the feature availability.
+     */
+    pricingSetup.evaluateProductFeatures();
 
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);

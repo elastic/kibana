@@ -8,11 +8,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  OpenPointInTimeResponse,
+  SearchRequest,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { isObject, merge, reduce } from 'lodash';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
   esClientMock: ElasticsearchClientMock;
@@ -23,9 +28,11 @@ interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
    * end of the index name)
    */
   index: string;
-  response: SearchResponse<TDocument>;
+  response:
+    | SearchResponse<TDocument>
+    | ((searchRequest: SearchRequest) => SearchResponse<TDocument>);
   /**
-   * Mock is to be used only when search is using ES's Point-in-Time
+   * Mock is to be used only when search is using ES's Point-in-Time.
    */
   pitUsage?: boolean;
 }
@@ -57,6 +64,8 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
   const priorOpenPointInTimeImplementation = esClientMock.openPointInTime.getMockImplementation();
   const priorClosePointInTimeImplementation = esClientMock.closePointInTime.getMockImplementation();
   const openedPitIds = new Set<string>();
+  const maxPitCalls = 50;
+  const pitCallCount: Record<string, number> = {};
 
   esClientMock.openPointInTime.mockImplementation(async (...args) => {
     const options = args[0];
@@ -64,6 +73,7 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
     if (options.index === index) {
       const pitResponse = { id: `mock:pit:${index}:${uuidV4()}` };
       openedPitIds.add(pitResponse.id);
+      pitCallCount[pitResponse.id] = 0;
 
       return pitResponse as OpenPointInTimeResponse;
     }
@@ -99,10 +109,42 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
     const searchReqIndexes = Array.isArray(params.index) ? params.index : [params.index!];
     const pit = 'pit' in params ? params.pit : undefined;
 
-    if (params.index && !pitUsage && indexListHasMatchForIndex(searchReqIndexes, index)) {
-      return response;
-    } else if (pit && pitUsage && openedPitIds.has(pit.id)) {
-      return response;
+    if (
+      (params.index && !pitUsage && indexListHasMatchForIndex(searchReqIndexes, index)) ||
+      (pit && pitUsage && openedPitIds.has(pit.id))
+    ) {
+      const searchResponse = typeof response === 'function' ? response(params) : response;
+
+      if (pitUsage) {
+        const mockPitId = pit?.id ?? '';
+        searchResponse.pit_id = searchResponse.pit_id ?? mockPitId;
+
+        if (Object.hasOwn(pitCallCount, mockPitId)) {
+          pitCallCount[mockPitId]++;
+
+          if (pitCallCount[mockPitId] > maxPitCalls) {
+            throw new EndpointError(`applyEsClientSearchMock: Possible infinite loop detected!
+'esClient.search()' method mock for index [${index}], which was setup with 'pitUsage: true', was called over [${maxPitCalls}] times indicating a possible infinite loop.
+If mock is being used to supply results to the AsyncIterable returned by the 'createEsSearchIterable()' utility, it should be configured so that it returns an empty set of search results when there is no more data to be provided.
+Example:
+
+    applyEsClientSearchMock({
+      esClientMock: esClientMock,
+      index: 'index_name',
+      pitUsage: true,
+      response: jest
+        // Mock function with default response of an empty set of results
+        .fn(() => BaseDataGenerator.toEsSearchResponse([]))
+        // Override the default response once with a result set for your test
+        .mockReturnValueOnce(BaseDataGenerator.toEsSearchResponse([...your_search_hits...])),
+    });
+
+`);
+          }
+        }
+      }
+
+      return searchResponse;
     }
 
     if (priorSearchMockImplementation) {
@@ -131,7 +173,7 @@ export const getPackagePolicyInfoFromFleetKuery = async (
     agentPolicyIds: [],
   };
 
-  // Why is a dynamic import being used here?
+  // Why is a dynamic import being used below for `kueryAst`?
   // There is a module (`grammar`) used by this ES Query utility that does not load correctly
   // when cypress is ran (unclear why). The error seen when this occurs is below. The work-around
   // seems to be to use dynamic import.

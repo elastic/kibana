@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiHorizontalRule,
@@ -14,14 +14,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { useKibana } from '../../../common/lib/kibana';
 import { KPIsSection } from './kpis/kpis_section';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
   defaultMessage: 'Unable to create data view',
@@ -31,8 +35,6 @@ export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'alert-summary-data-view-loading
 export const DATA_VIEW_ERROR_TEST_ID = 'alert-summary-data-view-error';
 export const SKELETON_TEST_ID = 'alert-summary-skeleton';
 export const CONTENT_TEST_ID = 'alert-summary-content';
-
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 export interface WrapperProps {
   /**
@@ -61,30 +63,23 @@ export interface WrapperProps {
  * If the creation fails, we show an error message.
  */
 export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
-  const { data } = useKibana().services;
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(true);
+  const spaceId = useSpaceId();
+  const oldSignalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const dataViewSpec = useMemo(() => ({ title: oldSignalIndexName }), [oldSignalIndexName]);
 
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      try {
-        dv = await data.dataViews.create(dataViewSpec);
-        setDataView(dv);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-      }
-    };
-    createDataView();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    // clearing after leaving the page
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv.id);
-      }
-    };
-  }, [data.dataViews]);
+  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
+    dataViewSpec,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
+  });
+
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalDataView?.getIndexPattern() ?? ''
+    : oldSignalIndexName;
+  const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   return (
     <EuiSkeletonLoading
@@ -120,7 +115,7 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
                 ruleResponse={ruleResponse}
               />
               <EuiSpacer />
-              <KPIsSection dataView={dataView} />
+              <KPIsSection signalIndexName={signalIndexName} />
               <EuiSpacer />
               <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
             </div>

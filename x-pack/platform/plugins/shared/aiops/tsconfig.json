@@ -76,6 +76,9 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
+    "@kbn/config-schema",
+    "@kbn/aiops-utils",
+    "@kbn/presentation-util",
   ],
   "exclude": [
     "target/**/*",

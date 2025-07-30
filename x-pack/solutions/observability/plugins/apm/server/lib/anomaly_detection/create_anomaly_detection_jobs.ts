@@ -23,6 +23,7 @@ import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 const DEFAULT_TIMEOUT = '60s';
+const ENV_MAX_LENGTH = 40;
 
 export async function createAnomalyDetectionJobs({
   mlClient,
@@ -107,10 +108,11 @@ async function createAnomalyDetectionJob({
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuidv4().substr(-4);
+    const sanitizedEnvironment = snakeCase(environment).slice(0, ENV_MAX_LENGTH); // limit env name due to ML job ID length constraints (up to 64 chars in total)
 
     const anomalyDetectionJob = mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
-      prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
+      prefix: `${APM_ML_JOB_GROUP}-${sanitizedEnvironment}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
       indexPatternName: apmMetricIndex,
       applyToAllSpaces: true,

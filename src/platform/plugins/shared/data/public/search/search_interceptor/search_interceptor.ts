@@ -64,6 +64,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -410,7 +411,11 @@ export class SearchInterceptor {
           return from(
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(
-            map(toPartialResponseAfterTimeout),
+            map((response) =>
+              options.strategy === ENHANCED_ES_SEARCH_STRATEGY
+                ? toPartialResponseAfterTimeout(response)
+                : response
+            ),
             tap(async () => {
               await sendCancelRequest();
               this.handleSearchError(e, request?.params?.body ?? {}, options, true);
@@ -619,6 +624,8 @@ export class SearchInterceptor {
             ) {
               this.showRestoreWarning(sessionId);
             }
+
+            defaultFreeze(response);
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);

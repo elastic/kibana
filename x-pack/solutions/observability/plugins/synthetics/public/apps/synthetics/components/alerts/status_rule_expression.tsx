@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
   EuiHorizontalRule,
   EuiIconTip,
@@ -51,6 +52,27 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         ...(ruleParams?.condition ?? DEFAULT_CONDITION),
         groupBy: groupByLocation ? 'locationId' : 'none',
       });
+    },
+    [ruleParams?.condition, setRuleParams]
+  );
+
+  const onAlertOnNoDataChange = useCallback(
+    (isChecked: boolean) => {
+      let newCondition = ruleParams?.condition ?? DEFAULT_CONDITION;
+      if (isChecked) {
+        newCondition = {
+          ...newCondition,
+          alertOnNoData: true,
+        };
+      } else if ('alertOnNoData' in newCondition) {
+        const { alertOnNoData, ...rest } = newCondition;
+        newCondition = rest;
+      } else {
+        throw new Error(
+          'Switch was unchecked but alertOnNoData was not set, this should not happen'
+        );
+      }
+      setRuleParams('condition', newCondition);
     },
     [ruleParams?.condition, setRuleParams]
   );
@@ -126,6 +148,16 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         onChange={onGroupByChange}
         locationsThreshold={locationsThreshold}
       />
+      <EuiSpacer size="m" />
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          compressed
+          label={ALERT_ON_NO_DATA_SWITCH_LABEL}
+          checked={ruleParams.condition?.alertOnNoData !== undefined}
+          onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
+        />
+      </EuiFlexItem>
+
       <EuiSpacer size="l" />
     </>
   );
@@ -155,3 +187,10 @@ export const StatusTranslations = {
     }
   ),
 };
+
+const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
+  'xpack.synthetics.statusRule.euiSwitch.alertOnNoData',
+  {
+    defaultMessage: "Alert me if there's no data",
+  }
+);

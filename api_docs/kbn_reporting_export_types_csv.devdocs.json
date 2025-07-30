@@ -222,7 +222,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              "; columns?: string[] | undefined; browserTimezone: string; objectType: string; title: string; version: string; layout?: { id?: ",
+              "; columns?: string[] | undefined; browserTimezone: string; objectType: string; title: string; version: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -542,7 +542,7 @@
               "ReportingRequestHandlerContext",
               ", req: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; layout?: { id?: ",
+              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",

@@ -129,7 +129,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(updatedAt),
+        this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -144,21 +144,35 @@ export class CaseCommentModel {
     }
   }
 
-  private async partialUpdateCaseUserAndDateSkipRefresh(date: string) {
-    return this.partialUpdateCaseUserAndDate(date, false);
+  private async partialUpdateCaseWithAttachmentDataSkipRefresh({
+    date,
+  }: {
+    date: string;
+  }): Promise<CaseCommentModel> {
+    return this.partialUpdateCaseWithAttachmentData({
+      date,
+      refresh: false,
+    });
   }
 
-  private async partialUpdateCaseUserAndDate(
-    date: string,
-    refresh: RefreshSetting
-  ): Promise<CaseCommentModel> {
+  private async partialUpdateCaseWithAttachmentData({
+    date,
+    refresh,
+  }: {
+    date: string;
+    refresh: RefreshSetting;
+  }): Promise<CaseCommentModel> {
     try {
+      const { totalComments, totalAlerts } = await this.getAttachmentStats();
+
       const updatedCase = await this.params.services.caseService.patchCase({
         originalCase: this.caseInfo,
         caseId: this.caseInfo.id,
         updatedAttributes: {
           updated_at: date,
           updated_by: { ...this.params.user },
+          total_comments: totalComments,
+          total_alerts: totalAlerts,
         },
         refresh,
       });
@@ -178,6 +192,21 @@ export class CaseCommentModel {
         logger: this.params.logger,
       });
     }
+  }
+
+  private async getAttachmentStats() {
+    const attachmentStats =
+      await this.params.services.attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: [this.caseInfo.id],
+      });
+
+    const totalComments = attachmentStats.get(this.caseInfo.id)?.userComments ?? 0;
+    const totalAlerts = attachmentStats.get(this.caseInfo.id)?.alerts ?? 0;
+
+    return {
+      totalComments,
+      totalAlerts,
+    };
   }
 
   private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
@@ -230,19 +259,20 @@ export class CaseCommentModel {
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
-      const [comment, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.create({
-          attributes: transformNewComment({
-            createdDate,
-            ...attachment,
-            ...this.params.user,
-          }),
-          references,
-          id,
-          refresh: false,
+      const comment = await this.params.services.attachmentService.create({
+        attributes: transformNewComment({
+          createdDate,
+          ...attachment,
+          ...this.params.user,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(createdDate),
-      ]);
+        references,
+        id,
+        refresh: true,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: createdDate,
+      });
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
@@ -486,23 +516,24 @@ export class CaseCommentModel {
 
       const caseReference = this.buildRefsToCase();
 
-      const [newlyCreatedAttachments, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.bulkCreate({
-          attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
-            return {
-              attributes: transformNewComment({
-                createdDate: new Date().toISOString(),
-                ...attachment,
-                ...this.params.user,
-              }),
-              references: [...caseReference, ...this.getCommentReferences(attachment)],
-              id,
-            };
-          }),
-          refresh: false,
+      const newlyCreatedAttachments = await this.params.services.attachmentService.bulkCreate({
+        attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
+          return {
+            attributes: transformNewComment({
+              createdDate: new Date().toISOString(),
+              ...attachment,
+              ...this.params.user,
+            }),
+            references: [...caseReference, ...this.getCommentReferences(attachment)],
+            id,
+          };
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(new Date().toISOString()),
-      ]);
+        refresh: true,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: new Date().toISOString(),
+      });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
         (attachment) => attachment.error == null

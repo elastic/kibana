@@ -16,17 +16,17 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import {
-  PublishesTitle,
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import {
+  DynamicActionsSerializedState,
+  EmbeddableDynamicActionsManager,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TracksOverlays, tracksOverlays } from '@kbn/presentation-containers';
-import React from 'react';
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -36,7 +36,6 @@ import { getMergedSearchContext } from '../expressions/merged_search_context';
 import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
-  IntegrationCallbacks,
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
@@ -45,7 +44,6 @@ import type {
   ViewUnderlyingDataArgs,
 } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
-import { mountInlinePanel } from '../mount';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
@@ -247,24 +245,17 @@ export function initializeActionApi(
   getLatestState: GetStateType,
   parentApi: unknown,
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
-  title$: PublishesTitle['title$'],
   internalApi: LensInternalApi,
-  services: LensEmbeddableStartServices
+  services: LensEmbeddableStartServices,
+  dynamicActionsManager?: EmbeddableDynamicActionsManager
 ): {
-  api: ViewInDiscoverCallbacks &
-    HasDynamicActions &
-    Pick<IntegrationCallbacks, 'mountInlineFlyout'>;
+  api: ViewInDiscoverCallbacks & HasDynamicActions;
   anyStateChange$: Observable<void>;
   getComparators: () => StateComparators<DynamicActionsSerializedState>;
   getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
   reinitializeState: (lastSaved?: LensSerializedState) => void;
 } {
-  const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-    uuid,
-    () => title$.getValue(),
-    initialState
-  );
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
   return {
@@ -277,22 +268,6 @@ export function initializeActionApi(
         parentApi,
         services
       ),
-      mountInlineFlyout: (
-        Component: React.ComponentType,
-        overlayTracker?: TracksOverlays,
-        options: {
-          dataTestSubj?: string;
-          uuid?: string;
-          container?: HTMLElement | null;
-        } = {}
-      ) => {
-        mountInlinePanel(
-          <Component />,
-          services.coreStart,
-          overlayTracker ?? (tracksOverlays(parentApi) ? parentApi : undefined),
-          { uuid, ...options }
-        );
-      },
     },
     anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
     getComparators: () => ({

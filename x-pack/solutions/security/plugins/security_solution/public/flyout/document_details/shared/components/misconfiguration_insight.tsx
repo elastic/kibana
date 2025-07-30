@@ -74,7 +74,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   openDetailsPanel,
 }) => {
   const renderingId = useGeneratedHtmlId();
-  const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { scopeId } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
     query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
@@ -138,7 +138,6 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
             field={fieldName}
             value={name}
             scopeId={scopeId}
-            isPreview={isPreview}
             data-test-subj={`${dataTestSubj}-count`}
           >
             <FormattedCount count={totalFindings} />
@@ -151,7 +150,6 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
       fieldName,
       name,
       scopeId,
-      isPreview,
       dataTestSubj,
       euiTheme.size,
       isNewNavigationEnabled,

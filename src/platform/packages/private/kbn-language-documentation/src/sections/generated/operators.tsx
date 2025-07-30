@@ -38,7 +38,6 @@ export const functions = {
               defaultMessage: `
   ### ADD \`+\`
   Add two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -237,7 +236,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NOT NULL
-  Use \`IS NOT NULL\` to filter data based on whether the field exists or not.
+  Returns \`false\` if the value is \`NULL\`, \`true\` otherwise.
+
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
 
   \`\`\`esql
   FROM employees
@@ -269,7 +270,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NULL
-  Use \`IS NULL\` to filter data based on whether the field exists or not.
+  Returns \`true\` if the value is \`NULL\`, \`false\` otherwise.
+
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
 
   \`\`\`esql
   FROM employees
@@ -385,7 +388,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_operator (:)', {
         defaultMessage: 'MATCH_OPERATOR (:)',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -436,7 +439,6 @@ export const functions = {
               defaultMessage: `
   ### MODULO \`%\`
   Divide one number by another and return the remainder. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -463,7 +465,6 @@ export const functions = {
               defaultMessage: `
   ### MULTIPLY \`*\`
   Multiply two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -490,7 +491,6 @@ export const functions = {
               defaultMessage: `
   ### NEGATE \`-\`
   Returns the negation of the argument.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -580,7 +580,6 @@ export const functions = {
               defaultMessage: `
   ### SUBTRACT \`-\`
   Subtract one number from another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
-
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

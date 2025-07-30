@@ -11,6 +11,7 @@ import { ITelemetryClient } from '../../services/telemetry';
 export interface DatasetQualityContextValue {
   service: DatasetQualityControllerStateService;
   telemetryClient: ITelemetryClient;
+  isDatasetQualityAllSignalsAvailable: boolean;
 }
 
 export const DatasetQualityContext = createContext({} as DatasetQualityContextValue);

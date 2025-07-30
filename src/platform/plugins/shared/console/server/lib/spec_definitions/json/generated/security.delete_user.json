@@ -17,7 +17,7 @@
     "patterns": [
       "_security/user/{username}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-user.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delete-user",
     "availability": {
       "stack": true,
       "serverless": false

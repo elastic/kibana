@@ -93,7 +93,7 @@ When testing components that use the pricing service, you can use the `@kbn/core
 ```typescript
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { render } from '@testing-library/react';
-import { CoreContext } from '@kbn/core-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MyComponent } from './my_component';
 
 describe('MyComponent', () => {
@@ -113,9 +113,10 @@ describe('MyComponent', () => {
   
   it('renders feature1 when available', () => {
     const { getByText } = render(
-      <CoreContext.Provider value={{ services: { pricing: pricingStart } }}>
+      // The Kibana context provides the services in the react tree, but it's not necessarily required if the services are provided by other means
+      <KibanaContextProvider services={{ pricing: pricingStart }}>
         <MyComponent />
-      </CoreContext.Provider>
+      </KibanaContextProvider>
     );
     
     expect(getByText('Use Feature 1')).toBeInTheDocument();

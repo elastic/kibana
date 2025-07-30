@@ -39,7 +39,7 @@ export class MlCapabilitiesService {
 
   /**
    * Updates on manual request, e.g. in the route resolver.
-   * @private
+   * @internal
    */
   private _updateRequested$ = new BehaviorSubject<number>(Date.now());
 

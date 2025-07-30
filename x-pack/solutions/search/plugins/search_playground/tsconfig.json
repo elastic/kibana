@@ -29,7 +29,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/langchain",
     "@kbn/logging",
-    "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
     "@kbn/core-logging-server-mocks",
     "@kbn/analytics",
@@ -55,11 +54,11 @@
     "@kbn/logging-mocks",
     "@kbn/inference-plugin",
     "@kbn/code-editor",
-    "@kbn/monaco",
     "@kbn/react-hooks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-saved-objects-server",
-    "@kbn/search-queries"
+    "@kbn/search-queries",
+    "@kbn/monaco"
   ],
   "exclude": [
     "target/**/*",

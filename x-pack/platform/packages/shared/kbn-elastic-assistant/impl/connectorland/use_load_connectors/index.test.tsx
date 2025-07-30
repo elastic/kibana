@@ -9,13 +9,6 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
-
-const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
-
-jest.mock('@kbn/inference-endpoint-ui-common', () => ({
-  isInferenceEndpointExists: jest.fn(),
-}));
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -64,7 +57,6 @@ const defaultProps = { http, toasts } as unknown as Props;
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedIsInferenceEndpointExists.mockResolvedValue(true);
   });
   it('should call api to load action types', async () => {
     renderHook(() => useLoadConnectors(defaultProps), {
@@ -100,11 +92,6 @@ describe('useLoadConnectors', () => {
     await waitFor(() => {
       expect(result.current.data).toStrictEqual(
         mockConnectors
-          .filter(
-            (c) =>
-              c.actionTypeId !== '.inference' ||
-              (c.actionTypeId === '.inference' && c.isPreconfigured)
-          )
           // @ts-ignore ts does not like config, but we define it in the mock data
           .map((c) => ({ ...c, referencedByCount: 0, apiProvider: c?.config?.apiProvider }))
       );

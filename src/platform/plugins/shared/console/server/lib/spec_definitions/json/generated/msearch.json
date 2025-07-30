@@ -38,7 +38,7 @@
       "_msearch",
       "{index}/_msearch"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-msearch",
     "availability": {
       "stack": true,
       "serverless": true

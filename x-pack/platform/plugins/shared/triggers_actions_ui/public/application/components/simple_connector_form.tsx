@@ -27,6 +27,7 @@ export interface CommonFieldSchema {
 
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
+  requireTld?: boolean;
   defaultValue?: string | string[];
 }
 
@@ -52,12 +53,14 @@ const getFieldConfig = ({
   label,
   isRequired = true,
   isUrlField = false,
+  requireTld = true,
   defaultValue,
   type,
 }: {
   label: string;
   isRequired?: boolean;
   isUrlField?: boolean;
+  requireTld?: boolean;
   defaultValue?: string | string[];
   type?: keyof typeof FIELD_TYPES;
 }) => ({
@@ -87,7 +90,8 @@ const getFieldConfig = ({
                 {
                   defaultMessage: 'Invalid URL',
                 }
-              )
+              ),
+              { requireTld }
             ),
           },
         ]
@@ -118,6 +122,7 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
+  requireTld,
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -128,7 +133,14 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField, defaultValue, type, isRequired })}
+              config={getFieldConfig({
+                label,
+                isUrlField,
+                defaultValue,
+                type,
+                isRequired,
+                requireTld,
+              })}
               helpText={helpText}
               componentProps={{
                 euiFieldProps: {

@@ -21,7 +21,7 @@ const FLYOUT_FOOTER_HEIGHT = 72;
  * Json view displayed in the document details expandable flyout right section
  */
 export const JsonTab = memo(() => {
-  const { searchHit, isPreview } = useDocumentDetailsContext();
+  const { searchHit, isRulePreview } = useDocumentDetailsContext();
   const jsonValue = JSON.stringify(searchHit, null, 2);
 
   const flexGroupElement = useRef<HTMLDivElement>(null);
@@ -29,7 +29,7 @@ export const JsonTab = memo(() => {
 
   useEffect(() => {
     const topPosition = flexGroupElement?.current?.getBoundingClientRect().top || 0;
-    const footerOffset = isPreview ? 0 : FLYOUT_FOOTER_HEIGHT;
+    const footerOffset = isRulePreview ? 0 : FLYOUT_FOOTER_HEIGHT;
     const height =
       window.innerHeight -
       topPosition -
@@ -42,7 +42,7 @@ export const JsonTab = memo(() => {
     }
 
     setEditorHeight(height);
-  }, [setEditorHeight, isPreview]);
+  }, [setEditorHeight, isRulePreview]);
 
   return (
     <EuiFlexGroup

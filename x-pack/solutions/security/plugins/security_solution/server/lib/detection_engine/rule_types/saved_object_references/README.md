@@ -158,4 +158,4 @@ Good examples and utilities can be found in the folder of `utils` such as:
 You can follow those patterns but if it doesn't fit your use case it's fine to just create a new file and wire up your new saved object references
 
 ## End to end tests
-See `test/alerting_api_integration/spaces_only/tests/alerting/migrations.ts` for tests around migrations
+See `x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/migrations.ts` for tests around migrations

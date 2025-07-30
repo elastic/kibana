@@ -93,9 +93,9 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
       refresh: 'wait_for',
       operations: [
         { create: { _id: 'migration1', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { id: 'migration1', created_at: '2023-01-01T00:00:00Z', created_by: 'user1' },
+        { created_at: '2023-01-01T00:00:00Z', created_by: 'user1' },
         { create: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { id: 'migration2', created_at: '2023-01-02T00:00:00Z', created_by: 'user2' },
+        { created_at: '2023-01-02T00:00:00Z', created_by: 'user2' },
       ],
     });
   });
@@ -109,6 +109,7 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
             _source: {
               created_at: '2023-01-01T00:00:00Z',
               created_by: 'user1',
+              name: 'SIEM Migration 1',
             },
           },
         ],
@@ -133,7 +134,61 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
       refresh: 'wait_for',
       operations: [
         { create: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { id: 'migration2', created_at: '2023-01-02T00:00:00Z', created_by: 'user2' },
+        {
+          created_at: '2023-01-02T00:00:00Z',
+          created_by: 'user2',
+        },
+      ],
+    });
+  });
+
+  it('should update migrations with missing names', async () => {
+    const mockMigrationIndexResultWithMissingNames = {
+      hits: {
+        hits: [
+          {
+            _id: 'migration1',
+            _source: {
+              created_at: '2023-01-01T00:00:00Z',
+              created_by: 'user1',
+              name: '',
+            },
+          },
+          {
+            _id: 'migration2',
+            _source: {
+              created_at: '2023-01-02T00:00:00Z',
+              created_by: 'user2',
+              name: '',
+            },
+          },
+        ],
+      },
+    } as unknown as SearchResponseBody<StoredSiemMigration>;
+
+    esClientMock.search.mockImplementation(
+      getMockedESSearchFunction(
+        mockRuleIndexAggregationsResult,
+        mockMigrationIndexResultWithMissingNames
+      ) as unknown as ElasticsearchClient['search']
+    );
+
+    const migrator = new RuleMigrationSpaceIndexMigrator(
+      'space1',
+      esClientMock,
+      loggerMock,
+      ruleMigrationIndexAdapters
+    );
+
+    await migrator.run();
+
+    expect(esClientMock.bulk).toHaveBeenNthCalledWith(1, {
+      refresh: 'wait_for',
+      operations: [
+        { update: { _id: 'migration1', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
+        { doc: { name: 'SIEM rules migration #1' } },
+        { update: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
+        { doc: { name: 'SIEM rules migration #2' } },
       ],
     });
   });

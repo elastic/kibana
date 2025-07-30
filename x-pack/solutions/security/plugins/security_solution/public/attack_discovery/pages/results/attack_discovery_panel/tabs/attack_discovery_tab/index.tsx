@@ -21,10 +21,10 @@ import * as i18n from './translations';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 
-const scrollable: React.CSSProperties = {
-  overflowX: 'auto',
-  scrollbarWidth: 'thin',
-};
+const scrollable = css`
+  overflow-x: auto;
+  scrollbar-width: thin;
+`;
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -84,7 +84,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         <h2>{i18n.SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <div style={scrollable} data-test-subj="summaryContent">
+      <div css={scrollable} data-test-subj="summaryContent">
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? summaryMarkdown : summaryMarkdownWithReplacements}
@@ -98,7 +98,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <div style={scrollable} data-test-subj="detailsContent">
+      <div css={scrollable} data-test-subj="detailsContent">
         <AttackDiscoveryMarkdownFormatter
           disableActions={disabledActions}
           markdown={showAnonymized ? detailsMarkdown : detailsMarkdownWithReplacements}

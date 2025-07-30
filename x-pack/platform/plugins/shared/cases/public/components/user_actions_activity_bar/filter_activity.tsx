@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
@@ -32,22 +31,9 @@ export const FilterActivity = React.memo<FilterActivityProps>(
     );
 
     return (
-      <EuiFilterGroup
-        data-test-subj="user-actions-filter-activity-group"
-        css={css`
-          > .euiFilterButton-hasNotification {
-            min-width: 68px;
-          }
-        `}
-      >
+      <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
           withNext
-          css={css`
-            &,
-            & .euiFilterButton__text {
-              min-width: 28px;
-            }
-          `}
           grow={false}
           onClick={() => handleFilterChange('all')}
           isToggle

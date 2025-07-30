@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
@@ -154,11 +153,9 @@ export function UXAppRoot({
                   <DatePickerContextProvider>
                     <InspectorContextProvider>
                       <UrlParamsProvider>
-                        <EuiErrorBoundary>
-                          <CsmSharedContextProvider>
-                            <UxApp />
-                          </CsmSharedContextProvider>
-                        </EuiErrorBoundary>
+                        <CsmSharedContextProvider>
+                          <UxApp />
+                        </CsmSharedContextProvider>
                         <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
                       </UrlParamsProvider>
                     </InspectorContextProvider>

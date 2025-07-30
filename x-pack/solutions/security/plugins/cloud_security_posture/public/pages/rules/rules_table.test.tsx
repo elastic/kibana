@@ -22,6 +22,7 @@ import {
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import userEvent from '@testing-library/user-event';
 import { RULES_TABLE } from './test_subjects';
+import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +42,7 @@ const getWrapper =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siemV2: { crud: canUpdate },
+          [SECURITY_FEATURE_ID]: { crud: canUpdate },
         },
       },
     };
@@ -139,5 +140,22 @@ describe('RulesTable', () => {
         },
       ],
     });
+  });
+
+  it('renders checkboxes with proper aria-labels for accessibility', () => {
+    render(
+      <Wrapper>
+        <RulesTable {...mockProps} />
+      </Wrapper>
+    );
+
+    // Check that the "select all" checkbox has an aria-label
+    const selectAllCheckbox = screen.getByLabelText('Select all rules on current page');
+    expect(selectAllCheckbox).toBeInTheDocument();
+
+    // Check that individual rule checkboxes have aria-labels with rule names
+    const mockRuleName = selectRulesMock[0].metadata.name;
+    const ruleCheckbox = screen.getByLabelText(`Select rule: ${mockRuleName}`);
+    expect(ruleCheckbox).toBeInTheDocument();
   });
 });

@@ -93,7 +93,7 @@ export const FieldTypesHelpPopover: FC<{
         })}
       >
         <EuiIcon
-          type="iInCircle"
+          type="info"
           color="primary"
           title={i18n.translate('xpack.dataVisualizer.fieldTypesPopover.iconTitle', {
             defaultMessage: 'Filter type help',

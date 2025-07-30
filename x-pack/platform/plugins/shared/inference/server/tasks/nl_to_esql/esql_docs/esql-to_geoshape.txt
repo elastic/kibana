@@ -1,6 +1,6 @@
 # TO_GEOSHAPE
 
-The TO_GEOSHAPE function converts an input value into a `geo_shape` value.
+Converts an input value to a `geo_shape` value. A string will only be successfully converted if it adheres to the WKT (Well-Known Text) format.
 
 ## Syntax
 
@@ -8,9 +8,9 @@ The TO_GEOSHAPE function converts an input value into a `geo_shape` value.
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is the input value. It can be a single or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
 
@@ -19,7 +19,4 @@ ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
 | EVAL geom = TO_GEOSHAPE(wkt)
 ```
 
-```esql
-ROW wkt = "LINESTRING (30 10, 10 30, 40 40)"
-| EVAL geom = TO_GEOSHAPE(wkt)
-```
+This example converts a WKT string representing a polygon into a `geo_shape` value.

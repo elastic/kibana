@@ -11,8 +11,11 @@ import { AppState } from '..';
 const getState = (appState: AppState) => appState.privateLocations;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
 
-export const selectAddingNewPrivateLocation = (state: AppState) =>
-  state.privateLocations.isCreatePrivateLocationFlyoutVisible ?? false;
+export const selectPrivateLocationFlyoutVisible = (state: AppState) =>
+  state.privateLocations.isPrivateLocationFlyoutVisible ?? false;
+
+export const selectPrivateLocationToEdit = (state: AppState) =>
+  state.privateLocations.privateLocationToEdit;
 
 export const selectPrivateLocationsLoading = (state: AppState) =>
   state.privateLocations.loading ?? false;

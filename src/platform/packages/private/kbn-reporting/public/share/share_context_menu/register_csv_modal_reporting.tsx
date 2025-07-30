@@ -15,9 +15,41 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
 import { LocatorParams } from '@kbn/reporting-common/types';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
 import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
+
+export const getCsvReportParams: ReportParamsGetter<
+  ReportParamsGetterOptions & { forShareUrl?: boolean },
+  CsvSearchModeParams
+> = ({ sharingData, forShareUrl = false }) => {
+  const getSearchSource = sharingData.getSearchSource as ({
+    addGlobalTimeFilter,
+    absoluteTime,
+  }: {
+    addGlobalTimeFilter?: boolean;
+    absoluteTime?: boolean;
+  }) => SerializedSearchSourceFields;
+
+  if (sharingData.isTextBased) {
+    // csv v2 uses locator params
+    return {
+      isEsqlMode: true,
+      locatorParams: sharingData.locatorParams as LocatorParams[],
+    };
+  }
+
+  // csv v1 uses search source and columns
+  return {
+    isEsqlMode: false,
+    columns: sharingData.columns as string[] | undefined,
+    searchSource: getSearchSource({
+      addGlobalTimeFilter: true,
+      absoluteTime: !forShareUrl,
+    }),
+  };
+};
 
 export const reportingCsvExportProvider = ({
   apiClient,
@@ -27,33 +59,8 @@ export const reportingCsvExportProvider = ({
     objectType,
     sharingData,
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const getSearchSource = sharingData.getSearchSource as ({
-      addGlobalTimeFilter,
-      absoluteTime,
-    }: {
-      addGlobalTimeFilter?: boolean;
-      absoluteTime?: boolean;
-    }) => SerializedSearchSourceFields;
-
-    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams => {
-      if (sharingData.isTextBased) {
-        // csv v2 uses locator params
-        return {
-          isEsqlMode: true,
-          locatorParams: sharingData.locatorParams as LocatorParams[],
-        };
-      }
-
-      // csv v1 uses search source and columns
-      return {
-        isEsqlMode: false,
-        columns: sharingData.columns as string[] | undefined,
-        searchSource: getSearchSource({
-          addGlobalTimeFilter: true,
-          absoluteTime: !forShareUrl,
-        }),
-      };
-    };
+    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
+      getCsvReportParams({ sharingData, forShareUrl });
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({
@@ -132,6 +139,7 @@ export const reportingCsvExportProvider = ({
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
+      icon: 'tableDensityNormal',
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage

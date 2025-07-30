@@ -76,7 +76,10 @@ export type PostAgentPolicyUpdateCallback = (
   agentPolicy: Partial<AgentPolicy>
 ) => Promise<Partial<AgentPolicy>>;
 
-export type PostAgentPolicyPostUpdateCallback = (agentPolicy: AgentPolicy) => Promise<AgentPolicy>;
+export type PostAgentPolicyPostUpdateCallback = (
+  agentPolicy: AgentPolicy,
+  requestSpaceId?: string
+) => Promise<AgentPolicy>;
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [

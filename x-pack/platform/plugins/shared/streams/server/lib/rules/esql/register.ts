@@ -54,6 +54,8 @@ export function esqlRuleType(): PersistenceAlertType<
       mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
       shouldWrite: false,
       isSpaceAware: false,
+      dangerouslyCreateAlertsInAllSpaces: true,
     },
+    internallyManaged: true,
   };
 }

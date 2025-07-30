@@ -7,41 +7,33 @@
 
 import { composeStories } from '@storybook/react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { EuiThemeProvider } from '@elastic/eui';
+import { screen } from '@testing-library/react';
 import * as stories from './exception_stacktrace.stories';
-import type { ExceptionStackTraceTitleProps } from './exception_stacktrace_title';
+import { renderWithTheme } from '../../../utils/test_helpers';
 
 const { JavaWithLongLines } = composeStories(stories);
 
 describe('ExceptionStacktrace', () => {
-  describe('render', () => {
-    describe('with stacktraces', () => {
-      it('renders the stacktraces', () => {
-        expect(
-          mount(<JavaWithLongLines />, {
-            wrappingComponent: EuiThemeProvider,
-          }).find('Stacktrace')
-        ).toHaveLength(3);
-      });
-      it('should have the title in a specific format', function () {
-        const wrapper = mount(<JavaWithLongLines />, {
-          wrappingComponent: EuiThemeProvider,
-        }).find('ExceptionStacktraceTitle');
-        expect(wrapper).toHaveLength(1);
-        const { type, message } = wrapper.props() as ExceptionStackTraceTitleProps;
-        expect(wrapper.text()).toContain(`${type}: ${message}`);
-      });
-    });
+  it('with stack traces renders the stacktraces', () => {
+    renderWithTheme(<JavaWithLongLines />);
+    const stacktraces = screen.getAllByTestId('stacktrace');
+    expect(stacktraces).toHaveLength(3);
+  });
 
-    describe('with more than one stack trace', () => {
-      it('renders cause stacktraces', () => {
-        expect(
-          mount(<JavaWithLongLines />, {
-            wrappingComponent: EuiThemeProvider,
-          }).find('CauseStacktrace')
-        ).toHaveLength(2);
-      });
-    });
+  it('with stack traces should have the title in a specific format', () => {
+    renderWithTheme(<JavaWithLongLines />);
+
+    const title = screen.getByTestId('exception-stacktrace-title');
+    const { exceptions } = JavaWithLongLines.args as {
+      exceptions: Array<{ type: string; message: string }>;
+    };
+    const { type, message } = exceptions[0];
+    expect(title).toHaveTextContent(`${type}: ${message}`);
+  });
+
+  it('with more than one stack trace renders cause stacktraces', () => {
+    renderWithTheme(<JavaWithLongLines />);
+    const causeStacktraces = screen.getAllByTestId('cause-stacktrace');
+    expect(causeStacktraces).toHaveLength(2);
   });
 });

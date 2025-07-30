@@ -1,250 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AddItemPopover calls addItems with multiple items on clicking Add button 1`] = `
-<div>
-  <EuiPopover
-    anchorPosition="downCenter"
-    button={
-      <EuiButton
-        color="primary"
-        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
-        iconSide="right"
-        iconType="arrowDown"
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-      >
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Add item"
-          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-        />
-      </EuiButton>
-    }
-    closePopover={[Function]}
-    display="inline-block"
-    hasArrow={true}
-    id="add_item_popover"
-    initialFocus="#filter_list_add_item_input_row"
-    isOpen={false}
-    ownFocus={true}
-    panelClassName="ml-add-filter-item-popover"
-    panelPaddingSize="m"
-    repositionToCrossAxis={true}
-  >
-    <EuiForm
-      data-test-subj="mlFilterListAddItemPopoverContent"
-    >
-      <EuiFormRow
-        id="filter_list_add_item_input_row"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Items"
-            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-          />
-        }
-      >
-        <EuiTextArea
-          data-test-subj="mlFilterListAddItemTextArea"
-          onChange={[Function]}
-          value=""
-        />
-      </EuiFormRow>
-    </EuiForm>
-    <EuiText
-      size="xs"
-    >
-      <MemoizedFormattedMessage
-        defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-      />
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="mlFilterListAddItemsButton"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Add"
-            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPopover>
-</div>
-`;
-
-exports[`AddItemPopover opens the popover onButtonClick 1`] = `
-<div>
-  <EuiPopover
-    anchorPosition="downCenter"
-    button={
-      <EuiButton
-        color="primary"
-        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
-        iconSide="right"
-        iconType="arrowDown"
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-      >
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Add item"
-          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-        />
-      </EuiButton>
-    }
-    closePopover={[Function]}
-    display="inline-block"
-    hasArrow={true}
-    id="add_item_popover"
-    initialFocus="#filter_list_add_item_input_row"
-    isOpen={true}
-    ownFocus={true}
-    panelClassName="ml-add-filter-item-popover"
-    panelPaddingSize="m"
-    repositionToCrossAxis={true}
-  >
-    <EuiForm
-      data-test-subj="mlFilterListAddItemPopoverContent"
-    >
-      <EuiFormRow
-        id="filter_list_add_item_input_row"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Items"
-            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-          />
-        }
-      >
-        <EuiTextArea
-          data-test-subj="mlFilterListAddItemTextArea"
-          onChange={[Function]}
-          value=""
-        />
-      </EuiFormRow>
-    </EuiForm>
-    <EuiText
-      size="xs"
-    >
-      <MemoizedFormattedMessage
-        defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-      />
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="mlFilterListAddItemsButton"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Add"
-            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPopover>
-</div>
-`;
-
 exports[`AddItemPopover renders the popover 1`] = `
 <div>
-  <EuiPopover
-    anchorPosition="downCenter"
-    button={
-      <EuiButton
-        color="primary"
-        data-test-subj="mlFilterListOpenNewItemsPopoverButton"
-        iconSide="right"
-        iconType="arrowDown"
-        isDisabled={false}
-        onClick={[Function]}
-        size="s"
-      >
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="Add item"
-          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
-        />
-      </EuiButton>
-    }
-    closePopover={[Function]}
-    display="inline-block"
-    hasArrow={true}
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
     id="add_item_popover"
-    initialFocus="#filter_list_add_item_input_row"
-    isOpen={false}
-    ownFocus={true}
-    panelClassName="ml-add-filter-item-popover"
-    panelPaddingSize="m"
-    repositionToCrossAxis={true}
   >
-    <EuiForm
-      data-test-subj="mlFilterListAddItemPopoverContent"
+    <button
+      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+      data-test-subj="mlFilterListOpenNewItemsPopoverButton"
+      type="button"
     >
-      <EuiFormRow
-        id="filter_list_add_item_input_row"
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Items"
-            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-          />
-        }
+      <span
+        class="emotion-euiButtonDisplayContent"
       >
-        <EuiTextArea
-          data-test-subj="mlFilterListAddItemTextArea"
-          onChange={[Function]}
-          value=""
+        Add item
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
         />
-      </EuiFormRow>
-    </EuiForm>
-    <EuiText
-      size="xs"
-    >
-      <MemoizedFormattedMessage
-        defaultMessage="Enter one item per line"
-        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
-      />
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-    <EuiFlexGroup
-      justifyContent="flexEnd"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="mlFilterListAddItemsButton"
-          disabled={true}
-          onClick={[Function]}
-        >
-          <MemoizedFormattedMessage
-            defaultMessage="Add"
-            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPopover>
+      </span>
+    </button>
+  </div>
 </div>
 `;

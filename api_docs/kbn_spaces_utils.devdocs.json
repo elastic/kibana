@@ -91,64 +91,6 @@
           "the space-aware version of the requested path, inclusive of the server's base path."
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/spaces-utils",
-        "id": "def-common.getSpaceIdFromPath",
-        "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "getSpaceIdFromPath",
-        "description": [
-          "\nExtracts the space id from the given path.\n"
-        ],
-        "signature": [
-          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/spaces-utils",
-            "id": "def-common.getSpaceIdFromPath.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "requestBasePath",
-            "description": [
-              "The base path of the current request."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/spaces-utils",
-            "id": "def-common.getSpaceIdFromPath.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "serverBasePath",
-            "description": [
-              "The server's base path."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "the space id."
-        ],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],

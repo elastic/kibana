@@ -107,15 +107,64 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 
   esClient.search.mockImplementation(async (payload) => {
     if (payload) {
-      switch (payload.index) {
-        case ENDPOINT_ACTIONS_INDEX:
-          return createActionRequestsEsSearchResultsMock();
-        case ACTION_RESPONSE_INDICES:
-          return createActionResponsesEsSearchResultsMock();
+      if (
+        !Array.isArray(payload.index) &&
+        (payload.index ?? '').startsWith(
+          ENDPOINT_ACTIONS_INDEX.substring(0, ENDPOINT_ACTIONS_INDEX.length - 1)
+        )
+      ) {
+        return createActionRequestsEsSearchResultsMock();
+      }
+
+      if (payload.index === ACTION_RESPONSE_INDICES) {
+        return createActionResponsesEsSearchResultsMock();
       }
     }
 
     return BaseDataGenerator.toEsSearchResponse([]);
+  });
+
+  esClient.indices.getMapping.mockResolvedValue({
+    '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
+      mappings: { properties: {} },
+    },
+  });
+
+  esClient.cluster.existsComponentTemplate.mockResolvedValue(true);
+
+  esClient.cluster.getComponentTemplate.mockResolvedValue({
+    component_templates: [
+      {
+        name: '.logs-endpoint.actions@package',
+        component_template: {
+          template: {
+            settings: {},
+            mappings: {
+              dynamic: false,
+              properties: {
+                agent: {
+                  properties: {
+                    policy: {
+                      properties: {
+                        agentId: { ignore_above: 1024, type: 'keyword' },
+                        agentPolicyId: { ignore_above: 1024, type: 'keyword' },
+                        elasticAgentId: { ignore_above: 1024, type: 'keyword' },
+                        integrationPolicyId: { ignore_above: 1024, type: 'keyword' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _meta: {
+            package: { name: 'endpoint' },
+            managed_by: 'fleet',
+            managed: true,
+          },
+        },
+      },
+    ],
   });
 
   (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(
@@ -164,6 +213,13 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     ...endpointServiceStartContract,
     esClient,
   });
+
+  // Enable the mocking of internal fleet services
+  const fleetServices = endpointService.getInternalFleetServices();
+  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+  const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
+  getInternalFleetServicesMock.mockReturnValue(fleetServices);
 
   return {
     esClient,

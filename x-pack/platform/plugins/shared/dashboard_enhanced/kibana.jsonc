@@ -15,6 +15,7 @@
       "dashboardEnhanced"
     ],
     "requiredPlugins": [
+      "dashboard",
       "data",
       "embeddable",
       "share",

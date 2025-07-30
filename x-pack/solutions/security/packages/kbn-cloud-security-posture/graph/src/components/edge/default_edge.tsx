@@ -7,10 +7,11 @@
 
 import React, { memo } from 'react';
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
-import { useEuiTheme } from '@elastic/eui';
 import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
-import { getMarkerStart, getMarkerEnd } from './markers';
+import { getMarkerEnd } from './markers';
+import { useEdgeColor } from './styles';
+import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -32,14 +33,12 @@ export const DefaultEdge = memo(
     targetPosition,
     data,
   }: EdgeProps) => {
-    const { euiTheme } = useEuiTheme();
     const color: EdgeColor = data?.color || 'primary';
+    const entityToLabel = data?.sourceShape !== 'group' && data?.targetShape === 'label';
+    const labelToEntity = data?.sourceShape === 'label' && data?.targetShape !== 'group';
+    const isExtraAlignment = entityToLabel || labelToEntity;
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
-    const markerStart =
-      !data?.sourceShape || !NODES_WITHOUT_MARKER.includes(data?.sourceShape)
-        ? getMarkerStart(color)
-        : undefined;
     const markerEnd =
       !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
         ? getMarkerEnd(color)
@@ -50,6 +49,14 @@ export const DefaultEdge = memo(
     const tX = Math.round(targetX + targetMargin);
     const tY = Math.round(targetY);
 
+    const xOffset = Math.abs(targetX - sourceX) / 2;
+    const centerX =
+      targetX < sourceX
+        ? targetX + xOffset
+        : targetX -
+          xOffset +
+          (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (labelToEntity ? 1 : -1);
+
     const [edgePath] = getSmoothStepPath({
       // sourceX and targetX are adjusted to account for the shape handle position
       sourceX: sX,
@@ -59,6 +66,7 @@ export const DefaultEdge = memo(
       targetY: tY,
       targetPosition,
       borderRadius: 15,
+      centerX,
       offset: 0,
     });
 
@@ -69,11 +77,10 @@ export const DefaultEdge = memo(
           path={edgePath}
           interactionWidth={0}
           style={{
-            stroke: euiTheme.colors[color],
-            // Defaults to dashed when type is not available
-            ...(!data?.type || data?.type === 'dashed' ? dashedStyle : {}),
+            stroke: useEdgeColor(color),
+            // Defaults to solid when type is not available
+            ...(data?.type === 'dashed' ? dashedStyle : {}),
           }}
-          markerStart={markerStart}
           markerEnd={markerEnd}
         />
       </>

@@ -7,10 +7,11 @@
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  MonitoringEntitySourceDescriptor,
-  MonitoringEntitySourceResponse,
+  CreateMonitoringEntitySource,
+  ListEntitySourcesRequestQuery,
+  MonitoringEntitySource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { MonitoringEntitySourceDescriptorClient } from './saved_object/monitoring_entity_source';
+import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
@@ -28,25 +29,25 @@ export class MonitoringEntitySourceDataClient {
     });
   }
 
-  public async init(
-    input: MonitoringEntitySourceDescriptor
-  ): Promise<MonitoringEntitySourceResponse> {
-    const descriptor = await this.monitoringEntitySourceClient.create(input);
+  public async init(input: CreateMonitoringEntitySource) {
+    const descriptor = await this.monitoringEntitySourceClient.create({
+      ...input,
+    });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
     return descriptor;
   }
 
-  public async get(): Promise<MonitoringEntitySourceResponse> {
-    this.log('debug', 'Getting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceClient.get();
+  public async get(id: string): Promise<MonitoringEntitySource> {
+    this.log('debug', `Getting Monitoring Entity Source Sync saved object with id: ${id}`);
+    return this.monitoringEntitySourceClient.get(id);
   }
 
-  public async update(update: Partial<MonitoringEntitySourceResponse>) {
-    this.log('debug', 'Updating Monitoring Entity Source Sync saved object');
+  public async update(update: Partial<MonitoringEntitySource> & { id: string }) {
+    this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
 
     const sanitizedUpdate = {
       ...update,
-      matchers: update.matchers?.map((matcher) => ({
+      matchers: update.matchers?.map((matcher: { fields: string[]; values: string[] }) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
       })),
@@ -55,9 +56,14 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.update(sanitizedUpdate);
   }
 
-  public async delete() {
-    this.log('debug', 'Deleting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceClient.delete();
+  public async delete(id: string) {
+    this.log('debug', `Deleting Monitoring Entity Source Sync saved object with id: ${id}`);
+    return this.monitoringEntitySourceClient.delete(id);
+  }
+
+  public async list(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
+    this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
+    return this.monitoringEntitySourceClient.findAll(query);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

@@ -8,31 +8,40 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type {
-  BoundChatCompleteOptions,
-  BoundInferenceClient,
-  InferenceClient,
-} from '@kbn/inference-common';
+import type { BoundOptions, BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { AnonymizationRule } from '@kbn/inference-common';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
+import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
-interface UnboundOptions {
+interface CreateClientOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
   logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  esClient: ElasticsearchClient;
 }
 
-interface BoundOptions extends UnboundOptions {
-  bindTo: BoundChatCompleteOptions;
+interface BoundCreateClientOptions extends CreateClientOptions {
+  bindTo: BoundOptions;
 }
 
-export function createClient(options: UnboundOptions): InferenceClient;
-export function createClient(options: BoundOptions): BoundInferenceClient;
+export function createClient(options: CreateClientOptions): InferenceClient;
+export function createClient(options: BoundCreateClientOptions): BoundInferenceClient;
 export function createClient(
-  options: UnboundOptions | BoundOptions
+  options: CreateClientOptions | BoundCreateClientOptions
 ): BoundInferenceClient | InferenceClient {
-  const { actions, request, logger } = options;
-  const client = createInferenceClient({ request, actions, logger: logger.get('client') });
+  const { actions, request, logger, anonymizationRulesPromise, esClient, regexWorker } = options;
+  const client = createInferenceClient({
+    request,
+    actions,
+    logger: logger.get('client'),
+    anonymizationRulesPromise,
+    regexWorker,
+    esClient,
+  });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
   } else {

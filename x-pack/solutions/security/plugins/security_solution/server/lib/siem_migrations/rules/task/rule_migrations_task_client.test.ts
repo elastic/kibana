@@ -204,7 +204,7 @@ describe('RuleMigrationsTaskClient', () => {
       await client.start(params);
       // Allow the asynchronous run() call to complete its finally callback.
       await new Promise(process.nextTick);
-      expect(data.migrations.saveAsEnded).toHaveBeenCalledWith({ id: migrationId });
+      expect(data.migrations.saveAsFinished).toHaveBeenCalledWith({ id: migrationId });
     });
   });
 
@@ -317,16 +317,25 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const stats = await client.getStats(migrationId);
-      expect(stats.status).toEqual(SiemMigrationTaskStatus.STOPPED);
+      expect(stats.status).toEqual(SiemMigrationTaskStatus.INTERRUPTED);
     });
 
-    it('should include last_error if one exists', async () => {
-      const error = new Error('Test error');
-      // @ts-expect-error private property
-      RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
+    it('should include error if one exists', async () => {
+      const errorMessage = 'Test error';
       data.rules.getStats.mockResolvedValue({
+        id: 'migration-1',
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
+
+      data.migrations.get.mockResolvedValue({
+        id: 'migration-1',
+        name: 'Test Migration',
+        created_at: new Date().toISOString(),
+        created_by: 'test-user',
+        last_execution: {
+          error: errorMessage,
+        },
+      });
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
@@ -343,7 +352,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const stats = await client.getStats(migrationId);
-      expect(stats.last_error).toEqual('Test error');
+      expect(stats.last_execution?.error).toEqual('Test error');
     });
   });
 
@@ -375,7 +384,7 @@ describe('RuleMigrationsTaskClient', () => {
       const m1Stats = allStats.find((s) => s.id === 'm1');
       const m2Stats = allStats.find((s) => s.id === 'm2');
       expect(m1Stats?.status).toEqual(SiemMigrationTaskStatus.RUNNING);
-      expect(m2Stats?.status).toEqual(SiemMigrationTaskStatus.STOPPED);
+      expect(m2Stats?.status).toEqual(SiemMigrationTaskStatus.INTERRUPTED);
     });
   });
 
@@ -446,13 +455,13 @@ describe('RuleMigrationsTaskClient', () => {
       );
     });
 
-    it('should mark migration task as aborted when manually stopping a running migration', async () => {
+    it('should mark migration task as stopped when manually stopping a running migration', async () => {
       const abortMock = jest.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
       } as unknown as RuleMigrationTaskRunner;
       migrationsRunning.set(migrationId, migrationRunner);
-      data.migrations.setIsAborted.mockResolvedValue(undefined);
+      data.migrations.setIsStopped.mockResolvedValue(undefined);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -462,7 +471,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       await client.stop(migrationId);
-      expect(data.migrations.setIsAborted).toHaveBeenCalledWith({ id: migrationId });
+      expect(data.migrations.setIsStopped).toHaveBeenCalledWith({ id: migrationId });
     });
   });
   describe('task error', () => {

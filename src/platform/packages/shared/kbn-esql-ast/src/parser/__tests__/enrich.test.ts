@@ -64,7 +64,7 @@ describe('ENRICH', () => {
             {
               type: 'source',
               name: 'mode:a',
-              cluster: {
+              prefix: {
                 type: 'literal',
                 literalType: 'keyword',
                 valueUnquoted: 'mode',
@@ -94,7 +94,7 @@ describe('ENRICH', () => {
       const source = enrich.args[0] as ESQLSource;
 
       expect(src.slice(source.location.min, source.location.max + 1)).toEqual('mode:index');
-      expect(src.slice(source.cluster!.location.min, source.cluster!.location.max + 1)).toEqual(
+      expect(src.slice(source.prefix!.location.min, source.prefix!.location.max + 1)).toEqual(
         'mode'
       );
       expect(src.slice(source.index!.location.min, source.index!.location.max + 1)).toEqual(
@@ -114,7 +114,7 @@ describe('ENRICH', () => {
       const source = enrich.args[0] as ESQLSource;
 
       expect(src.slice(source.location.min, source.location.max + 1)).toEqual('index');
-      expect(source.cluster).toBe(undefined);
+      expect(source.prefix).toBe(undefined);
       expect(src.slice(source.index!.location.min, source.index!.location.max + 1)).toEqual(
         'index'
       );
@@ -136,7 +136,7 @@ describe('ENRICH', () => {
       const source = enrich.args[0] as ESQLSource;
 
       expect(src.slice(source.location.min, source.location.max + 1)).toEqual('cluster');
-      expect(source.cluster).toBe(undefined);
+      expect(source.prefix).toBe(undefined);
       expect(src.slice(source.index!.location.min, source.index!.location.max + 1)).toEqual(
         'cluster'
       );

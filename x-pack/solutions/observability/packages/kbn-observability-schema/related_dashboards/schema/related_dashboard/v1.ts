@@ -8,9 +8,26 @@
 import { z } from '@kbn/zod';
 import { relevantPanelSchema } from '../relevant_panel/latest';
 
-export const relatedDashboardSchema = z.object({
+const commonDashboardSchema = {
   id: z.string(),
   title: z.string(),
+  description: z.string(),
+  tags: z.array(z.string()).optional(),
+};
+
+export const linkedDashboardSchema = z.object({
+  ...commonDashboardSchema,
+  matchedBy: z.object({
+    fields: z.array(z.string()).optional(),
+    index: z.array(z.string()).optional(),
+    linked: z.boolean().optional(),
+  }),
+  relevantPanelCount: z.number().optional(),
+  relevantPanels: z.array(relevantPanelSchema).optional(),
+});
+
+export const suggestedDashboardSchema = z.object({
+  ...commonDashboardSchema,
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
@@ -20,4 +37,6 @@ export const relatedDashboardSchema = z.object({
   score: z.number(),
 });
 
-export type RelatedDashboard = z.output<typeof relatedDashboardSchema>;
+export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
+export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;
+export type RelatedDashboard = LinkedDashboard | SuggestedDashboard;

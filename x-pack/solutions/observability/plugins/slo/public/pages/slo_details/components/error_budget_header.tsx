@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { SloTabId } from './slo_details';
+import { SLOWithSummaryResponse, rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
+import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 
@@ -17,18 +16,18 @@ import { ErrorBudgetActions } from './error_budget_actions';
 
 interface Props {
   slo: SLOWithSummaryResponse;
-  showTitle?: boolean;
+  hideTitle?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  selectedTabId?: SloTabId;
+  hideMetadata?: boolean;
 }
 
 export function ErrorBudgetHeader({
   slo,
-  showTitle = true,
+  hideTitle = false,
+  hideMetadata = false,
   isMouseOver,
   setDashboardAttachmentReady,
-  selectedTabId,
 }: Props) {
   const { executionContext } = useKibana().services;
   const executionContextName = executionContext.get().name;
@@ -38,7 +37,7 @@ export function ErrorBudgetHeader({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiFlexGroup>
-          {showTitle && (
+          {!hideTitle && (
             <EuiFlexItem>
               <EuiTitle size="xs" data-test-subj="errorBudgetPanelTitle">
                 <h2>
@@ -60,7 +59,7 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {selectedTabId !== 'history' && (
+      {!hideMetadata && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)

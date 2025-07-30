@@ -21,8 +21,8 @@ describe('commands', () => {
           name: 'show',
           args: [
             {
-              type: 'function',
-              name: 'info',
+              type: 'identifier',
+              name: 'INFO',
             },
           ],
         },
@@ -228,7 +228,7 @@ describe('commands', () => {
     });
 
     it('RENAME', () => {
-      const query = 'FROM index | RENAME a AS b, c AS d';
+      const query = 'FROM index | RENAME a AS b, c = d';
       const { ast } = parse(query);
 
       expect(ast).toMatchObject([
@@ -238,7 +238,7 @@ describe('commands', () => {
           name: 'rename',
           args: [
             {
-              type: 'option',
+              type: 'function',
               name: 'as',
               args: [
                 {
@@ -252,8 +252,8 @@ describe('commands', () => {
               ],
             },
             {
-              type: 'option',
-              name: 'as',
+              type: 'function',
+              name: '=',
               args: [
                 {
                   type: 'column',

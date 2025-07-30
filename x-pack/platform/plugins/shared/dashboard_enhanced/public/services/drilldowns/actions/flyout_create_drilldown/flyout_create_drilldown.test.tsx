@@ -5,52 +5,40 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
 import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { ViewMode } from '@kbn/presentation-publishing';
-import {
-  FlyoutCreateDrilldownAction,
-  OpenFlyoutAddDrilldownParams,
-} from './flyout_create_drilldown';
-import { coreMock } from '@kbn/core/public/mocks';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
+import { flyoutCreateDrilldownAction } from './flyout_create_drilldown';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 
-function createAction(
-  allPossibleTriggers = ['VALUE_CLICK_TRIGGER'],
-  overlays = coreMock.createStart().overlays
-) {
-  const uiActionsEnhanced = uiActionsEnhancedPluginMock.createStartContract();
-  const params: OpenFlyoutAddDrilldownParams = {
-    start: () => ({
-      core: {
-        overlays,
-        application: {
-          currentAppId$: new Subject(),
-        },
-        theme: {
-          theme$: new Subject(),
-        },
-      } as any,
-      plugins: {
-        uiActionsEnhanced,
+jest.mock('../../../kibana_services', () => {
+  return {
+    coreServices: {
+      overlays: {
+        openFlyout: jest.fn(),
       },
-      self: {},
-    }),
+      application: {
+        currentAppId$: { pipe: () => ({ subscribe: () => {} }) },
+      },
+    } as any,
+    uiActionsEnhancedServices: {
+      getActionFactories: jest.fn(() => [
+        {
+          supportedTriggers: () => ['VALUE_CLICK_TRIGGER'],
+          isCompatibleLicense: () => true,
+        } as unknown as UiActionsEnhancedActionFactory,
+      ]),
+    },
   };
+});
+import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
-  uiActionsEnhanced.getActionFactories.mockImplementation(() => [
-    {
-      supportedTriggers: () => allPossibleTriggers,
-      isCompatibleLicense: () => true,
-    } as unknown as UiActionsEnhancedActionFactory,
-  ]);
-  return new FlyoutCreateDrilldownAction(params);
-}
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
   dynamicActions: { events: [] },
 });
@@ -76,89 +64,118 @@ const compatibleEmbeddableApi = {
   viewMode$: new BehaviorSubject<ViewMode>('edit'),
 };
 
+const context = {} as unknown as ActionDefinitionContext<EmbeddableApiContext>;
+
 test('title is a string', () => {
-  expect(typeof createAction().getDisplayName() === 'string').toBe(true);
+  expect(
+    flyoutCreateDrilldownAction.getDisplayName &&
+      typeof flyoutCreateDrilldownAction.getDisplayName(context) === 'string'
+  ).toBe(true);
 });
 
 test('icon exists', () => {
-  expect(typeof createAction().getIconType() === 'string').toBe(true);
+  expect(
+    flyoutCreateDrilldownAction.getIconType &&
+      typeof flyoutCreateDrilldownAction.getIconType(context) === 'string'
+  ).toBe(true);
 });
 
 describe('isCompatible', () => {
   test("compatible if dynamicUiActions enabled, 'VALUE_CLICK_TRIGGER' is supported, in edit mode", async () => {
-    const action = createAction();
-    expect(await action.isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(true);
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
+    ).toBe(true);
   });
 
   test('not compatible if embeddable is not enhanced', async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       enhancements: undefined,
     };
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 
   test("not compatible if 'VALUE_CLICK_TRIGGER' is not supported", async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       supportedTriggers: () => {
         return [];
       },
     };
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 
   test('not compatible if in view mode', async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 
   test('not compatible if parent embeddable is not "dashboard"', async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       parentApi: {
         type: 'visualization',
       },
     };
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
-  });
-
-  test('not compatible if no triggers intersect', async () => {
-    expect(await createAction([]).isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(
-      false
-    );
     expect(
-      await createAction(['SELECT_RANGE_TRIGGER']).isCompatible({
-        embeddable: compatibleEmbeddableApi,
-      })
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
+  });
+  test('not compatible if no triggers intersect', async () => {
+    // Mock getActionFactories to return a factory that only supports SELECT_RANGE_TRIGGER
+    (uiActionsEnhancedServices.getActionFactories as jest.Mock).mockImplementation(() => [
+      {
+        supportedTriggers: () => ['SELECT_RANGE_TRIGGER'],
+        isCompatibleLicense: () => true,
+      } as unknown as UiActionsEnhancedActionFactory,
+    ]);
+
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
+    ).toBe(false);
+    (uiActionsEnhancedServices.getActionFactories as jest.Mock).mockImplementation(() => [
+      {
+        supportedTriggers: () => [],
+        isCompatibleLicense: () => true,
+      } as unknown as UiActionsEnhancedActionFactory,
+    ]);
+    expect(
+      flyoutCreateDrilldownAction.isCompatible &&
+        (await flyoutCreateDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
     ).toBe(false);
   });
 });
 
 describe('execute', () => {
   test('throws if no dynamicUiActions', async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       enhancements: undefined,
     };
     await expect(
-      action.execute({ embeddable: embeddableApi })
+      flyoutCreateDrilldownAction.execute({ embeddable: embeddableApi })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action is incompatible"`);
   });
 
   test('should open flyout', async () => {
-    const overlays = coreMock.createStart().overlays;
-    const spy = jest.spyOn(overlays, 'openFlyout');
-    const action = createAction(['VALUE_CLICK_TRIGGER'], overlays);
-    await action.execute({ embeddable: compatibleEmbeddableApi });
-    expect(spy).toBeCalled();
+    await flyoutCreateDrilldownAction.execute({
+      embeddable: compatibleEmbeddableApi,
+    });
+    expect(coreServices.overlays.openFlyout).toBeCalled();
   });
 });

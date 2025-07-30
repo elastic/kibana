@@ -22,16 +22,19 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { MachineLearningProvider } from '../../../../../functional/services/ml';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
+import { waitForEvaluationComplete } from './utils';
+
+const TEST_TIMOUT = 60 * 60 * 1000;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml');
   const esArchiver = getService('esArchiver');
+  const isEvalLocalPrompts = process.env.IS_SECURITY_AI_PROMPT_TEST === 'true';
 
   /**
    * Results will be written to LangSmith for project associated with the langSmithAPIKey, then later
@@ -60,6 +63,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
+      // if run is to test prompt changes, uninstall prompt integration to default to local prompts
+      if (isEvalLocalPrompts) {
+        // delete integration prompt saved objects
+        const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
+        await supertest.delete(route).set('kbn-xsrf', 'foo');
+      }
     });
 
     after(async () => {
@@ -75,9 +84,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Run Evaluations', () => {
       const buildNumber = process.env.BUILDKITE_BUILD_NUMBER || os.hostname();
+      const prNumber = process.env.BUILDKITE_PULL_REQUEST;
       const config = getSecurityGenAIConfigFromEnvVar();
       const defaultEvalPayload: PostEvaluateBody = {
-        runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,
+        runName: `Eval Automation${buildNumber ? ' | Build ' + buildNumber : ''}${
+          prNumber ? ' | PR ' + prNumber : ''
+        }${isEvalLocalPrompts ? ' | [Local Prompts]' : ''}`,
         graphs: ['DefaultAssistantGraph'],
         datasetName: 'Sample Dataset',
         connectorIds: Object.keys(config.connectors),
@@ -99,13 +111,16 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'ES|QL Generation Regression Suite',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-        });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
+        }).timeout(TEST_TIMOUT);
 
         // Uses attack discovery alerts from episodes 1-8
         it('should successfully run the "Alerts RAG Regression (Episodes 1-8)" dataset', async () => {
@@ -115,13 +130,16 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Alerts RAG Regression (Episodes 1-8)',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-        });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
+        }).timeout(TEST_TIMOUT);
 
         it('should successfully run the "Assistant Eval: Custom Knowledge" dataset', async () => {
           await loadEvalKnowledgeBaseEntries(supertest, log);
@@ -131,13 +149,16 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Assistant Eval: Custom Knowledge',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-        });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
+        }).timeout(TEST_TIMOUT);
       });
 
       describe('Attack Discovery', () => {
@@ -149,13 +170,16 @@ export default ({ getService }: FtrProviderContext) => {
             datasetName: 'Eval AD: All Scenarios',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
-          await supertest
+          const {
+            body: { evaluationId },
+          } = await supertest
             .post(route)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
             .expect(200);
-        });
+          await waitForEvaluationComplete({ evaluationId, supertest, log, timeout: TEST_TIMOUT });
+        }).timeout(TEST_TIMOUT);
       });
     });
   });

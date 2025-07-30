@@ -12,7 +12,7 @@
     "patterns": [
       "_ml/calendars/{calendar_id}/events"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-calendar-event.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-post-calendar-events",
     "availability": {
       "stack": true,
       "serverless": true

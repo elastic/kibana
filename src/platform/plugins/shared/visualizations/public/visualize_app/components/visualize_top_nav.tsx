@@ -17,6 +17,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -27,6 +30,32 @@ import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
+
+const topNavStyles = {
+  goToLens: (euiThemeContext: UseEuiTheme) =>
+    css({
+      // Less-than-ideal styles to add a vertical divider after this button. Consider restructuring markup for better semantics and styling options in the future.
+      '.visNavItem__goToLens': {
+        [euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])]: {
+          marginRight: euiThemeContext.euiTheme.size.m,
+          position: 'relative',
+        },
+
+        '&::after': {
+          [euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])]: {
+            borderRight: euiThemeContext.euiTheme.border.thin,
+            bottom: 0,
+            content: '""',
+            display: 'block',
+            pointerEvents: 'none',
+            position: 'absolute',
+            right: `-${euiThemeContext.euiTheme.size.s}`,
+            top: 0,
+          },
+        },
+      },
+    }),
+};
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -63,6 +92,7 @@ const TopNav = ({
   onAppLeave,
   eventEmitter,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
+  const styles = useMemoCss(topNavStyles);
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
@@ -362,6 +392,7 @@ const TopNav = ({
       }
       showSearchBar
       useDefaultBehaviors
+      css={styles.goToLens}
     />
   ) : showFilterBar ? (
     /**

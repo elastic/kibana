@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { usePageUrlState, type UrlStateService } from '@kbn/ml-url-state';
+import { resolveSeverityFormat } from '../../components/controls/select_severity/severity_format_resolver';
 import type { ExplorerAppState } from '../../../../common/types/locator';
 import { ML_PAGES } from '../../../../common/constants/locator';
 
@@ -28,8 +30,32 @@ export function useExplorerUrlState() {
    */
   const [legacyExplorerState] = usePageUrlState<LegacyExplorerPageUrlState>('mlExplorerSwimlane');
 
-  return usePageUrlState<ExplorerPageUrlState>(ML_PAGES.ANOMALY_EXPLORER, {
-    mlExplorerSwimlane: legacyExplorerState,
-    mlExplorerFilter: {},
-  });
+  const [rawExplorerState, setExplorerState, explorerStateService] =
+    usePageUrlState<ExplorerPageUrlState>(ML_PAGES.ANOMALY_EXPLORER, {
+      mlExplorerSwimlane: legacyExplorerState,
+      mlExplorerFilter: {},
+    });
+
+  const explorerState = useMemo(() => {
+    const swimlaneState = rawExplorerState.mlExplorerSwimlane;
+
+    // Check specifically for the old format (number type)
+    if (swimlaneState && typeof swimlaneState.severity === 'number') {
+      // Use the resolver function to handle old format conversion
+      const resolvedSeverity = resolveSeverityFormat(swimlaneState.severity);
+
+      return {
+        ...rawExplorerState,
+        mlExplorerSwimlane: {
+          ...swimlaneState,
+          severity: resolvedSeverity,
+        },
+      };
+    }
+
+    // Return the original state if no conversion was needed
+    return rawExplorerState;
+  }, [rawExplorerState]);
+
+  return [explorerState, setExplorerState, explorerStateService] as const;
 }

@@ -195,7 +195,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
                 data-test-subj="typePopoverIcon"
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
               >
-                <EuiIcon type="questionInCircle" />
+                <EuiIcon type="question" />
               </EuiLink>
             }
             isOpen={isPopoverOpen}

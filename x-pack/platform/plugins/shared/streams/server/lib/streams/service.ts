@@ -8,6 +8,7 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { AssetClient } from './assets/asset_client';
 import { QueryClient } from './assets/query/query_client';
@@ -66,6 +67,7 @@ export class StreamsService {
       queryClient,
       logger,
       scopedClusterClient,
+      lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: storageAdapter.getClient(),
       request,
       isServerless,

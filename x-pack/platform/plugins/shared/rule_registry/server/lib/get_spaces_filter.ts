@@ -7,5 +7,5 @@
 import { SPACE_IDS } from '../../common/technical_rule_data_field_names';
 
 export function getSpacesFilter(spaceId?: string) {
-  return spaceId ? { term: { [SPACE_IDS]: spaceId } } : undefined;
+  return spaceId ? { terms: { [SPACE_IDS]: [spaceId, '*'] } } : undefined;
 }

@@ -725,6 +725,10 @@ describe('helpers', () => {
           timelineType: TimelineTypeEnum.default,
           onOpenTimeline,
           openTimeline: true,
+          query: {
+            kind: 'kuery',
+            expression: 'foo: bar',
+          },
         };
         (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
         renderHook(async () => {
@@ -738,6 +742,12 @@ describe('helpers', () => {
             id: TimelineId.active,
             timeline: expect.objectContaining({
               columns: defaultUdtHeaders,
+              kqlQuery: {
+                filterQuery: {
+                  serializedQuery: 'foo: bar',
+                  kuery: { expression: 'foo: bar', kind: 'kuery' },
+                },
+              },
             }),
           })
         );

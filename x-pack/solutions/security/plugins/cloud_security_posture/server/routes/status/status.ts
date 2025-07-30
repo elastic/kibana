@@ -17,6 +17,7 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import type {
   CspSetupStatus,
@@ -36,7 +37,6 @@ import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_PATTERN,
   POSTURE_TYPES,
@@ -228,7 +228,7 @@ export const getCspStatus = async ({
       CDR_EXTENDED_VULN_RETENTION_POLICY,
       logger
     ),
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS, logger, {
       postureType: POSTURE_TYPE_ALL,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -241,7 +241,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS, logger, {
       postureType: CSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -254,7 +254,7 @@ export const getCspStatus = async ({
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS, logger, {
       postureType: KSPM_POLICY_TEMPLATE,
       retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
     }),
@@ -340,7 +340,7 @@ export const getCspStatus = async ({
   const MIN_DATE = 0;
   const indicesDetails = [
     {
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
       status: findingsLatestIndexStatus,
     },
     {

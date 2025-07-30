@@ -333,6 +333,7 @@ export async function getFullAgentPolicy(
     const tokenHash =
       (await appContextService
         .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
         ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
 
     fullAgentPolicy.agent.protection = {

@@ -187,13 +187,13 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
         enableFindAction={true}
+        enableCustomContextMenu={true}
         options={{
           readOnly: true,
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
-          lineHeight: 24,
         }}
       />
     </div>
