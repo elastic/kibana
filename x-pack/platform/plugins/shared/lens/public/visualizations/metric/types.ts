@@ -41,10 +41,12 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
-  extraTextAlign?: MetricStyle['extraTextAlign'];
-  valueTextAlign?: MetricStyle['valueTextAlign'];
+  secondaryAlign?: MetricStyle['extraTextAlign'];
+  primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
+  titleWeight?: MetricStyle['titleWeight'];
+  primaryPosition?: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;

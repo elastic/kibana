@@ -63,12 +63,17 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
         />
       )}
 
-      <ValuesAlignmentOption
-        value={state.valueTextAlign ?? metricStateDefaults.valueTextAlign}
-        onChange={(valueTextAlign) => {
-          setState({ ...state, valueTextAlign });
+      <PrimaryAlignmentOption
+        value={state.primaryAlign ?? metricStateDefaults.primaryAlign}
+        onChange={(primaryAlign) => {
+          setState({ ...state, primaryAlign });
         }}
       />
+
+      {/* Idea
+       * When primaryposition is Bottom, only leave the values alignment
+       * When primaryPosition is Top, leave two option for the alignment, primary and secondary
+       */}
 
       <ValueFontSizeOption
         value={state.valueFontMode ?? metricStateDefaults.valueFontMode}
@@ -249,15 +254,15 @@ function TitlesAlignmentOption({
   );
 }
 
-function ValuesAlignmentOption({
+function PrimaryAlignmentOption({
   value,
   onChange,
 }: {
   value: MetricStyle['valueTextAlign'];
   onChange: (alignment: MetricStyle['valueTextAlign']) => void;
 }) {
-  const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.valuesAlignment', {
-    defaultMessage: 'Values alignment',
+  const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.primaryAlignment', {
+    defaultMessage: 'Primary value alignment', // TODO: Check label
   });
 
   return (
@@ -268,12 +273,10 @@ function ValuesAlignmentOption({
           {label}{' '}
           <EuiIconTip
             color="subdued"
-            content={i18n.translate('xpack.lens.metric.toolbarTitlesText.valuesAlignmentTip', {
-              defaultMessage: 'Alignment of the Primary and Secondary Metrics',
+            content={i18n.translate('xpack.lens.metric.toolbarTitlesText.primaryAlignmentTip', {
+              defaultMessage: 'Alignment of the Primary Metric',
             })}
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
+            iconProps={{ className: 'eui-alignTop' }}
             position="top"
             size="s"
             type="question"
@@ -295,6 +298,52 @@ function ValuesAlignmentOption({
     </EuiFormRow>
   );
 }
+
+// Note: Only show when secondary metric
+// function SecondaryAlignmentOption({
+//   value,
+//   onChange,
+// }: {
+//   value: MetricStyle['extraTextAlign'];
+//   onChange: (alignment: MetricStyle['extraTextAlign']) => void;
+// }) {
+//   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.secondaryAlignment', {
+//     defaultMessage: 'Secondary value alignment', // TODO: Check label
+//   });
+
+//   return (
+//     <EuiFormRow
+//       display="columnCompressed"
+//       label={
+//         <span>
+//           {label}{' '}
+//           <EuiIconTip
+//             color="subdued"
+//             content={i18n.translate('xpack.lens.metric.toolbarTitlesText.secondaryAlignmentTip', {
+//               defaultMessage: 'Alignment of the Secondary Metric',
+//             })}
+//             iconProps={{ className: 'eui-alignTop' }}
+//             position="top"
+//             size="s"
+//             type="question"
+//           />
+//         </span>
+//       }
+//     >
+//       <EuiButtonGroup
+//         isFullWidth
+//         legend={label}
+//         data-test-subj="lens-values-alignment-btn"
+//         buttonSize="compressed"
+//         options={alignmentOptions}
+//         idSelected={value}
+//         onChange={(alignment) => {
+//           onChange(alignment as MetricStyle['valueTextAlign']);
+//         }}
+//       />
+//     </EuiFormRow>
+//   );
+// }
 
 const iconAlignmentOptions: Array<{
   id: MetricStyle['titlesTextAlign'] | MetricStyle['valueTextAlign'];

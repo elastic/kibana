@@ -49,10 +49,12 @@ export interface MetricArguments {
   secondaryTrendPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
-  valueTextAlign: MetricStyle['valueTextAlign'];
-  extraTextAlign: MetricStyle['extraTextAlign'];
+  primaryAlign: MetricStyle['valueTextAlign'];
+  secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
+  titleWeight: MetricStyle['titleWeight'];
+  primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;
