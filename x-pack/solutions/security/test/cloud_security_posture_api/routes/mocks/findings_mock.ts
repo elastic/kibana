@@ -34,6 +34,7 @@ export const findingsMockData = [
     },
     data_stream: {
       dataset: 'cloud_security_posture.findings',
+      namespace: 'default',
     },
   },
   {
@@ -60,6 +61,7 @@ export const findingsMockData = [
     },
     data_stream: {
       dataset: 'cloud_security_posture.findings',
+      namespace: 'default',
     },
   },
 ];
