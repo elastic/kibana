@@ -17,9 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects/privilege_monitoring';
-import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
-import { monitoringEntitySourceType } from '../saved_objects';
+import { EngineStatusService } from '../engine/status_service';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -50,21 +48,13 @@ export const healthCheckPrivilegeMonitoringRoute = (
           await context.core,
           ENABLE_PRIVILEGED_USER_MONITORING_SETTING
         );
-        const { deps } = secSol.getPrivilegeMonitoringDataClient();
-        const soClient = deps.savedObjects.getClient({
-          includedHiddenTypes: [
-            PrivilegeMonitoringApiKeyType.name,
-            monitoringEntitySourceType.name,
-          ],
-        });
+        const dataClient = secSol.getPrivilegeMonitoringDataClient();
+        const soClient = dataClient.getScopedSoClient(request);
 
-        const engineClient = new PrivilegeMonitoringEngineDescriptorClient({
-          soClient,
-          namespace: deps.namespace,
-        });
+        const statusService = EngineStatusService(dataClient, soClient);
 
         try {
-          const body = await engineClient.getStatus();
+          const body = await statusService.get();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

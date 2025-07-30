@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
@@ -19,13 +19,12 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../../telemetry/event_based/events';
 import { PrivmonIndexService } from './elasticsearch/indices';
-import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
+
 import {
   MonitoringEntitySourceDescriptorClient,
   PrivilegeMonitoringEngineDescriptorClient,
-  monitoringEntitySourceType,
 } from '../saved_objects';
-import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
 
 export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
@@ -36,11 +35,9 @@ export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient)
 
   const IndexService = PrivmonIndexService(dataClient);
 
-  const init = async (request: KibanaRequest): Promise<InitMonitoringEngineResponse> => {
-    const soClient = deps.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
-    });
-
+  const init = async (
+    soClient: SavedObjectsClientContract
+  ): Promise<InitMonitoringEngineResponse> => {
     const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient,
       namespace: deps.namespace,
@@ -61,16 +58,30 @@ export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient)
     const descriptor = await descriptorClient.init();
     dataClient.log('debug', `Initialized privileged monitoring engine saved object`);
     // create default index source for privilege monitoring for each namespace
-    const indexSourceDescriptor = await monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex(deps.namespace),
-      name: `default-monitoring-index-${deps.namespace}`,
-    });
-    dataClient.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+    try {
+      const indexSourceDescriptor = await monitoringIndexSourceClient.create({
+        type: 'index',
+        managed: true,
+        indexPattern: defaultMonitoringUsersIndex(deps.namespace),
+        name: `default-monitoring-index-${deps.namespace}`,
+      });
+      dataClient.log(
+        'debug',
+        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+      );
+    } catch (e) {
+      dataClient.log(
+        'error',
+        `Failed to create default index source for privilege monitoring: ${e.message}`
+      );
+      dataClient.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to create default index source for privilege monitoring',
+        e
+      );
+    }
+
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await IndexService.createIngestPipelineIfDoesNotExist();

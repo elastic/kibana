@@ -12,6 +12,8 @@ import type {
   Logger,
   AuditEvent,
   SavedObjectsServiceStart,
+  SavedObjectsClientProviderOptions,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -21,8 +23,9 @@ import type { ApiKeyManager } from '../auth/api_key';
 
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../../audit';
+import { monitoringEntitySourceType } from '../saved_objects';
 
-interface PrivilegeMonitoringGlobalDependencies {
+export interface PrivilegeMonitoringGlobalDependencies {
   namespace: string;
   kibanaVersion: string;
 
@@ -45,6 +48,11 @@ export class PrivilegeMonitoringDataClient {
 
   constructor(public readonly deps: PrivilegeMonitoringGlobalDependencies) {
     this.index = getPrivilegedMonitorUsersIndex(deps.namespace);
+  }
+
+  public getScopedSoClient(request: KibanaRequest, options?: SavedObjectsClientProviderOptions) {
+    const includedHiddenTypes = options?.includedHiddenTypes ?? [monitoringEntitySourceType.name];
+    return this.deps.savedObjects.getScopedClient(request, { ...options, includedHiddenTypes });
   }
 
   public log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
