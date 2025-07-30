@@ -34,47 +34,8 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
+import { IWorkflowEventLogger, LogSearchResult, SimpleWorkflowLogger } from './lib/workflow_logger';
 import { GetWorkflowsParams } from './workflows_management_api';
-
-// Simple interfaces for workflow logging
-interface IWorkflowEventLogger {
-  logInfo(message: string, meta?: any): void;
-  logError(message: string, error?: Error, meta?: any): void;
-}
-
-interface LogSearchResult {
-  total: number;
-  logs: Array<{
-    '@timestamp': string;
-    message: string;
-    level: string;
-    workflow?: {
-      id?: string;
-      name?: string;
-      execution_id?: string;
-      step_id?: string;
-      step_name?: string;
-    };
-    [key: string]: any;
-  }>;
-}
-
-// Simple logger implementation with console support
-class SimpleWorkflowLogger implements IWorkflowEventLogger {
-  constructor(private logger: Logger, private enableConsoleLogging: boolean = false) {}
-
-  logInfo(message: string, meta?: any): void {
-    if (this.enableConsoleLogging) {
-      this.logger.info(`🔄 WORKFLOW: ${message}`, meta);
-    }
-  }
-
-  logError(message: string, error?: Error, meta?: any): void {
-    if (this.enableConsoleLogging) {
-      this.logger.error(`🔄 WORKFLOW: ${message}`, { error, ...meta });
-    }
-  }
-}
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
