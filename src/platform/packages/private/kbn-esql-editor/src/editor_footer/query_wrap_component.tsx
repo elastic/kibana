@@ -23,7 +23,7 @@ export function QueryWrapComponent({
     <EuiFlexItem grow={false}>
       <EuiToolTip
         position="top"
-        content={i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+        content={i18n.translate('esqlEditor.query.formatQueryLabel', {
           defaultMessage: 'Prettify query',
         })}
         disableScreenReaderOutput
@@ -33,7 +33,7 @@ export function QueryWrapComponent({
           color="text"
           size="xs"
           data-test-subj="ESQLEditor-toggleWordWrap"
-          aria-label={i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+          aria-label={i18n.translate('esqlEditor.query.formatQueryLabel', {
             defaultMessage: 'Prettify query',
           })}
           onClick={() => {
