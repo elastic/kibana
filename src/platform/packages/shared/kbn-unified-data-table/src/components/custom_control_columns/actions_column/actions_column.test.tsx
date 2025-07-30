@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { getActionsColumn } from './actions_column';
-import { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import * as actionsHeader from './actions_header';

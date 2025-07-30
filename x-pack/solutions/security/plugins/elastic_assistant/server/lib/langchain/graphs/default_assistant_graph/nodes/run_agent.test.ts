@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { runAgent, RunAgentParams } from './run_agent';
+import type { RunAgentParams } from './run_agent';
+import { runAgent } from './run_agent';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AgentState } from '../types';
+import type { AgentState } from '../types';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AIMessage } from '@langchain/core/messages';

@@ -7,7 +7,7 @@
 
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import { DataStreamDetails } from '../../../../common/api_types';
+import type { DataStreamDetails } from '../../../../common/api_types';
 import { FAILURE_STORE_PRIVILEGE, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';

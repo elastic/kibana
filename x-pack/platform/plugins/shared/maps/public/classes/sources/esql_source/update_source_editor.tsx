@@ -6,13 +6,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

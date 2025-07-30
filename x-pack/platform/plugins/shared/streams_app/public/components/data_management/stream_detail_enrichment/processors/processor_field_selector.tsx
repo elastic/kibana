@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { css } from '@emotion/react';
-import { ProcessorFormState } from '../types';
+import type { ProcessorFormState } from '../types';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { selectUnsupportedDottedFields } from '../state_management/simulation_state_machine/selectors';
 

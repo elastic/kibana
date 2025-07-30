@@ -19,8 +19,8 @@ import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import { getMessageFromId } from '../errors';
-import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
-import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 
 export const validateCommandArguments = (
   command: ESQLCommand,

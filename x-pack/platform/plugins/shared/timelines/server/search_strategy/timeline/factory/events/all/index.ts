@@ -8,14 +8,14 @@
 import { cloneDeep, getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   EventHit,
   TimelineEventsAllStrategyResponse,
 } from '../../../../../../common/search_strategy';
-import { TimelineFactory } from '../../types';
+import type { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { formatTimelineData } from '../../helpers/format_timeline_data';

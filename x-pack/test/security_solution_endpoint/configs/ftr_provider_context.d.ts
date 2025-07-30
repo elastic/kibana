@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { pageObjects, svlPageObjects } from '../page_objects';
-import { services, svlServices } from '../services';
+import type { pageObjects, svlPageObjects } from '../page_objects';
+import type { services, svlServices } from '../services';
 
 export type FtrProviderContext = GenericFtrProviderContext<
   typeof services & typeof svlServices,

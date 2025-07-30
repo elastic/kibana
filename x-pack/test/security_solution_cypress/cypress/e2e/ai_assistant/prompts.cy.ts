@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { ESQLLicenseType } from '@kbn/esql-types';
+import type {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
@@ -23,17 +23,15 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../constants';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
-import {
+import type {
   FunctionParameter,
-  FunctionDefinitionTypes,
   FunctionDefinition,
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import {
-  ICommandCallbacks,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
+import { FunctionDefinitionTypes } from '../../types';
+import type { ICommandCallbacks } from '../../../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -57,7 +55,7 @@ import {
   isParamLiteral,
   isParametrized,
 } from '../../../ast/is';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];

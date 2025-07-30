@@ -6,7 +6,7 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 
 const mockFindContent = jest.fn(async () => ({
   pagination: { total: 0 },

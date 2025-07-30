@@ -24,7 +24,7 @@ interface Ignore {
   testing_regex?: string;
 }
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { getEqlRuleForAlertTesting } from '../../../../utils';
 export default ({ getService }: FtrProviderContext): void => {
   /**

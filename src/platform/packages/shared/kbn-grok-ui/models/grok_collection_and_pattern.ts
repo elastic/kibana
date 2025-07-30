@@ -18,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { escape } from 'lodash';
 import { Subject } from 'rxjs';
 import { PATTERN_MAP } from '../constants/pattern_map';
-import { SupportedTypeConversion, FieldDefinition } from './types';
+import type { FieldDefinition } from './types';
+import { SupportedTypeConversion } from './types';
 
 // Grok patterns use this official naming: %{SYNTAX:SEMANTIC:TYPE}
 

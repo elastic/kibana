@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TriggerInternal } from './trigger_internal';
+import type { TriggerInternal } from './trigger_internal';
 
 /**
  * This is a public representation of a trigger that is provided to other plugins.

@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import {
+import type {
   ESQLAstCompletionCommand,
   ESQLAstItem,
   ESQLCommandOption,

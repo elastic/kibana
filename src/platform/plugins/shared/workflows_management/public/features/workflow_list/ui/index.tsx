@@ -9,10 +9,10 @@
 
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,9 +24,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { Link } from 'react-router-dom';
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 

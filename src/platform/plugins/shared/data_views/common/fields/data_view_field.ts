@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
+import type { KbnFieldType } from '@kbn/field-types';
+import { getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type { RuntimeFieldSpec } from '../types';
-import { FieldSpec, DataView } from '..';
+import type { FieldSpec, DataView } from '..';
 import {
   shortenDottedString,
   isDataViewFieldSubtypeMulti,

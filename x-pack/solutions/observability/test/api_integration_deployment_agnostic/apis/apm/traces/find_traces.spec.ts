@@ -7,7 +7,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
-import { Environment } from '@kbn/apm-plugin/common/environment_rt';
+import type { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { sortBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';

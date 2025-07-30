@@ -9,8 +9,8 @@
 
 import chalk from 'chalk';
 
-import { Config } from './config';
-import { Platform } from './platform';
+import type { Config } from './config';
+import type { Platform } from './platform';
 
 export class Build {
   private buildDesc: string = '';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   TreeOptions,
   Tree,
-  EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
-import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
+import type { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
 

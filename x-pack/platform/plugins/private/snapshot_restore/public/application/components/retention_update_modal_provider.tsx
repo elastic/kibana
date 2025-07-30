@@ -25,7 +25,8 @@ import {
 } from '@elastic/eui';
 
 import { useCore, useServices, useToastNotifications } from '../app_context';
-import { Frequency, CronEditor } from '../../shared_imports';
+import type { Frequency } from '../../shared_imports';
+import { CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
 

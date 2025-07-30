@@ -7,8 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setup, setupEnvironment, SetupResult } from './pipeline_processors_editor.helpers';
-import { Pipeline } from '../../../../../common/types';
+import type { SetupResult } from './pipeline_processors_editor.helpers';
+import { setup, setupEnvironment } from './pipeline_processors_editor.helpers';
+import type { Pipeline } from '../../../../../common/types';
 import {
   extractProcessorDetails,
   getProcessorTypesAndLabels,

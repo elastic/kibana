@@ -9,6 +9,7 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -16,7 +17,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';

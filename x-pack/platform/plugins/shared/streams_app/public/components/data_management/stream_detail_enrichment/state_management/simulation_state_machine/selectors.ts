@@ -7,10 +7,10 @@
 
 import { createSelector } from 'reselect';
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { SimulationContext } from './types';
+import type { SimulationContext } from './types';
 import { getFilterSimulationDocumentsFn } from './utils';
 
 /**

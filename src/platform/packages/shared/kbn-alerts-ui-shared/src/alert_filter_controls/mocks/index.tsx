@@ -11,7 +11,7 @@ import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
+import type { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 

@@ -9,7 +9,7 @@
 
 import { Serializable } from '../../serializable';
 import { generateLongId, generateLongIdWithSeed, generateShortId } from '../../utils/generate_id';
-import { ApmOtelFields } from './apm_otel_fields';
+import type { ApmOtelFields } from './apm_otel_fields';
 
 export class ApmOtelError extends Serializable<ApmOtelFields> {
   constructor(fields: ApmOtelFields) {

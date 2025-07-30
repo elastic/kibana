@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const removeUUIDFromActions = (actions: RuleActionArray): RuleActionArray => {
   return actions.map(({ uuid, ...restOfAction }) => ({

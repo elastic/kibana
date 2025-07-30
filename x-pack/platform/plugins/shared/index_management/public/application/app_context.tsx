@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import SemVer from 'semver/classes/semver';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import {
+import type SemVer from 'semver/classes/semver';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type {
   ApplicationStart,
   I18nStart,
   ThemeServiceStart,
@@ -28,12 +28,12 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 
-import { EuiBreadcrumb } from '@elastic/eui';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ExtensionsService } from '../services';
-import { HttpService, NotificationService, UiMetricService } from './services';
-import { IndexManagementBreadcrumb } from './services/breadcrumbs';
+import type { ExtensionsService } from '../services';
+import type { HttpService, NotificationService, UiMetricService } from './services';
+import type { IndexManagementBreadcrumb } from './services/breadcrumbs';
 
 export const AppContext = createContext<AppDependencies | undefined>(undefined);
 

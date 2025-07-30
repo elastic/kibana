@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlAuth = getService('samlAuth');

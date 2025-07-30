@@ -8,14 +8,14 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { BoundOptions, InferenceClient } from '@kbn/inference-common';
-import { AnonymizationRule } from '@kbn/inference-common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { BoundOptions, InferenceClient } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createPromptApi } from '../prompt';
-import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { bindClient } from '../../common/inference_client/bind_client';
 
 export function createInferenceClient({

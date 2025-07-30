@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { GenericBuckets, RawBucket } from '@kbn/grouping/src';
-import { FindingsGroupingAggregation, VulnerabilitiesGroupingAggregation } from '../types';
+import type { GenericBuckets, RawBucket } from '@kbn/grouping/src';
+import type { FindingsGroupingAggregation, VulnerabilitiesGroupingAggregation } from '../types';
 
 export type GroupingAggregation = VulnerabilitiesGroupingAggregation | FindingsGroupingAggregation;
 

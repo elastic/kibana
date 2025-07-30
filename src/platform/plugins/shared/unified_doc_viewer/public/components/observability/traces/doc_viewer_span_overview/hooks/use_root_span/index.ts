@@ -9,7 +9,7 @@
 
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {

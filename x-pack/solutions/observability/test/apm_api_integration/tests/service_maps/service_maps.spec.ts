@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { first, isEmpty, last, orderBy, uniq } from 'lodash';
-import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
+import type { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =

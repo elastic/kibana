@@ -17,7 +17,7 @@ import {
   EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
-import { DraggableProvided } from '@hello-pangea/dnd';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
@@ -25,7 +25,7 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { EditRoutingRuleControls } from './control_bars';
-import { RoutingDefinitionWithUIAttributes } from './types';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function RoutingStreamEntry({
   availableStreams,

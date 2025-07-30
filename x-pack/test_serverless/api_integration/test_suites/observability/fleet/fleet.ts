@@ -11,7 +11,7 @@ import {
   expectDefaultFleetServer,
 } from '../../../services/default_fleet_setup';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');

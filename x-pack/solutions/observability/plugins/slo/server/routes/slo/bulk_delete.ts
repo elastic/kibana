@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  BulkDeleteStatusResponse,
-  bulkDeleteParamsSchema,
-  bulkDeleteStatusParamsSchema,
-} from '@kbn/slo-schema';
+import type { BulkDeleteStatusResponse } from '@kbn/slo-schema';
+import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
 import { v4 } from 'uuid';
 import { TYPE } from '../../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from '../create_slo_server_route';

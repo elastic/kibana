@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, Type, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import {
   KIBANA_PRODUCT_TIERS,
   KIBANA_SOLUTIONS,

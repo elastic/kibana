@@ -8,19 +8,20 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiToolTip,
   EuiDescriptionList,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';

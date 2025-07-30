@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { naturalLanguageSearch, NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
+import type { NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
+import { naturalLanguageSearch } from '@kbn/onechat-genai-utils';
 
 const searchDslSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),

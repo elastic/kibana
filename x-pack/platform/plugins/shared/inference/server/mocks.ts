@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceServerStart } from './types';
+import type { InferenceServerStart } from './types';
 
 const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
   return {

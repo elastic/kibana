@@ -9,38 +9,35 @@
 
 import React from 'react';
 import moment from 'moment';
-import EventEmitter from 'events';
+import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from '@kbn/core/public';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  OnSaveProps,
-} from '@kbn/saved-objects-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import type { SavedObjectSaveOpts, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
-import {
+import type {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VisualizeLocatorParams } from '../../../common/locator';
+import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';

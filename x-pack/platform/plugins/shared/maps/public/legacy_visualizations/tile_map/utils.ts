@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
-import { TileMapVisParams } from './types';
+import type { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
 import { GEOHASH_GRID } from './geo_hash';
 

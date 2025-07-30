@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { IFieldSubType } from '@kbn/es-query';
-import { ReactNode } from 'react';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { IFieldSubType } from '@kbn/es-query';
+import type { ReactNode } from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
+import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 

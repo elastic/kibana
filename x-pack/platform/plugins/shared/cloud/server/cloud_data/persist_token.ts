@@ -7,8 +7,9 @@
 
 import isDeepEqual from 'fast-deep-equal/react';
 
-import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
   CloudDataAttributes,
   CloudSecurityAnswer,
   SolutionType,

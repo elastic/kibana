@@ -14,12 +14,14 @@ import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
 import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
-import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
+import type { TransformConfig } from '@kbn/babel-transform';
+import { withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
 
-import { Task, scanCopy, write, deleteAll } from '../lib';
+import type { Task } from '../lib';
+import { scanCopy, write, deleteAll } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 

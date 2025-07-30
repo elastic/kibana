@@ -10,10 +10,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import { getStateColumnActions } from '../components/actions/columns';
-import { UnifiedDataTableSettings } from '../types';
+import type { UnifiedDataTableSettings } from '../types';
 
 export interface UseColumnsProps {
   capabilities: Capabilities;

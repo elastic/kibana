@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import {
+import type {
   SearchRequest,
   SearchResponse,
   AggregationsMultiBucketAggregateBase,

@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { StreamEnrichmentContextType } from './types';
+import type { StreamEnrichmentContextType } from './types';
 import { isProcessorUnderEdit } from '../processor_state_machine';
 
 /**

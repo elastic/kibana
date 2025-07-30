@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '../../queries';
+import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response

@@ -11,6 +11,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
+import type {
+  AttackDiscoveryScheduleCreateProps,
+  AttackDiscoveryScheduleUpdateProps,
+  FindAttackDiscoverySchedulesRequestQuery,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES,
@@ -18,9 +23,6 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
-  AttackDiscoveryScheduleCreateProps,
-  AttackDiscoveryScheduleUpdateProps,
-  FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 
 import type { User } from '../../../utils/auth/types';

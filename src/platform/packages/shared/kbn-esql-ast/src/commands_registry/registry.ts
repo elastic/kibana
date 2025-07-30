@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLSignatureLicenseType } from '@kbn/esql-types';
+import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
 import type { ESQLMessage, ESQLCommand, ESQLAst } from '../types';
 import type { ISuggestionItem, ESQLFieldWithMetadata, ICommandCallbacks } from './types';
 

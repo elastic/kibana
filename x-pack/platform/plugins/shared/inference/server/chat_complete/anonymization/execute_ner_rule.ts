@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withInferenceSpan } from '@kbn/inference-tracing';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing/src/types';
-import { AnonymizationState } from './types';
+import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
 // structured data can end up being a token per character.

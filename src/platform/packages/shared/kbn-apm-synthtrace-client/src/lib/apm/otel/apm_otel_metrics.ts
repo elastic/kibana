@@ -8,7 +8,7 @@
  */
 
 import { Serializable } from '../../serializable';
-import { Fields } from '../../entity';
+import type { Fields } from '../../entity';
 
 export class OtelMetricset<TFields extends Fields> extends Serializable<TFields> {
   constructor(fields: TFields) {

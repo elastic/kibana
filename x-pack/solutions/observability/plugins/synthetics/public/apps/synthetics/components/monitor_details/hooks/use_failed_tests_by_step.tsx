@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { useSelectedLocation } from './use_selected_location';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';

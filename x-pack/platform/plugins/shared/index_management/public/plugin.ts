@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -17,7 +17,7 @@ import {
   ScopedHistory,
   Capabilities,
 } from '@kbn/core/public';
-import {
+import type {
   ComponentTemplateFlyoutProps,
   DatastreamFlyoutProps,
   IndexManagementPluginSetup,
@@ -26,16 +26,16 @@ import {
   IndexSettingProps,
   IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
-import {
+import type {
   IndexManagementLocator,
   IndexManagementAppMountParams,
 } from '@kbn/index-management-shared-types';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import React from 'react';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
-import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import type { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';

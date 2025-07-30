@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { isHumanMessage, isAIMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
-import {
-  ToolCallWithResult,
-  ToolCallStep,
-  ConversationRoundStepType,
-  ConversationRound,
-} from '@kbn/onechat-common';
+import type { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
+import type { ToolCallWithResult, ToolCallStep, ConversationRound } from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  DefendInsightsCombinedPrompts,
-  getIncompatibleAntivirusPrompt,
-} from './incompatible_antivirus';
+import type { DefendInsightsCombinedPrompts } from './incompatible_antivirus';
+import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { getDefendInsightsPrompt } from '.';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 jest.mock('./incompatible_antivirus', () => ({
   getIncompatibleAntivirusPrompt: jest.fn(),

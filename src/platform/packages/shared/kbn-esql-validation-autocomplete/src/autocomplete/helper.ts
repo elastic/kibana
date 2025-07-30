@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLCommand, ESQLAstQueryExpression, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
+import { type ESQLCommand, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 /**
  * This function is used to build the query that will be used to compute the

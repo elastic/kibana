@@ -9,7 +9,8 @@
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/utils';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 

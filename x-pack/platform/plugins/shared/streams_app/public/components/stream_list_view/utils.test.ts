@@ -7,7 +7,7 @@
 
 import { buildStreamRows } from './utils';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {

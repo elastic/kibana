@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { createAgentGraph } from '../chat/graph';
 import {
@@ -20,7 +20,7 @@ import {
   getReplanningPrompt,
   getAnswerPrompt,
 } from './prompts';
-import { BacklogItem, PlanningResult } from './backlog';
+import type { BacklogItem, PlanningResult } from './backlog';
 
 const StateAnnotation = Annotation.Root({
   // inputs

@@ -8,7 +8,7 @@
  */
 
 import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
-import { EmbeddableSetup, EmbeddableStart } from './plugin';
+import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   ...createEmbeddablePersistableStateServiceMock(),

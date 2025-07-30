@@ -10,7 +10,7 @@
 // import useObservable from 'react-use/lib/useObservable';
 // import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 // import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 // import {

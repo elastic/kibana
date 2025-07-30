@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from '@kbn/test-suites-xpack/functional/services';
-import { pageObjects } from './page_objects';
+import type { services } from '@kbn/test-suites-xpack/functional/services';
+import type { pageObjects } from './page_objects';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

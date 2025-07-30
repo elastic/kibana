@@ -24,13 +24,14 @@ import {
   buildFieldsDefinitionsWithMetadata,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import {
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLLicenseType, ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { isSourceCommand } from '../shared/helpers';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { getAstContext } from '../shared/context';

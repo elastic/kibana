@@ -8,9 +8,9 @@
  */
 
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import { LinksAttributes } from '../../common/content_management';
+import type { LinksAttributes } from '../../common/content_management';
 import { injectReferences } from '../../common/persistable_state';
-import { LinksRuntimeState } from '../types';
+import type { LinksRuntimeState } from '../types';
 import { resolveLinks } from './resolve_links';
 
 export const deserializeLinksSavedObject = async (

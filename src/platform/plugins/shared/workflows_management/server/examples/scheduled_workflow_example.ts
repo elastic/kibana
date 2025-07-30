@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateWorkflowCommand } from '@kbn/workflows';
+import type { CreateWorkflowCommand } from '@kbn/workflows';
 
 /**
  * Example of creating a workflow with scheduled triggers

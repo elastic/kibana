@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 

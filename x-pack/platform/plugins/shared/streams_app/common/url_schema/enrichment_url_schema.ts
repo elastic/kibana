@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Filter, TimeRange } from '@kbn/es-query';
-import { SampleDocument, sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
+import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
 
 /**

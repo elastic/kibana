@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type FormConfig, getSurveyFeedbackURL, NodeType } from './feature_feedback_button';
+import type { NodeType } from './feature_feedback_button';
+import { type FormConfig, getSurveyFeedbackURL } from './feature_feedback_button';
 
 describe('getSurveyFeedbackURL', () => {
   const formUrl = 'https://ela.st/foo';

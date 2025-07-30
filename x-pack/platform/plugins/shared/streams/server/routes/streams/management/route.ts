@@ -8,7 +8,7 @@
 import { conditionSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { ResyncStreamsResponse } from '../../../lib/streams/client';
+import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 
 export const forkStreamsRoute = createServerRoute({

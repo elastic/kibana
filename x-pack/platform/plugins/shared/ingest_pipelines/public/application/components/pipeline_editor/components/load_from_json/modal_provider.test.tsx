@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
+import type { OnDoneLoadJsonHandler } from './modal_provider';
+import { ModalProvider } from './modal_provider';
 
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
@@ -37,7 +38,8 @@ jest.mock('@kbn/code-editor', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
   return registerTestBed(

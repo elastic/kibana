@@ -10,21 +10,21 @@ import ReactDOM from 'react-dom';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { LensAppState } from '../state_management';
 import {
   disableAutoApply,
   enableAutoApply,
-  LensAppState,
   selectAutoApplyEnabled,
   useLensDispatch,
   useLensSelector,
 } from '../state_management';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
-import { StartServices } from '../types';
+import type { StartServices } from '../types';
 
 const container = document.createElement('div');
 let isMenuOpen = false;

@@ -10,7 +10,7 @@
 import { extractByJsonPointer } from '../../../utils/extract_by_json_pointer';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
 import { parseRef } from '../../../utils/parse_ref';
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 import { isLocalRef } from './utils/is_local_ref';
 
 /**

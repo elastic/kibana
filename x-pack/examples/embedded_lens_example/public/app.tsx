@@ -27,7 +27,7 @@ import type {
   DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.

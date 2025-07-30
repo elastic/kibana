@@ -14,7 +14,7 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { getConnectorByName } from './utils';

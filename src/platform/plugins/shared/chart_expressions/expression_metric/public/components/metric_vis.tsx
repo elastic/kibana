@@ -10,35 +10,33 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Metric,
+import type {
   MetricSpec,
   MetricWProgress,
-  isMetricElementEvent,
   RenderChangeListener,
-  Settings,
   MetricWTrend,
   MetricWNumber,
   SettingsProps,
   MetricWText,
 } from '@elastic/charts';
+import { Chart, Metric, isMetricElementEvent, Settings } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
 import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import type { VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig } from './secondary_metric';
+import type { TrendConfig } from './secondary_metric';
+import { SecondaryMetric } from './secondary_metric';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];

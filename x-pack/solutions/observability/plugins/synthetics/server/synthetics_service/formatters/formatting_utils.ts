@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
-import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import type { ParsedVars } from './lightweight_param_formatter';
+import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 
 export type FormatterFn = (

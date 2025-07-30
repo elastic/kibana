@@ -8,7 +8,7 @@
 import { pick, omit } from 'lodash';
 import expect from 'expect';
 import type { ImportRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { combineArrayToNdJson } from '..';
 
 interface ImportRulesParams {

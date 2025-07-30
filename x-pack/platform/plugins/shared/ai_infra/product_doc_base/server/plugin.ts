@@ -13,7 +13,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
-import {
+import type {
   ProductDocBaseSetupContract,
   ProductDocBaseStartContract,
   ProductDocBaseSetupDependencies,

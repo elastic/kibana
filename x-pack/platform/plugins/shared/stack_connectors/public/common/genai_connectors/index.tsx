@@ -7,7 +7,7 @@
 
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-import { ConfigFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 

@@ -11,8 +11,8 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import {
   getKibanaMigratorTestKit,

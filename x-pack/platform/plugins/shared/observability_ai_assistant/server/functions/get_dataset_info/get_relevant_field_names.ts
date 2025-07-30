@@ -11,7 +11,7 @@ import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { MessageRole, ShortIdTable, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
-import { FunctionCallChatFunction } from '../../service/types';
+import type { FunctionCallChatFunction } from '../../service/types';
 
 export const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
 export const GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful assistant for Elastic Observability. 

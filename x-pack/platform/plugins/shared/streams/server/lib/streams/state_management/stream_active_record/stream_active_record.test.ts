@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { StreamActiveRecord } from './stream_active_record';
 
 describe('StreamActiveRecord', () => {

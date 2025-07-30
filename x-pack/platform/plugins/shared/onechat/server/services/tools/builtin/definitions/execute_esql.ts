@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { executeEsql, EsqlResponse } from '@kbn/onechat-genai-utils';
+import type { EsqlResponse } from '@kbn/onechat-genai-utils';
+import { executeEsql } from '@kbn/onechat-genai-utils';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),

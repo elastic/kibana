@@ -8,11 +8,13 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import {
+import type {
   ReadKnowledgeBaseEntryResponse,
+  ReadKnowledgeBaseEntryRequestParamsInput,
+} from '@kbn/elastic-assistant-common';
+import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
-  ReadKnowledgeBaseEntryRequestParamsInput,
 } from '@kbn/elastic-assistant-common';
 import type { User } from '../../../utils/auth/types';
 

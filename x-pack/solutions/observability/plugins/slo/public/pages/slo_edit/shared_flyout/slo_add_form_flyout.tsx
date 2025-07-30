@@ -7,8 +7,8 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { RecursivePartial } from '@kbn/utility-types';
+import type { CreateSLOInput } from '@kbn/slo-schema';
+import type { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';

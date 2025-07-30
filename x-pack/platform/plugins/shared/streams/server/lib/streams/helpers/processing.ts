@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   ManualIngestPipelineProcessorConfig,
   ElasticsearchProcessorType,
   ProcessorDefinition,
+} from '@kbn/streams-schema';
+import {
   elasticsearchProcessorTypes,
   getProcessorConfig,
   getProcessorType,
 } from '@kbn/streams-schema';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { conditionToPainless } from './condition_to_painless';
 
 export function formatToIngestProcessors(

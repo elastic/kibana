@@ -6,7 +6,8 @@
  */
 
 import { readRolesDescriptorsFromResource, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
-import { ElasticsearchRoleDescriptor, ScoutLogger, playwrightTest as base } from '@kbn/scout';
+import type { ElasticsearchRoleDescriptor, ScoutLogger } from '@kbn/scout';
+import { playwrightTest as base } from '@kbn/scout';
 
 export interface RoleDescriptorsFixture {
   serverless: Map<string, ElasticsearchRoleDescriptor>;

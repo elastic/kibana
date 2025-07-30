@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { App } from '../components/app';
-import { CanvasRenderedWorkpad } from '../types';
+import type { CanvasRenderedWorkpad } from '../types';
 
 export interface Options {
   /**

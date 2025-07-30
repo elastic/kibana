@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -13,17 +14,16 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiDataGridRowHeightsOptions,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
-  PreviewDocsFilterOption,
   getSourceField,
   getTableColumns,
   getUniqueDetectedFields,
@@ -41,11 +41,12 @@ import {
 } from './state_management/stream_enrichment_state_machine';
 import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
-import { WithUIAttributes } from './types';
+import type { WithUIAttributes } from './types';
 import { isGrokProcessor } from './utils';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
-import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
+import type { DataTableRecordWithIndex } from './preview_flyout';
+import { PreviewFlyout } from './preview_flyout';
 import { MemoProcessingPreviewTable } from './processing_preview_table';
 import {
   NoPreviewDocumentsEmptyPrompt,

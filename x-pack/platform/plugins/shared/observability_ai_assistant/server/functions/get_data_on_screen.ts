@@ -7,8 +7,8 @@
 
 import { compact } from 'lodash';
 import dedent from 'dedent';
-import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
-import { ChatFunctionClient } from '../service/chat_function_client';
+import type { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type { ChatFunctionClient } from '../service/chat_function_client';
 
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
 

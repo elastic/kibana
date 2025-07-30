@@ -17,14 +17,10 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  DataTableRecord,
-  LogDocumentOverview,
-  fieldConstants,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
 import { LogLevel } from './sub_components/log_level';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -17,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { Error, useKibana } from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
+import { useKibana } from '../../../shared_imports';
 import { getCreatePath } from '../../services/navigation';
 import { getErrorText, isIntegrationsPipeline } from '../utils';
 

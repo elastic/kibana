@@ -17,7 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { RelatedDashboard } from '@kbn/observability-schema';
-import { ActionButtonProps, DashboardTile } from './dashboard_tile';
+import type { ActionButtonProps } from './dashboard_tile';
+import { DashboardTile } from './dashboard_tile';
 
 export function DashboardTiles({
   title,

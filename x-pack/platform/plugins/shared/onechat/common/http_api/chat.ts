@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConversationRoundStep, AssistantResponse, AgentMode } from '@kbn/onechat-common';
+import type { ConversationRoundStep, AssistantResponse, AgentMode } from '@kbn/onechat-common';
 
 /**
  * body payload for request to the /internal/onechat/chat endpoint

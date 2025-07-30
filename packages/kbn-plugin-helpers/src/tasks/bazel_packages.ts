@@ -8,7 +8,7 @@
  */
 
 import { runBazel } from '@kbn/bazel-runner';
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 export async function buildBazelPackages({ log, dist }: TaskContext) {
   log.info('run bazel and build required artifacts for the optimizer');

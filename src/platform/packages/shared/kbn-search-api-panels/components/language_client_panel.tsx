@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { LanguageDefinition } from '../types';
+import type { LanguageDefinition } from '../types';
 import './select_client.scss';
 
 interface SelectClientProps {

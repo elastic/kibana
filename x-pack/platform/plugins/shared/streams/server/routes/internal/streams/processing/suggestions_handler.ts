@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import {
-  InferenceClient,
   MessageRole,
   type FromToolSchema,
   type Message,
   type OutputOptions,
 } from '@kbn/inference-common';
-import { FlattenRecord, Streams } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { cloneDeep, get } from 'lodash';
-import { StreamsClient } from '../../../../lib/streams/client';
+import type { StreamsClient } from '../../../../lib/streams/client';
 import { convertEcsFieldsToOtel } from './convert_ecs_fields_to_otel';
 import { getLogGroups, getVariedSamples, sortByProbability } from './get_log_groups';
-import { ProcessingSuggestionBody } from './route';
+import type { ProcessingSuggestionBody } from './route';
 import { simulateProcessing, type SimulationDocReport } from './simulation_handler';
 
 export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {

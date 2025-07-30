@@ -8,7 +8,8 @@
  */
 
 import type { UpdatableFileMetadata } from '../../../../common/types';
-import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../../test_utils';
+import type { TestEnvironmentUtils } from '../../../test_utils';
+import { setupIntegrationEnvironment } from '../../../test_utils';
 
 describe('File kind HTTP API', () => {
   let fileKind: string;

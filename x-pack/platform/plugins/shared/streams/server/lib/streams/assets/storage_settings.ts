@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IndexStorageSettings, types } from '@kbn/storage-adapter';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { types } from '@kbn/storage-adapter';
 import {
   ASSET_ID,
   ASSET_TYPE,

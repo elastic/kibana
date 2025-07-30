@@ -7,7 +7,7 @@
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Logger } from '@kbn/core/server';
-import { ToolsProvider } from '../../mcp_gateway';
+import type { ToolsProvider } from '../../mcp_gateway';
 import { createSearchAgentGraph } from './search_agent_graph';
 import type { SearchAgentOutput } from './types';
 import { graphNames } from '../../constants';

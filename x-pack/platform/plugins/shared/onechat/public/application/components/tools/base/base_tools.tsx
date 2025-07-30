@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import React from 'react';
 import { useBaseTools } from '../../../hooks/tools/use_tools';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { SolutionSideNavItemPosition } from './types';
-import type { SolutionSideNavItem, Tracker } from './types';
+import type { Tracker, SolutionSideNavItem } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
 import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
@@ -168,7 +168,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
       return (
         <>
           {items.map((item) => (
-            <SolutionSideNavItem
+            <SolutionSideNavItemMemoized
               key={item.id}
               item={item}
               isSelected={selectedId === item.id}
@@ -200,7 +200,7 @@ const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
             <React.Fragment key={categoryIndex}>
               {categoryIndex !== 0 && <EuiSpacer size="s" />}
               {categoryItems.map((item) => (
-                <SolutionSideNavItem
+                <SolutionSideNavItemMemoized
                   key={item.id}
                   item={item}
                   isSelected={selectedId === item.id}
@@ -230,8 +230,14 @@ interface SolutionSideNavItemProps {
  * Renders a single item for the main side navigation panel,
  * and it adds a button to open the item secondary panel if needed.
  */
-const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
+const SolutionSideNavItemMemoized: React.FC<SolutionSideNavItemProps> = React.memo(
+  function SolutionSideNavItemUnmemoized({
+    item,
+    isSelected,
+    isActive,
+    isMobileSize,
+    onOpenPanelNav,
+  }) {
     const { euiTheme } = useEuiTheme();
     const { tracker } = useTelemetryContext();
 

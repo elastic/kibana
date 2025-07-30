@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { BookState } from '../../../server';
-import { BookEmbeddableState, BookEmbeddableState910 } from '../types';
+import type { BookEmbeddableState, BookEmbeddableState910 } from '../types';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 
 export function transformOut(

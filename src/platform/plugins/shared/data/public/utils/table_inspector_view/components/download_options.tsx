@@ -20,10 +20,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 
 interface DataDownloadOptionsState {

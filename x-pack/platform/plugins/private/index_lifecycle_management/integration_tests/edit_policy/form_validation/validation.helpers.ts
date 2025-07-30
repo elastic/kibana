@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { TestBedConfig } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TestBedConfig } from '@kbn/test-jest-helpers';
 import {
   createColdPhaseActions,
   createDeletePhaseActions,

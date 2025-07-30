@@ -11,7 +11,7 @@ import type { Server as HttpServer } from 'http';
 import type { Server as HttpsServer } from 'https';
 import type { Http2SecureServer, Http2Server } from 'http2';
 import type { Duration } from 'moment';
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
 
 /**
  * Composite type of all possible kind of Listener types.

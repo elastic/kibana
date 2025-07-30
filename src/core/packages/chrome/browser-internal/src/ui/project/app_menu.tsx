@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 

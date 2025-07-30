@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
-import { ArgumentProps } from '../../../../types/arguments';
+import type { ArgumentProps } from '../../../../types/arguments';
 
 interface DateFormatOption {
   /** A MomentJS format string */

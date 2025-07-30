@@ -10,11 +10,11 @@ import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 import { act } from 'react-dom/test-utils';
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import * as fixtures from '../../test/fixtures';
 import { API_BASE_PATH } from '../../common';
 
-import { PolicyFormTestBed } from './helpers/policy_form.helpers';
+import type { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 

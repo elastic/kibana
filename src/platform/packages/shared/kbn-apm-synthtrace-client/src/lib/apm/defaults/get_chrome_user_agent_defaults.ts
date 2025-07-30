@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmUserAgentFields } from '../apm_fields';
+import type { ApmUserAgentFields } from '../apm_fields';
 
 export function getChromeUserAgentDefaults(): ApmUserAgentFields {
   return {

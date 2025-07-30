@@ -10,8 +10,8 @@
 import moment from 'moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import path from 'path';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('synthtrace');

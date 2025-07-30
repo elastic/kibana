@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { StreamRoutingContext } from './types';
+import type { StreamRoutingContext } from './types';
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.

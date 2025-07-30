@@ -11,9 +11,9 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { LinksLayoutType } from '../../common/content_management';
+import type { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
-import { LinksRuntimeState, ResolvedLink } from '../types';
+import type { LinksRuntimeState, ResolvedLink } from '../types';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import LinksEditor from '../components/editor/links_editor';
 

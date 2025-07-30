@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowExecution, EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowExecutionDto,
+} from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 
 interface GetWorkflowExecutionParams {

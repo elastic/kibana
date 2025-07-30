@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFields } from '../../../common/ecs';
+import type { EcsFields } from '../../../common/ecs';
 
 export const ECS_TYPES: EcsFields = {
   '@timestamp': 'date',

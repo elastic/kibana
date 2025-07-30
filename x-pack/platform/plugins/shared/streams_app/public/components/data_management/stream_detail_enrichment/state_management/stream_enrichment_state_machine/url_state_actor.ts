@@ -7,12 +7,9 @@
 
 import { fromCallback } from 'xstate5';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import {
-  ENRICHMENT_URL_STATE_KEY,
-  EnrichmentDataSource,
-  enrichmentUrlSchema,
-} from '../../../../../../common/url_schema';
-import { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import { ENRICHMENT_URL_STATE_KEY, enrichmentUrlSchema } from '../../../../../../common/url_schema';
+import type { StreamEnrichmentContextType, StreamEnrichmentServiceDependencies } from './types';
 import { defaultEnrichmentUrlState, defaultRandomSamplesDataSource } from './utils';
 
 export function createUrlInitializerActor({

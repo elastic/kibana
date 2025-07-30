@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLLicenseType } from '@kbn/esql-types';
 import {
   allStarConstant,
   commaCompleteItem,
   listCompleteItem,
 } from '../../../commands_registry/complete_items';
-import {
+import type {
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ICommandContext,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
-  Location,
   ItemKind,
   ICommandCallbacks,
 } from '../../../commands_registry/types';
-import {
+import { getLocationFromCommandOrOptionName, Location } from '../../../commands_registry/types';
+import type {
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -37,12 +36,8 @@ import {
   getFieldsOrFunctionsSuggestions,
   getValidSignaturesAndTypesToSuggestNext,
 } from './helpers';
-import {
-  FunctionDefinitionTypes,
-  FunctionParameter,
-  FunctionParameterType,
-  isNumericType,
-} from '../../types';
+import type { FunctionParameter, FunctionParameterType } from '../../types';
+import { FunctionDefinitionTypes, isNumericType } from '../../types';
 import {
   isAssignment,
   isColumn,

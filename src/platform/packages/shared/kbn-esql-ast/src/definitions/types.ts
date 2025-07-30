@@ -8,7 +8,7 @@
  */
 import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
 import type { ESQLFunction, ESQLMessage, ESQLNumericLiteralType } from '../types';
-import { Location } from '../commands_registry/types';
+import type { Location } from '../commands_registry/types';
 
 /**
  * All supported field types in ES|QL. This is all the types

@@ -7,12 +7,12 @@
 
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializedState } from '../react_embeddable/types';
+import type { MapApi, MapSerializedState } from '../react_embeddable/types';
 
 export interface Props {
   passiveLayer: LayerDescriptor;

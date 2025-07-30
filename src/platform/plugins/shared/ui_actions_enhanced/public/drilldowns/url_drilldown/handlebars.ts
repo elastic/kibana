@@ -10,7 +10,8 @@
 import Handlebars, { type HelperOptions, type HelperDelegate } from '@kbn/handlebars';
 import { encode } from '@kbn/rison';
 import dateMath from '@kbn/datemath';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { url } from '@kbn/kibana-utils-plugin/public';
 

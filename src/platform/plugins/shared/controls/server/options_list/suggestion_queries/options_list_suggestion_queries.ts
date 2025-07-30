@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OptionsListRequestBody } from '../../../common/options_list/types';
+import type { OptionsListRequestBody } from '../../../common/options_list/types';
 import { getAllSuggestionsAggregationBuilder } from './options_list_all_suggestions';
 import { getExactMatchAggregationBuilder } from './options_list_exact_match';
 import { getSearchSuggestionsAggregationBuilder } from './options_list_search_suggestions';

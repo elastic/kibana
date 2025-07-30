@@ -21,8 +21,8 @@ import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
-import { RuleDefinitionProps } from '../../../../types';
-import { RuleType } from '../../../..';
+import type { RuleDefinitionProps } from '../../../../types';
+import type { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   hasAllPrivilege,

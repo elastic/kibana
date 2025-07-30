@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { screen, render } from '@testing-library/react';
 import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ActionConnector, ActionTypeModel } from '../../../../types';
+import type { ActionConnector, ActionTypeModel } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();

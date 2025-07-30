@@ -16,7 +16,7 @@ import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { PointVisibilityOption } from './point_visibility_option';
-import { XYState } from '../../types';
+import type { XYState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,

@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '../constants';
-import { AgentState } from '../types';
+import type { AgentState } from '../types';
 
 /*
  * We use a single router endpoint for common conditional edges.

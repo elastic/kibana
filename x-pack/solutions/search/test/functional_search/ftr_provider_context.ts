@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { pageObjects } from './page_objects';
-import { services } from './services';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import type { pageObjects } from './page_objects';
+import type { services } from './services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

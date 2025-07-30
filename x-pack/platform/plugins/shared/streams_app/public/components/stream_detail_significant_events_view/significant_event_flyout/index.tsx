@@ -20,7 +20,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, streamQuerySchema } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
+import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../hooks/use_kibana';

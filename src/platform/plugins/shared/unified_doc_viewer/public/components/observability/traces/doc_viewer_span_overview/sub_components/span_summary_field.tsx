@@ -13,7 +13,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import React, { useState, useEffect } from 'react';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
 import { useRootSpanContext } from '../hooks/use_root_span';
-import { FieldConfiguration } from '../../resources/get_field_configuration';
+import type { FieldConfiguration } from '../../resources/get_field_configuration';
 export interface SpanSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;

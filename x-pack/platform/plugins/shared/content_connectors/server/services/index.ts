@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
   AgentPolicyServiceInterface,
   AgentService,
   PackagePolicyClient,

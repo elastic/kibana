@@ -14,7 +14,8 @@ jest.mock('@elastic/eui', () => ({
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 

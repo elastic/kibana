@@ -6,13 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 interface NPSScoreInputProps {
   /**

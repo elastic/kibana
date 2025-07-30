@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingElastic } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChatMessageText } from './chat_message_text';

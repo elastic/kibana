@@ -26,7 +26,7 @@ import type {
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
-import { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
+import type { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;

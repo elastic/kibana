@@ -8,7 +8,8 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';

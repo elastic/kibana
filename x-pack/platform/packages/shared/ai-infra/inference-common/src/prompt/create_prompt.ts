@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { Prompt, PromptFactory, PromptVersion } from './types';
+import type { z } from '@kbn/zod';
+import type { Prompt, PromptFactory, PromptVersion } from './types';
 
 export function createPrompt<TInput>(init: {
   name: string;

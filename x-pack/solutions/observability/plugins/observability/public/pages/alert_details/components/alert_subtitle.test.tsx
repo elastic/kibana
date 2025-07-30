@@ -11,7 +11,8 @@ import { render } from '../../../utils/test_helper';
 import { alert } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { AlertSubtitle, AlertSubtitleProps } from './alert_subtitle';
+import type { AlertSubtitleProps } from './alert_subtitle';
+import { AlertSubtitle } from './alert_subtitle';
 
 jest.mock('../../../utils/kibana_react');
 

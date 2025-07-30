@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { filter, lastValueFrom, of, throwError } from 'rxjs';
-import { ChatCompleteResponse } from '@kbn/inference-common';
-import { Message, MessageRole } from '../../../../common';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
 import {
   TITLE_CONVERSATION_FUNCTION_NAME,
   getTitleSystemMessage,
   getGeneratedTitle,
 } from './get_generated_title';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 
 describe('getGeneratedTitle', () => {
   const messages: Message[] = [

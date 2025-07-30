@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 import type { Boom } from '@hapi/boom';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { ZodError } from '@kbn/zod';

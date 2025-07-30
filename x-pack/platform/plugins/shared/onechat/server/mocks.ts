@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart } from './types';
+import type { OnechatPluginSetup, OnechatPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 import { createMockedAgentClient } from './test_utils/agents';
 

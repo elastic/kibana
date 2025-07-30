@@ -8,21 +8,17 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiAccordion,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiAccordion, EuiToolTip, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
-import { IAggConfig } from '@kbn/data-plugin/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorAggParams } from './agg_params';
-import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
+import type { DefaultEditorAggCommonProps } from './agg_common_props';
+import type { AggsAction } from './agg_group_state';
+import { AGGS_ACTION_KEYS } from './agg_group_state';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { getSchemaByName } from '../schemas';

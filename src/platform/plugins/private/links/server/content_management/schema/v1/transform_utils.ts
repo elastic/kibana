@@ -8,8 +8,8 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { LinksAttributes, LinksItem } from '../../../../common/content_management';
-import { LinksCreateOptions, LinksSavedObjectAttributes } from './types';
+import type { LinksAttributes, LinksItem } from '../../../../common/content_management';
+import type { LinksCreateOptions, LinksSavedObjectAttributes } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;

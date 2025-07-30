@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ToolDefinition } from '@langchain/core/language_models/base';
-import {
+import type { ToolDefinition } from '@langchain/core/language_models/base';
+import type {
   ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
 } from '@kbn/langchain/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
+import type { AgentRunnableSequence } from 'langchain/agents';
 import {
-  AgentRunnableSequence,
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ChatPromptTemplate } from '@langchain/core/prompts';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 export const TOOL_CALLING_LLM_TYPES = new Set(['inference', 'openai', 'bedrock', 'gemini']);
 

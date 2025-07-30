@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment-timezone';
-import React, { ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
@@ -15,7 +16,7 @@ import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
-import { PolicyFromES } from '../common/types';
+import type { PolicyFromES } from '../common/types';
 import { PolicyList } from '../public/application/sections/policy_list/policy_list';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';

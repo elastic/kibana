@@ -8,7 +8,7 @@
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import { InvalidDefendInsightTypeError } from '../../../errors';
-import { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
+import type { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
 import { getDefendInsightsIncompatibleVirusGenerationSchema } from './incompatible_antivirus';
 
 export function getDefendInsightsSchema({

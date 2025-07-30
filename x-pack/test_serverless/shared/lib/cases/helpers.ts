@@ -6,8 +6,8 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export const createOneCaseBeforeDeleteAllAfter = (
   getPageObject: FtrProviderContext['getPageObject'],

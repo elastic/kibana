@@ -9,7 +9,7 @@ import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { QualityIndicators } from '../../../common/types';
+import type { QualityIndicators } from '../../../common/types';
 import { QualityIndicator } from '.';
 
 export const DatasetQualityIndicator = ({

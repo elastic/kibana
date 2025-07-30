@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NodeType } from '@kbn/wc-framework-types-common';
+import type { NodeType } from '@kbn/wc-framework-types-common';
 import type { NodeTypeToNodeConfigMap } from './node_type_configs';
 
 /**

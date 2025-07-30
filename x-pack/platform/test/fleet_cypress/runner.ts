@@ -7,7 +7,7 @@
 
 import Url from 'url';
 
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export async function FleetCypressCliTestRunner(context: FtrProviderContext) {
   await startFleetCypress(context, 'run');

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { ISearchOptions } from '@kbn/search-types';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ISearchOptions } from '@kbn/search-types';
 import type { ISearchSource } from '../../../../public';
-import { IAggConfigs } from '../agg_configs';
-import { IAggConfig } from '../agg_config';
+import type { IAggConfigs } from '../agg_configs';
+import type { IAggConfig } from '../agg_config';
 
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;

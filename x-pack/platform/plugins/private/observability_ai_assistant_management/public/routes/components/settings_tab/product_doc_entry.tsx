@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';

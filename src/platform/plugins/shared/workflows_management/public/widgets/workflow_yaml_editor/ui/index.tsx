@@ -15,7 +15,7 @@ import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { navigateToErrorPosition } from '../lib/utils';
-import { WorkflowYAMLEditorProps } from '../model/types';
+import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';

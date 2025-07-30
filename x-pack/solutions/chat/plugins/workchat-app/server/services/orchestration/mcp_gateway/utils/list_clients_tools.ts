@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
+import type { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import { buildToolName } from '@kbn/wci-common';
 import type { McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { GatewayTool } from '../types';
+import type { GatewayTool } from '../types';
 
 /**
  * Retrieve all the tools from a list of MCP clients.

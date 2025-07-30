@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationConfiguration } from '@kbn/wci-common';
 
 export interface WCIExternalServerConfiguration extends IntegrationConfiguration {
   url: string;

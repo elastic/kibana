@@ -10,7 +10,7 @@
 import { Position } from '@elastic/charts';
 import { XYCurveTypes } from '@kbn/visualizations-plugin/public';
 import type { XYConfiguration, XYLayerConfig } from '@kbn/visualizations-plugin/common';
-import { Panel } from '../../../../../common/types';
+import type { Panel } from '../../../../../common/types';
 import { getYExtents } from './extents';
 
 export const getConfigurationForTimeseries = (

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchServiceStart, Logger, SavedObjectsClient } from '@kbn/core/server';
+import type { ElasticsearchServiceStart, Logger, SavedObjectsClient } from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ReindexWorker } from '../../lib/reindexing';
-import { CredentialStore } from '../../lib/reindexing/credential_store';
+import type { CredentialStore } from '../../lib/reindexing/credential_store';
 
 interface CreateReindexWorker {
   logger: Logger;

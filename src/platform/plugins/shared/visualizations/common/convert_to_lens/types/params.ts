@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { RANGE_MODES } from '../constants';
-import { Column } from './columns';
-import { Filter, NumberValueFormat } from './common';
+import type { $Values } from '@kbn/utility-types';
+import type { RANGE_MODES } from '../constants';
+import type { Column } from './columns';
+import type { Filter, NumberValueFormat } from './common';
 
 export type RangeMode = $Values<typeof RANGE_MODES>;
 

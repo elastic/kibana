@@ -9,7 +9,7 @@
 
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
-import * as ast from '../types';
+import type * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition, nonNullable } from './helpers';

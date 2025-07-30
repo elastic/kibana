@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { FieldDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
+import type { FieldDefinition, ProcessorDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { AssignArgs } from 'xstate5';
-import { StreamEnrichmentContextType } from './types';
+import type { AssignArgs } from 'xstate5';
+import type { StreamEnrichmentContextType } from './types';
+import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
-  SampleDocumentWithUIAttributes,
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import {
+import type {
   EnrichmentUrlState,
   KqlSamplesDataSource,
   RandomSamplesDataSource,

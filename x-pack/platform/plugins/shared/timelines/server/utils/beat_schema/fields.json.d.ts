@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { BeatFields } from '../../../common/search_strategy/index_fields';
+import type { BeatFields } from '../../../common/search_strategy/index_fields';
 
 export const fieldsBeat: BeatFields;

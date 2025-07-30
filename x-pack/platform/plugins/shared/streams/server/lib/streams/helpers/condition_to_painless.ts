@@ -6,11 +6,13 @@
  */
 
 import { isBoolean, isString, uniq } from 'lodash';
-import {
+import type {
   BinaryFilterCondition,
   Condition,
   FilterCondition,
   UnaryFilterCondition,
+} from '@kbn/streams-schema';
+import {
   isAlwaysCondition,
   isAndCondition,
   isFilterCondition,

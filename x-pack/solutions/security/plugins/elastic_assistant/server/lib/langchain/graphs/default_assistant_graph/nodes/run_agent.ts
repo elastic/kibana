@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { RunnableConfig } from '@langchain/core/runnables';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { BaseMessage } from '@langchain/core/messages';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { ContentReferencesStore, DocumentEntry } from '@kbn/elastic-assistant-common';
 import {
-  ContentReferencesStore,
   contentReferenceString,
-  DocumentEntry,
   knowledgeBaseReference,
   removeContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;

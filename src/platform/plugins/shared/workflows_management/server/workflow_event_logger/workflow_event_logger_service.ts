@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createIndexWithMappings } from '../workflows_management/lib/create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
-import {
-  WorkflowEventLogger,
-  IWorkflowEventLogger,
-  WorkflowEventLoggerContext,
-} from './workflow_event_logger';
+import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
+import { WorkflowEventLogger } from './workflow_event_logger';
 
 export interface WorkflowEventLoggerServiceOptions {
   esClient: ElasticsearchClient;

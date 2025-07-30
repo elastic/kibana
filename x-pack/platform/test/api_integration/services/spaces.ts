@@ -12,7 +12,7 @@ import { format as formatUrl } from 'url';
 import util from 'util';
 import Chance from 'chance';
 import Url from 'url';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();
 

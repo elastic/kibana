@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { MAX_ALERTS_PER_EXECUTION } from '../common';
 
 export const buildEsqlSearchRequest = ({

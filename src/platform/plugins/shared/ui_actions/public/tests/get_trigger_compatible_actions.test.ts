@@ -9,7 +9,7 @@
 
 import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from './test_samples';
-import { ActionDefinition } from '../actions';
+import type { ActionDefinition } from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
 

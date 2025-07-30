@@ -10,9 +10,9 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { data as telemetryMockData } from './data';
 import { createPackagePolicy } from './helper';
 import { waitForPluginInitialized, EsIndexDataProvider } from './utils';
-import { SupertestWithRoleScopeType } from '../../../services';
+import type { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../shared/services';
+import type { RoleCredentials } from '../../../../shared/services';
 
 const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 

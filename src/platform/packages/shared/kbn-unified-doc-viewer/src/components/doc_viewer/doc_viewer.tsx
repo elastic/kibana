@@ -8,7 +8,8 @@
  */
 
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';

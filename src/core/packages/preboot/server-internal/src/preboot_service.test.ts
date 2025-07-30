@@ -8,7 +8,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { LoggerFactory } from '@kbn/logging';
+import type { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

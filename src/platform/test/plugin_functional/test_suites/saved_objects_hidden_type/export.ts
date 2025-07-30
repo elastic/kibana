@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 function ndjsonToObject(input: string): string[] {
   return input.split('\n').map((str) => JSON.parse(str));

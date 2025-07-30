@@ -7,15 +7,16 @@
 
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { InferenceChatModel } from '@kbn/inference-langchain';
-import { ContentRef } from '@kbn/wci-common';
-import { ToolContentResult } from '@kbn/wci-server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ContentRef } from '@kbn/wci-common';
+import type { ToolContentResult } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { ToolsProvider } from '../../mcp_gateway';
-import { processSearchResults, parseRatings, Rating, processRatings } from './utils/tool_messages';
+import type { ToolsProvider } from '../../mcp_gateway';
+import type { Rating } from './utils/tool_messages';
+import { processSearchResults, parseRatings, processRatings } from './utils/tool_messages';
 import {
   getPlanningPrompt,
   getRetrievalPrompt,

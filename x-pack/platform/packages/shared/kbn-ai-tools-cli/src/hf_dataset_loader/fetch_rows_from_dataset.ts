@@ -6,14 +6,14 @@
  */
 
 import { fileDownloadInfo } from '@huggingface/hub';
-import { Logger } from '@kbn/core/server';
-import streamWeb from 'stream/web';
+import type { Logger } from '@kbn/core/server';
+import type streamWeb from 'stream/web';
 import { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import * as readline from 'node:readline';
 import { pickBy } from 'lodash';
 import { format } from 'util';
-import { HuggingFaceDatasetSpec } from './types';
+import type { HuggingFaceDatasetSpec } from './types';
 
 function toMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + 'mb';

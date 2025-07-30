@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PartialFieldsMetadataClient } from '@kbn/esql-validation-autocomplete/src/shared/types';
+import type { PartialFieldsMetadataClient } from '@kbn/esql-validation-autocomplete/src/shared/types';
 import { monaco } from '../../monaco_imports';
 import { ESQLLang } from './language';
 

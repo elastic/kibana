@@ -9,15 +9,15 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import { Query } from '@kbn/es-query';
-import { TextBasedLayerColumn } from '../../esql_layer/types';
+import type { Query } from '@kbn/es-query';
+import type { TextBasedLayerColumn } from '../../esql_layer/types';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
   type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '.';
-import {
+import type {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,

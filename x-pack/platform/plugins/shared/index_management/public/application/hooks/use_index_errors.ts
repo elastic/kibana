@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Index } from '@kbn/index-management-shared-types';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { Index } from '@kbn/index-management-shared-types';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import { useState, useEffect } from 'react';
 import { normalize } from '../components/mappings_editor/lib';
 import { isLocalModel } from '../components/mappings_editor/lib/utils';
-import { NormalizedField } from '../components/mappings_editor/types';
+import type { NormalizedField } from '../components/mappings_editor/types';
 import { useLoadIndexMappings, useLoadInferenceEndpoints } from '../services';
 import { parseMappings } from '../shared/parse_mappings';
 

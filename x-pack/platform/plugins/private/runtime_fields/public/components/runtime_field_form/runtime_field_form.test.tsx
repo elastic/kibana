@@ -8,9 +8,11 @@
 import { act } from 'react-dom/test-utils';
 
 import '../../__jest__/setup_environment';
-import { registerTestBed, TestBed } from '../../test_utils';
-import { RuntimeField } from '../../types';
-import { RuntimeFieldForm, Props, FormState } from './runtime_field_form';
+import type { TestBed } from '../../test_utils';
+import { registerTestBed } from '../../test_utils';
+import type { RuntimeField } from '../../types';
+import type { Props, FormState } from './runtime_field_form';
+import { RuntimeFieldForm } from './runtime_field_form';
 
 const setup = (props?: Props) =>
   registerTestBed(RuntimeFieldForm, {

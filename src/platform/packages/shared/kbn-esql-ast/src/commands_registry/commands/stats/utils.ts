@@ -21,7 +21,7 @@ import {
   findPreviousWord,
   getLastNonWhitespaceChar,
 } from '../../../definitions/utils/autocomplete/helpers';
-import { ISuggestionItem } from '../../types';
+import type { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';

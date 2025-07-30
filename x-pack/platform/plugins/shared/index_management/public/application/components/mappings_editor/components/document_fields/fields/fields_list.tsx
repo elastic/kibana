@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { FieldsListItemContainer } from './fields_list_item_container';
-import { NormalizedField, State } from '../../../types';
+import type { NormalizedField, State } from '../../../types';
 
 interface Props {
   fields?: NormalizedField[];

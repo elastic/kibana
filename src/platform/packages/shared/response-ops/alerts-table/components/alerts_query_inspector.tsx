@@ -10,7 +10,7 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useState, memo, useCallback } from 'react';
 
-import { EsQuerySnapshot } from '@kbn/alerting-types';
+import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import { HoverVisibilityContainer } from './hover_visibility_container';
 
 import { AlertsQueryInspectorModal } from './alerts_query_inspector_modal';

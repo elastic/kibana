@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useAssistantContext } from '../..';
 
-import { PromptContext } from '../assistant/prompt_context/types';
+import type { PromptContext } from '../assistant/prompt_context/types';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
 
 import * as i18n from './translations';

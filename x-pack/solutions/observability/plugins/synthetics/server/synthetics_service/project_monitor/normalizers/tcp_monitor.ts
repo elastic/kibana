@@ -6,16 +6,14 @@
  */
 import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import type { TCPFields, TLSVersion } from '../../../../common/runtime_types/monitor_management';
 import {
   ConfigKey,
   MonitorTypeEnum,
   FormMonitorType,
-  TCPFields,
-  TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
+import type { NormalizedProjectProps, NormalizerResult } from './common_fields';
 import {
-  NormalizedProjectProps,
-  NormalizerResult,
   normalizeYamlConfig,
   getNormalizeCommonFields,
   getOptionalArrayField,

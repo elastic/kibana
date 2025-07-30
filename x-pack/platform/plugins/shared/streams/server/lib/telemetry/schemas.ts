@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RootSchema } from '@elastic/ebt/client';
-import { StreamEndpointLatencyProps } from './types';
+import type { RootSchema } from '@elastic/ebt/client';
+import type { StreamEndpointLatencyProps } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
   name: {

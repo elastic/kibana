@@ -24,7 +24,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import type { IndexSourceDefinition } from '@kbn/wci-common';
-import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
+import type { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
 import { useGenerateSchema } from '../hooks/use_generate_schema';
 import { useIndexNameAutocomplete } from '../hooks/use_index_name_autocomplete';

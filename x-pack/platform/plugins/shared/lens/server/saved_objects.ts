@@ -6,12 +6,12 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
-import { CustomVisualizationMigrations } from './migrations/types';
+import type { CustomVisualizationMigrations } from './migrations/types';
 
 export function setupSavedObjects(
   core: CoreSetup,

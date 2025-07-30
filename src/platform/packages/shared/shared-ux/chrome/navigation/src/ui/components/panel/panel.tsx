@@ -11,7 +11,8 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } fr
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Theme, css } from '@emotion/react';
+import type { Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';

@@ -7,8 +7,10 @@
 import { z } from '@kbn/zod';
 import { BaseStream } from '../base';
 import { IngestBase } from './base';
-import { ModelValidation, joinValidation } from '../validation/model_validation';
-import { Validation, validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { joinValidation } from '../validation/model_validation';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicStream } from './classic';
 import { WiredIngest, WiredStream } from './wired';
 

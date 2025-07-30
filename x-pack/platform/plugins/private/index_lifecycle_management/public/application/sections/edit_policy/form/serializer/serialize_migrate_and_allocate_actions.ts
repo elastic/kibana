@@ -7,9 +7,9 @@
 
 import { isEmpty } from 'lodash';
 
-import { SerializedActionWithAllocation } from '../../../../../../common/types';
+import type { SerializedActionWithAllocation } from '../../../../../../common/types';
 
-import { DataAllocationMetaFields } from '../../types';
+import type { DataAllocationMetaFields } from '../../types';
 
 export const serializeMigrateAndAllocateActions = (
   /**

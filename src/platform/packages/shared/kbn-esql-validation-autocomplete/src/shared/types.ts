@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  Location,
+import type {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,

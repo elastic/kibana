@@ -8,21 +8,22 @@
  */
 
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import {
+import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import { getStacktraceFields, LogDocument } from '@kbn/discover-utils/src';
+import type { LogDocument } from '@kbn/discover-utils/src';
+import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
 import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_section';
-import { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
+import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];

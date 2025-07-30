@@ -14,7 +14,8 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
 import { graphlib } from '@dagrejs/dagre';

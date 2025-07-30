@@ -14,8 +14,8 @@ import {
   toKqlExpression,
 } from './ast';
 import { nodeTypes } from '../node_types';
-import { DataViewBase } from '../../..';
-import { KueryNode } from '../types';
+import type { DataViewBase } from '../../..';
+import type { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 import { performance } from 'perf_hooks';
 

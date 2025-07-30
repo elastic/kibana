@@ -14,8 +14,8 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
-import { SyntheticsServerSetup } from '../../types';
-import {
+import type { SyntheticsServerSetup } from '../../types';
+import type {
   AlertStatusMetaData,
   AlertPendingStatusMetaData,
 } from '../../../common/runtime_types/alert_rules/common';

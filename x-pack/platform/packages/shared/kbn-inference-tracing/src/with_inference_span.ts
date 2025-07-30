@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Context, Span, SpanStatusCode, context } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
+import { SpanStatusCode, context } from '@opentelemetry/api';
 import { Observable, from, ignoreElements, isObservable, of, switchMap, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { once } from 'lodash';
 import { createActiveInferenceSpan } from './create_inference_active_span';
-import { GenAISemConvAttributes } from './types';
+import type { GenAISemConvAttributes } from './types';
 
 export type InferenceSpanAttributes = GenAISemConvAttributes;
 

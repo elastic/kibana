@@ -8,8 +8,8 @@
  */
 
 import { apm } from '../apm';
-import { ApmFields } from '../apm/apm_fields';
-import { BaseSpan } from '../apm/base_span';
+import type { ApmFields } from '../apm/apm_fields';
+import type { BaseSpan } from '../apm/base_span';
 import { DistributedTrace } from './distributed_trace_client';
 
 const opbeansRum = apm

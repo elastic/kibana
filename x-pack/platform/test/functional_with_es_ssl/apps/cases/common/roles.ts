@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
+import type { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
 
 /**
  * Roles for Cases in the stack

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { Streams } from '../models/streams';
-import {
-  WiredIngestStreamEffectiveLifecycle,
-  isInheritLifecycle,
-} from '../models/ingest/lifecycle';
+import type { Streams } from '../models/streams';
+import type { WiredIngestStreamEffectiveLifecycle } from '../models/ingest/lifecycle';
+import { isInheritLifecycle } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
 export function findInheritedLifecycle(

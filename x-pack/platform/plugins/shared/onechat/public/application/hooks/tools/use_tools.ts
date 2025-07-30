@@ -6,7 +6,8 @@
  */
 
 import { ToolType } from '@kbn/onechat-common';
-import { EsqlToolDefinitionWithSchema, isEsqlTool } from '@kbn/onechat-common/tools/esql';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
+import { isEsqlTool } from '@kbn/onechat-common/tools/esql';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { queryKeys } from '../../query_keys';

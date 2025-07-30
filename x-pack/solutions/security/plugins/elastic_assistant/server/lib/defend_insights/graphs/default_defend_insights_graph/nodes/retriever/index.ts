@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
 import { AnonymizedEventsRetriever } from './anonymized_events_retriever';

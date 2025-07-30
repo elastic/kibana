@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequiredPaletteParamTypes } from '@kbn/coloring';
+import type { RequiredPaletteParamTypes } from '@kbn/coloring';
 
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 

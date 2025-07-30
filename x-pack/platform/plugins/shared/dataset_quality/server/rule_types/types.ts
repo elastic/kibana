@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
-import { StackAlert } from '@kbn/alerts-as-data-utils';
+import type { RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { StackAlert } from '@kbn/alerts-as-data-utils';
 import { i18n } from '@kbn/i18n';
 import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 

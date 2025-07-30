@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BaseMessage, isToolMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
 import type { ContentRef } from '@kbn/wci-common';
 
 /**

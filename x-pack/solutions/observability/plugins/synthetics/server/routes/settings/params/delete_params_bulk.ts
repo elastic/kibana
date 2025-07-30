@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],

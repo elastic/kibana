@@ -23,8 +23,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -37,7 +37,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -60,12 +60,8 @@ import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { registerSource } from './classes/sources/source_registry';
 import { registerLayerWizardExternal } from './classes/layers/wizards/layer_wizard_registry';
-import {
-  createLayerDescriptors,
-  MapsSetupApi,
-  MapsStartApi,
-  suggestEMSTermJoinConfig,
-} from './api';
+import type { MapsSetupApi, MapsStartApi } from './api';
+import { createLayerDescriptors, suggestEMSTermJoinConfig } from './api';
 import type { MapsXPackConfig, MapsConfigType } from '../server/config';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
 import { mapsVisTypeAlias } from './maps_vis_type_alias';

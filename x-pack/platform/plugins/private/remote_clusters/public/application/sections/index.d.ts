@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
 export declare const RemoteClusterEdit: ComponentType;
 export declare const RemoteClusterAdd: ComponentType;

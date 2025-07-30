@@ -15,10 +15,10 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Reference } from '@kbn/content-management-utils';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import { setKibanaServices } from './services/kibana_services';
-import { LinksParentApi, LinksSerializedState } from './types';
+import type { LinksParentApi, LinksSerializedState } from './types';
 
 export const setStubKibanaServices = () => {
   const mockCore = coreMock.createStart();

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
-import { ScoutSpaceParallelFixture } from '../../scout_space';
+import type { KbnClient, ScoutLogger } from '../../../../../../common';
+import { measurePerformanceAsync } from '../../../../../../common';
+import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;

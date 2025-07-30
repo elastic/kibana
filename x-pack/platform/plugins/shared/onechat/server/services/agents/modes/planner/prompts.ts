@@ -7,13 +7,8 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
-import {
-  isPlanningResult,
-  isStepExecutionResult,
-  BacklogItem,
-  PlanningResult,
-  StepExecutionResult,
-} from './backlog';
+import type { BacklogItem, PlanningResult, StepExecutionResult } from './backlog';
+import { isPlanningResult, isStepExecutionResult } from './backlog';
 
 export const getPlanningPrompt = ({
   customInstructions,

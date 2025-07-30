@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   GetDataStreamSettingsParams,
   DataStreamSettings,
   GetDataStreamDetailsParams,
@@ -18,13 +18,13 @@ import {
   GetDataStreamFailedDocsDetailsParams,
   GetDataStreamFailedDocsErrorsParams,
 } from '../../../common/data_streams_stats';
-import {
+import type {
   AnalyzeDegradedFieldsParams,
   IntegrationType,
   CheckAndLoadIntegrationParams,
   UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
-import {
+import type {
   Dashboard,
   DataStreamRolloverResponse,
   DegradedFieldAnalysis,

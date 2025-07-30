@@ -9,7 +9,7 @@
 
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
-import { ReferenceLineLayerFn } from '../types';
+import type { ReferenceLineLayerFn } from '../types';
 
 export const referenceLineLayerFn: ReferenceLineLayerFn['fn'] = async (input, args, handlers) => {
   const table = args.table ?? input;

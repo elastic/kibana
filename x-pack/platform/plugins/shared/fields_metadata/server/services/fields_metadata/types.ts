@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
-import {
+import type { KibanaRequest } from '@kbn/core/server';
+import type { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
+import type {
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
   IntegrationListExtractor,

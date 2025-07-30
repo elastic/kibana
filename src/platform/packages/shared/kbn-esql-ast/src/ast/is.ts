@@ -8,7 +8,7 @@
  */
 
 import type * as types from '../types';
-import { ESQLInlineCast, ESQLProperNode, ESQLTimeInterval } from '../types';
+import type { ESQLInlineCast, ESQLProperNode, ESQLTimeInterval } from '../types';
 import { Walker } from '../walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>

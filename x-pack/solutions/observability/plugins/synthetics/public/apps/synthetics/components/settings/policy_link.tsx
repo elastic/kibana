@@ -12,7 +12,7 @@ import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../contexts';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const PolicyLink = ({ name }: { name: string }) => {
   const { share, application } = useKibana<ClientPluginsStart>().services;

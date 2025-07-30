@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import { DocLinksStart } from '@kbn/core/public';
-import { configDrivenProcessors } from '.';
-import { WithUIAttributes } from '../../types';
+import type { ProcessorDefinition } from '@kbn/streams-schema';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { configDrivenProcessors } from '.';
+import type { WithUIAttributes } from '../../types';
 
 export interface ConfigDrivenProcessorConfiguration<
   FormStateT,

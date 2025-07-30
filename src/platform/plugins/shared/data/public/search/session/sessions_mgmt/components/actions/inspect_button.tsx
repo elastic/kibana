@@ -10,14 +10,14 @@
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
-import { UISession } from '../../types';
-import { IClickActionDescriptor } from '..';
+import type { UISession } from '../../types';
+import type { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
+import type { SearchSessionsMgmtAPI } from '../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;

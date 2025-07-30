@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Parser } from '../../parser';
-import { SupportedDataType, FunctionDefinitionTypes } from '../types';
+import type { SupportedDataType } from '../types';
+import { FunctionDefinitionTypes } from '../types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';

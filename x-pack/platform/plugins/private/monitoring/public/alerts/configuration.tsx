@@ -13,15 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { Fragment, useCallback, useMemo } from 'react';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { Legacy } from '../legacy_shims';
-import { CommonAlert } from '../../common/types/alerts';
+import type { CommonAlert } from '../../common/types/alerts';
 
 interface Props {
   alert: CommonAlert;

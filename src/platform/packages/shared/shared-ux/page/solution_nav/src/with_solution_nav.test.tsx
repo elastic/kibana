@@ -10,7 +10,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { SolutionNavProps } from './solution_nav';
+import type { SolutionNavProps } from './solution_nav';
 import { withSolutionNav } from './with_solution_nav';
 
 const TestComponent = () => {

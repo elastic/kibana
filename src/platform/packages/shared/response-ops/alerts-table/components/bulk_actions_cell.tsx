@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCheckbox, EuiLoadingSpinner, RenderCellValue } from '@elastic/eui';
-import React, { ChangeEvent, memo, useCallback } from 'react';
+import type { RenderCellValue } from '@elastic/eui';
+import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { memo, useCallback } from 'react';
 import { SELECT_ROW_ARIA_LABEL } from '../translations';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../types';

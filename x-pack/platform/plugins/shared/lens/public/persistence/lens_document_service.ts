@@ -12,7 +12,7 @@ import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
 import { getLensClient } from './lens_client';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
-import { LensDocument } from './types';
+import type { LensDocument } from './types';
 
 export interface CheckDuplicateTitleOptions {
   id?: string;

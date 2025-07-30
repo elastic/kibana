@@ -7,7 +7,7 @@
 
 import type { AnonymizationRegexWorkerTaskPayload } from '@kbn/inference-common';
 import type { AnonymizationState } from '../chat_complete/anonymization/types';
-import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 export const createRegexWorkerServiceMock = () => {
   const mock = {

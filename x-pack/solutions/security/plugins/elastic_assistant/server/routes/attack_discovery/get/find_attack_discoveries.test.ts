@@ -14,7 +14,7 @@ import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privile
 import { getMockAttackDiscoveryFindResponse } from '../../../__mocks__/attack_discovery_find_response';
 import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
 import { requestContextMock } from '../../../__mocks__/request_context';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 
 const mockAttackDiscoveryFindResponse = getMockAttackDiscoveryFindResponse();
 

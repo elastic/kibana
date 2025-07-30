@@ -11,7 +11,7 @@ import { StateChange } from './components/state_change';
 
 import './panel.css';
 
-import { RecordedAction } from './types';
+import type { RecordedAction } from './types';
 import { ActionList, ActionTree } from './components';
 
 export const Panel = () => {

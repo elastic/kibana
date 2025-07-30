@@ -6,8 +6,8 @@
  */
 
 import { format } from 'url';
-import supertest from 'supertest';
-import request from 'superagent';
+import type supertest from 'supertest';
+import type request from 'superagent';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,

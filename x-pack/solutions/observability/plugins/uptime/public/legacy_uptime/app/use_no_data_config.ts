@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { UptimeSettingsContext } from '../contexts';
-import { ClientPluginsStart } from '../../plugin';
+import type { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
 
 export function useNoDataConfig(): NoDataConfig | undefined {

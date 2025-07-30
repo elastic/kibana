@@ -11,7 +11,7 @@
 
 import { isStringLiteral } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
@@ -44,7 +44,7 @@ import {
   ESQLMap,
   ESQLMapEntry,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**

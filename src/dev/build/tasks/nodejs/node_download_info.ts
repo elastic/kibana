@@ -9,7 +9,7 @@
 
 import { basename } from 'path';
 
-import { Config, Platform } from '../../lib';
+import type { Config, Platform } from '../../lib';
 
 export function getNodeDownloadInfo(config: Config, platform: Platform) {
   const version = config.getNodeVersion();

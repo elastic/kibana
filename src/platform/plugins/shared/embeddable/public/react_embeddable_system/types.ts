@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import {
+import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
+import type {
   CanLockHoverActions,
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
   SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import React from 'react';
+import type React from 'react';
 
 /**
  * The default embeddable API that all Embeddables must implement.

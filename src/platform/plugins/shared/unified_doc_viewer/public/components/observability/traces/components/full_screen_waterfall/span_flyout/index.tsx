@@ -15,11 +15,11 @@ import {
   EuiFlyoutBody,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { flattenObject } from '@kbn/object-utils';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useSpan } from '../hooks/use_span';
 import { SpanFlyoutBody } from './span_flyout_body';
 import { isSpanHit } from '../helpers/is_span';

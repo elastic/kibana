@@ -33,10 +33,8 @@ import { IndexViewLogic } from './index_view_logic';
 
 import './index_mappings.scss';
 import { docLinks } from '../shared/doc_links';
-import {
-  AccessControlIndexSelector,
-  AccessControlSelectorOption,
-} from './access_control_index_selector/access_control_index_selector';
+import type { AccessControlSelectorOption } from './access_control_index_selector/access_control_index_selector';
+import { AccessControlIndexSelector } from './access_control_index_selector/access_control_index_selector';
 import { mappingsWithPropsApiLogic } from '../../api/mappings/mappings_logic';
 import { stripSearchPrefix } from '../../utils/strip_search_prefix';
 import { useAppContext } from '../../app_context';

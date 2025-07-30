@@ -10,7 +10,7 @@
 // @storybook/addon-storyshots has been removed in Storybook 8 https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#storyshots-has-been-removed
 
 import fs from 'fs';
-import { ReactChildren } from 'react';
+import type { ReactChildren } from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';

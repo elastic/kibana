@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from '@kbn/security-ai-prompts';
+import type { Prompt } from '@kbn/security-ai-prompts';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,

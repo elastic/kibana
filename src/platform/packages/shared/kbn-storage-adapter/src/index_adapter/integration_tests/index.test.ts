@@ -12,20 +12,19 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import {
+import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
   StorageDocumentOf,
-  StorageIndexAdapter,
-  type StorageSettings,
 } from '../../..';
+import { StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
-import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
+import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
 
 const TEST_INDEX_NAME = 'test_index';
 

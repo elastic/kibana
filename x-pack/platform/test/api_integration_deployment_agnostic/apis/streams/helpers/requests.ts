@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { Client } from '@elastic/elasticsearch';
-import { JsonObject } from '@kbn/utility-types';
+import type { Readable } from 'stream';
+import type { Client } from '@elastic/elasticsearch';
+import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { Streams } from '@kbn/streams-schema';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
-import { StreamsSupertestRepositoryClient } from './repository_client';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { Streams } from '@kbn/streams-schema';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
+import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);

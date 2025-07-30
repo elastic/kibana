@@ -9,7 +9,8 @@
 
 import { BehaviorSubject, type Observable, take } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';

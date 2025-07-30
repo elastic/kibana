@@ -19,11 +19,11 @@ import {
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
 } from '../../../../common/constants';
-import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
-import { DataRequest } from '../../util/data_request';
+import type { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
+import type { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
-import { DataRequestContext } from '../../../actions';
-import { EMSTMSSource } from '../../sources/ems_tms_source';
+import type { DataRequestContext } from '../../../actions';
+import type { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
 import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 

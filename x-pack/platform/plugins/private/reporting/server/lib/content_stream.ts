@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Duplex, Writable } from 'stream';
+import type { Writable } from 'stream';
+import { Duplex } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';

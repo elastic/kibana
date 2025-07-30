@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReindexOperation } from '../../../common/types';
+import type { ReindexOperation } from '../../../common/types';
 
 // These types represent contracts from the reindex RESTful API endpoints and
 // should be changed in a way that respects backwards compatibility.

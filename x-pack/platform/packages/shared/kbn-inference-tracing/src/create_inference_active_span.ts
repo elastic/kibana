@@ -6,9 +6,10 @@
  */
 
 import { core } from '@elastic/opentelemetry-node/sdk';
-import { Span, context, propagation, trace } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
+import { context, propagation, trace } from '@opentelemetry/api';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
-import { InferenceSpanAttributes } from './with_inference_span';
+import type { InferenceSpanAttributes } from './with_inference_span';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 export function createActiveInferenceSpan<T>(

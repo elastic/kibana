@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AuditLogger,
   ElasticsearchClient,
   KibanaRequest,
@@ -14,22 +14,19 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../../test_helpers';
+import type { CreatedAtSearchResponse } from './scheduled_query';
 import {
   transformResponse,
   scheduledQueryFactory,
-  CreatedAtSearchResponse,
   transformSingleResponse,
 } from './scheduled_query';
-import { ReportingCore } from '../../..';
-import { ScheduledReportType } from '../../../types';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ReportingCore } from '../../..';
+import type { ScheduledReportType } from '../../../types';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { omit } from 'lodash';
 
 const fakeRawRequest = {

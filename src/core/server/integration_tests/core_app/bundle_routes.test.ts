@@ -15,7 +15,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpService } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
 
 const buildHash = 'buildHash';

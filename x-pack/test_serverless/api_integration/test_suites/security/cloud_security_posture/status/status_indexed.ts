@@ -14,8 +14,8 @@ import {
 import { createPackagePolicy } from '../helper';
 import { EsIndexDataProvider } from '../utils';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../shared/services';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../../../shared/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

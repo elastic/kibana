@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,9 +18,9 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 import * as i18n from './translations';
-import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import type { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
   conversations: Record<string, Conversation>;

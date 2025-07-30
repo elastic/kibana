@@ -8,9 +8,10 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import { GraphSavePolicy } from '../types/config';
+import type { GraphSavePolicy } from '../types/config';
 
 export interface OnSaveGraphProps extends OnSaveProps {
   newDescription: string;

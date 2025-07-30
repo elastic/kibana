@@ -6,9 +6,10 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
-import { HttpFetchQuery } from '@kbn/core-http-browser';
-import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
+import type { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import type { HttpFetchQuery } from '@kbn/core-http-browser';
+import type { ChatCompleteResponse } from './post_chat_complete';
+import { postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
 
 interface SendMessageProps {

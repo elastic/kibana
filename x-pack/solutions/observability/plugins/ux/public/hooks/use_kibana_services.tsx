@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginStartDeps } from '../plugin';
 
 interface UxKibanaServices extends ApmPluginStartDeps {
   http: HttpStart;

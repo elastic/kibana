@@ -30,12 +30,8 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import {
-  ScoutEventsReport,
-  ScoutFileInfo,
-  ScoutReportEventAction,
-  type ScoutTestRunInfo,
-} from '../../report';
+import type { ScoutFileInfo } from '../../report';
+import { ScoutEventsReport, ScoutReportEventAction, type ScoutTestRunInfo } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import { generateTestRunId, getTestIDForTitle } from '../../../helpers';

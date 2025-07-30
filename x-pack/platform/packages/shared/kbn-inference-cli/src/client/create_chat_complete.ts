@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ChatCompleteRequestBody } from '@kbn/inference-plugin/common';
-import {
+import type { ChatCompleteRequestBody } from '@kbn/inference-plugin/common';
+import type {
   BoundChatCompleteAPI,
   ChatCompleteResponse,
   ChatCompletionEvent,
@@ -14,7 +14,7 @@ import {
 } from '@kbn/inference-common';
 import { defer, from } from 'rxjs';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { InferenceCliClientOptions } from './types';
+import type { InferenceCliClientOptions } from './types';
 import { combineSignal } from './combine_signal';
 
 export function createChatComplete(options: InferenceCliClientOptions): BoundChatCompleteAPI;

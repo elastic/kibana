@@ -8,29 +8,32 @@
  */
 
 import Path from 'path';
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs';
 import { getFlattenedObject } from '@kbn/std';
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import {
+import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
-import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { PluginWrapper } from './plugin';
+import type { PluginDiscoveryError } from './discovery';
+import { discover, PluginDiscoveryErrorType } from './discovery';
+import type { PluginWrapper } from './plugin';
 
 import type { PluginDependencies } from './types';
-import { PluginsConfig, PluginsConfigType } from './plugins_config';
+import type { PluginsConfigType } from './plugins_config';
+import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 

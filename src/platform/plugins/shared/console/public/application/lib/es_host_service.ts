@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Api } from './api';
+import type { Api } from './api';
 
 /**
  * Very simple state for holding the current ES host.

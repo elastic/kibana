@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TestFailure } from './get_failures';
-import { GithubApi } from './github_api';
+import type { TestFailure } from './get_failures';
+import type { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
-import { ExistingFailedTestIssue } from './existing_failed_test_issues';
+import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 
 export async function createFailureIssue(
   buildUrl: string,
