@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfigParams = baseConfig.getAll();
 
   return {
-    ...baseConfig.getAll(),
+    ...baseConfigParams,
     security: {
       ...baseConfigParams.security,
       roles: {
