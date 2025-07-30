@@ -731,6 +731,7 @@ export class TaskManagerRunner implements TaskRunner {
           shouldUpdateTask = true;
 
           partialTask = {
+            ...partialTask,
             // excluding updated task state from the update
             // because the execution ended in failure due to timeout, we do not update the state
             status: TaskStatus.Idle,
@@ -739,20 +740,17 @@ export class TaskManagerRunner implements TaskRunner {
             startedAt: null,
             retryAt: null,
             ownerId: null,
-            id: this.instance.task.id,
-            version: this.instance.task.version,
           };
         }
       } else {
         shouldUpdateTask = true;
         partialTask = {
+          ...partialTask,
           ...fieldUpdates,
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,
           ownerId: null,
-          id: this.instance.task.id,
-          version: this.instance.task.version,
         };
       }
 
