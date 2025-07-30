@@ -24,5 +24,3 @@ export declare interface MlJobService {
 }
 
 export const mlJobServiceFactory: (mlApi: MlApi) => MlJobService;
-
-export const useMlJobService: () => MlJobService;
