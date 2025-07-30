@@ -20,6 +20,7 @@ export const useSyncTimerangeUrlParam = () => {
 
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+  const { linkTo: valueReportLinkTo, timerange: valueReportTimerange } = inputState.valueReport;
 
   const socTrendsUrlParams = useMemo(() => {
     if (isSocTrendsEnabled && inputState.socTrends) {
@@ -44,6 +45,10 @@ export const useSyncTimerangeUrlParam = () => {
         [URL_PARAM_KEY.timerange]: timelineTimerange,
         linkTo: timelineLinkTo,
       },
+      valueReport: {
+        [URL_PARAM_KEY.timerange]: valueReportTimerange,
+        linkTo: valueReportLinkTo,
+      },
       ...socTrendsUrlParams,
     });
   }, [
@@ -53,5 +58,7 @@ export const useSyncTimerangeUrlParam = () => {
     timelineLinkTo,
     timelineTimerange,
     socTrendsUrlParams,
+    valueReportTimerange,
+    valueReportLinkTo,
   ]);
 };
