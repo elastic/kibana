@@ -145,7 +145,18 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on space after aggregate field', async () => {
-        await statsExpectSuggestions('from a | stats a=min(b) ', ['WHERE ', 'BY ', ', ', '| ']);
+        await statsExpectSuggestions('from a | stats a=min(integerField) ', [
+          'WHERE ',
+          'BY ',
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            'any',
+            { operators: true, skipAssign: true },
+            ['integer']
+          ),
+        ]);
       });
 
       test('on function left paren', async () => {
@@ -363,8 +374,19 @@ describe('STATS Autocomplete', () => {
 
       test('when typing right paren', async () => {
         await statsExpectSuggestions(
-          'from a | stats a = min(b) | sort b',
-          ['WHERE ', 'BY ', ', ', '| '],
+          'from a | stats a = min(integerField) | sort b',
+          [
+            'WHERE ',
+            'BY ',
+            ', ',
+            '| ',
+            ...getFunctionSignaturesByReturnType(
+              Location.STATS,
+              'any',
+              { operators: true, skipAssign: true },
+              ['integer']
+            ),
+          ],
           mockCallbacks,
           mockContext,
           25

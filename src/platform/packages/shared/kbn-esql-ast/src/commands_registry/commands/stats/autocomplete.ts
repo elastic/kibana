@@ -211,7 +211,7 @@ export async function autocomplete(
       return getExpressionSuggestions({
         innerText,
         expressionRoot,
-        location: Location.STATS,
+        location: Location.STATS_BY,
         context,
         callbacks,
         emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
@@ -237,7 +237,7 @@ export async function autocomplete(
       return getExpressionSuggestions({
         innerText,
         expressionRoot,
-        location: Location.STATS,
+        location: Location.STATS_BY,
         context,
         callbacks,
         emptySuggestions: [

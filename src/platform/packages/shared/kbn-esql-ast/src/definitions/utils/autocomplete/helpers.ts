@@ -365,7 +365,7 @@ export async function suggestForExpression({
   location: Location;
   preferredExpressionType?: SupportedDataType;
   innerText: string;
-  getColumnsByType?: GetColumnsByTypeFn;
+  getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
