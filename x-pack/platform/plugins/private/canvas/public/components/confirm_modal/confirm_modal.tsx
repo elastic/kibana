@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
@@ -33,6 +33,8 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
     ...rest
   } = props;
 
+  const modalTitleId = useGeneratedHtmlId();
+
   // render nothing if this component isn't open
   if (!isOpen) {
     return null;
@@ -50,6 +52,8 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
       defaultFocusedButton="confirm"
       buttonColor="danger"
       data-test-subj="canvasConfirmModal"
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
     >
       {message}
     </EuiConfirmModal>

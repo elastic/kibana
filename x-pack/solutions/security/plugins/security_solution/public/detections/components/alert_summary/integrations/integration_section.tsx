@@ -9,7 +9,6 @@ import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import { useIntegrationsLastActivity } from '../../../hooks/alert_summary/use_integrations_last_activity';
 import { IntegrationCard } from './integration_card';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
@@ -37,7 +36,6 @@ export interface IntegrationSectionProps {
  */
 export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) => {
   const navigateToIntegrationsPage = useNavigateToIntegrationsPage();
-  const { isLoading, lastActivities } = useIntegrationsLastActivity({ packages });
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -45,12 +43,7 @@ export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) =
         <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
           {packages.map((pkg) => (
             <EuiFlexItem grow={false} key={pkg.name}>
-              <IntegrationCard
-                data-test-subj={`${CARD_TEST_ID}${pkg.name}`}
-                integration={pkg}
-                isLoading={isLoading}
-                lastActivity={lastActivities[pkg.name]}
-              />
+              <IntegrationCard data-test-subj={`${CARD_TEST_ID}${pkg.name}`} integration={pkg} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
