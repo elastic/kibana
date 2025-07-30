@@ -86,7 +86,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       const output = await this.connectorExecutor.execute(
         step.type, // e.g., 'slack.sendMessage'
         step['connector-id']!,
-        renderedInputs
+        renderedInputs,
+        step.spaceId
       );
 
       // this.contextManager.logInfo(`Connector execution completed successfully`, {

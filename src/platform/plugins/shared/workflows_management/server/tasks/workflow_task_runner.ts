@@ -82,8 +82,7 @@ export function createWorkflowTaskRunner({
               },
               connectorCredentials,
               triggeredBy: 'scheduled', // <-- mark as scheduled
-            },
-            spaceId
+            }
           );
 
           logger.info(

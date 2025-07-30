@@ -26,6 +26,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
