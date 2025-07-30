@@ -100,7 +100,6 @@ describe('Service Overview', () => {
     });
 
     it('navigates to transaction detail page', () => {
-
       cy.contains('a', 'oteldemo.AdServiceEdotSynth/GetAds').click();
       cy.contains('h5', 'oteldemo.AdServiceEdotSynth/GetAds');
     });
@@ -132,8 +131,7 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpInfoUrl').contains(
-      );
+      cy.getByTestSubj('apmHttpInfoUrl').contains();
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
     });
   });
