@@ -6,86 +6,57 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { RefObject } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { EuiDataGridRefProps } from '@kbn/unified-data-table';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
-import { AddRowPanel } from './add_row_panel';
-import { AddColumnPanel } from './add_column_panel';
 
-type ToggleMode = 'add-row' | 'add-column';
-
-export const RowColumnCreator = () => {
-  const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
-  const { euiTheme } = useEuiTheme();
+export const RowColumnCreator = ({
+  dataTableRef,
+}: {
+  dataTableRef: RefObject<EuiDataGridRefProps>;
+}) => {
   const {
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
-  const isIndexCreated = useObservable(indexUpdateService.indexCreated$);
+  const columns = useObservable(indexUpdateService.dataTableColumns$);
 
   const toggleAddRow = () => {
-    if (isIndexCreated) {
-      setActiveMode('add-row');
-    } else {
-      indexUpdateService.addEmptyRow();
-    }
+    indexUpdateService.addEmptyRow();
+
+    requestAnimationFrame(() => {
+      // Focus needs to be changed if it was set on the cell before for it to work.
+      dataTableRef.current?.setFocusedCell({ rowIndex: 0, colIndex: 0 });
+      dataTableRef.current?.setFocusedCell({ rowIndex: 0, colIndex: 1 });
+    });
   };
 
   const toggleAddColumn = () => {
-    setActiveMode('add-column');
-  };
+    indexUpdateService.addNewColumn();
 
-  const hidePanel = () => {
-    setActiveMode(null);
+    requestAnimationFrame(() => {
+      if (columns?.length && dataTableRef.current?.scrollToItem) {
+        dataTableRef.current.scrollToItem({ columnIndex: columns?.length + 1, align: 'smart' });
+      }
+    });
   };
 
   return (
-    <>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={toggleAddRow}
-            iconType="plusInCircle"
-            size="s"
-            disabled={activeMode === 'add-row'}
-          >
-            <FormattedMessage defaultMessage="Add row" id="indexEditor.addRow" />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={toggleAddColumn}
-            iconType="plusInCircle"
-            size="s"
-            disabled={activeMode === 'add-column'}
-          >
-            <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      {activeMode && (
-        <EuiPanel
-          paddingSize="s"
-          css={{
-            background: euiTheme.colors.backgroundBaseSubdued,
-            marginBottom: euiTheme.size.xs,
-          }}
-        >
-          {activeMode === 'add-row' && <AddRowPanel onHide={hidePanel} />}
-          {activeMode === 'add-column' && <AddColumnPanel onHide={hidePanel} />}
-        </EuiPanel>
-      )}
-    </>
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={toggleAddRow} iconType="plusInCircle" size="s">
+          <FormattedMessage defaultMessage="Add row" id="indexEditor.addRow" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={toggleAddColumn} iconType="plusInCircle" size="s">
+          <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
