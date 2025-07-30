@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
@@ -22,6 +23,12 @@ export const SnapshotContainer = React.memo(() => {
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
   const config = usePluginConfig();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+
+  useEffect(() => {
+    return () => inventoryPrefill.reset();
+  }, [inventoryPrefill]);
 
   const {
     loading,

@@ -291,7 +291,7 @@ export const Expressions: React.FC<Props> = (props) => {
             >
               <ExpressionChart
                 expression={e}
-                filterQuery={ruleParams.filterQuery}
+                kuery={ruleParams.filterQueryText}
                 nodeType={ruleParams.nodeType}
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}

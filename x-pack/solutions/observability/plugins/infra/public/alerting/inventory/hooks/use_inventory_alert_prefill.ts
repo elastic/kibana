@@ -14,7 +14,7 @@ import type {
 
 export const useInventoryAlertPrefill = () => {
   const [nodeType, setNodeType] = useState<InventoryItemType>('host');
-  const [filterQuery, setFilterQuery] = useState<string | undefined>();
+  const [kuery, setKuery] = useState<string | undefined>();
   const [metric, setMetric] = useState<SnapshotMetricInput>({ type: 'cpuV2' });
   const [customMetrics, setCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
   // only shows for AWS when there are regions info
@@ -24,14 +24,14 @@ export const useInventoryAlertPrefill = () => {
 
   return {
     nodeType,
-    filterQuery,
+    kuery,
     metric,
     customMetrics,
     accountId,
     region,
     setAccountId,
     setNodeType,
-    setFilterQuery,
+    setKuery,
     setMetric,
     setCustomMetrics,
     setRegion,

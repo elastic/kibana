@@ -13,21 +13,35 @@ import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import type { InventoryView } from '../../../../../common/inventory_views';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { useInventoryViewsContext } from './use_inventory_views';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),
   isAutoReloading: false,
 };
 
+function mapInventoryViewToState(savedView: InventoryView): WaffleTimeState {
+  const { time, autoReload } = savedView.attributes;
+
+  return {
+    currentTime: time ?? DEFAULT_WAFFLE_TIME_STATE.currentTime,
+    isAutoReloading: autoReload,
+  };
+}
+
 export const useWaffleTime = () => {
   // INFO: We currently only use the "to" time, but in the future we may do more.
+  const { currentView } = useInventoryViewsContext();
   const [getTime] = useKibanaTimefilterTime({ from: 'now', to: 'now' });
   const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
-    defaultState: {
-      ...DEFAULT_WAFFLE_TIME_STATE,
-      currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
-    },
+    defaultState: currentView
+      ? mapInventoryViewToState(currentView)
+      : {
+          ...DEFAULT_WAFFLE_TIME_STATE,
+          currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
+        },
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',

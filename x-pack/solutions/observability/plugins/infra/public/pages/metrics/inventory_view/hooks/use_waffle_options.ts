@@ -12,7 +12,10 @@ import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import type { InventoryViewOptions } from '../../../../../common/inventory_views/types';
+import type {
+  InventoryView,
+  InventoryViewOptions,
+} from '../../../../../common/inventory_views/types';
 import {
   type InventoryLegendOptions,
   type InventoryOptionsState,
@@ -25,6 +28,7 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
+import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',
@@ -49,9 +53,45 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   timelineOpen: false,
 };
 
+function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
+  const {
+    metric,
+    groupBy,
+    nodeType,
+    view,
+    customOptions,
+    autoBounds,
+    boundsOverride,
+    accountId,
+    region,
+    customMetrics,
+    legend,
+    sort,
+    timelineOpen,
+  } = savedView.attributes;
+
+  return {
+    metric,
+    groupBy,
+    nodeType,
+    view,
+    customOptions,
+    autoBounds,
+    boundsOverride,
+    accountId,
+    region,
+    customMetrics,
+    legend,
+    sort,
+    timelineOpen,
+  };
+}
+
 export const useWaffleOptions = () => {
+  const { currentView } = useInventoryViewsContext();
+
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
-    defaultState: DEFAULT_WAFFLE_OPTIONS_STATE,
+    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
@@ -147,7 +187,6 @@ export const useWaffleOptions = () => {
   );
 
   return {
-    ...DEFAULT_WAFFLE_OPTIONS_STATE,
     ...state,
     changeMetric,
     changeGroupBy,

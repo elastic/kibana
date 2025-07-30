@@ -12,11 +12,13 @@ import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainter from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import type { InventoryView } from '../../../../../common/inventory_views';
 import {
   type InventoryFiltersState,
   inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
+import { useInventoryViewsContext } from './use_inventory_views';
 
 const validateKuery = (expression: string) => {
   try {
@@ -32,9 +34,15 @@ export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
   expression: '',
 };
 
+function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersState {
+  return savedView.attributes.filterQuery;
+}
+
 export const useWaffleFilters = () => {
+  const { currentView } = useInventoryViewsContext();
+
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
-    defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
+    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',

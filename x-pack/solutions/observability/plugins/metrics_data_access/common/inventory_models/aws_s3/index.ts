@@ -19,7 +19,7 @@ export const awsS3 = createInventoryModel('awsS3', {
       defaultMessage: 'S3 Bucket',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
