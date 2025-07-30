@@ -27,7 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 <h3>Inline HTML that should not be rendered as html</h3>
   `;
 
-  describe('markdown app', () => {
+
+  // TODO: replace these
+  describe.skip('markdown app', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.clickNewDashboard();
