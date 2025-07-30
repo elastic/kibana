@@ -50,6 +50,10 @@ export interface WorkflowEventLoggerContext {
   stepType?: string;
 }
 
+export interface WorkflowEventLoggerOptions {
+  enableConsoleLogging?: boolean;
+}
+
 export interface IWorkflowEventLogger {
   logEvent(event: WorkflowLogEvent): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
@@ -71,6 +75,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private logger: Logger;
   private indexName: string;
   private context: WorkflowEventLoggerContext;
+  private options: WorkflowEventLoggerOptions;
   private eventQueue: Doc[] = [];
   private flushTimeout: NodeJS.Timeout | null = null;
   private timings: Map<string, Date> = new Map();
@@ -79,12 +84,14 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     esClient: ElasticsearchClient,
     logger: Logger,
     indexName: string,
-    context: WorkflowEventLoggerContext = {}
+    context: WorkflowEventLoggerContext = {},
+    options: WorkflowEventLoggerOptions = {}
   ) {
     this.esClient = esClient;
     this.logger = logger;
     this.indexName = indexName;
     this.context = context;
+    this.options = options;
   }
 
   public logEvent(eventProperties: WorkflowLogEvent): void {
@@ -92,6 +99,11 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
     // Merge context, default properties, and provided properties
     merge(event, eventProperties);
+
+    // Log to console if enabled
+    if (this.options.enableConsoleLogging) {
+      this.logToConsole(event);
+    }
 
     const doc: Doc = {
       index: this.indexName,
@@ -221,12 +233,18 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger {
-    return new WorkflowEventLogger(this.esClient, this.logger, this.indexName, {
-      ...this.context,
-      stepId,
-      stepName,
-      stepType,
-    });
+    return new WorkflowEventLogger(
+      this.esClient,
+      this.logger,
+      this.indexName,
+      {
+        ...this.context,
+        stepId,
+        stepName,
+        stepType,
+      },
+      this.options
+    );
   }
 
   private createBaseEvent(): WorkflowLogEvent {
@@ -245,6 +263,45 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
       },
       tags: ['workflow'],
     };
+  }
+
+  private logToConsole(event: WorkflowLogEvent): void {
+    const message = event.message || '';
+
+    // Format workflow context metadata
+    const meta: Record<string, any> = {
+      workflow: {
+        name: event.workflow?.name,
+        execution_id: event.workflow?.execution_id,
+        step_name: event.workflow?.step_name,
+        step_type: event.workflow?.step_type,
+      },
+      event: event.event,
+      tags: event.tags,
+    };
+
+    // Add error details if present
+    if (event.error) {
+      meta.error = event.error;
+    }
+
+    // Use Kibana's structured logger with appropriate level
+    switch (event.level) {
+      case 'error':
+        this.logger.error(`🔄 WORKFLOW: ${message}`, meta);
+        break;
+      case 'warn':
+        this.logger.warn(`🔄 WORKFLOW: ${message}`, meta);
+        break;
+      case 'debug':
+        this.logger.debug(`🔄 WORKFLOW: ${message}`, meta);
+        break;
+      case 'trace':
+        this.logger.trace(`🔄 WORKFLOW: ${message}`, meta);
+        break;
+      default:
+        this.logger.info(`🔄 WORKFLOW: ${message}`, meta);
+    }
   }
 
   private getTimingKey(event: WorkflowLogEvent): string {
@@ -312,4 +369,4 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     // Flush any remaining events
     await this.flushEvents();
   }
-}
+} 
