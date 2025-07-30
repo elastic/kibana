@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Search Applications', () => {
+    describe('Search applications', () => {
       before(async () => {
         await common.navigateToApp('elasticsearch/applications/search_applications');
       });

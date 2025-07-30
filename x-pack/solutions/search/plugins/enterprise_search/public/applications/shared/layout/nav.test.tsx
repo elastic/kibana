@@ -58,7 +58,7 @@ const baseNavItems = [
         href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
         items: undefined,
-        name: 'Search Applications',
+        name: 'Search applications',
       },
     ],
     name: 'Build',
@@ -120,7 +120,7 @@ const mockNavLinks = [
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',
-    title: 'Search Applications',
+    title: 'Search applications',
     url: '/app/elasticsearch/applications/search_applications',
   },
   {
