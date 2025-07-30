@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/max-nested-describe */
-
 import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 
-test.describe('Stream data retention', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
+test.describe(
+  'Stream data retention - updating data retention',
+  { tag: ['@ess', '@svlOblt'] },
+  () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.streams.enable();
+    });
 
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
-  });
-
-  test.describe('Updating data retention', () => {
-    test.beforeEach(async ({ apiServices, pageObjects }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
       // Create a test stream with routing rules first
@@ -35,6 +28,10 @@ test.describe('Stream data retention', { tag: ['@ess', '@svlOblt'] }, () => {
       });
 
       await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.streams.disable();
     });
 
     test('should update a stream data retention policy successfully', async ({
@@ -82,5 +79,5 @@ test.describe('Stream data retention', { tag: ['@ess', '@svlOblt'] }, () => {
       ).toBeVisible();
       await pageObjects.streams.closeToast();
     });
-  });
-});
+  }
+);
