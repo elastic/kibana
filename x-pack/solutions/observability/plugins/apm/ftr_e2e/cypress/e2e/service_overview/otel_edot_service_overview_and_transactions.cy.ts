@@ -100,6 +100,9 @@ describe('Service Overview', () => {
     });
 
     it('navigates to transaction detail page', () => {
+      cy.visitKibana(baseUrl);
+      cy.contains('Transactions').click();
+
       cy.contains('a', 'oteldemo.AdServiceEdotSynth/GetAds').click();
       cy.contains('h5', 'oteldemo.AdServiceEdotSynth/GetAds');
     });
