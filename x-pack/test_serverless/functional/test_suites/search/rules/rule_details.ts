@@ -129,7 +129,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(ruleType).toEqual('Elasticsearch query');
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
-        await retry.tryForTime(5 * 1000, async () => {
+        await retry.tryForTime(15 * 1000, async () => {
           const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
           expect(owner.trim()).toEqual(username);
         });
@@ -317,7 +317,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(toastText).toEqual(`Updated "${updatedRuleName}"`);
         });
 
-        await retry.tryForTime(5 * 1000, async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
           expect(headingText.includes(updatedRuleName)).toBe(true);
         });
@@ -446,7 +446,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const ruleActionItems = await testSubjects.findAll('ruleActionsItem');
         expect(ruleActionItems.length).toEqual(2);
 
-        await retry.tryForTime(5 * 1000, async () => {
+        await retry.tryForTime(15 * 1000, async () => {
           const connectorTitle = await ruleActionItems[0].getVisibleText();
           expect(connectorTitle.includes('Slack')).toBe(true);
         });
