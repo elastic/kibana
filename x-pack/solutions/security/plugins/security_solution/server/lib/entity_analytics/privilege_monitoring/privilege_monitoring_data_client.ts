@@ -469,8 +469,8 @@ export class PrivilegeMonitoringDataClient {
       action === PrivilegeMonitoringEngineActions.CREATE
         ? AUDIT_TYPE.CREATION
         : PrivilegeMonitoringEngineActions.DELETE
-          ? AUDIT_TYPE.DELETION
-          : AUDIT_TYPE.CHANGE;
+        ? AUDIT_TYPE.DELETION
+        : AUDIT_TYPE.CHANGE;
 
     const category = AUDIT_CATEGORY.DATABASE;
 
