@@ -15,9 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { buildDiscoverParams } from '../utils/discover_helpers';
-import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,

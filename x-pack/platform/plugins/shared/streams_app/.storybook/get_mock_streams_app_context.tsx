@@ -96,7 +96,25 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
             getRedirectUrl: () => '',
           },
         },
-        observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
+        observabilityAIAssistant: {
+          useGenAIConnectors: () => {
+            return {
+              loading: false,
+              selectedConnector: 'azure-gpt4o',
+              connectors: [
+                {
+                  id: 'azure-gpt4o',
+                  actionTypeId: '.gen-ai',
+                  name: 'GPT-4o Azure',
+                  config: {
+                    apiUrl: '',
+                    apiProvider: 'Azure OpenAI',
+                  },
+                },
+              ],
+            };
+          },
+        } as unknown as ObservabilityAIAssistantPublicStart,
         unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
         charts: {
           theme: {

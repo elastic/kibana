@@ -5,17 +5,11 @@
  * 2.0.
  */
 import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { AssetImage } from '../../asset_image';
 
-export function SignificantEventsViewEmptyState({
-  onAddClick,
-  onGenerateClick,
-}: {
-  onAddClick?: () => void;
-  onGenerateClick?: () => void;
-}) {
+export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick: () => void }) {
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiSpacer size="m" />
@@ -34,26 +28,9 @@ export function SignificantEventsViewEmptyState({
         })}
       </EuiText>
       <EuiFlexGroup direction="row" gutterSize="s">
-        <EuiButton
-          iconType="plusInCircle"
-          fill
-          onClick={() => {
-            onAddClick?.();
-          }}
-        >
+        <EuiButton iconType="plusInCircle" fill onClick={() => onAddClick()}>
           {i18n.translate('xpack.streams.significantEvents.emptyState.addEvent', {
             defaultMessage: 'Add new event',
-          })}
-        </EuiButton>
-        <EuiButton
-          iconType="sparkles"
-          fill
-          onClick={() => {
-            onGenerateClick?.();
-          }}
-        >
-          {i18n.translate('xpack.streams.significantEvents.emptyState.generateEvents', {
-            defaultMessage: 'Generate new events',
           })}
         </EuiButton>
       </EuiFlexGroup>

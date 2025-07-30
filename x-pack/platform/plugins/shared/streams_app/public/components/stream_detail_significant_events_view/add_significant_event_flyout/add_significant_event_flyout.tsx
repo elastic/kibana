@@ -16,14 +16,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams, streamQuerySchema } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
-import { v4 } from 'uuid';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlowSelector } from './flow_selector';
+import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow } from './types';
+import { defaultQuery } from './utils/default_query';
 
 interface Props {
-  onClose?: () => void;
+  onClose: () => void;
   definition: Streams.all.Definition;
   onSave: (queries: StreamQueryKql[]) => Promise<void>;
   query?: StreamQueryKql;
@@ -34,13 +35,10 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
     isEditMode ? 'manual' : undefined
   );
+  const flowRef = useRef<Flow | undefined>(selectedFlow);
   const [queries, setQueries] = useState<StreamQueryKql[]>([
     {
-      id: v4(),
-      title: '',
-      kql: {
-        query: '',
-      },
+      ...defaultQuery(),
       ...query,
     },
   ]);
@@ -50,6 +48,15 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
   }, [queries]);
+
+  useEffect(() => {
+    if (flowRef.current !== selectedFlow) {
+      flowRef.current = selectedFlow;
+      setIsSubmitting(false);
+      setCanSave(false);
+      setQueries([defaultQuery()]);
+    }
+  }, [selectedFlow, setQueries, flowRef, queries.length, isEditMode]);
 
   return (
     <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose?.()} size="m">
@@ -79,16 +86,23 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
               definition={definition}
             />
           )}
+
+          {selectedFlow === 'ai' && (
+            <GeneratedFlowForm
+              definition={definition}
+              setQueries={(next: StreamQueryKql[]) => {
+                setQueries(next);
+              }}
+              setCanSave={(next: boolean) => {
+                setCanSave(next);
+              }}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-          <EuiButton
-            color="text"
-            onClick={() => {
-              onClose?.();
-            }}
-          >
+          <EuiButton color="text" onClick={() => onClose()}>
             {i18n.translate(
               'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
@@ -112,14 +126,19 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
               });
             }}
           >
-            {isEditMode
-              ? i18n.translate(
-                  'xpack.streams.streamDetailView.addSignificantEventFlyout.updateButtonLabel',
-                  { defaultMessage: 'Update' }
-                )
+            {selectedFlow === 'manual'
+              ? isEditMode
+                ? i18n.translate(
+                    'xpack.streams.streamDetailView.addSignificantEventFlyout.updateButtonLabel',
+                    { defaultMessage: 'Update' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.streamDetailView.addSignificantEventFlyout.addButtonLabel',
+                    { defaultMessage: 'Add' }
+                  )
               : i18n.translate(
-                  'xpack.streams.streamDetailView.addSignificantEventFlyout.addButtonLabel',
-                  { defaultMessage: 'Add' }
+                  'xpack.streams.streamDetailView.addSignificantEventFlyout.addSelectedButtonLabel',
+                  { defaultMessage: 'Add selected' }
                 )}
           </EuiButton>
         </EuiFlexGroup>
