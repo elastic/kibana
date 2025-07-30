@@ -43,6 +43,12 @@ const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
   version: schema.maybe(schema.string()),
   originId: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
+  accessControl: schema.maybe(
+    schema.object({
+      owner: schema.string(),
+      accessMode: schema.maybe(schema.literal('read_only')),
+    })
+  ),
   attributes: schema.recordOf(schema.string(), schema.maybe(schema.any())),
 });
 
