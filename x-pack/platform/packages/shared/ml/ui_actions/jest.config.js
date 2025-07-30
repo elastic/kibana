@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/ml/ui_actions'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ml/ui_actions'],
 };

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { useMlResultsService } from '@kbn/ml-hooks/results/use_ml_results_service';
 
 import type { MlEntity } from '../../../../embeddables/types';

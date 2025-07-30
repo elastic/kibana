@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-common-constants/ui_actions';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer_constants';
 import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import type { SwimLaneDrilldownContext } from '../embeddables/types';

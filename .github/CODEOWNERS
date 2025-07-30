@@ -881,7 +881,7 @@ x-pack/platform/packages/private/ml/query_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/route_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/string_hash @elastic/ml-ui
 x-pack/platform/packages/private/ml/time_buckets @elastic/ml-ui
-x-pack/platform/packages/private/ml/ui_actions @elastic/ml-ui
+x-pack/platform/packages/shared/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management

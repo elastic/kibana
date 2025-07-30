@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { basicResolvers } from '../../resolvers';
 import type { NavigateToPath } from '../../../contexts/kibana';
 

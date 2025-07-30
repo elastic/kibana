@@ -10,7 +10,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils/entity_field_operations';
-import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from '@kbn/ml-common-constants/ui_actions';
+import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from '@kbn/ml-ui-actions';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,

@@ -27,10 +27,11 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { type TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-common-constants/ui_actions';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT, SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
 
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
+
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { processFilters } from '../common/process_filters';
 import type { AnomalySwimlaneServices } from '../types';

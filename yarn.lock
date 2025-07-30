@@ -7467,7 +7467,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-ui-actions@link:x-pack/platform/packages/private/ml/ui_actions":
+"@kbn/ml-ui-actions@link:x-pack/platform/packages/shared/ml/ui_actions":
   version "0.0.0"
   uid ""
 

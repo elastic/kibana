@@ -17,7 +17,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { TimeSeriesExplorerAppState } from '@kbn/ml-common-types/locator';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils';
 
 import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
