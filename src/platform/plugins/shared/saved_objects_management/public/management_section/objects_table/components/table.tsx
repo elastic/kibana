@@ -204,7 +204,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       columnRegistry,
       taggingApi,
       allowedTypes,
-      deleteButtonRef, // <-- Extract deleteButtonRef from props
+      deleteButtonRef,
     } = this.props;
 
     const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
