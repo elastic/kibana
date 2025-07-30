@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBetaBadge, EuiLink, useEuiTheme, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiBetaBadge, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
