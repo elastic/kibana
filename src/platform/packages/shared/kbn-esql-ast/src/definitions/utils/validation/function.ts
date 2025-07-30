@@ -836,19 +836,7 @@ function validateFunctionColumnArg(
   }
 
   if (actualArg.name === '*') {
-    // if function does not support wildcards return a specific error
-    if (!('supportsWildcard' in parameterDefinition) || !parameterDefinition.supportsWildcard) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'noWildcardSupportAsArg',
-          values: {
-            name: astFunction.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    }
-
+    // special case for COUNT(*)
     return messages;
   }
 

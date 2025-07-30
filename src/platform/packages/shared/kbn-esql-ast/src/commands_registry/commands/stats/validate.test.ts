@@ -142,15 +142,6 @@ describe('STATS Validation', () => {
         ]);
       });
 
-      test('semantic errors', () => {
-        statsExpectErrors('from a_index | stats count(round(*))', [
-          'Using wildcards (*) in round is not allowed',
-        ]);
-        statsExpectErrors('from a_index | stats count(count(*))', [
-          `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
-        ]);
-      });
-
       test('allows WHERE clause', () => {
         statsExpectErrors('FROM a_index | STATS col0 = avg(doubleField) WHERE 123', []);
       });
@@ -177,15 +168,6 @@ describe('STATS Validation', () => {
             []
           );
         }
-      });
-
-      test('semantic errors in <aggregates>', () => {
-        statsExpectErrors('from a_index | stats count(round(*)) BY ipField', [
-          'Using wildcards (*) in round is not allowed',
-        ]);
-        statsExpectErrors('from a_index | stats count(count(*)) BY ipField', [
-          `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
-        ]);
       });
 
       test('various errors', () => {

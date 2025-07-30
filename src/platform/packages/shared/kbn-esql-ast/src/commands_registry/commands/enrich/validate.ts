@@ -28,24 +28,14 @@ export const validate = (
   const index = source.index;
   const policies = context?.policies || new Map<string, ESQLPolicy>();
 
-  if (index) {
-    if (hasWildcard(index.valueUnquoted)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'wildcardNotSupportedForCommand',
-          values: { command: 'ENRICH', value: index.valueUnquoted },
-          locations: index.location,
-        })
-      );
-    } else if (!policies.has(index.valueUnquoted)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownPolicy',
-          values: { name: index.valueUnquoted },
-          locations: index.location,
-        })
-      );
-    }
+  if (index && !policies.has(index.valueUnquoted)) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownPolicy',
+        values: { name: index.valueUnquoted },
+        locations: index.location,
+      })
+    );
   }
 
   if (cluster) {

@@ -208,25 +208,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'wildcardNotSupportedForCommand':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForCommand', {
-          defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
-          values: {
-            command: out.command,
-            value: out.value,
-          },
-        }),
-      };
-    case 'noWildcardSupportAsArg':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForFunction', {
-          defaultMessage: 'Using wildcards (*) in {name} is not allowed',
-          values: {
-            name: out.name,
-          },
-        }),
-      };
     case 'unsupportedFieldType':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedFieldType', {

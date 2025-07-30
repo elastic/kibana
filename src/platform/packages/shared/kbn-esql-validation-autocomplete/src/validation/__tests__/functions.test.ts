@@ -351,49 +351,6 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
     });
 
-    it('validates "all" parameter (wildcard)', async () => {
-      setTestFunctions([
-        {
-          name: 'supports_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: true }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'does_not_support_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: false }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*)', []);
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*, "")', [
-        // It may seem strange that these are syntax errors, but the grammar actually doesn't allow
-        // for a function to support the asterisk and have additional arguments. Testing it here so we'll
-        // be notified if that changes.
-        `SyntaxError: extraneous input ')' expecting <EOF>`,
-        `SyntaxError: no viable alternative at input 'SUPPORTS_ALL(*,'`,
-      ]);
-      await expectErrors('FROM a_index | EVAL DOES_NOT_SUPPORT_ALL(*)', [
-        'Using wildcards (*) in does_not_support_all is not allowed',
-      ]);
-    });
-
     it('casts string arguments to dates', async () => {
       setTestFunctions([
         {

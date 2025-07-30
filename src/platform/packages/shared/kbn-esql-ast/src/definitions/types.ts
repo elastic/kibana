@@ -327,14 +327,6 @@ export interface ValidationErrors {
     message: string;
     type: { type: string; value: string };
   };
-  wildcardNotSupportedForCommand: {
-    message: string;
-    type: { command: string; value: string };
-  };
-  noWildcardSupportAsArg: {
-    message: string;
-    type: { name: string };
-  };
   unsupportedFieldType: {
     message: string;
     type: { field: string };
