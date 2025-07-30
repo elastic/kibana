@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type {
-  ProductFeatureGroup,
   ProductFeatureKeyType,
   ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
@@ -45,7 +44,7 @@ export class ProductFeaturesService {
   private productFeaturesRegistry: ProductFeatures;
   private enabledProductFeatures?: Set<ProductFeatureKeyType>;
 
-  constructor(loggerFactory: Logger, private readonly experimentalFeatures: ExperimentalFeatures) {
+  constructor(loggerFactory: Logger, experimentalFeatures: ExperimentalFeatures) {
     this.logger = loggerFactory.get('productFeaturesService');
     this.productFeaturesRegistry = new ProductFeatures(this.logger);
 
@@ -61,7 +60,7 @@ export class ProductFeaturesService {
       getCasesV3Feature(casesProductFeatureParams),
     ]);
     this.productFeaturesRegistry.create('securityAssistant', [
-      getAssistantFeature(this.experimentalFeatures),
+      getAssistantFeature(experimentalFeatures),
     ]);
     this.productFeaturesRegistry.create('attackDiscovery', [getAttackDiscoveryFeature()]);
     this.productFeaturesRegistry.create('timeline', [
@@ -70,7 +69,9 @@ export class ProductFeaturesService {
     this.productFeaturesRegistry.create('notes', [
       getNotesFeature({ ...securityFeatureParams, savedObjects: securityNotesSavedObjects }),
     ]);
-    this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);
+    if (!experimentalFeatures.siemMigrationsDisabled) {
+      this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);
+    }
   }
 
   /** Initializes the features plugin setup */
@@ -84,16 +85,12 @@ export class ProductFeaturesService {
 
   /** Merges configurations of all the product features and registers them as Kibana features */
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
-    const enabledProductFeatures: ProductFeatureKeyType[] = [];
+    const { enabledProductFeatureKeys, extensions } = configurator;
+    this.logger.debug(`Registering product features: ${enabledProductFeatureKeys.join(', ')}`);
 
-    for (const featureGroup of Object.keys(configurator) as ProductFeatureGroup[]) {
-      const productFeatureConfig = configurator[featureGroup]();
-      this.productFeaturesRegistry.register(featureGroup, productFeatureConfig);
-      enabledProductFeatures.push(...productFeatureConfig.keys());
-    }
-    this.logger.debug(`Enabled product features: ${enabledProductFeatures.join(', ')}`);
+    this.productFeaturesRegistry.register(enabledProductFeatureKeys, extensions);
 
-    this.enabledProductFeatures = new Set<ProductFeatureKeyType>(enabledProductFeatures);
+    this.enabledProductFeatures = new Set<ProductFeatureKeyType>(enabledProductFeatureKeys);
   }
 
   /** Function to check if a specific product feature key is enabled */

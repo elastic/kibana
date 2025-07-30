@@ -20,14 +20,9 @@ export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.casesSettings,
 ];
 
-/**
- * @deprecated Use getCasesSubFeaturesMapV2 instead
- * @description - Defines all the Security Solution Cases available.
- * The order of the subFeatures is the order they will be displayed
- */
 export const getCasesSubFeaturesMap = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams) => {
   const deleteCasesSubFeature: SubFeatureConfig = {
@@ -39,7 +34,7 @@ export const getCasesSubFeaturesMap = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.delete,
+            api: apiTags.default.delete,
             id: 'cases_delete',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
@@ -55,7 +50,7 @@ export const getCasesSubFeaturesMap = ({
             cases: {
               delete: [APP_ID],
             },
-            ui: uiCapabilities.delete,
+            ui: uiCapabilities.default.delete,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_delete'] }],
           },
         ],
@@ -90,7 +85,7 @@ export const getCasesSubFeaturesMap = ({
             cases: {
               settings: [APP_ID],
             },
-            ui: uiCapabilities.settings,
+            ui: uiCapabilities.default.settings,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_settings'] }],
           },
         ],

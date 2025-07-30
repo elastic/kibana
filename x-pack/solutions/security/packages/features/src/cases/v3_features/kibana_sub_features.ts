@@ -28,8 +28,8 @@ export const getCasesBaseKibanaSubFeatureIdsV3 = (): CasesSubFeatureId[] => [
  * The order of the subFeatures is the order they will be displayed
  */
 export const getCasesSubFeaturesMapV3 = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams) => {
   const deleteCasesSubFeature: SubFeatureConfig = {
@@ -41,7 +41,7 @@ export const getCasesSubFeaturesMapV3 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.delete,
+            api: apiTags.default.delete,
             id: 'cases_delete',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
@@ -57,7 +57,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               delete: [APP_ID],
             },
-            ui: uiCapabilities.delete,
+            ui: uiCapabilities.default.delete,
           },
         ],
       },
@@ -91,7 +91,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               settings: [APP_ID],
             },
-            ui: uiCapabilities.settings,
+            ui: uiCapabilities.default.settings,
           },
         ],
       },
@@ -110,7 +110,7 @@ export const getCasesSubFeaturesMapV3 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.createComment,
+            api: apiTags.default.createComment,
             id: 'create_comment',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureDetails',
@@ -126,7 +126,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               createComment: [APP_ID],
             },
-            ui: uiCapabilities.createComment,
+            ui: uiCapabilities.default.createComment,
           },
         ],
       },
@@ -159,7 +159,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               reopenCase: [APP_ID],
             },
-            ui: uiCapabilities.reopenCase,
+            ui: uiCapabilities.default.reopenCase,
           },
         ],
       },
@@ -187,7 +187,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               assign: [APP_ID],
             },
-            ui: uiCapabilities.assignCase,
+            ui: uiCapabilities.default.assignCase,
           },
         ],
       },

@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import type {
-  ProductFeatureKeys,
-  ProductFeaturesConfigurator,
-} from '@kbn/security-solution-features';
-import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
-import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
-import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
-import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
-import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
-import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
-import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_product_features_config';
+import type { ProductFeaturesConfiguratorExtensions } from '@kbn/security-solution-features';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { APP_ID } from '@kbn/security-solution-plugin/common';
+import { updateGlobalArtifactManageReplacements } from './update_global_artifact_replacements';
 
-export const getProductProductFeaturesConfigurator = (
-  enabledProductFeatureKeys: ProductFeatureKeys
-): ProductFeaturesConfigurator => {
-  return {
-    security: getSecurityProductFeaturesConfigurator(enabledProductFeatureKeys),
-    cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
-    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
-    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
-    siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
-  };
+export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = {
+  security: {
+    allVersions: {
+      [ProductFeatureSecurityKey.endpointExceptions]: {
+        privileges: {
+          all: {
+            ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+            api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          },
+          read: {
+            ui: ['showEndpointExceptions'],
+            api: [`${APP_ID}-showEndpointExceptions`],
+          },
+        },
+      },
+    },
+    version: {
+      siem: {
+        [ProductFeatureSecurityKey.endpointArtifactManagement]: {
+          featureConfigModifier: updateGlobalArtifactManageReplacements,
+        },
+      },
+      siemV2: {
+        [ProductFeatureSecurityKey.endpointArtifactManagement]: {
+          featureConfigModifier: updateGlobalArtifactManageReplacements,
+        },
+      },
+    },
+  },
 };

@@ -12,58 +12,81 @@ import type {
   FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
-  ProductFeaturesConfigMap,
   ProductFeatureParams,
   ProductFeatureGroup,
+  ProductFeatureKeyType,
+  ProductFeaturesConfiguratorExtensions,
+  ProductFeatureKibanaConfig,
 } from '@kbn/security-solution-features';
+import { extendProductFeatureConfigs } from '@kbn/security-solution-features/tools';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
 export class ProductFeatures {
   private featuresSetup?: FeaturesPluginSetup;
-  private readonly productFeatures: Map<ProductFeatureGroup, ProductFeatureParams[]>;
+  private readonly groupVersions: Map<ProductFeatureGroup, ProductFeatureParams[]>;
   private readonly registeredActions: Set<string>;
 
   constructor(private readonly logger: Logger) {
-    this.productFeatures = new Map();
+    this.groupVersions = new Map();
     this.registeredActions = new Set();
   }
 
-  public create<S extends string = string>(
-    featureGroup: ProductFeatureGroup,
-    params: Array<ProductFeatureParams<S>>
-  ) {
-    this.productFeatures.set(featureGroup, params);
+  public create(featureGroup: ProductFeatureGroup, versions: ProductFeatureParams[]) {
+    this.groupVersions.set(featureGroup, versions);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
   }
 
-  public register<S extends string = string>(
-    featureGroup: ProductFeatureGroup,
-    productFeatureConfig: ProductFeaturesConfigMap<S>
+  public register(
+    enabledProductFeatureKeys: ProductFeatureKeyType[],
+    extensions: ProductFeaturesConfiguratorExtensions = {}
   ) {
     if (this.featuresSetup == null) {
       throw new Error('Cannot register product features. Service not initialized.');
     }
-    const productFeaturesGroup = this.productFeatures.get(featureGroup);
-    if (!productFeaturesGroup) {
-      throw new Error(`No product feature found for group: ${featureGroup}`);
-    }
 
-    for (const params of productFeaturesGroup) {
-      const { baseKibanaFeature, baseKibanaSubFeatureIds, subFeaturesMap } = params;
+    const enabledKeys = new Set(enabledProductFeatureKeys);
 
-      const featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
+    for (const [featureGroup, featureGroupVersions] of this.groupVersions.entries()) {
+      const { allVersions: allVersionsExtensions = {}, version: versionsExtensions = {} } =
+        extensions[featureGroup] ?? {};
 
-      const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
-        baseKibanaFeature,
-        baseKibanaSubFeatureIds,
-        Array.from(productFeatureConfig.values())
-      );
+      for (const featureVersion of featureGroupVersions) {
+        const versionExtensions = versionsExtensions[featureVersion.baseKibanaFeature.id] ?? {};
 
-      this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
-      this.addRegisteredActions(completeProductFeatureConfig);
+        const extendedConfig = extendProductFeatureConfigs<ProductFeatureKeyType, string>(
+          featureVersion.productFeatureConfig,
+          allVersionsExtensions,
+          versionExtensions
+        );
+
+        // Filter to include only the configs of enabled keys
+        const filteredConfig = Object.entries(extendedConfig).reduce<ProductFeatureKibanaConfig[]>(
+          (acc, [key, value]) => {
+            if (enabledKeys.has(key as ProductFeatureKeyType)) {
+              acc.push(value);
+            }
+            return acc;
+          },
+          []
+        );
+
+        const featureConfigMerger = new ProductFeaturesConfigMerger(
+          this.logger,
+          featureVersion.subFeaturesMap
+        );
+
+        const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
+          featureVersion.baseKibanaFeature,
+          featureVersion.baseKibanaSubFeatureIds,
+          filteredConfig
+        );
+
+        this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
+        this.addRegisteredActions(completeProductFeatureConfig);
+      }
     }
   }
 

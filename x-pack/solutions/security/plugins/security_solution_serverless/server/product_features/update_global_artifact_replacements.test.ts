@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { updateGlobalArtifactManagerPrivileges } from './security_product_features_config';
+import { updateGlobalArtifactManagerPrivileges } from './update_global_artifact_replacements';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 import type { MutableKibanaFeatureConfig } from '@kbn/security-solution-features';
 import { APP_ID } from '@kbn/security-solution-plugin/common';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { updateGlobalArtifactManagerPrivileges } from './security_product_features_config';
+import { updateGlobalArtifactManageReplacements } from './update_global_artifact_replacements';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 import type { MutableKibanaFeatureConfig } from '@kbn/security-solution-features';
 import { APP_ID } from '@kbn/security-solution-plugin/common';
@@ -35,7 +35,7 @@ const baseFeatureConfig: MutableKibanaFeatureConfig = {
   },
 };
 
-describe('updateGlobalArtifactManagerPrivileges', () => {
+describe('updateGlobalArtifactManageReplacements', () => {
   describe.each(['siem', 'siemV2'])('when features id is %s', (featureId: string) => {
     let featureConfig: MutableKibanaFeatureConfig;
 
@@ -46,7 +46,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
     it('should do nothing if replacedBy is not present', () => {
       const originalConfig = JSON.parse(JSON.stringify(featureConfig));
 
-      updateGlobalArtifactManagerPrivileges(featureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(featureConfig as MutableKibanaFeatureConfig);
 
       expect(featureConfig).toEqual(originalConfig);
     });
@@ -69,7 +69,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
         },
       };
 
-      updateGlobalArtifactManagerPrivileges(testFeatureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(testFeatureConfig as MutableKibanaFeatureConfig);
 
       const replacedBy = testFeatureConfig.privileges.all.replacedBy;
 
@@ -107,7 +107,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
         },
       };
 
-      updateGlobalArtifactManagerPrivileges(testFeatureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(testFeatureConfig as MutableKibanaFeatureConfig);
 
       const replacedBy = testFeatureConfig.privileges.all.replacedBy;
 
@@ -128,7 +128,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
         },
       };
 
-      updateGlobalArtifactManagerPrivileges(testFeatureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(testFeatureConfig as MutableKibanaFeatureConfig);
 
       expect(featureConfig.privileges?.all.api).toContain(`${APP_ID}-writeGlobalArtifacts`);
     });
@@ -151,7 +151,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
         },
       };
 
-      updateGlobalArtifactManagerPrivileges(featureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(featureConfig as MutableKibanaFeatureConfig);
 
       const replacedBy = featureConfig.privileges.all.replacedBy;
 
@@ -163,7 +163,7 @@ describe('updateGlobalArtifactManagerPrivileges', () => {
     it('should not add writeGlobalArtifacts api action', () => {
       const featureConfig = { ...baseFeatureConfig, id: 'siemV3' };
 
-      updateGlobalArtifactManagerPrivileges(featureConfig as MutableKibanaFeatureConfig);
+      updateGlobalArtifactManageReplacements(featureConfig as MutableKibanaFeatureConfig);
 
       expect(featureConfig.privileges?.all.api).not.toContain(`${APP_ID}-writeGlobalArtifacts`);
     });

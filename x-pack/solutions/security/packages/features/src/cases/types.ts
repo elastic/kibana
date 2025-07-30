@@ -9,12 +9,18 @@ import type { ProductFeatureCasesKey, CasesSubFeatureId } from '../product_featu
 import type { ProductFeaturesConfig } from '../types';
 
 export interface CasesFeatureParams {
-  uiCapabilities: CasesUiCapabilities;
-  apiTags: CasesApiTags;
+  apiTags: {
+    default: CasesApiTags;
+    connectors: Pick<CasesApiTags, 'all' | 'read'>;
+  };
+  uiCapabilities: {
+    default: CasesUiCapabilities;
+    connectors: Pick<CasesUiCapabilities, 'all' | 'read'>;
+  };
   savedObjects: { files: string[] };
 }
 
-export type DefaultCasesProductFeaturesConfig = ProductFeaturesConfig<
+export type CasesProductFeaturesConfig = ProductFeaturesConfig<
   ProductFeatureCasesKey,
   CasesSubFeatureId
 >;

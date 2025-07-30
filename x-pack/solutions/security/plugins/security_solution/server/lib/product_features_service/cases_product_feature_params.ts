@@ -14,13 +14,13 @@ import {
   GET_CONNECTORS_CONFIGURE_API_TAG,
 } from '@kbn/cases-plugin/common/constants';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-
+import type { CasesFeatureParams } from '@kbn/security-solution-features/src/cases/types';
 import { APP_ID } from '../../../common/constants';
 
 const originalCasesUiCapabilities = createCasesUICapabilities();
 const originalCasesApiTags = getCasesApiTags(APP_ID);
 
-const casesUiCapabilities = {
+const defaultUiCapabilities = {
   ...originalCasesUiCapabilities,
   all: originalCasesUiCapabilities.all.filter(
     (capability) => capability !== CASES_CONNECTORS_CAPABILITY
@@ -30,7 +30,7 @@ const casesUiCapabilities = {
   ),
 };
 
-const casesApiTags = {
+const defaultApiTags = {
   ...originalCasesApiTags,
   all: originalCasesApiTags.all.filter(
     (capability) => capability !== GET_CONNECTORS_CONFIGURE_API_TAG
@@ -40,8 +40,23 @@ const casesApiTags = {
   ),
 };
 
-export const casesProductFeatureParams = {
-  uiCapabilities: casesUiCapabilities,
-  apiTags: casesApiTags,
+const connectorsUiCapabilities = {
+  all: [CASES_CONNECTORS_CAPABILITY],
+  read: [CASES_CONNECTORS_CAPABILITY],
+};
+const connectorsApiTags = {
+  all: [GET_CONNECTORS_CONFIGURE_API_TAG],
+  read: [GET_CONNECTORS_CONFIGURE_API_TAG],
+};
+
+export const casesProductFeatureParams: CasesFeatureParams = {
+  apiTags: {
+    default: defaultApiTags,
+    connectors: connectorsApiTags,
+  },
+  uiCapabilities: {
+    default: defaultUiCapabilities,
+    connectors: connectorsUiCapabilities,
+  },
   savedObjects: { files: filesSavedObjectTypes },
 };

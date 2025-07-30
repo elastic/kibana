@@ -27,8 +27,8 @@ export const getCasesBaseKibanaSubFeatureIdsV2 = (): CasesSubFeatureId[] => [
  * The order of the subFeatures is the order they will be displayed
  */
 export const getCasesSubFeaturesMapV2 = ({
-  uiCapabilities,
   apiTags,
+  uiCapabilities,
   savedObjects,
 }: CasesFeatureParams) => {
   const deleteCasesSubFeature: SubFeatureConfig = {
@@ -40,7 +40,7 @@ export const getCasesSubFeaturesMapV2 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.delete,
+            api: apiTags.default.delete,
             id: 'cases_delete',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails',
@@ -56,7 +56,7 @@ export const getCasesSubFeaturesMapV2 = ({
             cases: {
               delete: [APP_ID],
             },
-            ui: uiCapabilities.delete,
+            ui: uiCapabilities.default.delete,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_delete'] }],
           },
         ],
@@ -91,7 +91,7 @@ export const getCasesSubFeaturesMapV2 = ({
             cases: {
               settings: [APP_ID],
             },
-            ui: uiCapabilities.settings,
+            ui: uiCapabilities.default.settings,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_settings'] }],
           },
         ],
@@ -113,7 +113,7 @@ export const getCasesSubFeaturesMapV2 = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.createComment,
+            api: apiTags.default.createComment,
             id: 'create_comment',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.addCommentsSubFeatureDetails',
@@ -129,7 +129,7 @@ export const getCasesSubFeaturesMapV2 = ({
             cases: {
               createComment: [APP_ID],
             },
-            ui: uiCapabilities.createComment,
+            ui: uiCapabilities.default.createComment,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['create_comment'] }],
           },
         ],
@@ -163,7 +163,7 @@ export const getCasesSubFeaturesMapV2 = ({
             cases: {
               reopenCase: [APP_ID],
             },
-            ui: uiCapabilities.reopenCase,
+            ui: uiCapabilities.default.reopenCase,
             replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['case_reopen'] }],
           },
         ],

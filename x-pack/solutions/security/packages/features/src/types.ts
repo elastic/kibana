@@ -60,63 +60,75 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
     featureConfigModifier?: FeatureConfigModifier;
   };
 
+/**
+ * App features privileges configuration for the Security Solution Kibana Feature app.
+ * These are the configs that are shared between both offering types (ess and serverless).
+ * They can be extended on each offering plugin to register privileges using different way on each offering type.
+ *
+ * Privileges can be added in different ways:
+ * - `privileges`: the privileges that will be added directly into the main Security feature.
+ * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
+ * - `featureConfigModifier`: a function to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
+ */
 export type ProductFeaturesConfig<
-  K extends ProductFeatureKeyType,
+  K extends ProductFeatureKeyType = ProductFeatureKeyType,
   T extends string = string
 > = Partial<Record<K, ProductFeatureKibanaConfig<T>>>;
 
-export type ProductFeaturesConfigMap<T extends string = string> = Map<
-  ProductFeatureKeyType,
-  ProductFeatureKibanaConfig<T>
->;
-
-export type SecurityProductFeaturesConfigMap = Map<
+export type SecurityProductFeaturesConfig = ProductFeaturesConfig<
   ProductFeatureSecurityKey,
-  ProductFeatureKibanaConfig<SecuritySubFeatureId>
+  SecuritySubFeatureId
 >;
-export type CasesProductFeaturesConfigMap = Map<
+export type CasesProductFeaturesConfig = ProductFeaturesConfig<
   ProductFeatureCasesKey,
-  ProductFeatureKibanaConfig<CasesSubFeatureId>
+  CasesSubFeatureId
 >;
-
-export type AssistantProductFeaturesConfigMap = Map<
+export type AssistantProductFeaturesConfig = ProductFeaturesConfig<
   ProductFeatureAssistantKey,
-  ProductFeatureKibanaConfig<AssistantSubFeatureId>
+  AssistantSubFeatureId
 >;
-
-export type AttackDiscoveryProductFeaturesConfigMap = Map<
-  ProductFeatureAttackDiscoveryKey,
-  ProductFeatureKibanaConfig
->;
-
-export type TimelineProductFeaturesConfigMap = Map<
-  ProductFeatureTimelineKey,
-  ProductFeatureKibanaConfig
->;
-
-export type NotesProductFeaturesConfigMap = Map<ProductFeatureNotesKey, ProductFeatureKibanaConfig>;
-
-export type SiemMigrationsProductFeaturesConfigMap = Map<
-  ProductFeatureSiemMigrationsKey,
-  ProductFeatureKibanaConfig
->;
+export type AttackDiscoveryProductFeaturesConfig =
+  ProductFeaturesConfig<ProductFeatureAttackDiscoveryKey>;
+export type TimelineProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureTimelineKey>;
+export type NotesProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureNotesKey>;
+export type SiemMigrationsProductFeaturesConfig =
+  ProductFeaturesConfig<ProductFeatureSiemMigrationsKey>;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
 
-export interface ProductFeatureParams<T extends string = string> {
+export interface ProductFeatureParams<
+  K extends ProductFeatureKeyType = ProductFeatureKeyType,
+  S extends string = string
+> {
   baseKibanaFeature: BaseKibanaFeatureConfig;
-  baseKibanaSubFeatureIds: T[];
-  subFeaturesMap: AppSubFeaturesMap<T>;
+  baseKibanaSubFeatureIds: S[];
+  subFeaturesMap: AppSubFeaturesMap<S>;
+  productFeatureConfig: ProductFeaturesConfig<K, S>;
 }
+
+export interface ConfigExtensions<C extends ProductFeaturesConfig> {
+  /** The `allVersions` is used to extend all the versions of the feature group */
+  allVersions: C;
+  /** The `version` object indexed by the feature `id` */
+  version: Record<string, C>;
+}
+
+interface ProductFeatureConfigExtensions {
+  security: ConfigExtensions<SecurityProductFeaturesConfig>;
+  cases: ConfigExtensions<CasesProductFeaturesConfig>;
+  securityAssistant: ConfigExtensions<AssistantProductFeaturesConfig>;
+  attackDiscovery: ConfigExtensions<AttackDiscoveryProductFeaturesConfig>;
+  timeline: ConfigExtensions<TimelineProductFeaturesConfig>;
+  notes: ConfigExtensions<NotesProductFeaturesConfig>;
+  siemMigrations: ConfigExtensions<SiemMigrationsProductFeaturesConfig>;
+}
+
+export type ProductFeaturesConfiguratorExtensions = Partial<ProductFeatureConfigExtensions>;
 
 export interface ProductFeaturesConfigurator {
-  security: () => SecurityProductFeaturesConfigMap;
-  cases: () => CasesProductFeaturesConfigMap;
-  securityAssistant: () => AssistantProductFeaturesConfigMap;
-  attackDiscovery: () => AttackDiscoveryProductFeaturesConfigMap;
-  timeline: () => TimelineProductFeaturesConfigMap;
-  notes: () => NotesProductFeaturesConfigMap;
-  siemMigrations: () => SiemMigrationsProductFeaturesConfigMap;
+  enabledProductFeatureKeys: ProductFeatureKeyType[];
+  extensions?: ProductFeaturesConfiguratorExtensions;
 }
 
-export type ProductFeatureGroup = keyof ProductFeaturesConfigurator;
+export type ProductFeatureGroup = keyof ProductFeatureConfigExtensions;
