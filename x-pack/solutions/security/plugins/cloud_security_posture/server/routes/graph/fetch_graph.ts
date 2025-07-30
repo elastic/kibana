@@ -12,8 +12,8 @@ import {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import type { EsQuery, GraphEdge, OriginEventId } from './types';
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -153,9 +153,7 @@ const checkEnrichPolicyExists = async (
       name: getEnrichPolicyId(spaceId),
     });
 
-    return policies.some(
-      (policy) => policy.config.match?.name === getEnrichPolicyId(spaceId)
-    );
+    return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
   } catch (error) {
     logger.error(`Error fetching enrich policy ${error.message}`);
     logger.error(error);
@@ -173,7 +171,7 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
 }: BuildEsqlQueryParams): string => {
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-  
+
   // Common parts of the query
   const originEventClause =
     originEventIds.length > 0
@@ -227,9 +225,9 @@ const buildEsqlQuery = ({
 | SORT isOrigin DESC, action`;
 
   if (isAssetInventoryEnabled && isEnrichPolicyExists) {
-  // Enrichment-specific parts
-  // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
-  // TODO: We should use the appropriate specific index for each entity type once it's fixed
+    // Enrichment-specific parts
+    // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
+    // TODO: We should use the appropriate specific index for each entity type once it's fixed
     const enrichClause = `
 | ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
 | ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`;
