@@ -26,7 +26,7 @@ import type {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce, omit } from 'lodash';
+import { omit } from 'lodash';
 import type { ChangeEvent, FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -35,6 +35,8 @@ import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-acce
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -46,13 +48,10 @@ import {
   withSourceProvider,
 } from '../../../containers/metrics_source';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
-
-const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -135,12 +134,13 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: string) => {
-      setRuleParams('filterQueryText', filter ?? '');
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+      setRuleParams('filterQueryText', kuery ?? '');
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
+          convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
@@ -148,11 +148,6 @@ export const Expressions: React.FC<Props> = (props) => {
     },
     [metricsView?.dataViewReference, setRuleParams]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   const emptyError = useMemo(() => {
     return {
@@ -194,7 +189,8 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) =>
+      onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
   );
 
@@ -366,10 +362,13 @@ export const Expressions: React.FC<Props> = (props) => {
         display="rowCompressed"
       >
         {metadata ? (
-          <MetricsExplorerKueryBar
-            onSubmit={onFilterChange}
-            onChange={debouncedOnFilterChange}
-            value={ruleParams.filterQueryText}
+          <UnifiedSearchBar
+            onQuerySubmit={onFilterChange}
+            useDefaultBehaviors={false}
+            query={{
+              query: ruleParams.filterQueryText || '',
+              language: 'kuery',
+            }}
           />
         ) : (
           <EuiFieldSearch

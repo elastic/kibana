@@ -76,7 +76,11 @@ export const SavedViews = () => {
         timelineOpen,
         time: currentTime,
         autoReload: isAutoReloading,
-        filterQuery,
+        // retrocompatibility with saved views
+        filterQuery: {
+          expression: filterQuery.query,
+          kind: filterQuery.language,
+        },
       }}
     />
   );
