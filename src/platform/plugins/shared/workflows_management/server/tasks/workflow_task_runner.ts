@@ -80,8 +80,7 @@ export function createWorkflowTaskRunner({
                 source: 'task-manager',
               },
               triggeredBy: 'scheduled', // <-- mark as scheduled
-            },
-            spaceId
+            }
           );
 
           logger.info(

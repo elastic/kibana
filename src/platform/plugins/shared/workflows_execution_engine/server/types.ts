@@ -19,8 +19,7 @@ export interface WorkflowsExecutionEnginePluginSetup {}
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    context: Record<string, any>,
-    spaceId: string
+    context: Record<string, any>
   ): Promise<void>;
 }
 

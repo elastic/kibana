@@ -104,16 +104,19 @@ export class WorkflowsManagementApi {
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    inputs: Record<string, any>,
-    spaceId: string
+    inputs: Record<string, any>
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, inputs, spaceId);
+    return await this.schedulerService.runWorkflow(workflow, inputs);
   }
 
-  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
+  public async testWorkflow(
+    workflowYaml: string,
+    inputs: Record<string, any>,
+    spaceId: string
+  ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
@@ -129,6 +132,7 @@ export class WorkflowsManagementApi {
 
     return await this.schedulerService.runWorkflow(
       {
+        spaceId,
         id: 'test-workflow',
         name: workflowToCreate.name,
         status: workflowToCreate.status,

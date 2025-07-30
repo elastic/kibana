@@ -53,8 +53,7 @@ export class SchedulerService {
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    inputs: Record<string, any>,
-    spaceId: string
+    inputs: Record<string, any>
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
@@ -65,7 +64,7 @@ export class SchedulerService {
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
       triggeredBy: 'manual', // <-- mark as manual
-      spaceId,
+      spaceId: workflow.spaceId,
     };
 
     const taskInstance = {
@@ -89,18 +88,14 @@ export class SchedulerService {
     return workflowRunId;
   }
 
-  public async pushEvent(eventType: string, eventData: Record<string, any>, spaceId: string) {
+  public async pushEvent(eventType: string, eventData: Record<string, any>) {
     try {
       const workflowsToRun = findWorkflowsByTrigger(eventType);
 
       for (const workflow of workflowsToRun) {
-        await this.runWorkflow(
-          workflow,
-          {
-            event: eventData,
-          },
-          spaceId
-        );
+        await this.runWorkflow(workflow, {
+          event: eventData,
+        });
       }
     } catch (error) {
       this.logger.error(`Failed to push event: ${error.message}`);
