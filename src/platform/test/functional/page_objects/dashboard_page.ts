@@ -794,14 +794,13 @@ export class DashboardPageObject extends FtrService {
 
   public async verifyNoRenderErrors() {
     const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
-    let captureScreenshotForFailure = false;
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
-      captureScreenshotForFailure = true;
     }
-    if (captureScreenshotForFailure) {
+    if (errorEmbeddables.length) {
       await this.browser.setWindowSize(1920, 1080);
       await sleep(1000); // wait for the window resize to take effect
+      this.log.error('Capturing screenshot...');
       await this.screenshots.takeForFailure(`dashboard_errored_embeddables_${performance.now()}`);
     }
     expect(errorEmbeddables.length).to.be(0);
