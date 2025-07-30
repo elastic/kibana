@@ -14,18 +14,18 @@ export function EmbeddableLogRateAnalysisUserInput({
   pluginStart,
   isNewPanel,
   logRateAnalysisControlsApi,
-  deletePanel,
-  initialState,
   onCancel,
   onConfirm,
+  deletePanel,
+  initialState,
 }: {
   pluginStart: AiopsPluginStartDeps;
   isNewPanel: boolean;
   logRateAnalysisControlsApi: LogRateAnalysisComponentApi;
-  deletePanel?: () => void;
-  initialState?: LogRateAnalysisEmbeddableState;
   onCancel: () => void;
   onConfirm: (newUpdate: LogRateAnalysisEmbeddableState) => void;
+  deletePanel?: () => void;
+  initialState?: LogRateAnalysisEmbeddableState;
 }) {
   const hasChanged = React.useRef(false);
   // Detects if the flyout was closed via "X" (not Confirm or Cancel) to clean up the panel preview state
