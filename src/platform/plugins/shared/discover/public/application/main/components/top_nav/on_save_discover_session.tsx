@@ -110,28 +110,28 @@ export const onSaveDiscoverSession = async ({
       });
     }
 
-    if (!response.id) {
-      return;
+    if (response.id) {
+      services.toastNotifications.addSuccess({
+        title: i18n.translate('discover.notifications.savedSearchTitle', {
+          defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
+          values: {
+            savedSearchTitle: newTitle,
+          },
+        }),
+        'data-test-subj': 'saveSearchSuccess',
+      });
+
+      if (onSaveCb) {
+        onSaveCb();
+      } else if (response.id !== persistedDiscoverSession?.id) {
+        services.locator.navigate({ savedSearchId: response.id });
+      } else {
+        // Update defaults so that "reload saved query" functions correctly
+        state.actions.undoSavedSearchChanges();
+      }
     }
 
-    services.toastNotifications.addSuccess({
-      title: i18n.translate('discover.notifications.savedSearchTitle', {
-        defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
-        values: {
-          savedSearchTitle: newTitle,
-        },
-      }),
-      'data-test-subj': 'saveSearchSuccess',
-    });
-
-    if (onSaveCb) {
-      onSaveCb();
-    } else if (response.id !== persistedDiscoverSession?.id) {
-      services.locator.navigate({ savedSearchId: response.id });
-    } else {
-      // Update defaults so that "reload saved query" functions correctly
-      state.actions.undoSavedSearchChanges();
-    }
+    return response;
   };
 
   const saveModal = (
