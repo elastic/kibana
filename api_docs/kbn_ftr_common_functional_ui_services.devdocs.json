@@ -1958,6 +1958,70 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.waitForAccordionState",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForAccordionState",
+            "description": [
+              "\nHelper function to wait for accordion state to reach expected value\nThis helps avoid race conditions in tests where UI updates are still in progress"
+            ],
+            "signature": [
+              "(selector: string, expectedState: string, timeout?: number) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAccordionState.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAccordionState.$2",
+                "type": "string",
+                "tags": [],
+                "label": "expectedState",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAccordionState.$3",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

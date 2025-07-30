@@ -5,60 +5,60 @@
  * 2.0.
  */
 
-import { UnwiredStream } from './unwired';
+import { ClassicStream } from './classic';
 
-describe('UnwiredStream', () => {
+describe('ClassicStream', () => {
   describe('Definition', () => {
     it.each([
       {
-        name: 'unwired-stream',
+        name: 'classic-stream',
         description: '',
         ingest: {
           lifecycle: {
             inherit: {},
           },
           processing: [],
-          unwired: {},
+          classic: {},
         },
       },
     ])('is valid', (val) => {
-      expect(UnwiredStream.Definition.is(val)).toBe(true);
-      expect(UnwiredStream.Definition.right.parse(val)).toEqual(val);
+      expect(ClassicStream.Definition.is(val)).toBe(true);
+      expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
     });
 
     it.each([
       {
-        name: 'unwired-stream',
+        name: 'classic-stream',
         description: null,
         ingest: {
           lifecycle: {
             inherit: {},
           },
           processing: [],
-          unwired: {},
+          classic: {},
         },
       },
       {
-        name: 'unwired-stream',
+        name: 'classic-stream',
         description: '',
         ingest: {
-          unwired: {},
+          classic: {},
         },
       },
       {
-        name: 'unwired-stream',
+        name: 'classic-stream',
         description: '',
         ingest: {
           lifecycle: {
             inherit: {},
           },
           processing: [],
-          unwired: {},
+          classic: {},
           wired: {},
         },
       },
     ])('is not valid', (val) => {
-      expect(UnwiredStream.Definition.is(val as any)).toBe(false);
+      expect(ClassicStream.Definition.is(val as any)).toBe(false);
     });
   });
 
@@ -66,14 +66,14 @@ describe('UnwiredStream', () => {
     it.each([
       {
         stream: {
-          name: 'unwired-stream',
+          name: 'classic-stream',
           description: '',
           ingest: {
             lifecycle: {
               inherit: {},
             },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
         effective_lifecycle: {
@@ -90,9 +90,9 @@ describe('UnwiredStream', () => {
         dashboards: [],
         queries: [],
       },
-    ] satisfies UnwiredStream.GetResponse[])('is valid', (val) => {
-      expect(UnwiredStream.GetResponse.is(val)).toBe(true);
-      expect(UnwiredStream.GetResponse.right.parse(val)).toEqual(val);
+    ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
+      expect(ClassicStream.GetResponse.is(val)).toBe(true);
+      expect(ClassicStream.GetResponse.right.parse(val)).toEqual(val);
     });
 
     it.each([
@@ -104,7 +104,7 @@ describe('UnwiredStream', () => {
               inherit: {},
             },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
         effective_lifecycle: {
@@ -122,7 +122,7 @@ describe('UnwiredStream', () => {
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(UnwiredStream.GetResponse.is(val as any)).toBe(false);
+      expect(ClassicStream.GetResponse.is(val as any)).toBe(false);
     });
   });
 
@@ -138,13 +138,13 @@ describe('UnwiredStream', () => {
               inherit: {},
             },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
       },
     ])('is valid', (val) => {
-      expect(UnwiredStream.UpsertRequest.is(val)).toBe(true);
-      expect(UnwiredStream.UpsertRequest.right.parse(val)).toEqual(val);
+      expect(ClassicStream.UpsertRequest.is(val)).toBe(true);
+      expect(ClassicStream.UpsertRequest.right.parse(val)).toEqual(val);
     });
 
     it.each([
@@ -159,12 +159,12 @@ describe('UnwiredStream', () => {
               inherit: {},
             },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
       },
     ])('is not valid', (val) => {
-      expect(UnwiredStream.UpsertRequest.is(val as any)).toBe(false);
+      expect(ClassicStream.UpsertRequest.is(val as any)).toBe(false);
     });
   });
 });
