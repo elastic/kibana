@@ -95,10 +95,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         bsearch = await utils.createBsearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/packetbeat/tls');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
+        async () =>
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/tls'
+          )
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
@@ -163,11 +166,19 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('Tls Overview Test', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
+<<<<<<< HEAD
         bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
+=======
+        search = await utils.createSearch();
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/packetbeat/tls');
+>>>>>>> 8e56732042e ([ska] relocate solutions ES archives (#229914))
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls')
+        async () =>
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/tls'
+          )
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {

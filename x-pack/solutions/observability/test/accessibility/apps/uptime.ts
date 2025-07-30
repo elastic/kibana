@@ -22,7 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // github.com/elastic/kibana/issues/153601
   describe.skip('uptime Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+      );
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
         tls: {
           certificate_not_valid_after: moment().add(30, 'days').toISOString(),
@@ -46,7 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank'
+      );
     });
 
     it('overview page', async () => {

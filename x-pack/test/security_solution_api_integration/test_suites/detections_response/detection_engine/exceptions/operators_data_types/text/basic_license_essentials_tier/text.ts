@@ -35,13 +35,21 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type text', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/text'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/text_no_spaces'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/text_no_spaces');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/text'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/text_no_spaces'
+      );
     });
 
     beforeEach(async () => {
