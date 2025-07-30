@@ -15,6 +15,13 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
+
+  async function getPrivMonSoStatus() {
+    return kibanaServer.savedObjects.find({
+      type: 'privilege-monitoring-status',
+    });
+  }
+
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
@@ -38,29 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-      });
-    });
-
-    describe('init', () => {
-      it('should initialize the privilege monitoring engine', async () => {
-        log.info(`Initializing privilege monitoring engine`);
-        const res = await api.initMonitoringEngine();
-
-        if (res.status !== 200) {
-          log.error(`Initialization failed`);
-          log.error(JSON.stringify(res.body));
-        }
-
-        expect(res.status).eql(200);
-        expect(res.body.status).to.eql('started');
-      });
-      it('should not initialize if privmon setting is disabled', async () => {
-        log.info(`Disabling privilege monitoring setting`);
-        await disablePrivmonSetting(kibanaServer);
-
-        const res = await api.initMonitoringEngine();
-
-        expect(res.status).eql(500);
       });
     });
 
@@ -90,29 +74,59 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('combination of init and disable', () => {
-      it('should initialize and then disable the privilege monitoring engine', async () => {
-        log.info(`Re-enabling privilege monitoring setting`);
-        await enablePrivmonSetting(kibanaServer);
+      afterEach(async () => {
+        log.info(`Cleaning up after test`);
+        try {
+          await api.deleteMonitoringEngine({ query: { data: true } });
+        } catch (err) {
+          log.warning(`Failed to clean up in afterEach: ${err.message}`);
+        }
+      });
 
+      beforeEach(async () => {
+        await enablePrivmonSetting(kibanaServer);
+      });
+
+      it('should initialize and then disable the privilege monitoring engine', async () => {
         log.info(`Initializing privilege monitoring engine`);
         const initRes = await api.initMonitoringEngine();
         expect(initRes.status).eql(200);
         expect(initRes.body.status).to.eql('started');
+
+        const soStatus = await getPrivMonSoStatus();
+        expect(soStatus.saved_objects[0].attributes.status).to.eql('started');
 
         log.info(`Disabling privilege monitoring engine`);
         const disableRes = await api.disableMonitoringEngine();
         expect(disableRes.status).eql(200);
         expect(disableRes.body.status).to.eql('disabled');
 
+        const soStatusAfterDisable = await getPrivMonSoStatus();
+        expect(soStatusAfterDisable.saved_objects[0].attributes.status).to.eql('disabled');
+
         log.info(`Re-disabling privilege monitoring engine`);
         const reDisableRes = await api.disableMonitoringEngine();
         expect(reDisableRes.status).eql(200);
         expect(reDisableRes.body.status).to.eql('disabled');
 
-        log.info(`Re-initialising privilege monitoring engine after disable`);
+        const soStatusAfterReDisable = await getPrivMonSoStatus();
+        expect(soStatusAfterReDisable.saved_objects[0].attributes.status).to.eql('disabled');
+
+        log.info(`Initializing privilege monitoring engine after disable`);
+        const initResAfterDisable = await api.initMonitoringEngine();
+        expect(initResAfterDisable.status).eql(200);
+        expect(initResAfterDisable.body.status).to.eql('started');
+
+        const soStatusOnInitAfterDisable = await getPrivMonSoStatus();
+        expect(soStatusOnInitAfterDisable.saved_objects[0].attributes.status).to.eql('started');
+
+        log.info(`Re-initializing privilege monitoring engine after disable`);
         const reInitRes = await api.initMonitoringEngine();
         expect(reInitRes.status).eql(200);
         expect(reInitRes.body.status).to.eql('started');
+
+        const soStatusAfterReInit = await getPrivMonSoStatus();
+        expect(soStatusAfterReInit.saved_objects[0].attributes.status).to.eql('started');
       });
     });
   });
