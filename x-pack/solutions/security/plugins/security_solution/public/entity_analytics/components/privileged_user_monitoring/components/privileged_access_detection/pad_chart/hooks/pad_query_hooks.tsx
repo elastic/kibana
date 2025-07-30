@@ -132,7 +132,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
         JSON.stringify(
           {
             index: [ML_ANOMALIES_INDEX],
-            body: prettifyQuery(padAnomalyDataEsqlSource ?? '', false),
+            body: prettifyQuery(padAnomalyDataEsqlSource ?? ''),
           },
           null,
           2
