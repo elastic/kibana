@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
@@ -35,14 +35,13 @@ import { getTimeRangeAsDays } from '../components/ai_value/utils';
  * Cost savings (e.g., based on time saved × analyst hourly rate)
  * Analyst time saved (e.g., minutes saved per alert × volume)
  * Total alerts filtered vs escalated
- * Real attacks detected by AI vs traditional methods
+ * Real attacks detected by AI
  * Alert response time trends (before vs after AI adoption)
  *
  * Metrics are calculated using dynamic values from the user’s actual data and can be customized per deployment.
  * Visualizations are executive-friendly: concise, interactive, and exportable.
  * Time range selection and historical trend views are supported.
  * Data sources and calculation methods are transparent and documented for auditability.
- * @constructor
  */
 
 const AIValueComponent = () => {
@@ -62,6 +61,8 @@ const AIValueComponent = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
+  const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
 
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
@@ -87,14 +88,18 @@ const AIValueComponent = () => {
                     width="auto"
                     compressed
                   />,
-                  <EuiButtonEmpty
-                    className="exportPdfButton"
-                    iconType="download"
-                    onClick={exportPDF}
-                    size="s"
-                  >
-                    {EXPORT_REPORT}
-                  </EuiButtonEmpty>,
+                  ...(hasAttackDiscoveries
+                    ? [
+                        <EuiButtonEmpty
+                          className="exportPdfButton"
+                          iconType="download"
+                          onClick={exportPDF}
+                          size="s"
+                        >
+                          {EXPORT_REPORT}
+                        </EuiButtonEmpty>,
+                      ]
+                    : []),
                 ]}
               />
               {isSourcererLoading ? (
@@ -102,7 +107,11 @@ const AIValueComponent = () => {
               ) : (
                 <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
                   <EuiFlexItem>
-                    <AIValueMetrics from={from} to={to} />
+                    <AIValueMetrics
+                      from={from}
+                      to={to}
+                      setHasAttackDiscoveries={setHasAttackDiscoveries}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

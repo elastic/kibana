@@ -36,8 +36,9 @@ export const getValueMetrics = ({
 }): ValueMetrics => ({
   attackDiscoveryCount,
   filteredAlerts: totalAlerts - escalatedAlertsCount,
-  filteredAlertsPerc: ((totalAlerts - escalatedAlertsCount) / totalAlerts) * 100,
-  escalatedAlertsPerc: (escalatedAlertsCount / totalAlerts) * 100,
+  filteredAlertsPerc:
+    totalAlerts > 0 ? ((totalAlerts - escalatedAlertsCount) / totalAlerts) * 100 : 0,
+  escalatedAlertsPerc: totalAlerts > 0 ? (escalatedAlertsCount / totalAlerts) * 100 : 0,
   hoursSaved: getTimeSavedHours(totalAlerts - escalatedAlertsCount, minutesPerAlert),
   totalAlerts,
   costSavings: getCostSavings({

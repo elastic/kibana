@@ -23,6 +23,10 @@ export const ComparePercentage = ({
   statType,
   timeRange,
 }: Props) => {
+  if (previousCount === 0 || currentCount === 0) {
+    // do not display percentage change if either count is zero
+    return null;
+  }
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
 
   const isNegative = percentageChange.charAt(0) === '-';

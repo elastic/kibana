@@ -17,6 +17,16 @@ interface Props {
 }
 
 export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMetricsCompare }) => {
+  if (
+    valueMetrics.filteredAlertsPerc === 0 ||
+    valueMetricsCompare.filteredAlertsPerc === 0 ||
+    valueMetrics.escalatedAlertsPerc === 0 ||
+    valueMetricsCompare.escalatedAlertsPerc === 0
+  ) {
+    // do not display the compare section if any of the values are 0
+    // this avoids showing a 0% change which is not useful
+    return null;
+  }
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
       <EuiFlexItem grow={false}>

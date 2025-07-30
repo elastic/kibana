@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
@@ -60,18 +60,12 @@ export const ComparePercentageBadge = ({
           statType,
         }),
   };
-  return (
-    <span
-      css={css`
-        display: flex;
-        flex-direction: column;
-        z-index: 9999;
-        position: relative;
-        // positioning hack for Lens Metric
-        top: ${positionForLens ? '-55px' : 'initial'};
-        left: ${positionForLens ? '20px' : 'initial'};
-      `}
-    >
+  const statUI = useMemo(() => {
+    if (previousCount === 0 || currentCount === 0) {
+      // do not display percentage change if either count is zero
+      return null;
+    }
+    return (
       <span
         css={css`
           display: flex;
@@ -88,6 +82,28 @@ export const ComparePercentageBadge = ({
           </EuiText>
         )}
       </span>
+    );
+  }, [
+    currentCount,
+    percentInfo.color,
+    percentInfo.note,
+    percentInfo.percent,
+    previousCount,
+    timeRange,
+  ]);
+  return (
+    <span
+      css={css`
+        display: flex;
+        flex-direction: column;
+        z-index: 9999;
+        position: relative;
+        // positioning hack for Lens Metric
+        top: ${positionForLens ? '-55px' : 'initial'};
+        left: ${positionForLens ? '20px' : 'initial'};
+      `}
+    >
+      {statUI}
       {description && (
         <span
           css={css`

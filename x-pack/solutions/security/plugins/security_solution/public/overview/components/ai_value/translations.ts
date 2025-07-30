@@ -187,6 +187,14 @@ export const ANALYST_RATE = (rate: string) =>
     values: { rate },
   });
 
+export const EXECUTIVE_MESSAGE_NO_ATTACKS = i18n.translate(
+  'xpack.securitySolution.aiValue.executiveMessageNoAttacks',
+  {
+    defaultMessage:
+      'There are no attack discoveries in the selected time range. Update your time range to include attack discoveries, or visit the attack discovery page to start generating attacks.',
+  }
+);
+
 export const EXECUTIVE_MESSAGE_SECOND = i18n.translate(
   'xpack.securitySolution.aiValue.executiveMessageSecond',
   {
@@ -235,6 +243,13 @@ export const EXECUTIVE_THREATS_DETECTED_DESC = (isIncrease: boolean) =>
     defaultMessage: '{creaseType} in real threats detected, improving detection coverage',
     values: { creaseType: isIncrease ? EXECUTIVE_INCREASE : EXECUTIVE_DECREASE },
   });
+
+export const EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE = i18n.translate(
+  'xpack.securitySolution.aiValue.executiveThreatsDetectedDesc',
+  {
+    defaultMessage: 'real threats detected, improving detection coverage',
+  }
+);
 
 export const AI_FILTERED = i18n.translate('xpack.securitySolution.aiValue.aiFiltered', {
   defaultMessage: 'AI filtered',

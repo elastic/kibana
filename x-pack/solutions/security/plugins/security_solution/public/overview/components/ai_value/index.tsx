@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
@@ -13,11 +13,12 @@ import { AlertProcessing } from './alert_processing';
 import { useValueMetrics } from './use_value_metrics';
 
 interface Props {
+  setHasAttackDiscoveries: React.Dispatch<boolean>;
   from: string;
   to: string;
 }
 
-export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
+export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from, to }) => {
   // TODO: make these configurable
   const minutesPerAlert = 8;
   const analystHourlyRate = 75;
@@ -29,12 +30,22 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
     analystHourlyRate,
   });
 
+  const hasAttackDiscoveries = useMemo(
+    () => valueMetrics.attackDiscoveryCount > 0,
+    [valueMetrics.attackDiscoveryCount]
+  );
+
+  useEffect(() => {
+    setHasAttackDiscoveries(hasAttackDiscoveries);
+  }, [hasAttackDiscoveries, setHasAttackDiscoveries]);
+
   // TODO loading state UI
   return isLoading ? null : (
     <>
       <ExecutiveSummary
         analystHourlyRate={analystHourlyRate}
         attackAlertIds={attackAlertIds}
+        hasAttackDiscoveries={hasAttackDiscoveries}
         minutesPerAlert={minutesPerAlert}
         from={from}
         to={to}
@@ -43,22 +54,24 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
       />
       <EuiSpacer size="l" />
 
-      <EuiFlexGrid columns={2} gutterSize="l">
-        <AlertProcessing
-          attackAlertIds={attackAlertIds}
-          valueMetrics={valueMetrics}
-          valueMetricsCompare={valueMetricsCompare}
-          from={from}
-          to={to}
-        />
-        <CostSavingsTrend
-          analystHourlyRate={analystHourlyRate}
-          attackAlertIds={attackAlertIds}
-          minutesPerAlert={minutesPerAlert}
-          from={from}
-          to={to}
-        />
-      </EuiFlexGrid>
+      {hasAttackDiscoveries && (
+        <EuiFlexGrid columns={2} gutterSize="l">
+          <AlertProcessing
+            attackAlertIds={attackAlertIds}
+            valueMetrics={valueMetrics}
+            valueMetricsCompare={valueMetricsCompare}
+            from={from}
+            to={to}
+          />
+          <CostSavingsTrend
+            analystHourlyRate={analystHourlyRate}
+            attackAlertIds={attackAlertIds}
+            minutesPerAlert={minutesPerAlert}
+            from={from}
+            to={to}
+          />
+        </EuiFlexGrid>
+      )}
       <EuiSpacer size="l" />
     </>
   );
