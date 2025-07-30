@@ -104,7 +104,10 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty iconType="gear" href={manageKeysLink} data-test-subj="manageApiKeysButton">
-          Manage API keys
+          <FormattedMessage
+            id="xpack.searchHomepage.apiKeyForm.manageKeysButton"
+            defaultMessage="Manage API keys"
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
