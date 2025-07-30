@@ -120,7 +120,8 @@ export const CountryFlags = ({ countryCodes }: CountryFlagsProps) => {
               font-weight: medium;
             `}
           >
-            {'+'}{groupedCodes.length - VISIBLE_FLAGS_LIMIT}
+            {'+'}
+            {groupedCodes.length - VISIBLE_FLAGS_LIMIT}
           </EuiText>
         ) : null}
       </RoundedBadge>
