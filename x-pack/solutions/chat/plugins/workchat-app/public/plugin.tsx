@@ -71,13 +71,13 @@ export class WorkChatAppPlugin
     //   http,
     // });
 
-    // this.services = {
-    //   chatService,
-    //   agentService,
-    //   conversationService,
-    //   integrationService,
-    //   integrationRegistry: this.integrationRegistry,
-    // };
+    this.services = {
+      // chatService,
+      // agentService,
+      // conversationService,
+      // integrationService,
+      // integrationRegistry: this.integrationRegistry,
+    };
 
     return {};
   }
