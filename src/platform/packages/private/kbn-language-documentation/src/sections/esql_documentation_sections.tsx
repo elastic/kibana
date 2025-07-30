@@ -172,7 +172,10 @@ export const processingCommands = {
       label: i18n.translate('languageDocumentation.documentationESQL.changePoint', {
         defaultMessage: 'CHANGE_POINT',
       }),
+
       preview: true,
+      license: { name: 'PLATINUM' },
+
       description: (
         <Markdown
           openLinksInNewTab={true}
