@@ -295,8 +295,9 @@ export function WaterfallItem({
             })
           : undefined
       }
-      onClick={() => {
+      onClick={(e: React.MouseEvent) => {
         if (onClick) {
+          e.stopPropagation();
           onClick(waterfallItemFlyoutTab);
         }
       }}

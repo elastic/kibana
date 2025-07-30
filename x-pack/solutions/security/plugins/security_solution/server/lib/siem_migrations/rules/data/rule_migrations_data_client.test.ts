@@ -10,7 +10,7 @@ import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('./rule_migrations_data_rules_client');
 jest.mock('./rule_migrations_data_resources_client');
@@ -55,7 +55,7 @@ const mockLogger = {
 } as unknown as jest.Mocked<Logger>;
 
 const mockSpaceId = 'default';
-const mockDependencies = {} as unknown as jest.Mocked<SiemRuleMigrationsClientDependencies>;
+const mockDependencies = {} as unknown as jest.Mocked<SiemMigrationsClientDependencies>;
 
 describe('RuleMigrationsDataClient', () => {
   beforeEach(() => {
