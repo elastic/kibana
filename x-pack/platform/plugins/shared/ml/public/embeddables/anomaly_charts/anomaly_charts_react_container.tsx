@@ -22,7 +22,7 @@ import { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { TimeRange } from '@kbn/es-query';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 
 import type {
   AnomalyChartsEmbeddableOverridableState,
