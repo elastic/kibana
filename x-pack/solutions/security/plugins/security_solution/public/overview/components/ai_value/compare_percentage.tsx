@@ -45,11 +45,11 @@ export const ComparePercentage = ({
         }),
   };
   return (
-    <>
+    <span data-test-subj="comparePercentage">
       {percentInfo.note}
       {` `}
       {i18n.TIME_RANGE(timeRange)}
       {`.`}
-    </>
+    </span>
   );
 };

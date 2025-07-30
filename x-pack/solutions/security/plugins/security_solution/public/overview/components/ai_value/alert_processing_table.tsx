@@ -26,7 +26,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
   escalatedAlertsPerc,
 }) => {
   return (
-    <div style={{ maxWidth: 280 }}>
+    <div style={{ maxWidth: 280 }} data-test-subj="alertsProcessingTable">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
@@ -34,7 +34,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
           </EuiText>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="alertsProcessingTableTotalAlerts">
           <EuiTitle size="m">
             <h2>{formatThousands(totalAlerts)}</h2>
           </EuiTitle>
@@ -42,7 +42,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
 
         <EuiSpacer size="s" />
 
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="alertsProcessingTableFilteredAlerts">
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiHealth color="#00BFB3" />
@@ -60,7 +60,7 @@ export const AlertsProcessingTable: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="alertsProcessingTableEscalatedAlerts">
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiHealth color="#FEC514" />

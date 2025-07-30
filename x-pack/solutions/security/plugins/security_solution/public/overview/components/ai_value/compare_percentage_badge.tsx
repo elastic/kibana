@@ -93,6 +93,7 @@ export const ComparePercentageBadge = ({
   ]);
   return (
     <span
+      data-test-subj="comparePercentageBadge"
       css={css`
         display: flex;
         flex-direction: column;

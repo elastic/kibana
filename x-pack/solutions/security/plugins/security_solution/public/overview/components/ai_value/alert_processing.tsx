@@ -14,20 +14,11 @@ import { AlertProcessingDonut } from './alert_processing_donut';
 import { AlertProcessingCompare } from './alert_processing_compare';
 
 interface Props {
-  attackAlertIds: string[];
-  from: string;
-  to: string;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
 }
 
-export const AlertProcessing: React.FC<Props> = ({
-  attackAlertIds,
-  valueMetrics,
-  valueMetricsCompare,
-  from,
-  to,
-}) => {
+export const AlertProcessing: React.FC<Props> = ({ valueMetrics, valueMetricsCompare }) => {
   return (
     <EuiPanel paddingSize="l" hasBorder hasShadow={false}>
       <EuiTitle size="s">

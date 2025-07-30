@@ -28,15 +28,15 @@ export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMet
     return null;
   }
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup gutterSize="xs" direction="column" data-test-subj="alertProcessingCompare">
+      <EuiFlexItem grow={false} data-test-subj="alertProcessingCompareTitle">
         <EuiText size="xs">
           <p>{i18n.COMPARED}</p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="alertProcessingCompareFilteringRate">
             <ComparePercentageBadge
               currentCount={valueMetrics.filteredAlertsPerc}
               previousCount={valueMetricsCompare.filteredAlertsPerc}
@@ -44,7 +44,7 @@ export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMet
               statType={i18n.FILTERING_RATE}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="alertProcessingCompareNonSuspiciousLabel">
             <EuiText size="xs">
               <p>{i18n.NON_SUSPICIOUS_ALERTS}</p>
             </EuiText>
@@ -53,7 +53,7 @@ export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMet
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="alertProcessingCompareEscalatedRate">
             <ComparePercentageBadge
               currentCount={valueMetrics.escalatedAlertsPerc}
               previousCount={valueMetricsCompare.escalatedAlertsPerc}
@@ -61,7 +61,7 @@ export const AlertProcessingCompare: React.FC<Props> = ({ valueMetrics, valueMet
               statType={i18n.ESCALATED_RATE}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="alertProcessingCompareEscalatedLabel">
             <EuiText size="xs">
               <p>{i18n.ESCALATED_ALERTS}</p>
             </EuiText>

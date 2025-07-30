@@ -56,13 +56,7 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
 
       {hasAttackDiscoveries && (
         <EuiFlexGrid columns={2} gutterSize="l">
-          <AlertProcessing
-            attackAlertIds={attackAlertIds}
-            valueMetrics={valueMetrics}
-            valueMetricsCompare={valueMetricsCompare}
-            from={from}
-            to={to}
-          />
+          <AlertProcessing valueMetrics={valueMetrics} valueMetricsCompare={valueMetricsCompare} />
           <CostSavingsTrend
             analystHourlyRate={analystHourlyRate}
             attackAlertIds={attackAlertIds}
