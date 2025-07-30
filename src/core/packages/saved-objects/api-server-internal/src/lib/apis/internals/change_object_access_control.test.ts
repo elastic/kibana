@@ -152,7 +152,7 @@ describe('changeObjectAccessControl', () => {
         const result = await changeObjectAccessControl({
           ...params,
           options: {
-            newOwnerProfileUid: 'owner-1',
+            newOwnerProfileUid: 'u_unittestuser_version',
           },
           actionType: 'changeOwnership',
         });
@@ -173,7 +173,7 @@ describe('changeObjectAccessControl', () => {
         mockMgetResults([{ found: true, namespaces: ['default'] }]);
         const result = await changeObjectAccessControl({
           ...params,
-          options: { newOwnerProfileUid: 'new-owner' },
+          options: { newOwnerProfileUid: 'u_unittestuser_version' },
           actionType: 'changeOwnership',
         });
         expect(client.mget).not.toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('changeObjectAccessControl', () => {
         await changeObjectAccessControl({
           ...params,
           securityExtension: params.securityExtension,
-          options: { newOwnerProfileUid: 'new-owner', namespace: 'default' },
+          options: { newOwnerProfileUid: 'u_unittestuser_version', namespace: 'default' },
           actionType: 'changeOwnership',
         });
         expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith(
