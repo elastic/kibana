@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
-import { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '@kbn/threat-intelligence-plugin/common/types/indicator';
 import { FILTER_IN_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
@@ -40,6 +40,10 @@ export interface FilterInCellActionProps extends FilterInProps {
    * Display component for when the FilterIn component is used within an {@link EuiDataGrid}.
    */
   Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+}
+
+export interface FilterInContextMenuProps extends FilterInProps {
+  onAnnounce: (filterInMessage: string) => void;
 }
 
 /**
@@ -114,10 +118,11 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const FilterInContextMenu: VFC<FilterInProps> = ({
+export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
+  onAnnounce,
 }) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
@@ -129,7 +134,10 @@ export const FilterInContextMenu: VFC<FilterInProps> = ({
       key="filterIn"
       icon="plusInCircle"
       size="s"
-      onClick={filterFn}
+      onClick={() => {
+        filterFn();
+        onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));
+      }}
       data-test-subj={dataTestSub}
     >
       {FILTER_IN_TITLE}
