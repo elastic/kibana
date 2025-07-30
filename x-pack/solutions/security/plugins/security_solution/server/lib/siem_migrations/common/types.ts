@@ -7,7 +7,11 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceClient } from '@kbn/inference-common';
 
@@ -18,6 +22,13 @@ export interface SiemMigrationsClientDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
+}
+
+export interface SiemMigrationsCreateClientParams {
+  request: KibanaRequest;
+  currentUser: AuthenticatedUser | null;
+  spaceId: string;
+  dependencies: SiemMigrationsClientDependencies;
 }
 
 export type SiemMigrationsIndexNameProvider = () => Promise<string>;

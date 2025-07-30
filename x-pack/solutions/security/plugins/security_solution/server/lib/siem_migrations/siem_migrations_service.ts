@@ -11,14 +11,13 @@ import type { ConfigType } from '../../config';
 import {
   SiemRuleMigrationsService,
   type SiemRuleMigrationsClient,
-  type SiemRuleMigrationsCreateClientParams,
 } from './rules/siem_rule_migrations_service';
 import type { SiemMigrationsSetupParams } from './types';
 import {
   SiemDashboardMigrationsService,
   type SiemDashboardMigrationsClient,
-  type SiemDashboardMigrationsCreateClientParams,
 } from './dashboards/siem_dashboard_migration_service';
+import type { SiemMigrationsCreateClientParams } from './common/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -50,13 +49,11 @@ export class SiemMigrationsService {
     }
   }
 
-  createRulesClient(params: SiemRuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
     return this.rulesService.createClient(params);
   }
 
-  createDashboardsClient(
-    params: SiemDashboardMigrationsCreateClientParams
-  ): SiemDashboardMigrationsClient {
+  createDashboardsClient(params: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     return this.dashboardsService.createClient(params);
   }
 

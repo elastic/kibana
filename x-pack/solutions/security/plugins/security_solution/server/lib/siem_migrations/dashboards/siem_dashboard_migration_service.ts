@@ -6,29 +6,16 @@
  */
 
 import assert from 'assert';
-import type {
-  AuthenticatedUser,
-  IClusterClient,
-  KibanaRequest,
-  LoggerFactory,
-  Logger,
-} from '@kbn/core/server';
+import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_data_client';
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
-import type { SiemMigrationsClientDependencies } from '../common/types';
+import type { SiemMigrationsCreateClientParams } from '../common/types';
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;
   pluginStop$: Subject<void>;
   tasksTimeoutMs?: number;
-}
-
-export interface SiemDashboardMigrationsCreateClientParams {
-  request: KibanaRequest;
-  currentUser: AuthenticatedUser | null;
-  spaceId: string;
-  dependencies: SiemMigrationsClientDependencies;
 }
 
 export interface SiemDashboardMigrationsClient {
@@ -59,7 +46,7 @@ export class SiemDashboardMigrationsService {
     currentUser,
     spaceId,
     dependencies,
-  }: SiemDashboardMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  }: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
     assert(this.esClusterClient, 'ES client not available, please call setup first');
 
