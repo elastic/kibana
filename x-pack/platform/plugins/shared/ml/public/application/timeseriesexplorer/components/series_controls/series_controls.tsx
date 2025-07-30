@@ -26,7 +26,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '@kbn/ml-common-types/storage';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { FieldDefinition } from '@kbn/ml-services/results_service_2/result_service_rx';
 
