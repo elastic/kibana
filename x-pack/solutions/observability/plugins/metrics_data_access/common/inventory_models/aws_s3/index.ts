@@ -31,18 +31,4 @@ export const awsS3 = createInventoryModel('awsS3', {
     id: 'aws.s3.bucket.name',
     name: 'aws.s3.bucket.name',
   },
-  requiredMetrics: [
-    'awsS3BucketSize',
-    'awsS3NumberOfObjects',
-    'awsS3TotalRequests',
-    'awsS3DownloadBytes',
-    'awsS3UploadBytes',
-  ],
-  tooltipMetrics: [
-    's3BucketSize',
-    's3NumberOfObjects',
-    's3TotalRequests',
-    's3UploadBytes',
-    's3DownloadBytes',
-  ],
 });
