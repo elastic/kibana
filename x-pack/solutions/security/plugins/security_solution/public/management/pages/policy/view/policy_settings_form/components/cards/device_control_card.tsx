@@ -37,10 +37,6 @@ const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
   PolicyOperatingSystem.mac,
 ];
 
-/**
- * The Malware Protections form for policy details
- * which will configure for all relevant OSes.
- */
 export const DeviceControlCard = React.memo<DeviceControlProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);

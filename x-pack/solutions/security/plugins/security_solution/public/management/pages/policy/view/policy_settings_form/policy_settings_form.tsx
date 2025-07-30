@@ -52,7 +52,6 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const { eventCollectionDataReductionBannerEnabled, trustedDevicesEnabled } =
     useEnableExperimental();
 
-  // Helper function to render trusted devices section
   const renderDeviceControlSection = () => {
     if (!trustedDevicesEnabled) {
       return null;

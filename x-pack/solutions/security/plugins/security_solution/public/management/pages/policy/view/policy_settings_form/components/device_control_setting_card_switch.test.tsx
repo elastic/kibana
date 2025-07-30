@@ -26,7 +26,6 @@ const setDeviceControlMode = ({
 }) => {
   const enabled = !turnOff;
 
-  // Ensure popup and device_control objects exist and assign to constants
   policy.windows.popup = policy.windows.popup ?? {};
   policy.mac.popup = policy.mac.popup ?? {};
   if (!policy.windows.device_control) {
@@ -44,7 +43,6 @@ const setDeviceControlMode = ({
   const windowsDeviceControl = policy.windows.device_control;
   const macDeviceControl = policy.mac.device_control;
 
-  // This logic now mirrors the component's behavior
   windowsDeviceControl.enabled = enabled;
   macDeviceControl.enabled = enabled;
 
@@ -54,7 +52,6 @@ const setDeviceControlMode = ({
     macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.block;
   }
 
-  // Popups are always aligned with the enabled state
   policy.windows.popup.device_control = { enabled, message: '' };
   policy.mac.popup.device_control = { enabled, message: '' };
 };

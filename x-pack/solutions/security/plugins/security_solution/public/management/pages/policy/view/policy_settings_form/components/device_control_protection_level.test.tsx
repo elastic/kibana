@@ -34,7 +34,6 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
     const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
       .config.policy.value;
 
-    // Default to block for tests
     policy.windows.device_control = {
       enabled: true,
       usb_storage: DeviceControlAccessLevelEnum.block,

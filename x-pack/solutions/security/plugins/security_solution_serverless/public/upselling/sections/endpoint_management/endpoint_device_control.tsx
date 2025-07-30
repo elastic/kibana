@@ -13,14 +13,14 @@ import styled from '@emotion/styled';
 const CARD_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.endpointDeviceControl.cardTitle',
   {
-    defaultMessage: 'USB device protection',
+    defaultMessage: 'Device Control',
   }
 );
 const CARD_MESSAGE = i18n.translate(
   'xpack.securitySolutionServerless.endpointDeviceControl.cardMessage',
   {
     defaultMessage:
-      'To turn on USB device protection, you must add at least Endpoint Complete to your project. ',
+      'To turn on Device Control, you must add at least Endpoint Complete to your project. ',
   }
 );
 const BADGE_TEXT = i18n.translate(
@@ -34,9 +34,6 @@ const CardDescription = styled.p`
   padding: 0 33.3%;
 `;
 
-/**
- * Component displayed when a given product tier is not allowed to use endpoint policy protections.
- */
 export const EndpointDeviceControl = memo(() => {
   return (
     <EuiCard

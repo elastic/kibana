@@ -85,7 +85,6 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
     }, []);
 
     const getCurrentAccessLevel = useMemo(() => {
-      // Check Windows first, then Mac for device_control configuration
       if (policy.windows.device_control?.usb_storage) {
         return policy.windows.device_control.usb_storage;
       }
@@ -191,7 +190,6 @@ const DeviceControlAccessRadio = React.memo(
     const handleRadioChange = useCallback(() => {
       const newPayload = cloneDeep(policy);
 
-      // Update Windows device control
       if (!newPayload.windows.device_control) {
         newPayload.windows.device_control = {
           enabled: true,
@@ -201,7 +199,6 @@ const DeviceControlAccessRadio = React.memo(
         newPayload.windows.device_control.usb_storage = accessLevel;
       }
 
-      // Update Mac device control
       if (!newPayload.mac.device_control) {
         newPayload.mac.device_control = {
           enabled: true,

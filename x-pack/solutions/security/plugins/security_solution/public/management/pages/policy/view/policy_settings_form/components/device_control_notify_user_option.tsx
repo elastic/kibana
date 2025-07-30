@@ -47,7 +47,6 @@ export const DeviceControlNotifyUserOption = React.memo(
 
     const isEditMode = mode === 'edit';
 
-    // Check if device control is enabled
     const isDeviceControlEnabled = useMemo(() => {
       return policy.windows.device_control?.enabled || policy.mac.device_control?.enabled || false;
     }, [policy]);
