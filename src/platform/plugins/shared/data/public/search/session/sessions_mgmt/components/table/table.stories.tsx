@@ -18,7 +18,7 @@ import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SessionsClient } from '../../../sessions_client';
 import { getUiSessionMocks } from '../../__mocks__';
-import { UISession } from '../../types';
+import type { UISession } from '../../types';
 import { ACTION } from '../actions';
 
 export default {

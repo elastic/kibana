@@ -29,7 +29,7 @@ import { promisify } from 'util';
 import { useEsqlEditorParams } from '../hooks/use_esql_editor_params';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 import { EsqlParamRow } from './esql_param_row';
 
 export const OnechatEsqlEditorField = React.memo(() => {

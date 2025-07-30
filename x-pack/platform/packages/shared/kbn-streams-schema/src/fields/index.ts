@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { recursiveRecord } from '../shared/record_types';

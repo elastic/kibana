@@ -13,7 +13,7 @@ import type {
   LayerSpecification,
   VectorTileSource,
 } from '@kbn/mapbox-gl';
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
@@ -21,24 +21,22 @@ import type { DynamicSizeProperty } from '../../../styles/vector/properties/dyna
 import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
 import { getField } from '../../../../../common/elasticsearch_util';
 import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/constants';
-import {
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-  AbstractVectorLayer,
-  VectorLayerArguments,
-} from '../vector_layer';
-import { IMvtVectorSource } from '../../../sources/vector_source';
-import { DataRequestContext } from '../../../../actions';
-import {
+import type { VectorLayerArguments } from '../vector_layer';
+import { NO_RESULTS_ICON_AND_TOOLTIPCONTENT, AbstractVectorLayer } from '../vector_layer';
+import type { IMvtVectorSource } from '../../../sources/vector_source';
+import type { DataRequestContext } from '../../../../actions';
+import type {
   DataRequestMeta,
   StyleMetaDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { ESSearchSource } from '../../../sources/es_search_source';
+import type { ESSearchSource } from '../../../sources/es_search_source';
 import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
-import { InnerJoin } from '../../../joins/inner_join';
-import { LayerIcon } from '../../layer';
-import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import type { InnerJoin } from '../../../joins/inner_join';
+import type { LayerIcon } from '../../layer';
+import type { MvtSourceData } from './mvt_source_data';
+import { syncMvtSourceData } from './mvt_source_data';
+import type { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { pluckStyleMeta } from './pluck_style_meta';
 import {
   ES_MVT_HITS_TOTAL_RELATION,

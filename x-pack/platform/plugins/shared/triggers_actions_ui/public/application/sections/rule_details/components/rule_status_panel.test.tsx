@@ -17,7 +17,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
+import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
+import { RuleStatusPanel } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({

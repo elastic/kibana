@@ -10,10 +10,11 @@
 import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { monaco } from '@kbn/monaco';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

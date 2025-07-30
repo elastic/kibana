@@ -6,18 +6,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
-  ConversationWithoutRounds,
 } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
 } from '../../../common/conversations';
-import { ConversationStorage } from './storage';
+import type { ConversationStorage } from './storage';
 import {
   fromEs,
   fromEsWithoutRounds,

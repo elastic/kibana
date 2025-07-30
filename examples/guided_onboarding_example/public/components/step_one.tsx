@@ -24,7 +24,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 
 interface GuidedOnboardingExampleAppDeps {
   guidedOnboarding?: GuidedOnboardingPluginStart;

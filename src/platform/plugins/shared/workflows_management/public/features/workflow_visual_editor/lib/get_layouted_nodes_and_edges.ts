@@ -8,7 +8,7 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { Position } from '@xyflow/react';
 
 export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';

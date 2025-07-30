@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
+import type { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';

@@ -6,9 +6,9 @@
  */
 
 import expect from 'expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryEditorClient,
 } from './helpers/repository_client';

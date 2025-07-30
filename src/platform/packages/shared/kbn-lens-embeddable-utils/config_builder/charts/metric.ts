@@ -14,7 +14,8 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
+import type { BuildDependencies, LensAttributes, LensMetricConfig } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerColumn,
   addLayerFormulaColumns,

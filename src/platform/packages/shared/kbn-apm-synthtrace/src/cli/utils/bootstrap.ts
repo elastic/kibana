@@ -13,7 +13,7 @@ import { createLogger } from '../../lib/utils/create_logger';
 import { SynthtraceClientsManager } from './clients_manager';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
-import { RunOptions } from './parse_run_cli_flags';
+import type { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
 
 export async function bootstrap({

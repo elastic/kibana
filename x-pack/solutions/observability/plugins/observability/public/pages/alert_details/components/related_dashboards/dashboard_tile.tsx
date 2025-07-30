@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
-import { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
 

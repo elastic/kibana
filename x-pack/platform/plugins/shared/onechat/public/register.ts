@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core-lifecycle-browser';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { AppMountParameters } from '@kbn/core-application-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { OnechatInternalService } from './services';
-import { OnechatPluginStart } from './types';
+import type { OnechatInternalService } from './services';
+import type { OnechatPluginStart } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
 
 export const registerApp = ({

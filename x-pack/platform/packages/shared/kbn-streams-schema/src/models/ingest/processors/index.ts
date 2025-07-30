@@ -7,11 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import {
-  ElasticsearchProcessorType,
-  elasticsearchProcessorTypes,
-} from '../../../ingest_pipeline_processors';
-import { Condition, conditionSchema } from '../../../conditions';
+import type { ElasticsearchProcessorType } from '../../../ingest_pipeline_processors';
+import { elasticsearchProcessorTypes } from '../../../ingest_pipeline_processors';
+import type { Condition } from '../../../conditions';
+import { conditionSchema } from '../../../conditions';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 /**

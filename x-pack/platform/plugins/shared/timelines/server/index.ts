@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
+import type { ConfigSchema } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { TimelinesPlugin } = await import('./plugin');

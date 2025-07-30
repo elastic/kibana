@@ -6,11 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 interface RuleSO {
   alert: Rule<BaseRuleParams>;

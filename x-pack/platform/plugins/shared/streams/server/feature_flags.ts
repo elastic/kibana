@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
 } from '@kbn/management-settings-ids';
-import { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
+import type { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
 export function registerFeatureFlags(

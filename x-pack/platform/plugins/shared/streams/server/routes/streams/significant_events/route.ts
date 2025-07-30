@@ -6,7 +6,7 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import {
+import type {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';

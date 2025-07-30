@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsMappingState } from '../../server/types';
+import type { EcsMappingState } from '../../server/types';
 import { SamplesFormatName } from '../../common';
 
 export const ecsMappingExpectedResults = {

@@ -8,13 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
-import { AIAssistantType } from '../common/ai_assistant_type';
+import type { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Context, propagation } from '@opentelemetry/api';
+import type { Context } from '@opentelemetry/api';
+import { propagation } from '@opentelemetry/api';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 
 export function isInInferenceContext(context: Context) {

@@ -6,10 +6,11 @@
  */
 
 import { partition, mapValues, pickBy } from 'lodash';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { nonNullable } from '../../../utils';
 import type { DateRange } from '../../../../common/types';
 import type {
@@ -33,12 +34,13 @@ import {
 import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
-import {
+import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './definitions/column_types';
-import { FormulaIndexPatternColumn, insertOrReplaceFormulaColumn } from './definitions/formula';
+import type { FormulaIndexPatternColumn } from './definitions/formula';
+import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';

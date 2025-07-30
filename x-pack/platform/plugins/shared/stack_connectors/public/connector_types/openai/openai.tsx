@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
-import { ActionParams, OpenAIConnector } from './types';
+import type { ActionParams, OpenAIConnector } from './types';
 
 interface ValidationErrors {
   subAction: string[];

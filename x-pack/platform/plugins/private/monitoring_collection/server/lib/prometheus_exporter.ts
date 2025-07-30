@@ -6,12 +6,12 @@
  */
 
 import { metrics } from '@elastic/opentelemetry-node/sdk';
+import type { ExporterConfig } from '@opentelemetry/exporter-prometheus';
 import {
   PrometheusExporter as OpenTelemetryPrometheusExporter,
-  ExporterConfig,
   PrometheusSerializer,
 } from '@opentelemetry/exporter-prometheus';
-import { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 
 export class PrometheusExporter extends metrics.MetricReader {
   private readonly prefix?: string;

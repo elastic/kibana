@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 
 export const ShowSelectedFilters = ({ filters }: { filters: MonitorFilters }) => {
   return (

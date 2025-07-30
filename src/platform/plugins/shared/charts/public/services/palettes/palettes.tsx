@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { getKbnPalettes, KbnPalette, type IKbnPalette } from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { createColorPalette as createLegacyColorPalette } from '../..';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';

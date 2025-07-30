@@ -10,7 +10,7 @@ import { core, node, resources, tracing } from '@elastic/opentelemetry-node/sdk'
 import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
 import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 import { fromExternalVariant } from '@kbn/std';
-import { TracingConfig } from '@kbn/tracing-config';
+import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';

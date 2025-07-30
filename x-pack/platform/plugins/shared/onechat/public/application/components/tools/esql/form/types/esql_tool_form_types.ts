@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsqlToolFieldTypes } from '@kbn/onechat-common';
+import type { EsqlToolFieldTypes } from '@kbn/onechat-common';
 
 export interface OnechatEsqlParam {
   name: string;

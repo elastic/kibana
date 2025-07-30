@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GeneralDatasourceStates } from '../../../state_management';
-import { DatatableVisualizationState } from '../datatable_visualization';
+import type { GeneralDatasourceStates } from '../../../state_management';
+import type { DatatableVisualizationState } from '../datatable_visualization';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(

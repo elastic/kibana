@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {

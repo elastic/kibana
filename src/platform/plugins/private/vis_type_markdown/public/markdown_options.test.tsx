@@ -8,8 +8,8 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { MarkdownVisParams } from './types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 import { I18nProvider } from '@kbn/i18n-react';
 

@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSwitch } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FieldDefinitionConfig } from '@kbn/streams-schema';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 interface FieldFormFormatProps {
   field: SchemaField;

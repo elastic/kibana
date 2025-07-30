@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 
 export async function addFromLibrary(dashboardApi: DashboardApi) {

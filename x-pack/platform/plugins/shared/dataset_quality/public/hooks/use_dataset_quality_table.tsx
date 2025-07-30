@@ -16,7 +16,7 @@ import { getDatasetQualityTableColumns } from '../components/dataset_quality/tab
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
-import { SortDirection } from '../../common/types';
+import type { SortDirection } from '../../common/types';
 import { useDatasetQualityState } from './use_dataset_quality_state';
 
 export type DatasetTableSortField = keyof DataStreamStat;

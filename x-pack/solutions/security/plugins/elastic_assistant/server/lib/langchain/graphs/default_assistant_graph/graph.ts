@@ -6,19 +6,19 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { StructuredTool } from '@langchain/core/tools';
+import type { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { ContentReferencesStore, Replacements } from '@kbn/elastic-assistant-common';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { AgentState, NodeParamsBase } from './types';
-import { AssistantDataClients } from '../../executors/types';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import type { ContentReferencesStore, Replacements } from '@kbn/elastic-assistant-common';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AgentState, NodeParamsBase } from './types';
+import type { AssistantDataClients } from '../../executors/types';
 
 import { stepRouter } from './nodes/step_router';
 import { modelInput } from './nodes/model_input';

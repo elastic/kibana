@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
-import { ACTION } from './components/actions';
+import type { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
+import type { ACTION } from './components/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 

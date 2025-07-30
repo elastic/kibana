@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { Method, AxiosRequestConfig } from 'axios';
+import type { Method, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;

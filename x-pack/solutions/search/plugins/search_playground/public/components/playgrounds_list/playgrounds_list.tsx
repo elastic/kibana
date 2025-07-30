@@ -6,21 +6,24 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { CriteriaWithPagination, EuiButton } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
-import { UsePlaygroundsListParameters, usePlaygroundsList } from '../../hooks/use_playgrounds_list';
+import type { UsePlaygroundsListParameters } from '../../hooks/use_playgrounds_list';
+import { usePlaygroundsList } from '../../hooks/use_playgrounds_list';
 import { SEARCH_PLAYGROUND_CHAT_PATH } from '../../routes';
 
 import { PlaygroundsListError } from './playgrounds_list_error';
 import { PlaygroundsListLoading } from './playgrounds_list_loading';
 import { PlaygroundsListEmptyState } from './empty_state';
-import { PlaygroundsTable, PlaygroundsTableProps } from './playgrounds_table';
-import { PlaygroundListObject } from '../../types';
+import type { PlaygroundsTableProps } from './playgrounds_table';
+import { PlaygroundsTable } from './playgrounds_table';
+import type { PlaygroundListObject } from '../../types';
 
 function PlaygroundListObjectFieldToSortField(field: string): 'updated_at' {
   // SO Index does not currently allow sorting on name, update this when we update SO index settings

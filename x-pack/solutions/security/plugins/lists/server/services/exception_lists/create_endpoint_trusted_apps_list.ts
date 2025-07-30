@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -16,7 +17,7 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
 
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectToExceptionList } from './utils';
 

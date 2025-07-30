@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { GlobalSearchTestPluginStart } from './plugin';
+import type { GlobalSearchTestPluginStart } from './plugin';
 
 export type GlobalSearchTestApi = GlobalSearchTestPluginStart;

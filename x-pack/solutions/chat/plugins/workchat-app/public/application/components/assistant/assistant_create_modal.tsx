@@ -24,7 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useKibana } from '../../hooks/use_kibana';
-import { AgentEditState, useAgentEdition } from '../../hooks/use_agent_edition';
+import type { AgentEditState } from '../../hooks/use_agent_edition';
+import { useAgentEdition } from '../../hooks/use_agent_edition';
 import type { Agent } from '../../../../common/agents';
 import { appPaths } from '../../app_paths';
 import { useNavigation } from '../../hooks/use_navigation';

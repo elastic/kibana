@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getUsername } from '../../../../../../tasks/common';
 import {
   expectedExportedExceptionList,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page } from '@playwright/test';
-import { PathOptions } from '../../../../../common/services/kibana_url';
+import type { Page } from '@playwright/test';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.

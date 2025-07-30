@@ -6,24 +6,24 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type {
   InferenceInferenceEndpointInfo,
   MlGetTrainedModelsStatsResponse,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { EIS_PRECONFIGURED_INFERENCE_IDS, KnowledgeBaseState } from '../../common';
-import { ObservabilityAIAssistantConfig } from '../config';
+import type { ObservabilityAIAssistantConfig } from '../config';
 import {
   getConcreteWriteIndex,
   getInferenceIdFromWriteIndex,
 } from './knowledge_base_service/get_inference_id_from_write_index';
 import { isReIndexInProgress } from './knowledge_base_service/reindex_knowledge_base';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
 const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
 

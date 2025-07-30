@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
 import {
   ENDPOINT_ARTIFACT_LISTS,
@@ -24,14 +24,14 @@ import type {
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { Role } from '@kbn/security-plugin-types-common';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { binaryToString } from '../../../detections_response/utils';
-import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { createSupertestErrorLogger } from '../../utils';
-import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');

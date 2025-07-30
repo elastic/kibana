@@ -9,7 +9,8 @@
 
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLAstItem, Parser, Walker } from '@kbn/esql-ast';
+import type { ESQLAstItem } from '@kbn/esql-ast';
+import { Parser, Walker } from '@kbn/esql-ast';
 import { getAstContext, isMarkerNode } from './context';
 
 const assertMarkerRemoved = (_query: string) => {

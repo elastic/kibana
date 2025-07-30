@@ -8,7 +8,7 @@
  */
 
 import { extractReferences } from '@kbn/data-plugin/common';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 
 export function transformSearchSourceIn(
   kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta']

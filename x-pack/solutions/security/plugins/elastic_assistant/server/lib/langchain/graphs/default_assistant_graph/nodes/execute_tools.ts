@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RunnableConfig } from '@langchain/core/runnables';
-import { StructuredTool } from '@langchain/core/tools';
+import type { RunnableConfig } from '@langchain/core/runnables';
+import type { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
 import { castArray } from 'lodash';
-import { AgentAction } from 'langchain/agents';
-import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AgentAction } from 'langchain/agents';
+import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { getActionTypeId } from '../../../../../routes/utils';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
-import { AgentState, NodeParamsBase } from '../types';
+import type { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
 export interface ExecuteToolsParams extends NodeParamsBase {

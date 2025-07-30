@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { getRowControlColumn } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 

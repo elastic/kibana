@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { AnyZodObject } from '@kbn/zod';
-import { StructuredTool, tool as toTool } from '@langchain/core/tools';
-import { Logger } from '@kbn/core/server';
+import type { AnyZodObject } from '@kbn/zod';
+import type { StructuredTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/core/server';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
-import { GatewayTool } from '../types';
-import { McpGatewaySession } from '../session';
+import type { GatewayTool } from '../types';
+import type { McpGatewaySession } from '../session';
 
 export function toLangchainTool({
   tool,

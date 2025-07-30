@@ -11,14 +11,14 @@ import {
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
-import {
+import type {
   ElasticRule,
   OriginalRule,
   RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { INDEX_PATTERN as SIEM_MIGRATIONS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
-import { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
+import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
 
 const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;

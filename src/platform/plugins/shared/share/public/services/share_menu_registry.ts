@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type {
   BrowserUrlService,

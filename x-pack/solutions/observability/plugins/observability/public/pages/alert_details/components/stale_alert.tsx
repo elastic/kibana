@@ -13,7 +13,7 @@ import { EuiButton, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { TopAlert } from '../../../typings/alerts';
+import type { TopAlert } from '../../../typings/alerts';
 import { useKibana } from '../../../utils/kibana_react';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 

@@ -11,7 +11,7 @@ import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
-import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
+import type { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 
 const control: RangeControlClass = {
   id: 'mock-range-control',

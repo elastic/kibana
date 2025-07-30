@@ -11,14 +11,15 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs';
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 
-import { calculateBounds, Query } from '../../..';
+import type { Query } from '../../..';
+import { calculateBounds } from '../../..';
 
-import { IAggConfigs } from '../../aggs';
-import { ISearchStartSearchSource } from '../../search_source';
+import type { IAggConfigs } from '../../aggs';
+import type { ISearchStartSearchSource } from '../../search_source';
 import { tabifyAggResponse } from '../../tabify';
 
 export interface RequestHandlerParams {

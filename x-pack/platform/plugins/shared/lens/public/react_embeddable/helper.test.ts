@@ -8,11 +8,11 @@ import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
 import { deserializeState, getStructuredDatasourceStates } from './helper';
 import { makeEmbeddableServices } from './mocks';
-import { FormBasedPersistedState } from '../datasources/form_based/types';
-import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import expect from 'expect';
-import { DatasourceState } from '../state_management';
-import { StructuredDatasourceStates } from './types';
+import type { DatasourceState } from '../state_management';
+import type { StructuredDatasourceStates } from './types';
 
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {

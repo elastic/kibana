@@ -29,8 +29,8 @@ import {
   ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

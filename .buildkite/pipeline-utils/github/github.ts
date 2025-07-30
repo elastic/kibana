@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 
 export const KIBANA_COMMENT_SIGIL = 'kbn-message-context';
 

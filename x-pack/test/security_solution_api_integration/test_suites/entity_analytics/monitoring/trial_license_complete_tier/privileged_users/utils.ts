@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common/src/constants';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
   getService: FtrProviderContext['getService'],

@@ -9,7 +9,7 @@
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { Usage } from './constants';
+import type { Usage } from './constants';
 
 const { makeUsageCollector } = createUsageCollectionSetupMock();
 

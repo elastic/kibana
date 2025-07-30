@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexWarning } from '../../../common/types';
+import type { IndexWarning } from '../../../common/types';
 import { versionService } from '../version';
-import { FlatSettings } from './types';
+import type { FlatSettings } from './types';
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;

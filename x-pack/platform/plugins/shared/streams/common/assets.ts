@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
-import { StreamQuery } from '@kbn/streams-schema';
+import type { ValuesType } from 'utility-types';
+import type { StreamQuery } from '@kbn/streams-schema';
 
 export const ASSET_TYPES = {
   Dashboard: 'dashboard' as const,

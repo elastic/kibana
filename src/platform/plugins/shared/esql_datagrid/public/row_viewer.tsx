@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface RowViewerProps {
   notifications?: NotificationsStart;

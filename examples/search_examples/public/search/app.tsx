@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -22,15 +23,15 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiText,
   EuiTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -38,13 +39,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { CreateAggConfigParams } from '@kbn/data-plugin/common';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CreateAggConfigParams } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
-import { IMyStrategyResponse } from '../../common/types';
+import type { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps
   extends Pick<

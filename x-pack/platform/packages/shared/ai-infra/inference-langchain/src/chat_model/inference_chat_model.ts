@@ -22,26 +22,25 @@ import type {
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { isZodSchema } from '@langchain/core/utils/types';
-import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
-import {
-  Runnable,
-  RunnablePassthrough,
-  RunnableSequence,
-  RunnableLambda,
-} from '@langchain/core/runnables';
-import {
+import type { Runnable } from '@langchain/core/runnables';
+import { RunnablePassthrough, RunnableSequence, RunnableLambda } from '@langchain/core/runnables';
+import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
   FunctionCallingMode,
+  ConnectorTelemetryMetadata,
+  ChatCompleteResponse,
+} from '@kbn/inference-common';
+import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
-  ConnectorTelemetryMetadata,
-  ChatCompleteResponse,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';

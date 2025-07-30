@@ -8,8 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,14 +21,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  UseEuiTheme,
   mathWithUnits,
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { MoveData } from '../move_data';
 import { createAppNavigationHandler } from '../app_navigation_handler';

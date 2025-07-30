@@ -6,11 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '@kbn/screenshotting-server';
-import * as puppeteer from 'puppeteer';
-import { Size } from '../../../common/layout';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import type * as puppeteer from 'puppeteer';
+import type { Size } from '../../../common/layout';
 import { PreserveLayout } from '../../layouts/preserve_layout';
+import type { PageWithCDPClient } from './driver';
 import { HeadlessChromiumDriver } from './driver';
 
 describe('chromium driver', () => {
@@ -63,7 +64,7 @@ describe('chromium driver', () => {
       mockScreenshotModeSetup,
       mockConfig,
       mockBasePath,
-      mockPage
+      mockPage as PageWithCDPClient
     );
 
     const result = await driver.screenshot({
@@ -82,7 +83,7 @@ describe('chromium driver', () => {
       mockScreenshotModeSetup,
       mockConfig,
       mockBasePath,
-      mockPage
+      mockPage as PageWithCDPClient
     );
 
     // @ts-expect-error spy on non-public class method

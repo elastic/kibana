@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -14,7 +15,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLoadingSpinner,
-  EuiThemeComputed,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -22,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { transformEsqlToolToFormData } from '../../../utils/transform_esql_form_data';
 import { OnechatEsqlToolForm } from './form/esql_tool_form';
-import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
 
 const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>

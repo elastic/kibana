@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLFunction,
-  isColumn,
-  isFunctionExpression,
-} from '@kbn/esql-ast';
+import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { isColumn, isFunctionExpression } from '@kbn/esql-ast';
 import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';

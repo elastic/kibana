@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { StreamlangProcessorDefinition } from '../../../types/processors';
-import { Condition } from '../../../types/conditions';
-import { StreamlangStep, isWhereBlock } from '../../../types/streamlang';
+import type { StreamlangProcessorDefinition } from '../../../types/processors';
+import type { Condition } from '../../../types/conditions';
+import type { StreamlangStep } from '../../../types/streamlang';
+import { isWhereBlock } from '../../../types/streamlang';
 
 /**
  * Helper to combine two conditions as an "and" logical condition.

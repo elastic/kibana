@@ -8,7 +8,7 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EditMenu } from '../edit_menu.component';
-import { PositionedElement } from '../../../../../types';
+import type { PositionedElement } from '../../../../../types';
 
 const handlers = {
   cutNodes: action('cutNodes'),

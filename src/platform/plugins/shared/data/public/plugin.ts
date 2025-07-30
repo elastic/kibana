@@ -9,12 +9,9 @@
 
 import './index.scss';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  Storage,
-  IStorageWrapper,
-  createStartServicesGetter,
-} from '@kbn/kibana-utils-plugin/public';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   EVENT_PROPERTY_EXECUTION_CONTEXT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -38,7 +35,8 @@ import {
 } from './services';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
+import type { NowProviderInternalContract } from './now_provider';
+import { NowProvider } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
 import type {
   MultiValueClickDataContext,

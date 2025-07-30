@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiPageSection, EuiCode } from '@elastic/eui';
 import { useParams } from 'react-router-dom';

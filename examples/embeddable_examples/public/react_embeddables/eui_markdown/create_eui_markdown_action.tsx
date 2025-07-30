@@ -14,7 +14,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_EUI_MARKDOWN_ACTION_ID, EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState } from './types';
+import type { MarkdownEditorSerializedState } from './types';
 
 // -----------------------------------------------------------------------------
 // Create an action which allows this embeddable to be created from the dashboard toolbar context menu.

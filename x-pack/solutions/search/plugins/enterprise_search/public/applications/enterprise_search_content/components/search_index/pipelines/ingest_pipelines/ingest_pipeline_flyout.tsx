@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../../shared/doc_links';
 

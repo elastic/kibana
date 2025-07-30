@@ -9,7 +9,7 @@
 
 import type { ESQLMessage } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLPolicy, ESQLUserDefinedColumn } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLPolicy, ESQLUserDefinedColumn } from '@kbn/esql-ast/src/commands_registry/types';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { EditorError } from '../types';
 

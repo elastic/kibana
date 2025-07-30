@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeSystem, EuiThemeAmsterdam } from '@elastic/eui';
+import type { EuiThemeSystem } from '@elastic/eui';
+import { EuiThemeAmsterdam } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 
 export interface ThemeConfig {

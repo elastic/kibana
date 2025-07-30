@@ -6,7 +6,7 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { NodeTypeDefinition, NodeRunner } from '@kbn/wc-framework-types-server';
+import type { NodeTypeDefinition, NodeRunner } from '@kbn/wc-framework-types-server';
 
 export type MockedNodeTypeDefinition = NodeTypeDefinition<any> & {
   factory: jest.MockedFunction<() => MockedNodeRunner>;

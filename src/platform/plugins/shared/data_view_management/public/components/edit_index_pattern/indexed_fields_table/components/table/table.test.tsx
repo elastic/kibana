@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { IndexedFieldItem } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { IndexedFieldItem } from '../../types';
 import {
   TableWithoutPersist as Table,
   renderFieldName,

@@ -8,9 +8,9 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { JOB_STATUS, KibanaShuttingDownError } from '@kbn/reporting-common';
-import { ReportDocument } from '@kbn/reporting-common/types';
+import type { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -18,17 +18,18 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 
 import { RunScheduledReportTask, SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
-import { ReportingCore } from '../..';
+import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import {
+import type {
   FakeRawRequest,
   KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { Frequency } from '@kbn/rrule';
-import { ReportingStore, SavedReport } from '../store';
-import { ScheduledReportType } from '../../types';
+import type { ReportingStore } from '../store';
+import { SavedReport } from '../store';
+import type { ScheduledReportType } from '../../types';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 
 interface StreamMock {

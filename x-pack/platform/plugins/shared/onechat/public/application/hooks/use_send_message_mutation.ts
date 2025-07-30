@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { OnechatError, OnechatErrorCode } from '@kbn/onechat-common';
 import {
-  OnechatError,
-  OnechatErrorCode,
   isConversationCreatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,

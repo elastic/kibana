@@ -12,7 +12,7 @@
 import { readdirSync, readFileSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { ElasticsearchCommandDefinition } from '../src/definitions/types';
+import type { ElasticsearchCommandDefinition } from '../src/definitions/types';
 
 const GENERATED_COMMANDS_BASE_PATH = '../src/definitions/generated/commands';
 const ELASTICSEARCH_COMMANDS_PATH =

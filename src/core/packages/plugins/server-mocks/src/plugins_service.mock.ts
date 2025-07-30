@@ -9,8 +9,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
+import type { PluginsService } from '@kbn/core-plugins-server-internal';
 import {
-  PluginsService,
   type InternalPluginsServiceSetup,
   type InternalPluginsServiceStart,
 } from '@kbn/core-plugins-server-internal';

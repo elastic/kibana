@@ -6,8 +6,8 @@
  */
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('@ess @serverless @serverlessQA Response Actions support for sentinelOne agentType', function () {

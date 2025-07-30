@@ -8,7 +8,7 @@
  */
 
 import { ShareRegistry } from './share_menu_registry';
-import { ShareContext, ShareIntegration, ShareRegistryApiStart } from '../types';
+import type { ShareContext, ShareIntegration, ShareRegistryApiStart } from '../types';
 import { url } from '../mocks';
 
 describe('ShareActionsRegistry', () => {

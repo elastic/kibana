@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
-import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
-  StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';

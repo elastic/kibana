@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

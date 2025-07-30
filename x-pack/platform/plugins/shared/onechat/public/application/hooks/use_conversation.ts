@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
-import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Conversation, ConversationRound, ToolCallStep } from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useMemo, useRef } from 'react';
 import { queryKeys } from '../query_keys';

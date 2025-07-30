@@ -7,8 +7,8 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { validate } from './rule_form/validate';
 

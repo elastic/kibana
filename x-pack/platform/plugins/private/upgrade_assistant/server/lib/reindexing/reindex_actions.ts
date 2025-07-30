@@ -7,22 +7,16 @@
 
 import moment from 'moment';
 
-import {
+import type {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
   ElasticsearchClient,
   Logger,
 } from '@kbn/core/server';
-import {
-  REINDEX_OP_TYPE,
-  ReindexOperation,
-  ReindexOptions,
-  ReindexSavedObject,
-  ReindexStatus,
-  ReindexStep,
-} from '../../../common/types';
+import type { ReindexOperation, ReindexOptions, ReindexSavedObject } from '../../../common/types';
+import { REINDEX_OP_TYPE, ReindexStatus, ReindexStep } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
-import { FlatSettings } from './types';
+import type { FlatSettings } from './types';
 import { getRollupJobByIndexName } from '../rollup_job';
 
 // TODO: base on elasticsearch.requestTimeout?

@@ -9,6 +9,7 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,17 +30,17 @@ import {
   EuiToolTip,
   EuiPopover,
   EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading } from '../../../../../shared_imports';
-import { SectionError, Error, DataHealth } from '../../../../components';
+import type { Error } from '../../../../components';
+import { SectionError, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';

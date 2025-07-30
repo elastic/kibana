@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
 
 /**
  * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state

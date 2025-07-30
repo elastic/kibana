@@ -22,7 +22,7 @@ import {
   NUMERICAL_COLOR_PALETTES,
   CATEGORICAL_COLOR_PALETTES,
 } from '../color_palettes';
-import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
+import type { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 import { getIsDarkMode } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;

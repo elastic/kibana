@@ -10,7 +10,7 @@ import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/s
 
 import { getLatestTransformId } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { riskEngineRouteHelpersFactory } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const expectTaskIsHealthy = (taskStatus?: string) => {
   expect(['idle', 'claiming', 'running']).contain(taskStatus);

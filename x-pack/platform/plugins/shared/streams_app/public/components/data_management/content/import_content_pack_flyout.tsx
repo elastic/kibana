@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { Streams } from '@kbn/streams-schema';
-import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
+import type { Streams } from '@kbn/streams-schema';
+import type { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,

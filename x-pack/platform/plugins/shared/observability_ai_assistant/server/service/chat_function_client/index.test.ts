@@ -6,8 +6,8 @@
  */
 import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
-import { Logger } from '@kbn/logging';
-import { RegisterInstructionCallback } from '../types';
+import type { Logger } from '@kbn/logging';
+import type { RegisterInstructionCallback } from '../types';
 import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../functions/get_data_on_screen';
 
 describe('chatFunctionClient', () => {

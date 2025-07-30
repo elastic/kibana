@@ -10,8 +10,8 @@ import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,
 } from '../../../services/default_fleet_setup';
-import { RoleCredentials } from '../../../../shared/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../../shared/services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const svlCommonApi = ctx.getService('svlCommonApi');

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { LOGS_INDEX_PATTERN } from '..';
 

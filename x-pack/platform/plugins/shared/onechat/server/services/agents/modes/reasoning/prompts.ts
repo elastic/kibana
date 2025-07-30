@@ -7,7 +7,8 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
-import { AddedMessage, isReasoningStep } from './actions';
+import type { AddedMessage } from './actions';
+import { isReasoningStep } from './actions';
 
 export const getReasoningPrompt = ({
   customInstructions,

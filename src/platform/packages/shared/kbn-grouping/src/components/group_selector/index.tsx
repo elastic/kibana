@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  useEuiTheme,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';

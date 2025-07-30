@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FontValue } from '@kbn/expressions-plugin/common';
+import type { FontValue } from '@kbn/expressions-plugin/common';
 
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';

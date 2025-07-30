@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '../../../types';
 import { TitlesAndTextPopover } from './titles_and_text_popover';
-import { MetricVisualizationState } from '../types';
+import type { MetricVisualizationState } from '../types';
 
 export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
   const { state, setState } = props;

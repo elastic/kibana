@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
+import type { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';

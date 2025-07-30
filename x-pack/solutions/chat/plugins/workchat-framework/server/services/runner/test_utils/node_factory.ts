@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import {
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type {
   NodeFactoryBaseServices,
   ScopedRunner,
   ScopedNodeProvider,
-  type ScopedWorkflowProvider,
 } from '@kbn/wc-framework-types-server';
+import { type ScopedWorkflowProvider } from '@kbn/wc-framework-types-server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { createToolProviderMock, ToolProviderMock } from './tools';
-import { createModelProviderMock, ModelProviderMock } from './models';
+import type { ToolProviderMock } from './tools';
+import { createToolProviderMock } from './tools';
+import type { ModelProviderMock } from './models';
+import { createModelProviderMock } from './models';
 
 export interface MockedNodeFactoryBaseServices extends NodeFactoryBaseServices {
   logger: MockedLogger;

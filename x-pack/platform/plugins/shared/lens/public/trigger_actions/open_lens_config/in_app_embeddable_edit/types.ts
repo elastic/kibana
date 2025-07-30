@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { TypedLensByValueInput } from '../../../react_embeddable/types';
 
 export interface LensChartLoadEvent {

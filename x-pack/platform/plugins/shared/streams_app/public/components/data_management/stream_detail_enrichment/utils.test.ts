@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { getDefaultFormStateByType } from './utils';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';

@@ -7,7 +7,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiConfirmModal, EuiButtonProps, useGeneratedHtmlId } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 const i18nTexts = {
   inProgressButtonLabel: i18n.translate(

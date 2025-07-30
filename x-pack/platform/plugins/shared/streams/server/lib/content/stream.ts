@@ -6,8 +6,10 @@
  */
 
 import { isEqual, uniq } from 'lodash';
-import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { FieldDefinition, RoutingDefinition, getAncestorsAndSelf } from '@kbn/streams-schema';
+import type { ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
+import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import { baseFields } from '../streams/component_templates/logs_layer';
 import { ContentPackConflictError } from './error';
 

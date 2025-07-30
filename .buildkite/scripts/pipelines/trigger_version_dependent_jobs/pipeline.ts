@@ -8,7 +8,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getVersionsFile, BuildkiteTriggerStep } from '#pipeline-utils';
+import type { BuildkiteTriggerStep } from '#pipeline-utils';
+import { getVersionsFile } from '#pipeline-utils';
 
 const pipelineSets = {
   'es-forward': 'kibana-es-forward-compatibility-testing',

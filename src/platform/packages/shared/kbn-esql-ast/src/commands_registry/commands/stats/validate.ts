@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage, ESQLFunction, ESQLAst } from '../../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { isFunctionExpression, isWhereExpression, isAssignment } from '../../../ast/is';
 import { checkAggExistence, checkFunctionContent } from './utils';
 

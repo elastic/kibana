@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BaseMessageLike } from '@langchain/core/messages';
-import { ToolContentResult } from '@kbn/wci-server';
+import type { BaseMessageLike } from '@langchain/core/messages';
+import type { ToolContentResult } from '@kbn/wci-server';
 import { stepDoneToolName } from './workflow_tools';
 
 const baseSystemMessage = `

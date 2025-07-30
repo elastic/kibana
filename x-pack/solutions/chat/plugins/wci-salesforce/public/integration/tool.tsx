@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IntegrationToolComponentProps } from '@kbn/wci-browser';
+import type { IntegrationToolComponentProps } from '@kbn/wci-browser';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { EuiTextColor } from '@elastic/eui';

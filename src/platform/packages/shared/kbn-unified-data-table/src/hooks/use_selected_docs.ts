@@ -9,7 +9,8 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useRestorableState, UnifiedDataTableRestorableState } from '../restorable_state';
+import type { UnifiedDataTableRestorableState } from '../restorable_state';
+import { useRestorableState } from '../restorable_state';
 
 export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;

@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { listIndices, ListIndexInfo } from '@kbn/onechat-genai-utils';
+import type { ListIndexInfo } from '@kbn/onechat-genai-utils';
+import { listIndices } from '@kbn/onechat-genai-utils';
 
 const listIndicesSchema = z.object({
   pattern: z

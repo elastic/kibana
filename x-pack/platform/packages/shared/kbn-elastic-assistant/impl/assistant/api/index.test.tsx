@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
-import { fetchConnectorExecuteAction, FetchConnectorExecuteAction } from '.';
+import type { FetchConnectorExecuteAction } from '.';
+import { fetchConnectorExecuteAction } from '.';
 import { API_ERROR } from '../translations';
 
 jest.mock('@kbn/core-http-browser');

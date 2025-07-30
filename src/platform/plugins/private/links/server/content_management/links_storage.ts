@@ -8,24 +8,27 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
 import { CONTENT_ID as LINKS_SAVED_OBJECT_TYPE } from '../../common';
 import type { LinksAttributes, LinksItem, LinksSearchOut } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
-import {
+import type {
   LinksCreateOptions,
   LinksCreateOut,
   LinksGetOut,
   LinksSavedObjectAttributes,
-  savedObjectToItem,
-  itemToSavedObject,
   LinksUpdateOptions,
   LinksUpdateOut,
   LinksSearchOptions,
 } from './schema/latest';
+import { savedObjectToItem, itemToSavedObject } from './schema/latest';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {

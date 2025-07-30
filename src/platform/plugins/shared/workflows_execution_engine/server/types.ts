@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}

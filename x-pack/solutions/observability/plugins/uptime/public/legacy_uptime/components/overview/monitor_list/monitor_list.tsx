@@ -17,17 +17,17 @@ import {
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { X509Expiry } from '../../../../../common/runtime_types';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import type { X509Expiry } from '../../../../../common/runtime_types';
+import type { MonitorSummary } from '../../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
-import { ExpandedRowMap } from './types';
+import type { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
-import { MonitorListProps } from './monitor_list_container';
-import { MonitorList } from '../../../state/reducers/monitor_list';
+import type { MonitorListProps } from './monitor_list_container';
+import type { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';

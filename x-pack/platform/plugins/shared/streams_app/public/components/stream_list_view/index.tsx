@@ -9,10 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiBetaBadge, EuiLink, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';

@@ -8,7 +8,7 @@
 import { unlink } from 'fs/promises';
 import type { Logger } from '@kbn/logging';
 import { getArtifactName } from '@kbn/product-doc-common';
-import { DatasetSampleType } from '../../../common';
+import type { DatasetSampleType } from '../../../common';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   fetchArtifactVersions,

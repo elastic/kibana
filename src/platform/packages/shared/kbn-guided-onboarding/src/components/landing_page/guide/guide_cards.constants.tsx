@@ -8,12 +8,13 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode } from 'react';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ReactNode } from 'react';
+import React from 'react';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { GuideId } from '../../../..';
-import { GuideCardSolutions } from './guide_cards';
+import type { GuideId } from '../../../..';
+import type { GuideCardSolutions } from './guide_cards';
 export interface GuideCardConstants {
   solution: GuideCardSolutions;
   title: string | ReactNode;

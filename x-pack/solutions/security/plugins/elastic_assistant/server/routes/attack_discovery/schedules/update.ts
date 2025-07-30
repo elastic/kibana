@@ -17,7 +17,7 @@ import {
   UpdateAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
 import { isFeatureAvailable } from './utils/is_feature_available';
 

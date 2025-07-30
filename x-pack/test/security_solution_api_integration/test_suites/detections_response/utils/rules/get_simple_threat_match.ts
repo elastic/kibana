@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * This is a typical simple indicator match/threat match for testing that is easy for most basic testing

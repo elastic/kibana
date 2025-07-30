@@ -35,12 +35,12 @@ module.exports = {
 
       rules: {
         'block-scoped-var': 'error',
-        camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
+        camelcase: ['error', { properties: 'never', allow: ['^UNSAFE_'] }],
         'consistent-return': 'off',
-        'dot-notation': [ 'error', { allowKeywords: true } ],
-        eqeqeq: [ 'error', 'allow-null' ],
+        'dot-notation': ['error', { allowKeywords: true }],
+        eqeqeq: ['error', 'allow-null'],
         'guard-for-in': 'error',
-        'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
+        'new-cap': ['error', { capIsNewExceptions: ['Private'] }],
         'no-bitwise': 'off',
         'no-caller': 'error',
         'no-cond-assign': 'off',
@@ -71,13 +71,13 @@ module.exports = {
         'no-unsanitized/method': 'error',
         'no-unsanitized/property': 'error',
         'no-unused-expressions': 'off',
-        'no-unused-vars': [ 'error' ],
-        'no-use-before-define': [ 'error', 'nofunc' ],
+        'no-unused-vars': ['error'],
+        'no-use-before-define': ['error', 'nofunc'],
         'no-var': 'error',
         'no-with': 'error',
-        'one-var': [ 'error', 'never' ],
+        'one-var': ['error', 'never'],
         'prefer-const': 'error',
-        strict: [ 'error', 'never' ],
+        strict: ['error', 'never'],
         'valid-typeof': 'error',
         yoda: 'off',
 
@@ -92,7 +92,12 @@ module.exports = {
         'import/no-named-as-default-member': 'error',
         'import/no-duplicates': 'error',
         'import/no-dynamic-require': 'error',
-
+        'import/no-duplicates': [
+          "error",
+          {
+            'prefer-inline': false
+          }
+        ],
         'prefer-object-spread': 'error',
       }
     },

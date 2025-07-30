@@ -12,33 +12,32 @@ import fsp from 'fs/promises';
 import chalk from 'chalk';
 import * as path from 'path';
 import execa from 'execa';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { combineLatest, fromEvent, first } from 'rxjs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
+import type { DockerOptions, ServerlessOptions } from './utils';
 import {
-  DockerOptions,
   extractConfigFiles,
   log as defaultLog,
   NativeRealm,
   parseEsLog,
   runDockerContainer,
   runServerlessCluster,
-  ServerlessOptions,
   stopServerlessCluster,
   teardownServerlessClusterSync,
 } from './utils';
 import { createCliError } from './errors';
 const treeKillAsync = promisify<number, string>(treeKill);
 import { parseSettings, SettingsFilter } from './settings';
-import { EsClusterExecOptions } from './cluster_exec_options';
-import {
+import type { EsClusterExecOptions } from './cluster_exec_options';
+import type {
   DownloadSnapshotOptions,
   InstallArchiveOptions,
   InstallSnapshotOptions,

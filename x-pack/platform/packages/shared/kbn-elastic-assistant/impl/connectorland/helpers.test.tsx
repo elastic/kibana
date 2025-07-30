@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { AiConfigCatchAll } from './helpers';
 import {
   getGenAiConfig,
   getActionTypeTitle,
   getConnectorTypeTitle,
   OpenAiProviderType,
-  AiConfigCatchAll,
 } from './helpers';
 import { PRECONFIGURED_CONNECTOR } from './translations';
 import {

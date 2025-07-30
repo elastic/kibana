@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';

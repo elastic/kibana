@@ -15,7 +15,7 @@ import {
   logicalCSSWithFallback,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
+import type { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 import panelBgTop from '../../assets/panel_bg_top.svg';
 import panelBgTopDark from '../../assets/panel_bg_top_dark.svg';
 import panelBgBottom from '../../assets/panel_bg_bottom.svg';

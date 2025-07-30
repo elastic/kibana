@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
-import { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
+import type { SavedObjectsType } from '@kbn/core/server';
+import type { WorkflowStatus, WorkflowYaml } from '@kbn/workflows';
 
 export const WORKFLOW_SAVED_OBJECT_TYPE = 'workflow';
 

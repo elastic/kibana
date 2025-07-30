@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination, EuiBasicTableColumn, Search } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -16,28 +15,27 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiTitle,
-  Search,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
+import type {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
-  useCreateToolFlyout,
 } from '../../../hooks/tools/use_create_tools';
-import {
+import { useCreateToolFlyout } from '../../../hooks/tools/use_create_tools';
+import type {
   DeleteToolErrorCallback,
   DeleteToolSuccessCallback,
-  useDeleteToolModal,
 } from '../../../hooks/tools/use_delete_tools';
-import {
+import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
+import type {
   EditToolErrorCallback,
   EditToolSuccessCallback,
-  useEditToolFlyout,
 } from '../../../hooks/tools/use_edit_tools';
+import { useEditToolFlyout } from '../../../hooks/tools/use_edit_tools';
 import { useEsqlTools } from '../../../hooks/tools/use_tools';
 import { useToasts } from '../../../hooks/use_toasts';
 import {
@@ -47,7 +45,7 @@ import {
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { OnechatToolTags } from '../tags/tool_tags';
 import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql_tool_flyout';
-import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 
 const getColumns = ({
   deleteTool,

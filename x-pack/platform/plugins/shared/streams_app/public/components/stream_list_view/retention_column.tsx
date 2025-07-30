@@ -8,13 +8,10 @@
 import { EuiText, EuiLink, EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import {
-  IngestStreamEffectiveLifecycle,
-  isDslLifecycle,
-  isErrorLifecycle,
-  isIlmLifecycle,
-} from '@kbn/streams-schema';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {

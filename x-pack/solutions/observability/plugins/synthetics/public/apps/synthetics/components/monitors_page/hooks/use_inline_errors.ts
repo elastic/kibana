@@ -9,7 +9,8 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,

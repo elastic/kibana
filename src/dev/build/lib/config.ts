@@ -10,24 +10,17 @@
 import Path from 'path';
 import os from 'os';
 
-import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
-import {
-  Package,
-  getPackages,
-  PluginSelector,
-  PluginPackage,
-  getPluginPackagesFilter,
-} from '@kbn/repo-packages';
+import type { KibanaPackageJson } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import type { Package, PluginSelector, PluginPackage } from '@kbn/repo-packages';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { type KibanaProject } from '@kbn/projects-solutions-groups';
 
-import { getVersionInfo, VersionInfo } from './version_info';
-import {
-  PlatformName,
-  PlatformArchitecture,
-  ALL_PLATFORMS,
-  SERVERLESS_PLATFORMS,
-} from './platform';
-import { BuildOptions } from '../build_distributables';
+import type { VersionInfo } from './version_info';
+import { getVersionInfo } from './version_info';
+import type { PlatformName, PlatformArchitecture } from './platform';
+import { ALL_PLATFORMS, SERVERLESS_PLATFORMS } from './platform';
+import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;

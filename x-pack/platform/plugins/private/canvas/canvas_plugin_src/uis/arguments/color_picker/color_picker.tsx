@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiColorPicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSetColorMethod,
-  useColorPickerState,
-} from '@elastic/eui';
+import type { EuiSetColorMethod } from '@elastic/eui';
+import { EuiColorPicker, EuiFlexGroup, EuiFlexItem, useColorPickerState } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { withDebounceArg } from '../../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../../i18n';

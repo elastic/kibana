@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { generateProjectAPIKey } from '../../synthetics_service/get_api_key';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 

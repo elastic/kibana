@@ -7,11 +7,10 @@
 
 import { of, lastValueFrom } from 'rxjs';
 import { addAnonymizationData } from './add_anonymization_data';
-import { Deanonymization, Message, MessageRole } from '../../../../common/types';
-import {
-  MessageAddEvent,
-  StreamingChatResponseEventType,
-} from '../../../../common/conversation_complete';
+import type { Deanonymization, Message } from '../../../../common/types';
+import { MessageRole } from '../../../../common/types';
+import type { MessageAddEvent } from '../../../../common/conversation_complete';
+import { StreamingChatResponseEventType } from '../../../../common/conversation_complete';
 
 const baseTimestamp = '2025-07-06T00:00:00.000Z';
 

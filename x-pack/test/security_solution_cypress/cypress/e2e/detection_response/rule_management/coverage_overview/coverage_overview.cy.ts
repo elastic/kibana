@@ -9,7 +9,7 @@ import {
   getDuplicateTechniqueThreatData,
   getMockThreatData,
 } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
-import { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON,
   COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES,

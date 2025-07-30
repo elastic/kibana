@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, screen, waitFor, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import React from 'react';

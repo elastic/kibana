@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsServiceSetup } from '@kbn/core/server';
-import { BannersConfigType } from './config';
+import type { UiSettingsServiceSetup } from '@kbn/core/server';
+import type { BannersConfigType } from './config';
 import { isHexColor } from './utils';
 
 export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: BannersConfigType) => {

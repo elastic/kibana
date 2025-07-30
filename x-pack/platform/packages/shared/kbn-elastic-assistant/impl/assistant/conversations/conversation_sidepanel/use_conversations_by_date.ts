@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { Conversation } from '../../../..';
+import type { Conversation } from '../../../..';
 import { getAbsoluteTime, isValidDateMath } from './date_utils';
 
 export function useConversationsByDate(conversations: Conversation[] = []) {

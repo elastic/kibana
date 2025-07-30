@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
-import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { RunStepResult } from '../step/step_base';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;

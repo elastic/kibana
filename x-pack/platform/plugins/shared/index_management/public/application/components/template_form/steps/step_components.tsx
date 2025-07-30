@@ -16,8 +16,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { ComponentTemplateListItem } from '../../../../../common';
-import { Forms } from '../../../../shared_imports';
+import type { ComponentTemplateListItem } from '../../../../../common';
+import type { Forms } from '../../../../shared_imports';
 import { ComponentTemplatesSelector } from '../../component_templates';
 import { documentationService } from '../../mappings_editor/shared_imports';
 

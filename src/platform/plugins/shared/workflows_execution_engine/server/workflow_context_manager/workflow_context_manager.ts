@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import { graphlib } from '@dagrejs/dagre';
-import { RunStepResult } from '../step/step_base';
-import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { WorkflowSchema } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
+import type { graphlib } from '@dagrejs/dagre';
+import type { RunStepResult } from '../step/step_base';
+import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
   workflowRunId: string;

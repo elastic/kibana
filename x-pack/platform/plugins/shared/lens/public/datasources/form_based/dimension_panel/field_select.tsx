@@ -8,9 +8,10 @@
 import { partition } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import type { FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
+import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
@@ -67,7 +68,7 @@ export function FieldSelect({
       return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
 
-    interface FieldOption {
+    interface LocalFieldOption {
       label: string;
       value: { type: 'field'; field: string; dataType: string | undefined; operationType: string };
       exists: boolean;
@@ -75,7 +76,7 @@ export function FieldSelect({
       'data-test-subj': string;
     }
 
-    function fieldNamesToOptions(items: string[]): FieldOption[] {
+    function fieldNamesToOptions(items: string[]): LocalFieldOption[] {
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
@@ -114,7 +115,7 @@ export function FieldSelect({
     const constructFieldsOptions = (
       fieldsArr: string[],
       label: string
-    ): { label: string; options: FieldOption[] } | false =>
+    ): { label: string; options: LocalFieldOption[] } | false =>
       fieldsArr.length > 0 && {
         label,
         options: fieldNamesToOptions(fieldsArr),

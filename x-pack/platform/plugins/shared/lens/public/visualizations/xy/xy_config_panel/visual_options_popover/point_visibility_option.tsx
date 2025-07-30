@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
-import { PointVisibility } from '@kbn/expression-xy-plugin/common';
+import type { PointVisibility } from '@kbn/expression-xy-plugin/common';
 import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
 
 const pointVisibilityOptions: Array<{

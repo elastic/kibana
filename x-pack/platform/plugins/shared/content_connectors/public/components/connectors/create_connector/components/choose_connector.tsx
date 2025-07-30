@@ -10,12 +10,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexItem,
   EuiIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiText,
   useEuiTheme,
@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 import { useAppContext } from '../../../../app_context';
 import { CONNECTOR_CLIENT_LABEL } from '../../translations';
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from './translations';

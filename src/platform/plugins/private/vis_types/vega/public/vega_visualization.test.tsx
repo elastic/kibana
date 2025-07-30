@@ -10,7 +10,8 @@
 import 'jest-canvas-mock';
 import { render, screen } from '@testing-library/react';
 
-import { VegaVisType, createVegaVisualization } from './vega_visualization';
+import type { VegaVisType } from './vega_visualization';
+import { createVegaVisualization } from './vega_visualization';
 
 import vegaliteGraph from './test_utils/vegalite_graph.json';
 import vegaGraph from './test_utils/vega_graph.json';
@@ -22,7 +23,7 @@ import { setInjectedVars, setData, setNotifications } from './services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { VegaVisualizationDependencies } from './plugin';
+import type { VegaVisualizationDependencies } from './plugin';
 import React from 'react';
 import { TimeCache } from './data_model/time_cache';
 

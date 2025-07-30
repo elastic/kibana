@@ -10,7 +10,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RenderingService as Service } from '../rendering_service';
 import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
+import type { mockRenderingServiceParams } from './params';
 
 type IRenderingService = PublicMethodsOf<Service>;
 

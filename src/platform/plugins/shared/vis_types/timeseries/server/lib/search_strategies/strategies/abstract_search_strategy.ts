@@ -10,7 +10,7 @@
 import { tap } from 'rxjs';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 

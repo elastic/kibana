@@ -10,7 +10,7 @@ import {
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import { deleteEndpointFleetPackage, deletePrebuiltRulesFleetPackage } from '../../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {

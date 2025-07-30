@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
 /*
     Attempts to get a string representation of the intent

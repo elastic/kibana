@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   CreateWorkflowCommand,
   EsWorkflow,
-  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -19,12 +18,11 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import {
-  WORKFLOW_SAVED_OBJECT_TYPE,
-  WorkflowSavedObjectAttributes,
-} from '../saved_objects/workflow';
+import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
+import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { WorkflowEventLoggerService, type IWorkflowEventLogger } from '../workflow_event_logger';
 import { createIndexWithMappings } from './lib/create_index';
@@ -34,7 +32,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import { GetWorkflowsParams } from './workflows_management_api';
+import type { GetWorkflowsParams } from './workflows_management_api';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;

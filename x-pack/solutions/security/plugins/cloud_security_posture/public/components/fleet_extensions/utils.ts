@@ -13,14 +13,15 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { merge } from 'lodash';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,

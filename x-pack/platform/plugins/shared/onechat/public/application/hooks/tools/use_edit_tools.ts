@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
+import type { UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';

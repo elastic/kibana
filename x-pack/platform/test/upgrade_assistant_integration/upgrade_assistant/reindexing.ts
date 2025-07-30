@@ -15,7 +15,7 @@ import {
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
 import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

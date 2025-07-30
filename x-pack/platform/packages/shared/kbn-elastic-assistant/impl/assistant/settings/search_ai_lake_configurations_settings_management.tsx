@@ -14,7 +14,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { AIForSOCConnectorSettingsManagement } from '../../connectorland/ai_for_soc_connector_settings_management';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -35,7 +35,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
-import { ManagementSettingsTabs } from './types';
+import type { ManagementSettingsTabs } from './types';
 import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 interface Props {

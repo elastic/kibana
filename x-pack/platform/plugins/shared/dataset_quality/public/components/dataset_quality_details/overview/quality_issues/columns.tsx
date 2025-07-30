@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { QualityIssue } from '../../../../../common/api_types';
+import type { QualityIssue } from '../../../../../common/api_types';
 import { NUMBER_FORMAT } from '../../../../../common/constants';
 import {
   countColumnName,
@@ -19,7 +20,7 @@ import {
   issueColumnName,
   lastOccurrenceColumnName,
 } from '../../../../../common/translations';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { SparkPlot } from '../../../common/spark_plot';
 
 const expandDatasetAriaLabel = i18n.translate(

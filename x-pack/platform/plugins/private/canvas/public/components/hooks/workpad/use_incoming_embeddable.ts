@@ -11,7 +11,7 @@ import { fromExpression } from '@kbn/interpreter';
 import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
-import { CanvasElement, CanvasPage } from '../../../../types';
+import type { CanvasElement, CanvasPage } from '../../../../types';
 import { useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
 import { addElement, fetchAllRenderables } from '../../../state/actions/elements';

@@ -8,7 +8,8 @@
  */
 
 import { Builder } from '../builder';
-import { Walker, WalkerAstNode } from '../walker/walker';
+import type { WalkerAstNode } from '../walker/walker';
+import { Walker } from '../walker/walker';
 import { SynthNode } from './synth_node';
 import { holeToFragment } from './holes';
 import type { ESQLProperNode } from '../types';

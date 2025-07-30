@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 import type { ESQLCommand, ESQLCommandOption, ESQLColumn, ESQLFunction } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/utils/functions';

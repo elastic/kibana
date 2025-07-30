@@ -16,7 +16,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { ChartLayer, StaticValueConfig, StaticChartColumn } from '../../types';
 import { getDefaultReferences } from '../../utils';
-import { XY_REFERENCE_LINE_ID } from '../constants';
+import type { XY_REFERENCE_LINE_ID } from '../constants';
 import { StaticColumn } from './columns/static';
 
 export interface XYReferenceLinesLayerConfig {

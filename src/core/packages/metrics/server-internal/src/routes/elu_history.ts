@@ -9,7 +9,7 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import apm from 'elastic-apm-node';
-import { EluMetrics } from '@kbn/core-metrics-server';
+import type { EluMetrics } from '@kbn/core-metrics-server';
 
 interface ELUHistoryResponse {
   /**

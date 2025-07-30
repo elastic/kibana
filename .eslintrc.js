@@ -1218,7 +1218,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/no-duplicate-imports': 'off',
         '@typescript-eslint/consistent-type-imports': 'error',
         'no-restricted-imports': [
           'error',
@@ -1280,7 +1280,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        '@typescript-eslint/no-duplicate-imports': 'off',
         'no-restricted-imports': [
           'error',
           {
@@ -1466,7 +1466,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        '@typescript-eslint/no-duplicate-imports': 'off',
       },
       overrides: [
         {
@@ -1689,7 +1689,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',

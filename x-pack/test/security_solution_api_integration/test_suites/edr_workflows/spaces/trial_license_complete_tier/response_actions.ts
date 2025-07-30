@@ -7,10 +7,10 @@
 
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
 import expect from '@kbn/expect';
+import type { IndexedHostsResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_hosts';
 import {
   buildIndexHostsResponse,
   deleteIndexedEndpointHosts,
-  IndexedHostsResponse,
   indexEndpointHostForPolicy,
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_hosts';
 import { mergeAndAppendArrays } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
@@ -20,8 +20,8 @@ import {
   assignFleetAgentToNewPolicy,
   updateAgentPolicy,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
-import TestAgent from 'supertest/lib/agent';
-import {
+import type TestAgent from 'supertest/lib/agent';
+import type {
   ActionDetails,
   ActionListApiResponse,
   PromiseResolvedValue,
@@ -34,7 +34,7 @@ import {
   ISOLATE_HOST_ROUTE_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { createSupertestErrorLogger } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
 
 import type { MapAttributes } from '../../common/content_management';
 import { getMapClient } from './maps_client';

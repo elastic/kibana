@@ -9,8 +9,8 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PieChartTypes } from '../../../common/constants';
-import { PieVisualizationState } from '../..';
-import { VisualizationLayerSettingsProps } from '../../types';
+import type { PieVisualizationState } from '../..';
+import type { VisualizationLayerSettingsProps } from '../../types';
 
 export function LayerSettings(
   props: VisualizationLayerSettingsProps<PieVisualizationState> & { section: 'data' | 'appearance' }

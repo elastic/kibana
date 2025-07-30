@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { ValuesType } from 'utility-types';
-import { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
+import type { ValuesType } from 'utility-types';
+import type { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
 import { meanBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

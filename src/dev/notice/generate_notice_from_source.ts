@@ -11,7 +11,7 @@ import { readFile } from 'fs/promises';
 import { relative } from 'path';
 import globby from 'globby';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 const NOTICE_COMMENT_RE = /\/\*[\s\n\*]*@notice([\w\W]+?)\*\//g;
 const NEWLINE_RE = /\r?\n/g;

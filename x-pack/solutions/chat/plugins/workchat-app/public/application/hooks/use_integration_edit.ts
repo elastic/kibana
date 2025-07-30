@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import { Integration } from '../../../common/integrations';
+import type { Integration } from '../../../common/integrations';
 import { useWorkChatServices } from './use_workchat_service';
 
 export interface IntegrationEditState {

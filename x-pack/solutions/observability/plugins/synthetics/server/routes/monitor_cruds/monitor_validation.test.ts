@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import {
+import type {
   BrowserAdvancedFields,
   BrowserFields,
   BrowserSimpleFields,
-  CodeEditorMode,
   CommonFields,
-  ConfigKey,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
   HTTPFields,
   HTTPSimpleFields,
   ICMPSimpleFields,
   Metadata,
   MonitorFields,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  SourceType,
   TCPAdvancedFields,
   TCPFields,
   TCPSimpleFields,
   TLSFields,
+} from '../../../common/runtime_types';
+import {
+  CodeEditorMode,
+  ConfigKey,
+  MonitorTypeEnum,
+  FormMonitorType,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types';

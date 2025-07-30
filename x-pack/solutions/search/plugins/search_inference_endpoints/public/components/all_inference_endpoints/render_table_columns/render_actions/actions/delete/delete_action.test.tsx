@@ -10,7 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 import { DeleteAction } from './delete_action';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Delete Action', () => {
   const mockProvider: InferenceInferenceEndpointInfo = {

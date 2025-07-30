@@ -6,16 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlattenRecord } from '@kbn/streams-schema';
-import { fromPromise, ErrorActorEvent } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromPromise } from 'xstate5';
+import type { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { getFormattedError } from '../../../../../util/errors';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import type { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
-import { Simulation, SimulationMachineDeps } from './types';
-import { SchemaField } from '../../../schema_editor/types';
+import type { Simulation, SimulationMachineDeps } from './types';
+import type { SchemaField } from '../../../schema_editor/types';
 import { getMappedSchemaFields } from './utils';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 

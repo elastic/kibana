@@ -7,15 +7,15 @@
 
 import { z } from '@kbn/zod';
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { BaseMessageLike } from '@langchain/core/messages';
-import {
-  WorkflowExecutionError,
+import type { BaseMessageLike } from '@langchain/core/messages';
+import type {
   NodeTypeDefinition,
   IntentRecognitionNodeConfigType,
   IntentRecognitionBranch,
   WorkflowState,
   NodeSequence,
 } from '@kbn/wc-framework-types-server';
+import { WorkflowExecutionError } from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../state';
 import { runNodeSequence } from '../../utils';
 

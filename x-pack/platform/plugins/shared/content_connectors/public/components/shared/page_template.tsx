@@ -9,10 +9,11 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import './page_template.scss';
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { Loading } from './loading';
 import { FlashMessages } from './flash_messages';
 

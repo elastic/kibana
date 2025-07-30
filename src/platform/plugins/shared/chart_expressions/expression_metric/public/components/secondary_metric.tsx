@@ -15,7 +15,7 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { FormatOverrides } from './helpers';
+import type { FormatOverrides } from './helpers';
 
 export interface TrendConfig {
   icon: boolean;

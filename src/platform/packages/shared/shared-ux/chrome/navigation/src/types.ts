@@ -17,7 +17,7 @@ import type {
   ChromeRecentlyAccessedHistoryItem,
   PanelSelectedNode,
 } from '@kbn/core-chrome-browser';
-import { EventTracker } from './analytics';
+import type { EventTracker } from './analytics';
 
 export type BasePathService = Pick<IBasePath, 'prepend' | 'remove'>;
 

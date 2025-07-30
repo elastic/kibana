@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Ast } from '@kbn/interpreter';
-import { Assign } from '@kbn/utility-types';
+import type { Ast } from '@kbn/interpreter';
+import type { Assign } from '@kbn/utility-types';
 
 /** @public **/
 export type PaletteContinuity = 'above' | 'below' | 'none' | 'all';

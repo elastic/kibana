@@ -10,7 +10,7 @@ import {
   PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
-import { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import type { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
 import {
   superUser,
   globalRead,
@@ -18,7 +18,7 @@ import {
   obsOnlySpacesAll,
   noKibanaPrivileges,
 } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;

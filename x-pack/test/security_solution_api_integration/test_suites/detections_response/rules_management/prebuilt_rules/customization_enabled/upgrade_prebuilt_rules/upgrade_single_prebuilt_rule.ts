@@ -13,7 +13,7 @@ import {
   DEFAULT_TEST_RULE_ID,
   setUpRuleUpgrade,
 } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   performUpgradePrebuiltRules,

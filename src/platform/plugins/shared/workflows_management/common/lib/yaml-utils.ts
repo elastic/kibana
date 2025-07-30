@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument, Document, Scalar, visit, isPair, isSeq } from 'yaml';
-import { z } from '@kbn/zod';
+import type { Scalar } from 'yaml';
+import { parseDocument, Document, visit, isPair, isSeq } from 'yaml';
+import type { z } from '@kbn/zod';
 import { WorkflowSchema } from '@kbn/workflows';
 
 const YAML_STRINGIFY_OPTIONS = {

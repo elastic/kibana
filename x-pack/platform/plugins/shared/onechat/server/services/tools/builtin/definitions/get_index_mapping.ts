@@ -8,7 +8,8 @@
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { getIndexMappings, GetIndexMappingsResult } from '@kbn/onechat-genai-utils';
+import type { GetIndexMappingsResult } from '@kbn/onechat-genai-utils';
+import { getIndexMappings } from '@kbn/onechat-genai-utils';
 
 const getIndexMappingsSchema = z.object({
   indices: z.array(z.string()).min(1).describe('List of indices to retrieve mappings for.'),

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type { MapAttributes } from '../content_management';
 
 export function migrateDataPersistedState(

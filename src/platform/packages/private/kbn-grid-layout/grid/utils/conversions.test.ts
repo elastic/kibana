@@ -8,7 +8,7 @@
  */
 
 import { getSampleLayout, getSampleOrderedLayout } from '../test_utils/sample_layout';
-import { GridLayoutData, OrderedLayout } from '../types';
+import type { GridLayoutData, OrderedLayout } from '../types';
 import { getGridLayout, getOrderedLayout } from './conversions';
 
 describe('conversions', () => {

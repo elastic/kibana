@@ -14,10 +14,10 @@ import type {
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '../../..';
 import type {
   ListScheduledReportApiJSON,

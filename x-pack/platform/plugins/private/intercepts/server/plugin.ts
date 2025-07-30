@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Plugin } from '@kbn/core/server';
 import {
-  Plugin,
   type CoreSetup,
   type CoreStart,
   type PluginInitializerContext,

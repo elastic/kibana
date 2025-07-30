@@ -9,12 +9,10 @@
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { pick, range, sum } from 'lodash';
-import { Readable } from 'stream';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceEsClientImpl,
-} from '../lib/apm/client/apm_synthtrace_es_client';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Readable } from 'stream';
+import type { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
+import { ApmSynthtraceEsClientImpl } from '../lib/apm/client/apm_synthtrace_es_client';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('Synthtrace ES Client indexer', () => {
   let apmEsClient: ApmSynthtraceEsClient;

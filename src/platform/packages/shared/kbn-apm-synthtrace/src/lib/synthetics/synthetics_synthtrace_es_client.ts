@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, Readable } from 'stream';
-import {
-  SynthtraceEsClientBase,
-  SynthtraceEsClient,
-  SynthtraceEsClientOptions,
-} from '../shared/base_client';
+import type { Client } from '@elastic/elasticsearch';
+import type { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
+import type { Readable } from 'stream';
+import { pipeline } from 'stream';
+import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
-import { Logger } from '../utils/create_logger';
+import type { Logger } from '../utils/create_logger';
 import { getRoutingTransform } from '../shared/data_stream_get_routing_transform';
 
 export type SyntheticsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;

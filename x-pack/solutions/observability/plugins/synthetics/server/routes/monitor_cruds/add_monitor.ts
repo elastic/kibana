@@ -16,8 +16,9 @@ import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';

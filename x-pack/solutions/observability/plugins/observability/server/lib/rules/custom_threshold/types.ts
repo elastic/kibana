@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import {
+import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import type {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
 } from '@kbn/rule-data-utils';
-import { Group } from '../../../../common/typings';
-import {
+import type { Group } from '../../../../common/typings';
+import type {
   CustomMetricExpressionParams,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { MissingGroupsRecord } from './lib/check_missing_group';
+import type {
+  FIRED_ACTIONS_ID,
+  NO_DATA_ACTIONS_ID,
+  FIRED_ACTION,
+  NO_DATA_ACTION,
+} from './constants';
+import type { MissingGroupsRecord } from './lib/check_missing_group';
 
 export enum AlertStates {
   OK,

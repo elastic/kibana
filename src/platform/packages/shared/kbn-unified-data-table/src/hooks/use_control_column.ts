@@ -8,7 +8,8 @@
  */
 
 import { useContext, useEffect, useMemo } from 'react';
-import { EuiDataGridCellValueElementProps, useEuiTheme } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 

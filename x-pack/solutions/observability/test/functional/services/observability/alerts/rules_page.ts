@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const METRIC_THRESHOLD_RULE_TYPE_SELECTOR = 'metrics.alert.threshold-SelectOption';
 const CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR = 'observability.rules.custom_threshold-SelectOption';

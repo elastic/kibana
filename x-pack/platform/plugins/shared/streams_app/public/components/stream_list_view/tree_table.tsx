@@ -6,19 +6,19 @@
  */
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Direction, Criteria } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiIcon,
   EuiInMemoryTable,
-  Direction,
-  Criteria,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { buildStreamRows, TableRow, SortableField } from './utils';
+import type { TableRow, SortableField } from './utils';
+import { buildStreamRows } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';

@@ -6,11 +6,11 @@
  */
 
 import { anonymizeRecords } from './anonymize_records';
-import { AnonymizationRule } from '@kbn/inference-common';
-import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import type { AnonymizationRule } from '@kbn/inference-common';
+import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
-import { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),

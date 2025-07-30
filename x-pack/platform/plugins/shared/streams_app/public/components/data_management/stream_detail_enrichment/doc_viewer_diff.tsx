@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useState, useRef, useMemo, useLayoutEffect } from 'react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {

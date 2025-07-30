@@ -6,7 +6,8 @@
  */
 
 import { insertOrReplaceFormulaColumn } from './parse';
-import { createFormulaPublicApi, FormulaPublicApi } from './formula_public_api';
+import type { FormulaPublicApi } from './formula_public_api';
+import { createFormulaPublicApi } from './formula_public_api';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DateHistogramIndexPatternColumn, PersistedIndexPatternLayer } from '../../../types';

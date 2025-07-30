@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
 import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';

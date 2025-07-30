@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   DateProcessorConfig,
   DissectProcessorConfig,
   GrokProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
-import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
-import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+import type { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;

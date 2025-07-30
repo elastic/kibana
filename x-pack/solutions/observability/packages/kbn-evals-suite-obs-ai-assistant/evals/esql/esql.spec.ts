@@ -8,7 +8,8 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { evaluate as base } from '../../src/evaluate';
-import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
+import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
+import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 
 const evaluate = base.extend<
   {

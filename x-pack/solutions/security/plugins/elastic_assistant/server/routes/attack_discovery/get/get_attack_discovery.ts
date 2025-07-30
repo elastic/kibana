@@ -6,7 +6,8 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import { type IKibanaResponse } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
   API_VERSIONS,
@@ -17,7 +18,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { updateAttackDiscoveryLastViewedAt, getAttackDiscoveryStats } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 
 export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned

@@ -9,11 +9,9 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  InlineEditableTable,
-  InlineEditableTableProps,
-} from '../inline_editable_table/inline_editable_table';
-import { ItemWithAnID } from '../types';
+import type { InlineEditableTableProps } from '../inline_editable_table/inline_editable_table';
+import { InlineEditableTable } from '../inline_editable_table/inline_editable_table';
+import type { ItemWithAnID } from '../types';
 
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 

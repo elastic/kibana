@@ -8,11 +8,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  DataStreamMigrationStatus,
-  DataStreamsAction,
-  EnrichedDeprecationInfo,
-} from '../../../../../../common/types';
+import type { DataStreamsAction, EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DataStreamMigrationStatus } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -22,7 +19,7 @@ import {
   UIM_DATA_STREAM_REINDEX_OPEN_MODAL_CLICK,
   UIM_DATA_STREAM_REINDEX_CLOSE_MODAL_CLICK,
 } from '../../../../lib/ui_metric';
-import { DeprecationTableColumns } from '../../../types';
+import type { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DataStreamReindexResolutionCell } from './resolution_table_cell';
 import { DataStreamReindexFlyout } from './flyout';

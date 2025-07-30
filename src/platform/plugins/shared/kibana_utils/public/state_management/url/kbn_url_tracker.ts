@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHashHistory, History, UnregisterCallback } from 'history';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppUpdater, ToastsSetup } from '@kbn/core/public';
+import type { History, UnregisterCallback } from 'history';
+import { createHashHistory } from 'history';
+import type { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import type { AppUpdater, ToastsSetup } from '@kbn/core/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 

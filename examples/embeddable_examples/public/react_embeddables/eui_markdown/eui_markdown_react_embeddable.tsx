@@ -9,12 +9,11 @@
 
 import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
-  StateComparators,
-  WithAllKeys,
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
@@ -24,7 +23,11 @@ import {
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
+import type {
+  MarkdownEditorApi,
+  MarkdownEditorSerializedState,
+  MarkdownEditorState,
+} from './types';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',

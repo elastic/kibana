@@ -6,7 +6,7 @@
  */
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { Role, User, UserInfo } from './types';
+import type { Role, User, UserInfo } from './types';
 import { allUsers } from './users';
 import { allRoles } from './roles';
 import { spaces } from './spaces';

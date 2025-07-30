@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSwitchEvent, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiButton,
@@ -24,12 +25,10 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTextArea,
   EuiIconTip,
   EuiText,
   withEuiTheme,
-  WithEuiThemeProps,
   mathWithUnits,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

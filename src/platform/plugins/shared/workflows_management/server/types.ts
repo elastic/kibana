@@ -9,13 +9,13 @@
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import {
+import type {
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

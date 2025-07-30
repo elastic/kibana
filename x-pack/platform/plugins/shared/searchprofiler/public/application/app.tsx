@@ -8,15 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiPanel,
-  UseEuiTheme,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
@@ -32,7 +25,7 @@ import {
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
-import { Targets } from './types';
+import type { Targets } from './types';
 
 const componentStyles = {
   appRoot: ({ euiTheme }: UseEuiTheme) =>

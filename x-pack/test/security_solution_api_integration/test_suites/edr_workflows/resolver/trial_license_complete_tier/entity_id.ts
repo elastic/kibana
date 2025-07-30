@@ -11,21 +11,17 @@ import {
   timestampAsDateSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import {
+import type {
   ResolverEntityIndex,
   ResolverNode,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import {
-  EndpointDocGenerator,
-  Event,
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { Event } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createAncestryArray, schemaWithAncestry, HEADERS } from './common';
-import {
-  InsertedEvents,
-  processEventsIndex,
-} from '../../../../config/services/security_solution_edr_workflows_resolver';
+import type { InsertedEvents } from '../../../../config/services/security_solution_edr_workflows_resolver';
+import { processEventsIndex } from '../../../../config/services/security_solution_edr_workflows_resolver';
 
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');

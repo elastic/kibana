@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { EsWorkflowStepExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
-import { Handle, Node, Position } from '@xyflow/react';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { Node } from '@xyflow/react';
+import { Handle, Position } from '@xyflow/react';
 import React from 'react';
-import { flowNodeTypes, NodeType } from '../lib/get_layouted_nodes_and_edges';
+import type { NodeType } from '../lib/get_layouted_nodes_and_edges';
+import { flowNodeTypes } from '../lib/get_layouted_nodes_and_edges';
 
 const triggerNodeTypes = [
   'triggers.elastic.manual',

@@ -20,14 +20,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import {
-  OVERVIEW_TAB_ID,
-  SloDetails,
-  SloTabId,
-} from '../../../pages/slo_details/components/slo_details';
+import type { SloTabId } from '../../../pages/slo_details/components/slo_details';
+import { OVERVIEW_TAB_ID, SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';

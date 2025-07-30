@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import { DashboardTiles } from './related_dashboards/dashboard_tiles';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import {
+import type {
   AlertOverviewStatus,
   StaleDownConfig,
   SyntheticsCommonState,

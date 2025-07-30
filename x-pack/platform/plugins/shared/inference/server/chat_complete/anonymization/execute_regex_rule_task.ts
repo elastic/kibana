@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RegexAnonymizationRule } from '@kbn/inference-common';
-import { Anonymization } from '@kbn/inference-common';
+import type { RegexAnonymizationRule } from '@kbn/inference-common';
+import type { Anonymization } from '@kbn/inference-common';
 import { getEntityMask } from './get_entity_mask';
-import { AnonymizationState } from './types';
+import type { AnonymizationState } from './types';
 
 export function executeRegexRuleTask({
   rule,

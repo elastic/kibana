@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { DatasetSampleType, type StatusResponse } from '../../../common/types';
+import type { DatasetSampleType } from '../../../common/types';
+import { type StatusResponse } from '../../../common/types';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import type { ZipArchive } from '../types';

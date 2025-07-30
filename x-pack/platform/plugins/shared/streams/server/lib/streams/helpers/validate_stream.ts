@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Streams, isInheritLifecycle } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';

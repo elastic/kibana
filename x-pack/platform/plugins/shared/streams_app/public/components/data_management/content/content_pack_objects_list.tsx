@@ -7,9 +7,10 @@
 import { EuiBasicTable, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { ContentPackEntry, ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { ContentPackEntry, ContentPackStream } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { Streams } from '@kbn/streams-schema';
 import {
-  Streams,
   getAncestors,
   getAncestorsAndSelf,
   getSegments,

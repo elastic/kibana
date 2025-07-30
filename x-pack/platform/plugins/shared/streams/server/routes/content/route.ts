@@ -7,14 +7,14 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
+import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import {
-  ContentPack,
-  ContentPackStream,
   ROOT_STREAM_ID,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
-import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
+import { Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';

@@ -8,9 +8,10 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));

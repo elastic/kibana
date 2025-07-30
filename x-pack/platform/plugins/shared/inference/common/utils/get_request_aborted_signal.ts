@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 export function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
   const controller = new AbortController();

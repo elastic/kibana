@@ -10,17 +10,16 @@
 import { omit, pick } from 'lodash';
 import React, { useMemo } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
+import type { CreateRuleBody, UpdateRuleBody } from '../../common/apis';
 import {
-  CreateRuleBody,
   UPDATE_FIELDS_WITH_ACTIONS,
-  UpdateRuleBody,
   transformCreateRuleBody,
   transformUpdateRuleBody,
 } from '../../common/apis';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { useRuleFormState } from '../../hooks';
 import { SHOW_REQUEST_MODAL_ERROR } from '../../translations';
-import { RuleFormData } from '../../types';
+import type { RuleFormData } from '../../types';
 
 const stringifyBodyRequest = ({
   formData,

@@ -6,9 +6,9 @@
  */
 
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { CelInputState } from '../../types';
+import type { CelInputState } from '../../types';
 import { CEL_AUTH_HEADERS_PROMPT as CEL_AUTH_HEADER_PROMPT } from './prompts';
-import { CelInputNodeParams } from './types';
+import type { CelInputNodeParams } from './types';
 
 export async function handleUpdateProgramHeaderAuth({
   state,

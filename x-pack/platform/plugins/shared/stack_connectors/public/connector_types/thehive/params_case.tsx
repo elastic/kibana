@@ -6,13 +6,13 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
-  ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
-import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
+import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
 import { OptionalFieldLabel } from '../../common/optional_field_label';

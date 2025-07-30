@@ -55,7 +55,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
 import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';

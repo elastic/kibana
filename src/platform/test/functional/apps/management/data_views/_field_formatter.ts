@@ -10,8 +10,8 @@
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

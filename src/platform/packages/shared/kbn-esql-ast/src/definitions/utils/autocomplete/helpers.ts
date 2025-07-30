@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
 import type {
@@ -25,13 +26,8 @@ import {
   compareTypesWithLiterals,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
-import {
-  type SupportedDataType,
-  isParameterType,
-  FunctionDefinition,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '../../types';
+import type { FunctionDefinition, FunctionReturnType } from '../../types';
+import { type SupportedDataType, isParameterType, FunctionDefinitionTypes } from '../../types';
 import { getColumnForASTNode, getOverlapRange } from '../shared';
 import { getExpressionType } from '../expressions';
 import { getColumnByName, isParamExpressionType } from '../shared';

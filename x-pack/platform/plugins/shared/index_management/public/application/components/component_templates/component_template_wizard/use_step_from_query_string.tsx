@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { type WizardSection } from './component_template_form';
 
 export function useStepFromQueryString(history: History) {

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type {
   RollupGetRollupIndexCapsResponse,
   RollupGetJobsResponse,
 } from '@elastic/elasticsearch/lib/api/types';

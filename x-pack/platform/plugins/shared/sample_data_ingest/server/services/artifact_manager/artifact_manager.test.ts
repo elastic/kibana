@@ -19,7 +19,7 @@ import {
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getArtifactName } from '@kbn/product-doc-common';
-import { DatasetSampleType } from '../../../common';
+import type { DatasetSampleType } from '../../../common';
 import { ArtifactManager } from './artifact_manager';
 
 const artifactsFolder = '/tmp/artifacts';

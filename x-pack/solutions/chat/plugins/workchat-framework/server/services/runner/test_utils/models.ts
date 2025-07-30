@@ -6,7 +6,7 @@
  */
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ModelProvider } from '@kbn/wc-framework-types-server';
+import type { ModelProvider } from '@kbn/wc-framework-types-server';
 
 export type MockedModel = jest.Mocked<InferenceChatModel>;
 export type ModelProviderMock = jest.Mocked<ModelProvider>;

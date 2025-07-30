@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchOptions } from '@kbn/search-types';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchOptions } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 import {
   getCommonDefaultAsyncGetParams,
   getCommonDefaultAsyncSubmitParams,

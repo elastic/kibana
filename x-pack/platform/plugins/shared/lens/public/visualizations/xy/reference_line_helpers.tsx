@@ -7,7 +7,7 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';

@@ -6,8 +6,9 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { ToolType } from '@kbn/onechat-common';
-import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { ToolType } from '@kbn/onechat-common';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
 export const toolIndexName = '.kibana_onechat_tools';
 

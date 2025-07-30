@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchSource } from '@kbn/data-plugin/common';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getQueryFromCsvJob } from '@kbn/reporting-export-types-csv-common';
 import type { ClientConfigType } from '@kbn/reporting-public';

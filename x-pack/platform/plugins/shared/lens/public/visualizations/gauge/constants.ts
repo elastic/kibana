@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   GaugeShape,
-  GaugeShapes,
   GaugeState as GaugeStateOriginal,
 } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LayerType } from '../../../common/types';
 

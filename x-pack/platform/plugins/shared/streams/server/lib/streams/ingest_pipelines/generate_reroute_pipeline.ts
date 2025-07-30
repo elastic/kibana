@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';

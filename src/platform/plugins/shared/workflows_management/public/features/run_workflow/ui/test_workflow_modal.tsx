@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';

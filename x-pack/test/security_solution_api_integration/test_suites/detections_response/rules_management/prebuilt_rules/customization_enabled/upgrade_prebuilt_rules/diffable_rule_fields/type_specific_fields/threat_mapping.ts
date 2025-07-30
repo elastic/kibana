@@ -6,7 +6,7 @@
  */
 
 import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
   testFieldUpgradeReview,

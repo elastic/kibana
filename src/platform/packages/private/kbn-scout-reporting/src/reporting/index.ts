@@ -9,7 +9,7 @@
 
 import type { ReporterDescription } from 'playwright/test';
 import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
-import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
+import type { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
 export * from './stats';

@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HTTPFormatMap, httpFormatters } from './http_formatters';
-import { TCPFormatMap, tcpFormatters } from './tcp_formatters';
-import { ICMPFormatMap, icmpFormatters } from './icmp_formatters';
-import { BrowserFormatMap, browserFormatters } from './browser_formatters';
-import { CommonFormatMap, commonFormatters } from './common_formatters';
+import type { HTTPFormatMap } from './http_formatters';
+import { httpFormatters } from './http_formatters';
+import type { TCPFormatMap } from './tcp_formatters';
+import { tcpFormatters } from './tcp_formatters';
+import type { ICMPFormatMap } from './icmp_formatters';
+import { icmpFormatters } from './icmp_formatters';
+import type { BrowserFormatMap } from './browser_formatters';
+import { browserFormatters } from './browser_formatters';
+import type { CommonFormatMap } from './common_formatters';
+import { commonFormatters } from './common_formatters';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 

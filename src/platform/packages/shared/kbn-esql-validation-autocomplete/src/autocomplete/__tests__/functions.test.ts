@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
-import { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';

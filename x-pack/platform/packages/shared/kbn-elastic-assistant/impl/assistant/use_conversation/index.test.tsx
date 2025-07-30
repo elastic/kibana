@@ -9,7 +9,7 @@ import { useConversation } from '.';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
-import { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
   deleteConversation,

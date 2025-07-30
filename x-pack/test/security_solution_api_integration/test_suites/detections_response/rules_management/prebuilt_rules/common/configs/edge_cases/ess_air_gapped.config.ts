@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
 const PACKAGES_PATH = path.join(path.dirname(__filename), '../../fixtures/packages');

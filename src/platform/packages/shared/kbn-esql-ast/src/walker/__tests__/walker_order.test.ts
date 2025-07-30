@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLCommand, ESQLIdentifier, ESQLLiteral, ESQLStringLiteral } from '../../types';
+import type { ESQLCommand, ESQLIdentifier, ESQLLiteral, ESQLStringLiteral } from '../../types';
 import { walk, Walker } from '../walker';
 
 describe('traversal order', () => {

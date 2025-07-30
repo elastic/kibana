@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { Model } from '@kbn/inference-common';
-import { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Model } from '@kbn/inference-common';
+import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import { sumBy, mean, keyBy, uniq } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
-import { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
+import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 
 interface DatasetScore {
   id: string;

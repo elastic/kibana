@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServerSentEventBase } from '@kbn/sse-utils';
-import { DeanonymizationInput, DeanonymizationOutput, type Message } from './types';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { DeanonymizationInput, DeanonymizationOutput } from './types';
+import { type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',

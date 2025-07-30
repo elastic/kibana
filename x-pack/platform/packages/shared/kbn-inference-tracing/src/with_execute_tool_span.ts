@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Span } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
 import { withInferenceSpan } from './with_inference_span';

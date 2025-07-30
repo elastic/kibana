@@ -7,7 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface RoundLayoutProps {

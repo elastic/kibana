@@ -12,7 +12,7 @@ import type {
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
 } from '@kbn/esql-types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { ESQLLicenseType } from '@kbn/esql-types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';

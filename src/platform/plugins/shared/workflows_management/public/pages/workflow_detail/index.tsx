@@ -8,10 +8,10 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,

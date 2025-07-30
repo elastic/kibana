@@ -8,13 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ProductDocEntry } from './product_doc_entry';
+import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
 import {
-  APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   KnowledgeBaseState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 jest.mock('../../../hooks/use_get_product_doc', () => ({

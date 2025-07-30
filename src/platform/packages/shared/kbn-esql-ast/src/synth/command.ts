@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParseOptions, Parser } from '../parser';
+import type { ParseOptions } from '../parser';
+import { Parser } from '../parser';
 import { createTag, makeSynthNode } from './tag';
 import type { SynthGenerator } from './types';
 import type { ESQLCommand } from '../types';

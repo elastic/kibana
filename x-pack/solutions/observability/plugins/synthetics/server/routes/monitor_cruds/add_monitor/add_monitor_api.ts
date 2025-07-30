@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,15 +18,15 @@ import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
-import {
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
-  MonitorTypeEnum,
   ServiceLocations,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../common/runtime_types';
 import {
   getMaxAttempts,
   getMonitorLocations,
@@ -38,7 +38,7 @@ import {
 } from '../../../../common/constants/monitor_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultAlertService } from '../../default_alerts/default_alert_service';
-import { RouteContext } from '../../types';
+import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';

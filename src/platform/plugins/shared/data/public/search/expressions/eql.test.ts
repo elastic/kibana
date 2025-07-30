@@ -9,9 +9,9 @@
 
 import { getEql } from './eql';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
-import { StartServicesAccessor } from '@kbn/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {

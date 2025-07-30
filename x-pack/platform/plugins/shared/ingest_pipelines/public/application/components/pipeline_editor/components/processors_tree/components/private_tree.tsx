@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
+import type { FunctionComponent, MutableRefObject } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import List from 'react-virtualized/dist/commonjs/List';
 import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
 
 import { DropSpecialLocations } from '../../../constants';
-import { ProcessorInternal, ProcessorSelector } from '../../../types';
+import type { ProcessorInternal, ProcessorSelector } from '../../../types';
 import { isChildPath } from '../../../processors_reducer';
 import { selectorToDataTestSubject } from '../../../utils';
 
 import { DropZoneButton } from '.';
 import { TreeNode } from '.';
 import { calculateItemHeight } from '../utils';
-import { OnActionHandler, ProcessorInfo } from '../processors_tree';
+import type { OnActionHandler, ProcessorInfo } from '../processors_tree';
 
 export interface PrivateProps {
   processors: ProcessorInternal[];

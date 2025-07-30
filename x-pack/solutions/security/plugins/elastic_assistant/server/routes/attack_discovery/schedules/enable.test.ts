@@ -11,7 +11,7 @@ import { enableAttackDiscoverySchedulesRoute } from './enable';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { enableAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
-import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();

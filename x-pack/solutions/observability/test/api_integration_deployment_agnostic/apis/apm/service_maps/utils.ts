@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
-import { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { GroupResourceNodesResponse } from '@kbn/apm-plugin/common/service_map';
+import type { ServiceMapSpan } from '@kbn/apm-plugin/common/service_map/types';
 
 export function getElements({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) {
   if ('elements' in body) {

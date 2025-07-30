@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
 import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 

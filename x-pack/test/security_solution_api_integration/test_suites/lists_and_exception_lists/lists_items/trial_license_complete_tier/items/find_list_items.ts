@@ -12,10 +12,10 @@ import { LIST_ITEM_ID, LIST_ID } from '@kbn/lists-plugin/common/constants.mock';
 import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_item_schema.mock';
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 
-import TestAgent from 'supertest/lib/agent';
+import type TestAgent from 'supertest/lib/agent';
 import { createListsIndex, deleteListsIndex } from '../../../utils';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');

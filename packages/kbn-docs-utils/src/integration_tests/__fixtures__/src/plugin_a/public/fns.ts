@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeWithGeneric, ImAType } from './types';
-import { ImNotExportedFromIndex } from './foo';
+import type { TypeWithGeneric, ImAType } from './types';
+import type { ImNotExportedFromIndex } from './foo';
 
 /**
  * This is a non arrow function.

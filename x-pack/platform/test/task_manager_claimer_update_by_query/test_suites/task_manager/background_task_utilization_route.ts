@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { MonitoredUtilization } from '@kbn/task-manager-plugin/server/routes/background_task_utilization';
-import { MonitoredStat } from '@kbn/task-manager-plugin/server/monitoring/monitoring_stats_stream';
-import { BackgroundTaskUtilizationStat } from '@kbn/task-manager-plugin/server/monitoring/background_task_utilization_statistics';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { MonitoredUtilization } from '@kbn/task-manager-plugin/server/routes/background_task_utilization';
+import type { MonitoredStat } from '@kbn/task-manager-plugin/server/monitoring/monitoring_stats_stream';
+import type { BackgroundTaskUtilizationStat } from '@kbn/task-manager-plugin/server/monitoring/background_task_utilization_statistics';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');

@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 type ConnectorSelectorBaseProps = UseGenAIConnectorsResult;
 

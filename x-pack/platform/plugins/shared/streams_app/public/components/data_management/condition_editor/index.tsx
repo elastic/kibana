@@ -7,6 +7,7 @@
 
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFieldText,
@@ -15,16 +16,10 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSelect,
-  EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
-import {
-  BinaryFilterCondition,
-  Condition,
-  FilterCondition,
-  isCondition,
-  isNeverCondition,
-} from '@kbn/streams-schema';
+import type { BinaryFilterCondition, Condition, FilterCondition } from '@kbn/streams-schema';
+import { isCondition, isNeverCondition } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { isPlainObject } from 'lodash';

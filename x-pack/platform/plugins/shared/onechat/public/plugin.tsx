@@ -13,13 +13,8 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { registerApp } from './register';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  OnechatInternalService,
-  ToolsService,
-} from './services';
+import type { OnechatInternalService } from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,

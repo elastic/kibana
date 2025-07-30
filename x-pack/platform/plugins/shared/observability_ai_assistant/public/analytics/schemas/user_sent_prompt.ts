@@ -6,7 +6,7 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
 
 export interface UserSentPrompt {

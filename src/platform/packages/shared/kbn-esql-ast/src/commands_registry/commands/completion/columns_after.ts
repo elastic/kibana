@@ -10,7 +10,7 @@ import uniqBy from 'lodash/uniqBy';
 import { type ESQLCommand, type ESQLAstCompletionCommand } from '../../../types';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import type { ESQLFieldWithMetadata } from '../../types';
-import { ICommandContext } from '../../types';
+import type { ICommandContext } from '../../types';
 
 export const columnsAfter = (
   command: ESQLCommand,

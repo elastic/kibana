@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 
 export const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {

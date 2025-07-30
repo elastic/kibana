@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import type { ToolDefinition } from '@kbn/inference-common';
+import { isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';

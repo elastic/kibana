@@ -87,6 +87,14 @@ module.exports = {
             },
           ],
           camelcase: 'off',
+          "@typescript-eslint/consistent-type-imports": [
+            "error",
+            {
+              "prefer": "type-imports",
+              "disallowTypeAnnotations": false,
+              "fixStyle": "separate-type-imports"
+            }
+          ],
           '@typescript-eslint/naming-convention': [
             'error',
             {
@@ -270,8 +278,9 @@ module.exports = {
               message: 'Do not use `const` with enum declarations',
             },
           ],
+          '@typescript-eslint/no-duplicate-imports': ['off'],
         },
-        eslintConfigPrettierRules
+        eslintConfigPrettierRules,
       ),
     },
   ],

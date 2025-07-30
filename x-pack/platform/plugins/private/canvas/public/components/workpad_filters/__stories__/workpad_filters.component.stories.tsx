@@ -10,8 +10,8 @@ import type { Meta } from '@storybook/react';
 import React from 'react';
 import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
-import { FiltersGroup as FiltersGroupType } from '../types';
-import { Filter } from '../../../../types';
+import type { FiltersGroup as FiltersGroupType } from '../types';
+import type { Filter } from '../../../../types';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

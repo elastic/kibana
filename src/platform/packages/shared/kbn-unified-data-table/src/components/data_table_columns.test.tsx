@@ -14,7 +14,7 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
-import { UnifiedDataTableSettingsColumn } from '../types';
+import type { UnifiedDataTableSettingsColumn } from '../types';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(

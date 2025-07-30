@@ -19,7 +19,7 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useToolTags } from '../../../../hooks/tools/use_tool_tags';
 import { OnechatEsqlEditorField } from './components/esql_editor_field';
-import { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
+import type { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
 
 export interface OnechatEsqlToolFormProps {
   formId: string;
