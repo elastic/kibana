@@ -7,3 +7,9 @@
 
 export { ReindexService } from './src/reindex_service';
 export type { ReindexServicePublicSetup, ReindexServicePublicStart } from './types';
+
+import { ReindexServerPublicPlugin } from './plugin';
+
+export function plugin() {
+  return new ReindexServerPublicPlugin();
+}

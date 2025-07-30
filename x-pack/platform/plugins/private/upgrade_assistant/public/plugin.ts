@@ -21,7 +21,7 @@ export class UpgradeAssistantUIPlugin
 
   setup(
     coreSetup: CoreSetup<StartDependencies>,
-    { management, cloud, share, usageCollection, reindexService }: SetupDependencies
+    { management, cloud, share, usageCollection }: SetupDependencies
   ) {
     const {
       featureSet,
@@ -53,8 +53,11 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data }] = await coreSetup.getStartServices();
+          const a = await coreSetup.getStartServices();
+          console.log('upgrade assistant setup', a);
+          const [coreStart, { data, reindexService }] = a;
 
+          console.log('upgrade assistant mount', reindexService);
           const {
             chrome: { docTitle },
           } = coreStart;

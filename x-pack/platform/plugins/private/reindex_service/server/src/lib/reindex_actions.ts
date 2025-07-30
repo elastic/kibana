@@ -24,7 +24,6 @@ import {
   ReindexStep,
 } from '@kbn/upgrade-assistant-pkg-common';
 import { generateNewIndexName } from './index_settings';
-// todo
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
