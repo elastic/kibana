@@ -17,7 +17,7 @@ import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-en
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginSetup {}
