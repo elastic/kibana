@@ -280,15 +280,16 @@ describe('PackageInstaller', () => {
   describe('uninstallAll', () => {
     it('calls uninstall for all packages', async () => {
       jest.spyOn(packageInstaller, 'uninstallPackage');
-
+      const totalProducts = Object.keys(DocumentationProduct).length;
       await packageInstaller.uninstallAll();
 
-      expect(packageInstaller.uninstallPackage).toHaveBeenCalledTimes(
-        Object.keys(DocumentationProduct).length
-      );
+      expect(productDocClient.setUninstallationStarted).toHaveBeenCalledTimes(totalProducts);
+
+      expect(packageInstaller.uninstallPackage).toHaveBeenCalledTimes(totalProducts);
       Object.values(DocumentationProduct).forEach((productName) => {
         expect(packageInstaller.uninstallPackage).toHaveBeenCalledWith({ productName });
       });
+      expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(totalProducts);
     });
   });
 });
