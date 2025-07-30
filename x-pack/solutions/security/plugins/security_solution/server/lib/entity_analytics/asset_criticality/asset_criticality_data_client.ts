@@ -14,6 +14,7 @@ import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
   AssetCriticalityUpsertForBulkUpload,
+  AssetCriticalityUpdateEntityDestination,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
@@ -26,11 +27,16 @@ import {
 } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getImplicitEntityFields, getImplicitEntityFieldsWithDeleted } from './helpers';
+import {
+  entityTypeByIdField,
+  getImplicitEntityFields,
+  getImplicitEntityFieldsWithDeleted,
+} from './helpers';
 import {
   getIngestPipelineName,
   createEventIngestedPipeline,
 } from '../utils/event_ingested_pipeline';
+import { getEntitiesIndexName } from '../entity_store/utils';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -250,6 +256,8 @@ export class AssetCriticalityDataClient {
       doc_as_upsert: true,
     });
 
+    await this.updateEntityDestination(record, refresh);
+
     return doc;
   }
 
@@ -362,6 +370,34 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
+  private async updateEntityDestination(
+    record: AssetCriticalityUpdateEntityDestination,
+    refresh = 'wait_for' as const
+  ) {
+    const { idField, idValue, criticalityLevel } = record;
+
+    const entityType = entityTypeByIdField[idField];
+    const index = getEntitiesIndexName(entityType, this.options.namespace);
+
+    try {
+      await this.options.esClient.updateByQuery({
+        index,
+        refresh: refresh ? true : false,
+        conflicts: 'proceed',
+        query: { term: { [idField]: idValue } },
+        script: {
+          source:
+            'if (ctx._source.asset == null) { ctx._source.asset = [:]; } ctx._source.asset.criticality = params.level;',
+          params: { level: criticalityLevel },
+        },
+      });
+    } catch (err) {
+      this.options.logger.error(
+        `Failed to update entity destination index for ${idField}:${idValue}: ${err.message}`
+      );
+    }
+  }
+
   public async delete(
     idParts: AssetCriticalityIdParts,
     refresh = 'wait_for' as const
@@ -398,6 +434,14 @@ export class AssetCriticalityDataClient {
           }),
         },
       });
+
+      await this.updateEntityDestination(
+        {
+          ...idParts,
+          criticalityLevel: CRITICALITY_VALUES.DELETED,
+        },
+        refresh
+      );
     } catch (err) {
       this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);
       throw err;

@@ -85,7 +85,7 @@ type AssetCriticalityRecordWithDeleted = {
     : AssetCriticalityRecord[K];
 };
 
-const entityTypeByIdField = {
+export const entityTypeByIdField = {
   'host.name': 'host',
   'user.name': 'user',
   'service.name': 'service',
