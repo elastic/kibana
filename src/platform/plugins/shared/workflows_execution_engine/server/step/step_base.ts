@@ -61,7 +61,6 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
   public async run(): Promise<void> {
     const stepId = (this.step as any).id || this.getName();
-    const stepName = this.getName();
 
     // RuntimeManager handles logging via startStep()
     await this.workflowState.startStep(stepId);
