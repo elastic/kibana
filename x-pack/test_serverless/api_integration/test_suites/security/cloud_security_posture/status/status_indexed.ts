@@ -54,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertestWithoutAuth
           .post(`/api/fleet/agent_policies`)
@@ -75,7 +75,9 @@ export default function (providerContext: FtrProviderContext) {
         await latestFindingsIndex.deleteAll();
         await latestVulnerabilitiesIndex.deleteAll();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Return kspm status indexed when security_solution-cloud_security_posture.misconfiguration_latestration_latest contains new kspm documents`, async () => {

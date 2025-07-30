@@ -6,6 +6,7 @@
  */
 
 import { first } from 'lodash';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { TIMESTAMP_FIELD, PROCESS_COMMANDLINE_FIELD } from '../../../common/constants';
 import type {
   ProcessListAPIChartRequest,
@@ -13,7 +14,6 @@ import type {
   ProcessListAPIRow,
   ProcessListAPIChartResponse,
 } from '../../../common/http_api';
-import type { ESSearchClient } from '../metrics/types';
 
 export const getProcessListChart = async (
   search: ESSearchClient,
