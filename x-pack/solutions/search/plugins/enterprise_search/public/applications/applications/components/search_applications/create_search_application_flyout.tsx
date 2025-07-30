@@ -88,7 +88,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
             {i18n.translate(
               'xpack.enterpriseSearch.searchApplications.createSearchApplication.headerTitle',
               {
-                defaultMessage: 'Create a Search Application',
+                defaultMessage: 'Create a search application',
               }
             )}
           </h3>
@@ -109,7 +109,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.searchApplications.createSearchApplication.header.docsLink',
-                      { defaultMessage: 'Search Applications documentation' }
+                      { defaultMessage: 'Search applications documentation' }
                     )}
                   </EuiLink>
                 ),
