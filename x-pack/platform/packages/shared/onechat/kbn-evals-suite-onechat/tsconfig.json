@@ -11,7 +11,5 @@
     "@kbn/onechat-common",
     "@kbn/tooling-log",
     "@kbn/core",
-    "@kbn/core-http-browser",
-    "@kbn/gen-ai-functional-testing"
   ]
 }
