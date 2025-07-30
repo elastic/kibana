@@ -59,21 +59,7 @@ export const fetchGraph = async ({
     }
   });
 
-  let isEnrichPolicyExists = false;
-  try {
-    const { policies } = await esClient.asCurrentUser.enrich.getPolicy({
-      name: getEnrichPolicyId(spaceId),
-    });
-
-    isEnrichPolicyExists = policies.some(
-      (policy) => policy.config.match?.name === getEnrichPolicyId(spaceId)
-    );
-  } catch (error) {
-    logger.error(`Error fetching enrich policy ${error.message}`);
-    logger.error(error);
-    // If we can't check the policy, assume it doesn't exist and continue without enrichment
-    isEnrichPolicyExists = false;
-  }
+  const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
 
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
@@ -157,6 +143,26 @@ const buildDslFilter = (
   },
 });
 
+const checkEnrichPolicyExists = async (
+  esClient: IScopedClusterClient,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> => {
+  try {
+    const { policies } = await esClient.asCurrentUser.enrich.getPolicy({
+      name: getEnrichPolicyId(spaceId),
+    });
+
+    return policies.some(
+      (policy) => policy.config.match?.name === getEnrichPolicyId(spaceId)
+    );
+  } catch (error) {
+    logger.error(`Error fetching enrich policy ${error.message}`);
+    logger.error(error);
+    return false;
+  }
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
@@ -221,9 +227,9 @@ const buildEsqlQuery = ({
 | SORT isOrigin DESC, action`;
 
   if (isAssetInventoryEnabled && isEnrichPolicyExists) {
-    // Enrichment-specific parts
-    // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
-    // TODO: We should use the appropriate specific index for each entity type once it's fixed
+  // Enrichment-specific parts
+  // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
+  // TODO: We should use the appropriate specific index for each entity type once it's fixed
     const enrichClause = `
 | ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
 | ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`;
