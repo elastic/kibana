@@ -1,7 +1,7 @@
 # Predefined roles for "Security" "SearchAiLake" (tier) project types
 # Source: https://github.com/elastic/elasticsearch-controller/blob/main/internal/config/roles/security.search_ai_lake.yaml
 
-_analyst:
+_search_ai_lake_analyst:
   metadata:
     _public: true
     _reserved: true
@@ -59,7 +59,7 @@ _analyst:
       resources: "*"
   run_as: []
 
-soc_manager:
+_search_ai_lake_soc_manager:
   metadata:
     _public: true
     _reserved: true
