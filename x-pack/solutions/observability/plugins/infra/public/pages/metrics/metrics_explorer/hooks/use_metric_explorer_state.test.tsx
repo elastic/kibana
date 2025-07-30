@@ -170,7 +170,9 @@ describe('useMetricsExplorerState', () => {
       const { result } = renderUseMetricsExplorerStateHook();
       const { handleFilterQuerySubmit } = result.current;
       act(() => {
-        handleFilterQuerySubmit('host.name: "example-host-01"');
+        handleFilterQuerySubmit({
+          query: { query: 'host.name: "example-host-01"', language: 'kuery' },
+        });
       });
       expect(result.current.options.filterQuery).toBe('host.name: "example-host-01"');
     });
