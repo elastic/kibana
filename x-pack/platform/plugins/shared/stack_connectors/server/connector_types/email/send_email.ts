@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
@@ -24,10 +23,10 @@ import type {
   ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import type { Attachment } from '.';
-import { getOauth2DeleteTokenAxiosInterceptor } from '@kbn/stack-connectors-plugin/common/auth/oauth2_delete_token_axios_interceptor';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
