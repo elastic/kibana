@@ -151,9 +151,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'datatable':
         return 'Tabelle';
       case 'bar':
-        return 'Säulendiagramm';
+        return 'Bar'; // 'Säulendiagramm'; Not translated yet.
       case 'line':
-        return 'Liniengraphik';
+        return 'Zeile';
       case 'pie':
         return 'Kreisdiagramm';
       case 'treemap':
@@ -172,11 +172,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'moving_average':
         return 'Bewegungsdurchschnitt';
       case 'average':
-        return field ? `${field} Durchschnitt` : `Durchschnitt`;
+        return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
       case 'max':
         return field ? `${field} Maximum` : 'Maximum';
       case 'terms':
-        return field ? `${field} Top ${values} Werte` : 'Top Werte';
+        return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
       case 'sum':
         return 'Summe';
       default:
