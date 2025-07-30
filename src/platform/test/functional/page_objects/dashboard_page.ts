@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setTimeout as sleep } from 'node:timers/promises';
-
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
-const screenshotDirectories = ['dashboard'];
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
@@ -54,7 +51,6 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
-  private readonly screenshots = this.ctx.getService('screenshots');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -796,12 +792,6 @@ export class DashboardPageObject extends FtrService {
     const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
     for (const errorEmbeddable of errorEmbeddables) {
       this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
-    }
-    if (errorEmbeddables.length) {
-      await this.browser.setWindowSize(1920, 1080);
-      await sleep(1000); // wait for the window resize to take effect
-      this.log.error('Capturing screenshot...');
-      await this.screenshots.takeForFailure(`dashboard_errored_embeddables_${performance.now()}`);
     }
     expect(errorEmbeddables.length).to.be(0);
   }
