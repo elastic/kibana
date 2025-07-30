@@ -24,5 +24,6 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core",
+    "@kbn/core-http-router-server-mocks",
   ]
 }
