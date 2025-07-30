@@ -8,12 +8,12 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   MANAGED_BY_STREAMS,
-  translateUnwiredStreamPipelineActions,
-} from './translate_unwired_stream_pipeline_actions';
+  translateClassicStreamPipelineActions,
+} from './translate_classic_stream_pipeline_actions';
 import { ActionsByType } from './types';
 import { ASSET_VERSION } from '../../../../../common/constants';
 
-describe('translateUnwiredStreamPipelineActions', () => {
+describe('translateClassicStreamPipelineActions', () => {
   describe('createStreamsManagedPipeline', () => {
     it('translates a single append action to a single upsert action', async () => {
       const actionsByType = emptyActionsByType();
@@ -47,7 +47,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -71,7 +71,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               version: ASSET_VERSION,
               _meta: {
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
                 managed: true,
                 managed_by: 'streams',
               },
@@ -155,7 +155,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -188,7 +188,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               version: ASSET_VERSION,
               _meta: {
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
                 managed: true,
                 managed_by: 'streams',
               },
@@ -290,7 +290,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
           ],
         }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -314,7 +314,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               version: ASSET_VERSION,
               _meta: {
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
                 managed: true,
                 managed_by: 'streams',
               },
@@ -339,7 +339,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               version: ASSET_VERSION,
               _meta: {
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
                 managed: true,
                 managed_by: 'streams',
               },
@@ -442,7 +442,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -522,7 +522,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               managed_by: MANAGED_BY_STREAMS,
               managed: true,
               description:
-                'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                'Streams managed pipeline to connect Classic streams to the Streams layer',
             },
           },
         };
@@ -539,7 +539,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -574,7 +574,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
                 managed_by: 'streams',
                 managed: true,
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
               },
             },
           },
@@ -628,7 +628,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
               managed_by: MANAGED_BY_STREAMS,
               managed: true,
               description:
-                'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                'Streams managed pipeline to connect Classic streams to the Streams layer',
             },
           },
         };
@@ -645,7 +645,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -671,7 +671,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
                 managed_by: 'streams',
                 managed: true,
                 description:
-                  'Streams managed pipeline to connect Unwired streams to the Streams layer',
+                  'Streams managed pipeline to connect Classic streams to the Streams layer',
               },
             },
           },
@@ -735,7 +735,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -806,7 +806,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -900,7 +900,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
@@ -995,7 +995,7 @@ describe('translateUnwiredStreamPipelineActions', () => {
         ],
       }));
 
-      await translateUnwiredStreamPipelineActions(actionsByType, clusterClient);
+      await translateClassicStreamPipelineActions(actionsByType, clusterClient);
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
