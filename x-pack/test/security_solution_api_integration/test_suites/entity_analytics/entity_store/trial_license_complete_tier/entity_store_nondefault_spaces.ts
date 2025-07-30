@@ -189,7 +189,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('host');
+        await utils.expectEngineAssetsDoNotExist('host', '1.1.0');
       });
 
       it('should delete the user entity engine', async () => {
@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           )
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('user');
+        await utils.expectEngineAssetsDoNotExist('user', '1.1.0');
       });
     });
   });

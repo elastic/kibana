@@ -35,12 +35,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['user']);
-        await utils.expectEngineAssetsExist('user');
+        await utils.expectEngineAssetsExist('user', '1.1.0');
       });
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
-        await utils.expectEngineAssetsExist('host');
+        await utils.expectEngineAssetsExist('host', '1.1.0');
       });
 
       it('should have installed the expected generic resources', async () => {
@@ -80,8 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.enableEntityStore({
           entityTypes: ['host', 'user'],
         });
-        await utils.expectEngineAssetsExist('user');
-        await utils.expectEngineAssetsExist('host');
+        await utils.expectEngineAssetsExist('user', '1.1.0');
+        await utils.expectEngineAssetsExist('host', '1.1.0');
       });
     });
 
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('host');
+        await utils.expectEngineAssetsDoNotExist('host', '1.1.0');
       });
 
       it('should delete the user entity engine', async () => {
@@ -213,7 +213,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await utils.expectEngineAssetsDoNotExist('user');
+        await utils.expectEngineAssetsDoNotExist('user', '1.1.0');
       });
     });
 
