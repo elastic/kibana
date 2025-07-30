@@ -9,6 +9,7 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { esClient } from './support/es_client';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
