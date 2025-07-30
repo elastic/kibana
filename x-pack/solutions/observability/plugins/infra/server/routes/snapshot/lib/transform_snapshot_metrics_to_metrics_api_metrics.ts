@@ -10,13 +10,18 @@ import { networkTraffic, findInventoryModel } from '@kbn/metrics-data-access-plu
 import type { MetricsAPIMetric } from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
 import { type SnapshotRequest, SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 
-export const transformSnapshotMetricsToMetricsAPIMetrics = (
+export const transformSnapshotMetricsToMetricsAPIMetrics = async (
   snapshotRequest: SnapshotRequest
-): MetricsAPIMetric[] => {
+): Promise<MetricsAPIMetric[]> => {
+  const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
+  const aggregations = await inventoryModel.metrics.getAggregations({
+    schema: snapshotRequest.schema,
+  });
+
   return snapshotRequest.metrics
     .map((metric, index) => {
-      const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
-      const aggregations = inventoryModel.metrics.snapshot?.[metric.type];
+      const aggregation = aggregations.get(metric.type);
+
       if (SnapshotCustomMetricInputRT.is(metric)) {
         const isUniqueId = snapshotRequest.metrics.findIndex((m) =>
           SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
@@ -36,7 +41,7 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
           },
         };
       }
-      return { id: metric.type, aggregations };
+      return { id: metric.type, aggregations: aggregation };
     })
     .filter(identity) as MetricsAPIMetric[];
 };
