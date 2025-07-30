@@ -20,12 +20,20 @@ import { appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 
 import type { Agent } from '../types';
-import { findAgentlessPolicies } from '../services/outputs/helpers';
 
 import { AgentStatusChangeTask, TYPE, VERSION } from './agent_status_change_task';
 
+jest.mock('../services');
 jest.mock('../services/agents');
 jest.mock('../services/outputs/helpers');
+jest.mock('../services/agent_policy', () => ({
+  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
+  agentPolicyService: {
+    list: jest.fn().mockResolvedValue({
+      items: [{ id: 'agentless-policy-1', name: 'Agentless Policy 1' } as any],
+    }),
+  },
+}));
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -49,9 +57,6 @@ const getMockFetchAllAgentsByKuery = (items: Agent[]) =>
     yield items;
   })();
 const mockBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bulkUpdateAgents>;
-const mockFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
-  typeof findAgentlessPolicies
->;
 
 describe('AgentStatusChangeTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -77,9 +82,6 @@ describe('AgentStatusChangeTask', () => {
         taskInterval: '10m',
       },
     });
-    mockFindAgentlessPolicies.mockResolvedValue([
-      { id: 'agentless-policy-1', name: 'Agentless Policy 1' } as any,
-    ]);
   });
 
   afterEach(() => {

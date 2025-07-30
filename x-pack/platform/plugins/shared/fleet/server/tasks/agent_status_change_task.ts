@@ -20,10 +20,11 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { appContextService } from '../services';
+import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
-import type { Agent, AgentPolicy } from '../types';
-import { findAgentlessPolicies } from '../services/outputs/helpers';
+import type { Agent } from '../types';
+import { SO_SEARCH_LIMIT } from '../constants';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 export const TYPE = 'fleet:agent-status-change-task';
 export const VERSION = '1.0.0';
@@ -191,7 +192,7 @@ export class AgentStatusChangeTask {
       }
 
       if (!agentlessPolicies) {
-        agentlessPolicies = (await findAgentlessPolicies()).map((policy: AgentPolicy) => policy.id);
+        agentlessPolicies = await this.findAgentlessPolicies();
       }
 
       await this.bulkCreateAgentStatusChangeDocs(esClient, agentsToUpdate, agentlessPolicies);
@@ -210,6 +211,19 @@ export class AgentStatusChangeTask {
         this.logger.info(`Errors while bulk updating agents: ${JSON.stringify(updateErrors)}`);
       }
     }
+  };
+
+  private findAgentlessPolicies = async () => {
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+    const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
+      spaceId: '*',
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
+      fields: ['id'],
+    });
+    return agentlessPolicies.items.map((policy) => policy.id);
   };
 
   private bulkCreateAgentStatusChangeDocs = async (
