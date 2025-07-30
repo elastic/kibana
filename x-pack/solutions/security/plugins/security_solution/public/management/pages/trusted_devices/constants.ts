@@ -6,8 +6,8 @@
  */
 
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `name`,
@@ -17,10 +17,10 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `entries.entries.value`,
 ];
 
-export const TRUSTED_APPS_EXCEPTION_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_ARTIFACT_LISTS.trustedApps.name,
+export const TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION: CreateExceptionListSchema = {
+  description: ENDPOINT_ARTIFACT_LISTS.trustedDevices.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+  name: ENDPOINT_ARTIFACT_LISTS.trustedDevices.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_ARTIFACT_LISTS.trustedApps.description,
-  list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
-  type: ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS,
+  type: ExceptionListTypeEnum.ENDPOINT_TRUSTED_DEVICES,
 };

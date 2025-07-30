@@ -61,6 +61,10 @@ export const createAssetsNavigationTree = (core: CoreStart): NodeDefinition => (
           link: securityLink(SecurityPageName.trustedApps),
         },
         {
+          id: SecurityPageName.trustedDevices,
+          link: securityLink(SecurityPageName.trustedDevices),
+        },
+        {
           id: SecurityPageName.eventFilters,
           link: securityLink(SecurityPageName.eventFilters),
         },

@@ -45,6 +45,8 @@ export const POLICIES = '[data-test-subj~="panelNavItem-id-policy"]';
 
 export const TRUSTED_APPS = '[data-test-subj~="panelNavItem-id-trusted_apps"]';
 
+export const TRUSTED_DEVICES = '[data-test-subj~="panelNavItem-id-trusted_devices"]';
+
 export const EVENT_FILTERS = '[data-test-subj~="panelNavItem-id-event_filters"]';
 
 export const BLOCKLIST = '[data-test-subj~="panelNavItem-id-blocklist"]';

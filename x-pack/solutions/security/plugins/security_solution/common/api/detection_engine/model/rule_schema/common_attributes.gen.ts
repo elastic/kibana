@@ -576,7 +576,6 @@ export const RuleActionFrequency = z.object({
 - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
     - `kql` (string, required): A KQL string.
     - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-      
 
   */
 export type RuleActionAlertsFilter = z.infer<typeof RuleActionAlertsFilter>;
@@ -669,6 +668,7 @@ export const ExceptionListType = z.enum([
   'rule_default',
   'endpoint',
   'endpoint_trusted_apps',
+  'endpoint_trusted_devices',
   'endpoint_events',
   'endpoint_host_isolation_exceptions',
   'endpoint_blocklists',
