@@ -8,8 +8,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -22,8 +22,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -36,8 +36,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -50,8 +50,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -64,8 +64,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -78,8 +78,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -92,8 +92,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -106,8 +106,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -120,8 +120,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -134,8 +134,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -148,8 +148,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -162,8 +162,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -176,8 +176,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -190,8 +190,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -205,8 +205,8 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless
         key: investigations:timeline:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -219,8 +219,8 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
         key: investigations:saved-objects:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -233,8 +233,8 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: kibana-ubuntu-2404-1753746852
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
