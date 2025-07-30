@@ -61,10 +61,7 @@ interface LogSearchResult {
 
 // Simple logger implementation with console support
 class SimpleWorkflowLogger implements IWorkflowEventLogger {
-  constructor(
-    private logger: Logger,
-    private enableConsoleLogging: boolean = false
-  ) {}
+  constructor(private logger: Logger, private enableConsoleLogging: boolean = false) {}
 
   logInfo(message: string, meta?: any): void {
     if (this.enableConsoleLogging) {
@@ -182,13 +179,10 @@ export class WorkflowsService {
     const executionHistoryResults = await Promise.all(executionHistoryPromises);
 
     // Create a map for quick lookup
-    const historyByWorkflowId = executionHistoryResults.reduce(
-      (acc, result) => {
-        acc[result.workflowId] = result.history;
-        return acc;
-      },
-      {} as Record<string, WorkflowExecutionHistoryModel[]>
-    );
+    const historyByWorkflowId = executionHistoryResults.reduce((acc, result) => {
+      acc[result.workflowId] = result.history;
+      return acc;
+    }, {} as Record<string, WorkflowExecutionHistoryModel[]>);
 
     const results = response.saved_objects.map((so) => {
       const workflowName = so.attributes.name;
@@ -471,9 +465,10 @@ export class WorkflowsService {
       });
 
       return {
-        total: typeof response.hits.total === 'number' 
-          ? response.hits.total 
-          : response.hits.total?.value || 0,
+        total:
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value || 0,
         logs: response.hits.hits
           .map((hit: any) => hit._source)
           .filter((source: any) => source && source['@timestamp']), // Filter out invalid entries

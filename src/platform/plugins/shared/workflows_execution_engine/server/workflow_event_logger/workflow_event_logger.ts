@@ -369,4 +369,4 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     // Flush any remaining events
     await this.flushEvents();
   }
-} 
+}

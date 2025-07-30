@@ -91,4 +91,4 @@ export const createOrUpdateIndex = async ({
     logger.error(`Failed to create or update index ${indexName}: ${error}`);
     throw error;
   }
-}; 
+};

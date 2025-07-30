@@ -12,7 +12,6 @@ import {
   WorkflowEventLogger,
   IWorkflowEventLogger,
   WorkflowEventLoggerContext,
-  WorkflowEventLoggerOptions,
 } from './workflow_event_logger';
 import { createIndexWithMappings } from './create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
@@ -137,9 +136,10 @@ export class WorkflowEventLoggerService {
       });
 
       return {
-        total: typeof response.hits.total === 'number' 
-          ? response.hits.total 
-          : response.hits.total?.value || 0,
+        total:
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value || 0,
         logs: response.hits.hits.map((hit: any) => hit._source),
       };
     } catch (error) {
@@ -241,9 +241,10 @@ export class WorkflowEventLoggerService {
       });
 
       return {
-        total: typeof response.hits.total === 'number' 
-          ? response.hits.total 
-          : response.hits.total?.value || 0,
+        total:
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value || 0,
         logs: response.hits.hits.map((hit: any) => hit._source),
       };
     } catch (error) {
@@ -251,4 +252,4 @@ export class WorkflowEventLoggerService {
       throw error;
     }
   }
-} 
+}

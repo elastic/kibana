@@ -148,7 +148,11 @@ export class WorkflowsManagementApi {
       logs: result.logs
         .filter((log: any) => log) // Filter out undefined/null logs
         .map((log: any) => ({
-          id: log.id || `${log['@timestamp']}-${log.workflow?.execution_id}-${log.workflow?.step_id || 'workflow'}`,
+          id:
+            log.id ||
+            `${log['@timestamp']}-${log.workflow?.execution_id}-${
+              log.workflow?.step_id || 'workflow'
+            }`,
           timestamp: log['@timestamp'],
           level: log.level,
           message: log.message,

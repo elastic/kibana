@@ -33,4 +33,4 @@ export interface IWorkflowContextLogger {
   // Step-level logging (no state management needed)
   logStepStart(stepId: string, stepName?: string): void;
   logStepComplete(stepId: string, stepName?: string, success?: boolean): void;
-} 
+}
