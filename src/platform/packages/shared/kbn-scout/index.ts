@@ -13,6 +13,7 @@ export {
   test,
   spaceTest,
   lighthouseTest,
+  apiTest,
   globalSetupHook,
   tags,
   browserAuthFixture,
@@ -49,3 +50,5 @@ export type { Locator, CDPSession } from 'playwright/test';
 export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
