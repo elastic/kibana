@@ -57,5 +57,6 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/discover-utils",
+    "@kbn/xstate-utils",
   ]
 }

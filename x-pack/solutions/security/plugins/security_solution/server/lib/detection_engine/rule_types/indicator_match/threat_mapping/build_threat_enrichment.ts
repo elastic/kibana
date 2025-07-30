@@ -6,9 +6,8 @@
  */
 
 import type { SignalsEnrichment } from '../../types';
-import type { BuildThreatEnrichmentOptions, GetThreatListOptions } from './types';
-import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import type { BuildThreatEnrichmentOptions } from './types';
+import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 
@@ -20,44 +19,27 @@ export const buildThreatEnrichment = ({
   threatFilters,
   threatIndicatorPath,
   pitId,
-  reassignPitId,
+  reassignThreatPitId,
   threatIndexFields,
+  allowedFieldsForTermsQuery,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
-    const threatFiltersFromEvents = buildThreatMappingFilter({
-      threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
-      threatList: signals,
-      entryKey: 'field',
-      allowedFieldsForTermsQuery: {
-        source: {},
-        threat: {},
-      },
-    });
-
-    const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
+    const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
+      services,
       sharedParams,
-      esClient: services.scopedClusterClient.asCurrentUser,
-      threatFilters: [...threatFilters, threatFiltersFromEvents],
-      threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-        fields: undefined,
-      },
+      signals,
+      allowedFieldsForTermsQuery,
       pitId,
-      reassignPitId,
-      indexFields: threatIndexFields,
-    };
-
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
-      threatSearchParams,
-      eventsCount: signals.length,
-      termsQueryAllowed: false,
+      reassignThreatPitId,
+      threatFilters,
+      threatIndexFields,
+      threatIndicatorPath,
     });
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap,
       threatIndicatorPath,
-      threatFilters,
-      threatSearchParams,
+      matchedThreats: threatList,
     });
 
     return enrichment(signals);

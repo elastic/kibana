@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { PackagePolicy } from '../../../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import { getSavedObjectTypes } from '../..';
 
 const policyDoc: SavedObject<PackagePolicy> = {
@@ -72,7 +72,7 @@ const policyDoc: SavedObject<PackagePolicy> = {
       },
     ],
   },
-  type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   references: [],
 };
 
@@ -81,7 +81,7 @@ describe('8.14.0 Endpoint Package Policy migration', () => {
 
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({
-      type: getSavedObjectTypes()[PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+      type: getSavedObjectTypes()[LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE],
     });
   });
 

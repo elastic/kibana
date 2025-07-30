@@ -9,20 +9,22 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
+import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
+import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
 const LENS_VISUALIZATION_HEIGHT = 150;
 const LENS_VISUALIZATION_MIN_WIDTH = 220;
 
 interface KeyInsightsTileProps {
-  title: ReactElement;
-  label: ReactElement;
-  getEsqlQuery: (namespace: string) => string;
+  title: string;
+  label: string;
+  getEsqlQuery: (namespace: string) => EsqlQueryOrInvalidFields;
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
@@ -43,18 +45,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
-  // Extract the defaultMessage from FormattedMessage elements
-  const titleString = title.props.defaultMessage;
-  const labelString = label.props.defaultMessage;
-
-  const lensAttributes = createKeyInsightsPanelLensAttributes({
-    title: titleString,
-    label: labelString,
-    esqlQuery: getEsqlQuery(effectiveSpaceId),
-    dataViewId: 'default-dataview',
-    filterQuery,
-  });
-
   const visualizationResponse = useVisualizationResponse({
     visualizationId: id,
   });
@@ -73,15 +63,18 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     setHasStartedLoading(false);
   }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
 
+  const esqlQuery = getEsqlQuery(effectiveSpaceId);
+
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
   // 2. Loading is now complete (loading === false)
   // 3. We have no tables (indicating an error)
   if (
-    hasStartedLoading &&
-    visualizationResponse &&
-    visualizationResponse.loading === false &&
-    !visualizationResponse.tables
+    isLeft(esqlQuery) ||
+    (hasStartedLoading &&
+      visualizationResponse &&
+      visualizationResponse.loading === false &&
+      !visualizationResponse.tables)
   ) {
     return (
       <EuiFlexGroup
@@ -91,7 +84,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4>{titleString}</h4>
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
 
@@ -113,6 +106,14 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       </EuiFlexGroup>
     );
   }
+
+  const lensAttributes = createKeyInsightsPanelLensAttributes({
+    title,
+    label,
+    esqlQuery: esqlQuery.right,
+    dataViewId: 'default-dataview',
+    filterQuery,
+  });
 
   // If we reach here, either still loading or we have a valid response, so show the embeddable
   return (

@@ -9,7 +9,7 @@ export { Streams } from './src/models/streams';
 export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
-export { UnwiredIngest } from './src/models/ingest/unwired';
+export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
 export {
@@ -59,6 +59,7 @@ export {
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { buildEsqlQuery } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -106,7 +107,7 @@ export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lif
 
 export {
   type IngestStreamLifecycle,
-  type UnwiredIngestStreamEffectiveLifecycle,
+  type ClassicIngestStreamEffectiveLifecycle,
   type IlmPolicyPhases,
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,

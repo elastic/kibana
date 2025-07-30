@@ -16,6 +16,7 @@ import {
   DiffLayout,
 } from '../../../model/rule_details/rule_field_diff';
 import { fieldToDisplayNameMap } from './translations';
+import { convertFieldToDisplayName } from '../helpers';
 
 const SubFieldComponent = ({
   currentVersion,
@@ -33,7 +34,7 @@ const SubFieldComponent = ({
     <EuiFlexGroup direction="column">
       {shouldShowSubtitles ? (
         <EuiTitle data-test-subj="ruleUpgradePerFieldDiffSubtitle" size="xxxs">
-          <h4>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h4>
+          <h4>{convertFieldToDisplayName(fieldName)}</h4>
         </EuiTitle>
       ) : null}
       {diffLayout === DiffLayout.RightToLeft ? (

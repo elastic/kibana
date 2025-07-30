@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
 
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, htmlIdGenerator } from '@elastic/eui';
 
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
@@ -114,9 +114,11 @@ export class CalendarsListUI extends Component {
     const helpLink = this.props.kibana.services.docLinks.links.ml.calendars;
 
     if (this.state.isDestroyModalVisible) {
+      const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
       destroyModal = (
         <EuiConfirmModal
           data-test-subj={'mlCalendarDeleteConfirmation'}
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate(
             'xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle',
             {
@@ -128,6 +130,7 @@ export class CalendarsListUI extends Component {
               },
             }
           )}
+          titleProps={{ id: confirmModalTitleId }}
           onCancel={this.closeDestroyModal}
           onConfirm={this.deleteCalendars}
           cancelButtonText={i18n.translate(

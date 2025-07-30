@@ -16,7 +16,7 @@ import {
   isFunctionExpression,
 } from '@kbn/esql-ast';
 import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type {
   ESQLUserDefinedColumn,

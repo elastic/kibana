@@ -12,7 +12,7 @@ import {
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -21,7 +21,7 @@ interface BaseParams {
 
 export function getDataStreamLifecycle(
   dataStream: IndicesDataStream | null
-): UnwiredIngestStreamEffectiveLifecycle {
+): ClassicIngestStreamEffectiveLifecycle {
   if (!dataStream) {
     return { error: { message: 'Data stream not found' } };
   }

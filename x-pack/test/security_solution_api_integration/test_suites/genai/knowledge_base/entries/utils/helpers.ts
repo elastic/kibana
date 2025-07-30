@@ -17,9 +17,9 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
 export const TINY_ELSER = {

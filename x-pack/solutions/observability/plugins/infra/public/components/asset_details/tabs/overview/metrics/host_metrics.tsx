@@ -13,7 +13,7 @@ import { HostCharts, KubernetesNodeCharts } from '../../../charts';
 import { ContentTabIds } from '../../../types';
 
 interface Props {
-  assetId: string;
+  entityId: string;
   dateRange: TimeRange;
   dataView?: DataView;
 }
