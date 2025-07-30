@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
+import domtoimage from 'dom-to-image-more';
+import { useToasts } from '../../common/lib/kibana';
 
 interface Props {
   children: (exportPDF: () => void) => React.ReactNode;
@@ -15,6 +16,8 @@ interface Props {
 
 const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
   const exportRef = useRef<HTMLDivElement>(null);
+
+  const toasts = useToasts();
   const uiAdjuster = useCallback((eRef: HTMLDivElement) => {
     const badgeEls = eRef.querySelectorAll('.euiBadge');
     const badgeTextEls = eRef.querySelectorAll('.euiBadge__text');
@@ -23,17 +26,18 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
     const adjustUI = () => {
       badgeEls.forEach((el) => {
         el.setAttribute('data-original-style', el.getAttribute('style') || '');
-        (el as HTMLElement).style.backgroundColor = 'transparent'; // force visible color
+        (el as HTMLElement).style.backgroundColor = 'transparent';
       });
       badgeTextEls.forEach((el) => {
         el.setAttribute('data-original-style', el.getAttribute('style') || '');
-        (el as HTMLElement).style.color = 'black'; // force visible color
+        (el as HTMLElement).style.color = 'black';
       });
       if (exportButton) {
         exportButton.setAttribute('data-original-style', exportButton.getAttribute('style') || '');
-        (exportButton as HTMLElement).style.display = 'none'; // hide export button
+        (exportButton as HTMLElement).style.display = 'none';
       }
     };
+
     const restoreUI = () => {
       badgeEls.forEach((el) => {
         const original = el.getAttribute('data-original-style');
@@ -60,50 +64,58 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
         }
       }
     };
-    return {
-      adjustUI,
-      restoreUI,
-    };
+
+    return { adjustUI, restoreUI };
   }, []);
+
   const handleExportPDF = useCallback(async () => {
     if (!exportRef.current) return;
+
     const { adjustUI, restoreUI } = uiAdjuster(exportRef.current);
     adjustUI();
-    const canvas = await html2canvas(exportRef.current, {
-      useCORS: true,
-      backgroundColor: '#fff',
-      scale: 2, // Higher quality
-    });
 
-    const imgData = canvas.toDataURL('image/png');
+    try {
+      const dataUrl = await domtoimage.toPng(exportRef.current, {
+        quality: 1,
+        bgcolor: '#ffffff',
+        cacheBust: true,
+      });
 
-    const pdf = new jsPDF('portrait', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+      const img = new Image();
+      img.src = dataUrl;
 
-    const padding = 20; // add left/right padding
-    const imgWidth = pageWidth - padding * 2;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      img.onload = () => {
+        const pdf = new jsPDF('portrait', 'pt', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const padding = 20;
+        const imgWidth = pageWidth - padding * 2;
+        const imgHeight = (img.height * imgWidth) / img.width;
 
-    let position = 0;
-    let heightLeft = imgHeight;
+        let position = 0;
+        let heightLeft = imgHeight;
 
-    while (heightLeft > 0) {
-      pdf.addImage(imgData, 'PNG', padding, position + padding, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      position -= pageHeight;
-      if (heightLeft > 0) pdf.addPage();
+        while (heightLeft > 0) {
+          pdf.addImage(dataUrl, 'PNG', padding, position + padding, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          position -= pageHeight;
+          if (heightLeft > 0) pdf.addPage();
+        }
+
+        const date = new Date().toISOString();
+        pdf.save(`value-report-${date}.pdf`);
+      };
+    } catch (err) {
+      toasts.addError(err, {
+        title: 'Failed to export value report PDF',
+        toastMessage: err.message ?? 'An unexpected error occurred. Please try again later.',
+      });
+    } finally {
+      restoreUI();
     }
-    const date = new Date().toISOString();
-    pdf.save(`value-report-${date}.pdf`);
-    restoreUI();
-  }, [uiAdjuster]);
+  }, [toasts, uiAdjuster]);
 
-  return (
-    <>
-      <div ref={exportRef}>{children(handleExportPDF)}</div>
-    </>
-  );
+  return <div ref={exportRef}>{children(handleExportPDF)}</div>;
 };
 
 export const ValueReportExporter = React.memo(ValueReportExporterComponent);
