@@ -20,23 +20,23 @@ import type {
 
 export const MANAGED_BY_STREAMS = 'streams';
 
-type UnwiredStreamPipelineAction =
+type ClassicStreamPipelineAction =
   | AppendProcessorToIngestPipelineAction
   | DeleteProcessorFromIngestPipelineAction;
 
 /**
- * UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
+ * ClassicStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
  * In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
  * We need to translate some actions
  */
-export async function translateUnwiredStreamPipelineActions(
+export async function translateClassicStreamPipelineActions(
   actionsByType: ActionsByType,
   scopedClusterClient: IScopedClusterClient
 ) {
   const maybeActions = [
     ...actionsByType.append_processor_to_ingest_pipeline,
     ...actionsByType.delete_processor_from_ingest_pipeline,
-  ] as UnwiredStreamPipelineAction[];
+  ] as ClassicStreamPipelineAction[];
 
   if (maybeActions.length === 0) {
     return;
@@ -82,7 +82,7 @@ async function createStreamsManagedPipeline({
   actionsByType,
   scopedClusterClient,
 }: {
-  actions: UnwiredStreamPipelineAction[];
+  actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
   scopedClusterClient: IScopedClusterClient;
 }) {
@@ -97,13 +97,13 @@ async function createStreamsManagedPipeline({
 
   actionsByType.upsert_ingest_pipeline.push({
     type: 'upsert_ingest_pipeline',
-    // All of these are UnwiredStreams so take any stream name to use for the ordering of operations
+    // All of these are ClassicStreams so take any stream name to use for the ordering of operations
     stream: actions[0].dataStream,
     request: {
       id: pipelineName,
       processors: actions.map((action) => action.processor),
       _meta: {
-        description: `Streams managed pipeline to connect Unwired streams to the Streams layer`,
+        description: `Streams managed pipeline to connect Classic streams to the Streams layer`,
         managed: true,
         managed_by: MANAGED_BY_STREAMS,
       },
@@ -152,7 +152,7 @@ async function updateExistingStreamsManagedPipeline({
 }: {
   pipelineName: string;
   pipeline: IngestPipeline;
-  actions: UnwiredStreamPipelineAction[];
+  actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
   scopedClusterClient: IScopedClusterClient;
 }) {
@@ -177,7 +177,7 @@ async function updateExistingStreamsManagedPipeline({
   if (processors.length !== 0) {
     actionsByType.upsert_ingest_pipeline.push({
       type: 'upsert_ingest_pipeline',
-      // All of these are UnwiredStreams so take any stream name to use for the ordering of operations
+      // All of these are ClassicStreams so take any stream name to use for the ordering of operations
       stream: actions[0].dataStream,
       request: {
         id: pipelineName,
@@ -241,7 +241,7 @@ async function updateExistingUserManagedPipeline({
   scopedClusterClient,
 }: {
   pipelineName: string;
-  actions: UnwiredStreamPipelineAction[];
+  actions: ClassicStreamPipelineAction[];
   actionsByType: ActionsByType;
   scopedClusterClient: IScopedClusterClient;
 }) {
@@ -272,7 +272,7 @@ async function updateExistingUserManagedPipeline({
 
   actionsByType.upsert_ingest_pipeline.push({
     type: 'upsert_ingest_pipeline',
-    // All of these are UnwiredStreams so take any stream name to use for the ordering of operations
+    // All of these are ClassicStreams so take any stream name to use for the ordering of operations
     stream: actions[0].dataStream,
     request: {
       id: targetPipelineName,
