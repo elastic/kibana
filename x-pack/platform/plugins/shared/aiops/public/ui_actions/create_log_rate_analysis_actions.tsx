@@ -23,7 +23,7 @@ import type {
 import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
-import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input';
+import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/log_rate_analysis_config_input';
 
 const parentApiIsCompatible = async (
   parentApi: unknown

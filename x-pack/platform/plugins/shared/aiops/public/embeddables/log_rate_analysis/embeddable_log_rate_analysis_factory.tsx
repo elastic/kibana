@@ -38,7 +38,7 @@ import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type { LogRateAnalysisEmbeddableApi, LogRateAnalysisEmbeddableState } from './types';
 import { getDataviewReferences } from '../get_dataview_references';
-import { EmbeddableLogRateAnalysisUserInput } from './resolve_log_rate_analysis_config_input';
+import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
