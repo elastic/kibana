@@ -43,6 +43,7 @@ import type { ApiKeyManager } from './auth/api_key';
 import {
   startPrivilegeMonitoringTask,
   removePrivilegeMonitoringTask,
+  scheduleNow,
 } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
@@ -856,5 +857,31 @@ export class PrivilegeMonitoringDataClient {
       );
       throw new Error(msg);
     }
+  }
+
+  public async scheduleNow() {
+    if (!this.opts.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    const engineStatus = await this.getEngineStatus();
+
+    if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      throw new Error(
+        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+      );
+    }
+
+    this.audit(
+      PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
+      EngineComponentResourceEnum.privmon_engine,
+      'Privilege Monitoring Engine scheduled for immediate run'
+    );
+
+    return scheduleNow({
+      taskManager: this.opts.taskManager,
+      namespace: this.opts.namespace,
+      logger: this.opts.logger,
+    });
   }
 }
