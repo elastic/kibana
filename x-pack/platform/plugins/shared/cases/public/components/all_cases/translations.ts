@@ -96,6 +96,10 @@ export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
   defaultMessage: 'Select',
 });
 
+export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAttached', {
+  defaultMessage: 'Already added',
+});
+
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
 });
