@@ -51,8 +51,9 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           return await privilege.getVisibleText();
         })
       );
-      expect(privileges.length).to.be(4);
+      expect(privileges.length).to.be(5);
       expect(text).to.eql([
+        'ObservabilityManageRules\nAll\nRead\nNone',
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
         'Streams\nAll\nRead\nNone',

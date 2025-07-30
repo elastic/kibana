@@ -120,13 +120,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       createESQueryRule({ ruleName });
 
-      it('should have logs consumer by default', async () => {
+      it('should have observability consumer by default', async () => {
         const searchResults = await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         );
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('logs');
+        expect(rule.consumer).toEqual('observability');
         ruleIdList.push(rule.id);
       });
     });
@@ -143,13 +143,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       createESQueryRule({ ruleName });
 
-      it('should have infrastructure consumer by default', async () => {
+      it('should have observability consumer by default', async () => {
         const searchResults = await alertingApi.searchRules(
           roleAuthc,
           `alert.attributes.name:"${ruleName}"`
         );
         const rule = searchResults.body.data[0];
-        expect(rule.consumer).toEqual('infrastructure');
+        expect(rule.consumer).toEqual('observability');
         ruleIdList.push(rule.id);
       });
     });
