@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

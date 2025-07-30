@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before('initialize tests', async () => {
         log.debug('ReportingPage:initTests');
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
         await kibanaServer.importExport.load(ecommerceSOPath);
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       after('clean up archives', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
         await kibanaServer.importExport.unload(ecommerceSOPath);
         await es.deleteByQuery({
           index: '.reporting-*',
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
