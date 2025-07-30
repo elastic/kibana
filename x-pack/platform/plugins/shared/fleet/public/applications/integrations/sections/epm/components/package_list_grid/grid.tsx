@@ -53,7 +53,7 @@ export const GridColumn = ({
 
   if (isLoading) {
     return (
-      <EuiFlexGrid gutterSize="l" columns={3} alignItems="start">
+      <EuiFlexGrid gutterSize="m" columns={3} alignItems="start">
         {Array.from({ length: 12 }).map((_, index) => (
           <EuiFlexItem key={index} grow={3}>
             <EuiSkeletonRectangle height="160px" width="100%" />
@@ -66,7 +66,7 @@ export const GridColumn = ({
   if (!list.length) {
     return (
       <EuiFlexGrid
-        gutterSize="l"
+        gutterSize="m"
         columns={3}
         data-test-subj="emptyState"
         style={emptyStateStyles}
@@ -105,12 +105,13 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGrid columns={3} gutterSize="l" alignItems="start">
+            <EuiFlexGrid columns={3} gutterSize="m" alignItems="start">
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
                   // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                   css={css`
+                    align-self: stretch;
                     & > .euiPopover,
                     & > .euiPopover > .euiCard {
                       height: 100%;
