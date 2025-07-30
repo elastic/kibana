@@ -19,8 +19,8 @@ import {
   DataTableRecord,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
-import { EuiBadge, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import type { CSSObject } from '@emotion/react';
+import { makeHighContrastColor, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { formatJsonDocumentForContent } from './utils';
 
 interface ContentProps extends DataGridCellValueElementProps {
@@ -29,15 +29,13 @@ interface ContentProps extends DataGridCellValueElementProps {
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
-const badgeCss: CSSObject = { paddingInline: 0, marginInlineStart: '0 !important', border: 0 };
-
 const LogMessage = ({
   field,
   value,
   className,
 }: {
   field: string;
-  value: string | React.ReactNode;
+  value: string | HTMLElement;
   className: string;
 }) => {
   const shouldRenderFieldName = field !== MESSAGE_FIELD;
@@ -46,45 +44,47 @@ const LogMessage = ({
     return (
       <div className={className}>
         <strong>{field}</strong>{' '}
-        <span className={className} data-test-subj="discoverDataTableMessageValue">
-          {value}
-        </span>
+        <span
+          className={className}
+          data-test-subj="discoverDataTableMessageValue"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: value }}
+        />
       </div>
     );
   }
 
   return (
-    <p className={className} data-test-subj="discoverDataTableMessageValue">
-      {value}
-    </p>
+    <p
+      className={className}
+      data-test-subj="discoverDataTableMessageValue"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
   );
 };
 
 const getHighlightedMessage = (
   value: string,
   _row: DataTableRecord,
-  euiTheme: EuiThemeComputed
-): React.ReactNode => {
-  return value.split(LOG_LEVEL_REGEX).map((part, idx) => {
-    if (LOG_LEVEL_REGEX.test(part)) {
-      const coalesced = getLogLevelCoalescedValue(part);
-      if (!coalesced) return part;
+  euiTheme: EuiThemeComputed,
+  isDarkTheme: boolean
+): string => {
+  return value.replace(LOG_LEVEL_REGEX, (match) => {
+    const coalesced = getLogLevelCoalescedValue(match);
+    if (!coalesced) return match;
 
-      const bgColor = getLogLevelColor(coalesced, euiTheme);
-      if (!bgColor) return part;
+    const bgColor = getLogLevelColor(coalesced, euiTheme);
+    if (!bgColor) return match;
 
-      return (
-        <EuiBadge
-          key={`logLevelHighlight-${coalesced}-${idx}`}
-          color={bgColor}
-          data-test-subj={`logLevelHighlight-${coalesced}`}
-          css={badgeCss}
-        >
-          {part}
-        </EuiBadge>
-      );
-    }
-    return part;
+    // Use EUI's makeHighContrastColor utility to calculate appropriate text color
+    // This function automatically determines the best contrasting color based on WCAG standards
+    const textColor = makeHighContrastColor(
+      isDarkTheme ? euiTheme.colors.ghost : euiTheme.colors.ink, // preferred foreground color
+      4.5 // WCAG AA contrast ratio (default in EUI)
+    )(bgColor);
+
+    return `<span style="color:${textColor};background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
   });
 };
 
@@ -101,10 +101,11 @@ export const Content = ({
   const { field, value } = getMessageFieldWithFallbacks(documentOverview);
 
   const { euiTheme } = useEuiTheme();
+  const isDarkTheme = useKibanaIsDarkMode();
 
   const highlightedValue = useMemo(
-    () => (value ? getHighlightedMessage(value as string, row, euiTheme) : value),
-    [value, row, euiTheme]
+    () => (value ? getHighlightedMessage(value as string, row, euiTheme, isDarkTheme) : value),
+    [value, row, euiTheme, isDarkTheme]
   );
 
   const shouldRenderContent = !!field && !!value && !!highlightedValue;
