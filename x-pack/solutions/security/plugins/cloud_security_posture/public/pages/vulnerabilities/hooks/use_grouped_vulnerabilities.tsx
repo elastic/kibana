@@ -38,7 +38,7 @@ export const useGroupedVulnerabilities = ({
   } = useKibana().services;
 
   return useQuery(
-    ['csp_grouped_vulnerabilities', { query }],
+    [CDR_VULNERABILITIES_INDEX_PATTERN, 'csp_grouped_vulnerabilities', { query }],
     async () => {
       const {
         rawResponse: { aggregations },

@@ -7,6 +7,7 @@
 
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { BasicMetricValueRT } from '@kbn/metrics-data-access-plugin/server';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraEntityMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
@@ -16,7 +17,6 @@ import {
   getInventoryModelAggregations,
   getDocumentsFilter,
 } from '../helpers/query';
-import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async ({
   infraMetricsClient,
