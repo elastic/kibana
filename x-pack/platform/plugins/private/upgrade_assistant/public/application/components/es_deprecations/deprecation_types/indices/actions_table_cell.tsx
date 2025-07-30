@@ -158,6 +158,7 @@ const ReindexActionButtons: React.FunctionComponent<{
 
   const canDisplayDelete = !!(
     reindexState.hasRequiredPrivileges &&
+    !reindexingInProgressOrCompleted &&
     !isSettingReadOnly &&
     deprecation.level === 'critical'
   );
