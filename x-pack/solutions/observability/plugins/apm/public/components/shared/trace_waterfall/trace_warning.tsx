@@ -14,7 +14,7 @@ const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallContext.warningMessage.fallbackWarning',
   {
     defaultMessage:
-      'The waterfall visual may be incomplete or missing until processing finishes. Try refreshing the page or adjusting the time range.',
+      'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
   }
 );
 
