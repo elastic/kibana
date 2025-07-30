@@ -44,10 +44,10 @@ export const READ_ALL_INDICES_ROLE = {
   },
 };
 
-const READ_PRIV_MON_INDICES_ROLE = {
+export const READ_PRIV_MON_INDICES_ROLE = {
   name: 'priv_mon_read',
   privileges: {
-    kibana: ALL_SECURITY_SOLUTION_PRIVILEGES,
+    kibana: READ_SECURITY_SOLUTION_PRIVILEGES,
     elasticsearch: {
       indices: [
         {
@@ -60,6 +60,16 @@ const READ_PRIV_MON_INDICES_ROLE = {
 };
 
 export const READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE = {
+  name: 'no_index_no_privileges',
+  privileges: {
+    kibana: READ_SECURITY_SOLUTION_PRIVILEGES,
+    elasticsearch: {
+      indices: [],
+    },
+  },
+};
+
+export const READ_NO_INDEX_ROLE = {
   name: 'no_index',
   privileges: {
     kibana: READ_SECURITY_SOLUTION_PRIVILEGES,
@@ -73,6 +83,7 @@ const ROLES = [
   READ_ALL_INDICES_ROLE,
   READ_PRIV_MON_INDICES_ROLE,
   READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
+  READ_NO_INDEX_ROLE,
 ];
 
 export const PrivMonRolesUtils = (getService: FtrProviderContext['getService']) => {
