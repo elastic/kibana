@@ -53,11 +53,11 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       );
       expect(privileges.length).to.be(5);
       expect(text).to.eql([
-        'ObservabilityManageRules\nAll\nRead\nNone',
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
         'Streams\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
+        'Observability Rules and Alerts\nAll\nRead\nNone',
       ]);
     });
 

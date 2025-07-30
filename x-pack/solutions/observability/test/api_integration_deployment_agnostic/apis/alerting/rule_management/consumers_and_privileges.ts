@@ -124,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Custom threshold - rule cannot be created with unauthorized consumers', function () {
       ['metrics', 'stackAlerts'].forEach((consumer) => {
-        it(`creates rule successfully for consumer ${consumer}`, async () => {
+        it(`throws 403 error for consumer ${consumer}`, async () => {
           await samlAuth.setCustomRole(ROLES.rules_only);
           const rulesOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
           const createdRule = await alertingApi.createRule({
@@ -143,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Custom threshold - rule cannot be created with read-only privileges', function () {
       ['observability', 'logs'].forEach((consumer) => {
-        it(`creates rule successfully for consumer ${consumer}`, async () => {
+        it(`throws 403 error for consumer ${consumer}`, async () => {
           await samlAuth.setCustomRole(ROLES.rules_read_only);
           const rulesReadOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
           const createdRule = await alertingApi.createRule({
