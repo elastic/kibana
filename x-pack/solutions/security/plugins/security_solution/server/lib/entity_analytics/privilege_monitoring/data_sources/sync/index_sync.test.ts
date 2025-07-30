@@ -55,7 +55,8 @@ jest.mock('../../users/search', () => {
 const mockBuildBulkUpsertOperations = jest.fn();
 jest.mock('../bulk/upsert', () => {
   return {
-    buildBulkUpsertOperations: () => mockBuildBulkUpsertOperations(),
+    // buildBulkUpsertOperations is curried, hence the extra function. We only need to mock the last part so we can return mocked values.
+    buildBulkUpsertOperations: () => () => mockBuildBulkUpsertOperations(),
   };
 });
 
@@ -89,8 +90,6 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   });
 
   describe('syncAllIndexUsers', () => {
-    const mockLog = jest.fn();
-
     it('should sync all index users successfully', async () => {
       const mockMonitoringSOSources = [
         { name: 'source1', indexPattern: 'index1' },
@@ -102,16 +101,15 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       expect(mockFindByIndex).toHaveBeenCalled();
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(2);
-      expect(mockSearchUsernamesInIndex).toHaveBeenCalledWith({
-        indexName: 'index1',
-        kuery: undefined,
-      });
+      expect(mockSearchUsernamesInIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ indexName: 'index1' })
+      );
     });
 
     it('logs and returns if no index sources', async () => {
+      mockFindByIndex.mockResolvedValue([]);
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
-      expect(mockLog).toHaveBeenCalledWith(
-        'debug',
+      expect(deps.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('No monitoring index sources found. Skipping sync.')
       );
     });
@@ -123,15 +121,12 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       ]);
       mockFindStaleUsers.mockResolvedValue([]);
 
-      indexSyncService.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1']);
-
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       // Should only be called for the source with indexPattern
-      expect(indexSyncService.syncUsernamesFromIndex).toHaveBeenCalledTimes(1);
-      expect(indexSyncService.syncUsernamesFromIndex).toHaveBeenCalledWith({
-        indexName: 'foo',
-        kuery: undefined,
-      });
+      expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(1);
+      expect(mockSearchUsernamesInIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ indexName: 'foo' })
+      );
     });
 
     it('should retrieve all usernames from index and perform bulk ops', async () => {
@@ -168,6 +163,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
         .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
 
       mockGetMonitoredUsers.mockResolvedValue(mockMonitoredUserHits);
+
       mockBuildBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.index = 'test-index';
 

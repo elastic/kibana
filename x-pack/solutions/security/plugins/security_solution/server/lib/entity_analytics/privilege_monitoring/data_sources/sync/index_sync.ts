@@ -56,7 +56,6 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
     });
     // get all monitoring index source saved objects of type 'index'
     const indexSources = await monitoringIndexSourceClient.findByIndex();
-    console.log(`Found ${indexSources.length} monitoring index sources.`);
     if (indexSources.length === 0) {
       dataClient.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
@@ -73,7 +72,7 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
           indexName: index,
           kuery: source.filter?.kuery,
         });
-        console.log(`Found ${batchUserNames.length} usernames in index: ${index}`);
+
         // collect stale users
         const staleUsers = await findStaleUsers(index, batchUserNames);
         allStaleUsers.push(...staleUsers);
@@ -124,7 +123,6 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
     indexName: string;
     kuery?: string | unknown;
   }): Promise<string[]> => {
-    console.log(`Syncing usernames from index: ${indexName}`);
     const allUsernames: string[] = []; // Collect all usernames across batches
     let searchAfter: SortResults | undefined;
     const batchSize = 100;
@@ -137,7 +135,6 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
         searchAfter,
         query,
       });
-      console.log(`Found ${response.hits.total.value} total hits in index: ${indexName}`);
 
       const hits = response.hits.hits;
       if (hits.length === 0) break;
