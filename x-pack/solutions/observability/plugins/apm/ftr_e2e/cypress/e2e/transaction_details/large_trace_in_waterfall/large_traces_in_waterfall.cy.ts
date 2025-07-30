@@ -43,7 +43,7 @@ describe('Large Trace in waterfall', () => {
 
     it('renders waterfall items', () => {
       // it renders a virtual list, so the number of items rendered is not the same as the number of items in the trace
-      cy.getByTestSubj('waterfallItem').should('have.length.at.least', 39);
+      cy.getByTestSubj('accordionWaterfall').should('have.length.at.least', 39);
       cy.getByTestSubj('waterfall').should('have.css', 'height').and('eq', '10011px');
     });
 
@@ -73,7 +73,7 @@ describe('Large Trace in waterfall', () => {
 
     it('renders waterfall items', () => {
       // it renders a virtual list, so the number of items rendered is not the same as the number of items in the trace
-      cy.getByTestSubj('waterfallItem').should('have.length.at.least', 39);
+      cy.getByTestSubj('accordionWaterfall').should('have.length.at.least', 39);
       cy.getByTestSubj('waterfall').should('have.css', 'height').and('eq', '10011px');
     });
 
