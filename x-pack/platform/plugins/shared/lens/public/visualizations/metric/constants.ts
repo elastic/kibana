@@ -32,15 +32,22 @@ type MetricVisualizationStateOptionals = Pick<
 export const metricStateDefaults: Required<
   Pick<
     MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valueTextAlign' | 'extraTextAlign' | 'iconAlign' | 'valueFontMode'
+    | 'titlesTextAlign'
+    | 'primaryAlign'
+    | 'secondaryAlign'
+    | 'iconAlign'
+    | 'valueFontMode'
+    | 'primaryPosition'
+    | 'titleWeight'
   >
 > = {
-  // TODO: Update this with default, layout 1 or 2
   titlesTextAlign: 'left',
-  valueTextAlign: 'right',
-  extraTextAlign: 'right',
+  primaryAlign: 'right',
+  secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontMode: 'default',
+  primaryPosition: 'bottom',
+  titleWeight: 'bold',
 };
 
 export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
