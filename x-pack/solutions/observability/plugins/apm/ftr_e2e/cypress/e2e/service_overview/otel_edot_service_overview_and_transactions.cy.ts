@@ -131,7 +131,9 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpInfoUrl').contains();
+      cy.getByTestSubj('apmHttpInfoUrl').contains(
+        'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
+      );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
     });
   });
