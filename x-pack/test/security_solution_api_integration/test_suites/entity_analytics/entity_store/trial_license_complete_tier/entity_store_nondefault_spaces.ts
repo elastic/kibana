@@ -44,12 +44,12 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
       it('should have installed the expected user resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['user']);
-        await utils.expectEngineAssetsExist('user');
+        await utils.expectEngineAssetsExist('user', '1.1.0');
       });
 
       it('should have installed the expected host resources', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
-        await utils.expectEngineAssetsExist('host');
+        await utils.expectEngineAssetsExist('host', '1.1.0');
       });
     });
 
