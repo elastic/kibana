@@ -77,10 +77,12 @@ export class StreamsApp {
 
   async confirmDeleteInModal() {
     await this.getDeleteModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getDeleteModal()).toBeHidden();
   }
 
   async cancelDeleteInModal() {
     await this.getDeleteModal().getByRole('button', { name: 'Cancel' }).click();
+    await expect(this.getDeleteModal()).toBeHidden();
   }
 
   async closeToast() {
