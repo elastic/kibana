@@ -7,8 +7,8 @@
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
 import {
-  UnwiredIngestStreamEffectiveLifecycle,
-  unwiredIngestStreamEffectiveLifecycleSchema,
+  ClassicIngestStreamEffectiveLifecycle,
+  classicIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { Validation, validation } from '../validation/validation';
@@ -17,50 +17,50 @@ import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-export interface IngestUnwired {
-  unwired: {};
+export interface IngestClassic {
+  classic: {};
 }
 
-export const IngestUnwired: z.Schema<IngestUnwired> = z.object({
-  unwired: z.object({}),
+export const IngestClassic: z.Schema<IngestClassic> = z.object({
+  classic: z.object({}),
 });
 
-export type UnwiredIngest = IngestBase & IngestUnwired;
+export type ClassicIngest = IngestBase & IngestClassic;
 
-export const UnwiredIngest: Validation<IngestBase, UnwiredIngest> = validation(
+export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
-  z.intersection(IngestBase.right, IngestUnwired)
+  z.intersection(IngestBase.right, IngestClassic)
 );
 
-export namespace UnwiredStream {
+export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
-    ingest: UnwiredIngest;
+    ingest: ClassicIngest;
   }
 
-  export type Source = IngestBaseStream.Source<UnwiredStream.Definition>;
+  export type Source = IngestBaseStream.Source<ClassicStream.Definition>;
 
   export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
-    effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+    effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
 
   export interface Model {
-    Definition: UnwiredStream.Definition;
-    Source: UnwiredStream.Source;
-    GetResponse: UnwiredStream.GetResponse;
-    UpsertRequest: UnwiredStream.UpsertRequest;
+    Definition: ClassicStream.Definition;
+    Source: ClassicStream.Source;
+    GetResponse: ClassicStream.GetResponse;
+    UpsertRequest: ClassicStream.UpsertRequest;
   }
 }
 
-export const UnwiredStream: ModelValidation<BaseStream.Model, UnwiredStream.Model> =
+export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Model> =
   modelValidation(BaseStream, {
     Definition: z.intersection(
       IngestBaseStream.Definition.right,
       z.object({
-        ingest: IngestUnwired,
+        ingest: IngestClassic,
       })
     ),
     Source: z.intersection(IngestBaseStream.Source.right, z.object({})),
@@ -69,7 +69,7 @@ export const UnwiredStream: ModelValidation<BaseStream.Model, UnwiredStream.Mode
       z.object({
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
-        effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
+        effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
