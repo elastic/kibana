@@ -73,7 +73,7 @@ export function useGrokPatternSuggestion() {
           samples: originalSamples,
           previewDocsFilter,
           simulation,
-        } as SimulationContext);
+        });
       }
 
       const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
