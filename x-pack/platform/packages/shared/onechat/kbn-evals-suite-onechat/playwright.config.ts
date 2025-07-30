@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Path from 'path';
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export function foo() {
-  return 'hello world';
-}
+export default createPlaywrightEvalsConfig({
+  testDir: Path.join(__dirname, './evals'),
+});
