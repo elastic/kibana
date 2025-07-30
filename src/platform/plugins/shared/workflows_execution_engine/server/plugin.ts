@@ -65,8 +65,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>,
-      spaceId: string
+      context: Record<string, any>
     ) => {
       const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
@@ -75,7 +74,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
-        spaceId,
+        spaceId: workflow.spaceId,
         id: workflowRunId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
@@ -118,7 +117,7 @@ export class WorkflowsExecutionEnginePlugin
       });
 
       const contextManager = new WorkflowContextManager({
-        spaceId,
+        spaceId: workflow.spaceId,
         workflowRunId,
         workflow: workflow.definition,
         event: context.event,
