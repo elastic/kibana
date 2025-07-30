@@ -177,6 +177,7 @@ export class IndexUpdateService {
         return acc;
       }, new Map() as PendingSave);
     }),
+    startWith(new Map() as PendingSave),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -206,7 +207,7 @@ export class IndexUpdateService {
         }),
         { prevLength: 0, currLength: 0 }
       ),
-      filter(({ prevLength, currLength }) => currLength < prevLength || prevLength === 0),
+      filter(({ prevLength, currLength }) => currLength < prevLength),
       startWith({ prevLength: 0, currLength: 0 })
     ),
   ]).pipe(
@@ -417,7 +418,6 @@ export class IndexUpdateService {
     this._subscription.add(
       this.dataView$
         .pipe(
-          take(1),
           switchMap((dataView) => {
             const columnsCount = dataView.fields.filter(
               // @ts-ignore

@@ -28,6 +28,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { firstValueFrom } from 'rxjs';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextExtra } from '../../types';
+import { isPlaceholderColumn } from '../../utils';
 
 const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
 
@@ -116,10 +117,10 @@ export const getOverrideConfirmation = async ({
   storage,
   indexUpdateService,
 }: KibanaContextExtra): Promise<boolean> => {
-  const columnsPendingToBeSaved = await firstValueFrom(
-    indexUpdateService.pendingColumnsToBeSaved$,
-    { defaultValue: [] }
-  );
+  const columnsPendingToBeSaved = (
+    await firstValueFrom(indexUpdateService.pendingColumnsToBeSaved$, { defaultValue: [] })
+  ).filter((col) => !isPlaceholderColumn(col.name));
+
   const docsPendingToBeSaved = await firstValueFrom(indexUpdateService.savingDocs$, {
     defaultValue: new Map(),
   });
