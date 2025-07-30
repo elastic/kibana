@@ -123,8 +123,8 @@
     "@kbn/apm-types",
     "@kbn/react-query",
     "@kbn/ml-common-types",
-    "@kbn/ml-common-constants",
     "@kbn/ml-embeddables",
+    "@kbn/ml-ui-actions",
   ],
   "exclude": ["target/**/*"]
 }

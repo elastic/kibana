@@ -11,7 +11,7 @@ import React, { useContext, useEffect, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { useGlobalUrlState } from '@kbn/ml-url-state/src/url_state';
 import { useMlKibana } from '@kbn/ml-kibana-context';
-import { useMlJobService } from '@kbn/ml-services/job_service';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
 
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';

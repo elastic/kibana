@@ -17,6 +17,8 @@ export interface CreateCategorizationADJobContext {
 }
 
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
-
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER =
   'CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER';
+export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
+export const CONTROLLED_BY_ANOMALY_CHARTS_FILTER = 'anomaly-charts';
+export const CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER = 'single-metric-viewer';
