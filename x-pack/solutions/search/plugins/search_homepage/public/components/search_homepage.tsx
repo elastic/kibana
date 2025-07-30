@@ -9,9 +9,11 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
+import { useIngestionCtaFeatureFlag } from '../hooks/use_ingestion_cta_feature_flag';
 import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
+import { SearchHomepageIngestionVariantBody } from './ingestion_body';
 
 export const SearchHomepagePage = () => {
   const {
@@ -22,6 +24,7 @@ export const SearchHomepagePage = () => {
       searchNavigation.breadcrumbs.setSearchBreadCrumbs([]);
     }
   }, [searchNavigation]);
+  const ingestionCTAVariantLoaded = useIngestionCtaFeatureFlag();
   const { isLoading } = useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(
@@ -43,7 +46,11 @@ export const SearchHomepagePage = () => {
         <>
           <SearchHomepageHeader />
           <EuiHorizontalRule margin="none" />
-          <SearchHomepageBody />
+          {ingestionCTAVariantLoaded ? (
+            <SearchHomepageIngestionVariantBody />
+          ) : (
+            <SearchHomepageBody />
+          )}
           {embeddableConsole}
         </>
       )}
