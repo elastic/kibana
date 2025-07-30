@@ -20,16 +20,27 @@ import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { GroupByExpression } from './common/group_by_field';
 import { WindowValueExpression } from './common/condition_window_value';
-import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
+import {
+  DEFAULT_CONDITION,
+  ForTheLastExpression,
+  SHOW_RECOVERY_MODE_SWITCH,
+} from './common/for_the_last_expression';
 import { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  showRecoveryModeSwitch?: boolean;
 }
 
-export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
+export const StatusRuleExpression: React.FC<Props> = ({
+  ruleParams,
+  setRuleParams,
+  showRecoveryModeSwitch = SHOW_RECOVERY_MODE_SWITCH,
+}) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
 
@@ -170,20 +181,24 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
           onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
         />
       </EuiFlexItem>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            compressed
-            label={FIRST_UP_RECOVERY_MODE_SWITCH_LABEL}
-            checked={ruleParams.condition?.recoveryMode === 'firstUp'}
-            onChange={(e) => onFirstUpRecoveryModeChange(e.target.checked)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={FIRST_UP_RECOVERY_MODE_TOOLTIP} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {showRecoveryModeSwitch && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={FIRST_UP_RECOVERY_MODE_SWITCH_LABEL}
+                checked={ruleParams.condition?.recoveryMode === 'firstUp'}
+                onChange={(e) => onFirstUpRecoveryModeChange(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={FIRST_UP_RECOVERY_MODE_TOOLTIP} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
       <EuiSpacer size="l" />
     </>
   );
