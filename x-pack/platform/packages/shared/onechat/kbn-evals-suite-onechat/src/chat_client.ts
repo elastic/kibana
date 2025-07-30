@@ -8,7 +8,6 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { HttpHandler } from '@kbn/core/public';
 import { AgentMode, oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { inspect } from 'util';
 
 type StringOrMessageList = string;
 
