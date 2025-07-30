@@ -8,7 +8,7 @@
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
-import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams, ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -16,7 +16,7 @@ import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
-  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
 }
 
