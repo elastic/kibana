@@ -29,9 +29,10 @@ import { BehaviorSubject } from 'rxjs';
 import {
   getRuntimeStateManagerMock,
   getTabRuntimeStateMock,
-} from './state_management/redux/mocks/runtime_state.mocks';
-import type { DiscoverStateContainer } from './state_management/discover_state';
+} from './state_management/redux/__mocks__/runtime_state.mocks';
+import { type DiscoverStateContainer } from './state_management/discover_state';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -205,25 +206,21 @@ describe('DiscoverMainRoute', () => {
   });
 
   describe.each([
-    { hasChanged: false, id: undefined },
-    { hasChanged: true, id: undefined },
-    { hasChanged: false, id: '1234' },
-  ])('when there are no unsaved changes', ({ hasChanged, id }) => {
+    { hasChanged: false, id: undefined, description: "hasn't changed and is not saved" },
+    { hasChanged: true, id: undefined, description: 'has changed and is not saved' },
+    { hasChanged: false, id: '1234', description: "hasn't changed and is saved" },
+  ])('when $description', ({ hasChanged, id }) => {
     it('should call the default action', () => {
       // Given
+      const discoverStateContainer = getDiscoverStateMock();
+      discoverStateContainer.savedSearchState.getHasChanged$ = () =>
+        new BehaviorSubject(hasChanged);
+      discoverStateContainer.savedSearchState.getId = () => id;
+
       const tabMock = getTabRuntimeStateMock({
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>({
-          savedSearchState: {
-            getHasChanged$: () => new BehaviorSubject(hasChanged),
-            getId: () => id,
-          },
-          dataState: {
-            cancel: jest.fn(),
-          },
-          actions: {
-            stopSyncing: jest.fn(),
-          },
-        } as unknown as DiscoverStateContainer),
+        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(
+          discoverStateContainer
+        ),
       });
 
       mockCreateRuntimeStateManager.mockReturnValue(
@@ -253,19 +250,14 @@ describe('DiscoverMainRoute', () => {
   describe('when there are unsaved changes', () => {
     it('should call the confirm action', () => {
       // Given
+      const discoverStateContainer = getDiscoverStateMock();
+      discoverStateContainer.savedSearchState.getHasChanged$ = () => new BehaviorSubject(true);
+      discoverStateContainer.savedSearchState.getId = () => '1234';
+
       const tabMock = getTabRuntimeStateMock({
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>({
-          savedSearchState: {
-            getHasChanged$: () => new BehaviorSubject(true),
-            getId: () => '1234',
-          },
-          dataState: {
-            cancel: jest.fn(),
-          },
-          actions: {
-            stopSyncing: jest.fn(),
-          },
-        } as unknown as DiscoverStateContainer),
+        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(
+          discoverStateContainer
+        ),
       });
 
       mockCreateRuntimeStateManager.mockReturnValue(
