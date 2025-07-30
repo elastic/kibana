@@ -48,7 +48,7 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
               const { page, per_page: size } = req.query;
               const options: RuleMigrationGetRulesOptions = {

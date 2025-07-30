@@ -27,7 +27,7 @@ export const withExistingMigration = <
   return async (context, req, res) => {
     const { migration_id: migrationId } = req.params;
     const ctx = await context.resolve(['securitySolution']);
-    const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+    const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
     const storedMigration = await ruleMigrationsClient.data.migrations.get({
       id: migrationId,
     });

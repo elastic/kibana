@@ -212,37 +212,39 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
-      getSiemRuleMigrationsClient: memoize(() =>
-        siemMigrationsService.createRulesClient({
-          request,
-          currentUser: coreContext.security.authc.getCurrentUser(),
-          spaceId: getSpaceId(),
-          dependencies: {
-            inferenceClient: startPlugins.inference.getClient({ request }),
-            rulesClient,
-            actionsClient,
-            savedObjectsClient: coreContext.savedObjects.client,
-            packageService: startPlugins.fleet?.packageService,
-            telemetry: core.analytics,
-          },
-        })
-      ),
+      siemMigrations: {
+        getRulesClient: memoize(() =>
+          siemMigrationsService.createRulesClient({
+            request,
+            currentUser: coreContext.security.authc.getCurrentUser(),
+            spaceId: getSpaceId(),
+            dependencies: {
+              inferenceClient: startPlugins.inference.getClient({ request }),
+              rulesClient,
+              actionsClient,
+              savedObjectsClient: coreContext.savedObjects.client,
+              packageService: startPlugins.fleet?.packageService,
+              telemetry: core.analytics,
+            },
+          })
+        ),
 
-      getSiemDashboardMigrationsClient: memoize(() =>
-        siemMigrationsService.createDashboardsClient({
-          request,
-          currentUser: coreContext.security.authc.getCurrentUser(),
-          spaceId: getSpaceId(),
-          dependencies: {
-            inferenceClient: startPlugins.inference.getClient({ request }),
-            rulesClient,
-            actionsClient,
-            savedObjectsClient: coreContext.savedObjects.client,
-            packageService: startPlugins.fleet?.packageService,
-            telemetry: core.analytics,
-          },
-        })
-      ),
+        getDashboardsClient: memoize(() =>
+          siemMigrationsService.createDashboardsClient({
+            request,
+            currentUser: coreContext.security.authc.getCurrentUser(),
+            spaceId: getSpaceId(),
+            dependencies: {
+              inferenceClient: startPlugins.inference.getClient({ request }),
+              rulesClient,
+              actionsClient,
+              savedObjectsClient: coreContext.savedObjects.client,
+              packageService: startPlugins.fleet?.packageService,
+              telemetry: core.analytics,
+            },
+          })
+        ),
+      },
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 

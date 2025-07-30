@@ -69,7 +69,7 @@ export const registerSiemRuleMigrationsStartRoute = (
                 return res.badRequest({ body: `Connector with id ${connectorId} not found` });
               }
 
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               if (retry) {
                 const { updated } = await ruleMigrationsClient.task.updateToRetry(
                   migrationId,

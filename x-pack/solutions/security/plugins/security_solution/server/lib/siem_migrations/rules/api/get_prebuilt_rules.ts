@@ -43,7 +43,7 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
           const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             const savedObjectsClient = ctx.core.savedObjects.client;
             const rulesClient = await ctx.alerting.getRulesClient();
 

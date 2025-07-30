@@ -60,7 +60,7 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
             req.events.aborted$.subscribe(() => abortController.abort());
 
             const securitySolutionContext = await context.securitySolution;
-            const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
             const invocationConfig: MigrateRuleGraphConfig = {
               callbacks: createTracersCallbacks(langsmithOptions, logger),

@@ -54,7 +54,7 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
                 return res.noContent();
               }
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               await siemMigrationAuditLogger.logAddRules({
                 migrationId,
                 count: rulesCount,

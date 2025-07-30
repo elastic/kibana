@@ -36,7 +36,7 @@ export const registerSiemRuleMigrationsIntegrationsRoute = (
         ): Promise<IKibanaResponse<GetRuleMigrationIntegrationsResponse>> => {
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
             const relatedIntegrations: Record<string, RelatedIntegration> = {};
             const packages = await ruleMigrationsClient.data.integrations.getSecurityLogsPackages();

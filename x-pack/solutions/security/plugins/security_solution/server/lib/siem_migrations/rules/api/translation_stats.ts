@@ -44,7 +44,7 @@ export const registerSiemRuleMigrationsTranslationStatsRoute = (
             const migrationId = req.params.migration_id;
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
               const stats = await ruleMigrationsClient.data.rules.getTranslationStats(migrationId);
 

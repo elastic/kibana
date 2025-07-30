@@ -31,7 +31,7 @@ export const registerSiemRuleMigrationsStatsAllRoute = (
         async (context, req, res): Promise<IKibanaResponse<GetAllStatsRuleMigrationResponse>> => {
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
             const allStats = await ruleMigrationsClient.task.getAllStats();
 

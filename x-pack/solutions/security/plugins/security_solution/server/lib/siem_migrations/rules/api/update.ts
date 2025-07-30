@@ -44,7 +44,7 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
             await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
 

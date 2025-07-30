@@ -41,7 +41,7 @@ export const registerSiemRuleMigrationsDeleteRoute = (
           const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             await siemMigrationAuditLogger.logDeleteMigration({ migrationId });
 
             if (ruleMigrationsClient.task.isMigrationRunning(migrationId)) {

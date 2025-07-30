@@ -48,7 +48,8 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
         }
         try {
           const ctx = await context.resolve(['securitySolution']);
-          const dashboardMigrationsClient = ctx.securitySolution.getSiemDashboardMigrationsClient();
+          const dashboardMigrationsClient =
+            ctx.securitySolution.siemMigrations.getDashboardsClient();
           await dashboardMigrationsClient.data.dashboards.create(
             migrationId,
             originalDashboardsExport

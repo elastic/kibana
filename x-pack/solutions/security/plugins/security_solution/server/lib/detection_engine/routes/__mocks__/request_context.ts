@@ -197,8 +197,10 @@ const createSecuritySolutionRequestContextMock = (
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),
     getMonitoringEntitySourceDataClient: jest.fn(),
-    getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
-    getSiemDashboardMigrationsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
+    siemMigrations: {
+      getRulesClient: jest.fn(() => clients.siemRuleMigrationsClient),
+      getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
+    },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),

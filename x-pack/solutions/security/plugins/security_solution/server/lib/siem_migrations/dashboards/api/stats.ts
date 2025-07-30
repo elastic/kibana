@@ -44,7 +44,7 @@ export const registerSiemDashboardMigrationsStatsRoute = (
             try {
               const ctx = await context.resolve(['securitySolution']);
               const dashboardMigrationClient =
-                ctx.securitySolution.getSiemDashboardMigrationsClient();
+                ctx.securitySolution.siemMigrations.getDashboardsClient();
 
               const [stats, migration] = await Promise.all([
                 dashboardMigrationClient.data.dashboards.getStats(migrationId),

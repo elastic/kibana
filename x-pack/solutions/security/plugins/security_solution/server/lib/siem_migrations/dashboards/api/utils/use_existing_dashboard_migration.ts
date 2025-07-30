@@ -26,7 +26,7 @@ export const withExistingDashboardMigration = <
   return async (context, req, res) => {
     const { migration_id: migrationId } = req.params;
     const ctx = await context.resolve(['securitySolution']);
-    const dashboardMigrationsClient = ctx.securitySolution.getSiemDashboardMigrationsClient();
+    const dashboardMigrationsClient = ctx.securitySolution.siemMigrations.getDashboardsClient();
     const storedMigration = await dashboardMigrationsClient.data.migrations.get(migrationId);
 
     if (!storedMigration) {
