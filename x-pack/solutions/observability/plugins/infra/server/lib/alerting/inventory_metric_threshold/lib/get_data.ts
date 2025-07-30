@@ -10,12 +10,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
-import type { LogQueryFields } from '../../../metrics/types';
 import type { InfraSource } from '../../../sources';
 import { createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
