@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
-import { intersection, isEmpty } from 'lodash';
+import { intersection } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
