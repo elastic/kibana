@@ -1805,7 +1805,7 @@ describe('<CspPolicyTemplateForm />', () => {
       });
     });
 
-    it.only('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
