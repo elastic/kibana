@@ -66,6 +66,8 @@ export interface GetCasesColumn {
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
+  alertIds?: string[];
+  hasAlertAttached?: (caseId: string) => boolean;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +83,8 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  alertIds = [],
+  hasAlertAttached,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -319,7 +323,7 @@ export const useCasesColumns = ({
                 }}
                 size="s"
               >
-                {i18n.SELECT}
+                {hasAlertAttached?.(theCase.id) ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }
@@ -328,7 +332,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, hasAlertAttached]
   );
 
   // we need to extend the columnsDict with the columns of
