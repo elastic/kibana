@@ -112,7 +112,7 @@ export const convertGraphEvents = ({
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? 'unknown',
-                results: JSON.stringify({ results: toolReturn.results }),
+                results: toolReturn.results,
               })
             );
           }

@@ -28,7 +28,7 @@ describe('conversationLangchainMessages', () => {
     tool_call_id: id,
     tool_id: toolId,
     params,
-    results: JSON.stringify(results),
+    results,
   });
   const makeToolCallStep = (toolCall: ToolCallWithResult): ToolCallStep => ({
     ...toolCall,
@@ -94,7 +94,7 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-1');
     // ToolMessage type guard is not imported, so just check property
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-1');
-    expect(JSON.parse(toolCallToolMessage.content as string)).toEqual([
+    expect(toolCallToolMessage.content).toEqual([
       {
         type: ToolResultType.other,
         data: 'result!',
@@ -148,9 +148,7 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
-    expect(JSON.parse(toolCallToolMessage.content as string)).toEqual([
-      { type: ToolResultType.other, data: 'found!' },
-    ]);
+    expect(toolCallToolMessage.content).toEqual([{ type: ToolResultType.other, data: 'found!' }]);
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
     expect(isHumanMessage(lastHumanMessage)).toBe(true);

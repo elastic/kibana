@@ -105,7 +105,9 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
                 isCopyable={false}
                 transparentBackground
               >
-                {JSON.stringify(results, null, 2)}
+                {
+                  JSON.stringify(results, null, 2) // stringify the results for display
+                }
               </EuiCodeBlock>
             </div>
           </EuiAccordion>

@@ -65,7 +65,7 @@ export const useSendMessageMutation = ({
             actions.addToolCall({
               step: createToolCallStep({
                 params: event.data.params,
-                results: '',
+                results: [],
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
               }),
