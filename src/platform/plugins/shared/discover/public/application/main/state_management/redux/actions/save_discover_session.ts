@@ -9,7 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
+import type {
+  SaveDiscoverSessionOptions,
+  SaveDiscoverSessionParams,
+} from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -19,6 +22,7 @@ import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
 import { getAllowedSampleSize } from '../../../../../utils/get_allowed_sample_size';
+import { internalStateSlice } from '../internal_state';
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
   'internalState/saveDiscoverSession',
@@ -104,9 +108,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             grid: tab.initialAppState?.grid ?? {},
             hideChart: tab.initialAppState?.hideChart ?? false,
             isTextBasedQuery: isOfAggregateQueryType(tab.initialAppState?.query),
-            // usesAdHocDataView: tab.initialAppState?.usesAdHocDataView,
-            // serializedSearchSource: tab.initialAppState?.searchSource.getSerializedFields() ?? {},
-            serializedSearchSource: {},
+            usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
+            serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},
             viewMode: tab.initialAppState?.viewMode,
             hideAggregatedPreview: tab.initialAppState?.hideAggregatedPreview,
             rowHeight: tab.initialAppState?.rowHeight,
@@ -177,93 +180,26 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       tabs: updatedTabs,
       tags: services.savedObjectsTagging ? newTags : undefined,
     };
+
+    const saveOptions: SaveDiscoverSessionOptions = {
+      onTitleDuplicate,
+      copyOnSave: newCopyOnSave,
+      isTitleDuplicateConfirmed,
+    };
+
+    const id = await services.savedSearch.saveDiscoverSession(updatedDiscoverSession, saveOptions);
+
+    if (id) {
+      allTabs.forEach((tab) => {
+        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
+
+        const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+
+        tabStateContainer?.appState.resetInitialState();
+      });
+    }
+
+    return { id };
   }
 );
-
-// const onSave = async ({
-//   newTitle,
-//   newCopyOnSave,
-//   newTimeRestore,
-//   newDescription,
-//   newTags,
-//   isTitleDuplicateConfirmed,
-//   onTitleDuplicate,
-// }: {
-//   newTitle: string;
-//   newTimeRestore: boolean;
-//   newCopyOnSave: boolean;
-//   newDescription: string;
-//   newTags: string[];
-//   isTitleDuplicateConfirmed: boolean;
-//   onTitleDuplicate: () => void;
-// }) => {
-//   const appState = state.appState.getState();
-//   const currentTitle = savedSearch.title;
-//   const currentTimeRestore = savedSearch.timeRestore;
-//   const currentRowsPerPage = savedSearch.rowsPerPage;
-//   const currentSampleSize = savedSearch.sampleSize;
-//   const currentDescription = savedSearch.description;
-//   const currentTags = savedSearch.tags;
-//   const currentVisContext = savedSearch.visContext;
-
-//   savedSearch.title = newTitle;
-//   savedSearch.description = newDescription;
-//   savedSearch.timeRestore = newTimeRestore;
-//   savedSearch.rowsPerPage = appState.rowsPerPage;
-
-//   // save the custom value or reset it if it's invalid
-//   const appStateSampleSize = appState.sampleSize;
-//   const allowedSampleSize = getAllowedSampleSize(appStateSampleSize, uiSettings);
-//   savedSearch.sampleSize =
-//     appStateSampleSize && allowedSampleSize === appStateSampleSize ? appStateSampleSize : undefined;
-
-//   if (savedObjectsTagging) {
-//     savedSearch.tags = newTags;
-//   }
-
-//   if (overriddenVisContextAfterInvalidation) {
-//     savedSearch.visContext = overriddenVisContextAfterInvalidation;
-//   }
-
-//   const saveOptions: SaveSavedSearchOptions = {
-//     onTitleDuplicate,
-//     copyOnSave: newCopyOnSave,
-//     isTitleDuplicateConfirmed,
-//   };
-
-//   // TODO: put in redux action
-//   if (newCopyOnSave) {
-//     await state.actions.updateAdHocDataViewId();
-//   }
-
-//   const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
-//   const response = await saveDataSource({
-//     saveOptions,
-//     services,
-//     savedSearch,
-//     state,
-//     navigateOrReloadSavedSearch,
-//   });
-
-//   // If the save wasn't successful, put the original values back.
-//   if (!response) {
-//     savedSearch.title = currentTitle;
-//     savedSearch.timeRestore = currentTimeRestore;
-//     savedSearch.rowsPerPage = currentRowsPerPage;
-//     savedSearch.sampleSize = currentSampleSize;
-//     savedSearch.description = currentDescription;
-//     savedSearch.visContext = currentVisContext;
-//     if (savedObjectsTagging) {
-//       savedSearch.tags = currentTags;
-//     }
-//   } else {
-//     state.internalState.dispatch(
-//       state.injectCurrentTab(internalStateActions.resetOnSavedSearchChange)()
-//     );
-//     state.appState.resetInitialState();
-//   }
-
-//   onSaveCb?.();
-
-//   return response;
-// };
