@@ -60,7 +60,6 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import * as KibanaHook from '../../common/hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { async } from 'fast-glob';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
