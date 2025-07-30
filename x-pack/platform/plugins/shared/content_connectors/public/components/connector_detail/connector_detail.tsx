@@ -22,7 +22,6 @@ import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 import { generateEncodedPath } from '../shared/encode_path_params';
-import { useAppContext } from '../../app_context';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { ConnectorName } from './connector_name';
@@ -78,21 +77,6 @@ export const ConnectorDetail: React.FC = () => {
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
-
-  const {
-    plugins: { guidedOnboarding },
-  } = useAppContext();
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('databaseSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS = [
     {
