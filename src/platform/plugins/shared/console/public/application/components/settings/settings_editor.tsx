@@ -95,14 +95,14 @@ export const SettingsEditor = (props: Props) => {
         const hosts = props.esHostService.getAllHosts();
         setAvailableHosts(hosts);
         // If no host is selected, default to the first one
-        if (!selectedHost && hosts.length > 0) {
+        if (!props.settings.selectedHost && hosts.length > 0) {
           setSelectedHost(hosts[0]);
         }
       }
     };
 
     loadHosts();
-  }, [props.esHostService, selectedHost]);
+  }, [props.esHostService, props.settings.selectedHost]);
 
   const autoCompleteCheckboxes = [
     {
@@ -166,6 +166,7 @@ export const SettingsEditor = (props: Props) => {
     } else {
       isMounted.current = true;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     fontSize,
     wrapMode,
@@ -180,7 +181,6 @@ export const SettingsEditor = (props: Props) => {
     isKeyboardShortcutsEnabled,
     isAccessibilityOverlayEnabled,
     selectedHost,
-    debouncedSaveSettings,
   ]);
 
   const onPollingIntervalChange = useCallback((value: string) => {
