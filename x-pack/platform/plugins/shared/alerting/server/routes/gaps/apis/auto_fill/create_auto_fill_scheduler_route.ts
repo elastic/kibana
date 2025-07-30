@@ -10,13 +10,15 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 // Define the schema for the auto fill creation payload
 export const autoFillSchema = schema.object({
   name: schema.maybe(schema.string()),
-  amountOfGapsToProcessPerRun: schema.maybe(schema.number()),
+  maxAmountOfGapsToProcessPerRun: schema.maybe(schema.number()),
+  maxAmountOfRulesToProcessPerRun: schema.maybe(schema.number()),
   amountOfRetries: schema.maybe(schema.number()),
-  excludeRuleIds: schema.maybe(schema.arrayOf(schema.string())),
+  rulesFilter: schema.maybe(schema.string()),
   gapFillRange: schema.maybe(schema.string()),
   schedule: schema.maybe(
     schema.object({
@@ -36,12 +38,7 @@ export const createAutoFillSchedulerRoute = (
       path: '/internal/alerting/rules/gaps/auto_fill_scheduler',
       validate: { body: autoFillSchema },
       options: { access: 'internal' },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
@@ -49,9 +46,10 @@ export const createAutoFillSchedulerRoute = (
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
         const {
           name,
-          amountOfGapsToProcessPerRun,
+          maxAmountOfGapsToProcessPerRun,
+          maxAmountOfRulesToProcessPerRun,
           amountOfRetries,
-          excludeRuleIds,
+          rulesFilter,
           gapFillRange,
           schedule,
         } = req.body;
@@ -61,13 +59,10 @@ export const createAutoFillSchedulerRoute = (
           },
           name: name || 'gap-fill-auto-fill-name',
         };
-        // Generate a unique auto fill/task ID (could use uuid or a simple timestamp-based id)
-        const autoFillId = `gap-fill-auto-fill-${Date.now()}`;
-        // Schedule the task in Task Manager with user context
         try {
           await taskManager.schedule(
             {
-              id: 'default',
+              id: 'default', // a id for the task just for POC
               taskType: 'gap-fill-auto-scheduler', // This task type must be registered elsewhere
               schedule: autoFill.schedule,
               scope: ['securitySolution'],
@@ -75,16 +70,17 @@ export const createAutoFillSchedulerRoute = (
               state: {
                 config: {
                   name: name || 'gap-fill-auto-fill-name',
-                  amountOfGapsToProcessPerRun: amountOfGapsToProcessPerRun || 100,
+                  maxAmountOfGapsToProcessPerRun: maxAmountOfGapsToProcessPerRun || 10000,
+                  maxAmountOfRulesToProcessPerRun: maxAmountOfRulesToProcessPerRun || 100,
                   amountOfRetries: amountOfRetries || 3,
-                  excludeRuleIds: excludeRuleIds || [],
+                  rulesFilter: rulesFilter || '',
                   gapFillRange: gapFillRange || 'now-7d',
                 },
                 lastRun: null,
               },
             },
             {
-              request: req, // This is the key! Pass the request to get user context
+              request: req,
             }
           );
         } catch (error) {
@@ -92,7 +88,6 @@ export const createAutoFillSchedulerRoute = (
         }
         return res.ok({
           body: {
-            id: autoFillId,
             message: 'Gap fill auto fill created and scheduled',
           },
         });

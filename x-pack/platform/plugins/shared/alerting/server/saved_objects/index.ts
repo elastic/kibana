@@ -23,7 +23,12 @@ import type { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
+export {
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+  bulkPartiallyUpdateRules,
+  bulkPartiallyUpdateRulesWithEs,
+} from './partially_update_rule';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,

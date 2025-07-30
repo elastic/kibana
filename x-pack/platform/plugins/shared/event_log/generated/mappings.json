@@ -623,18 +623,18 @@
                                             "type": "keyword",
                                             "ignore_above": 1024
                                         },
-                                        "amountOfGapsToProcessPerRun": {
+                                        "maxAmountOfGapsToProcessPerRun": {
+                                            "type": "long"
+                                        },
+                                        "maxAmountOfRulesToProcessPerRun": {
                                             "type": "long"
                                         },
                                         "amountOfRetries": {
                                             "type": "long"
                                         },
-                                        "excludeRuleIds": {
+                                        "rulesFilter": {
                                             "type": "keyword",
-                                            "ignore_above": 1024,
-                                            "meta": {
-                                                "isArray": "true"
-                                            }
+                                            "ignore_above": 1024
                                         },
                                         "gapFillRange": {
                                             "type": "keyword",

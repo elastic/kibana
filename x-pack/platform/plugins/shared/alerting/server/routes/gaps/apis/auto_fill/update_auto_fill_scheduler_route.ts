@@ -9,8 +9,8 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-// Define the schema for the auto fill update payload
 export const updateAutoFillSchema = schema.object({
   schedule: schema.maybe(
     schema.object({
@@ -18,11 +18,12 @@ export const updateAutoFillSchema = schema.object({
     })
   ),
   name: schema.maybe(schema.string()),
-  amountOfGapsToProcessPerRun: schema.maybe(schema.number()),
+  maxAmountOfGapsToProcessPerRun: schema.maybe(schema.number()),
+  maxAmountOfRulesToProcessPerRun: schema.maybe(schema.number()),
   amountOfRetries: schema.maybe(schema.number()),
-  excludeRuleIds: schema.maybe(schema.arrayOf(schema.string())),
+  rulesFilter: schema.maybe(schema.string()),
   gapFillRange: schema.maybe(schema.string()),
-  enabled: schema.maybe(schema.boolean()), // <-- Added enabled field
+  enabled: schema.maybe(schema.boolean()),
 });
 
 export type UpdateAutoFillPayload = schema.TypeOf<typeof updateAutoFillSchema>;
@@ -41,12 +42,7 @@ export const updateAutoFillSchedulerRoute = (
         body: updateAutoFillSchema,
       },
       options: { access: 'internal' },
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
-        },
-      },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
@@ -54,9 +50,10 @@ export const updateAutoFillSchedulerRoute = (
         const {
           schedule,
           name,
-          amountOfGapsToProcessPerRun,
+          maxAmountOfGapsToProcessPerRun,
+          maxAmountOfRulesToProcessPerRun,
           amountOfRetries,
-          excludeRuleIds,
+          rulesFilter,
           gapFillRange,
           enabled,
         } = req.body;
@@ -65,15 +62,6 @@ export const updateAutoFillSchedulerRoute = (
         const taskManager = (await alertingContext.getRulesClient()).getTaskManager();
 
         try {
-          // Get the current task to verify it exists and is the right type
-          const task = await taskManager.get(id);
-
-          if (task.taskType !== 'gap-fill-auto-scheduler') {
-            return res.badRequest({
-              body: { message: `Task with id ${id} is not a gap-fill-auto-scheduler task` },
-            });
-          }
-
           // Enable/disable if requested
           if (enabled !== undefined) {
             if (enabled) {
@@ -91,50 +79,36 @@ export const updateAutoFillSchedulerRoute = (
           // Update config fields if provided
           if (
             name !== undefined ||
-            amountOfGapsToProcessPerRun !== undefined ||
+            maxAmountOfGapsToProcessPerRun !== undefined ||
+            maxAmountOfRulesToProcessPerRun !== undefined ||
             amountOfRetries !== undefined ||
-            excludeRuleIds !== undefined ||
+            rulesFilter !== undefined ||
             gapFillRange !== undefined ||
             schedule !== undefined
           ) {
-            await taskManager.bulkUpdateState(
-              [id],
-              (currentState) => ({
-                ...currentState, // Preserve existing state fields
-                config: {
-                  ...currentState.config, // Preserve existing config
-                  ...(name !== undefined && { name }),
-                  ...(amountOfGapsToProcessPerRun !== undefined && { amountOfGapsToProcessPerRun }),
-                  ...(amountOfRetries !== undefined && { amountOfRetries }),
-                  ...(excludeRuleIds !== undefined && { excludeRuleIds }),
-                  ...(gapFillRange !== undefined && { gapFillRange }),
-                  ...(schedule !== undefined && { schedule }),
-                },
-              }),
-              (currentParams) => ({
-                ...currentParams,
-                name: 'YOYOYO',
-              })
-            );
+            await taskManager.bulkUpdateState([id], (currentState) => ({
+              ...currentState, // Preserve existing state fields
+              config: {
+                ...currentState.config, // Preserve existing config
+                ...(name !== undefined && { name }),
+                ...(maxAmountOfGapsToProcessPerRun !== undefined && {
+                  maxAmountOfGapsToProcessPerRun,
+                }),
+                ...(maxAmountOfRulesToProcessPerRun !== undefined && {
+                  maxAmountOfRulesToProcessPerRun,
+                }),
+                ...(amountOfRetries !== undefined && { amountOfRetries }),
+                ...(rulesFilter !== undefined && { rulesFilter }),
+                ...(gapFillRange !== undefined && { gapFillRange }),
+                ...(schedule !== undefined && { schedule }),
+              },
+            }));
           }
 
-          // Get the updated task to return
           const updatedTask = await taskManager.get(id);
 
           return res.ok({
-            body: {
-              id: updatedTask.id,
-              taskType: updatedTask.taskType,
-              status: updatedTask.status,
-              enabled: updatedTask.enabled,
-              runAt: updatedTask.runAt,
-              scheduledAt: updatedTask.scheduledAt,
-              attempts: updatedTask.attempts,
-              params: updatedTask.params,
-              state: updatedTask.state,
-              schedule: updatedTask.schedule,
-              message: 'Gap fill auto fill updated successfully',
-            },
+            body: updatedTask,
           });
         } catch (error) {
           if (error?.output?.statusCode === 404) {

@@ -79,11 +79,8 @@ export const processGapsBatchFromRules = async (
     return { results: [] };
   }
 
-  console.log('schedulingPayloads', JSON.stringify(schedulingPayloads, null, 2) );
-
   // Schedule all backfills in a single bulk operation
   const scheduleResults = await scheduleBackfill(context, schedulingPayloads, gaps, gapsByRuleId);
-  console.log('scheduleResults', JSON.stringify(scheduleResults, null, 2) );
 
   for (let i = 0; i < scheduleResults.length; i++) {
     const result = scheduleResults[i];
