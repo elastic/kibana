@@ -28,6 +28,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 import { checkForShardFailures } from '../util';
@@ -63,6 +64,7 @@ export async function fetchSearchSourceQuery({
   const searchSourceClient = await getSearchSourceClient();
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
+  const sourceFields = getSourceFields();
 
   let initialSearchSource;
   try {
@@ -83,6 +85,7 @@ export async function fetchSearchSourceQuery({
     dateStart,
     dateEnd,
     logger,
+    sourceFields,
     alertLimit
   );
 
@@ -119,7 +122,7 @@ export async function fetchSearchSourceQuery({
       isCountAgg,
       isGroupAgg,
       esResult: searchResult,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       termField: params.termField,
     }),
     index: [index.name],
@@ -134,6 +137,7 @@ export async function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   logger: Logger,
+  sourceFields: Array<{ label: string; searchPath: string }>,
   alertLimit?: number
 ): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -190,7 +194,7 @@ export async function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -261,3 +265,16 @@ export function getSmallerDataViewSpec(
 ): DiscoverAppLocatorParams['dataViewSpec'] {
   return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }
+
+export const getSourceFields = () => {
+  const alertFields = Object.keys(alertFieldMap);
+  return (
+    Object.keys(ecsFieldMap)
+      // exclude the alert fields that we don't want to override
+      .filter((key) => !alertFields.includes(key))
+      .map((key) => {
+        const field = ecsFieldMap[key];
+        return { label: key, searchPath: field.type === 'keyword' ? `${key}.keyword` : key };
+      })
+  );
+};

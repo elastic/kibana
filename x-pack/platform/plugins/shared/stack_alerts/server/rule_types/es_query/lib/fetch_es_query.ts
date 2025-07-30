@@ -18,6 +18,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
@@ -66,6 +67,7 @@ export async function fetchEsQuery({
     runtime_mappings,
     _source,
   } = getParsedQuery(params);
+  const sourceFields = getSourceFields();
 
   const filter =
     timestamp && params.excludeHitsFromPreviousRun
@@ -116,7 +118,7 @@ export async function fetchEsQuery({
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -157,7 +159,7 @@ export async function fetchEsQuery({
       isGroupAgg,
       esResult: searchResult,
       resultLimit: alertLimit,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       termField: params.termField,
     }),
     link,
@@ -199,3 +201,16 @@ export function generateLink(
 
   return redirectUrl;
 }
+
+export const getSourceFields = () => {
+  const alertFields = Object.keys(alertFieldMap);
+  return (
+    Object.keys(ecsFieldMap)
+      // exclude the alert fields that we don't want to override
+      .filter((key) => !alertFields.includes(key))
+      .map((key) => {
+        const field = ecsFieldMap[key];
+        return { label: key, searchPath: field.type === 'keyword' ? `${key}.keyword` : key };
+      })
+  );
+};
