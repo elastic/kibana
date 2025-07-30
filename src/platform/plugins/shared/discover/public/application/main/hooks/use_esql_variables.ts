@@ -61,7 +61,7 @@ const getEsqlVariablesFromState = (
  * @param options.onTextLangQueryChange - Callback function to update the ESQL query.
  *
  * @returns An object containing handler functions for saving and canceling control changes,
- * and a function to retrieve control creation options.
+ * and a getter function to retrieve the currently active control panels state for the current tab.
  */
 
 interface ESQLControlSessionStorage {
@@ -83,12 +83,12 @@ export const useESQLVariables = ({
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   onCancelControl: () => void;
-  activePanels?: ControlPanelsState<ESQLControlState>;
+  getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
 
-  const [controlsState, setControlsState] = useSessionStorage<
+  const [controlsStateMap, setControlsStateMap] = useSessionStorage<
     ESQLControlSessionStorage | undefined
   >(CONTROLS_STORAGE_KEY);
   // Effect to subscribe to control group input changes
@@ -99,27 +99,30 @@ export const useESQLVariables = ({
     }
     const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
-        const esqlControlState =
+        const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
-        // Persist control state to storage or remove if empty
-        if (Object.keys(esqlControlState).length === 0) {
-          if (controlsState?.[currentTabId]) {
-            const updatedControlsState = { ...controlsState };
-            delete updatedControlsState[currentTabId];
-            setControlsState(updatedControlsState);
+        const newControlsStateMap = { ...(controlsStateMap || {}) };
+
+        // Check if the current tab's state is empty
+        if (Object.keys(currentTabControlState).length === 0) {
+          // If the current tab's state exists in storage, delete it.
+          if (newControlsStateMap[currentTabId]) {
+            delete newControlsStateMap[currentTabId];
+            // Only update if something was actually deleted to avoid unnecessary renders
+            if (!isEqual(controlsStateMap, newControlsStateMap)) {
+              setControlsStateMap(newControlsStateMap);
+            }
           }
         } else {
-          if (!controlsState || !isEqual(controlsState[currentTabId], esqlControlState)) {
-            const updatedControlsState = {
-              ...controlsState,
-              [currentTabId]: esqlControlState,
-            };
-            setControlsState(updatedControlsState);
+          // If the state for the current tab has changed, update it.
+          if (!isEqual(newControlsStateMap[currentTabId], currentTabControlState)) {
+            newControlsStateMap[currentTabId] = currentTabControlState;
+            setControlsStateMap(newControlsStateMap);
           }
         }
 
-        const newVariables = getEsqlVariablesFromState(esqlControlState);
+        const newVariables = getEsqlVariablesFromState(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           dispatch(internalStateActions.setEsqlVariables(newVariables));
           stateContainer.dataState.fetch();
@@ -133,8 +136,8 @@ export const useESQLVariables = ({
   }, [
     controlGroupAPI,
     currentEsqlVariables,
-    controlsState,
-    setControlsState,
+    controlsStateMap,
+    setControlsStateMap,
     dispatch,
     isEsqlMode,
     stateContainer,
@@ -169,9 +172,14 @@ export const useESQLVariables = ({
   // Callback for canceling control changes (currently a no-op, but kept for API consistency)
   const onCancelControl = useCallback(() => {}, []); // No dependencies as it does nothing for now
 
+  // New getter function
+  const getActivePanels = useCallback(() => {
+    return controlsStateMap?.[currentTabId];
+  }, [controlsStateMap, currentTabId]); // Dependencies are important for `useCallback`
+
   return {
     onSaveControl,
     onCancelControl,
-    activePanels: controlsState ? controlsState[currentTabId] : undefined,
+    getActivePanels,
   };
 };

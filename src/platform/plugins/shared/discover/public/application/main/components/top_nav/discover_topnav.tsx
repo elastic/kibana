@@ -85,7 +85,7 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   // ES|QL variables management
-  const { onSaveControl, onCancelControl, activePanels } = useESQLVariables({
+  const { onSaveControl, onCancelControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
@@ -311,7 +311,7 @@ export const DiscoverTopNav = ({
               timeRange={timeRange}
               getCreationOptions={async (initialState) => {
                 const initialChildControlState =
-                  activePanels ?? initialState.initialChildControlState ?? {};
+                  getActivePanels() ?? initialState.initialChildControlState ?? {};
                 return {
                   initialState: {
                     ...initialState,
