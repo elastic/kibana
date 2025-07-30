@@ -32,10 +32,26 @@ function getLicensesArray(license: MultipleLicenseInfo | undefined): LicenseInfo
   return [];
 }
 
+// Helper function to convert license name to title case
+function toTitleCase(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 function createLicenseTooltip(license: LicenseInfo): string {
+  function startsWithVowel(str: string): boolean {
+    return /^[aeiouAEIOU]/.test(str);
+  }
+
+  const licenseTitleCase = toTitleCase(license.name);
+  const articleType = startsWithVowel(license.name) ? 'vowel' : 'consonant';
+
   let tooltip = i18n.translate('languageDocumentation.licenseRequiredTooltip', {
-    defaultMessage: 'This feature requires {license} license',
-    values: { license: license.name },
+    defaultMessage:
+      'This feature requires {articleType, select, vowel {an} other {a}} {license} subscription',
+    values: {
+      license: licenseTitleCase,
+      articleType,
+    },
   });
 
   if (license.isSignatureSpecific && license?.paramsWithLicense?.length) {
@@ -161,7 +177,7 @@ function DocumentationContent({
                           {getLicensesArray(helpItem.license).map((license) => (
                             <EuiFlexItem key={license.name} grow={false}>
                               <EuiBetaBadge
-                                label={license.name}
+                                label={toTitleCase(license.name)}
                                 tooltipContent={createLicenseTooltip(license)}
                                 color="subdued"
                                 size="s"
