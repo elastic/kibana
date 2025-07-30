@@ -22,7 +22,7 @@ export const THREAT_FIELD_LABEL_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.threatMatch.threatFieldLabelHelpDescription',
   {
     defaultMessage:
-      'Start with the MATCH condition, and refine it with additional MATCH/DOES NOT MATCH conditions if needed',
+      'Start with the MATCHES condition, and refine it with additional MATCHES/DOES NOT MATCH conditions if needed',
   }
 );
 
