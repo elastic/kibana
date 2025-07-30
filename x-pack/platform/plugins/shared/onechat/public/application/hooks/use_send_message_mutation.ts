@@ -19,6 +19,7 @@ import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
+import { eventTypes } from '../../../common/events';
 import { mutationKeys } from '../mutation_keys';
 import { useConversation } from './use_conversation';
 import { useKibana } from './use_kibana';
@@ -124,7 +125,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     onError: (err) => {
       setIsResponseLoading(false);
 
-      analytics.reportEvent('onechat_error', {
+      analytics.reportEvent(eventTypes.ONECHAT_CONVERSE_ERROR, {
         error_type: err?.constructor?.name || 'unknown',
         error_message: err instanceof Error ? err.message : String(err),
         error_stack: err instanceof Error ? err.stack : undefined,
