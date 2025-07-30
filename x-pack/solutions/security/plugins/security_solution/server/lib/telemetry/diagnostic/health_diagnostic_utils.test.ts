@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { applyFilterlist } from './health_diagnostic_utils';
+import { applyFilterlist, fieldNames } from './health_diagnostic_utils';
 import { Action } from './health_diagnostic_service.types';
 
-describe('health_diagnostic_utils', () => {
+describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
     const mockSalt = 'test-salt';
 
@@ -223,6 +223,162 @@ describe('health_diagnostic_utils', () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result[0] as any).sensitiveId).not.toBe('12345');
+    });
+  });
+
+  describe('fieldNames', () => {
+    test('should extract field names from simple object', () => {
+      const input = { name: 'john', age: 30, active: true };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual(['active', 'age', 'name']);
+    });
+
+    test('should extract nested field names', () => {
+      const input = {
+        user: {
+          profile: {
+            name: 'john',
+            email: 'john@example.com',
+          },
+          settings: {
+            theme: 'dark',
+          },
+        },
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual([
+        'user.profile.email',
+        'user.profile.name',
+        'user.settings.theme',
+      ]);
+    });
+
+    test('should handle arrays with elements', () => {
+      const input = {
+        users: [{ name: 'john', age: 30 }],
+        tags: ['security', 'admin'],
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual(['tags[]', 'users[].age', 'users[].name']);
+    });
+
+    test('should handle empty arrays', () => {
+      const input = {
+        users: [],
+        tags: [],
+        data: 'test',
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual(['data', 'tags[]', 'users[]']);
+    });
+
+    test('should handle mixed data types', () => {
+      const input = {
+        string: 'text',
+        number: 42,
+        boolean: true,
+        nullValue: null,
+        undefinedValue: undefined,
+        object: {
+          nested: 'value',
+        },
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual([
+        'boolean',
+        'nullValue',
+        'number',
+        'object.nested',
+        'string',
+        'undefinedValue',
+      ]);
+    });
+
+    test('should handle deeply nested structures', () => {
+      const input = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                value: 'deep',
+              },
+            },
+          },
+        },
+      };
+      const result = fieldNames(input);
+      expect(result).toEqual(['level1.level2.level3.level4.value']);
+    });
+
+    test('should handle arrays of objects with different structures', () => {
+      const input = {
+        items: [
+          { name: 'item1', type: 'A' },
+          { name: 'item2', category: 'B' },
+        ],
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual(['items[].name', 'items[].type']);
+    });
+
+    test('should handle nested arrays', () => {
+      const input = {
+        matrix: [[{ x: 1, y: 2 }]],
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual(['matrix[][].x', 'matrix[][].y']);
+    });
+
+    test('should handle empty object', () => {
+      const input = {};
+      const result = fieldNames(input);
+      expect(result).toEqual([]);
+    });
+
+    test('should handle primitive values', () => {
+      expect(fieldNames('string')).toEqual(['']);
+      expect(fieldNames(42)).toEqual(['']);
+      expect(fieldNames(true)).toEqual(['']);
+      expect(fieldNames(null)).toEqual(['']);
+      expect(fieldNames(undefined)).toEqual(['']);
+    });
+
+    test('should handle complex real-world structure', () => {
+      const input = {
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        event: {
+          action: 'login',
+          outcome: 'success',
+        },
+        user: {
+          id: '123',
+          name: 'john.doe',
+          roles: ['admin', 'user'],
+        },
+        host: {
+          name: 'server01',
+          ip: ['192.168.1.1', '10.0.0.1'],
+        },
+        process: {
+          pid: 1234,
+          args: ['-f', '/etc/config'],
+        },
+        tags: [],
+      };
+      const result = fieldNames(input);
+      expect(result.sort()).toEqual([
+        '@timestamp',
+        'event.action',
+        'event.outcome',
+        'host.ip[]',
+        'host.name',
+        'process.args[]',
+        'process.pid',
+        'tags[]',
+        'user.id',
+        'user.name',
+        'user.roles[]',
+      ]);
     });
   });
 });
