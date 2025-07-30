@@ -10,12 +10,6 @@ import type { ScopedModel } from '@kbn/onechat-server';
 import { executeEsql, EsqlResponse } from './steps/execute_esql';
 import { generateEsql } from './generate_esql';
 
-export interface NaturalLanguageSearchResponse {
-  success: boolean;
-  reason?: string;
-  result?: EsqlResponse;
-}
-
 export const naturalLanguageSearch = async ({
   query,
   context,
@@ -28,7 +22,7 @@ export const naturalLanguageSearch = async ({
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<NaturalLanguageSearchResponse> => {
+}): Promise<EsqlResponse> => {
   const generateResponse = await generateEsql({
     query,
     context,
@@ -38,13 +32,11 @@ export const naturalLanguageSearch = async ({
   });
 
   if (generateResponse.queries.length < 1) {
-    return { success: false, reason: 'No query was generated' };
+    throw new Error(`No esql queries were generated for query=${query}`);
   }
 
-  const result = await executeEsql({
-    query: generateResponse.queries[0],
+  return executeEsql({
+    query: generateResponse.queries[0], // TODO: handle multiple queries
     esClient,
   });
-
-  return { success: true, result };
 };

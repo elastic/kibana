@@ -40,27 +40,11 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof search
         esClient: esClient.asCurrentUser,
       });
 
-      if (!result.result) {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                reason: result.reason,
-                original_query: query,
-                index,
-                context,
-              },
-            },
-          ],
-        };
-      }
-
       return {
         results: [
           {
             type: ToolResultType.tabularData,
-            data: result.result,
+            data: result,
           },
         ],
       };

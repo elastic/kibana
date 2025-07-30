@@ -32,7 +32,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     schema: nlToEsqlToolSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await generateEsql({
+      const esqlResponse = await generateEsql({
         query,
         context,
         index,
@@ -40,19 +40,19 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         esClient: esClient.asCurrentUser,
       });
 
-      const structuredToolResults: ToolResult[] = result.queries.map((esqlQuery) => ({
+      const toolResults: ToolResult[] = esqlResponse.queries.map((esqlQuery) => ({
         type: ToolResultType.query,
         data: {
           esql: esqlQuery,
         },
       }));
 
-      if (result.answer) {
-        structuredToolResults.push({
+      if (esqlResponse.answer) {
+        toolResults.push({
           type: ToolResultType.other,
           data: {
             type: 'esql_generation_response',
-            answer: result.answer,
+            answer: esqlResponse.answer,
             original_query: query,
             context,
             index,
@@ -61,7 +61,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       }
 
       return {
-        results: structuredToolResults,
+        results: toolResults,
       };
     },
     tags: [builtinTags.retrieval],
