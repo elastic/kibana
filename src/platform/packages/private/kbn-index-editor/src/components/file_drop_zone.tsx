@@ -64,6 +64,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
       }
 
       indexUpdateService.discardUnsavedChanges();
+      indexUpdateService.discardUnsavedColumns();
 
       await fileUploadManager.addFiles(files);
     },
