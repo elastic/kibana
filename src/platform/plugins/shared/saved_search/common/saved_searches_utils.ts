@@ -16,13 +16,14 @@ export const fromSavedSearchAttributes = <
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
 >(
   id: string | undefined,
-  { title, description, tabs: [{ attributes }] }: SavedSearchAttributes,
+  { title, description, tabs }: SavedSearchAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   managed: boolean,
   serialized: Serialized = false as Serialized
-) =>
-  ({
+) => {
+  const [{ attributes }] = tabs;
+  return {
     id,
     ...(serialized
       ? { serializedSearchSource: searchSource as SerializedSearchSourceFields }
@@ -48,5 +49,7 @@ export const fromSavedSearchAttributes = <
     breakdownField: attributes.breakdownField,
     visContext: attributes.visContext,
     density: attributes.density,
+    tabs,
     managed,
-  } as ReturnType);
+  } as ReturnType;
+};
