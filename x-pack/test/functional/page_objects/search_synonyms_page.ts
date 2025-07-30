@@ -113,11 +113,13 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         ADD_NEW_RULE_BUTTON: 'searchSynonymsSynonymsSetRuleTableAddRuleButton',
       },
       async expectSynonymsSetDetailPageNavigated(name: string) {
-        const h1Element = await find.byCssSelector('main header h1');
-        const text = await h1Element.getVisibleText();
-        if (text !== name) {
-          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
-        }
+        await retry.tryForTime(5000, async () => {
+          const h1Element = await find.byCssSelector('main header h1');
+          const text = await h1Element.getVisibleText();
+          if (text !== name) {
+            throw new Error(`Expected page title to be "${name}" but got "${text}"`);
+          }
+        });
       },
 
       async expectEmptyPromptToExist() {
