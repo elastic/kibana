@@ -177,6 +177,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const references = getTagFindReferences({ selectedTags, taggingApi });
 
+    // These are the saved objects visible in the table.
     const filteredSavedObjectCounts = await getSavedObjectCounts({
       http: this.props.http,
       typesToInclude: selectedTypes,
@@ -200,6 +201,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       {}
     );
 
+    // Fetch all the saved objects that exist so we can accurately populate the counts within
+    // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts({
       http: this.props.http,
       typesToInclude: allowedTypes,
@@ -231,6 +234,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       .map((type) => type.name)
       .filter((type) => !visibleTypes || visibleTypes.includes(type));
 
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions: FindQueryHTTP = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
@@ -248,6 +253,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       }
 
       this.setState(({ activeQuery }) => {
+        // ignore results for old requests
         if (activeQuery.text !== query.text) {
           return null;
         }
@@ -299,6 +305,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       }
 
       this.setState(({ savedObjects, filteredItemCount }) => {
+        // modify the existing objects array, replacing any existing objects with the newly fetched ones
         const refreshedSavedObjects = savedObjects.map((obj) => {
           const fetchedObject = fetchedObjectsMap.get(getObjectKey(obj));
           return fetchedObject ?? obj;
@@ -348,10 +355,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onQueryChange = ({ query }: { query: Query }) => {
+    // TODO: Use isSameQuery to compare new query with state.activeQuery to avoid re-fetching the
+    // same data we already have.
     this.setState(
       {
         activeQuery: query,
-        page: 0,
+        page: 0, // Reset this on each query change
         selectedSavedObjects: [],
       },
       () => {
@@ -542,15 +551,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       }),
     });
 
+    // Unset this
     this.setState({
       selectedSavedObjects: selectedSavedObjects.filter(({ id, type }) =>
         deleteStatus.some(matches({ id, type, success: false }))
       ),
     });
 
+    // Fetching all data
     this.fetchAllSavedObjects();
     await this.fetchCounts();
 
+    // Allow the user to interact with the table once the saved objects have been re-fetched.
     this.setState({
       isShowingDeleteConfirmModal: false,
       isDeleting: false,

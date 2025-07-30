@@ -70,7 +70,6 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: QueryType;
-  // ADD: Delete button ref prop
   deleteButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
@@ -437,7 +436,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                       )
                 }
                 data-test-subj="savedObjectsManagementDelete"
-                buttonRef={deleteButtonRef} // <-- Forward the ref here
+                buttonRef={deleteButtonRef}
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
