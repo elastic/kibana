@@ -11,8 +11,14 @@ import { render } from '@testing-library/react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChart } from './barchart';
+<<<<<<< HEAD:x-pack/solutions/security/plugins/threat_intelligence/public/modules/indicators/components/barchart/barchart.test.tsx
 import { ChartSeries } from '../../services/fetch_aggregated_indicators';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+=======
+import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { ScreenReaderAnnouncementsProvider } from '../../containers/screen_reader_a11y';
+>>>>>>> 906a8284eba ([Security Solution][Intelligence] A11Y project: missing announcement for filter in/out actions on barchart (#227388)):x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/indicators/components/barchart/barchart.test.tsx
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -53,16 +59,34 @@ describe('<IndicatorsBarChart />', () => {
 
     const { container } = render(
       <TestProvidersComponent>
-        <IndicatorsBarChart
-          indicators={mockIndicators}
-          dateRange={mockDateRange}
-          field={mockField}
-        />
+        <ScreenReaderAnnouncementsProvider>
+          <IndicatorsBarChart
+            indicators={mockIndicators}
+            dateRange={mockDateRange}
+            field={mockField}
+          />
+        </ScreenReaderAnnouncementsProvider>
       </TestProvidersComponent>
     );
 
     expect(container).toMatchInlineSnapshot(`
       <div>
+        <div
+          class="emotion-euiScreenReaderOnly"
+          tabindex="-1"
+        >
+          <div
+            aria-atomic="true"
+            aria-live="off"
+            role="status"
+          />
+          <div
+            aria-atomic="true"
+            aria-hidden="true"
+            aria-live="off"
+            role="status"
+          />
+        </div>
         <div
           class="echChart"
           style="width: 100%; height: 200px;"
