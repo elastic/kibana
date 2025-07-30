@@ -40,7 +40,7 @@ export const useGenericEntityCriticality = ({
   const { fetchAssetCriticality, createAssetCriticality, deleteAssetCriticality } =
     useEntityAnalyticsRoutes();
 
-  const { refreshAssetInventory } = useAssetInventoryRefresh();
+  const { assetInventoryRefresh } = useAssetInventoryRefresh();
 
   const genericEntityAssetCriticalityQueryKey = [QUERY_KEY, idField, idValue];
 
@@ -103,7 +103,7 @@ export const useGenericEntityCriticality = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [GET_GENERIC_ENTITY_QUERY_KEY] });
-      refreshAssetInventory();
+      assetInventoryRefresh();
     },
   });
 

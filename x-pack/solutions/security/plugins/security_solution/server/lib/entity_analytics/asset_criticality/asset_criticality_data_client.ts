@@ -380,6 +380,8 @@ export class AssetCriticalityDataClient {
     const index = getEntitiesIndexName(entityType, this.options.namespace);
 
     try {
+      // TODO: Change to internal Es client once https://github.com/elastic/elasticsearch/pull/129662 is merged
+      // So users won't require write permissions to the entities index
       await this.options.esClient.updateByQuery({
         index,
         refresh: refresh ? true : false,
