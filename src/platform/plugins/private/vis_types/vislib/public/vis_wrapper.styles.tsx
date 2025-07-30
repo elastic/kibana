@@ -16,13 +16,15 @@ import { vislibMeterStyles } from './vislib/visualizations/gauges/meter.styles';
 import { vislibTooltipStyles } from './vislib/components/tooltip/tooltip.styles';
 
 // Styles for non-React DOM nodes
-export const GlobalVislibWrapperStyles = () => {
+export const GlobalVislibWrapperStyles = React.memo(() => {
   const euiThemeContext = useEuiTheme();
 
-  const vislibStyles = vislibVisTypeStyles;
-  const layoutStyles = vislibLayoutStyles(euiThemeContext);
-  const meterStyles = vislibMeterStyles(euiThemeContext);
-  const tooltipStyles = vislibTooltipStyles(euiThemeContext);
+  const styles = [
+    vislibVisTypeStyles,
+    vislibLayoutStyles(euiThemeContext),
+    vislibMeterStyles(euiThemeContext),
+    vislibTooltipStyles(euiThemeContext),
+  ];
 
-  return <Global styles={[vislibStyles, layoutStyles, meterStyles, tooltipStyles]} />;
-};
+  return <Global styles={styles} />;
+});
