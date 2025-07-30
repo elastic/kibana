@@ -8,7 +8,7 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { OPTIONS_LIST_CONTROL } from '../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   createOptionsListExtract,
   createOptionsListInject,

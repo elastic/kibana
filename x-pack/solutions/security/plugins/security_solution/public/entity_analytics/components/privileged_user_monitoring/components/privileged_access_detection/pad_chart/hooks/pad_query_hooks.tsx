@@ -6,8 +6,10 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
+import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
+import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
 import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../../common/lib/kibana';
@@ -103,7 +105,7 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
       const anomalyRecords = esqlResponseToRecords<ESQLRawAnomalyRecord>(
         (
           await getESQLResults({
-            esqlQuery: padAnomalyDataEsqlSource,
+            esqlQuery: padAnomalyDataEsqlSource, // here
             search,
             signal,
             filter: filterQuery,
@@ -124,6 +126,22 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
     }
   );
 
+  const inspect = useMemo(() => {
+    return {
+      dsl: [
+        JSON.stringify(
+          {
+            index: [ML_ANOMALIES_INDEX],
+            body: prettifyQuery(padAnomalyDataEsqlSource ?? ''),
+          },
+          null,
+          2
+        ),
+      ],
+      response: data ? [JSON.stringify(data, null, 2)] : [],
+    };
+  }, [data, padAnomalyDataEsqlSource]);
+
   useErrorToast(
     i18n.translate(
       'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.queryError',
@@ -140,5 +158,6 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
     isError: isTopUsersError || isAnomaliesError,
     refetch,
     error,
+    inspect,
   };
 };
