@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const privMonRolesUtils = PrivMonRolesUtils(getService);
   const log = getService('log');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
@@ -154,7 +155,6 @@ export default ({ getService }: FtrProviderContext) => {
         // register entity source
         const response = await api.createEntitySource({ body: entitySource }, 'default');
         expect(response.status).to.be(200);
-        const listedSources = await api.listEntitySources({ query: {} }, 'default');
         expect(response.status).to.be(200);
         // Call init to trigger the sync
         await privMonUtils.initPrivMonEngine();
@@ -167,22 +167,22 @@ export default ({ getService }: FtrProviderContext) => {
         const names = result.saved_objects.map((so) => so.attributes.name);
         expect(names).to.contain('default-monitoring-index-default');
         expect(names).to.contain('StarWars');
-        await sleep(40000); // Wait task to run
-        const res = await api.listPrivMonUsers({
-          query: {},
-        });
-        const userNames = res.body.map((monitoring: any) => monitoring.user.name);
-        expect(userNames.length).to.be.greaterThan(0);
-        expect(userNames).contain('Luke Skywalker');
-        expect(userNames).contain('Leia Organa');
-        expect(userNames).to.contain('C-3PO');
-        // Test that duplicate C-3PO is counted only once
-        expect(userNames.filter((name: string) => name === 'C-3PO').length).to.be(1);
+        await retry.waitForWithTimeout(
+          'Wait for PrivMon users to be synced',
+          40000, // 40s timeout
+          async () => {
+            const res = await api.listPrivMonUsers({ query: {} });
+            const userNames = res.body.map((monitoring: any) => monitoring.user.name);
+            expect(userNames).to.contain('Luke Skywalker');
+            expect(userNames).to.contain('Leia Organa');
+            expect(userNames).to.contain('C-3PO');
+            // Test that duplicate C-3PO is counted only once
+            expect(userNames.filter((name: string) => name === 'C-3PO').length).to.be(1);
+            return true;
+          }
+        );
       });
     });
   });
 };
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
