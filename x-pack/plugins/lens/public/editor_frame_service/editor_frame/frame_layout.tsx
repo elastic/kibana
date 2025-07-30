@@ -66,9 +66,13 @@ export function FrameLayout(props: FrameLayoutProps) {
               {props.dataPanel}
             </section>
             <section
-              className={classNames('lnsFrameLayout__pageBody', {
-                'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
-              })}
+              className={classNames(
+                'lnsFrameLayout__pageBody',
+                'lnsVisualizationWorkspace_container',
+                {
+                  'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
+                }
+              )}
               aria-labelledby="workspaceId"
             >
               <EuiScreenReaderOnly>
