@@ -20,7 +20,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('security', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
     });
 
     after(async () => {

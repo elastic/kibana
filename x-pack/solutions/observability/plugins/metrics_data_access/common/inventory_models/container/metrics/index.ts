@@ -27,6 +27,7 @@ export const metrics: InventoryMetricsConfig<
     return catalog;
   },
   getCharts: async () => import('./charts').then(({ charts }) => charts),
+  getWaffleMapTooltipMetrics: () => ['cpu', 'memory', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };
