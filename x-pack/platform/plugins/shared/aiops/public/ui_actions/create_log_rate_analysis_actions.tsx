@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -21,6 +23,7 @@ import type {
 import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
+import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -49,43 +52,48 @@ export function createAddLogRateAnalysisEmbeddableAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-          '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input'
-        );
+      const initialState: LogRateAnalysisEmbeddableInitialState = {
+        dataViewId: undefined,
+      };
 
-        const initialState: LogRateAnalysisEmbeddableInitialState = {
-          dataViewId: undefined,
-        };
+      const embeddable = await presentationContainerParent.addNewPanel<
+        object,
+        LogRateAnalysisEmbeddableApi
+      >({
+        panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+        serializedState: { rawState: initialState },
+      });
 
-        const embeddable = await presentationContainerParent.addNewPanel<
-          object,
-          LogRateAnalysisEmbeddableApi
-        >({
-          panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-          serializedState: { rawState: initialState },
-        });
-
-        if (!embeddable) {
-          return;
-        }
-
-        const deletePanel = () => {
-          presentationContainerParent.removePanel(embeddable.uuid);
-        };
-
-        resolveEmbeddableLogRateAnalysisUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          embeddable.uuid,
-          true,
-          embeddable,
-          deletePanel
-        );
-      } catch (e) {
-        return Promise.reject();
+      if (!embeddable) {
+        return;
       }
+
+      const deletePanel = () => {
+        presentationContainerParent.removePanel(embeddable.uuid);
+      };
+
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          return (
+            <EmbeddableLogRateAnalysisUserInput
+              isNewPanel={true}
+              pluginStart={pluginStart}
+              logRateAnalysisControlsApi={embeddable}
+              deletePanel={deletePanel}
+              onConfirm={(updatedState) => {
+                embeddable.updateUserInput(updatedState);
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }
