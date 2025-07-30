@@ -61,7 +61,7 @@ const streamDefinition = {
   },
 };
 
-const expectedStreamsResponse: Streams.UnwiredStream.Definition = {
+const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
   ingest: {
@@ -81,7 +81,7 @@ const expectedStreamsResponse: Streams.UnwiredStream.Definition = {
         },
       },
     ],
-    unwired: {},
+    classic: {},
   },
 };
 

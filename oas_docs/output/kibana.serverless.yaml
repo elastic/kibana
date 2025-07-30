@@ -48340,12 +48340,12 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
-                                            unwired:
+                                            classic:
                                               additionalProperties: false
                                               type: object
                                               properties: {}
                                           required:
-                                            - unwired
+                                            - classic
                                       required:
                                         - ingest
                           required:
@@ -52166,12 +52166,12 @@ paths:
                             - processing
                         - type: object
                           properties:
-                            unwired:
+                            classic:
                               additionalProperties: false
                               type: object
                               properties: {}
                           required:
-                            - unwired
+                            - classic
               required:
                 - ingest
       responses: {}

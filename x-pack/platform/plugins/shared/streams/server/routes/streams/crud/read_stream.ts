@@ -68,7 +68,7 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
-  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
+  if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
@@ -83,7 +83,7 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-    } satisfies Streams.UnwiredStream.GetResponse;
+    } satisfies Streams.ClassicStream.GetResponse;
   }
 
   const inheritedFields = addAliasesForNamespacedFields(

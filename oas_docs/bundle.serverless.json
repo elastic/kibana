@@ -51727,14 +51727,14 @@
                                           "ingest": {
                                             "additionalProperties": false,
                                             "properties": {
-                                              "unwired": {
+                                              "classic": {
                                                 "additionalProperties": false,
                                                 "properties": {},
                                                 "type": "object"
                                               }
                                             },
                                             "required": [
-                                              "unwired"
+                                              "classic"
                                             ],
                                             "type": "object"
                                           }
@@ -57753,14 +57753,14 @@
                           },
                           {
                             "properties": {
-                              "unwired": {
+                              "classic": {
                                 "additionalProperties": false,
                                 "properties": {},
                                 "type": "object"
                               }
                             },
                             "required": [
-                              "unwired"
+                              "classic"
                             ],
                             "type": "object"
                           }
