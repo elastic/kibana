@@ -57,7 +57,6 @@ const getEsqlVariablesFromState = (
  * @param options.controlGroupAPI - The ControlGroupRendererApi instance for interacting with control panels.
  * @param options.currentEsqlVariables - The currently active ESQL variables from the application state.
  * @param options.stateContainer - The DiscoverStateContainer instance for data fetching.
- * @param options.storage - The storage service for persisting control panel state.
  * @param options.onTextLangQueryChange - Callback function to update the ESQL query.
  *
  * @returns An object containing handler functions for saving and canceling control changes,
@@ -172,7 +171,7 @@ export const useESQLVariables = ({
   // Callback for canceling control changes (currently a no-op, but kept for API consistency)
   const onCancelControl = useCallback(() => {}, []); // No dependencies as it does nothing for now
 
-  // New getter function
+  // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
     return controlsStateMap?.[currentTabId];
   }, [controlsStateMap, currentTabId]); // Dependencies are important for `useCallback`
