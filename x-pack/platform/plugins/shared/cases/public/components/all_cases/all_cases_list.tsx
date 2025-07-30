@@ -33,6 +33,7 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
+import { useCheckAlertAttachments } from '../../containers/use_check_alert_attachments';
 
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
@@ -42,10 +43,11 @@ export interface AllCasesListProps {
   hiddenStatuses?: CaseStatuses[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
+  alertIds?: string[];
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
-  ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
+  ({ hiddenStatuses = [], isSelectorView = false, onRowClick, alertIds = [] }) => {
     const { owner, permissions } = useCasesContext();
 
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -62,6 +64,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
       filterOptions,
       queryParams,
+    });
+
+    // Check if alerts are already attached to cases
+    const { hasAlertAttached, isLoading: isLoadingAlertAttachments } = useCheckAlertAttachments({
+      cases: data.cases,
+      alertIds,
+      isEnabled: isSelectorView && alertIds.length > 0,
     });
 
     const assigneesFromCases = useMemo(() => {
@@ -141,6 +150,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       onRowClick,
       disableActions: selectedCases.length > 0,
       selectedColumns,
+      alertIds,
+      hasAlertAttached,
     });
 
     const pagination = useMemo(
@@ -190,7 +201,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           color="accent"
           className="essentialAnimation"
           css={
-            isLoading || isLoadingCases || isLoadingColumns
+            isLoading || isLoadingCases || isLoadingColumns || isLoadingAlertAttachments
               ? css`
                   top: ${euiTheme.size.xxs};
                   border-radius: ${euiTheme.border.radius};
