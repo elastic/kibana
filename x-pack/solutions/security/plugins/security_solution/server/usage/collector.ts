@@ -3106,6 +3106,24 @@ export const registerCollector: RegisterCollector = ({
               },
             },
           },
+          elastic_detection_rule_upgrade_status: {
+            total: {
+              type: 'long',
+              _meta: { description: 'The number of total upgradeable elastic rules' },
+            },
+            customized: {
+              type: 'long',
+              _meta: { description: 'The number of customized upgradeable elastic rules' },
+            },
+            enabled: {
+              type: 'long',
+              _meta: { description: 'The number of enabled upgradeable elastic rules' },
+            },
+            disabled: {
+              type: 'long',
+              _meta: { description: 'The number of disabled upgradeable elastic rules' },
+            },
+          },
         },
         ml_jobs: {
           ml_job_usage: {
