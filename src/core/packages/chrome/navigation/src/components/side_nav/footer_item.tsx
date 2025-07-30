@@ -10,10 +10,10 @@
 import React, { KeyboardEvent, MouseEvent, forwardRef, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
+import { IMenuItem } from '../../../types';
 
-export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'> {
+export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, IMenuItem {
   hasContent?: boolean;
-  href?: string;
   iconType?: IconType;
   isCurrent: boolean;
   label: string;
@@ -26,7 +26,7 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
   (
-    { hasContent, iconType, isCurrent, label, onClick, ...props },
+    { hasContent, iconType, id, isCurrent, label, onClick, ...props },
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     const wrapperStyles = css`
@@ -44,6 +44,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       <EuiButtonIcon
         aria-label={label}
         color={isCurrent ? 'primary' : 'text'}
+        data-test-subj={`footerMenuItem-${id}`}
         display={isCurrent ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
         onClick={handleClick}

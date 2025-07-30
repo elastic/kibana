@@ -10,16 +10,18 @@
 import { EuiButton, EuiButtonEmpty, IconType, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { ISecondaryMenuItem } from '../../../types';
 
 import { useMenuItemClick } from '../../hooks/use_menu_item_click';
 
-export interface SecondaryMenuItemProps {
-  key: string;
-  iconType?: IconType;
-  isCurrent: boolean;
+export interface SecondaryMenuItemProps extends ISecondaryMenuItem {
   children: ReactNode;
   href: string;
+  iconType?: IconType;
+  isCurrent: boolean;
+  key: string;
   onClick?: () => void;
+  testSubjPrefix?: string;
 }
 
 /**
@@ -27,11 +29,14 @@ export interface SecondaryMenuItemProps {
  * The only style overrides are making the button labels left-aligned.
  */
 export const SecondaryMenuItem = ({
-  iconType,
-  isCurrent,
   children,
   href,
+  iconType,
+  id,
+  isCurrent,
   onClick,
+  testSubjPrefix = 'secondaryMenuItem',
+  ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
@@ -60,6 +65,7 @@ export const SecondaryMenuItem = ({
         // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButton
           css={styles}
+          data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
           href={href}
           onClick={handleClick}
@@ -67,6 +73,7 @@ export const SecondaryMenuItem = ({
           tabIndex={0}
           textProps={false}
           {...iconProps}
+          {...props}
         >
           {children}
         </EuiButton>
@@ -75,12 +82,14 @@ export const SecondaryMenuItem = ({
         <EuiButtonEmpty
           css={styles}
           color="text"
+          data-test-subj={`${testSubjPrefix}-${id}`}
           href={href}
           onClick={handleClick}
           size="s"
           tabIndex={0}
           textProps={false}
           {...iconProps}
+          {...props}
         >
           {children}
         </EuiButtonEmpty>

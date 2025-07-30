@@ -8,17 +8,17 @@
  */
 
 import { useState, useCallback } from 'react';
-import { MenuItem, SecondaryMenuItem } from '../../types';
+import { IMenuItem, ISecondaryMenuItem } from '../../types';
 
 interface UseNavigationProps {
-  initialMenuItem: MenuItem;
+  initialMenuItem: IMenuItem;
   isCollapsed: boolean;
 }
 
 interface NavigationState {
-  currentPage: string;
+  currentPage: string | undefined;
   currentSubpage: string | null;
-  sidePanelContent: MenuItem | null;
+  sidePanelContent: IMenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
@@ -26,14 +26,14 @@ interface NavigationState {
 export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationProps) => {
   const [currentPage, setCurrentPage] = useState(initialMenuItem.href);
   const [currentSubpage, setCurrentSubpage] = useState<string | null>(null);
-  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(initialMenuItem);
+  const [sidePanelContent, setSidePanelContent] = useState<IMenuItem | null>(initialMenuItem);
 
   // Determine if side panel should be open based on simple logic
   const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
 
   // Check if a menu item is currently active
   const isMenuItemActive = useCallback(
-    (item: MenuItem | SecondaryMenuItem): boolean => {
+    (item: IMenuItem | ISecondaryMenuItem): boolean => {
       if ('href' in item && item.href) {
         return item.href === currentPage || item.href === currentSubpage;
       }
@@ -44,7 +44,7 @@ export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationPro
 
   // Navigate to a menu item
   const navigateTo = useCallback(
-    (primaryMenuItem: MenuItem, secondaryMenuItem?: SecondaryMenuItem) => {
+    (primaryMenuItem: IMenuItem, secondaryMenuItem?: ISecondaryMenuItem) => {
       setCurrentPage(primaryMenuItem.href);
       setCurrentSubpage(secondaryMenuItem?.href || null);
       setSidePanelContent(primaryMenuItem);

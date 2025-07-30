@@ -8,13 +8,14 @@
  */
 
 import { EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
-import React, { FC, ReactNode, useCallback } from 'react';
+import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';
 
-export interface ItemProps {
+export interface ItemProps
+  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isCurrent' | 'href'> {
   children: ReactNode;
   hasSubmenu?: boolean;
   href?: string;
@@ -29,9 +30,11 @@ export const Item: FC<ItemProps> = ({
   hasSubmenu = false,
   href,
   iconType,
+  id,
   isCurrent = false,
   onClick,
   submenuPanelId,
+  ...props
 }) => {
   const { goToPanel } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
@@ -58,11 +61,14 @@ export const Item: FC<ItemProps> = ({
 
   return (
     <SecondaryMenu.Item
+      id={id}
       href={href || ''}
       iconType={iconType}
       isCurrent={isCurrent}
-      key={`nested-item-${href || Math.random()}`}
       onClick={handleClick}
+      {...props}
+      key={`nested-item-${href || Math.random()}`}
+      testSubjPrefix="nestedMenuItem"
     >
       <div css={itemStyle}>
         <span>{children}</span>

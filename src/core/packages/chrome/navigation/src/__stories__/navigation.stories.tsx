@@ -17,7 +17,7 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 
 import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_ITEMS, PRIMARY_MENU_FOOTER_ITEMS } from '../mocks/observability';
-import { NavigationStructure } from '../../types';
+import { INavigationStructure } from '../../types';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
@@ -38,7 +38,7 @@ interface StoryArgs {
   isCollapsed: boolean;
   logoLabel: string;
   logoType: string;
-  items: NavigationStructure;
+  items: INavigationStructure;
 }
 
 type PropsAndArgs = React.ComponentProps<typeof Navigation> & StoryArgs;

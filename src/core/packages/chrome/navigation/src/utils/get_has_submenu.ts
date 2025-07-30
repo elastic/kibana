@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import { IMenuItem } from '../../types';
 
 /**
  * Utility function for checking whether the menu item has a submenu
  */
-export const getHasSubmenu = (item: MenuItem): boolean => {
+export const getHasSubmenu = (item: IMenuItem): boolean => {
   return !!item.sections && item.sections.length > 0;
 };

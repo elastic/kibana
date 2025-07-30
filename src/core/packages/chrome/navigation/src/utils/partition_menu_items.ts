@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import { IMenuItem } from '../../types';
 
 /**
  * Utility function for splitting menu items into `visible` and `overflow` based on available space
@@ -15,9 +15,9 @@ import { MenuItem } from '../../types';
  * @param maxVisibleCount - Maximum number of items that can be displayed in the primary menu
  */
 export const partitionMenuItems = (
-  allItems: MenuItem[],
+  allItems: IMenuItem[],
   maxVisibleCount: number
-): { visible: MenuItem[]; overflow: MenuItem[] } => {
+): { visible: IMenuItem[]; overflow: IMenuItem[] } => {
   if (maxVisibleCount >= allItems.length) {
     return { visible: allItems, overflow: [] };
   }

@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, ReactNode, useCallback } from 'react';
+import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, IconType, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 
 import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
 
-export interface PrimaryMenuItemProps {
+export interface PrimaryMenuItemProps
+  extends Omit<ComponentProps<typeof SideNav.PrimaryMenuItem>, 'children' | 'isCurrent'> {
   children: ReactNode;
   hasSubmenu?: boolean;
-  href?: string;
-  iconType?: IconType;
   isCurrent?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
@@ -34,6 +33,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   isCollapsed,
   onClick,
   submenuPanelId,
+  ...props
 }) => {
   const { goToPanel } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
@@ -69,6 +69,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
         isCurrent={isCurrent}
         isCollapsed={isCollapsed}
         onClick={handleClick}
+        {...props}
       >
         {children}
       </SideNav.PrimaryMenuItem>

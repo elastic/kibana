@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem } from '../../types';
+import { IMenuItem } from '../../types';
 
 export const LOGO = {
   label: 'Elasticsearch',
   logoType: 'logoElasticsearch',
 };
 
-export const PRIMARY_MENU_ITEMS: MenuItem[] = [
+export const PRIMARY_MENU_ITEMS: IMenuItem[] = [
   {
     id: 'discover',
     label: 'Discover',
@@ -77,7 +77,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   },
 ];
 
-export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
+export const PRIMARY_MENU_FOOTER_ITEMS: IMenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',

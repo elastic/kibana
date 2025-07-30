@@ -9,7 +9,7 @@
 
 import { useCallback, useRef, useState, RefObject, useLayoutEffect } from 'react';
 
-import { MenuCalculations, MenuItem, NavigationStructure } from '../../types';
+import { IMenuCalculations, IMenuItem, INavigationStructure } from '../../types';
 import { getActualItemHeights } from '../utils/get_actual_item_heights';
 import {
   COLLAPSED_MENU_ITEM_HEIGHT,
@@ -21,8 +21,8 @@ import { partitionMenuItems } from '../utils/partition_menu_items';
 
 interface ResponsiveMenuState {
   primaryMenuRef: RefObject<HTMLElement>;
-  visibleMenuItems: MenuItem[];
-  overflowMenuItems: MenuItem[];
+  visibleMenuItems: IMenuItem[];
+  overflowMenuItems: IMenuItem[];
 }
 
 /**
@@ -33,12 +33,12 @@ interface ResponsiveMenuState {
  */
 export function useResponsiveMenu(
   isCollapsed: boolean,
-  items: NavigationStructure
+  items: INavigationStructure
 ): ResponsiveMenuState {
   const primaryMenuRef = useRef<HTMLElement>(null);
 
-  const [visibleMenuItems, setVisibleMenuItems] = useState<MenuItem[]>([]);
-  const [overflowMenuItems, setOverflowMenuItems] = useState<MenuItem[]>([]);
+  const [visibleMenuItems, setVisibleMenuItems] = useState<IMenuItem[]>([]);
+  const [overflowMenuItems, setOverflowMenuItems] = useState<IMenuItem[]>([]);
 
   const recalculateMenuLayout = useCallback(() => {
     const menuElement = primaryMenuRef.current;
@@ -67,7 +67,7 @@ export function useResponsiveMenu(
       }
     }
 
-    const calculations: MenuCalculations = {
+    const calculations: IMenuCalculations = {
       availableHeight: menuRect.height,
       itemGap,
       maxVisibleItems: MAX_MENU_ITEMS,

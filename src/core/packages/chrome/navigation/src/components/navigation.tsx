@@ -10,7 +10,7 @@
 import React, { KeyboardEvent } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 
-import { MenuItem, NavigationStructure } from '../../types';
+import { IMenuItem, INavigationStructure } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -24,7 +24,7 @@ const FOOTER_ITEM_LIMIT = 5;
 
 interface NavigationProps {
   isCollapsed: boolean;
-  items: NavigationStructure;
+  items: INavigationStructure;
   logoLabel: string;
   logoType: string;
   setWidth: (width: number) => void;
@@ -53,12 +53,12 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
-  const handleMainItemClick = (item: MenuItem) => {
+  const handleMainItemClick = (item: IMenuItem) => {
     navigateTo(item);
     focusMainContent();
   };
 
-  const handleSubMenuItemClick = (item: MenuItem, subItem: MenuItem) => {
+  const handleSubMenuItemClick = (item: IMenuItem, subItem: IMenuItem) => {
     if (item.href && subItem.href === item.href) {
       navigateTo(item);
     } else {
@@ -67,7 +67,7 @@ export const Navigation = ({
     focusMainContent();
   };
 
-  const handleFooterItemKeyDown = (item: MenuItem, e: KeyboardEvent) => {
+  const handleFooterItemKeyDown = (item: IMenuItem, e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       navigateTo(item);
@@ -90,12 +90,12 @@ export const Navigation = ({
               label={item.label}
               trigger={
                 <SideNav.PrimaryMenuItem
-                  href={item.href}
                   iconType={item.iconType}
                   isCollapsed={isCollapsed}
                   isCurrent={item.id === sidePanelContent?.id}
                   hasContent={getHasSubmenu(item)}
                   onClick={() => handleMainItemClick(item)}
+                  {...item}
                 >
                   {item.label}
                 </SideNav.PrimaryMenuItem>
@@ -112,13 +112,14 @@ export const Navigation = ({
                             (subItem.href && currentSubpage === subItem.href) ||
                             (!currentSubpage && subItem.href === currentPage)
                           }
-                          href={subItem.href}
                           onClick={() => {
                             if (subItem.href) {
                               handleSubMenuItemClick(item, subItem);
                               closePopover();
                             }
                           }}
+                          testSubjPrefix="popoverItem"
+                          {...subItem}
                         >
                           {subItem.label}
                         </SecondaryMenu.Item>
@@ -139,10 +140,14 @@ export const Navigation = ({
               persistent
               trigger={
                 <SideNav.PrimaryMenuItem
+                  data-test-subj="sideNavMoreMenuItem"
                   isCurrent={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
                   isCollapsed={isCollapsed}
                   iconType="boxesHorizontal"
                   hasContent
+                  href=""
+                  id="more-menu"
+                  label="More" // TODO: translate
                 >
                   {/* TODO: translate */}
                   More
@@ -162,10 +167,8 @@ export const Navigation = ({
                           return (
                             <NestedSecondaryMenu.PrimaryMenuItem
                               key={item.id}
-                              iconType={item.iconType}
                               isCurrent={isCurrent}
                               isCollapsed={isCollapsed}
-                              href={item.href}
                               hasSubmenu={hasSubItems}
                               submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
                               onClick={() => {
@@ -175,6 +178,7 @@ export const Navigation = ({
                                   focusMainContent();
                                 }
                               }}
+                              {...item}
                             >
                               {item.label}
                             </NestedSecondaryMenu.PrimaryMenuItem>
@@ -197,17 +201,16 @@ export const Navigation = ({
                             {section.items.map((subItem) => (
                               <NestedSecondaryMenu.Item
                                 key={subItem.id}
-                                iconType={subItem.iconType}
                                 isCurrent={
                                   (subItem.href && currentSubpage === subItem.href) ||
                                   (!currentSubpage && subItem.href === currentPage)
                                 }
-                                href={subItem.href}
                                 onClick={() => {
                                   navigateTo(item, subItem);
                                   closePopover();
                                   focusMainContent();
                                 }}
+                                {...subItem}
                               >
                                 {subItem.label}
                               </NestedSecondaryMenu.Item>
@@ -226,10 +229,8 @@ export const Navigation = ({
                         return (
                           <SideNav.PrimaryMenuItem
                             key={item.id}
-                            iconType={item.iconType}
                             isCurrent={isCurrent}
                             isCollapsed={isCollapsed}
-                            href={item.href}
                             hasContent
                             onClick={() => {
                               navigateTo(item);
@@ -237,6 +238,7 @@ export const Navigation = ({
                               focusMainContent();
                             }}
                             horizontal
+                            {...item}
                           >
                             {item.label}
                           </SideNav.PrimaryMenuItem>
@@ -265,9 +267,7 @@ export const Navigation = ({
                   onClick={() => navigateTo(item)}
                   hasContent={getHasSubmenu(item)}
                   onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
-                  label={item.label}
-                  iconType={item.iconType}
-                  href={item.href}
+                  {...item}
                 />
               }
             >
@@ -282,13 +282,14 @@ export const Navigation = ({
                             (subItem.href && currentSubpage === subItem.href) ||
                             (!currentSubpage && subItem.href === currentPage)
                           }
-                          href={subItem.href}
                           onClick={() => {
                             if (subItem.href) {
                               handleSubMenuItemClick(item, subItem);
                               closePopover();
                             }
                           }}
+                          {...subItem}
+                          testSubjPrefix="popoverFooterItem"
                         >
                           {subItem.label}
                         </SecondaryMenu.Item>
@@ -314,12 +315,13 @@ export const Navigation = ({
                       (subItem.href && currentSubpage === subItem.href) ||
                       (!currentSubpage && subItem.href === currentPage)
                     }
-                    href={subItem.href}
                     onClick={() => {
                       if (subItem.href) {
                         handleSubMenuItemClick(sidePanelContent, subItem);
                       }
                     }}
+                    testSubjPrefix="sidePanelItem"
+                    {...subItem}
                   >
                     {subItem.label}
                   </SecondaryMenu.Item>

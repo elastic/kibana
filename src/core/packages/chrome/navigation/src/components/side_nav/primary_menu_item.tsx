@@ -9,23 +9,15 @@
 
 import React, { forwardRef, ForwardedRef, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiIcon,
-  EuiScreenReaderOnly,
-  EuiText,
-  EuiToolTip,
-  IconType,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIcon, EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { useMenuItemClick } from '../../hooks/use_menu_item_click';
+import { IMenuItem } from '../../../types';
 
-export interface SideNavPrimaryMenuItemProps {
+export interface SideNavPrimaryMenuItemProps extends IMenuItem {
   children: ReactNode;
   hasContent?: boolean;
   horizontal?: boolean;
-  href?: string;
-  iconType?: IconType;
   isCollapsed: boolean;
   isCurrent: boolean;
   onClick?: () => void;
@@ -36,7 +28,18 @@ export const SideNavPrimaryMenuItem = forwardRef<
   SideNavPrimaryMenuItemProps
 >(
   (
-    { children, hasContent, horizontal, href, iconType, isCollapsed, isCurrent, onClick, ...props },
+    {
+      children,
+      hasContent,
+      horizontal,
+      href,
+      iconType,
+      id,
+      isCollapsed,
+      isCurrent,
+      onClick,
+      ...props
+    },
     ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
   ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
@@ -162,23 +165,25 @@ export const SideNavPrimaryMenuItem = forwardRef<
 
     const menuItem = hasContent ? (
       <button
-        ref={ref as ForwardedRef<HTMLButtonElement>}
-        css={buttonStyles}
-        onClick={handleClick}
         data-menu-item
+        onClick={handleClick}
         type="button"
+        css={buttonStyles}
+        data-test-subj={`primaryMenuItem-${id}`}
+        ref={ref as ForwardedRef<HTMLButtonElement>}
         {...props}
       >
         {content}
       </button>
     ) : (
       <a
-        ref={ref as ForwardedRef<HTMLAnchorElement>}
         aria-current={isCurrent ? 'page' : undefined}
         css={buttonStyles}
+        data-menu-item
+        data-test-subj={`primaryMenuItem-${id}`}
         href={href}
         onClick={handleClick}
-        data-menu-item
+        ref={ref as ForwardedRef<HTMLAnchorElement>}
         {...props}
       >
         {content}
