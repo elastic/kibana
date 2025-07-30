@@ -9,8 +9,10 @@
 
 import React, { useContext, useCallback, useEffect, memo, useState, useRef } from 'react';
 import type { ReactElement } from 'react';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, type UseEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
   DragDropIdentifier,
@@ -22,6 +24,7 @@ import {
   useDragDropContext,
 } from './providers';
 import { DropType } from './types';
+import { domDragAndDrop, DRAG_DROP_Z_LEVEL_3 } from './shared_styles';
 import './sass/droppable.scss';
 
 type DroppableEvent = React.DragEvent<HTMLElement>;
@@ -138,7 +141,7 @@ const DroppableImpl = memo(function DroppableImpl(props: DropsInnerProps) {
     getAdditionalClassesOnDroppable,
     getCustomDropTarget,
   } = props;
-
+  const styles = useMemoCss(droppableStyles);
   const { dragging, hoveredDropTarget, dataTestSubjPrefix, keyboardMode } = dndState;
 
   const [isInZone, setIsInZone] = useState(false);
@@ -259,6 +262,7 @@ const DroppableImpl = memo(function DroppableImpl(props: DropsInnerProps) {
     return {
       'data-test-subj': dataTestSubj || `${dataTestSubjPrefix}-domDroppable`,
       className: getClasses(dropType, dropChildren),
+      css: styles.domDroppable,
       onDragEnter: dragEnter,
       onDragLeave: dragLeave,
       onDragOver: dropType
@@ -479,4 +483,52 @@ const ReorderableDroppableImpl = memo(function ReorderableDroppableImpl(
       />
     </>
   );
+});
+
+const droppableStyles = {
+  domDroppable: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css([
+      domDragAndDrop(themeContext),
+      {
+        '&:not(.domDroppable__overlayWrapper)': {
+          '&:before': createBeforePseudo(euiTheme),
+        },
+        '.domDraggable_ghost': {
+          position: 'absolute',
+          margin: '0 !important',
+          top: 0,
+          width: '100%',
+          left: 0,
+          opacity: 0.9,
+          transform: `translate(${euiTheme.size.s}, ${euiTheme.size.l})`,
+          zIndex: DRAG_DROP_Z_LEVEL_3,
+          pointerEvents: 'none',
+          outline: `${euiTheme.size.xxs} solid currentColor`, // Safari & Firefox
+          outlineStyle: 'auto', // Chrome
+        },
+        '.domDroppable--active': {
+          '&:not(.domDroppable__overlayWrapper)': {
+            '&:before': createBeforePseudo(euiTheme, String(euiTheme.border.width.thin)),
+          },
+        },
+      },
+    ]);
+  },
+};
+
+// Helper functions which replace mixins
+
+// Static styles for a drop area
+const createBeforePseudo = (euiTheme: EuiThemeComputed, borderWidth?: string) => ({
+  content: '""',
+  position: 'absolute' as const,
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  pointerEvents: 'none' as const,
+  borderRadius: euiTheme.border.radius.medium,
+  border: `${borderWidth || euiTheme.border.width.thin} dashed transparent`,
 });

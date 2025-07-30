@@ -5,6 +5,8 @@ $domDragDropZLevel1: 1;
 $domDragDropZLevel2: 2;
 $domDragDropZLevel3: 3;
 
+@mixin mixinDomDragDrop() {}
+
 // Static styles for a drop area
 @mixin mixinDomDroppable($borderWidth: $euiBorderWidthThin) {
   &:before {
