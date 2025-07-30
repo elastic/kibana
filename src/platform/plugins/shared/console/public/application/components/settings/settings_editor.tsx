@@ -270,6 +270,7 @@ export const SettingsEditor = (props: Props) => {
         <EuiSuperSelect
           css={{ minWidth: '220px' }}
           compressed
+          disabled={availableHosts.length < 2}
           options={availableHosts.map((host) => ({
             value: host,
             inputDisplay: host,
