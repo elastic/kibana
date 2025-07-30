@@ -8,28 +8,37 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionRequestStatus } from '../../../common';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
-import { AsyncSearchStatusResponse } from '../..';
+
+// Define a common interface that captures the properties we need from both response types
+interface CommonResponse {
+  is_running: boolean;
+  completion_status?: number;
+}
 
 export async function getSearchStatus(
   internalClient: ElasticsearchClient,
-  asyncId: string
+  asyncId: string,
+  session: SearchSessionRequestInfo,
+  logger: Logger,
+  asUserClient: ElasticsearchClient
 ): Promise<SearchSessionRequestStatus> {
-  // TODO: Handle strategies other than the default one
-  // https://github.com/elastic/kibana/issues/127880
+  logger.debug(`SearchSession getSearchStatus ${asyncId}`);
   try {
-    const apiResponse: TransportResult<AsyncSearchStatusResponse> =
-      await internalClient.asyncSearch.status(
-        {
-          id: asyncId,
-        },
-        { meta: true }
-      );
-    const response = apiResponse.body;
-    if (response.completion_status! >= 400) {
+    let response: CommonResponse;
+
+    if (session.strategy === 'esql_async') {
+      const apiResponse = await asUserClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
+      response = apiResponse.body;
+    } else {
+      const apiResponse = await internalClient.asyncSearch.status({ id: asyncId }, { meta: true });
+      response = apiResponse.body;
+    }
+
+    if ('completion_status' in response && response.completion_status! >= 400) {
+      logger.debug(`SearchSession getSearchStatus ${asyncId} ${SearchStatus.ERROR}`);
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {
@@ -38,17 +47,20 @@ export async function getSearchStatus(
         }),
       };
     } else if (!response.is_running) {
+      logger.debug(`SearchSession getSearchStatus ${asyncId} ${SearchStatus.COMPLETE}`);
       return {
         status: SearchStatus.COMPLETE,
         error: undefined,
       };
     } else {
+      logger.debug(`SearchSession getSearchStatus ${SearchStatus.IN_PROGRESS}`);
       return {
         status: SearchStatus.IN_PROGRESS,
         error: undefined,
       };
     }
   } catch (e) {
+    logger.debug(`SearchSession getSearchStatus error ${asyncId} ${e.message}`);
     return {
       status: SearchStatus.ERROR,
       error: i18n.translate('data.search.statusThrow', {
