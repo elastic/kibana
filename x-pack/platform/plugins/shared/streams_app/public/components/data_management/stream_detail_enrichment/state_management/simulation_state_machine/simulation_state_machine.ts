@@ -6,11 +6,11 @@
  */
 import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
+import { isValidProcessor } from '../../utils';
 import {
   SimulationInput,
   SimulationContext,
@@ -35,10 +35,8 @@ export interface ProcessorEventParams {
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
-  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
-const hasValidProcessors = (processors: ProcessorDefinitionWithUIAttributes[]) =>
-  processors.every(isValidProcessor);
+const hasAnyValidProcessors = (processors: ProcessorDefinitionWithUIAttributes[]) =>
+  processors.some(isValidProcessor);
 
 export const simulationMachine = setup({
   types: {
@@ -75,7 +73,7 @@ export const simulationMachine = setup({
         (col) => !params.columns.includes(col)
       ),
     })),
-    storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
+    storePreviewColumnsOrder: assign((_, params: { columns: string[] }) => ({
       previewColumnsOrder: params.columns,
     })),
     storePreviewColumnsSorting: assign(
@@ -99,7 +97,6 @@ export const simulationMachine = setup({
       detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
     })),
     resetSimulationOutcome: assign({
-      processors: [],
       detectedSchemaFields: [],
       explicitlyEnabledPreviewColumns: [],
       explicitlyDisabledPreviewColumns: [],
@@ -111,11 +108,11 @@ export const simulationMachine = setup({
     resetSamples: assign({ samples: [] }),
   },
   delays: {
-    processorChangeDebounceTime: 800,
+    processorChangeDebounceTime: 300,
   },
   guards: {
     canSimulate: ({ context }) =>
-      hasSamples(context.samples) && hasValidProcessors(context.processors),
+      hasSamples(context.samples) && hasAnyValidProcessors(context.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
@@ -208,6 +205,14 @@ export const simulationMachine = setup({
       target: '.assertingRequirements',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
+    'processor.edit': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+    },
+    'processor.save': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+    },
     'processor.change': {
       target: '.debouncingChanges',
       reenter: true,
@@ -250,7 +255,10 @@ export const simulationMachine = setup({
     },
 
     assertingRequirements: {
-      always: [{ guard: 'canSimulate', target: 'runningSimulation' }, { target: 'idle' }],
+      always: [
+        { guard: 'canSimulate', target: 'runningSimulation' },
+        { target: 'idle', actions: [{ type: 'resetSimulationOutcome' }] },
+      ],
     },
 
     runningSimulation: {
@@ -262,7 +270,7 @@ export const simulationMachine = setup({
           documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          processors: context.processors,
+          processors: context.processors.filter(isValidProcessor),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
