@@ -66,7 +66,7 @@ import {
 import { ControlFactory } from '../../types';
 import { confirmDeleteControl } from '../../../common';
 import { DataViewAndFieldContextProvider } from './data_view_and_field_picker';
-import { SelectValuesSource } from './input/select_values_source';
+import { SelectValuesSource } from './values_source/select_values_source';
 import { SelectOutput } from './output/select_output';
 import { validateESQLVariableString } from './output/validate_esql_variable_string';
 
@@ -235,7 +235,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     isEdit && isESQLValuesSource ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
   );
 
-  const [hasTouchedInput, setHasTouchedInput] = useState(isEdit);
+  const [hasTouchedValuesSource, setHasTouchedValuesSource] = useState(isEdit);
 
   const updateEditorState = useCallback(
     (update: Partial<State>) => setEditorState((state) => ({ ...state, ...update })),
@@ -270,7 +270,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     }
 
     //  When creating a new control, and the user has not yet touched the values source
-    if (!hasTouchedInput) {
+    if (!hasTouchedValuesSource) {
       // Sync up the output mode with the values source
       switch (editorState.output) {
         case ControlOutputOption.DSL:
@@ -289,7 +289,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       }
     }
   }, [
-    hasTouchedInput,
+    hasTouchedValuesSource,
     editorState,
     defaultPanelTitle,
     isDSLValuesSource,
@@ -531,7 +531,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             setSelectedControlType={setSelectedControlType}
             setControlOptionsValid={setControlOptionsValid}
             setESQLQueryValidation={setESQLQueryValidation}
-            setHasTouchedInput={setHasTouchedInput}
+            setHasTouchedValuesSource={setHasTouchedValuesSource}
             isEdit={isEdit}
             showESQLOnly={showESQLOnly}
           />

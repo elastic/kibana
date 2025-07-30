@@ -21,7 +21,7 @@ import {
   ControlGroupEditorConfig,
   OPTIONS_LIST_CONTROL,
 } from '../../../../../common';
-import { ListOptionsInput } from '../../../../common/list_options_input/list_options_input';
+import { ListOptionsInput } from './list_options_input/list_options_input';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker, useDataViewAndFieldContext } from '../data_view_and_field_picker';
 import {
@@ -47,7 +47,7 @@ interface SelectValuesSourceProps<State> {
   setDefaultPanelTitle: (title: string) => void;
   setControlOptionsValid: (valid: boolean) => void;
   setESQLQueryValidation: (status: EditorComponentStatus) => void;
-  setHasTouchedInput: (b: boolean) => void;
+  setHasTouchedValuesSource: (b: boolean) => void;
   isEdit: boolean;
   showESQLOnly: boolean;
 }
@@ -64,7 +64,7 @@ export const SelectValuesSource = <
   setDefaultPanelTitle,
   setControlOptionsValid,
   setESQLQueryValidation,
-  setHasTouchedInput,
+  setHasTouchedValuesSource,
   isEdit,
   showESQLOnly,
 }: SelectValuesSourceProps<State>) => {
@@ -89,7 +89,7 @@ export const SelectValuesSource = <
 
   const onStaticValuesChange = useCallback(
     (staticValues: EuiSelectOption[]) => {
-      setHasTouchedInput(true);
+      setHasTouchedValuesSource(true);
       updateEditorState({
         staticValues: staticValues as State['staticValues'],
       });
@@ -97,7 +97,7 @@ export const SelectValuesSource = <
         setSelectedControlType(OPTIONS_LIST_CONTROL);
       }
     },
-    [setHasTouchedInput, updateEditorState, selectedControlType, setSelectedControlType]
+    [setHasTouchedValuesSource, updateEditorState, selectedControlType, setSelectedControlType]
   );
 
   const updatePreviewOptionsAndColumns = useCallback(
@@ -178,14 +178,14 @@ export const SelectValuesSource = <
 
   const onESQLQueryChange = useCallback(
     (q: AggregateQuery) => {
-      setHasTouchedInput(true);
+      setHasTouchedValuesSource(true);
       updateEditorState({ ...editorState, esqlQuery: q.esql });
       setPreviewError(undefined);
       setPreviewOptions([]);
       setPreviewColumns([]);
       setESQLQueryValidation(EditorComponentStatus.INCOMPLETE);
     },
-    [setHasTouchedInput, updateEditorState, editorState, setESQLQueryValidation]
+    [setHasTouchedValuesSource, updateEditorState, editorState, setESQLQueryValidation]
   );
 
   const appendColumnToESQLQuery = useCallback(
@@ -231,9 +231,9 @@ export const SelectValuesSource = <
           isFullWidth
           options={inputOptions}
           idSelected={editorState.valuesSource ?? DEFAULT_CONTROL_VALUES_SOURCE}
-          onChange={(input) => {
-            updateEditorState({ input: input as ControlValuesSource });
-            setHasTouchedInput(true);
+          onChange={(source) => {
+            updateEditorState({ valuesSource: source as ControlValuesSource });
+            setHasTouchedValuesSource(true);
           }}
           legend="Select control input"
           isDisabled={lockToStatic}
@@ -247,10 +247,10 @@ export const SelectValuesSource = <
           onChangeDataViewId={(newDataViewId) => {
             updateEditorState({ ...editorState, dataViewId: newDataViewId });
             setSelectedControlType(undefined);
-            setHasTouchedInput(true);
+            setHasTouchedValuesSource(true);
           }}
           onSelectField={(field) => {
-            setHasTouchedInput(true);
+            setHasTouchedValuesSource(true);
             const newFieldName = field.name;
             const prevFieldName = editorState.fieldName;
             if (

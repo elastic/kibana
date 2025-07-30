@@ -18,36 +18,41 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
-  EuiSelectOption,
   EuiSplitPanel,
   euiDragDropReorder,
   useEuiPaddingCSS,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FixedSizeList } from 'react-window';
 import { v4 as uuidv4, NIL as UUID_NIL } from 'uuid';
+import { BehaviorSubject, debounceTime } from 'rxjs';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { SuggestionsBox } from './suggestions_box';
 
 interface Props {
   idAria?: string;
   [key: string]: unknown;
   maxOptions?: number;
   label: string;
-  helpText?: string;
-  value: EuiSelectOption[];
-  onChange: (options: EuiSelectOption[]) => void;
-  isInvalid?: boolean;
-  error?: ReactNode;
+  value: ListOptionsInputOption[];
+  onChange: (options: ListOptionsInputOption[]) => void;
+  suggestions: string[];
 }
 
-type ListOptionsInputOption = EuiSelectOption & { isFresh?: boolean };
+interface ListOptionsInputOption {
+  value: string;
+  text: string;
+  isFresh?: boolean;
+}
 
 const DRAG_DROP_ITEM_LIMIT = 50;
 const MAX_HEIGHT = 350;
 
-export const INITIAL_OPTIONS: EuiSelectOption[] = [
+export const INITIAL_OPTIONS: ListOptionsInputOption[] = [
   {
     // Key used to identify the initial default option
     // String literal 'default' is not used to avoid confusion in case the user changes the
@@ -59,24 +64,46 @@ export const INITIAL_OPTIONS: EuiSelectOption[] = [
 
 export const ListOptionsInput = ({
   value,
-  helpText,
   label,
   idAria,
   maxOptions,
   onChange,
-  isInvalid,
-  error,
-  ...rest
+  suggestions,
 }: Props) => {
-  // Add a state to track if an option has just been created. This is used to auto-focus the input, and to prevent
-  // any validation errors from appearing until after the user has entered a value or blurred the input
+  // Add a state to track if an option has just been created. This is used to auto-focus the input.
   const [freshOption, setFreshOption] = useState<ListOptionsInputOption | null>(null);
   const [nextSortDir, setNextSortDir] = useState<'asc' | 'desc'>('desc');
-  const scrollListRef = useRef<FixedSizeList>(null);
+
+  const virtualizedScrollList = useRef<FixedSizeList>(null);
+  const virtualizedListWrapperRef = useRef<HTMLSpanElement>(null);
+  const suggestionsBoxRef = useRef<HTMLDivElement>(null);
+
+  // Virtualized mode is very picky about re-rendering, and the normal react ref lifecycle ends up causing a lot of problems
+  // For the purpose of rendering the suggestion box, track the currently focused field with observables instead
+  const listItemHTMLIdPrefix = useGeneratedHtmlId();
+  const [focusedFieldKey$] = useState(new BehaviorSubject<string | null>(null));
+  const [focusedField$] = useState(new BehaviorSubject<HTMLInputElement | null>(null));
+  // Also track changes in virtualized mode, and queue them up for commit. This is to avoid a change in the `value` prop,
+  // which triggers a re-render, until the user is no longer interacting with the virtualized list.
+  const virtualizedChangesSet = useRef<Map<string, string>>(new Map([]));
+
+  useEffectOnce(() => {
+    const focusedFieldKeySubscription = focusedFieldKey$
+      .pipe(debounceTime(0))
+      .subscribe((nextKey) =>
+        focusedField$.next(
+          document.getElementById(`${listItemHTMLIdPrefix}-${nextKey}`)?.querySelector('input') ??
+            null
+        )
+      );
+    return () => focusedFieldKeySubscription.unsubscribe();
+  });
 
   const currentOptions: ListOptionsInputOption[] = useMemo(() => {
-    const parsedValue = value.length ? value : INITIAL_OPTIONS;
-    if (freshOption) parsedValue.push(freshOption);
+    const parsedValue = value.length ? value : [...INITIAL_OPTIONS];
+    if (freshOption) {
+      parsedValue.push(freshOption);
+    }
     return parsedValue;
   }, [value, freshOption]);
   const renderingInVirtualizedMode = useMemo(
@@ -86,24 +113,59 @@ export const ListOptionsInput = ({
 
   const onChangeOptionLabel = useCallback(
     ({ value: key, text }: ListOptionsInputOption) => {
-      setFreshOption(null);
+      if (renderingInVirtualizedMode) {
+        virtualizedChangesSet.current.set(String(key), text);
+        return;
+      }
+      if (freshOption) setFreshOption(null);
       const newOptions = currentOptions.map((option) =>
         key === option.value ? { value: key, text } : option
       );
       onChange(newOptions);
     },
-    [currentOptions, onChange]
+    [currentOptions, freshOption, onChange, renderingInVirtualizedMode]
+  );
+
+  const onChooseSuggestion = useCallback(
+    (suggestion: string) => {
+      const key = focusedFieldKey$.getValue();
+      if (key) onChangeOptionLabel({ value: key, text: suggestion });
+    },
+    [focusedFieldKey$, onChangeOptionLabel]
+  );
+
+  const commitVirtualizedChanges = useCallback(() => {
+    const newOptions = currentOptions.map((option) => {
+      const newText = virtualizedChangesSet.current.get(String(option.value));
+      return newText ? { ...option, text: newText } : option;
+    });
+    virtualizedChangesSet.current.clear();
+    onChange(newOptions);
+  }, [currentOptions, onChange]);
+
+  const onBlurVirtualizedList = useCallback(
+    (e: React.FocusEvent) => {
+      // Check to see if the event bubbled up from an element within the list, or within the suggestions box portal
+      if (
+        virtualizedListWrapperRef.current?.contains(e.relatedTarget) ||
+        suggestionsBoxRef.current?.contains(e.relatedTarget)
+      )
+        return;
+      if (freshOption) setFreshOption(null);
+      commitVirtualizedChanges();
+    },
+    [freshOption, commitVirtualizedChanges]
   );
 
   const onAddOption = useCallback(() => {
     if (maxOptions && currentOptions.length >= maxOptions) return;
     const newOption = { value: uuidv4(), text: '', isFresh: true };
     setFreshOption(newOption);
-    scrollListRef.current?.scrollToItem(currentOptions.length, 'end');
+    virtualizedScrollList.current?.scrollToItem(currentOptions.length + 1, 'end');
   }, [maxOptions, currentOptions]);
 
   const onRemoveOption = useCallback(
-    (key: EuiSelectOption['value']) => {
+    (key: ListOptionsInputOption['value']) => {
       const newOptions = currentOptions.filter((option) => option.value !== key);
       onChange(newOptions);
     },
@@ -111,8 +173,9 @@ export const ListOptionsInput = ({
   );
 
   const onClearAll = useCallback(() => {
-    onChange([]);
+    virtualizedChangesSet.current.clear();
     setFreshOption(null);
+    onChange([]);
   }, [onChange]);
   const onSort = useCallback(() => {
     const nextOptions = (value ?? INITIAL_OPTIONS).sort((a, b) => {
@@ -128,14 +191,9 @@ export const ListOptionsInput = ({
     setNextSortDir(nextSortDir === 'asc' ? 'desc' : 'asc');
   }, [value, onChange, nextSortDir]);
 
-  const onBlurOption = useCallback(
-    (option: ListOptionsInputOption) => {
-      if (option.isFresh && !renderingInVirtualizedMode) {
-        onChangeOptionLabel(option);
-      }
-    },
-    [onChangeOptionLabel, renderingInVirtualizedMode]
-  );
+  const onBlurOption = useCallback(() => {
+    focusedFieldKey$.next(null);
+  }, [focusedFieldKey$]);
 
   const onDragEnd = useCallback<OnDragEndResponder>(
     ({ source, destination }) => {
@@ -155,102 +213,109 @@ export const ListOptionsInput = ({
   const showActions = useMemo(() => currentOptions.length >= 6, [currentOptions.length]);
 
   const renderOption = useCallback(
-    (option: ListOptionsInputOption, index: number) => (
-      <>
-        <EuiFlexItem>
-          <EuiFieldText
-            compressed
-            autoFocus={option.isFresh}
-            fullWidth
-            defaultValue={String(option.text)}
-            placeholder={i18n.translate('optionsfield.placeholderText', {
-              defaultMessage: 'Option text',
-            })}
-            onChange={
-              !renderingInVirtualizedMode
-                ? (e) => onChangeOptionLabel({ value: option.value, text: e.target.value })
-                : undefined
-            }
-            onBlur={(e) => {
-              if (renderingInVirtualizedMode) {
-                onChangeOptionLabel({ value: option.value, text: e.target.value });
-              } else {
-                onBlurOption(option);
+    (option: ListOptionsInputOption, index: number) => {
+      return (
+        <>
+          <EuiFlexItem id={`${listItemHTMLIdPrefix}-${option.value}`}>
+            <EuiFieldText
+              compressed
+              autoFocus={!renderingInVirtualizedMode && option.isFresh}
+              fullWidth
+              defaultValue={
+                /** Virtualizing breaks focus on re-render, so render as an uncontrolled component */
+                renderingInVirtualizedMode ? String(option.text) : undefined
               }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onBlurOption(option);
-                onAddOption();
-              }
-            }}
-            data-test-subj={`list-options-input-option-label-${index}`}
-          />
-        </EuiFlexItem>
-        {currentOptions.length > 1 && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType={'minusInCircle'}
-              color={'danger'}
-              onClick={() => onRemoveOption(option.value)}
-              data-test-subj={`list-options-input-remove-option-${index}`}
+              value={!renderingInVirtualizedMode ? String(option.text) : undefined}
+              placeholder={i18n.translate('optionsfield.placeholderText', {
+                defaultMessage: 'Option text',
+              })}
+              onChange={(e) => {
+                onChangeOptionLabel({ value: String(option.value), text: e.target.value });
+              }}
+              onBlur={(e) => {
+                // If this blur was triggered by clicking a suggestion, defer to the click handler
+                if (suggestionsBoxRef.current?.contains(e.relatedTarget)) return;
+                onBlurOption();
+              }}
+              onFocus={() => focusedFieldKey$.next(String(option.value))}
+              onKeyDown={(e) => {
+                if (!e.defaultPrevented && e.key === 'Enter') {
+                  onBlurOption();
+                  commitVirtualizedChanges();
+                  onAddOption();
+                }
+              }}
+              data-test-subj={`list-options-input-option-label-${index}`}
             />
           </EuiFlexItem>
-        )}
-      </>
-    ),
+          {currentOptions.length > 1 && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType={'minusInCircle'}
+                color={'danger'}
+                onClick={() => onRemoveOption(option.value)}
+                data-test-subj={`list-options-input-remove-option-${index}`}
+              />
+            </EuiFlexItem>
+          )}
+        </>
+      );
+    },
     [
-      currentOptions.length,
-      onAddOption,
-      onBlurOption,
-      onChangeOptionLabel,
-      onRemoveOption,
+      listItemHTMLIdPrefix,
       renderingInVirtualizedMode,
+      currentOptions.length,
+      onChangeOptionLabel,
+      onBlurOption,
+      focusedFieldKey$,
+      commitVirtualizedChanges,
+      onAddOption,
+      onRemoveOption,
     ]
   );
   const paddingLeftCSS = useEuiPaddingCSS('left');
-  const listBody =
-    currentOptions.length <= DRAG_DROP_ITEM_LIMIT ? (
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css`
-          max-height: ${MAX_HEIGHT}px;
-          overflow-y: auto;
-        `}
-      >
-        <EuiDragDropContext onDragEnd={onDragEnd}>
-          <EuiDroppable droppableId="OPTIONS_DROPPABLE_AREA" spacing="s">
-            {currentOptions.map((option, index) => (
-              <EuiDraggable
-                spacing="s"
-                key={`option-${option.value}`}
-                draggableId={`option-${option.value}`}
-                index={index}
-                customDragHandle
-                hasInteractiveChildren
-                usePortal
-              >
-                {(provided) => (
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiPanel
-                        color="transparent"
-                        paddingSize="s"
-                        {...provided.dragHandleProps}
-                        aria-label="Drag Handle"
-                      >
-                        <EuiIcon type="grab" />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                    {renderOption(option, index)}
-                  </EuiFlexGroup>
-                )}
-              </EuiDraggable>
-            ))}
-          </EuiDroppable>
-        </EuiDragDropContext>
-      </EuiSplitPanel.Inner>
-    ) : (
+  const listBody = !renderingInVirtualizedMode ? (
+    <EuiSplitPanel.Inner
+      paddingSize="none"
+      css={css`
+        max-height: ${MAX_HEIGHT}px;
+        overflow-y: auto;
+      `}
+    >
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable droppableId="OPTIONS_DROPPABLE_AREA" spacing="s">
+          {currentOptions.map((option, index) => (
+            <EuiDraggable
+              spacing="s"
+              key={`option-${option.value}`}
+              draggableId={`option-${option.value}`}
+              index={index}
+              customDragHandle
+              hasInteractiveChildren
+              usePortal
+            >
+              {(provided) => (
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiPanel
+                      color="transparent"
+                      paddingSize="s"
+                      {...provided.dragHandleProps}
+                      aria-label="Drag Handle"
+                    >
+                      <EuiIcon type="grab" />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                  {renderOption(option, index)}
+                </EuiFlexGroup>
+              )}
+            </EuiDraggable>
+          ))}
+        </EuiDroppable>
+      </EuiDragDropContext>
+    </EuiSplitPanel.Inner>
+  ) : (
+    <span ref={virtualizedListWrapperRef} onBlur={onBlurVirtualizedList}>
       <EuiSplitPanel.Inner paddingSize="xs" css={paddingLeftCSS.xl}>
         <FixedSizeList
           width="100%"
@@ -258,7 +323,7 @@ export const ListOptionsInput = ({
           itemCount={currentOptions.length}
           itemSize={40}
           itemData={currentOptions}
-          ref={scrollListRef}
+          ref={virtualizedScrollList}
         >
           {({ data, index, style }) => (
             <EuiFlexGroup alignItems="center" gutterSize="s" style={style}>
@@ -267,20 +332,19 @@ export const ListOptionsInput = ({
           )}
         </FixedSizeList>
       </EuiSplitPanel.Inner>
-    );
+    </span>
+  );
 
   return (
-    <EuiFormRow
-      helpText={helpText}
-      error={error}
-      isInvalid={isInvalid}
-      fullWidth
-      describedByIds={idAria ? [idAria] : undefined}
-      label={label}
-      {...rest}
-    >
+    <EuiFormRow fullWidth describedByIds={idAria ? [idAria] : undefined} label={label}>
       <EuiSplitPanel.Outer hasBorder>
         {listBody}
+        <SuggestionsBox
+          innerRef={suggestionsBoxRef}
+          suggestions={suggestions}
+          inputField$={focusedField$}
+          onChoose={onChooseSuggestion}
+        />
         {(showAddOption || showActions) && (
           <EuiSplitPanel.Inner color="subdued" paddingSize="none">
             <EuiFlexGroup>
