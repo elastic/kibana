@@ -31,6 +31,7 @@ import { FixedSizeList } from 'react-window';
 import { v4 as uuidv4, NIL as UUID_NIL } from 'uuid';
 import { BehaviorSubject, debounceTime } from 'rxjs';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { omit } from 'lodash';
 import { SuggestionsBox } from './suggestions_box';
 
 interface Props {
@@ -76,6 +77,8 @@ export const ListOptionsInput = ({
 
   const virtualizedScrollList = useRef<FixedSizeList>(null);
   const virtualizedListWrapperRef = useRef<HTMLSpanElement>(null);
+  const virtualizedScrollListOuterRef = useRef<HTMLDivElement>(null);
+  const standardListWrapperRef = useRef<HTMLDivElement>(null);
   const suggestionsBoxRef = useRef<HTMLDivElement>(null);
 
   // Virtualized mode is very picky about re-rendering, and the normal react ref lifecycle ends up causing a lot of problems
@@ -119,7 +122,7 @@ export const ListOptionsInput = ({
       }
       if (freshOption) setFreshOption(null);
       const newOptions = currentOptions.map((option) =>
-        key === option.value ? { value: key, text } : option
+        key === option.value ? { value: key, text } : omit(option, 'isFresh')
       );
       onChange(newOptions);
     },
@@ -137,7 +140,7 @@ export const ListOptionsInput = ({
   const commitVirtualizedChanges = useCallback(() => {
     const newOptions = currentOptions.map((option) => {
       const newText = virtualizedChangesSet.current.get(String(option.value));
-      return newText ? { ...option, text: newText } : option;
+      return newText ? { ...option, text: newText } : omit(option, 'isFresh');
     });
     virtualizedChangesSet.current.clear();
     onChange(newOptions);
@@ -282,6 +285,7 @@ export const ListOptionsInput = ({
         max-height: ${MAX_HEIGHT}px;
         overflow-y: auto;
       `}
+      panelRef={standardListWrapperRef}
     >
       <EuiDragDropContext onDragEnd={onDragEnd}>
         <EuiDroppable droppableId="OPTIONS_DROPPABLE_AREA" spacing="s">
@@ -325,6 +329,7 @@ export const ListOptionsInput = ({
           itemSize={40}
           itemData={currentOptions}
           ref={virtualizedScrollList}
+          outerRef={virtualizedScrollListOuterRef}
         >
           {({ data, index, style }) => (
             <EuiFlexGroup alignItems="center" gutterSize="s" style={style}>
@@ -345,6 +350,9 @@ export const ListOptionsInput = ({
           suggestions={suggestions}
           inputField$={focusedField$}
           onChoose={onChooseSuggestion}
+          scrollListRef={
+            renderingInVirtualizedMode ? virtualizedScrollListOuterRef : standardListWrapperRef
+          }
         />
         {(showAddOption || showActions) && (
           <EuiSplitPanel.Inner color="subdued" paddingSize="none">

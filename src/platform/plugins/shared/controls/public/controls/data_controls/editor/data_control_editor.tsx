@@ -244,7 +244,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
 
   // ADD FIELD DETECTION INFO CALLOUT
   // CACHE FIRST ESQL VARIABLE OPTION
-  // SUGGESTIONS
 
   useEffect(() => {
     // Set the default input mode to ES|QL for showESQLOnly editors
@@ -421,7 +420,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     ]
   );
 
-  const inputStatus = useMemo(() => {
+  const valuesSourceStatus = useMemo(() => {
     if (isDSLValuesSource) {
       const hasFieldName = !!editorState.fieldName;
       const hasSelectedDataView = !!selectedDataView;
@@ -651,16 +650,27 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 color="primary"
                 disabled={
                   !(
-                    inputStatus === EditorComponentStatus.COMPLETE &&
+                    valuesSourceStatus === EditorComponentStatus.COMPLETE &&
                     outputStatus === EditorComponentStatus.COMPLETE &&
                     controlConfigStatus === EditorComponentStatus.COMPLETE
                   )
                 }
                 onClick={() => {
-                  onSave(
-                    { ...editorState, title: editorState.title ?? defaultPanelTitle },
-                    selectedControlType!
-                  );
+                  const state = { ...editorState, title: editorState.title ?? defaultPanelTitle };
+                  if (!isDSLValuesSource && isESQLOutputMode) {
+                    delete state.fieldName;
+                    delete state.dataViewId;
+                  }
+                  if (!isESQLOutputMode) {
+                    delete state.esqlVariableString;
+                  }
+                  if (!isESQLValuesSource) {
+                    delete state.esqlQuery;
+                  }
+                  if (!isStaticValuesSource) {
+                    delete state.staticValues;
+                  }
+                  onSave(state, selectedControlType!);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

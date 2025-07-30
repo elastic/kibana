@@ -17,9 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { Reducer, useCallback, useEffect, useReducer, useRef } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import React, { Reducer, useCallback, useEffect, useReducer, useState } from 'react';
+import { Subject, debounceTime } from 'rxjs';
 
 /**
  * EuiInputPopover is not compatible with react-window virtualized items, so use this custom
@@ -30,6 +29,7 @@ interface Props {
   inputField$: PublishingSubject<HTMLInputElement | null>;
   suggestions: string[];
   onChoose: (s: string) => void;
+  scrollListRef: React.RefObject<HTMLElement>;
 }
 
 const SET_NEXT_SUGGESTION = 'SET_NEXT_SUGGESTION';
@@ -67,7 +67,13 @@ const filterSuggestionsByInputFieldValue = (suggestions: string[], inputFieldVal
   return [...inputFirstSuggestions.sort(), ...otherSuggestions.sort()];
 };
 
-export const SuggestionsBox = ({ suggestions, onChoose, innerRef, inputField$ }: Props) => {
+export const SuggestionsBox = ({
+  suggestions,
+  onChoose,
+  innerRef,
+  scrollListRef,
+  inputField$,
+}: Props) => {
   const [{ activeSuggestionIndex, displayedSuggestions }, dispatch] = useReducer<
     Reducer<SuggestionsBoxState, SuggestionsBoxAction>
   >(
@@ -105,7 +111,7 @@ export const SuggestionsBox = ({ suggestions, onChoose, innerRef, inputField$ }:
           };
         case CLEAR_STATE:
           return {
-            displayedSuggestions: suggestions,
+            displayedSuggestions: [],
             inputFieldValue: '',
             activeSuggestionIndex: null,
           };
@@ -121,13 +127,10 @@ export const SuggestionsBox = ({ suggestions, onChoose, innerRef, inputField$ }:
     }
   );
 
-  // Make the current keyboard-active suggestion available to the keyboard listener functions
-  // which don't reinitialize on state change
-  const activeSuggestionValue = useRef<string | null>(null);
-  useEffect(() => {
-    if (activeSuggestionIndex === null) activeSuggestionValue.current = null;
-    else activeSuggestionValue.current = displayedSuggestions[activeSuggestionIndex];
-  }, [activeSuggestionIndex, displayedSuggestions]);
+  const publishedField = useStateFromPublishingSubject(inputField$);
+  const [fieldRect, setFieldRect] = useState<DOMRect | undefined>(
+    publishedField?.getBoundingClientRect()
+  );
 
   const setInputFieldValue = useCallback(
     (value: string) => dispatch({ type: SET_INPUT_FIELD_VALUE, value }),
@@ -135,13 +138,13 @@ export const SuggestionsBox = ({ suggestions, onChoose, innerRef, inputField$ }:
   );
   const onChooseSuggestion = useCallback(
     (suggestion: string) => {
-      if (!inputField.current) return;
-      inputField.current.value = suggestion;
-      inputField.current.focus();
+      if (!publishedField) return;
+      publishedField.value = suggestion;
+      publishedField.focus();
       onChoose(suggestion);
       dispatch({ type: SET_INPUT_FIELD_VALUE, value: suggestion });
     },
-    [onChoose]
+    [onChoose, publishedField]
   );
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -152,65 +155,88 @@ export const SuggestionsBox = ({ suggestions, onChoose, innerRef, inputField$ }:
         } else if (e.key === 'ArrowUp') {
           dispatch({ type: SET_PREV_SUGGESTION });
         }
-      } else if (e.key === 'Enter' && activeSuggestionValue.current) {
+      } else if (
+        e.key === 'Enter' &&
+        activeSuggestionIndex !== null &&
+        displayedSuggestions[activeSuggestionIndex]
+      ) {
         e.preventDefault();
-        onChooseSuggestion(activeSuggestionValue.current);
+        onChooseSuggestion(displayedSuggestions[activeSuggestionIndex]);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        dispatch({ type: CLEAR_STATE });
       }
     },
-    [onChooseSuggestion]
+    [activeSuggestionIndex, displayedSuggestions, onChooseSuggestion]
   );
 
-  // Track the input field in a subscription for rendering
-  const publishedField = useStateFromPublishingSubject(inputField$);
-  // Track the input field in a ref to handle binding and unbinding keyboard handlers when it changes
-  const inputField = useRef<HTMLInputElement | null>(publishedField);
-  const keyDownListener = useRef(onKeyDown);
-
+  useEffect(() => {
+    setFieldRect(publishedField?.getBoundingClientRect());
+  }, [publishedField]);
   useEffect(() => {
     // When keydown listener changes, unbind the previous and rebind the new one
-    const nextKeyDownListener = onKeyDown;
-    if (inputField.current) {
-      inputField.current.removeEventListener('keydown', keyDownListener.current);
-      inputField.current.addEventListener('keydown', nextKeyDownListener);
+    if (publishedField) {
+      const keyUpEvent$ = new Subject<KeyboardEvent>();
+      // Debounce the keydown event and update the stored input field value; debounce is used to prevent race conditions
+      // e.g. pressing the Shift key and then typing a letter
+      // Binding this behavior to the keydown event doesn't work correctly outside of virtualized mode due to re-rendering
+      const debouncedKeydownSubscription = keyUpEvent$.pipe(debounceTime(10)).subscribe((e) => {
+        if (!['Tab', 'Escape'].includes(e.key)) setInputFieldValue(publishedField.value);
+      });
+      const keyUpListener = (e: KeyboardEvent) => {
+        keyUpEvent$.next(e);
+      };
+      publishedField.addEventListener('keydown', onKeyDown);
+      publishedField.addEventListener('keyup', keyUpListener);
+      return () => {
+        publishedField.removeEventListener('keydown', onKeyDown);
+        publishedField.removeEventListener('keyup', keyUpListener);
+
+        debouncedKeydownSubscription.unsubscribe();
+      };
     }
-    keyDownListener.current = onKeyDown;
-  }, [onKeyDown]);
+  }, [onKeyDown, publishedField, setInputFieldValue]);
+  useEffect(() => {
+    if (publishedField) {
+      const positionChange$ = new Subject();
+      const positionChangeSubscription = positionChange$
+        .pipe(debounceTime(100))
+        .subscribe(() => setFieldRect(publishedField.getBoundingClientRect()));
 
-  useEffectOnce(() => {
-    const keyUp$ = new BehaviorSubject<Event | null>(null);
-    const keyUpListener = (e: Event) => {
-      keyUp$.next(e);
-    };
+      const scrollListener = (e: Event) => {
+        if (
+          (e.target as HTMLElement).contains(publishedField) ||
+          e.target === scrollListRef.current
+        ) {
+          setFieldRect(undefined);
+          positionChange$.next(null);
+        }
+      };
+      const resizeListener = () => {
+        setFieldRect(undefined);
+        positionChange$.next(null);
+      };
 
-    const keyUpSubscription = keyUp$.pipe(debounceTime(10)).subscribe((e) => {
-      if (!e || !inputField.current) return;
-      setInputFieldValue(inputField.current.value);
-    });
-
-    const inputFieldSubscription = inputField$.pipe(debounceTime(0)).subscribe((field) => {
-      if (inputField.current) {
-        inputField.current.removeEventListener('keydown', keyDownListener.current);
-        inputField.current.removeEventListener('keyup', keyUpListener);
-      }
-      dispatch({ type: CLEAR_STATE });
-      inputField.current = field;
-      if (field) {
-        field.addEventListener('keydown', keyDownListener.current);
-        field.addEventListener('keyup', keyUpListener);
-        setInputFieldValue(field.value);
-      }
-    });
-    return () => {
-      inputField.current?.removeEventListener('keydown', keyDownListener.current);
-      inputField.current?.removeEventListener('keyup', keyUpListener);
-      inputFieldSubscription.unsubscribe();
-      keyUpSubscription.unsubscribe();
-    };
-  });
+      document.addEventListener('scroll', scrollListener, { capture: true });
+      window.addEventListener('resize', resizeListener);
+      return () => {
+        document.removeEventListener('scroll', scrollListener, { capture: true });
+        window.removeEventListener('resize', resizeListener);
+        positionChangeSubscription.unsubscribe();
+      };
+    }
+    setFieldRect(undefined);
+  }, [scrollListRef, publishedField]);
+  useEffect(() => {
+    dispatch({ type: CLEAR_STATE });
+    if (publishedField) {
+      setInputFieldValue(publishedField.value);
+    }
+  }, [publishedField, setInputFieldValue]);
 
   const { euiTheme } = useEuiTheme();
-  if (!publishedField || inputField.current !== publishedField) return null;
-  const { top, left, width, height } = publishedField.getBoundingClientRect();
+  if (!publishedField || !fieldRect || displayedSuggestions.length === 0) return null;
+  const { top, left, width, height } = fieldRect;
   return (
     <EuiPortal>
       <EuiPanel
