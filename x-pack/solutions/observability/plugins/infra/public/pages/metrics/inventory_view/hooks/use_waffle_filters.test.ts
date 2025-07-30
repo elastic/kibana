@@ -46,7 +46,7 @@ let PREFILL: Record<string, any> = {};
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     inventoryPrefill: {
-      setFilterQuery(filterQuery: string) {
+      setKuery(filterQuery: string) {
         PREFILL = { filterQuery };
       },
     },
