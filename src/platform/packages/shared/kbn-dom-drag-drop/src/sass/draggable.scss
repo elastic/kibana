@@ -1,5 +1,21 @@
 @import './drag_drop_mixins';
 
+// Draggable item
+.domDraggable {
+  cursor: grab;
+  @include mixinDomDragDrop;
+  @include mixinDomDraggableHover;
+
+  // Include a possible nested button like when using FieldButton
+  & .kbnFieldButton__button,
+  & .euiLink {
+    cursor: grab;
+  }
+
+  &:focus {
+    @include euiFocusRing;
+  }
+}
 
 .domDraggable--reorderable {
   transform: translateY(0);
