@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+import type {
+  CircuitBreaker,
+  CircuitBreakerResult,
+} from '../health_diagnostic_circuit_breakers.types';
 
-// helper function to create a success result
-export function success(): CircuitBreakerResult {
-  return { valid: true };
-}
+export abstract class BaseCircuitBreaker implements CircuitBreaker {
+  abstract validate(): Promise<CircuitBreakerResult>;
+  abstract stats(): unknown;
+  abstract validationIntervalMs(): number;
 
-// helper function to create a failure result
-export function failure(message: string): CircuitBreakerResult {
-  return { valid: false, message };
+  // helper function to create a success result
+  protected success(): CircuitBreakerResult {
+    return { circuitBreaker: this.constructor.name, valid: true };
+  }
+
+  // helper function to create a failure result
+  protected failure(message: string): CircuitBreakerResult {
+    return { circuitBreaker: this.constructor.name, valid: false, message };
+  }
 }

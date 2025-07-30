@@ -6,16 +6,14 @@
  */
 
 import { type EventLoopUtilization, performance } from 'perf_hooks';
-import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
-} from '../health_diagnostic_circuit_breakers.types';
-import { failure, success } from './utils';
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+import { BaseCircuitBreaker } from './utils';
 
-export class EventLoopUtilizationCircuitBreaker implements CircuitBreaker {
+export class EventLoopUtilizationCircuitBreaker extends BaseCircuitBreaker {
   private readonly startUtilization: EventLoopUtilization;
 
   constructor(private readonly config: { thresholdMillis: number; validationIntervalMs: number }) {
+    super();
     this.startUtilization = performance.eventLoopUtilization();
   }
 
@@ -25,9 +23,11 @@ export class EventLoopUtilizationCircuitBreaker implements CircuitBreaker {
     const exceeded = eventLoop.active > this.config.thresholdMillis;
 
     if (exceeded) {
-      return failure(`Event loop utilization exceeded: ${eventLoop.active.toString()}, stopping`);
+      return this.failure(
+        `Event loop utilization exceeded: ${eventLoop.active.toString()}, stopping`
+      );
     }
-    return success();
+    return this.success();
   }
 
   stats(): unknown {

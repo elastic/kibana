@@ -7,17 +7,15 @@
 
 import { performance } from 'perf_hooks';
 
-import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
-} from '../health_diagnostic_circuit_breakers.types';
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
 
-import { failure, success } from './utils';
+import { BaseCircuitBreaker } from './utils';
 
-export class TimeoutCircuitBreaker implements CircuitBreaker {
+export class TimeoutCircuitBreaker extends BaseCircuitBreaker {
   private readonly started: number;
 
   constructor(private readonly config: { timeoutMillis: number; validationIntervalMs: number }) {
+    super();
     this.started = performance.now();
   }
 
@@ -25,9 +23,9 @@ export class TimeoutCircuitBreaker implements CircuitBreaker {
     const now = performance.now();
 
     if (now > this.started + this.config.timeoutMillis) {
-      return failure(`Timeout exceeded: ${this.config.timeoutMillis.toString()} ms`);
+      return this.failure(`Timeout exceeded: ${this.config.timeoutMillis.toString()} ms`);
     }
-    return success();
+    return this.success();
   }
 
   stats(): unknown {

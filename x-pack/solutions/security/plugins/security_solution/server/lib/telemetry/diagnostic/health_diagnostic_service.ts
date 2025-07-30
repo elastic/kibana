@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { randomUUID } from 'crypto';
+import { schema } from '@kbn/config-schema';
+import { bufferCount, from, mergeMap, take, tap } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { schema } from '@kbn/config-schema';
 import type {
   ElasticsearchClient,
   LogMeta,
@@ -20,16 +20,20 @@ import type {
   AnalyticsServiceStart,
 } from '@kbn/core/server';
 import {
-  Action,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryResult,
   type HealthDiagnosticQueryStats,
   type HealthDiagnosticService,
   type HealthDiagnosticServiceSetup,
   type HealthDiagnosticServiceStart,
 } from './health_diagnostic_service.types';
-import { fieldNames, nextExecution, parseDiagnosticQueries } from './health_diagnostic_utils';
-import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
+import {
+  emptyStat as queryStat,
+  fieldNames,
+  shouldExecute as isDueForExecution,
+  parseDiagnosticQueries,
+  applyFilterlist,
+} from './health_diagnostic_utils';
+import { type CircuitBreaker, ValidationError } from './health_diagnostic_circuit_breakers.types';
 import type { CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import {
@@ -58,10 +62,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
 
-  // TODO: allow external configuration
-  private readonly circuitBreakersConfig = {
+  // TODO: implement external configuration
+  private readonly healthDiagnosticConfig = {
+    query: {
+      maxDocuments: 100_000_000,
+      bufferSize: 10_000,
+    },
     rssGrowth: {
-      maxRssGrowthPercent: 20,
+      maxRssGrowthPercent: 40,
       validationIntervalMs: 200,
     },
     timeout: {
@@ -69,7 +77,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       validationIntervalMs: 50,
     },
     eventLoopUtilization: {
-      thresholdMillis: 500,
+      thresholdMillis: 1000,
       validationIntervalMs: 50,
     },
     eventLoopDelay: {
@@ -80,7 +88,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       maxJvmHeapUsedPercent: 80,
       maxCpuPercent: 80,
       expectedClusterHealth: ['green', 'yellow'],
-      validationIntervalMs: 30,
+      validationIntervalMs: 1000,
     },
   };
 
@@ -90,13 +98,13 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   public setup(setup: HealthDiagnosticServiceSetup) {
-    this.logger.info('Setting up health diagnostic service');
+    this.logger.debug('Setting up health diagnostic service');
 
     this.registerTask(setup.taskManager);
   }
 
   public async start(start: HealthDiagnosticServiceStart) {
-    this.logger.info('Starting health diagnostic service');
+    this.logger.debug('Starting health diagnostic service');
 
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
@@ -108,93 +116,112 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async runHealthDiagnosticQueries(
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]> {
-    const statistics: HealthDiagnosticQueryStats[] = [];
-    const toDate = new Date();
+    this.logger.debug('Running health diagnostic task');
 
-    this.logger.info('Running health diagnostic task');
+    const queriesToRun = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
+    const statistics: HealthDiagnosticQueryStats[] = [];
 
     if (this.queryExecutor === undefined) {
       this.logger.warn('CircuitBreakingQueryExecutor service is not started');
       return statistics;
     }
 
-    const healthQueries = await this.healthQueries();
-
-    const queriesToRun = healthQueries.filter((query) => {
-      const { name, scheduleCron, enabled } = query;
-      const lastExecution = new Date(lastExecutionByQuery[name] ?? 0);
-
-      return nextExecution(lastExecution, toDate, scheduleCron) !== undefined && (enabled ?? true);
-    });
-
-    this.logger.info('About to run health diagnostic queries', {
-      totalQueries: healthQueries.length,
+    this.logger.debug('About to run health diagnostic queries', {
       queriesToRun: queriesToRun.length,
     } as LogMeta);
 
     for (const query of queriesToRun) {
+      const now = new Date();
       const circuitBreakers = this.buildCircuitBreakers();
       const options = { query, circuitBreakers };
 
-      const queryStats: HealthDiagnosticQueryStats = {
-        name: query.name,
-        started: toDate.toISOString(),
-        traceId: randomUUID(),
-        finished: new Date().toISOString(),
-        numDocs: 0,
-        passed: false,
-        fieldNames: [],
-      };
+      const query$ = this.queryExecutor.search(options);
 
-      try {
-        const data: unknown[] = await this.queryExecutor.search(options);
+      const stats = await new Promise<HealthDiagnosticQueryStats>((resolve) => {
+        const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now);
+        let currentPage = 0;
 
-        queryStats.numDocs += data.length;
-        queryStats.fieldNames = fieldNames(data);
-        queryStats.finished = new Date().toISOString();
-        const queryResult: HealthDiagnosticQueryResult = {
-          name: query.name,
-          queryId: query.id,
-          traceId: queryStats.traceId,
-          page: 0,
-          data,
-        };
+        query$
+          .pipe(
+            // cap the result set to the max number of documents
+            take(this.healthDiagnosticConfig.query.maxDocuments),
 
-        this.logger.info('Sending query result EBT', {
-          queryName: query.name,
-          traceId: queryStats.traceId,
-        } as LogMeta);
+            // get the fields names, only once (assume all docs have the same structure)
+            tap((doc) => {
+              if (queryStats.fieldNames.length === 0) {
+                queryStats.fieldNames = fieldNames(doc);
+              }
+            }),
 
-        const filtered = query.filterlist
-          ? await this.applyFilterlist(queryResult, query.filterlist)
-          : queryResult;
+            // publish N documents in the same EBT
+            bufferCount(this.healthDiagnosticConfig.query.bufferSize),
 
-        this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, filtered);
+            // apply filterlist
+            mergeMap((result) => from(applyFilterlist(result, query.filterlist, this.salt)))
+          )
+          .subscribe({
+            next: (data) => {
+              this.logger.debug('Sending query result EBT', {
+                queryName: query.name,
+                traceId: queryStats.traceId,
+              } as LogMeta);
 
-        queryStats.passed = true;
-      } catch (error) {
-        queryStats.failure = error.message;
-        this.logger.error('Error running query', { error });
-      }
+              this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, {
+                name: query.name,
+                queryId: query.id,
+                traceId: queryStats.traceId,
+                page: currentPage++,
+                data,
+              });
 
-      queryStats.circuitBreakers = circuitBreakers.reduce((acc, cb) => {
-        acc[cb.constructor.name] = cb.stats();
-        return acc;
-      }, {} as Record<string, unknown>);
+              queryStats.numDocs += data.length;
+            },
+            error: (error) => {
+              const failure = {
+                message: error.message,
+                reason: error instanceof ValidationError ? error.result : undefined,
+              };
+              this.logger.error('Error running query', { error });
+              resolve({
+                ...queryStats,
+                failure,
+                finished: new Date().toISOString(),
+                circuitBreakers: this.circuitBreakersStats(circuitBreakers),
+                passed: false,
+              });
+            },
+            complete: () => {
+              resolve({
+                ...queryStats,
+                finished: new Date().toISOString(),
+                circuitBreakers: this.circuitBreakersStats(circuitBreakers),
+                passed: true,
+              });
+            },
+          });
+      });
 
-      this.logger.info('Query executed. Sending query stats EBT', {
+      this.logger.debug('Query executed. Sending query stats EBT', {
         queryName: query.name,
-        traceId: queryStats.traceId,
-        queryStats,
+        traceId: stats.traceId,
+        statistics: stats,
       } as LogMeta);
 
-      this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, queryStats);
-      statistics.push(queryStats);
+      this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
+
+      statistics.push(stats);
     }
 
-    this.logger.info('Finished running health diagnostic task', { statistics } as LogMeta);
+    this.logger.debug('Finished running health diagnostic task', { statistics } as LogMeta);
 
     return statistics;
+  }
+
+  private circuitBreakersStats(circuitBreakers: CircuitBreaker[]): Record<string, unknown> {
+    return circuitBreakers.reduce((acc, cb) => {
+      acc[cb.constructor.name] = cb.stats();
+      return acc;
+    }, {} as Record<string, unknown>);
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
@@ -262,11 +289,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   private buildCircuitBreakers(): CircuitBreaker[] {
     return [
-      new RssGrowthCircuitBreaker(this.circuitBreakersConfig.rssGrowth),
-      new TimeoutCircuitBreaker(this.circuitBreakersConfig.timeout),
-      new EventLoopUtilizationCircuitBreaker(this.circuitBreakersConfig.eventLoopUtilization),
-      new EventLoopDelayCircuitBreaker(this.circuitBreakersConfig.eventLoopDelay),
-      new ElasticsearchCircuitBreaker(this.circuitBreakersConfig.elasticsearch, this.esClient()),
+      new RssGrowthCircuitBreaker(this.healthDiagnosticConfig.rssGrowth),
+      new TimeoutCircuitBreaker(this.healthDiagnosticConfig.timeout),
+      new EventLoopUtilizationCircuitBreaker(this.healthDiagnosticConfig.eventLoopUtilization),
+      new EventLoopDelayCircuitBreaker(this.healthDiagnosticConfig.eventLoopDelay),
+      new ElasticsearchCircuitBreaker(this.healthDiagnosticConfig.elasticsearch, this.esClient()),
     ];
   }
 
@@ -281,7 +308,24 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     if (!this.analytics) {
       throw Error('analytics is unavailable');
     }
-    this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
+    try {
+      this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
+    } catch (error) {
+      this.logger.warn('Error sending EBT', { error });
+    }
+  }
+
+  private async getRunnableHealthQueries(
+    lastExecutionByQuery: Record<string, number>,
+    now: Date
+  ): Promise<HealthDiagnosticQuery[]> {
+    const healthQueries = await this.healthQueries();
+    return healthQueries.filter((query) => {
+      const { name, scheduleCron, enabled = false } = query;
+      const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
+
+      return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
+    });
   }
 
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
@@ -292,65 +336,5 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.warn('Error getting health diagnostic queries', { error });
       return [];
     }
-  }
-
-  private async applyFilterlist(
-    queryResult: HealthDiagnosticQueryResult,
-    rules: Record<string, Action>
-  ): Promise<HealthDiagnosticQueryResult> {
-    const filteredResult: unknown[] = [];
-    const documents = queryResult.data;
-
-    const applyFilterToDoc = async (doc: unknown): Promise<Record<string, unknown>> => {
-      const filteredDoc: Record<string, unknown> = {};
-      for (const path of Object.keys(rules)) {
-        const keys = path.split('.');
-        let src = doc as Record<string, unknown>;
-        let dst = filteredDoc;
-
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
-
-          if (!Object.hasOwn(src, key)) break;
-
-          if (i === keys.length - 1) {
-            const value = src[key];
-            dst[key] = rules[path] === Action.MASK ? await this.maskValue(String(value)) : value;
-          } else {
-            dst[key] ??= {};
-            src = src[key] as Record<string, unknown>;
-            dst = dst[key] as Record<string, unknown>;
-          }
-        }
-      }
-      return filteredDoc;
-    };
-
-    for (const doc of documents) {
-      if (Array.isArray(doc)) {
-        const docs = doc as unknown[];
-        const result = await Promise.all(
-          docs.map((d) => {
-            return applyFilterToDoc(d);
-          })
-        );
-        filteredResult.push(result);
-      } else {
-        filteredResult.push(await applyFilterToDoc(doc));
-      }
-    }
-
-    return {
-      ...queryResult,
-      data: filteredResult as unknown[],
-    };
-  }
-
-  private async maskValue(value: string): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(this.salt + value);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 }

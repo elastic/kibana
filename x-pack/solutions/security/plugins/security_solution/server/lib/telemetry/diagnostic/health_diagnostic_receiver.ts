@@ -5,14 +5,31 @@
  * 2.0.
  */
 
-import { filter, finalize, merge, type Observable, Subject, takeUntil, tap, timer } from 'rxjs';
+import {
+  mergeMap,
+  finalize,
+  expand,
+  filter,
+  EMPTY,
+  from,
+  merge,
+  type Observable,
+  takeUntil,
+  map,
+  timer,
+} from 'rxjs';
 import * as rx from 'rxjs';
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
-import type { EqlSearchRequest, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { QueryConfig, CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
+  EqlSearchRequest,
+  SearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryConfig, CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
+import {
+  ValidationError,
+  type CircuitBreaker,
+  type CircuitBreakerResult,
 } from './health_diagnostic_circuit_breakers.types';
 import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
@@ -25,182 +42,134 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     this.logger = newTelemetryLogger(logger.get('circuit-breaking-query-executor'));
   }
 
-  async search<T>(queryConfig: QueryConfig): Promise<T[]> {
-    const { query, circuitBreakers } = queryConfig;
-
-    const upstream$ = new Subject<T[]>();
-    const stop$ = new Subject<void>();
+  search<T>({ query, circuitBreakers }: QueryConfig): Observable<T> {
+    const controller = new AbortController();
+    const abortSignal = controller.signal;
+    const circuitBreakers$ = this.configureCircuitBreakers(circuitBreakers, controller);
 
     switch (query.type) {
       case QueryType.DSL:
-        this.streamDsl(query, upstream$, stop$).catch((err: unknown) => {
-          upstream$.error(err);
-        });
-        break;
+        return this.streamDSL<T>(query, abortSignal).pipe(takeUntil(circuitBreakers$));
       case QueryType.EQL:
-        this.streamEql(query, upstream$, stop$).catch((err: unknown) => {
-          upstream$.error(err);
-        });
-        break;
+        return this.streamEql<T>(query, abortSignal).pipe(takeUntil(circuitBreakers$));
       case QueryType.ESQL:
-        this.streamEsql(query, upstream$, stop$).catch((err: unknown) => {
-          upstream$.error(err);
-        });
-        break;
+        return this.streamEsql<T>(query, abortSignal).pipe(takeUntil(circuitBreakers$));
       default: {
         const exhaustiveCheck: never = query.type;
         throw new Error(`Unhandled QueryType: ${exhaustiveCheck}`);
       }
     }
+  }
 
-    return rx.firstValueFrom(
-      upstream$.pipe(
-        takeUntil(this.configureCircuitBreakers(circuitBreakers)),
-        finalize(() => {
-          stop$.next();
-        })
-      )
+  streamEsql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
+    const regex = /^[\s\r\n]*FROM/;
+
+    return from(this.indicesFor(diagnosticQuery)).pipe(
+      mergeMap((index) => {
+        const query = regex.test(diagnosticQuery.query)
+          ? diagnosticQuery.query
+          : `FROM ${index} | ${diagnosticQuery.query}`;
+
+        return from(this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()).pipe(
+          mergeMap((resp) => {
+            return resp.records.map((r) => r as T);
+          })
+        );
+      })
     );
   }
 
-  async streamDsl<T>(
-    diagnosticQuery: HealthDiagnosticQuery,
-    collector$: Subject<T[]>,
-    stop$: Subject<void>
-  ): Promise<void> {
-    const controller = new AbortController();
-    const abortSignal = controller.signal;
-    const index = await this.indexFor(diagnosticQuery);
-
-    if (index.length === 0) {
-      this.logger.warn('No indices found for the query', {
-        queryName: diagnosticQuery.name,
-      } as LogMeta);
-      collector$.next([]);
-      return;
-    }
-
-    const stopSub: rx.Subscription = stop$.subscribe(() => {
-      controller.abort();
-    });
-
-    const request: SearchRequest = JSON.parse(diagnosticQuery.query) as SearchRequest;
-    try {
-      const response = await this.client.search(
-        {
+  streamEql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
+    return from(this.indicesFor(diagnosticQuery)).pipe(
+      mergeMap((index) => {
+        const request: EqlSearchRequest = {
           index,
-          ...request,
-        },
-        { signal: abortSignal }
-      );
+          query: diagnosticQuery.query,
+          size: diagnosticQuery.size,
+        };
 
-      if (response.aggregations) {
-        collector$.next([response.aggregations as T]);
-      } else if (response.hits.hits.length > 0) {
-        const hits = response.hits.hits;
-        const data = hits.flatMap((h) => (h._source != null ? ([h._source] as T[]) : []));
-        collector$.next(data);
-      } else {
-        this.logger.warn('Neither aggregations nor hits found in the response for query', {
-          query: diagnosticQuery.name,
-        } as LogMeta);
-        collector$.next([]);
-      }
-    } finally {
-      stopSub.unsubscribe();
-    }
+        return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
+          mergeMap((resp) => {
+            if (resp.hits.events) {
+              return resp.hits.events.map((h) => h._source as T);
+            } else if (resp.hits.sequences) {
+              return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
+            } else {
+              this.logger.warn(
+                '>> Neither hits.events nor hits.sequences found in the response for query',
+                { queryName: diagnosticQuery.name } as LogMeta
+              );
+              return [];
+            }
+          })
+        );
+      })
+    );
   }
 
-  async streamEsql<T>(
+  streamDSL<T>(
     diagnosticQuery: HealthDiagnosticQuery,
-    collector$: Subject<T[]>,
-    stop$: Subject<void>
-  ): Promise<void> {
-    const controller = new AbortController();
-    const abortSignal = controller.signal;
-    const regex = /^[\s\r\n]*FROM/;
-    const index = await this.indexFor(diagnosticQuery);
+    abortSignal: AbortSignal,
+    pitKeepAlive: string = '1m'
+  ): Observable<T> {
+    let pitId: string;
+    let searchAfter: SortResults | undefined;
+    const pageSize = diagnosticQuery.size ?? 10000;
 
-    if (index.length === 0) {
-      this.logger.warn('No indices found for the query', {
-        queryName: diagnosticQuery.name,
-      } as LogMeta);
-      collector$.next([]);
-      return;
-    }
+    const query: SearchRequest = JSON.parse(diagnosticQuery.query) as SearchRequest;
 
-    const stopSub: rx.Subscription = stop$.subscribe(() => {
-      controller.abort();
-    });
-
-    const query = regex.test(diagnosticQuery.query)
-      ? diagnosticQuery.query
-      : `FROM ${index.join(',')} | ${diagnosticQuery.query}`;
-
-    try {
-      const response = await this.client.helpers
-        .esql({ query }, { signal: abortSignal })
-        .toRecords();
-
-      collector$.next(response.records as T[]);
-    } finally {
-      stopSub.unsubscribe();
-    }
-  }
-
-  async streamEql<T>(
-    diagnosticQuery: HealthDiagnosticQuery,
-    collector$: Subject<T[]>,
-    stop$: Subject<void>
-  ): Promise<void> {
-    const controller = new AbortController();
-    const abortSignal = controller.signal;
-    const index = await this.indexFor(diagnosticQuery);
-
-    if (index.length === 0) {
-      this.logger.warn('No indices found for the query', {
-        queryName: diagnosticQuery.name,
-      } as LogMeta);
-      collector$.next([]);
-      return;
-    }
-
-    const stopSub: rx.Subscription = stop$.subscribe(() => {
-      controller.abort();
-    });
-    try {
-      const request: EqlSearchRequest = {
-        index,
-        query: diagnosticQuery.query,
+    const fetchPage = () => {
+      const paginatedRequest: SearchRequest = {
+        size: pageSize,
+        sort: [{ _shard_doc: 'asc' }],
+        search_after: searchAfter,
+        pit: { id: pitId, keep_alive: pitKeepAlive },
+        ...query,
       };
+      return this.client.search<T>(paginatedRequest, { signal: abortSignal });
+    };
 
-      const response = await this.client.eql.search(request, { signal: abortSignal });
+    return from(this.indicesFor(diagnosticQuery)).pipe(
+      mergeMap((index) => from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }))),
 
-      if (response.hits.events) {
-        const data = response.hits.events.flatMap((h) =>
-          h._source != null ? ([h._source] as T[]) : []
-        );
-        collector$.next(data);
-      } else if (response.hits.sequences) {
-        const data = response.hits.sequences.map((seq) => {
-          return seq.events.flatMap((h) =>
-            h._source != null ? ([h._source] as unknown[]) : []
-          ) as T;
+      map((res) => res.id),
+
+      mergeMap((id) => {
+        pitId = id;
+        return from(fetchPage());
+      }),
+      expand((searchResponse) => {
+        const hits = searchResponse.hits.hits;
+        const aggrs = searchResponse.aggregations;
+
+        if (aggrs || hits.length === 0) {
+          return EMPTY;
+        }
+
+        searchAfter = hits[hits.length - 1].sort;
+        return from(fetchPage());
+      }),
+
+      mergeMap((searchResponse) => {
+        if (searchResponse.aggregations) {
+          return [searchResponse.aggregations as T];
+        } else {
+          return searchResponse.hits.hits.map((h) => h._source as T);
+        }
+      }),
+
+      finalize(() => {
+        this.client.closePointInTime({ id: pitId }).catch((error) => {
+          this.logger.warn('>> closePointInTime error', { error });
         });
-        collector$.next(data);
-      } else {
-        this.logger.warn(
-          '>> Neither hits.events nor hits.sequences found in the response for query',
-          { query: diagnosticQuery.name } as LogMeta
-        );
-        collector$.next([]);
-      }
-    } finally {
-      stopSub.unsubscribe();
-    }
+      })
+    );
   }
 
-  configureCircuitBreakers(circuitBreakers: CircuitBreaker[]): Observable<CircuitBreakerResult> {
+  configureCircuitBreakers(
+    circuitBreakers: CircuitBreaker[],
+    controller: AbortController
+  ): Observable<CircuitBreakerResult> {
     return merge(
       ...circuitBreakers.map((cb) =>
         timer(0, cb.validationIntervalMs()).pipe(
@@ -209,8 +178,10 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         )
       )
     ).pipe(
-      tap((result) => {
-        throw new Error(result.message);
+      map((result) => {
+        this.logger.debug('>> Circuit breaker triggered', { circuitBreaker: result } as LogMeta);
+        controller.abort();
+        throw new ValidationError(result);
       })
     );
   }
@@ -223,7 +194,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
    * @param query The health diagnostic query object.
    * @returns A Promise resolving to an array of indices.
    */
-  async indexFor(query: HealthDiagnosticQuery): Promise<string[]> {
+  async indicesFor(query: HealthDiagnosticQuery): Promise<string[]> {
     if (query.tiers === undefined) {
       this.logger.debug('No tiers defined in the query, returning index as is', {
         queryName: query.name,
@@ -241,7 +212,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         })
         .then((response) => {
           if (response.indices === undefined) {
-            this.logger.info(
+            this.logger.debug(
               'Got an empty response while explaining lifecycle. Asumming serverless.',
               {
                 index: query.index,

@@ -10,6 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CircuitBreakerResult } from './health_diagnostic_circuit_breakers.types';
 
 /**
  * Enum defining the types of actions that can be applied to data,
@@ -101,11 +102,15 @@ export interface HealthDiagnosticQuery {
   /**
    * Optional mapping of dot-separated paths to associated actions for filtering results.
    */
-  filterlist?: Record<string, Action>;
+  filterlist: Record<string, Action>;
   /**
    * Optional flag indicating whether this query is active and should be executed.
    */
   enabled?: boolean;
+  /**
+   * Query size
+   */
+  size?: number;
 }
 
 export interface HealthDiagnosticQueryResult {
@@ -123,7 +128,12 @@ export interface HealthDiagnosticQueryStats {
   traceId: string;
   numDocs: number;
   passed: boolean;
-  failure?: string;
+  failure?: HealthDiagnosticQueryFailure;
   fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
+}
+
+export interface HealthDiagnosticQueryFailure {
+  message: string;
+  reason?: CircuitBreakerResult;
 }

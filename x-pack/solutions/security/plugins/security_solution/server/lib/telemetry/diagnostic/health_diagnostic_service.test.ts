@@ -6,7 +6,7 @@
  */
 
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import { nextExecution } from './health_diagnostic_utils';
+import { shouldExecute } from './health_diagnostic_utils';
 
 describe('Security Solution - health diagnostic', () => {
   beforeEach(() => {});
@@ -38,10 +38,8 @@ describe('Security Solution - health diagnostic', () => {
       ['365d', '2025-01-31T17:00:00.000Z', '2025-12-31T17:00:00.000Z', false],
     ])(
       'adds %s to %s when endDate is %s should return %s',
-      (interval, startDate, endDate, validDate) => {
-        const next = nextExecution(new Date(startDate), new Date(endDate), interval);
-
-        expect(next !== undefined).toBe(validDate);
+      (interval, startDate, endDate, expected) => {
+        expect(shouldExecute(new Date(startDate), new Date(endDate), interval)).toBe(expected);
       }
     );
   });

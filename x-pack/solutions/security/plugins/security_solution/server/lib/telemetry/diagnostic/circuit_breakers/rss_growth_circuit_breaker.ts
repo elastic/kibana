@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
-} from '../health_diagnostic_circuit_breakers.types';
-import { failure, success } from './utils';
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+import { BaseCircuitBreaker } from './utils';
 
-export class RssGrowthCircuitBreaker implements CircuitBreaker {
+export class RssGrowthCircuitBreaker extends BaseCircuitBreaker {
   private readonly initialRss: number;
   private maxRss: number;
   private maxPercentGrowth: number;
@@ -22,6 +19,7 @@ export class RssGrowthCircuitBreaker implements CircuitBreaker {
       validationIntervalMs: number;
     }
   ) {
+    super();
     if (config.maxRssGrowthPercent < 0 || config.maxRssGrowthPercent > 100) {
       throw new Error('maxRssGrowthPercent must be between 0 and 100');
     }
@@ -39,13 +37,13 @@ export class RssGrowthCircuitBreaker implements CircuitBreaker {
     this.maxPercentGrowth = Math.max(this.maxPercentGrowth, percentGrowth);
 
     if (percentGrowth > this.config.maxRssGrowthPercent) {
-      return failure(
+      return this.failure(
         `RSS growth exceeded: ${percentGrowth.toFixed(2)}% - max allowed: ${
           this.config.maxRssGrowthPercent
         }%`
       );
     }
-    return success();
+    return this.success();
   }
 
   stats(): unknown {

@@ -933,10 +933,39 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
         _meta: { description: 'When the query finished execution.' },
       },
       failure: {
-        type: 'keyword',
+        properties: {
+          message: {
+            type: 'keyword',
+            _meta: { description: 'A high-level failure message describing the error.' },
+          },
+          reason: {
+            properties: {
+              circuitBreaker: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The name of the circuit breaker that triggered the failure.',
+                },
+              },
+              valid: {
+                type: 'boolean',
+                _meta: {
+                  description: 'Indicates whether the query execution was considered valid.',
+                },
+              },
+              message: {
+                type: 'keyword',
+                _meta: {
+                  optional: true,
+                  description:
+                    'A detailed reason or message explaining why the circuit breaker was triggered.',
+                },
+              },
+            },
+          },
+        },
         _meta: {
           optional: true,
-          description: 'Error message if the query execution failed.',
+          description: 'Details about the failure if the operation was unsuccessful.',
         },
       },
       fieldNames: {

@@ -35,6 +35,10 @@ export interface CircuitBreaker {
  */
 export interface CircuitBreakerResult {
   /**
+   * The name of the circuit breaker that was validated.
+   */
+  circuitBreaker: string;
+  /**
    * Whether the circuit is currently considered valid.
    */
   valid: boolean;
@@ -43,4 +47,11 @@ export interface CircuitBreakerResult {
    * Optional message providing context about the validation result.
    */
   message?: string;
+}
+
+export class ValidationError extends Error {
+  constructor(public result: CircuitBreakerResult) {
+    super(result.message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
 }

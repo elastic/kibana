@@ -7,15 +7,12 @@
 
 import type { IntervalHistogram } from '@kbn/core-metrics-server';
 import { type IntervalHistogram as PerfIntervalHistogram, monitorEventLoopDelay } from 'perf_hooks';
-import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
-} from '../health_diagnostic_circuit_breakers.types';
-import { failure, success } from './utils';
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+import { BaseCircuitBreaker } from './utils';
 
 export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 
-export class EventLoopDelayCircuitBreaker implements CircuitBreaker {
+export class EventLoopDelayCircuitBreaker extends BaseCircuitBreaker {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
   private lastHistogram: IntervalHistogram = {
@@ -35,6 +32,7 @@ export class EventLoopDelayCircuitBreaker implements CircuitBreaker {
   };
 
   constructor(private readonly config: { thresholdMillis: number; validationIntervalMs: number }) {
+    super();
     const monitor = monitorEventLoopDelay();
     monitor.enable();
     this.fromTimestamp = new Date();
@@ -71,12 +69,12 @@ export class EventLoopDelayCircuitBreaker implements CircuitBreaker {
     this.loopMonitor.enable();
 
     if (this.lastHistogram.mean > this.config.thresholdMillis) {
-      return failure(
+      return this.failure(
         `Event loop delay mean ${this.lastHistogram.mean.toFixed(2)}ms exceeds threshold`
       );
     }
 
-    return success();
+    return this.success();
   }
 
   stats(): unknown {

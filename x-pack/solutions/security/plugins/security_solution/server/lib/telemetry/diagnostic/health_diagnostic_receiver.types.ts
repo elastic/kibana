@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
 import { type HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
@@ -33,5 +34,5 @@ export interface CircuitBreakingQueryExecutor {
    * @param queryConfig - Configuration including the query and circuit breakers.
    * @returns An async iterable of results matching the query.
    */
-  search<T>(queryConfig: QueryConfig): Promise<T[]>;
+  search<T>(queryConfig: QueryConfig): Observable<T>;
 }

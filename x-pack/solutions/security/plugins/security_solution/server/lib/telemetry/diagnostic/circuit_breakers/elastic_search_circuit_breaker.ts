@@ -7,13 +7,10 @@
 
 import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  CircuitBreaker,
-  CircuitBreakerResult,
-} from '../health_diagnostic_circuit_breakers.types';
-import { failure, success } from './utils';
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+import { BaseCircuitBreaker } from './utils';
 
-export class ElasticsearchCircuitBreaker implements CircuitBreaker {
+export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
   private lastHealth: HealthStatus = 'green';
   private lastJvmStats: Record<string, unknown> | undefined;
   private lastCpuStats: Record<string, unknown> | undefined;
@@ -28,6 +25,7 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
     },
     private readonly client: ElasticsearchClient
   ) {
+    super();
     if (config.maxJvmHeapUsedPercent < 0 || config.maxJvmHeapUsedPercent > 100) {
       throw new Error('maxJvmHeapUsedPercent must be between 0 and 100');
     }
@@ -40,7 +38,7 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
       const status = this.lastHealth;
 
       if (!this.config.expectedClusterHealth.includes(status as string)) {
-        return failure(`Elasticsearch cluster health is ${status}`);
+        return this.failure(`Elasticsearch cluster health is ${status}`);
       }
 
       const nodesResp = await this.client.nodes.stats({
@@ -48,7 +46,7 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
       });
 
       if (!nodesResp.nodes || Object.keys(nodesResp.nodes).length === 0) {
-        return failure('No Elasticsearch nodes found');
+        return this.failure('No Elasticsearch nodes found');
       }
 
       this.lastJvmStats = {};
@@ -60,7 +58,7 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
         const lastReportedTimestamp = this.nodeTimestamps[nodeId];
 
         if (!currentTimestamp || lastReportedTimestamp === currentTimestamp) {
-          return failure(
+          return this.failure(
             `Node ${nodeId} is stale: no timestamp updates detected. Current timestamp=${currentTimestamp}, Last reported timestamp=${lastReportedTimestamp}`
           );
         }
@@ -78,18 +76,20 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
           this.lastCpuStats[nodeId] = cpuPercent;
 
           if (heapUsedPercent > this.config.maxJvmHeapUsedPercent) {
-            return failure(`Node ${nodeId} JVM heap used ${heapUsedPercent}% exceeds threshold`);
+            return this.failure(
+              `Node ${nodeId} JVM heap used ${heapUsedPercent}% exceeds threshold`
+            );
           }
 
           if (cpuPercent > this.config.maxCpuPercent) {
-            return failure(`Node ${nodeId} CPU usage ${cpuPercent}% exceeds threshold`);
+            return this.failure(`Node ${nodeId} CPU usage ${cpuPercent}% exceeds threshold`);
           }
         }
       }
 
-      return success();
+      return this.success();
     } catch (error) {
-      return failure(`Failed to get ES cluster or node stats: ${(error as Error).message}`);
+      return this.failure(`Failed to get ES cluster or node stats: ${(error as Error).message}`);
     }
   }
 
