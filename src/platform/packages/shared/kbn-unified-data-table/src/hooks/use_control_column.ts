@@ -22,7 +22,7 @@ export const useControlColumn = ({
   const { expanded, getRowByIndex } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
   const { euiTheme } = useEuiTheme();
-  const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
+  const anchorColor = euiTheme.components.dataGridRowBackgroundMarked;
 
   useEffect(() => {
     if (record?.isAnchor) {
