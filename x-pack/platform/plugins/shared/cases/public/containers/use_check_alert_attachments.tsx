@@ -13,6 +13,7 @@ import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 import type { CaseUI } from '../common/ui/types';
 import { AttachmentType } from '../../common/types/domain';
+import { useCallback } from 'react';
 
 export interface UseCheckAlertAttachmentsProps {
   cases: CaseUI[];
@@ -77,20 +78,16 @@ export const useCheckAlertAttachments = ({
   });
 
   // Check which cases have the current alert attached
-  const casesWithAlertAttached = cases.filter((theCase) => {
-    const attachedAlerts = caseToAttachedAlerts.get(theCase.id) || [];
-    return alertIds.some((alertId) => attachedAlerts.includes(alertId));
-  });
+  const hasAlertAttached = useCallback((caseId: string) => {
+    const attachedAlerts = caseToAttachedAlerts.get(caseId) || [];
+    return alertIds.every((alertId) => attachedAlerts.includes(alertId));
+  }, [caseToAttachedAlerts, alertIds]);
 
   return {
     isLoading,
     isError,
     caseToAttachedAlerts,
-    casesWithAlertAttached,
-    hasAlertAttached: (caseId: string) => {
-      const attachedAlerts = caseToAttachedAlerts.get(caseId) || [];
-      return alertIds.some((alertId) => attachedAlerts.includes(alertId));
-    },
+    hasAlertAttached,
   };
 };
 

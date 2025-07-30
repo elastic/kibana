@@ -315,16 +315,29 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
-            return (
+            const isAlreadyAttached = hasAlertAttached?.(theCase.id);
+            const button = (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => {
                   assignCaseAction(theCase);
                 }}
                 size="s"
+                disabled={isAlreadyAttached}
               >
-                {hasAlertAttached?.(theCase.id) ? i18n.ALREADY_ATTACHED : i18n.SELECT}
+                {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
+            );
+
+            return isAlreadyAttached ? (
+              <EuiToolTip
+                content="This alert is already attached to this case"
+                position="top"
+              >
+                {button}
+              </EuiToolTip>
+            ) : (
+              button
             );
           }
           return getEmptyCellValue();

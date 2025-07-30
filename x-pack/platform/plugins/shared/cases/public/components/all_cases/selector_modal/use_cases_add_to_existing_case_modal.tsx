@@ -140,12 +140,12 @@ export const useCasesAddToExistingCaseModal = ({
       // Extract alert IDs from attachments to show indicators in the modal
       const attachments = getAttachments?.({ theCase: undefined }) ?? [];
       const alertIds = attachments
-        .filter((attachment) => attachment.type === 'alert')
+        .filter((attachment): attachment is Extract<typeof attachment, { type: 'alert' }> =>
+          attachment.type === 'alert'
+        )
         .flatMap((attachment) => {
-          if (attachment.alertId) {
-            return Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
-          }
-          return [];
+          const { alertId } = attachment;
+          return alertId ? (Array.isArray(alertId) ? alertId : [alertId]) : [];
         });
 
       dispatch({

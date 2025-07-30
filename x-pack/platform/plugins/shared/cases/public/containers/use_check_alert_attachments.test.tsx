@@ -140,7 +140,7 @@ describe('useCheckAlertAttachments', () => {
     const { result, waitFor } = renderHook(() =>
       useCheckAlertAttachments({
         cases: mockCases,
-        alertIds,
+        alertIds: ['alert-1'], // Only one alert ID to match the mock
         isEnabled: true,
       })
     );
@@ -151,8 +151,72 @@ describe('useCheckAlertAttachments', () => {
 
     expect(result.current.hasAlertAttached('case-1')).toBe(true);
     expect(result.current.hasAlertAttached('case-2')).toBe(false);
-    expect(result.current.casesWithAlertAttached).toHaveLength(1);
-    expect(result.current.casesWithAlertAttached[0].id).toBe('case-1');
+  });
+
+  it('should return false when only some alerts are attached', async () => {
+    mockFindCaseUserActions.mockResolvedValue({
+      userActions: [
+        {
+          type: 'comment',
+          payload: {
+            comment: {
+              type: AttachmentType.alert,
+              alertId: 'alert-1',
+            },
+          },
+        },
+      ],
+      page: 1,
+      perPage: 1000,
+      total: 1,
+    });
+
+    const { result, waitFor } = renderHook(() =>
+      useCheckAlertAttachments({
+        cases: [mockCases[0]],
+        alertIds: ['alert-1', 'alert-2'], // Two alert IDs but only one is attached
+        isEnabled: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.hasAlertAttached('case-1')).toBe(false); // Should be false because not ALL alerts are attached
+  });
+
+  it('should return true when all alerts are attached', async () => {
+    mockFindCaseUserActions.mockResolvedValue({
+      userActions: [
+        {
+          type: 'comment',
+          payload: {
+            comment: {
+              type: AttachmentType.alert,
+              alertId: ['alert-1', 'alert-2'], // Both alerts attached
+            },
+          },
+        },
+      ],
+      page: 1,
+      perPage: 1000,
+      total: 1,
+    });
+
+    const { result, waitFor } = renderHook(() =>
+      useCheckAlertAttachments({
+        cases: [mockCases[0]],
+        alertIds: ['alert-1', 'alert-2'], // Both alerts being checked
+        isEnabled: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.hasAlertAttached('case-1')).toBe(true); // Should be true because ALL alerts are attached
   });
 
   it('should handle array of alert IDs', async () => {
