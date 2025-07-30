@@ -21,7 +21,7 @@ import {
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
@@ -96,38 +96,32 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [props.columns]
   );
 
-  useEffect(() => {
-    const currentColumnNames = props.columns
-      .map((c) => c.name)
-      .filter((name) => !hiddenColumns.current.includes(name));
-
-    const newColumn = difference(currentColumnNames, activeColumns).at(0);
-
-    if (newColumn) {
-      const preservedOrder = intersection(activeColumns, currentColumnNames);
-      const newColumnIndex = currentColumnNames.findIndex((col) => col === newColumn);
-      // if there is a new column, we added at it original index
-      preservedOrder.splice(newColumnIndex, 0, newColumn);
-      setActiveColumns(preservedOrder);
-    }
-  }, [props.columns, activeColumns]);
-
   // Visible columns are calculated based on 3 sources:
-  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user.
-  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly, it preserves the order of the columns.
+  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user plus the placeholders.
+  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly,
+  // it preserves the order of the columns given by the user.
   // The visible columns are determined by:
   // - Filter out hidden columns from the props.columns
-  // - Ensure the order is preserved based on activeColumns
-  // - Add any new columns that are not in the preserved order to the beginning
+  // - Ensure the order is preserved based on activeColumns and the new columns that might have been added.
   const renderedColumns = useMemo(() => {
     const currentColumnNames = props.columns
       .map((c) => c.name)
       .filter((name) => !hiddenColumns.current.includes(name));
 
-    const newColumns = difference(currentColumnNames, activeColumns);
+    // It's important to only keep the columns that are still present in the props.columns
     const preservedOrder = intersection(activeColumns, currentColumnNames);
+    const newColumns = difference(currentColumnNames, preservedOrder);
 
-    return [...newColumns, ...preservedOrder];
+    // We need to place the new columns, (the ones not present in activeColumns) at their original index.
+    if (newColumns.length > 0) {
+      newColumns.forEach((newColumn) => {
+        const newColumnIndex = currentColumnNames.findIndex((col) => col === newColumn);
+        // if there is a new column, we added at it original index
+        preservedOrder.splice(newColumnIndex, 0, newColumn);
+      });
+    }
+
+    return preservedOrder;
   }, [props.columns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
