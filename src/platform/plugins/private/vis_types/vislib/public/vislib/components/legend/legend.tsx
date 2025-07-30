@@ -342,7 +342,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   renderLegend = (anchorPosition: EuiPopoverProps['anchorPosition']) => (
-    <ul className="visLegend__list" id={this.legendId} css={visLegendStyles.list as any}>
+    <ul className="visLegend__list" id={this.legendId} css={visLegendStyles.list}>
       {this.state.labels.map((item) => (
         <VisLegendItem
           item={item}
@@ -385,7 +385,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           css={[
             visLegendStyles.inEmbPanel,
             visLegendStyles.toggle,
-            open && (visLegendStyles.openToggle as any), // TypeScript doesn't recognize the openToggle style as a valid CSS object
+            open && visLegendStyles.openToggle,
           ]}
         >
           <EuiIcon color="text" type="list" />
