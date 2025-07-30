@@ -19,6 +19,7 @@ import {
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
+import { getEventLog } from '../../../alerting_api_integration/common/lib';
 
 const DASHBOARD_PANEL_TEST_SUBJ = 'dashboardPanel';
 
@@ -44,10 +45,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const sampleData = getService('sampleData');
   const rules = getService('rules');
-  const es = getService('es');
-  const config = getService('config');
-  const retryTimeout = config.get('timeouts.try');
-  const waitForAlertsRetryTimeout = 5 * 60 * 1000; // 5 minutes
 
   describe('Embeddable alerts panel', () => {
     before(async () => {
@@ -60,19 +57,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
         createEsQueryRule(),
-        createCustomThreasholdRule(sampleDataLogsDataView.id),
-        createSecurityRule(sampleDataLogsDataView.id),
+        createCustomThresholdRule(sampleDataLogsDataView.id),
+        createSecurityRule(),
       ]);
 
-      await waitForRuleToBecomeActive(stackRule.id);
-      await waitForRuleToBecomeActive(observabilityRule.id);
-      await waitForRuleToBecomeActive(securityRule.id);
+      await waitForRuleToExecute(stackRule.id);
+      await waitForRuleToExecute(observabilityRule.id);
+      await waitForRuleToExecute(securityRule.id);
 
-      await waitForAlertsToBeCreated(stackRule.id, stackRule.rule_type_id);
-      await waitForAlertsToBeCreated(observabilityRule.id, observabilityRule.rule_type_id);
-      await waitForAlertsToBeCreated(securityRule.id, securityRule.rule_type_id);
-
-      // await indexAlertDocs();
       await pageObjects.dashboard.gotoDashboardURL();
     });
 
@@ -90,6 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should ask for confirmation before resetting filters when switching solution', async () => {
+        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
@@ -98,6 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await options[0].click();
 
         await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+        await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
         expect(await find.byButtonText('Switch solution')).to.be.ok();
@@ -121,6 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (solution === 'stack' || solution === 'observability') {
             await testSubjects.missingOrFail(SOLUTION_SELECTOR_SUBJ);
           }
+
           await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
           await find.clickByCssSelector(`button#ruleTags`);
           await testSubjects.click('comboBoxToggleListButton');
@@ -151,6 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
+      await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
       await find.clickByCssSelector(`button#observability`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
       await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
@@ -267,7 +263,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const createCustomThreasholdRule = async (index: string) => {
+  const createCustomThresholdRule = async (dataView: string) => {
     const name = 'observability-rule';
     const createdRule = await rules.api.createRule({
       name,
@@ -300,7 +296,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             query: '',
             language: 'kuery',
           },
-          index,
+          index: dataView,
         },
       },
     });
@@ -310,39 +306,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const createSecurityRule = async (index: string) => {
+  const createSecurityRule = async () => {
+    const name = 'security-rule';
+
     const { body: createdRule } = await supertest
       .post(`/api/detection_engine/rules`)
       .set('kbn-xsrf', 'foo')
       .send({
-        type: 'query',
-        filters: [],
-        language: 'kuery',
-        query: '_id: *',
-        required_fields: [],
-        data_view_id: index,
-        author: [],
-        false_positives: [],
-        references: [],
-        risk_score: 21,
-        risk_score_mapping: [],
-        severity: 'low',
-        severity_mapping: [],
-        threat: [],
-        max_signals: 100,
-        name: 'security-rule',
-        description: 'security-rule',
-        tags: ['security-rule'],
-        setup: '',
-        license: '',
-        interval: '5s',
-        from: 'now-10d',
-        to: 'now',
-        actions: [],
+        name,
+        description: 'Spammy query rule',
         enabled: true,
-        meta: {
-          kibana_siem_app_url: 'http://localhost:5601/app/security',
-        },
+        risk_score: 1,
+        rule_id: 'rule-1',
+        severity: 'low',
+        type: 'query',
+        query: '_id: *',
+        index: ['kibana_sample_data_logs'],
+        from: 'now-1y',
+        interval: '1m',
+        tags: [name],
       })
       .expect(200);
 
@@ -351,45 +333,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForAlertsToBeCreated = async (ruleId: string, ruleTypeId: string) => {
-    return await retry.tryForTime(waitForAlertsRetryTimeout, async () => {
-      const response = await es.search({
-        index: '.alerts*',
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
-            ],
-          },
-        },
+  const waitForRuleToExecute = async (ruleId: string) => {
+    await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId: 'default',
+        type: 'alert',
+        id: ruleId,
+        provider: 'alerting',
+        actions: new Map([['active-instance', { gte: 1 }]]),
       });
-
-      if (response.hits.hits.length === 0) {
-        throw new Error(
-          `No hits found for index .alerts*, ruleTypeId ${ruleTypeId}, and ruleId ${ruleId}`
-        );
-      }
-
-      return response;
-    });
-  };
-
-  const waitForRuleToBecomeActive = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const rule = await rules.api.getRule(ruleId);
-
-      const { execution_status: executionStatus } = rule || {};
-      const { status } = executionStatus || {};
-
-      if (status !== 'error' && status !== 'unknown' && status !== 'pending') {
-        return executionStatus?.status;
-      }
-
-      throw new Error(`Waiting for rule to become active. Status: ${status}`);
     });
   };
 
