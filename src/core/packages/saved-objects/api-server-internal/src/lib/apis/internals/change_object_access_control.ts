@@ -95,7 +95,7 @@ const validateChangeAccessControlParams = ({
   if (actionType === 'changeOwnership' && newOwnerProfileUid) {
     if (!isValidUserProfileId(newOwnerProfileUid)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Failed to get user profile for owner: ${newOwnerProfileUid}`
+        `User profile ID is invalid: ${newOwnerProfileUid}`
       );
     }
   }
