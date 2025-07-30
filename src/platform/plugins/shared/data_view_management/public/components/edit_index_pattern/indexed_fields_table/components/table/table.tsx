@@ -492,9 +492,8 @@ class TableClass extends PureComponent<
             name: deleteLabel,
             description: deleteDescription,
             icon: 'trash',
-            onClick: (field: IndexedFieldItem) => {
+            onClick: (field) => {
               const toDelete = [field.name];
-              // If the field is a runtime field with sub-fields, add them to the delete list.
               if (field.spec?.runtimeField?.fields) {
                 const childFieldNames = Object.keys(field.spec.runtimeField.fields).map(
                   (key) => `${field.name}.${key}`
@@ -505,7 +504,7 @@ class TableClass extends PureComponent<
             },
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => showDelete(field),
+            available: showDelete,
           },
         ],
         width: '80px',
