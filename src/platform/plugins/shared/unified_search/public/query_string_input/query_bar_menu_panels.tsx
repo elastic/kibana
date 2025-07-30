@@ -253,9 +253,10 @@ export function useQueryBarMenuPanels({
 
   useEffect(() => {
     if (savedQuery) {
-      const filtersHaveChanged = Boolean(
-        savedQuery?.attributes.filters &&
-          !compareFilters(filters ?? [], savedQuery.attributes.filters, COMPARE_ALL_OPTIONS)
+      const filtersHaveChanged = !compareFilters(
+        filters ?? [],
+        savedQuery.attributes.filters ?? [],
+        COMPARE_ALL_OPTIONS
       );
 
       const timeFilterHasChanged = Boolean(
