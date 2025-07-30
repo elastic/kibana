@@ -41,7 +41,7 @@ export const registerRuleManagementRoutes = (
 
   // Rules export/import
   exportRulesRoute(router, config, logger);
-  importRulesRoute(router, config, logger);
+  importRulesRoute(router, config);
 
   // Rules search
   findRulesRoute(router, logger);

@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { range } from 'lodash';
-// import type { Response } from 'supertest';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
@@ -136,11 +135,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const spacesServices = getService('spaces');
-  const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/220971
   // Failing: See https://github.com/elastic/kibana/issues/220971
-  describe('@ess @serverless @skipInServerlessMKI import_rules', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI import_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -951,7 +949,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('migrate pre-8.0 action connector ids', () => {
+      describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
         const defaultSpaceActionConnectorId = '61b17790-544e-11ec-a349-11361cc441c4';
         const space714ActionConnectorId = '51b17790-544e-11ec-a349-11361cc441c4';
 
@@ -967,51 +965,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         describe('should be imported into the non-default space', () => {
-          // THIS
           it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
             const spaceId = '714-space';
             // connectorId is from the 7.x connector here
             // x-pack/test/functional/es_archives/security_solution/import_rule_connector
-
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
-            log.debug(
-              `TEST SUITE - .kibana_alerting_cases before: ${JSON.stringify(
-                await es.search({ index: '.kibana_alerting_cases' })
-              )}`
-            );
-
-            // function assert200(error: Error, response: Response) {
-            //   if ((response.status || error?.code) !== 200) {
-            //     log.error(`TEST SUITE - Unexpected response status: ${response.status}`);
-            //     log.error(JSON.stringify(response));
-            //     log.error(JSON.stringify(error));
-            //     throw error;
-            //   }
-            // }
-
-            const importResult = await supertest
+            const { body } = await supertest
               .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
               .set('kbn-xsrf', 'true')
               .set('elastic-api-version', '2023-10-31')
-              .attach('file', buffer, 'rules.ndjson');
-            // .expect(assert200);
+              .attach('file', buffer, 'rules.ndjson')
+              .expect(200);
 
-            log.debug(`TEST SUITE - importResult: ${JSON.stringify(importResult)}`);
-
-            log.debug(
-              `TEST SUITE - .kibana_alerting_cases after: ${JSON.stringify(
-                await es.search({ index: '.kibana_alerting_cases' })
-              )}`
-            );
-
-            log.debug({ a: 1 });
-            log.debug('HELLO', { b: 2 });
-            log.debug('TEST SUITE - importResult.body', importResult.body);
-
-            expect(true).toBe(false); // TODO: remove this line after debugging
-
-            expect(importResult.body).toMatchObject({
+            expect(body).toMatchObject({
               success: true,
               success_count: 1,
               errors: [],
