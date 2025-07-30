@@ -41,7 +41,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
     isAssistantVisible: true,
-    isStarterPromptsEnabled: true,
+    isAssistantManagementEnabled: true,
   };
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));

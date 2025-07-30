@@ -91,6 +91,7 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
       helpText={getHelpText()}
     >
       <EuiComboBox
+        isInvalid={!!validationError}
         fullWidth={fullWidth}
         data-test-subj={dataTestSubj}
         noSuggestions

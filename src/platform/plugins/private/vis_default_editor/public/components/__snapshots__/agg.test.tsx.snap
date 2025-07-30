@@ -18,7 +18,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       <EuiToolTip
         content="Enable   aggregation"
         delay="regular"
-        disableScreenReaderOutput={false}
+        disableScreenReaderOutput={true}
         display="inlineBlock"
         position="bottom"
       >

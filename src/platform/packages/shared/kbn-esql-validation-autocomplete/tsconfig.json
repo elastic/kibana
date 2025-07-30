@@ -12,7 +12,6 @@
     "**/*.ts", "scripts",
   ],
   "kbn_references": [
-    "@kbn/i18n",
     "@kbn/esql-ast",
     "@kbn/esql-types",
   ],

@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { Conversation } from '@kbn/onechat-common';
+import { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
 import type { ListConversationsResponse } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
@@ -20,7 +20,7 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions) {
+  async list({ agentId }: ConversationListOptions): Promise<ConversationWithoutRounds[]> {
     const response = await this.http.get<ListConversationsResponse>('/api/chat/conversations', {
       query: {
         agent_id: agentId,

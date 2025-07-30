@@ -192,7 +192,11 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
             </EuiHighlight>
           </EuiFlexItem>
           <EuiFlexItem grow={false} component={'span'}>
-            <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
+            <EuiToolTip
+              position="right"
+              content={i18n.DELETE_CONVERSATION}
+              disableScreenReaderOutput
+            >
               <EuiButtonIcon
                 iconType="cross"
                 aria-label={i18n.DELETE_CONVERSATION}

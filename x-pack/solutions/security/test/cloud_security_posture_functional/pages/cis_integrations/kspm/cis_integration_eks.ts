@@ -28,7 +28,8 @@ export default function (providerContext: FtrProviderContext) {
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const kibanaServer = getService('kibanaServer');
 
-  describe('Test adding Cloud Security Posture Integrations KSPM EKS', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/229421
+  describe.skip('Test adding Cloud Security Posture Integrations KSPM EKS', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_eks']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 

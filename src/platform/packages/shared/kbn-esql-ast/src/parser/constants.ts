@@ -9,15 +9,7 @@
 
 import { Token } from 'antlr4';
 
-/**
- * The root ANTLR rule to start parsing from.
- */
-export const GRAMMAR_ROOT_RULE = 'singleStatement';
-
-/**
- * @todo Move this out of the parser/ folder.
- */
-export const EDITOR_MARKER = 'marker_esql_editor';
-
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
+
+export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);

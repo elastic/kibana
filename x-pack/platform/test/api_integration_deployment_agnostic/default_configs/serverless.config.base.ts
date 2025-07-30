@@ -32,11 +32,7 @@ interface CreateTestConfigOptions<T> {
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 const esServerArgsFromController = {
   es: [],
-  oblt: [
-    'xpack.apm_data.enabled=true',
-    // for ML, data frame analytics are not part of this project type
-    'xpack.ml.dfa.enabled=false',
-  ],
+  oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
   chat: [],
 };
@@ -109,11 +105,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
+          'xpack.security.authc.native_roles.enabled=true',
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
-          // custom native roles are enabled only for search and security projects
-          ...(options.serverlessProject !== 'oblt'
-            ? ['xpack.security.authc.native_roles.enabled=true']
-            : []),
           ...esServerArgsFromController[options.serverlessProject],
           ...(options.tier && options.tier === 'oblt_logs_essentials'
             ? [

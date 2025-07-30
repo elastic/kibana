@@ -27,3 +27,4 @@ export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
 export { getColumnExists } from './columns';
+export { getValidSignaturesAndTypesToSuggestNext } from './autocomplete/helpers';

@@ -11,7 +11,6 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
-import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 
 export interface SelectRangeActionContext {
   // Need to make this unknown to prevent circular dependencies.
@@ -37,6 +36,7 @@ export function createSelectRangeActionDefinition(
     shouldAutoExecute: async () => true,
     execute: async (context: SelectRangeActionContext) => {
       try {
+        const { createFiltersFromRangeSelectAction } = await import('./filters');
         const filters = await createFiltersFromRangeSelectAction(context.data);
         if (filters.length > 0) {
           await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({

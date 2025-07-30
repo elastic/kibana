@@ -35,7 +35,6 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -89,7 +88,6 @@ import {
   setCapabilities,
   setHttp,
   setSearch,
-  setSavedObjects,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -162,7 +160,6 @@ export interface VisualizationsStartDeps {
   application: ApplicationStart;
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -473,14 +470,20 @@ export class VisualizationsPlugin
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
+        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel<VisualizeSavedObjectInputState>(
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                },
+              ],
             },
           },
           true
@@ -537,7 +540,6 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);
     setExpressions(expressions);

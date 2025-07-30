@@ -26,8 +26,8 @@ export function HostLink({ name, id, timerange }: Props) {
     services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   const href = assetDetailsLocator?.getRedirectUrl({
-    assetType: 'host',
-    assetId: id,
+    entityType: 'host',
+    entityId: id,
     assetDetails: {
       dateRange: {
         from: new Date(timerange.from).toISOString(),

@@ -39,7 +39,7 @@ export const validate = (
       // all the args should be commands
       arg.commands.forEach((subCommand) => {
         const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-        const validationMessages = subCommandMethods?.validate?.(subCommand, ast, context);
+        const validationMessages = subCommandMethods?.validate?.(subCommand, arg.commands, context);
         messages.push(...(validationMessages || []));
       });
     }
@@ -49,7 +49,7 @@ export const validate = (
   const forks = allCommands.filter(({ name }) => name === 'fork');
 
   if (forks.length > 1) {
-    messages.push(errors.tooManyForks(forks[1] as any));
+    messages.push(errors.tooManyForks(forks[1]));
   }
 
   context?.fields.set('_fork', {
