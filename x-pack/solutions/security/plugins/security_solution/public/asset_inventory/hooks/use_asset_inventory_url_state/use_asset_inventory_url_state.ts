@@ -8,7 +8,7 @@ import { type Dispatch, type SetStateAction, useCallback } from 'react';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
+import { ASSET_FIELDS, LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { useUrlQuery } from './use_url_query';
 import { usePageSize } from './use_page_size';
 import { useBaseEsQuery } from './use_base_es_query';
@@ -55,7 +55,7 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
   query,
   filters,
   pageFilters: [],
-  sort: { field: '@timestamp', direction: 'desc' },
+  sort: { field: ASSET_FIELDS.TIMESTAMP, direction: 'desc' },
   pageIndex: 0,
 });
 

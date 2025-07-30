@@ -25,6 +25,7 @@ import { useDataView } from '../hooks/use_data_view';
 import { DataViewContext } from '../hooks/data_view_context';
 
 import {
+  ASSET_FIELDS,
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   LOCAL_STORAGE_COLUMNS_KEY,
   LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
@@ -37,7 +38,7 @@ const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): U
   query,
   filters,
   pageFilters,
-  sort: [['@timestamp', 'desc']],
+  sort: [[ASSET_FIELDS.TIMESTAMP, 'desc', ASSET_FIELDS.ENTITY_NAME, 'asc']],
 });
 
 export const AllAssets = () => {

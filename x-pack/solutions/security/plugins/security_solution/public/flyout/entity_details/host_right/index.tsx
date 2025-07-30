@@ -11,6 +11,7 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useAssetInventoryRefresh } from '../../../asset_inventory/hooks/use_asset_inventory_refresh';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -62,6 +63,8 @@ const FIRST_RECORD_PAGINATION = {
 export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
+  const { assetInventoryRefresh } = useAssetInventoryRefresh();
 
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
@@ -136,6 +139,11 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
 
   const observedHost = useObservedHost(hostName, scopeId);
 
+  const onAssetCriticalityChange = useCallback(() => {
+    calculateEntityRiskScore();
+    assetInventoryRefresh();
+  }, [assetInventoryRefresh, calculateEntityRiskScore]);
+
   if (observedHost.isLoading) {
     return <FlyoutLoading />;
   }
@@ -180,7 +188,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
               openDetailsPanel={openDetailsPanel}
               isLinkEnabled={isLinkEnabled}
               recalculatingScore={recalculatingScore}
-              onAssetCriticalityChange={calculateEntityRiskScore}
+              onAssetCriticalityChange={onAssetCriticalityChange}
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (

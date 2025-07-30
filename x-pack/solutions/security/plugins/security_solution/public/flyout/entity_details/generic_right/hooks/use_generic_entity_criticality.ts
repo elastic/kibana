@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAssetInventoryRefresh } from '../../../../asset_inventory/hooks/use_asset_inventory_refresh';
 import type {
   CriticalityLevelWithUnassigned,
   IdField,
@@ -16,6 +17,7 @@ import {
   useEntityAnalyticsRoutes,
 } from '../../../../entity_analytics/api/api';
 import type { AssetCriticalityRecord } from '../../../../../common/api/entity_analytics';
+import { GET_GENERIC_ENTITY_QUERY_KEY } from './use_get_generic_entity';
 
 const QUERY_KEY = 'generic-entity-asset-criticality';
 
@@ -37,6 +39,8 @@ export const useGenericEntityCriticality = ({
   const queryClient = useQueryClient();
   const { fetchAssetCriticality, createAssetCriticality, deleteAssetCriticality } =
     useEntityAnalyticsRoutes();
+
+  const { refreshAssetInventory } = useAssetInventoryRefresh();
 
   const genericEntityAssetCriticalityQueryKey = [QUERY_KEY, idField, idValue];
 
@@ -97,7 +101,9 @@ export const useGenericEntityCriticality = ({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries(genericEntityAssetCriticalityQueryKey);
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [GET_GENERIC_ENTITY_QUERY_KEY] });
+      refreshAssetInventory();
     },
   });
 
