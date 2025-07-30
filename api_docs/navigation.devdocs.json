@@ -829,9 +829,10 @@
         "label": "AddSolutionNavigationArg",
         "description": [],
         "signature": [
-          "Omit<",
-          "SolutionNavigation",
-          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; }"
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
+          ">"
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
@@ -1080,13 +1081,7 @@
           ],
           "signature": [
             "(solutionNavigationAgg: ",
-            {
-              "pluginId": "navigation",
-              "scope": "public",
-              "docId": "kibNavigationPluginApi",
-              "section": "def-public.AddSolutionNavigationArg",
-              "text": "AddSolutionNavigationArg"
-            },
+            "SolutionNavigation",
             ") => void"
           ],
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
@@ -1096,18 +1091,12 @@
             {
               "parentPluginId": "navigation",
               "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
-              "type": "CompoundType",
+              "type": "Object",
               "tags": [],
               "label": "solutionNavigationAgg",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "navigation",
-                  "scope": "public",
-                  "docId": "kibNavigationPluginApi",
-                  "section": "def-public.AddSolutionNavigationArg",
-                  "text": "AddSolutionNavigationArg"
-                }
+                "SolutionNavigation"
               ],
               "path": "src/platform/plugins/shared/navigation/public/types.ts",
               "deprecated": false,
