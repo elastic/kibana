@@ -24,4 +24,8 @@ export interface AssetCriticalityUpsertForBulkUpload extends BaseAssetCriticalit
   criticalityLevel: AssetCriticalityRecord['criticality_level'] | 'unassigned';
 }
 
+export interface AssetCriticalityUpdateEntityDestination extends BaseAssetCriticalityUpsert {
+  criticalityLevel: AssetCriticalityRecord['criticality_level'] | 'deleted';
+}
+
 export * from '../../api/entity_analytics/asset_criticality';
