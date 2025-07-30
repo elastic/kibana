@@ -28,6 +28,7 @@ import type {
   getNewSavedSearch,
   saveDiscoverSession,
   SaveDiscoverSessionOptions,
+  SaveDiscoverSessionParams,
   SavedSearchUnwrapResult,
   saveSavedSearch,
   SaveSavedSearchOptions,
@@ -58,7 +59,7 @@ export interface SavedSearchPublicPluginStart {
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
   saveDiscoverSession: (
-    discoverSession: DiscoverSession,
+    discoverSession: SaveDiscoverSessionParams,
     options?: SaveDiscoverSessionOptions
   ) => ReturnType<typeof saveDiscoverSession>;
   checkForDuplicateTitle: (
