@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +42,7 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -153,11 +154,18 @@ export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
 
-  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+  const { value: formulas } = useAsync(
+    () =>
+      inventoryModel.metrics.getFormulas({
+        schema: searchCriteria.preferredSchema ?? DataSchemaFormat.ECS,
+      }),
+    [inventoryModel.metrics, searchCriteria.preferredSchema]
+  );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
@@ -496,6 +504,7 @@ export const useHostsTable = () => {
         align: 'right',
       },
     ],
+
     [
       displayAlerts,
       showApmHostTroubleshooting,
