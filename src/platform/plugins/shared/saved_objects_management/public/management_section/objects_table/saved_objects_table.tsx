@@ -711,9 +711,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {/* ARIA live region for selection changes (optional but a11y best practice) */}
         <div aria-live="polite" style={{ position: 'absolute', left: '-9999px' }}>
           {selectedSavedObjects.length > 0
-            ? `${selectedSavedObjects.length} item${
-                selectedSavedObjects.length > 1 ? 's' : ''
-              } selected.`
+            ? i18n.translate(
+                'savedObjectsManagement.objectsTable.selected.selectedSavedObjectsLabel',
+                {
+                  defaultMessage:
+                    '{count, plural, one {# item selected.} other {# items selected.}}',
+                  values: {
+                    count: selectedSavedObjects.length,
+                  },
+                }
+              )
             : ''}
         </div>
         {this.renderFlyout()}
