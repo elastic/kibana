@@ -41,7 +41,7 @@ export function removeCombinedFieldsFromMappings(
   mappings: MappingTypeMapping,
   combinedFields: CombinedField[]
 ) {
-  const updatedMappings = { properties: {}, ...mappings };
+  const updatedMappings = { properties: {}, ...cloneDeep(mappings) };
   combinedFields.forEach((combinedField) => {
     delete updatedMappings.properties[combinedField.combinedFieldName];
   });
@@ -72,9 +72,10 @@ export function removeCombinedFieldsFromPipeline(
   pipeline: IngestPipeline,
   combinedFields: CombinedField[]
 ) {
+  const updatedPipeline = cloneDeep(pipeline);
   return {
-    ...pipeline,
-    processors: pipeline.processors.filter((processor) => {
+    ...updatedPipeline,
+    processors: updatedPipeline.processors.filter((processor) => {
       return 'set' in processor
         ? !combinedFields.some((combinedField) => {
             return processor.set.field === combinedField.combinedFieldName;

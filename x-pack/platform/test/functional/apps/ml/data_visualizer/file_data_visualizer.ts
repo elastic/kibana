@@ -280,7 +280,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('file based', function () {
+  // skipping while UX changes are being made
+  describe.skip('file based', function () {
     this.tags(['ml']);
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();

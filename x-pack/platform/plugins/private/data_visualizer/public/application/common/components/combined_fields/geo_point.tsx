@@ -37,7 +37,7 @@ import type { AddCombinedField } from './combined_fields_form';
 interface Props {
   addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
-  results: FindFileStructureResponse;
+  results?: FindFileStructureResponse;
 }
 
 interface State {
@@ -56,14 +56,16 @@ export class GeoPointForm extends Component<Props, State> {
 
     const latFields: EuiSelectOption[] = [{ value: '', text: '' }];
     const lonFields: EuiSelectOption[] = [{ value: '', text: '' }];
-    getFieldNames(props.results).forEach((columnName: string) => {
-      if (isWithinLatRange(columnName, props.results.field_stats)) {
-        latFields.push({ value: columnName, text: columnName });
-      }
-      if (isWithinLonRange(columnName, props.results.field_stats)) {
-        lonFields.push({ value: columnName, text: columnName });
-      }
-    });
+    if (props.results !== undefined) {
+      getFieldNames(props.results).forEach((columnName: string) => {
+        if (isWithinLatRange(columnName, props.results!.field_stats)) {
+          latFields.push({ value: columnName, text: columnName });
+        }
+        if (isWithinLonRange(columnName, props.results!.field_stats)) {
+          lonFields.push({ value: columnName, text: columnName });
+        }
+      });
+    }
 
     this.state = {
       latField: '',
@@ -110,7 +112,8 @@ export class GeoPointForm extends Component<Props, State> {
       this.props.addCombinedField(
         combinedField,
         (mappings) => addCombinedFieldsToMappings(mappings, [combinedField]),
-        (pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField])
+        (pipelines) =>
+          pipelines.map((pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField]))
       );
 
       this.setState({ submitError: '' });
