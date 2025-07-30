@@ -321,9 +321,12 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       try {
+        const spaceId = spaces.getSpaceId(request);
+
         const workflowExecutionId = await api.testWorkflow(
           request.body.workflowYaml,
-          request.body.inputs
+          request.body.inputs,
+          spaceId
         );
 
         return response.ok({
