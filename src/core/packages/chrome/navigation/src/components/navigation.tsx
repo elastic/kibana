@@ -18,6 +18,7 @@ import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
+import { focusMainContent } from '../utils/focus_main_content';
 
 const FOOTER_ITEM_LIMIT = 5;
 
@@ -51,14 +52,6 @@ export const Navigation = ({
   );
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
-
-  const focusMainContent = () => {
-    const mainElement = document.querySelector('main#app-main-scroll');
-
-    if (mainElement instanceof HTMLElement) {
-      mainElement.focus();
-    }
-  };
 
   const handleMainItemClick = (item: MenuItem) => {
     navigateTo(item);
