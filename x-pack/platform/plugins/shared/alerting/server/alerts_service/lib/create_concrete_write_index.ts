@@ -27,13 +27,6 @@ interface UpdateIndexMappingsAndSettingsOpts {
   simulatedMapping: MappingTypeMapping | undefined;
 }
 
-interface UpdateDataStreamIndexMappingsOpts {
-  logger: Logger;
-  esClient: ElasticsearchClient;
-  totalFieldsLimit: number;
-  concreteIndexInfo: ConcreteIndexInfo;
-}
-
 interface UpdateIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
