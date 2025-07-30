@@ -136,6 +136,7 @@ export function registerLogThresholdRuleType(
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },
+        { name: 'grouping', description: groupByKeysActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },
