@@ -8,28 +8,49 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const { dashboard, header, visualize, visEditor } = getPageObjects([
-    'dashboard',
-    'header',
-    'visualize',
-    'common',
-    'visEditor',
-  ]);
+const getTestSpec = (text = 'Test') => `
+{
+config: { "kibana": {"renderer": "svg"} }
+$schema: https://vega.github.io/schema/vega/v5.json
+marks: [{
+  type: text
+  encode: { update: { text: { value: "${text}" } } }
+}]}`;
+
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const { dashboard, header, visualize, visEditor, vegaChart, visChart, timePicker } =
+    getPageObjects([
+      'dashboard',
+      'header',
+      'visualize',
+      'visEditor',
+      'vegaChart',
+      'visChart',
+      'timePicker',
+    ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  const originalMarkdownText = 'Original markdown text';
-  const modifiedMarkdownText = 'Modified markdown text';
-
-  const createMarkdownVis = async (title) => {
-    await dashboardAddPanel.clickAddMarkdownPanel();
-    await visEditor.setMarkdownTxt(originalMarkdownText);
+  const fillSpecAndGo = async (newSpec: string) => {
+    await vegaChart.fillSpec(newSpec);
     await visEditor.clickGo();
+  };
+
+  const expectVegaText = async (text: string) => {
+    const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
+    expect(await vegaText.getVisibleText()).to.eql(text);
+  };
+
+  const createVegaVis = async (title?: string) => {
+    await dashboardAddPanel.clickAddCustomVisualization();
+    await fillSpecAndGo(getTestSpec());
+
+    await visChart.waitForVisualizationRenderingStabilized();
     if (title) {
       await visualize.saveVisualizationExpectSuccess(title, {
         saveAsNew: true,
@@ -40,11 +61,11 @@ export default function ({ getService, getPageObjects }) {
     }
   };
 
-  const editMarkdownVis = async () => {
+  const editVegaVis = async () => {
     await dashboardPanelActions.clickEdit();
     await header.waitUntilLoadingHasFinished();
-    await visEditor.setMarkdownTxt(modifiedMarkdownText);
-    await visEditor.clickGo();
+    await fillSpecAndGo(getTestSpec('Modified'));
+    await visChart.waitForVisualizationRenderingStabilized();
   };
 
   describe('edit visualizations from dashboard', () => {
@@ -57,6 +78,7 @@ export default function ({ getService, getPageObjects }) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await dashboard.navigateToApp();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
@@ -64,31 +86,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('save button returns to dashboard after editing visualization with changes saved', async () => {
-      const title = 'test save';
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
 
-      await createMarkdownVis(title);
-
-      await editMarkdownVis();
+      await createVegaVis('test save');
+      await expectVegaText('Test');
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-
-      const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
-    });
-
-    it('cancel button returns to dashboard after editing visualization without saving', async () => {
-      const title = 'test cancel';
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
-
-      await createMarkdownVis(title);
-
-      await editMarkdownVis();
-      await visualize.cancelAndReturn(true);
-
-      const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+      expect(await (await vegaChart.getViewContainer()).getVisibleText()).to.eql('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
@@ -96,20 +101,25 @@ export default function ({ getService, getPageObjects }) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.cancelAndReturn(false);
+      await expectVegaText('Modified');
+    });
 
-      const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+    it('cancel button returns to dashboard after editing visualization without saving', async () => {
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
+
+      await createVegaVis('test cancel');
+
+      await editVegaVis();
+      await visualize.cancelAndReturn(true);
+      await expectVegaText('Test');
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-
-      // Create markdown by value.
-      await createMarkdownVis();
-
-      // Edit then save and return
-      await editMarkdownVis();
+      await createVegaVis();
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
@@ -121,12 +131,8 @@ export default function ({ getService, getPageObjects }) {
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
-
-      // Create markdown by reference.
-      await createMarkdownVis('by reference');
-
-      // Edit then save and return
-      await editMarkdownVis();
+      await createVegaVis('by reference');
+      await editVegaVis();
       await visualize.saveVisualizationAndReturn();
 
       await header.waitUntilLoadingHasFinished();
@@ -139,17 +145,13 @@ export default function ({ getService, getPageObjects }) {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
 
-        await createMarkdownVis();
-
-        const originalPanelCount = dashboard.getPanelCount();
-
-        await editMarkdownVis();
+        await createVegaVis();
+        const originalPanelCount = await dashboard.getPanelCount();
+        await editVegaVis();
         await visualize.saveVisualizationAndReturn();
+        await expectVegaText('Modified');
 
-        const markdownText = await testSubjects.find('markdownBody');
-        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
-
-        const newPanelCount = dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(originalPanelCount);
       });
 
@@ -157,32 +159,29 @@ export default function ({ getService, getPageObjects }) {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
 
-        await createMarkdownVis();
+        await createVegaVis();
 
-        await editMarkdownVis();
+        await editVegaVis();
         await visualize.cancelAndReturn(true);
-
-        const markdownText = await testSubjects.find('markdownBody');
-        expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+        await expectVegaText('Test');
       });
 
       it('save to library button returns to dashboard after editing visualization with changes saved', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
 
-        await createMarkdownVis();
+        await createVegaVis();
 
-        const originalPanelCount = dashboard.getPanelCount();
+        const originalPanelCount = await dashboard.getPanelCount();
 
-        await editMarkdownVis();
+        await editVegaVis();
         await visualize.saveVisualization('test save to library', {
           redirectToOrigin: true,
         });
 
-        const markdownText = await testSubjects.find('markdownBody');
-        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+        await expectVegaText('Modified');
 
-        const newPanelCount = dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(originalPanelCount);
       });
 
