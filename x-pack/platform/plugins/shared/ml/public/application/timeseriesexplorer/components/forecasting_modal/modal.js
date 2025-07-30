@@ -32,7 +32,7 @@ import { RunControls } from './run_controls';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Modal(props) {
-  const modalHeaderId = useGeneratedHtmlId();
+  const modalTitleId = useGeneratedHtmlId();
 
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
   const {
@@ -54,13 +54,13 @@ export function Modal(props) {
 
   return (
     <EuiModal
-      aria-labelledby={modalHeaderId}
+      aria-labelledby={modalTitleId}
       onClose={props.close}
       maxWidth={860}
       data-test-subj="mlModalForecast"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalHeaderId}>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
             defaultMessage="Forecasting"
