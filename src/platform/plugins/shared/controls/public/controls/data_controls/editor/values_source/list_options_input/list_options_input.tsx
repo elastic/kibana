@@ -166,6 +166,7 @@ export const ListOptionsInput = ({
 
   const onRemoveOption = useCallback(
     (key: ListOptionsInputOption['value']) => {
+      setFreshOption(null);
       const newOptions = currentOptions.filter((option) => option.value !== key);
       onChange(newOptions);
     },
