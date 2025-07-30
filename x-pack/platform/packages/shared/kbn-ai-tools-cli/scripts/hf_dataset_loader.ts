@@ -18,6 +18,8 @@ interface Flags {
   datasets?: string | string[];
   // whether all specified dataset's indices should be cleared before loading
   clear?: boolean;
+  // the kibana URL to connect to
+  'kibana-url'?: string;
 }
 
 run(
@@ -32,13 +34,15 @@ run(
       );
     }
 
+    // destructure and normalize CLI flags
+    const { limit, datasets, clear } = flags as Flags;
+    const kibanaUrl = typeof flags['kibana-url'] === 'string' ? flags['kibana-url'] : undefined;
+
     const kibanaClient = await createKibanaClient({
       log,
       signal,
+      baseUrl: kibanaUrl,
     });
-
-    // destructure and normalize CLI flags
-    const { limit, datasets, clear } = flags as Flags;
 
     const datasetNames = !!datasets
       ? castArray(datasets)
@@ -73,7 +77,7 @@ run(
   {
     description: `Loads HuggingFace datasets into an Elasticsearch cluster`,
     flags: {
-      string: ['limit', 'datasets'],
+      string: ['limit', 'datasets', 'kibana-url'],
       boolean: ['clear'],
       help: `
         Usage: node --require ./src/setup_node_env/index.js x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts [options]
@@ -81,6 +85,7 @@ run(
         --datasets          Comma-separated list of HuggingFace dataset names to load
         --limit             Number of rows per dataset to load into Elasticsearch
         --clear             Clear the existing indices for the specified datasets before loading
+        --kibana-url        Kibana URL to connect to (bypasses auto-discovery when provided)
       `,
       default: {
         clear: false,
