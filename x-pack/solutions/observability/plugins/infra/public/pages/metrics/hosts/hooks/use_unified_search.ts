@@ -114,7 +114,7 @@ export const useUnifiedSearch = () => {
   const onPreferredSchemaChange = useCallback(
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
-      inventoryPrefill.setSchema(preferredSchema ?? DataSchemaFormat.ECS);
+      inventoryPrefill.setPartial({ schema: preferredSchema ?? DataSchemaFormat.ECS });
       updateReloadRequestTime();
     },
     [inventoryPrefill, setSearch, updateReloadRequestTime]
@@ -172,6 +172,7 @@ export const useUnifiedSearch = () => {
   ]);
 
   useEffectOnce(() => {
+    inventoryPrefill.reset();
     // Sync filtersService from the URL state
     if (!deepEqual(filterManagerService.getFilters(), searchCriteria.filters)) {
       filterManagerService.setFilters(searchCriteria.filters);
@@ -180,6 +181,12 @@ export const useUnifiedSearch = () => {
     if (!deepEqual(queryStringService.getQuery(), searchCriteria.query)) {
       queryStringService.setQuery(searchCriteria.query);
     }
+
+    // Sync Inventory Alert Prefill state
+    inventoryPrefill.setPartial({
+      nodeType: 'host',
+      schema: searchCriteria.preferredSchema ?? DataSchemaFormat.ECS,
+    });
 
     try {
       // Validates the "query" object from the URL state

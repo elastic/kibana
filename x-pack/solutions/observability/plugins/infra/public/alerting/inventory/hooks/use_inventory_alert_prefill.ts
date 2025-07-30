@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useMemo, useCallback } from 'react';
+import { useMemo, useReducer } from 'react';
 import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type {
@@ -13,51 +13,34 @@ import type {
   SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';
 
-interface State {
+export interface InventoryPrefillState {
   nodeType: InventoryItemType;
+  kuery: string | undefined;
   metric: SnapshotMetricInput;
-  kuery?: string;
   customMetrics: SnapshotCustomMetricInput[];
-  accountId: string;
+  schema: DataSchemaFormat;
   region: string;
-  schema?: DataSchemaFormat;
+  accountId: string;
 }
 
-type Action =
-  | { type: 'SET_NODE_TYPE'; value: InventoryItemType }
-  | { type: 'SET_KUERY'; value: string }
-  | { type: 'SET_METRIC'; value: SnapshotMetricInput }
-  | { type: 'SET_CUSTOM_METRICS'; value: SnapshotCustomMetricInput[] }
-  | { type: 'SET_ACCOUNT_ID'; value: string }
-  | { type: 'SET_REGION'; value: string }
-  | { type: 'SET_SCHEMA'; value: DataSchemaFormat };
-
-const initialState: State = {
+const initialState: InventoryPrefillState = {
   nodeType: 'host',
-  metric: { type: 'cpuV2' },
   kuery: undefined,
+  metric: { type: 'cpuV2' },
   customMetrics: [],
-  accountId: '',
-  region: '',
   schema: DataSchemaFormat.ECS,
+  region: '',
+  accountId: '',
 };
 
-function reducer(state: State, action: Action): State {
+type Action = { type: 'SET_PARTIAL'; value: Partial<InventoryPrefillState> } | { type: 'RESET' };
+
+function reducer(state: InventoryPrefillState, action: Action): InventoryPrefillState {
   switch (action.type) {
-    case 'SET_NODE_TYPE':
-      return { ...state, nodeType: action.value };
-    case 'SET_KUERY':
-      return { ...state, kuery: action.value };
-    case 'SET_METRIC':
-      return { ...state, metric: action.value };
-    case 'SET_CUSTOM_METRICS':
-      return { ...state, customMetrics: action.value };
-    case 'SET_ACCOUNT_ID':
-      return { ...state, accountId: action.value };
-    case 'SET_REGION':
-      return { ...state, region: action.value };
-    case 'SET_SCHEMA':
-      return { ...state, schema: action.value };
+    case 'SET_PARTIAL':
+      return { ...state, ...action.value };
+    case 'RESET':
+      return { ...initialState };
     default:
       return state;
   }
@@ -66,68 +49,27 @@ function reducer(state: State, action: Action): State {
 export const useInventoryAlertPrefill = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const setNodeType = useCallback(
-    (nodeType: InventoryItemType) => dispatch({ type: 'SET_NODE_TYPE', value: nodeType }),
-    []
-  );
-  const setKuery = useCallback(
-    (kuery: string) => dispatch({ type: 'SET_KUERY', value: kuery }),
-    []
-  );
-  const setMetric = useCallback(
-    (metric: SnapshotMetricInput) => dispatch({ type: 'SET_METRIC', value: metric }),
-    []
-  );
-  const setCustomMetrics = useCallback(
-    (customMetrics: SnapshotCustomMetricInput[]) =>
-      dispatch({ type: 'SET_CUSTOM_METRICS', value: customMetrics }),
-    []
-  );
-  const setAccountId = useCallback(
-    (accountId: string) => dispatch({ type: 'SET_ACCOUNT_ID', value: accountId }),
-    []
-  );
-  const setRegion = useCallback(
-    (region: string) => dispatch({ type: 'SET_REGION', value: region }),
-    []
-  );
-  const setSchema = useCallback(
-    (schema: DataSchemaFormat) => dispatch({ type: 'SET_SCHEMA', value: schema }),
-    []
-  );
-
   return useMemo(
     () => ({
       nodeType: state.nodeType,
-      metric: state.metric,
       kuery: state.kuery,
+      metric: state.metric,
       customMetrics: state.customMetrics,
-      accountId: state.accountId,
-      region: state.region,
       schema: state.schema,
-      setNodeType,
-      setKuery,
-      setMetric,
-      setCustomMetrics,
-      setAccountId,
-      setRegion,
-      setSchema,
+      region: state.region,
+      accountId: state.accountId,
+      setPartial: (value: Partial<InventoryPrefillState>) =>
+        dispatch({ type: 'SET_PARTIAL', value }),
+      reset: () => dispatch({ type: 'RESET' }),
     }),
     [
       state.nodeType,
-      state.metric,
       state.kuery,
+      state.metric,
       state.customMetrics,
-      state.accountId,
-      state.region,
       state.schema,
-      setNodeType,
-      setKuery,
-      setMetric,
-      setCustomMetrics,
-      setAccountId,
-      setRegion,
-      setSchema,
+      state.region,
+      state.accountId,
     ]
   );
 };

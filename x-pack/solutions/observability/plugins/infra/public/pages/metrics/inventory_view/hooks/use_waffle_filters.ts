@@ -31,7 +31,10 @@ function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersStat
 
 export const useWaffleFilters = () => {
   const { currentView } = useInventoryViewsContext();
-  const { inventoryPrefill } = useAlertPrefillContext();
+  const {
+    inventoryPrefill: { setPartial },
+  } = useAlertPrefillContext();
+
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
@@ -66,8 +69,8 @@ export const useWaffleFilters = () => {
   );
 
   useEffect(() => {
-    inventoryPrefill.setKuery(urlState.expression);
-  }, [inventoryPrefill, urlState.expression]);
+    setPartial({ kuery: urlState.expression });
+  }, [setPartial, urlState.expression]);
 
   return {
     filterQuery: urlState,

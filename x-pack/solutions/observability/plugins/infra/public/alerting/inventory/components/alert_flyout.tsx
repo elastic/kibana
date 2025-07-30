@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
-
+import React, { useCallback, useContext } from 'react';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
@@ -32,41 +31,32 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, schema, setVis
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const { inventoryPrefill } = useAlertPrefillContext();
 
-  const AddAlertFlyout = useMemo(() => {
-    if (!triggersActionsUI) return null;
-    const { customMetrics = [], accountId, region } = inventoryPrefill;
-    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
-    return (
-      <RuleFormFlyout
-        plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-        consumer={'infrastructure'}
-        onCancel={onCloseFlyout}
-        onSubmit={onCloseFlyout}
-        ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-        initialMetadata={{
-          accountId,
-          options,
-          nodeType,
-          filter,
-          customMetrics,
-          region,
-          schema,
-        }}
-        shouldUseRuleProducer
-      />
-    );
-  }, [
-    filter,
-    inventoryPrefill,
-    nodeType,
-    onCloseFlyout,
-    options,
-    schema,
-    services,
-    triggersActionsUI,
-  ]);
+  const { customMetrics = [], accountId, region } = inventoryPrefill;
 
-  return <>{visible && AddAlertFlyout}</>;
+  if (!triggersActionsUI || !visible) {
+    return null;
+  }
+
+  const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
+  return (
+    <RuleFormFlyout
+      plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+      consumer={'infrastructure'}
+      onCancel={onCloseFlyout}
+      onSubmit={onCloseFlyout}
+      ruleTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+      initialMetadata={{
+        accountId,
+        options,
+        nodeType,
+        filter,
+        customMetrics,
+        region,
+        schema,
+      }}
+      shouldUseRuleProducer
+    />
+  );
 };
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
