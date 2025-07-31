@@ -24,7 +24,7 @@ export const transformEntityTypeToIcon = (entityType: string | undefined): strin
 
   // Find the first matching mapping where the entity type is in the values array
   const mappingResult = entityTypeMappings.find((mapping) =>
-    mapping.values.some((type: string) => entityTypeLower.toLowerCase() === type.toLowerCase())
+    mapping.values.some((type) => entityTypeLower === type.toLowerCase())
   );
   // Return the icon name if found, otherwise we return undefined
   return mappingResult?.icon ?? undefined;

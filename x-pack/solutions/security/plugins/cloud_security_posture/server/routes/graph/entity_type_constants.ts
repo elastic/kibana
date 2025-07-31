@@ -73,7 +73,7 @@ export const entityTypeMappings: EntityTypeMapping[] = [
   },
   {
     icon: 'tableDensityExpanded',
-    values: ['Application (Desktop or Web App)', 'Development Service'],
+    values: ['Application (Desktop or Web App)'],
   },
   {
     icon: 'database',
@@ -163,21 +163,12 @@ export const entityTypeMappings: EntityTypeMapping[] = [
       'Repository Branch',
       'Data Workflow',
       'Data Workload',
-      'AI Pipeline',
       'AI Extension',
-      'Config Map',
     ],
   },
   {
     icon: 'comment',
-    values: [
-      'Call Center Service',
-      'Messaging Service',
-      'Monitor Service',
-      'Log Configuration',
-      'Domain',
-      'Registered Domain',
-    ],
+    values: ['Call Center Service', 'Messaging Service', 'Monitor Service', 'Log Configuration'],
   },
   {
     icon: 'key',
