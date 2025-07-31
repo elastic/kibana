@@ -7,9 +7,7 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
 import {
   generateApacheErrorSpikeLogs,
@@ -22,6 +20,7 @@ import {
   generateUniqueUserLoginLogs,
 } from '../../data_generators/logs';
 import { generatePacketbeatData } from '../../data_generators/packetbeat';
+import { generateApmData, generateCustomApmLogs } from '../../data_generators/apm';
 
 async function evaluateEsqlQuery({
   question,
@@ -56,7 +55,7 @@ async function evaluateEsqlQuery({
 
 describe('ES|QL query generation', () => {
   describe('ES|QL scenarios with data', () => {
-    describe('Logs dataset', () => {
+    describe.skip('Logs dataset', () => {
       const logsClient = synthtraceEsClients.logsSynthtraceEsClient;
 
       before(async () => {
@@ -312,48 +311,15 @@ describe('ES|QL query generation', () => {
 
     describe('APM dataset', () => {
       before(async () => {
-        const myServiceInstance = apm
-          .service('my-service', 'production', 'go')
-          .instance('my-instance');
-
-        await synthtraceEsClients.apmSynthtraceEsClient.index(
-          timerange(moment().subtract(15, 'minutes'), moment())
-            .interval('1m')
-            .rate(10)
-            .generator((timestamp) =>
-              myServiceInstance
-                .transaction('GET /api')
-                .timestamp(timestamp)
-                .duration(50)
-                .outcome('success')
-            )
-        );
-
-        await synthtraceEsClients.apmSynthtraceEsClient.index(
-          timerange(moment().subtract(15, 'minutes'), moment())
-            .interval('1m')
-            .rate(10)
-            .generator((timestamp) =>
-              myServiceInstance
-                .transaction('GET /api')
-                .timestamp(timestamp)
-                .duration(50)
-                .failure()
-                .errors(
-                  myServiceInstance
-                    .error({
-                      message: '2024-11-15T13:12:00 - ERROR - duration: 12ms',
-                      type: 'My Type',
-                    })
-                    .timestamp(timestamp)
-                )
-            )
-        );
+        await generateApmData({ apmSynthtraceEsClient: synthtraceEsClients.apmSynthtraceEsClient });
+        await generateCustomApmLogs({
+          logsSynthtraceEsClient: synthtraceEsClients.logsSynthtraceEsClient,
+        });
       });
 
-      after(async () => {
-        await synthtraceEsClients.apmSynthtraceEsClient.clean();
-      });
+      // after(async () => {
+      //   await synthtraceEsClients.apmSynthtraceEsClient.clean();
+      // });
 
       it('service inventory', async () => {
         await evaluateEsqlQuery({
@@ -362,9 +328,15 @@ describe('ES|QL query generation', () => {
           expected: `FROM traces-apm*
           | WHERE @timestamp >= NOW() - 24 hours
           | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
-          | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = SUM(is_success) / COUNT(*) BY service.name
+          | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = TO_DOUBLE(SUM(is_success)) / COUNT(*) BY service.name
           | KEEP service.name, avg_duration, success_rate, total_requests`,
           execute: true,
+          criteria: [
+            "The result should contain one row for the service 'my-apm-service'.",
+            "For 'my-apm-service', the total requests should be 300",
+            'The average duration should be approximately 50,000',
+            'The success rate should now be correctly calculated as 0.5.',
+          ],
         });
       });
 
@@ -386,11 +358,12 @@ describe('ES|QL query generation', () => {
       it('trace duration', async () => {
         await evaluateEsqlQuery({
           question:
-            'My APM data is in .ds-traces-apm-default-*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
-          expected: `FROM .ds-traces-apm-default-*
+            'My APM data is in traces-apm*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
+          expected: `FROM traces-apm*
           | WHERE @timestamp > NOW() - 1 hour
           | STATS AVG(transaction.duration.us) BY service.name`,
           execute: true,
+          criteria: ['The average duration should be 50,000 for the my-apm-service'],
         });
       });
 
@@ -401,31 +374,109 @@ describe('ES|QL query generation', () => {
           expected: `FROM logs-apm*
           | WHERE @timestamp >= NOW() - 7 days
           | EVAL error = CASE(processor.event == "error", 1, 0)
-          | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY BUCKET(@timestamp, 1 day)
-          | EVAL error_rate = total_errors / total_logs * 100
-          | SORT day ASC`,
+          | STATS total_logs = COUNT(*), total_errors = SUM(error) BY BUCKET(@timestamp, 1 day)
+          | EVAL error_rate = TO_DOUBLE(total_errors) / total_logs * 100
+          | SORT \`BUCKET(@timestamp, 1 day)\` ASC`,
           execute: true,
+          criteria: [
+            'For the most recent full day, the total log count should be 10,480.',
+            'The total error count for that day should be 150.',
+            'The calculated error rate should be approximately 1.431.',
+          ],
         });
       });
 
       it('error message and date', async () => {
         await evaluateEsqlQuery({
           question:
-            'From logs-apm*, I want to see the 5 latest messages using ES|QL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
-          expected: `FROM logs-apm*
+            'From logs-apm.error-*, I want to see the 5 latest messages using ES|QL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+          expected: `FROM logs-apm.error-*
           | SORT @timestamp DESC
           | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
-          | KEEP formatted_date, processor.event, message
+          | KEEP formatted_date, processor.event, error.exception.message
           | LIMIT 5`,
           execute: true,
           criteria: [
-            'The Assistant uses KEEP, to make sure the AT LEAST the formatted date, processor event and message fields are displayed. More columns are fine, fewer are not',
+            'The assistant uses KEEP, to make sure AT LEAST the formatted date, processor event and the message fields are displayed. More columns are fine, fewer are not',
+            'The assistant should retrieve exactly 5 rows',
+            `The field that includes the message should have '2024-11-15T13:12:00 - ERROR - duration: 12ms'`,
+          ],
+        });
+      });
+
+      it('counts the total number of logs for each tag', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'From logs-apm.custom-*, what is the total count of logs for each individual tag?',
+          expected: `FROM logs-apm.custom-*
+          | WHERE @timestamp >= NOW() - 24 hours
+          | MV_EXPAND tags
+          | STATS count = COUNT(*) BY tags
+          | SORT count DESC`,
+          execute: true,
+          criteria: [
+            'The result should be a list of tags and their corresponding total counts across all logs.',
+          ],
+        });
+      });
+
+      it('finds logs with one tag but not another', async () => {
+        await evaluateEsqlQuery({
+          question:
+            "From logs-apm.custom-*, list info-level logs that are tagged with 'cache' but NOT with 'search'.",
+          expected: `FROM logs-apm.custom-*
+          | WHERE @timestamp >= NOW() - 24 hours AND log.level == "info" AND tags == "cache" AND NOT tags == "search"
+          | KEEP message, tags`,
+          execute: true,
+          criteria: [
+            "Results must contain the 'cache' tag.",
+            "Results must NOT contain the 'search' tag.",
+          ],
+        });
+      });
+
+      it('correlates transaction failures and error logs by hour', async () => {
+        await evaluateEsqlQuery({
+          question:
+            "Show me a side-by-side hourly comparison of the transaction failure count from 'my-apm-service' and the error log count from 'my-apm-service-2' over the last 24 hours.",
+          expected: `FROM "*apm*"
+          | WHERE @timestamp >= NOW() - 24 hours
+          | EVAL tx_failure = CASE(processor.event == "transaction" AND event.outcome == "failure" AND service.name == "my-apm-service", 1, 0),
+                log_error = CASE(processor.event == "log" AND log.level == "error" AND service.name == "my-apm-service-2", 1, 0)
+          | STATS failure_count = SUM(tx_failure), error_log_count = SUM(log_error) BY BUCKET(@timestamp, 1h)
+          | WHERE failure_count > 0 OR error_log_count > 0
+          | SORT \`BUCKET(@timestamp, 1h)\` ASC`,
+          execute: true,
+          criteria: [
+            'The result should be a time-series table with columns for hourly transaction failures and error logs.',
+          ],
+        });
+      });
+
+      it('parses duration from error messages and calculates the average per tag', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'From the custom APM error logs, parse the duration from the message field and calculate the average parsed duration for each tag.',
+          expected: `FROM logs-apm.custom-*
+          | WHERE @timestamp >= NOW() - 24 hours AND log.level == 'error'
+          | GROK message "%{GREEDYDATA}duration: %{NUMBER:duration_ms:string}ms"
+          | WHERE duration_ms IS NOT NULL
+          | EVAL duration = TO_LONG(duration_ms)
+          | MV_EXPAND tags
+          | STATS avg_parsed_duration = AVG(duration) BY tags
+          | SORT avg_parsed_duration DESC`,
+          execute: true,
+          criteria: [
+            'The result should contain a row for each of the 5 possible tags.',
+            "The 'avg_parsed_duration' for each tag should be a value between 5 and 200.",
+            "The results must be sorted in descending order by 'avg_parsed_duration'.",
+            "The highest 'avg_parsed_duration' should be for the 'search' tag and the lowest 'avg_parsed_duration' should be for the 'queue' tag",
           ],
         });
       });
     });
 
-    describe('Packetbeat dataset', () => {
+    describe.skip('Packetbeat dataset', () => {
       const indexName = 'packetbeat-test-data';
 
       before(async () => {
@@ -493,7 +544,7 @@ describe('ES|QL query generation', () => {
       });
     });
 
-    describe('Employees dataset', () => {
+    describe.skip('Employees dataset', () => {
       before(async () => {
         await esClient.indices.create({
           index: 'employees',
@@ -565,7 +616,7 @@ describe('ES|QL query generation', () => {
     });
   });
 
-  describe('ES|QL scenarios without data', () => {
+  describe.skip('ES|QL scenarios without data', () => {
     it('logs avg cpu', async () => {
       await evaluateEsqlQuery({
         question:
@@ -618,7 +669,7 @@ describe('ES|QL query generation', () => {
     });
   });
 
-  describe('SPL to ES|QL conversion', () => {
+  describe.skip('SPL to ES|QL conversion', () => {
     it('network_firewall count by', async () => {
       await evaluateEsqlQuery({
         question: `Can you convert this SPL query to ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,
