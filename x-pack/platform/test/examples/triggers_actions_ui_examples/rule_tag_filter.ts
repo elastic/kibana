@@ -16,11 +16,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Rule tag filter', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await PageObjects.common.navigateToApp('triggersActionsUiExample/rule_tag_filter');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     it('should load from shareable lazy loader', async () => {
