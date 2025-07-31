@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src';
+export { DataCascade, DataCascadeRow, DataCascadeRowCell } from './src/components';
+export type {
+  GroupNode,
+  LeafNode,
+  DataCascadeRowProps,
+  DataCascadeRowCellProps,
+} from './src/components';
+export * from './src/lib';
