@@ -42,7 +42,7 @@ export function setupSavedObjects({
       }
   );
 
-  savedObjects.setSecurityExtension(({ request }) => {
+  savedObjects.setSecurityExtension(({ request, typeRegistry }) => {
     return authz.mode.useRbacForRequest(request)
       ? new SavedObjectsSecurityExtension({
           actions: authz.actions,
@@ -50,6 +50,7 @@ export function setupSavedObjects({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
+          typeRegistry,
         })
       : undefined;
   });

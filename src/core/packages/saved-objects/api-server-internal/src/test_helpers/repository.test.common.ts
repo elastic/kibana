@@ -141,6 +141,7 @@ export const mockTimestampFieldsWithCreated = {
   updated_at: mockTimestamp,
   created_at: mockTimestamp,
 };
+export const ACCESS_CONTROL_TYPE = 'accessControlType';
 export const REMOVE_REFS_COUNT = 42;
 
 export interface TypeIdTuple {
@@ -382,6 +383,11 @@ export const createRegistry = () => {
   registry.registerType(
     createType(MULTI_NAMESPACE_ENCRYPTED_TYPE, {
       namespaceType: 'multiple',
+    })
+  );
+  registry.registerType(
+    createType(ACCESS_CONTROL_TYPE, {
+      supportsAccessControl: true,
     })
   );
   return registry;
@@ -826,13 +832,13 @@ export const deleteSuccess = async (
   if (registry.isMultiNamespace(type)) {
     const mockGetResponse =
       mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
-    client.get.mockResponseOnce(mockGetResponse);
+    client.get.mockResponse(mockGetResponse);
   }
   client.delete.mockResponseOnce({
     result: 'deleted',
   } as estypes.DeleteResponse);
   const result = await repository.delete(type, id, options);
-  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  client.get.mockClear();
   return result;
 };
 

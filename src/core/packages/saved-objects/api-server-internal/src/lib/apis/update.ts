@@ -110,12 +110,16 @@ export const executeUpdate = async <T>(
   });
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
+  const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: {
       type,
       id,
       existingNamespaces,
+      ...(accessControl && {
+        accessControl,
+      }),
       objectNamespace: namespace && registry.isSingleNamespace(type) ? namespace : undefined,
       name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
         attributes: { ...(preflightDocResult.rawDocSource?._source?.[type] ?? {}), ...attributes },

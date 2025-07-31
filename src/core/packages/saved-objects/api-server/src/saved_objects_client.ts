@@ -47,6 +47,9 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlObject,
 } from './apis';
 
 /**
@@ -433,4 +436,30 @@ export interface SavedObjectsClientContract {
    * @param namespace Space to which the client should be scoped to.
    */
   asScopedToNamespace(namespace: string): SavedObjectsClientContract;
+
+  /**
+   * Changes the ownership of one or more SavedObjects to a new owner passed in the options.
+   *
+   * @param type - The type of SavedObject to update
+   * @param id - The ID of the SavedObject to update
+   * @param attributes - Attributes to update
+   * @param options {@link SavedObjectsChangeOwnershipOptions} - options for the update operation
+   * @returns the {@link SavedObjectChangeOwnershipResponse}
+   */
+  changeOwnership(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the access control of one or more SavedObjects. If no option is passed or if `accessMode`
+   * is undefined, the object will be treated as editable.
+   * @param objects - The objects to change access control for
+   * @param options {@link SavedObjectsChangeAccessControlOptions} - options for the change access control operation
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   */
+  changeAccessMode(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

@@ -115,6 +115,7 @@ export function getSavedObjectFromSource<T>(
     coreMigrationVersion,
     typeMigrationVersion,
     managed,
+    accessControl,
     migrationVersion = migrationVersionCompatibility === 'compatible' && typeMigrationVersion
       ? { [type]: typeMigrationVersion }
       : undefined,
@@ -143,6 +144,7 @@ export function getSavedObjectFromSource<T>(
     attributes: doc._source[type],
     references: doc._source.references || [],
     managed,
+    accessControl,
   };
 }
 
