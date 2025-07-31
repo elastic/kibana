@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const webpackConfig = require('./src/webpack.config');
+const { webpackConfig } = require('./src/webpack.config');
 
 module.exports = {
-  managerEntries: (entry = []) => {
-    return [require.resolve('./src/lib/register'), ...entry];
-  },
-  webpackFinal: (config) => {
-    return webpackConfig({ config });
-  },
+  // managerEntries: (entry = []) => {
+  //   return [require.resolve('./src/lib/register'), ...entry];
+  // },
+  // webpackFinal: (config) => {
+  //   return webpackConfig({ config });
+  // },
   previewAnnotations: (entry) => {
     return [...entry, require.resolve('./src/lib/preview')];
   },

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from 'storybook-react-rsbuild';
 
 import { ReadyToHelp as Component } from '../ready_to_help';
 

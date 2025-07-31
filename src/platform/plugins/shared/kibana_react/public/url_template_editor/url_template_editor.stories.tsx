@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { UrlTemplateEditor } from './url_template_editor';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj } from '@storybook/react';
+import type { StoryObj } from 'storybook-react-rsbuild';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { ServiceLink } from '.';

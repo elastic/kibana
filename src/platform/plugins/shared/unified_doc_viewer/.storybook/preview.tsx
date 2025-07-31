@@ -55,8 +55,12 @@ export const argTypes: ArgTypes = {
   indexes: { control: false },
 };
 
+export const parameters = {
+  a11y: { test: true },
+};
+
 export const decorators: Decorator[] = [
-  (Story, { args: storyArgs, parameters }) => {
+  (Story, { args: storyArgs, parameters: params }) => {
     // Override items provided by the mock unified doc view services.
     const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
       // Mock locator return so the locator service returns as expected.
@@ -97,9 +101,9 @@ export const decorators: Decorator[] = [
     return (
       <>
         <Story args={{ ...storyArgs, hit }} />
-        {parameters?.docs?.description?.story && (
+        {params?.docs?.description?.story && (
           <EuiText css={{ width: '33em', float: 'right' }} size="xs" color="subdued">
-            <p>{parameters.docs.description.story}</p>
+            <p>{params.docs.description.story}</p>
           </EuiText>
         )}
       </>

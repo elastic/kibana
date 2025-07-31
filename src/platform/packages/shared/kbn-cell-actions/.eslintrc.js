@@ -199,4 +199,5 @@ const finalOverrides = inScopeOverrides.filter((override) => override.files.leng
 
 module.exports = {
   overrides: finalOverrides,
+  extends: ['plugin:storybook/recommended']
 };

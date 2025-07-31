@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { DrilldownForm } from '.';
 import type { TriggerPickerProps } from '../trigger_picker';
 

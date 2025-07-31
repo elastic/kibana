@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
+import { expect } from 'storybook/test';
 import AttributesOverview from '.';
 import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
 import basicFixture from '../../../../__fixtures__/span_otel_minimal.json';
@@ -26,4 +27,28 @@ export const Basic: Story = { args: { hit: basicFixture } };
 export const RedisSpan: Story = {
   name: 'Redis client span (processed)',
   args: { hit: redisSpanFixture },
+  /**
+   * Check if both "server.port" and "server.address" are visible.
+   * Search for "port" then check if "server.port" is visible and "server.address" is not.
+   * Clear the input.
+   */
+  play: async ({ canvas, userEvent, step }) => {
+    const searchInput = canvas.getByPlaceholderText('Search attributes names or values');
+    await step('Check initial visibility', async () => {
+      await expect(canvas.getByText('server.port')).toBeInTheDocument();
+      await expect(canvas.getByText('server.address')).toBeInTheDocument();
+    });
+    await step('Enter "6379" in the search box', async () => {
+      await userEvent.clear(searchInput);
+      await userEvent.type(searchInput, '6379');
+    });
+    await step('Check visibility after search', async () => {
+      await expect(canvas.getByText('server.port')).toBeInTheDocument();
+      await expect(canvas.getByText('6379')).toBeInTheDocument();
+      await expect(canvas.queryByText('server.address')).not.toBeInTheDocument();
+    });
+    await step('Clear the search input', async () => {
+      await userEvent.clear(searchInput);
+    });
+  },
 };

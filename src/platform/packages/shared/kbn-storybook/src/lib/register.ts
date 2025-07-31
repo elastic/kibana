@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addons } from '@storybook/manager-api';
-import { create } from '@storybook/theming';
+// import { addons } from '@storybook/manager-api';
+// import { create } from '@storybook/theming';
 
-// This configures the "Manager", or main outer view of Storybook. It is an
-// addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
-addons.setConfig({
-  theme: create({
-    base: 'light',
-    brandTitle: 'Kibana Storybook',
-    brandUrl:
-      'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-storybook',
-  }),
-  showPanel: false,
-  isFullscreen: false,
-  panelPosition: 'bottom',
-  showToolbar: true,
-});
+// // This configures the "Manager", or main outer view of Storybook. It is an
+// // addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
+// addons.setConfig({
+//   theme: create({
+//     base: 'light',
+//     brandTitle: 'Kibana Storybook',
+//     brandUrl:
+//       'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-storybook',
+//   }),
+//   showPanel: false,
+//   isFullscreen: false,
+//   panelPosition: 'bottom',
+//   showToolbar: true,
+// });

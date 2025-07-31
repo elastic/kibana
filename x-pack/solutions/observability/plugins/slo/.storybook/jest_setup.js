@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setProjectAnnotations } from '@storybook/react';
+import { setProjectAnnotations } from 'storybook-react-rsbuild';
 import * as globalStorybookConfig from './preview';
 
 setProjectAnnotations(globalStorybookConfig);

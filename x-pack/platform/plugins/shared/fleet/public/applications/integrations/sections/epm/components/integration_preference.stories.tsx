@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { Meta } from '@storybook/react';
+import type { Meta } from 'storybook-react-rsbuild';
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 
 import { IntegrationPreference as Component } from './integration_preference';
 

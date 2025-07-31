@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from 'storybook-react-rsbuild';
 import React from 'react';
 import { noop } from 'lodash';
 import { RootCauseAnalysisContainer } from '.';

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { StoryObj, Meta } from '@storybook/react';
+import { StoryObj, Meta } from 'storybook-react-rsbuild';
 
 import { CaseStatuses } from '../status/types';
 import { Tooltip } from '../tooltip/tooltip';

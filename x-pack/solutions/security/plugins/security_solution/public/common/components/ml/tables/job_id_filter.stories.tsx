@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { JobIdFilter } from './job_id_filter';
 
 const withTheme = (storyFn: () => ReactNode) => (

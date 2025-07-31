@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { makeDecorator } from '@storybook/preview-api';
+import { makeDecorator } from 'storybook/preview-api';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';

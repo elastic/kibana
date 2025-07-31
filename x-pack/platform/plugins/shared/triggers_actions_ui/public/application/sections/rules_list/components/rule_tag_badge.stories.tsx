@@ -6,8 +6,8 @@
  */
 
 import React, { ComponentProps } from 'react';
-import type { StoryFn } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { StoryFn } from 'storybook-react-rsbuild';
+import { action } from 'storybook/actions';
 import { RuleTagBadge } from './rule_tag_badge';
 
 type Args = ComponentProps<typeof RuleTagBadge>;
