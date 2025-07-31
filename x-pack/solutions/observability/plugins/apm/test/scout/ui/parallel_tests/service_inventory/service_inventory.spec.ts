@@ -7,7 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
@@ -19,7 +19,9 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test('renders page with selected date range', async ({ page }) => {
     await test.step('shows correct heading', async () => {
       expect(page.url()).toContain('/app/apm/services');
-      await expect(page.getByRole('heading', { name: 'Services', level: 1 })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Service inventory', level: 1 })
+      ).toBeVisible();
     });
 
     await test.step('shows a list of services', async () => {
