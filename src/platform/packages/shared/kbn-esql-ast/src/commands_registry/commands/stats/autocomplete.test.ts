@@ -544,6 +544,11 @@ describe('STATS Autocomplete', () => {
           'integerField | ',
           'integerField, ',
         ]);
+
+        await statsExpectSuggestions(
+          'from a | stats a=max(b) by keywordField, col0 = integerField',
+          ['integerField | ', 'integerField, ']
+        );
       });
 
       test('attaches field range', async () => {
