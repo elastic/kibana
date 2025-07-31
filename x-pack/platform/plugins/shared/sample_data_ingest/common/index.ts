@@ -15,3 +15,4 @@ export const indexNamePrefix = 'kibana_sample_data_';
 
 export { type StatusResponse, type InstallResponse, DatasetSampleType } from './types';
 export { STATUS_API_PATH, INSTALL_API_PATH } from './routes';
+export { getSampleDataIndexName } from './utils';

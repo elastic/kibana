@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { DatasetSampleType, type StatusResponse } from '../../../common/types';
+import { DatasetSampleType, type StatusResponse, getSampleDataIndexName } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import type { ZipArchive } from '../types';
@@ -65,7 +65,7 @@ export class SampleDataManager {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
     let archive: ZipArchive | undefined;
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
 
     try {
       await this.removeSampleData({ sampleType, esClient });
@@ -111,7 +111,7 @@ export class SampleDataManager {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
   }): Promise<void> {
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
     await this.indexManager.deleteIndex({ indexName, esClient });
   }
 
@@ -122,7 +122,7 @@ export class SampleDataManager {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
   }): Promise<StatusResponse> {
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
     try {
       const isIndexExists = await esClient.indices.exists({ index: indexName });
       return {
@@ -133,9 +133,5 @@ export class SampleDataManager {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
       return { status: 'uninstalled' };
     }
-  }
-
-  private getSampleDataIndexName(sampleType: DatasetSampleType): string {
-    return `${this.indexPrefixName}${sampleType.toLowerCase()}`;
   }
 }

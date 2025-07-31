@@ -298,41 +298,6 @@ describe('SampleDataManager', () => {
     });
   });
 
-  describe('getSampleDataIndexName', () => {
-    it('should generate correct index names for different sample types', async () => {
-      const kibanaType = 'kibana' as DatasetSampleType;
-      const elasticsearchType = 'elasticsearch' as DatasetSampleType;
-
-      await sampleDataManager.installSampleData({ sampleType: kibanaType, esClient });
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'kibana_sample_data_kibana',
-        })
-      );
-
-      jest.clearAllMocks();
-
-      await sampleDataManager.installSampleData({ sampleType: elasticsearchType, esClient });
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'kibana_sample_data_elasticsearch',
-        })
-      );
-    });
-
-    it('should handle uppercase sample types correctly', async () => {
-      const sampleType = 'KIBANA' as DatasetSampleType;
-
-      await sampleDataManager.installSampleData({ sampleType, esClient });
-
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'kibana_sample_data_kibana',
-        })
-      );
-    });
-  });
-
   describe('integration scenarios', () => {
     it('should handle full installation workflow', async () => {
       const sampleType = 'kibana' as DatasetSampleType;
