@@ -24,7 +24,7 @@ export async function ensureInstalledPackage(
       .getInternalFleetServices()
       .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
 
-    logger.debug(
+    logger.info(
       `ensureInstalledPackage: "${PREBUILT_RULES_PACKAGE_NAME}" version ${pkgVersion} is ${packageInstallationResult.status}`
     );
 

@@ -36,7 +36,7 @@ export async function findLatestPackageVersion(
 
     return result.version;
   } catch (error) {
-    logger.debug(
+    logger.error(
       `fetchFindLatestPackage: Error finding latest package version for "${packageName}" with prerelease=${isPrerelease}`,
       error
     );
