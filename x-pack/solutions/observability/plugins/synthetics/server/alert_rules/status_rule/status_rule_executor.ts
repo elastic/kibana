@@ -403,10 +403,14 @@ export class StatusRuleExecutor {
     } else {
       const downConfigsById = getConfigsByIds(downConfigs);
 
-      for (const [configId, configs] of downConfigsById) {
-        const totalLocationsNo = configs.length;
-        const upLocationsNo = configs.filter((c) => (c.ping.summary?.up ?? 0) > 0).length;
-        if (recoveryMode === 'firstUp' && upLocationsNo > totalLocationsNo - locationsThreshold) {
+      for (const [configId, locationConfigs] of downConfigsById) {
+        // If recoveryMode is 'firstUp', we only consider configs that are not up
+        const configs =
+          recoveryMode === 'firstUp'
+            ? locationConfigs.filter((c) => (c.ping.summary?.up ?? 0) === 0)
+            : locationConfigs;
+
+        if (!configs.length) {
           continue;
         }
 
