@@ -6,22 +6,16 @@
  */
 
 import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
-import {
-  QueryClient,
-  QueryKey,
-  useIsMutating,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useMemo, useRef } from 'react';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import { useConversationId } from './use_conversation_id';
+import { useIsSendingMessage } from './use_is_sending_message';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
-import { useConversationId } from './use_conversation_id';
-import { createNewConversation, newConversationId } from '../utils/new_conversation';
-import { mutationKeys } from '../mutation_keys';
 
 const createActions = ({
   queryClient,
@@ -138,9 +132,7 @@ export const useConversation = () => {
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
-  const isSendingMessage = Boolean(
-    useIsMutating({ mutationKey: mutationKeys.sendMessage, fetching: true })
-  );
+  const isSendingMessage = useIsSendingMessage();
   const { data: conversation, isLoading } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent

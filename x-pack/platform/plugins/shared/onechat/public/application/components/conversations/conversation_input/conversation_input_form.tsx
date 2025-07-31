@@ -9,6 +9,7 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
@@ -28,8 +29,9 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   setMessage,
   onSubmit,
 }) => {
+  const isSendingMessage = useIsSendingMessage();
   const { euiTheme } = useEuiTheme();
-  const disabled = !message.trim();
+  const disabled = !message.trim() || isSendingMessage;
 
   const handleSubmit = () => {
     if (disabled) {
