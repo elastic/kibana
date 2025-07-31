@@ -19,11 +19,10 @@ import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
-import { eventTypes } from '../../../common/events';
 import { mutationKeys } from '../mutation_keys';
 import { useConversation } from './use_conversation';
-import { useKibana } from './use_kibana';
 import { useOnechatServices } from './use_onechat_service';
+import { useReportConverseError } from './use_report_error';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -47,9 +46,7 @@ const showError = (error: unknown) => {
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
-  const {
-    services: { analytics },
-  } = useKibana();
+  const { reportConverseError } = useReportConverseError();
   const { actions, conversationId, conversation } = useConversation();
   const { agent_id: agentId } = conversation ?? {};
   const [isResponseLoading, setIsResponseLoading] = useState(false);
@@ -124,15 +121,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     },
     onError: (err) => {
       setIsResponseLoading(false);
-
-      analytics.reportEvent(eventTypes.ONECHAT_CONVERSE_ERROR, {
-        error_type: err?.constructor?.name || 'unknown',
-        error_message: err instanceof Error ? err.message : String(err),
-        error_stack: err instanceof Error ? err.stack : undefined,
-        conversation_id: conversationId,
-        agent_id: agentId,
-        connector_id: connectorId,
-      });
+      reportConverseError(err, { conversationId, agentId, connectorId });
     },
   });
 
