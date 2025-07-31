@@ -127,26 +127,17 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
-    this.logger?.debug('RULE SOURCE IMPORTER - setup starts');
-
     if (!this.latestPackagesInstalled) {
-      this.logger?.debug('RULE SOURCE IMPORTER - latest package not installed');
       await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logger);
       this.latestPackagesInstalled = true;
-    } else {
-      this.logger?.debug('RULE SOURCE IMPORTER - latest package already installed');
     }
 
     this.rulesToImport = rules.map((rule) => ({ rule_id: rule.rule_id, version: rule.version }));
-    this.logger?.debug('RULE SOURCE IMPORTER - fetchMatchingAssetsByRuleId()');
     this.matchingAssetsByRuleId = await this.fetchMatchingAssetsByRuleId();
-    this.logger?.debug('RULE SOURCE IMPORTER - fetchAvailableRuleAssetIds()');
     this.availableRuleAssetIds = new Set(await this.fetchAvailableRuleAssetIds());
-    this.logger?.debug('RULE SOURCE IMPORTER - fetchInstalledRulesByIds()');
     this.currentRulesById = await this.fetchInstalledRulesByIds(
       this.rulesToImport.map((rule) => rule.rule_id)
     );
-    this.logger?.debug('RULE SOURCE IMPORTER - setup complete');
   }
 
   public isPrebuiltRule(rule: RuleToImport): boolean {
