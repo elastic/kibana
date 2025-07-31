@@ -205,7 +205,7 @@ export function getSavedSearchContainer({
 
     updateSavedSearch({
       savedSearch: nextSavedSearch,
-      globalState: getCurrentTab().lastPersistedGlobalState,
+      globalState: getCurrentTab().globalState,
       services,
       useFilterAndQueryServices: true,
       dataView: replacementDataView,
@@ -248,7 +248,7 @@ export function getSavedSearchContainer({
       savedSearch: { ...previousSavedSearch },
       dataView,
       appState: nextState || {},
-      globalState: getCurrentTab().lastPersistedGlobalState,
+      globalState: getCurrentTab().globalState,
       services,
       useFilterAndQueryServices,
     });

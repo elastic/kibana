@@ -29,7 +29,7 @@ export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
-  globalState: TabState['lastPersistedGlobalState'] | undefined;
+  globalState: TabState['globalState'] | undefined;
 };
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
@@ -165,7 +165,7 @@ export const createTabsStorageManager = ({
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
-      globalState: tabState.lastPersistedGlobalState || tabState.initialGlobalState,
+      globalState: tabState.globalState || tabState.initialGlobalState,
     };
   };
 
@@ -195,7 +195,7 @@ export const createTabsStorageManager = ({
     const internalState = getDefinedStateOnly(tabStateInStorage.internalState);
     const appState = getDefinedStateOnly(tabStateInStorage.appState);
     const globalState = getDefinedStateOnly(
-      tabStateInStorage.globalState || defaultTabState.lastPersistedGlobalState
+      tabStateInStorage.globalState || defaultTabState.globalState
     );
     return {
       ...defaultTabState,
@@ -203,7 +203,7 @@ export const createTabsStorageManager = ({
       initialInternalState: internalState,
       initialAppState: appState,
       initialGlobalState: globalState,
-      lastPersistedGlobalState: globalState || {},
+      globalState: globalState || {},
     };
   };
 

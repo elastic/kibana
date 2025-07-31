@@ -132,7 +132,7 @@ export const useDiscoverInTimelineActions = (
           discoverState?.internalState.dispatch(
             discoverState.injectCurrentTab(discoverState.internalStateActions.setTabGlobalState)({
               globalState: {
-                ...discoverState.getCurrentTab().lastPersistedGlobalState,
+                ...discoverState.getCurrentTab().globalState,
                 timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
               },
             })
@@ -149,7 +149,7 @@ export const useDiscoverInTimelineActions = (
         discoverState?.internalState.dispatch(
           discoverState.injectCurrentTab(discoverState.internalStateActions.setTabGlobalState)({
             globalState: {
-              ...discoverState.getCurrentTab().lastPersistedGlobalState,
+              ...discoverState.getCurrentTab().globalState,
               timeRange: defaultDiscoverTimeRange,
             },
           })

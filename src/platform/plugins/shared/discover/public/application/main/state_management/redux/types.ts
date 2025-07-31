@@ -42,7 +42,7 @@ export interface TabState extends TabItem {
   initialGlobalState?: TabStateGlobalState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
-  lastPersistedGlobalState: TabStateGlobalState;
+  globalState: TabStateGlobalState;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
