@@ -10,7 +10,7 @@ import { DatasetSampleType, getSampleDataIndexName } from '.';
 describe('getSampleDataIndexName', () => {
   it('should generate correct index names', async () => {
     expect(getSampleDataIndexName(DatasetSampleType.elasticsearch)).toBe(
-      'kibana_sample_data_elasticsearch'
+      'kibana_sample_data_elasticsearch_documentation'
     );
   });
 
