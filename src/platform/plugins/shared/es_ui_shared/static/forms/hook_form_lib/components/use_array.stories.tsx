@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react-webpack5';
+import { Meta } from 'storybook-react-rsbuild';
 
 import { UseArray } from './use_array';
 import { useArrayStories } from './__stories__';

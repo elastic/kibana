@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Decorator } from '@storybook/react-webpack5';
+import { Decorator } from 'storybook-react-rsbuild';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
 import { StorybookContextDecorator } from './decorator';
 

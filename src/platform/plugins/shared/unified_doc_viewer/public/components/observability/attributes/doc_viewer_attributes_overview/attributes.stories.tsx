@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
 import { expect } from 'storybook/test';
 import AttributesOverview from '.';
 import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
@@ -38,12 +38,13 @@ export const RedisSpan: Story = {
       await expect(canvas.getByText('server.port')).toBeInTheDocument();
       await expect(canvas.getByText('server.address')).toBeInTheDocument();
     });
-    await step('Enter "port" in the search box', async () => {
+    await step('Enter "6379" in the search box', async () => {
       await userEvent.clear(searchInput);
-      await userEvent.type(searchInput, 'port');
+      await userEvent.type(searchInput, '6379');
     });
     await step('Check visibility after search', async () => {
       await expect(canvas.getByText('server.port')).toBeInTheDocument();
+      await expect(canvas.getByText('6379')).toBeInTheDocument();
       await expect(canvas.queryByText('server.address')).not.toBeInTheDocument();
     });
     await step('Clear the search input', async () => {

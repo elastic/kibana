@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
-import type { Meta, StoryFn } from '@storybook/react-webpack5';
+import type { Meta, StoryFn } from 'storybook-react-rsbuild';
 import { MemoryRouter } from 'react-router-dom';
 import { useArgs } from 'storybook/preview-api';
 import { AssetDetails } from './asset_details';

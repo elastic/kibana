@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiToolTip,
 } from '@elastic/eui';
-import type { StoryFn, Meta, StoryObj } from '@storybook/react-webpack5';
+import type { StoryFn, Meta, StoryObj } from 'storybook-react-rsbuild';
 import React, { useEffect, useState, useCallback } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { useArgs } from 'storybook/preview-api';

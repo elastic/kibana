@@ -6,7 +6,7 @@
  */
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { SpanFlyout } from '.';

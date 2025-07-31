@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react-webpack5';
+import { Meta, StoryFn } from 'storybook-react-rsbuild';
 import React from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
 import { Streams } from '@kbn/streams-schema';

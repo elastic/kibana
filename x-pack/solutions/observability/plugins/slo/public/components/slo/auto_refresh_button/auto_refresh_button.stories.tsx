@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type { StoryObj } from '@storybook/react-webpack5';
+import type { StoryObj } from 'storybook-react-rsbuild';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { AutoRefreshButton as Component } from './auto_refresh_button';

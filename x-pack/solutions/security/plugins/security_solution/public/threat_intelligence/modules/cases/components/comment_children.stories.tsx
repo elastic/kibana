@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { TransactionFlyout } from '.';

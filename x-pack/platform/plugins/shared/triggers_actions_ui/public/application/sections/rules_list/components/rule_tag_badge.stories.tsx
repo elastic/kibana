@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { RuleTagBadge } from './rule_tag_badge';
 

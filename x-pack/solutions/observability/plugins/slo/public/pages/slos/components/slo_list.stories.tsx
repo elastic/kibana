@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloList as Component } from './slo_list';

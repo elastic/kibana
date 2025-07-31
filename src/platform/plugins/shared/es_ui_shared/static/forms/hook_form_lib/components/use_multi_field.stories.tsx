@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react-webpack5';
+import { Meta } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 

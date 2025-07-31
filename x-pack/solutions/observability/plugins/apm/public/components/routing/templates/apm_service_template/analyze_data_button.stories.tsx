@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj, Meta } from '@storybook/react-webpack5';
+import type { StoryObj, Meta } from 'storybook-react-rsbuild';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

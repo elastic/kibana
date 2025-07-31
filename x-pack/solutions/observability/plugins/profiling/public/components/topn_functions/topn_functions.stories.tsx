@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta } from '@storybook/react-webpack5';
+import type { Meta } from 'storybook-react-rsbuild';
 import React from 'react';
 import { TopNFunctionsView } from '../../views/functions/topn';
 import { MockProfilingDependenciesStorybook } from '../contexts/profiling_dependencies/mock_profiling_dependencies_storybook';

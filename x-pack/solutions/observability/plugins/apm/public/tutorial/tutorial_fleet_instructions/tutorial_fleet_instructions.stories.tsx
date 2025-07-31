@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj } from '@storybook/react-webpack5';
+import type { StoryObj } from 'storybook-react-rsbuild';
 import React from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import { TutorialFleetInstructions } from '.';

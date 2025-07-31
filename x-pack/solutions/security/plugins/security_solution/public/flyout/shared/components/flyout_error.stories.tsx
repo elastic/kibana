@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { FlyoutError } from './flyout_error';
 
 export default {

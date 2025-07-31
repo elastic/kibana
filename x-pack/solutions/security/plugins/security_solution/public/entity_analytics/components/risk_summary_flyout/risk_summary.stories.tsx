@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';

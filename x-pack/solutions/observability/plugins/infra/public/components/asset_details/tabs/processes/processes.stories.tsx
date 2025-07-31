@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryFn } from '@storybook/react-webpack5';
+import type { Meta, StoryFn } from 'storybook-react-rsbuild';
 import {
   DecorateWithKibanaContext,
   DecorateWithAssetDetailsStateContext,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react-webpack5';
+import { Meta, StoryFn } from 'storybook-react-rsbuild';
 
 import { NeedLicenseUpgrade as Component } from '../need_license_upgrade';
 

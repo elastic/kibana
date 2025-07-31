@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
 
 import { DeprecationBadge } from './deprecation_badge';
 

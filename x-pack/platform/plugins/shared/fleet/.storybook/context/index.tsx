@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
-import type { Decorator } from '@storybook/react-webpack5';
+import type { Decorator } from 'storybook-react-rsbuild';
 import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, StoryFn } from '@storybook/react-webpack5';
+import type { Meta, StoryFn } from 'storybook-react-rsbuild';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';

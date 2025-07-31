@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {

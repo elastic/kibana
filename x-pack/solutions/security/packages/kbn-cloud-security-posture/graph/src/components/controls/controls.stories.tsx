@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
 import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from 'storybook/actions';

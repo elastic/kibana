@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   AlertLifecycleStatusBadge,

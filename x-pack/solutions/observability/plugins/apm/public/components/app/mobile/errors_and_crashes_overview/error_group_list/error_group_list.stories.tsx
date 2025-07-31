@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj, Meta } from '@storybook/react-webpack5';
+import type { StoryObj, Meta } from 'storybook-react-rsbuild';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';

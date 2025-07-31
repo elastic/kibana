@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { StoryObj } from '@storybook/react-webpack5';
+import type { StoryObj } from 'storybook-react-rsbuild';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { HttpStart, NotificationsStart } from '@kbn/core/public';

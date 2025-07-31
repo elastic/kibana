@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from 'storybook/actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { StoryObj } from '@storybook/react-webpack5';
+import type { StoryObj } from 'storybook-react-rsbuild';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
 import { FiltersBuilder } from '../filters_builder';
 

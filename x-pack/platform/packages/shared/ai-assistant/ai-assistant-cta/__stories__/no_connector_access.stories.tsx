@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react-webpack5';
+import { Meta, StoryFn } from 'storybook-react-rsbuild';
 
 import { NoConnectorAccess as Component } from '../no_connector_access';
 

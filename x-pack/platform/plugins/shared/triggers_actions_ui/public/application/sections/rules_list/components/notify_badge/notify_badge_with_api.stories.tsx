@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StoryObj, Meta, StoryFn } from '@storybook/react-webpack5';
+import { StoryObj, Meta, StoryFn } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';

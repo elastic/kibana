@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryFn, StoryObj } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';

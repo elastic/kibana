@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryFn, StoryObj } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { Tab, type TabProps } from '../tab';
 import { servicesMock } from '../../../__mocks__/services';

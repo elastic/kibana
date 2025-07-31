@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, StoryFn } from '@storybook/react-webpack5';
+import type { Meta, StoryFn } from 'storybook-react-rsbuild';
 import React from 'react';
 import { action } from 'storybook/actions';
 import { TraceWaterfall } from '.';

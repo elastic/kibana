@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 
 import React, { useState } from 'react';
-import type { Meta } from '@storybook/react-webpack5';
+import type { Meta } from 'storybook-react-rsbuild';
 
 import { EuiButton } from '@elastic/eui';
 

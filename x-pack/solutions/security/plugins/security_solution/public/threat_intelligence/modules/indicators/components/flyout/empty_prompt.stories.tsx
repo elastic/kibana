@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 

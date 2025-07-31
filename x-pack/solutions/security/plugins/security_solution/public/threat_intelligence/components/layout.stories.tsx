@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { EuiText } from '@elastic/eui';
 import { DefaultPageLayout } from './layout';
 import { StoryProvidersComponent } from '../mocks/story_providers';

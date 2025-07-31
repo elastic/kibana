@@ -6,7 +6,7 @@
  */
 
 import { action } from 'storybook/actions';
-import type { Meta } from '@storybook/react-webpack5';
+import type { Meta } from 'storybook-react-rsbuild';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';

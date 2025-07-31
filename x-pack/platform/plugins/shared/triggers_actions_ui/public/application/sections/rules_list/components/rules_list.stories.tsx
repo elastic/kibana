@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps, useEffect } from 'react';
-import { Meta } from '@storybook/react-webpack5';
+import { Meta } from 'storybook-react-rsbuild';
 import { action } from 'storybook/actions';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { RulesList, RulesListProps } from './rules_list';

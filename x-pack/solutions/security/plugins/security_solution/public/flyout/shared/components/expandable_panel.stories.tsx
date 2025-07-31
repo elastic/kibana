@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react-webpack5';
+import type { StoryFn } from 'storybook-react-rsbuild';
 import { EuiIcon } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
 

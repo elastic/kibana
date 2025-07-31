@@ -6,7 +6,7 @@
  */
 
 import { actions } from 'storybook/actions';
-import type { Meta } from '@storybook/react-webpack5';
+import type { Meta } from 'storybook-react-rsbuild';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';

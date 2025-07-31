@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import type { Meta, StoryObj } from '@storybook/react-webpack5';
+import type { Meta, StoryObj } from 'storybook-react-rsbuild';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { NodeShapeContainer } from './styles';
 import { NodeExpandButton } from './node_expand_button';
