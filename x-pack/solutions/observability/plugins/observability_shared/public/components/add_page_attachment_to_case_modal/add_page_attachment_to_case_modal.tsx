@@ -15,6 +15,7 @@ import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { NotificationsStart } from '@kbn/core/public';
 import { useChatService } from '../../hooks/use_chat_service';
+import { usePageSummary } from '../../hooks/use_page_summary';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
@@ -114,6 +115,9 @@ function AddToCaseButtonContent({
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
   const [isCommentLoading, setIsCommentLoading] = useState(true);
   const [comment, setComment] = useState<string>('');
+  const { screenContexts } = usePageSummary({
+    observabilityAIAssistant,
+  });
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal();
 
@@ -126,6 +130,7 @@ function AddToCaseButtonContent({
             persistableStateAttachmentState: {
               ...pageAttachmentState,
               summary: comment,
+              screenContext: screenContexts,
             },
             persistableStateAttachmentTypeId: '.page',
             type: 'persistableState',
@@ -133,7 +138,7 @@ function AddToCaseButtonContent({
         ] as CaseAttachmentsWithoutOwner;
       },
     });
-  }, [casesModal, comment, pageAttachmentState]);
+  }, [casesModal, comment, pageAttachmentState, screenContexts]);
 
   return (
     <>

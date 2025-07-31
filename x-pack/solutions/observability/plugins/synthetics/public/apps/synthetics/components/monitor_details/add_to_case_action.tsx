@@ -23,6 +23,7 @@ export function AddToCaseContextItem() {
   const services = useKibana<ClientPluginsStart>().services;
   const cases = services.cases;
   const observabilityAIAssistant = services.observabilityAIAssistant;
+  const notifications = services.notifications;
   const canUseCases = cases?.helpers.canUseCases;
 
   const casesPermissions: CasesPermissions = useMemo(() => {
@@ -46,8 +47,7 @@ export function AddToCaseContextItem() {
 
   const hasCasesPermissions =
     casesPermissions.read && casesPermissions.update && casesPermissions.push;
-  const notifications = services.notifications;
-  // type checked in wrapper component
+
   const timeRange: TimeRange = useMemo(
     () => ({
       from: dateRangeStart,
@@ -115,6 +115,7 @@ export function AddToCaseContextItem() {
           cases={cases}
           observabilityAIAssistant={observabilityAIAssistant}
           onCloseModal={onCloseModal}
+          notifications={notifications}
         />
       )}
     </>
