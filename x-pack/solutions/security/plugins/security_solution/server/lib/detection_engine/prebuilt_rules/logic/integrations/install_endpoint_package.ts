@@ -13,7 +13,7 @@ import { ensureInstalledPackage } from './ensure_installed_package';
 
 export async function installEndpointPackage(
   context: SecuritySolutionApiRequestHandlerContext,
-  logger?: Logger
+  logger: Logger
 ) {
   const pkgVersion = await findLatestPackageVersion(context, ENDPOINT_PACKAGE_NAME, logger);
 

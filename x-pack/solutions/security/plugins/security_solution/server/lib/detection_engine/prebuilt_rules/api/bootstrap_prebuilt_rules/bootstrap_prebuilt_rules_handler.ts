@@ -53,7 +53,7 @@ export const bootstrapPrebuiltRulesHandler = async (
     const packageResults: PackageInstallStatus[] = [];
 
     // Install packages sequentially to avoid high memory usage
-    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext);
+    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext, logger);
     packageResults.push({
       name: prebuiltRulesResult.package.name,
       version: prebuiltRulesResult.package.version,

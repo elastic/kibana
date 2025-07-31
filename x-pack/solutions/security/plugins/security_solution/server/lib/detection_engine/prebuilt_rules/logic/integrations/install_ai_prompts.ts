@@ -13,7 +13,7 @@ import { findLatestPackageVersion } from './find_latest_package_version';
 
 export async function installSecurityAiPromptsPackage(
   context: SecuritySolutionApiRequestHandlerContext,
-  logger?: Logger
+  logger: Logger
 ) {
   try {
     const pkgVersion = await findLatestPackageVersion(

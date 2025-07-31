@@ -11,7 +11,7 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../ty
 export async function findLatestPackageVersion(
   context: SecuritySolutionApiRequestHandlerContext,
   packageName: string,
-  logger?: Logger
+  logger: Logger
 ) {
   const securityAppClient = context.getAppClient();
   const packageClient = context.getInternalFleetServices().packages;
@@ -23,20 +23,20 @@ export async function findLatestPackageVersion(
       securityAppClient.getKibanaBranch() === 'main');
 
   try {
-    logger?.debug(
+    logger.debug(
       `fetchFindLatestPackage: Querying Fleet for latest available version of package "${packageName}" with prerelease=${isPrerelease}`
     );
     const result = await packageClient.fetchFindLatestPackage(packageName, {
       prerelease: isPrerelease,
     });
 
-    logger?.debug(
+    logger.debug(
       `fetchFindLatestPackage: Found latest version ${result.version} for package "${packageName}" with prerelease=${isPrerelease}`
     );
 
     return result.version;
   } catch (error) {
-    logger?.debug(
+    logger.debug(
       `fetchFindLatestPackage: Error finding latest package version for "${packageName}" with prerelease=${isPrerelease}`,
       error
     );

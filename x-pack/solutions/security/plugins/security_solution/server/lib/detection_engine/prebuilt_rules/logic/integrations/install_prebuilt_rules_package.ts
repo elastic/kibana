@@ -19,18 +19,16 @@ import { ensureInstalledPackage } from './ensure_installed_package';
  */
 export async function installPrebuiltRulesPackage(
   context: SecuritySolutionApiRequestHandlerContext,
-  logger?: Logger
+  logger: Logger
 ) {
   const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
 
   if (!pkgVersion) {
-    logger?.debug(`installPrebuiltRulesPackage: no package version specified in config.`);
+    logger.debug(`installPrebuiltRulesPackage: no package version specified in config.`);
     pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME, logger);
   } else {
-    logger?.debug(
-      `installPrebuiltRulesPackage: package version specified in config: ${pkgVersion}`
-    );
+    logger.debug(`installPrebuiltRulesPackage: package version specified in config: ${pkgVersion}`);
   }
 
   return ensureInstalledPackage(context, PREBUILT_RULES_PACKAGE_NAME, pkgVersion, logger);

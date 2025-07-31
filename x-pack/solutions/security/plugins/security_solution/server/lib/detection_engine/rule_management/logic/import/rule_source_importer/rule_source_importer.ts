@@ -102,7 +102,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private currentRulesById: Record<string, RuleResponse> = {};
   private rulesToImport: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
-  private logger: Logger | undefined;
+  private logger: Logger;
 
   constructor({
     context,
@@ -113,7 +113,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-    logger?: Logger;
+    logger: Logger;
   }) {
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
@@ -217,7 +217,7 @@ export const createRuleSourceImporter = ({
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-  logger?: Logger;
+  logger: Logger;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
     context,

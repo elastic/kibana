@@ -13,7 +13,7 @@ import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
 export async function ensureLatestRulesPackageInstalled(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   securityContext: SecuritySolutionApiRequestHandlerContext,
-  logger?: Logger
+  logger: Logger
 ) {
   let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   if (latestPrebuiltRules.length === 0) {

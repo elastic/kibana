@@ -24,11 +24,11 @@ export const registerPrebuiltRulesRoutes = (
 ) => {
   // Legacy endpoints that we're going to deprecate
   getPrebuiltRulesAndTimelinesStatusRoute(router);
-  installPrebuiltRulesAndTimelinesRoute(router);
+  installPrebuiltRulesAndTimelinesRoute(router, logger);
 
   // New endpoints for the rule upgrade and installation workflows
   getPrebuiltRulesStatusRoute(router);
-  performRuleInstallationRoute(router);
+  performRuleInstallationRoute(router, logger);
   performRuleUpgradeRoute(router);
   reviewRuleInstallationRoute(router);
   reviewRuleUpgradeRoute(router);

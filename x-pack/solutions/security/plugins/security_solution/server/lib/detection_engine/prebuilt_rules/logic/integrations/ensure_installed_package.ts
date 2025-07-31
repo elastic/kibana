@@ -13,10 +13,10 @@ export async function ensureInstalledPackage(
   context: SecuritySolutionApiRequestHandlerContext,
   pkgName: string,
   pkgVersion: string,
-  logger?: Logger
+  logger: Logger
 ) {
   try {
-    logger?.debug(
+    logger.debug(
       `ensureInstalledPackage: requesting Fleet to install package "${pkgName}" version ${pkgVersion} if it's not already installed.`
     );
 
@@ -24,7 +24,7 @@ export async function ensureInstalledPackage(
       .getInternalFleetServices()
       .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
 
-    logger?.debug(
+    logger.debug(
       `ensureInstalledPackage: "${PREBUILT_RULES_PACKAGE_NAME}" version ${pkgVersion} is ${packageInstallationResult.status}`
     );
 

@@ -45,7 +45,7 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  logger?: Logger
+  logger: Logger
 ) => {
   router.versioned
     .post({
