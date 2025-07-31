@@ -23,7 +23,6 @@ import { INCLUDE_CITATIONS } from '../../../prompt/prompts';
 
 interface ChatPromptTemplateInputValues {
   systemPrompt: string;
-  knowledgeHistory: string;
   messages: BaseMessage[];
 }
 
@@ -43,7 +42,6 @@ interface Inputs {
 
 export const DEFAULT_ASSISTANT_GRAPH_PROMPT_TEMPLATE = ChatPromptTemplate.fromMessages<{
   systemPrompt: string;
-  knowledgeHistory: string;
   messages: BaseMessage[];
 }>([['system', '{systemPrompt}'], new MessagesPlaceholder('messages')]);
 
@@ -92,7 +90,6 @@ export const chatPromptFactory = async (
   });
 
   const chatPrompt = await chatPromptTemplate.invoke({
-    knowledgeHistory: formattedKnowledgeHistory,
     systemPrompt,
     messages: enrichedMessages,
   });
