@@ -95,7 +95,6 @@ describe(
       changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
-      cy.getByTestSubj('expand-event', { timeout: 60000 }).should('exist');
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
       cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
