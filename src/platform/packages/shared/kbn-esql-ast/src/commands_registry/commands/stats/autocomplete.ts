@@ -216,7 +216,7 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
-        advanceCursorAfterInitialField: false,
+        advanceCursorAfterInitialColumn: false,
         ignoredColumns,
       });
     }
@@ -246,7 +246,7 @@ export async function autocomplete(
           getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
-        advanceCursorAfterInitialField: false,
+        advanceCursorAfterInitialColumn: false,
         ignoredColumns,
       });
     }
@@ -264,7 +264,7 @@ async function getExpressionSuggestions({
   callbacks,
   emptySuggestions = [],
   afterCompleteSuggestions = [],
-  advanceCursorAfterInitialField,
+  advanceCursorAfterInitialColumn,
   suggestColumns = true,
   ignoredColumns = [],
 }: {
@@ -275,7 +275,7 @@ async function getExpressionSuggestions({
   callbacks?: ICommandCallbacks;
   emptySuggestions?: ISuggestionItem[];
   afterCompleteSuggestions?: ISuggestionItem[];
-  advanceCursorAfterInitialField?: boolean;
+  advanceCursorAfterInitialColumn?: boolean;
   suggestColumns?: boolean;
   ignoredColumns?: string[];
 }): Promise<ISuggestionItem[]> {
@@ -290,7 +290,7 @@ async function getExpressionSuggestions({
         context,
         getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-        advanceCursorAfterInitialColumn: advanceCursorAfterInitialField,
+        advanceCursorAfterInitialColumn,
         ignoredColumnsForEmptyExpression: ignoredColumns,
       }))
     );

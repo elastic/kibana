@@ -116,6 +116,8 @@ describe('STATS Autocomplete', () => {
     return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
   };
   describe('STATS ...', () => {
+    afterEach(() => setTestFunctions([]));
+
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
         const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
@@ -148,6 +150,32 @@ describe('STATS Autocomplete', () => {
             'any',
             { operators: true, skipAssign: true },
             ['integer']
+          ),
+        ]);
+
+        await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) WHE', [
+          'WHERE ',
+          'BY ',
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            'any',
+            { operators: true, skipAssign: true },
+            ['double']
+          ),
+        ]);
+
+        await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) B', [
+          'WHERE ',
+          'BY ',
+          ', ',
+          '| ',
+          ...getFunctionSignaturesByReturnType(
+            Location.STATS,
+            'any',
+            { operators: true, skipAssign: true },
+            ['double']
           ),
         ]);
       });
