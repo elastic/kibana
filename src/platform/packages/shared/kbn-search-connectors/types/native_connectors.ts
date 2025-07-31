@@ -545,14 +545,16 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.confluence.urlLabel', {
-          defaultMessage: 'Confluence URL label',
+          defaultMessage: 'Confluence URL',
         }),
         options: [],
         order: 8,
         placeholder: 'http://127.0.0.1:5000',
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: translate('searchConnectors.nativeConnectors.confluence.urlTooltip', {
+          defaultMessage: 'Confluence URL, e.g. https://myworkplace.atlassian.net',
+        }),
         type: STRING,
         ui_restrictions: [],
         validations: [],
