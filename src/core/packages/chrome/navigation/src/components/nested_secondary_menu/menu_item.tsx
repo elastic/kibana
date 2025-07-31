@@ -67,7 +67,7 @@ export const Item: FC<ItemProps> = ({
       isCurrent={isCurrent}
       onClick={handleClick}
       {...props}
-      key={`nested-item-${href || Math.random()}`}
+      key={`nested-item-${id}`}
       testSubjPrefix="nestedMenuItem"
     >
       <div css={itemStyle}>
