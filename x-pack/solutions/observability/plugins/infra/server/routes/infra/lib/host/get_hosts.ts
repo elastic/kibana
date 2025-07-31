@@ -65,6 +65,7 @@ export const getHosts = async ({
       from,
       to,
       limit,
+      schema,
     }),
   ]);
 

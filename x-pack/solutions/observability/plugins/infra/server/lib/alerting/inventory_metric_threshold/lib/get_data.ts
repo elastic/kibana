@@ -8,20 +8,18 @@
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import type {
-  DataSchemaFormat,
-  InventoryItemType,
-  SnapshotMetricType,
-} from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
+import { unflattenKnownApmEventFields as unflattenKnownFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
 import type { InfraSource } from '../../../sources';
-import { createRequest } from './create_request';
+import { METADATA_BLOCKED_LIST_REGEX, createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
 import { doFieldsExist, KUBERNETES_POD_UID, termsAggField } from '../../common/utils';
 
@@ -80,6 +78,33 @@ const createContainerList = (containerContext: ContainerContext) => {
   return containerList;
 };
 
+const getMetadata = (
+  bucket: NodeBucket,
+  schema?: DataSchemaFormat
+): AdditionalContext | undefined => {
+  const bucketHits = bucket.additionalContext?.hits?.hits;
+
+  if (!bucketHits || bucketHits.length === 0) {
+    return undefined;
+  }
+
+  if (schema === DataSchemaFormat.SEMCONV) {
+    const metadata = bucketHits[0].fields;
+
+    if (!metadata) {
+      return undefined;
+    }
+
+    const filteredMetadata = Object.fromEntries(
+      Object.entries(metadata).filter(([key]) => !METADATA_BLOCKED_LIST_REGEX.test(key))
+    );
+
+    return unflattenKnownFields(filteredMetadata);
+  }
+
+  return bucketHits[0]._source;
+};
+
 export const getData = async ({
   esClient,
   nodeType,
@@ -121,9 +146,7 @@ export const getData = async ({
         ? createContainerList(bucket.containerContext)
         : undefined;
 
-      const bucketHits = bucket.additionalContext?.hits?.hits;
-      const additionalContextSource =
-        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
+      const additionalContextSource = getMetadata(bucket, schema);
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,

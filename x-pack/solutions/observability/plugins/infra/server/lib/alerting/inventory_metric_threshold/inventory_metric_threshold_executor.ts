@@ -359,6 +359,7 @@ export const createInventoryMetricThresholdExecutor =
           hostName: additionalContext?.host?.name,
           assetDetailsLocator,
           inventoryLocator,
+          schema,
         }),
         reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),

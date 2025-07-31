@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { ESSearchRequest } from '@kbn/es-types';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type {
-  DataSchemaFormat,
-  InventoryItemType,
-  SnapshotMetricType,
-} from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import type {
   InfraTimerangeInput,
   SnapshotCustomMetricInput,
@@ -20,6 +19,15 @@ import { createMetricAggregations } from './create_metric_aggregations';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
+
+const METADATA_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+const METADATA_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+
+export const METADATA_BLOCKED_LIST_REGEX = new RegExp(
+  '^' +
+    METADATA_BLOCKED_LIST.map((p) => p.replace(/\./g, '\\.').replace(/\*/g, '.*')).join('|') +
+    '$'
+);
 
 export const createRequest = async (
   index: string,
@@ -34,31 +42,14 @@ export const createRequest = async (
   fieldsExisted?: Record<string, boolean> | null,
   schema?: DataSchemaFormat
 ) => {
-  const filters: any[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: timerange.from,
-          lte: timerange.to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
-  const parsedFilters = parseFilterQuery(filterQuery);
-  if (parsedFilters) {
-    filters.push(parsedFilters);
-  }
+  const inventoryModels = findInventoryModel(nodeType);
 
-  const inventoryFields = findInventoryFields(nodeType);
-
-  const composite: any = {
+  const composite: estypes.AggregationsCompositeAggregation = {
     size: compositeSize,
-    sources: [{ node: { terms: { field: inventoryFields.id } } }],
+    sources: [{ node: { terms: { field: inventoryModels.fields.id } } }],
+    ...(afterKey ? { after: afterKey } : {}),
   };
-  if (afterKey) {
-    composite.after = afterKey;
-  }
+
   const metricAggregations = await createMetricAggregations(
     timerange,
     nodeType,
@@ -68,7 +59,7 @@ export const createRequest = async (
   );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
-  const containerContextAgg =
+  const containerContextAgg: Record<string, estypes.AggregationsAggregationContainer> | undefined =
     nodeType === 'pod' && fieldsExisted && fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
           containerContext: {
@@ -90,28 +81,45 @@ export const createRequest = async (
         }
       : undefined;
 
-  const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-  const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
-  if (!containerContextAgg) includesList.push('container.*');
+  const allowList = !containerContextAgg
+    ? METADATA_ALLOW_LIST.concat('container.*')
+    : METADATA_ALLOW_LIST;
 
-  const additionalContextAgg = {
+  const additionalContextAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     additionalContext: {
       top_hits: {
         size: 1,
-        _source: {
-          includes: includesList,
-          excludes: excludesList,
-        },
+        _source:
+          schema === DataSchemaFormat.SEMCONV
+            ? false
+            : {
+                includes: allowList,
+                excludes: METADATA_BLOCKED_LIST,
+              },
+        docvalue_fields: schema === DataSchemaFormat.SEMCONV ? allowList : [],
       },
     },
   };
 
+  const parsedFilters = parseFilterQuery(filterQuery);
   const request: ESSearchRequest = {
     allow_no_indices: true,
     ignore_unavailable: true,
     index,
     size: 0,
-    query: { bool: { filter: filters } },
+    query: {
+      bool: {
+        filter: [
+          ...(parsedFilters
+            ? Array.isArray(parsedFilters)
+              ? parsedFilters
+              : [parsedFilters]
+            : []),
+          ...rangeQuery(timerange.from, timerange.to),
+          ...(schema ? inventoryModels.nodeFilter?.({ schema }) ?? [] : []),
+        ],
+      },
+    },
     aggs: {
       nodes: {
         composite,
