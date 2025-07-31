@@ -21,6 +21,13 @@ interface Params {
   replacements?: Replacements;
   newMessages: BaseMessage[];
 }
+
+/**
+ * Fetches a conversation by its ID and appends new messages to it.
+ * If the conversation does not exist, it returns the new messages as is.
+ * If the conversation exists, it appends the new messages to the existing conversation.
+ * The returned messages are anonymized.
+ */
 export const getConversationWithNewMessage = async (params: Params) => {
   const { conversationsDataClient, conversationId } = params;
   if (!conversationsDataClient || !conversationId) {
@@ -55,11 +62,14 @@ export const getConversationWithNewMessage = async (params: Params) => {
   });
 
   if (!updatedConversation) {
-    params.logger.debug('Not updated conversation');
-    return params.newMessages;
+    params.logger.debug('Conversation was not updated with new messages');
   }
 
-  const langChainMessages = getLangChainMessages(updatedConversation.messages ?? []);
+  // Anonymized conversation
+  const conversationLangChainMessages = getLangChainMessages(existingConversation.messages ?? []);
+  // Anonymized new messages
+  const newLangChainMessages = params.newMessages;
 
-  return langChainMessages;
+  // Combine both, return the whole conversation with new messages, all anonymized
+  return [...conversationLangChainMessages, ...newLangChainMessages];
 };
