@@ -75,14 +75,14 @@ export const OptionsListEditorOptions = ({
   updateState,
   controlGroupApi,
   output,
-  input,
+  valuesSource,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
   const allowExpensiveQueries = useStateFromPublishingSubject(
     controlGroupApi.allowExpensiveQueries$
   );
 
   const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
-  const isDSLValuesSource = useMemo(() => input === ControlValuesSource.DSL, [input]);
+  const isDSLValuesSource = useMemo(() => valuesSource === ControlValuesSource.DSL, [valuesSource]);
 
   const [singleSelect, setSingleSelect] = useState<boolean>(
     isESQLOutputMode || (initialState.singleSelect ?? false)

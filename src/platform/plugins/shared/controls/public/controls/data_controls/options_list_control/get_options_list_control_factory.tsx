@@ -39,7 +39,7 @@ import {
 } from '../data_control_manager';
 import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
-import { OptionsListEditorOptions } from './components/options_list_editor_options';
+import { OptionsListEditorOptions } from './editor/options_list_editor_options';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,

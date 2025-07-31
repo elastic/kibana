@@ -14,7 +14,11 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { DefaultDataControlState } from '../../../../../common';
+import {
+  ControlOutputOption,
+  ControlValuesSource,
+  type DefaultDataControlState,
+} from '../../../../../common';
 import type { OptionsListControlState } from '../../../../../common/options_list';
 import type { ControlGroupApi } from '../../../../control_group/types';
 import { getMockedControlGroupApi } from '../../../mocks/control_mocks';
@@ -47,6 +51,8 @@ describe('Options list sorting button', () => {
         updateState={updateState}
         setControlEditorValid={jest.fn()}
         controlGroupApi={controlGroupApi}
+        output={ControlOutputOption.DSL}
+        valuesSource={ControlValuesSource.DSL}
       />
     );
     return component;
@@ -173,6 +179,8 @@ describe('Options list sorting button', () => {
             updateState={updateState}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
@@ -189,6 +197,8 @@ describe('Options list sorting button', () => {
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
@@ -208,6 +218,8 @@ describe('Options list sorting button', () => {
             updateState={updateState}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
@@ -232,6 +244,8 @@ describe('Options list sorting button', () => {
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
@@ -248,6 +262,8 @@ describe('Options list sorting button', () => {
             updateState={updateState}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
@@ -264,6 +280,8 @@ describe('Options list sorting button', () => {
             updateState={jest.fn()}
             setControlEditorValid={jest.fn()}
             controlGroupApi={controlGroupApi}
+            output={ControlOutputOption.DSL}
+            valuesSource={ControlValuesSource.DSL}
           />
         );
 
