@@ -12,45 +12,21 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
+import { LicenseInfo, MultipleLicenseInfo, getLicensesArray } from '../../utils/get_license_array';
 
-interface LicenseInfo {
-  name: string;
-  isSignatureSpecific?: boolean;
-  paramsWithLicense?: string[];
-}
-
-interface MultipleLicenseInfo {
-  licenses: LicenseInfo[];
-  hasMultipleLicenses: boolean;
-}
-
-// Helper function to get licenses array from either format
-function getLicensesArray(license: MultipleLicenseInfo | undefined): LicenseInfo[] {
-  if (license && Array.isArray(license.licenses)) {
-    return license.licenses;
-  }
-  return [];
-}
-
-// Helper function to convert license name to title case
 function toTitleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
-
 function createLicenseTooltip(license: LicenseInfo): string {
   function startsWithVowel(str: string): boolean {
     return /^[aeiouAEIOU]/.test(str);
   }
 
-  const licenseTitleCase = toTitleCase(license.name);
-  const articleType = startsWithVowel(license.name) ? 'vowel' : 'consonant';
-
   let tooltip = i18n.translate('languageDocumentation.licenseRequiredTooltip', {
-    defaultMessage:
-      'This feature requires {articleType, select, vowel {an} other {a}} {license} subscription',
+    defaultMessage: 'This feature requires {articleType} {license} subscription',
     values: {
-      license: licenseTitleCase,
-      articleType,
+      license: toTitleCase(license.name),
+      articleType: startsWithVowel(license.name) ? 'an' : 'a',
     },
   });
 

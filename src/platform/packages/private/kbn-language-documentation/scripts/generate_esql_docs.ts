@@ -11,97 +11,14 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { FunctionDefinition, Signature } from '@kbn/esql-ast';
+import { FunctionDefinition } from '@kbn/esql-ast';
 import { functions } from '../src/sections/generated/scalar_functions';
-
-interface LicenseInfo {
-  name: string;
-  isSignatureSpecific: boolean;
-  paramsWithLicense: string[];
-}
-
-interface MultipleLicenseInfo {
-  licenses: LicenseInfo[];
-  hasMultipleLicenses: boolean;
-}
-
-function getLicenseInfo(
-  fnDefinition: FunctionDefinition | undefined
-): MultipleLicenseInfo | undefined {
-  if (!fnDefinition) {
-    return undefined;
-  }
-
-  // Case 1: A top-level license exists. This takes precedence over all signature-specific licenses.
-  if (fnDefinition.license) {
-    const licenseInfo: LicenseInfo = {
-      name: fnDefinition.license,
-      isSignatureSpecific: false,
-      paramsWithLicense: [],
-    };
-    return {
-      licenses: [licenseInfo],
-      hasMultipleLicenses: false,
-    };
-  }
-
-  // Case 2: Licenses are defined at the signature level.
-  const licensesMap = aggregateLicensesFromSignatures(fnDefinition.signatures);
-
-  if (licensesMap.size === 0) {
-    return undefined;
-  }
-
-  const licenses = transformLicenseMap(licensesMap);
-
-  return {
-    licenses,
-    hasMultipleLicenses: licenses.length > 1,
-  };
-}
-
-/**
- * Aggregates licenses from an array of signatures into a map.
- * The map's key is the license name, and the value is a Set of associated parameter types.
- */
-function aggregateLicensesFromSignatures(signatures: Signature[]): Map<string, Set<string>> {
-  const licensesMap = new Map<string, Set<string>>();
-
-  for (const sig of signatures) {
-    if (sig.license) {
-      if (!licensesMap.has(sig.license)) {
-        licensesMap.set(sig.license, new Set<string>());
-      }
-      const paramTypes = licensesMap.get(sig.license)!;
-      sig.params?.forEach((param) => {
-        if (param.type) {
-          paramTypes.add(param.type);
-        }
-      });
-    }
-  }
-
-  return licensesMap;
-}
-
-/**
- * Transforms the aggregated license map into the final array of LicenseInfo objects.
- */
-function transformLicenseMap(licensesMap: Map<string, Set<string>>): LicenseInfo[] {
-  return Array.from(licensesMap.entries()).map(([name, paramsSet]) => {
-    const paramsWithLicense = Array.from(paramsSet);
-    return {
-      name,
-      isSignatureSpecific: paramsWithLicense.length > 0,
-      paramsWithLicense,
-    };
-  });
-}
+import { getLicenseInfo } from '../src/utils/get_license_info';
 
 interface DocsSectionContent {
   description: string;
   preview: boolean;
-  license: MultipleLicenseInfo | undefined;
+  license: ReturnType<typeof getLicenseInfo> | undefined;
 }
 
 (function () {
