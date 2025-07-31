@@ -21,8 +21,8 @@ import {
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IntegrationCard } from './integration_card';
-import imageSrcLight from './alert_summary_light.jpg';
-import imageSrcDark from './alert_summary_dark.jpg';
+import imageSrcLight from './alert_summary_light.webp';
+import imageSrcDark from './alert_summary_dark.webp';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.title', {
