@@ -29,32 +29,26 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
-        onClick={() => clickTreeNode(treeNode.pipelineName)}
       />
     ),
+    'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
     className:
       (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
-    children: treeNode.children.length ? ([] as Node[]) : undefined,
+    children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
-    // Disable EUI's logic for activating tree node when expanding/collapsing them
-    // We should only activate a tree node when we click on the pipeline name
-    isActive: false,
-  };
+    callback: () => clickTreeNode(treeNode.pipelineName),
+  } as unknown as Node;
 
   if (level === MAX_TREE_LEVEL) {
     if (treeNode.children.length > 0) {
       const morePipelinesNode = {
         id: `${treeNode.pipelineName}-moreChildrenPipelines`,
-        label: (
-          <MorePipelinesLabel
-            count={treeNode.children.length}
-            onClick={() => clickMorePipelines(treeNode.pipelineName)}
-          />
-        ),
+        label: <MorePipelinesLabel count={treeNode.children.length} />,
         'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
         className: 'cssTreeNode-morePipelines',
-      };
+        callback: () => clickMorePipelines(treeNode.pipelineName),
+      } as unknown as Node;
       currentNode.children!.push(morePipelinesNode);
     }
     return currentNode;

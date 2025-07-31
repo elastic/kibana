@@ -7,20 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 interface MorePipelinesLabelProps {
   count: number;
-  onClick: () => void;
 }
 
-export const MorePipelinesLabel = ({ count, onClick }: MorePipelinesLabelProps) => {
+export const MorePipelinesLabel = ({ count }: MorePipelinesLabelProps) => {
   return (
-    <EuiLink color="primary" onClick={onClick} data-test-subj="morePipelinesNodeLabel">
+    <EuiText data-test-subj="morePipelinesNodeLabel">
       {i18n.translate('ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel', {
         defaultMessage: '+{count} more {count, plural,one {pipeline} other {pipelines}}',
         values: { count },
       })}
-    </EuiLink>
+    </EuiText>
   );
 };

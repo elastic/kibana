@@ -42,7 +42,7 @@ export const TreePanel = React.memo(
     }, [setTreeRootStack]);
 
     return (
-      <EuiSplitPanel.Inner color="subdued" data-test-subj="pipelineTreePanel">
+      <EuiSplitPanel.Inner color="subdued" data-test-subj="pipelineTreePanel" style={{ overflowY: 'auto' }}>
         <EuiTitle id="pipelineTreeTitle">
           <h2>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.title', {

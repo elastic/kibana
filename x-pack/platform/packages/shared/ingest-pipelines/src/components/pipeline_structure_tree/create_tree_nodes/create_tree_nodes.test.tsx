@@ -63,7 +63,7 @@ describe('createTreeNodesFromPipelines', () => {
     const node = createTreeNodesFromPipelines(pipeline, '', clickTreeNode, clickMorePipelines);
     const { getByTestId } = renderTreeNode(node);
 
-    fireEvent.click(getByTestId('pipelineTreeNodeLink-test-pipeline'));
+    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline'));
     expect(clickTreeNode).toHaveBeenCalledWith('test-pipeline');
   });
 
@@ -144,8 +144,8 @@ describe('createTreeNodesFromPipelines', () => {
     const { getByTestId } = renderTreeNode(node);
 
     // Expand root to display the "More pipelines" node
-    fireEvent.click(getByTestId('pipelineTreeNodeLink-test-pipeline'));
-    fireEvent.click(getByTestId('morePipelinesNodeLabel'));
+    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline'));
+    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline-moreChildrenPipelines'));
     expect(clickMorePipelines).toHaveBeenCalledWith('test-pipeline');
   });
 });
