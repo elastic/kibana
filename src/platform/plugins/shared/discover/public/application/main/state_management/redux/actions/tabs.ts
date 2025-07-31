@@ -130,10 +130,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           tab.initialAppState =
             selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
             cloneDeep(existingTabToDuplicateFrom.initialAppState);
-          tab.initialGlobalState = cloneDeep({
-            ...existingTabToDuplicateFrom.initialGlobalState,
-            ...existingTabToDuplicateFrom.globalState,
-          });
+          tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
           tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
         } else {
           // the new tab is a fresh one
