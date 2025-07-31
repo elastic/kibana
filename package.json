@@ -1362,7 +1362,6 @@
     "react-shortcuts": "^2.1.0",
     "react-use": "^17.6.0",
     "react-virtualized": "^9.22.6",
-    "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.9",
     "reduce-reducers": "^1.0.4",
