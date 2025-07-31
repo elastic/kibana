@@ -242,6 +242,11 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: true,
 
   /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
+
+  /**
    * Disables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationDisabled: false,
