@@ -615,7 +615,7 @@ describe('Discover state', () => {
             savedSearch,
             services: mockServices,
           }),
-          globalState: state.getCurrentTab().lastPersistedGlobalState,
+          globalState: state.getCurrentTab().globalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -862,7 +862,7 @@ describe('Discover state', () => {
             savedSearch,
             services: mockServices,
           }),
-          globalState: state.getCurrentTab().lastPersistedGlobalState,
+          globalState: state.getCurrentTab().globalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -890,7 +890,7 @@ describe('Discover state', () => {
             savedSearch,
             services: mockServices,
           }),
-          globalState: state.getCurrentTab().lastPersistedGlobalState,
+          globalState: state.getCurrentTab().globalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -919,7 +919,7 @@ describe('Discover state', () => {
             savedSearch,
             services: mockServices,
           }),
-          globalState: state.getCurrentTab().lastPersistedGlobalState,
+          globalState: state.getCurrentTab().globalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -1079,7 +1079,7 @@ describe('Discover state', () => {
       expect(state.appState.getState().query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""") | LIMIT 10',
       });
-      expect(state.getCurrentTab().lastPersistedGlobalState.filters).toStrictEqual([]);
+      expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
       expect(state.appState.getState().filters).toStrictEqual([]);
     });
 

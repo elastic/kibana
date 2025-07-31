@@ -79,10 +79,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             rowHeight: tabSavedSearch.rowHeight,
             headerRowHeight: tabSavedSearch.headerRowHeight,
             timeRestore: newTimeRestore,
-            timeRange: newTimeRestore ? tab.lastPersistedGlobalState.timeRange : undefined,
-            refreshInterval: newTimeRestore
-              ? tab.lastPersistedGlobalState.refreshInterval
-              : undefined,
+            timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
+            refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
             rowsPerPage: tabSavedSearch.rowsPerPage,
             sampleSize:
               tabSavedSearch.sampleSize && tabSavedSearch.sampleSize === allowedSampleSize

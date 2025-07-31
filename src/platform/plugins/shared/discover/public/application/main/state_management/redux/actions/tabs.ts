@@ -105,7 +105,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const tab: TabState = {
         ...DEFAULT_TAB_STATE,
         ...{
-          lastPersistedGlobalState: {
+          globalState: {
             timeRange: services.timefilter.getTime(),
             refreshInterval: services.timefilter.getRefreshInterval(),
             filters: services.filterManager.getGlobalFilters(),
@@ -132,7 +132,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
             cloneDeep(existingTabToDuplicateFrom.initialAppState);
           tab.initialGlobalState = cloneDeep({
             ...existingTabToDuplicateFrom.initialGlobalState,
-            ...existingTabToDuplicateFrom.lastPersistedGlobalState,
+            ...existingTabToDuplicateFrom.globalState,
           });
           tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
         } else {
@@ -169,11 +169,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
 
       if (nextTab && nextTabStateContainer) {
-        const {
-          timeRange,
-          refreshInterval,
-          filters: globalFilters,
-        } = nextTab.lastPersistedGlobalState;
+        const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const appState = nextTabStateContainer.appState.getState();
         const { filters: appFilters, query } = appState;
 
@@ -218,7 +214,7 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
         tabId,
         internalState: selectTabRuntimeInternalState(runtimeStateManager, tabId),
         appState: selectTabRuntimeAppState(runtimeStateManager, tabId),
-        globalState: selectTab(getState(), tabId).lastPersistedGlobalState,
+        globalState: selectTab(getState(), tabId).globalState,
       })
     );
   };

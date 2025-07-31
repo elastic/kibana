@@ -11,7 +11,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { TabState } from './types';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
-  lastPersistedGlobalState: {},
+  globalState: {},
   isDataViewLoading: false,
   dataRequestParams: {
     timeRangeAbsolute: undefined,

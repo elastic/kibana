@@ -140,21 +140,21 @@ export const internalStateSlice = createSlice({
       action: TabAction<{
         internalState: TabState['initialInternalState'] | undefined;
         appState: DiscoverAppState | undefined;
-        globalState: TabState['lastPersistedGlobalState'] | undefined;
+        globalState: TabState['globalState'] | undefined;
       }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.lastPersistedGlobalState = action.payload.globalState || {};
+        tab.globalState = action.payload.globalState || {};
       }),
 
     setTabGlobalState: (
       state,
       action: TabAction<{
-        globalState: TabState['lastPersistedGlobalState'];
+        globalState: TabState['globalState'];
       }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.lastPersistedGlobalState = action.payload.globalState;
+        tab.globalState = action.payload.globalState;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
