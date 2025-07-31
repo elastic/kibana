@@ -105,6 +105,11 @@ const metricsApiRequest: MetricsAPIRequest = {
       },
     },
   ],
+  filters: {
+    bool: {
+      filter: [],
+    },
+  },
   limit: 3000,
   alignDataToEnd: true,
   dropPartialBuckets: true,

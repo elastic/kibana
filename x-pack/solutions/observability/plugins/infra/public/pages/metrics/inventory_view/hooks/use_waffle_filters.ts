@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { useMemo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -31,7 +31,7 @@ function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersStat
 
 export const useWaffleFilters = () => {
   const { currentView } = useInventoryViewsContext();
-
+  const { inventoryPrefill } = useAlertPrefillContext();
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
@@ -63,12 +63,9 @@ export const useWaffleFilters = () => {
     [isValidKuery, setUrlState]
   );
 
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
-  useEffect(
-    () => prefillContext.setKuery(urlState.expression),
-    [prefillContext, urlState.expression]
-  );
+  useEffect(() => {
+    inventoryPrefill.setKuery(urlState.expression);
+  }, [inventoryPrefill, urlState.expression]);
 
   return {
     filterQuery: urlState,

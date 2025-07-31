@@ -52,9 +52,11 @@ export const transformRequestToMetricsAPIRequest = async ({
           ? termQuery('cloud.account.id', snapshotRequest.accountId)
           : []),
         ...(snapshotRequest.region ? termQuery('cloud.region', snapshotRequest.region) : []),
-        ...(inventoryModel
-          .nodeFilter?.({ schema: snapshotRequest.schema })
-          .map((filter) => filter) ?? []),
+        ...(snapshotRequest.schema
+          ? inventoryModel
+              .nodeFilter?.({ schema: snapshotRequest.schema })
+              .map((filter) => filter) ?? []
+          : []),
       ],
     },
   };
