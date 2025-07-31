@@ -21,7 +21,6 @@ import {
   EuiSplitPanel,
   euiDragDropReorder,
   useEuiPaddingCSS,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
@@ -29,8 +28,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { FixedSizeList } from 'react-window';
 import { v4 as uuidv4, NIL as UUID_NIL } from 'uuid';
-import { BehaviorSubject, debounceTime } from 'rxjs';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { omit } from 'lodash';
 import { SuggestionsBox } from './suggestions_box';
 
@@ -86,26 +83,9 @@ export const ListOptionsInput = ({
   const standardListWrapperRef = useRef<HTMLDivElement>(null);
   const suggestionsBoxRef = useRef<HTMLDivElement>(null);
 
-  // Virtualized mode is very picky about re-rendering, and the normal react ref lifecycle ends up causing a lot of problems
-  // For the purpose of rendering the suggestion box, track the currently focused field with observables instead
-  const listItemHTMLIdPrefix = useGeneratedHtmlId();
-  const [focusedFieldKey$] = useState(new BehaviorSubject<string | null>(null));
-  const [focusedField$] = useState(new BehaviorSubject<HTMLInputElement | null>(null));
-  // Also track changes in virtualized mode, and queue them up for commit. This is to avoid a change in the `value` prop,
+  // Track changes in virtualized mode, and queue them up for commit. This is to avoid a change in the `value` prop,
   // which triggers a re-render, until the user is no longer interacting with the virtualized list.
   const virtualizedChangesSet = useRef<Map<string, string>>(new Map([]));
-
-  useEffectOnce(() => {
-    const focusedFieldKeySubscription = focusedFieldKey$
-      .pipe(debounceTime(0))
-      .subscribe((nextKey) =>
-        focusedField$.next(
-          document.getElementById(`${listItemHTMLIdPrefix}-${nextKey}`)?.querySelector('input') ??
-            null
-        )
-      );
-    return () => focusedFieldKeySubscription.unsubscribe();
-  });
 
   const currentOptions: ListOptionsInputOption[] = useMemo(() => {
     const parsedValue = value.length ? value : [...INITIAL_OPTIONS];
@@ -135,11 +115,10 @@ export const ListOptionsInput = ({
   );
 
   const onChooseSuggestion = useCallback(
-    (suggestion: string) => {
-      const key = focusedFieldKey$.getValue();
+    (key: string, suggestion: string) => {
       if (key) onChangeOptionLabel({ value: key, text: suggestion });
     },
-    [focusedFieldKey$, onChangeOptionLabel]
+    [onChangeOptionLabel]
   );
 
   const commitVirtualizedChanges = useCallback(() => {
@@ -200,10 +179,6 @@ export const ListOptionsInput = ({
     setNextSortDir(nextSortDir === 'asc' ? 'desc' : 'asc');
   }, [value, onChange, nextSortDir]);
 
-  const onBlurOption = useCallback(() => {
-    focusedFieldKey$.next(null);
-  }, [focusedFieldKey$]);
-
   const onDragEnd = useCallback<OnDragEndResponder>(
     ({ source, destination }) => {
       if (source && destination) {
@@ -224,62 +199,40 @@ export const ListOptionsInput = ({
   const renderOption = useCallback(
     (option: ListOptionsInputOption, index: number) => {
       return (
-        <>
-          <EuiFlexItem id={`${listItemHTMLIdPrefix}-${option.value}`}>
-            <EuiFieldText
-              compressed
-              autoFocus={!renderingInVirtualizedMode && option.isFresh}
-              fullWidth
-              defaultValue={
-                /** Virtualizing breaks focus on re-render, so render as an uncontrolled component */
-                renderingInVirtualizedMode ? String(option.text) : undefined
-              }
-              value={!renderingInVirtualizedMode ? String(option.text) : undefined}
-              placeholder={i18n.translate('optionsfield.placeholderText', {
-                defaultMessage: 'Option text',
-              })}
-              onChange={(e) => {
-                onChangeOptionLabel({ value: String(option.value), text: e.target.value });
-              }}
-              onBlur={(e) => {
-                // If this blur was triggered by clicking a suggestion, defer to the click handler
-                if (suggestionsBoxRef.current?.contains(e.relatedTarget)) return;
-                onBlurOption();
-              }}
-              onFocus={() => focusedFieldKey$.next(String(option.value))}
-              onKeyDown={(e) => {
-                if (!e.defaultPrevented && e.key === 'Enter') {
-                  onBlurOption();
-                  commitVirtualizedChanges();
-                  onAddOption();
-                }
-              }}
-              data-test-subj={`list-options-input-option-label-${index}`}
-            />
-          </EuiFlexItem>
-          {currentOptions.length > 1 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType={'minusInCircle'}
-                color={'danger'}
-                onClick={() => onRemoveOption(option.value)}
-                data-test-subj={`list-options-input-remove-option-${index}`}
-              />
-            </EuiFlexItem>
-          )}
-        </>
+        <ListOption
+          option={option}
+          index={index}
+          renderingInVirtualizedMode={renderingInVirtualizedMode}
+          onChange={(e) => {
+            onChangeOptionLabel({ value: String(option.value), text: e.target.value });
+          }}
+          onKeyDown={(e) => {
+            if (!e.defaultPrevented && e.key === 'Enter') {
+              commitVirtualizedChanges();
+              onAddOption();
+            }
+          }}
+          onRemoveOption={onRemoveOption}
+          canRemoveOption={currentOptions.length > 1}
+          suggestions={suggestions}
+          onChooseSuggestion={onChooseSuggestion}
+          refs={{
+            suggestionsBoxRef,
+            virtualizedScrollListOuterRef,
+            standardListWrapperRef,
+          }}
+        />
       );
     },
     [
-      listItemHTMLIdPrefix,
       renderingInVirtualizedMode,
+      onRemoveOption,
       currentOptions.length,
+      suggestions,
+      onChooseSuggestion,
       onChangeOptionLabel,
-      onBlurOption,
-      focusedFieldKey$,
       commitVirtualizedChanges,
       onAddOption,
-      onRemoveOption,
     ]
   );
   const paddingLeftCSS = useEuiPaddingCSS('left');
@@ -350,15 +303,7 @@ export const ListOptionsInput = ({
     <EuiFormRow fullWidth describedByIds={idAria ? [idAria] : undefined} label={label}>
       <EuiSplitPanel.Outer hasBorder>
         {listBody}
-        <SuggestionsBox
-          innerRef={suggestionsBoxRef}
-          suggestions={suggestions}
-          inputField$={focusedField$}
-          onChoose={onChooseSuggestion}
-          scrollListRef={
-            renderingInVirtualizedMode ? virtualizedScrollListOuterRef : standardListWrapperRef
-          }
-        />
+
         {(showAddOption || showActions) && (
           <EuiSplitPanel.Inner color="subdued" paddingSize="none">
             <EuiFlexGroup>
@@ -401,5 +346,86 @@ export const ListOptionsInput = ({
         )}
       </EuiSplitPanel.Outer>
     </EuiFormRow>
+  );
+};
+
+const ListOption: React.FC<{
+  option: ListOptionsInputOption;
+  index: number;
+  renderingInVirtualizedMode: boolean;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  onKeyDown: React.KeyboardEventHandler;
+  onRemoveOption: (option: string) => void;
+  canRemoveOption: boolean;
+  suggestions: string[];
+  onChooseSuggestion: (key: string, suggestion: string) => void;
+  refs: {
+    suggestionsBoxRef: React.RefObject<HTMLDivElement>;
+    virtualizedScrollListOuterRef: React.RefObject<HTMLDivElement>;
+    standardListWrapperRef: React.RefObject<HTMLDivElement>;
+  };
+}> = ({
+  option,
+  index,
+  renderingInVirtualizedMode,
+  onChange,
+  onKeyDown,
+  onRemoveOption,
+  canRemoveOption,
+  suggestions,
+  onChooseSuggestion,
+  refs: { suggestionsBoxRef, virtualizedScrollListOuterRef, standardListWrapperRef },
+}) => {
+  const [inFocus, setInFocus] = useState(!renderingInVirtualizedMode && option.isFresh);
+  const inputFieldRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <EuiFlexItem>
+        <EuiFieldText
+          inputRef={inputFieldRef}
+          compressed
+          autoFocus={!renderingInVirtualizedMode && option.isFresh}
+          fullWidth
+          defaultValue={
+            /** Virtualizing breaks focus on re-render, so render as an uncontrolled component */
+            renderingInVirtualizedMode ? String(option.text) : undefined
+          }
+          value={!renderingInVirtualizedMode ? String(option.text) : undefined}
+          placeholder={i18n.translate('optionsfield.placeholderText', {
+            defaultMessage: 'Option text',
+          })}
+          onChange={onChange}
+          onBlur={(e) => {
+            // If this blur was triggered by clicking a suggestion, defer to the click handler
+            if (suggestionsBoxRef.current?.contains(e.relatedTarget)) return;
+            setInFocus(false);
+          }}
+          onFocus={() => setInFocus(true)}
+          onKeyDown={onKeyDown}
+          data-test-subj={`list-options-input-option-label-${index}`}
+        />
+      </EuiFlexItem>
+      {canRemoveOption && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType={'minusInCircle'}
+            color={'danger'}
+            onClick={() => onRemoveOption(option.value)}
+            data-test-subj={`list-options-input-remove-option-${index}`}
+          />
+        </EuiFlexItem>
+      )}
+      {inFocus && (
+        <SuggestionsBox
+          suggestions={suggestions}
+          inputField={inputFieldRef.current}
+          onChoose={(suggestion) => onChooseSuggestion(option.value, suggestion)}
+          innerRef={suggestionsBoxRef}
+          scrollListRef={
+            renderingInVirtualizedMode ? virtualizedScrollListOuterRef : standardListWrapperRef
+          }
+        />
+      )}
+    </>
   );
 };

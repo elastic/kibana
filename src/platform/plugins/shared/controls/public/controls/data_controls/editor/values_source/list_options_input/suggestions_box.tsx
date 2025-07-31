@@ -16,7 +16,6 @@ import {
   EuiHighlight,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { Reducer, useCallback, useEffect, useReducer, useState } from 'react';
 import { Subject, debounceTime } from 'rxjs';
 
@@ -26,7 +25,7 @@ import { Subject, debounceTime } from 'rxjs';
  */
 interface Props {
   innerRef: React.RefObject<HTMLDivElement>;
-  inputField$: PublishingSubject<HTMLInputElement | null>;
+  inputField: HTMLInputElement | null;
   suggestions: string[];
   onChoose: (s: string) => void;
   scrollListRef: React.RefObject<HTMLElement>;
@@ -72,7 +71,7 @@ export const SuggestionsBox = ({
   onChoose,
   innerRef,
   scrollListRef,
-  inputField$,
+  inputField,
 }: Props) => {
   const [{ activeSuggestionIndex, displayedSuggestions }, dispatch] = useReducer<
     Reducer<SuggestionsBoxState, SuggestionsBoxAction>
@@ -119,17 +118,16 @@ export const SuggestionsBox = ({
     },
     {
       activeSuggestionIndex: null,
-      inputFieldValue: inputField$.getValue()?.value ?? '',
+      inputFieldValue: inputField?.value ?? '',
       displayedSuggestions: filterSuggestionsByInputFieldValue(
         suggestions,
-        inputField$.getValue()?.value ?? ''
+        inputField?.value ?? ''
       ),
     }
   );
 
-  const publishedField = useStateFromPublishingSubject(inputField$);
   const [fieldRect, setFieldRect] = useState<DOMRect | undefined>(
-    publishedField?.getBoundingClientRect()
+    inputField?.getBoundingClientRect()
   );
 
   const setInputFieldValue = useCallback(
@@ -138,13 +136,13 @@ export const SuggestionsBox = ({
   );
   const onChooseSuggestion = useCallback(
     (suggestion: string) => {
-      if (!publishedField) return;
-      publishedField.value = suggestion;
-      publishedField.focus();
+      if (!inputField) return;
+      inputField.value = suggestion;
+      inputField.focus();
       onChoose(suggestion);
       dispatch({ type: SET_INPUT_FIELD_VALUE, value: suggestion });
     },
-    [onChoose, publishedField]
+    [onChoose, inputField]
   );
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -171,43 +169,40 @@ export const SuggestionsBox = ({
   );
 
   useEffect(() => {
-    setFieldRect(publishedField?.getBoundingClientRect());
-  }, [publishedField]);
+    setFieldRect(inputField?.getBoundingClientRect());
+  }, [inputField]);
   useEffect(() => {
     // When keydown listener changes, unbind the previous and rebind the new one
-    if (publishedField) {
+    if (inputField) {
       const keyUpEvent$ = new Subject<KeyboardEvent>();
       // Debounce the keydown event and update the stored input field value; debounce is used to prevent race conditions
       // e.g. pressing the Shift key and then typing a letter
       // Binding this behavior to the keydown event doesn't work correctly outside of virtualized mode due to re-rendering
       const debouncedKeydownSubscription = keyUpEvent$.pipe(debounceTime(10)).subscribe((e) => {
-        if (!['Tab', 'Escape'].includes(e.key)) setInputFieldValue(publishedField.value);
+        if (!['Tab', 'Escape'].includes(e.key)) setInputFieldValue(inputField.value);
       });
       const keyUpListener = (e: KeyboardEvent) => {
         keyUpEvent$.next(e);
       };
-      publishedField.addEventListener('keydown', onKeyDown);
-      publishedField.addEventListener('keyup', keyUpListener);
+      inputField.addEventListener('keydown', onKeyDown);
+      inputField.addEventListener('keyup', keyUpListener);
       return () => {
-        publishedField.removeEventListener('keydown', onKeyDown);
-        publishedField.removeEventListener('keyup', keyUpListener);
+        inputField.removeEventListener('keydown', onKeyDown);
+        inputField.removeEventListener('keyup', keyUpListener);
 
         debouncedKeydownSubscription.unsubscribe();
       };
     }
-  }, [onKeyDown, publishedField, setInputFieldValue]);
+  }, [onKeyDown, inputField, setInputFieldValue]);
   useEffect(() => {
-    if (publishedField) {
+    if (inputField) {
       const positionChange$ = new Subject();
       const positionChangeSubscription = positionChange$
         .pipe(debounceTime(100))
-        .subscribe(() => setFieldRect(publishedField.getBoundingClientRect()));
+        .subscribe(() => setFieldRect(inputField.getBoundingClientRect()));
 
       const scrollListener = (e: Event) => {
-        if (
-          (e.target as HTMLElement).contains(publishedField) ||
-          e.target === scrollListRef.current
-        ) {
+        if ((e.target as HTMLElement).contains(inputField) || e.target === scrollListRef.current) {
           setFieldRect(undefined);
           positionChange$.next(null);
         }
@@ -226,16 +221,16 @@ export const SuggestionsBox = ({
       };
     }
     setFieldRect(undefined);
-  }, [scrollListRef, publishedField]);
+  }, [scrollListRef, inputField]);
   useEffect(() => {
     dispatch({ type: CLEAR_STATE });
-    if (publishedField) {
-      setInputFieldValue(publishedField.value);
+    if (inputField) {
+      setInputFieldValue(inputField.value);
     }
-  }, [publishedField, setInputFieldValue]);
+  }, [inputField, setInputFieldValue]);
 
   const { euiTheme } = useEuiTheme();
-  if (!publishedField || !fieldRect || displayedSuggestions.length === 0) return null;
+  if (!inputField || !fieldRect || displayedSuggestions.length === 0) return null;
   const { top, left, width, height } = fieldRect;
   return (
     <EuiPortal>
@@ -270,7 +265,7 @@ export const SuggestionsBox = ({
                 data-suggestion-button
                 key={`suggestion-${suggestion}-${i}`}
                 label={
-                  <EuiHighlight strict={false} search={publishedField.value}>
+                  <EuiHighlight strict={false} search={inputField.value}>
                     {suggestion}
                   </EuiHighlight>
                 }

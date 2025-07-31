@@ -426,8 +426,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       return esqlQueryValidation;
     } else if (isStaticValuesSource) {
       if (
-        editorState.staticValues?.every(({ text }) => Boolean(text)) &&
-        editorState.staticValues.length
+        editorState.staticValues?.length &&
+        editorState.staticValues?.some(({ text }) => Boolean(text))
       )
         return EditorComponentStatus.COMPLETE;
     }
@@ -666,6 +666,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                   }
                   if (!isStaticValuesSource) {
                     delete state.staticValues;
+                  } else {
+                    // Do not save empty static values
+                    state.staticValues = state.staticValues!.filter(({ text }) => !!text);
                   }
                   onSave(state, selectedControlType!);
                 }}
