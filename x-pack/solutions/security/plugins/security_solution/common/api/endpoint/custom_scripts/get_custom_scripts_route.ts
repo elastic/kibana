@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { AgentTypeSchemaLiteral } from '..';
+import { AgentTypeSchemaLiteral, HostOsTypeSchemaLiteral } from '..';
 
 export const CustomScriptsRequestSchema = {
   query: schema.object({
@@ -18,6 +18,14 @@ export const CustomScriptsRequestSchema = {
           defaultValue: 'endpoint',
         }
       )
+    ),
+    /**
+     * Filter for `osType`. Valid values are `'macos', 'windows', 'linux'`.
+     * Currently only supported for SentinelOne EDR
+     */
+    osType: schema.maybe(
+      // @ts-expect-error TS2769: No overload matches this call
+      schema.oneOf(HostOsTypeSchemaLiteral)
     ),
   }),
 };
