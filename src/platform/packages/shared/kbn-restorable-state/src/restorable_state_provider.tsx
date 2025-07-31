@@ -123,6 +123,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
       );
 
       // Function components cannot forward refs and show a warning if you try to do so.
+      // When a component is a class component or a forwardRef component, we can safely forward the ref.
       const canForwardRef =
         typeof Component !== 'function' || Component.prototype?.isReactComponent;
 
