@@ -12,11 +12,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { throttle } from 'lodash';
 import {
   type PayloadAction,
-  configureStore,
-  createSlice,
+  type PayloadActionCreator,
   type ThunkAction,
   type ThunkDispatch,
+  type TypedStartListening,
+  type ListenerEffect,
+  configureStore,
+  createSlice,
   createListenerMiddleware,
+  createAction,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
@@ -133,18 +137,6 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;
-      }),
-
-    setTabAppStateAndGlobalState: (
-      state,
-      action: TabAction<{
-        internalState: TabState['initialInternalState'] | undefined;
-        appState: DiscoverAppState | undefined;
-        globalState: TabState['globalState'] | undefined;
-      }>
-    ) =>
-      withTab(state, action, (tab) => {
-        tab.globalState = action.payload.globalState || {};
       }),
 
     setTabGlobalState: (
@@ -265,6 +257,23 @@ export const internalStateSlice = createSlice({
   },
 });
 
+export const setTabAppStateAndGlobalState = createAction<
+  TabActionPayload<{
+    internalState: TabState['initialInternalState'] | undefined;
+    appState: DiscoverAppState | undefined;
+  }>
+>('internalState/setTabAppStateAndGlobalState');
+
+type InternalStateListenerEffect<
+  TActionCreator extends PayloadActionCreator<TPayload>,
+  TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
+> = ListenerEffect<
+  ReturnType<TActionCreator>,
+  DiscoverInternalState,
+  InternalStateDispatch,
+  InternalStateDependencies
+>;
+
 const createMiddleware = ({
   tabsStorageManager,
   runtimeStateManager,
@@ -273,10 +282,15 @@ const createMiddleware = ({
   runtimeStateManager: RuntimeStateManager;
 }) => {
   const listenerMiddleware = createListenerMiddleware();
+  const startListening = listenerMiddleware.startListening as TypedStartListening<
+    DiscoverInternalState,
+    InternalStateDispatch,
+    InternalStateDependencies
+  >;
 
-  listenerMiddleware.startListening({
+  startListening({
     actionCreator: internalStateSlice.actions.setTabs,
-    effect: throttle(
+    effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
       (action) => {
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
@@ -289,11 +303,16 @@ const createMiddleware = ({
     ),
   });
 
-  listenerMiddleware.startListening({
-    actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
-    effect: throttle(
-      (action) => {
-        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+  startListening({
+    actionCreator: setTabAppStateAndGlobalState,
+    effect: throttle<InternalStateListenerEffect<typeof setTabAppStateAndGlobalState>>(
+      (action, listenerApi) => {
+        withTab(listenerApi.getState(), action, ({ globalState }) => {
+          tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
+            ...action.payload,
+            globalState,
+          });
+        });
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
