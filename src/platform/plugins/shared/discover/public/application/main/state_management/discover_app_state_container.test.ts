@@ -20,7 +20,6 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
 import type { InternalStateStore, TabState } from './redux';
 import {
@@ -62,8 +61,8 @@ describe('Test discover app state container', () => {
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
-      globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
+      getCurrentTab: () => getCurrentTab(),
     });
     await internalState.dispatch(
       internalStateActions.initializeTabs({ discoverSessionId: savedSearchState.getState()?.id })

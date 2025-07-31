@@ -610,12 +610,12 @@ describe('Discover state', () => {
         const savedSearch = copySavedSearch(savedSearchMock);
         const savedSearchWithDefaults = updateSavedSearch({
           savedSearch,
-          state: getInitialState({
+          appState: getInitialState({
             initialUrlState: undefined,
             savedSearch,
             services: mockServices,
           }),
-          globalStateContainer: state.globalState,
+          globalState: state.getCurrentTab().lastPersistedGlobalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -857,12 +857,12 @@ describe('Discover state', () => {
         const savedSearch = copySavedSearch(savedSearchMock);
         const savedSearchWithDefaults = updateSavedSearch({
           savedSearch,
-          state: getInitialState({
+          appState: getInitialState({
             initialUrlState: undefined,
             savedSearch,
             services: mockServices,
           }),
-          globalStateContainer: state.globalState,
+          globalState: state.getCurrentTab().lastPersistedGlobalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -885,12 +885,12 @@ describe('Discover state', () => {
         const savedSearch = copySavedSearch(savedSearchMockWithTimeField);
         const savedSearchWithDefaults = updateSavedSearch({
           savedSearch,
-          state: getInitialState({
+          appState: getInitialState({
             initialUrlState: undefined,
             savedSearch,
             services: mockServices,
           }),
-          globalStateContainer: state.globalState,
+          globalState: state.getCurrentTab().lastPersistedGlobalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -914,12 +914,12 @@ describe('Discover state', () => {
         const savedSearch = copySavedSearch(savedSearchMock);
         const savedSearchWithDefaults = updateSavedSearch({
           savedSearch,
-          state: getInitialState({
+          appState: getInitialState({
             initialUrlState: undefined,
             savedSearch,
             services: mockServices,
           }),
-          globalStateContainer: state.globalState,
+          globalState: state.getCurrentTab().lastPersistedGlobalState,
           services: mockServices,
         });
         return Promise.resolve(savedSearchWithDefaults);
@@ -1069,13 +1069,17 @@ describe('Discover state', () => {
       savedSearchWithQuery.searchSource.setField('query', query);
       savedSearchWithQuery.searchSource.setField('filter', filters);
       const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-      state.globalState?.set({ filters });
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.setTabGlobalState)({
+          globalState: { filters },
+        })
+      );
       state.appState.set({ query });
       await state.actions.transitionFromDataViewToESQL(dataViewMock);
       expect(state.appState.getState().query).toStrictEqual({
         esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""") | LIMIT 10',
       });
-      expect(state.globalState?.get?.()?.filters).toStrictEqual([]);
+      expect(state.getCurrentTab().lastPersistedGlobalState.filters).toStrictEqual([]);
       expect(state.appState.getState().filters).toStrictEqual([]);
     });
 
