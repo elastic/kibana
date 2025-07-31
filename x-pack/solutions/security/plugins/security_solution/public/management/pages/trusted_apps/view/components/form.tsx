@@ -285,10 +285,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
-    const [basicFormConditions, setBasicFormConditions] = useState<
+    const [lastBasicFormConditions, setLastBasicFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(!isFormAdvancedMode ? item.entries : []);
-    const [advancedFormConditions, setAdvancedFormConditions] = useState<
+    const [lastAdvancedFormConditions, setLastAdvancedFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(isFormAdvancedMode ? item.entries : []);
 
@@ -419,14 +419,14 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         // save current form to relevant state before switching
         const currentItem = itemRef.current;
         if (selectedId === 'advancedMode') {
-          setBasicFormConditions(currentItem.entries);
+          setLastBasicFormConditions(currentItem.entries);
         } else {
-          setAdvancedFormConditions(currentItem.entries);
+          setLastAdvancedFormConditions(currentItem.entries);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
           ...item,
-          entries: selectedId === 'advancedMode' ? advancedFormConditions : basicFormConditions,
+          entries: selectedId === 'advancedMode' ? lastAdvancedFormConditions : lastBasicFormConditions,
           tags: getTagsUpdatedBy(
             'advancedMode',
             selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : []
@@ -436,7 +436,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         processChanged(nextItem);
         setHasFormChanged(true);
       },
-      [advancedFormConditions, basicFormConditions, getTagsUpdatedBy, item, processChanged]
+      [lastAdvancedFormConditions, lastBasicFormConditions, getTagsUpdatedBy, item, processChanged]
     );
 
     const handleOnOsChange = useCallback(
