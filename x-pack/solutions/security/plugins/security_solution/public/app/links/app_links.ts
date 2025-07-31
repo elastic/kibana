@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-import { aiValueLinks } from '../../overview/links';
+import { aiValueLinks } from '../../reports/links';
 import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';

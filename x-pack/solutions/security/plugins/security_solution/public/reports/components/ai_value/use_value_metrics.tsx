@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { useAlertCountQuery } from '../../../reports/hooks/use_alert_count_query';
 import { getValueMetrics, type ValueMetrics } from './metrics';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
@@ -17,6 +16,7 @@ import {
   OPEN,
 } from '../../../attack_discovery/pages/results/history/search_and_filter/translations';
 import { getPreviousTimeRange } from '../../../common/utils/get_time_range';
+import { useAlertCountQuery } from '../../pages/use_alert_count_query';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 interface Props {
   analystHourlyRate: number;

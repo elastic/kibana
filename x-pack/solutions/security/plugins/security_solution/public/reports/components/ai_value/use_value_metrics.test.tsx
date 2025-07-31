@@ -10,14 +10,14 @@ import { useValueMetrics } from './use_value_metrics';
 
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useAlertCountQuery } from '../../../reports/hooks/use_alert_count_query';
+import { useAlertCountQuery } from '../../pages/use_alert_count_query';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
 const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('../../../reports/hooks/use_alert_count_query');
+jest.mock('../../pages/use_alert_count_query');
 jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../common/lib/kibana', () => {
