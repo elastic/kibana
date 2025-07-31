@@ -5,38 +5,16 @@
  * 2.0.
  */
 
-import type { ProductFeaturesConfiguratorExtensions } from '@kbn/security-solution-features';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import { APP_ID } from '@kbn/security-solution-plugin/common';
-import { updateGlobalArtifactManageReplacements } from './update_global_artifact_replacements';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { SecuritySolutionEssPluginSetupDeps } from '../types';
+import { productFeaturesExtensions } from './product_features_extensions';
 
-export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = {
-  security: {
-    allVersions: {
-      [ProductFeatureSecurityKey.endpointExceptions]: {
-        privileges: {
-          all: {
-            ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
-            api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
-          },
-          read: {
-            ui: ['showEndpointExceptions'],
-            api: [`${APP_ID}-showEndpointExceptions`],
-          },
-        },
-      },
-    },
-    version: {
-      siem: {
-        [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifier: updateGlobalArtifactManageReplacements,
-        },
-      },
-      siemV2: {
-        [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifier: updateGlobalArtifactManageReplacements,
-        },
-      },
-    },
-  },
+export const registerProductFeatures = (
+  pluginsSetup: SecuritySolutionEssPluginSetupDeps,
+  enabledProductFeatureKeys: ProductFeatureKeys
+): void => {
+  pluginsSetup.securitySolution.setProductFeaturesConfigurator({
+    enabledProductFeatureKeys,
+    extensions: productFeaturesExtensions,
+  });
 };

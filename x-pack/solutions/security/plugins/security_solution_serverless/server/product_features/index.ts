@@ -7,22 +7,17 @@
 
 import type { Logger } from '@kbn/logging';
 
-import {
-  ProductFeatureKey,
-  ProductFeatureSecurityKey,
-  SecuritySubFeatureId,
-} from '@kbn/security-solution-features/keys';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import { ProductLine } from '../../common/product';
-import { updateGlobalArtifactManagerPrivileges } from './update_global_artifact_replacements';
+import { productFeaturesExtensions } from './product_features_extensions';
 
 export const registerProductFeatures = (
   pluginsSetup: SecuritySolutionServerlessPluginSetupDeps,
-  enabledProductFeatureKeys: ProductFeatureKeys,
-  config: ServerlessSecurityConfig
+  enabledProductFeatureKeys: ProductFeatureKeys
 ): void => {
   // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
   // This check is an additional layer of security to prevent double registrations when
@@ -35,27 +30,7 @@ export const registerProductFeatures = (
   // register product features for the main security solution product features service
   pluginsSetup.securitySolution.setProductFeaturesConfigurator({
     enabledProductFeatureKeys,
-    extensions: {
-      security: {
-        allVersions: {
-          [ProductFeatureSecurityKey.endpointExceptions]: {
-            subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
-          },
-        },
-        version: {
-          siem: {
-            [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-              featureConfigModifier: updateGlobalArtifactManagerPrivileges,
-            },
-          },
-          siemV2: {
-            [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-              featureConfigModifier: updateGlobalArtifactManagerPrivileges,
-            },
-          },
-        },
-      },
-    },
+    extensions: productFeaturesExtensions,
   });
 
   // enable rule actions based on the enabled product features

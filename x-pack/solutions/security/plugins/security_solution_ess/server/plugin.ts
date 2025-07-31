@@ -6,7 +6,7 @@
  */
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { productFeaturesExtensions } from './product_features';
+import { registerProductFeatures } from './product_features';
 import { DEFAULT_PRODUCT_FEATURES } from '../common/constants';
 
 import type {
@@ -26,10 +26,7 @@ export class SecuritySolutionEssPlugin
     >
 {
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
-    pluginsSetup.securitySolution.setProductFeaturesConfigurator({
-      enabledProductFeatureKeys: DEFAULT_PRODUCT_FEATURES,
-      extensions: productFeaturesExtensions,
-    });
+    registerProductFeatures(pluginsSetup, DEFAULT_PRODUCT_FEATURES);
     return {};
   }
 
