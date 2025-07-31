@@ -50,6 +50,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     data: { snapshots = [], policies = [], errors = {}, total: totalSnapshotsCount },
     resendRequest: reload,
   } = useLoadSnapshots(listParams);
+  // To make the repository filter work in the search bar (even when snapshots request fails), we need to load repositories separately.
+  // For more context see https://github.com/elastic/kibana/issues/225935
   const {
     isInitialRequest: isRepositoriesInitialRequest,
     isLoading: isRepositoriesLoading,
