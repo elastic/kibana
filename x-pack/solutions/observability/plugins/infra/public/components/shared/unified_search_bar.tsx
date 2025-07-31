@@ -49,7 +49,7 @@ export const UnifiedSearchBar = ({
         showPlaceholder
           ? placeholder ??
             i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
-              defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)}',
+              defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
             })
           : undefined
       }

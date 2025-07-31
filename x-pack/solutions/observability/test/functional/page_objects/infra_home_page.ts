@@ -151,7 +151,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clearSearchTerm() {
-      const input = await testSubjects.find('infraSearchField');
+      const input = await testSubjects.find('queryInput');
       await input.clearValueWithKeyboard();
       return input;
     },
@@ -451,11 +451,11 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickQueryBar() {
-      await testSubjects.click('infraSearchField');
+      await testSubjects.click('queryInput');
     },
 
     async inputQueryData() {
-      const queryBar = await testSubjects.find('infraSearchField');
+      const queryBar = await testSubjects.find('queryInput');
       await queryBar.type('h');
     },
 
