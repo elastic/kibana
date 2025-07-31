@@ -153,6 +153,78 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('delete read only objects', () => {
+      it('allow owner to delete object marked as read only', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        await supertestWithoutAuth
+          .delete(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .expect(200);
+      });
+      it('allows admin to delete object marked as read only', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
+        await supertestWithoutAuth
+          .delete(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(404);
+        expect(getResponse.body).to.have.property('message');
+        expect(getResponse.body.message).to.contain(
+          `Saved object [read_only_type/${objectId}] not found`
+        );
+      });
+
+      it('throws when trying to delete read only object owned by a different user when not admin', async () => {
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await login(
+          adminTestUser.username,
+          adminTestUser.password
+        );
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+
+        const { cookie: testUserCookie } = await loginAsTestUser();
+        const deleteResponse = await supertestWithoutAuth
+          .delete(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .expect(400);
+        expect(deleteResponse.body).to.have.property('message');
+        expect(deleteResponse.body.message).to.contain(`Unable to delete read_only_type`);
+      });
+    });
+
     describe('transfer ownership of read only objects', () => {
       it('should transfer ownership of read only objects by owner', async () => {
         const { profileUid: simpleUserProfileUid } = await getSimpleUserProfile();
