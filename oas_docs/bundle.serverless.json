@@ -15363,6 +15363,9 @@
                               ],
                               "type": "object"
                             },
+                            "connectors": {},
+                            "exporters": {},
+                            "extensions": {},
                             "fleet": {
                               "anyOf": [
                                 {
@@ -15651,6 +15654,8 @@
                               },
                               "type": "object"
                             },
+                            "processors": {},
+                            "receivers": {},
                             "revision": {
                               "type": "number"
                             },
@@ -15669,6 +15674,7 @@
                               },
                               "type": "array"
                             },
+                            "service": {},
                             "signed": {
                               "additionalProperties": false,
                               "properties": {
@@ -15689,7 +15695,13 @@
                           "required": [
                             "id",
                             "outputs",
-                            "inputs"
+                            "inputs",
+                            "extensions",
+                            "receivers",
+                            "processors",
+                            "service",
+                            "connectors",
+                            "exporters"
                           ],
                           "type": "object"
                         }
