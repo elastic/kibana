@@ -35,9 +35,7 @@ export function useSnapshot(
       JSON.stringify(
         buildPayload({
           ...props,
-          schema: config.featureFlags.hostOtelEnabled
-            ? DataSchemaFormat.SEMCONV
-            : DataSchemaFormat.ECS,
+          schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
         })
       ),
     [props, config.featureFlags.hostOtelEnabled]

@@ -38,7 +38,7 @@ export const SnapshotContainer = React.memo(() => {
       currentTime,
       accountId,
       region,
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : DataSchemaFormat.ECS,
+      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
     },
     { sendRequestImmediately: true }
   );

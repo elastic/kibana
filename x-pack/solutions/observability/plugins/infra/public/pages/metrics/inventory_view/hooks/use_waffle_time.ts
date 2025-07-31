@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
@@ -47,9 +47,11 @@ export const useWaffleTime = () => {
     urlStateKey: 'waffleTime',
   });
 
+  const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
-    if (currentView) {
+    if (currentView && currentView.id !== previousViewId.current) {
       setUrlState(mapInventoryViewToState(currentView));
+      previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
 

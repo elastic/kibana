@@ -89,7 +89,7 @@ export function useTimeline({
       accountId,
       region,
       includeTimeseries: true,
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : DataSchemaFormat.ECS,
+      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
     },
     { sendRequestImmediately: false }
   );

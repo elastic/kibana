@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -39,6 +39,14 @@ export const useWaffleFilters = () => {
     urlStateKey: 'waffleFilter',
   });
 
+  const previousViewId = useRef<string | undefined>(currentView?.id);
+  useEffect(() => {
+    if (currentView && currentView.id !== previousViewId.current) {
+      setUrlState(mapInventoryViewToState(currentView));
+      previousViewId.current = currentView.id;
+    }
+  }, [currentView, setUrlState]);
+
   const isValidKuery = useCallback((expression: string) => {
     try {
       fromKueryExpression(expression);
@@ -47,12 +55,6 @@ export const useWaffleFilters = () => {
     }
     return true;
   }, []);
-
-  useEffect(() => {
-    if (currentView) {
-      setUrlState(mapInventoryViewToState(currentView));
-    }
-  }, [currentView, setUrlState]);
 
   const applyFilterQuery = useCallback(
     (query: string) => {

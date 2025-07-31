@@ -168,7 +168,6 @@ describe('ConditionalToolTip', () => {
       sourceId: 'default',
       currentTime,
       accountId: '',
-      schema: 'ecs',
       region: '',
     } as UseSnapshotRequest);
 

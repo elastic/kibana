@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
@@ -97,9 +97,11 @@ export const useWaffleOptions = () => {
     urlStateKey: 'waffleOptions',
   });
 
+  const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
-    if (currentView) {
+    if (currentView && currentView.id !== previousViewId.current) {
       setUrlState(mapInventoryViewToState(currentView));
+      previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
 
