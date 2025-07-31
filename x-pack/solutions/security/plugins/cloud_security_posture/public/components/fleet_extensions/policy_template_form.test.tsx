@@ -249,6 +249,7 @@ describe('<CspPolicyTemplateForm />', () => {
       updatedPolicy: {
         ...policy,
         namespace: 'default',
+        name: 'cspm-1',
       },
     });
   });
