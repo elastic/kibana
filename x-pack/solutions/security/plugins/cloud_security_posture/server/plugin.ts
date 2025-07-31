@@ -317,14 +317,8 @@ const isTransformAssetIncluded = (integrationVersion: string): boolean => {
 };
 
 const getRetryOptions = (logger: Logger, operation: string) => {
-  // should retry on the order of 2s, 4s, 8s, 16s
-  // see: https://github.com/tim-kos/node-retry#retryoperationoptions
   return {
-    minTimeout: 2000,
-    maxTimeout: 16000,
-    retries: 4,
-    factor: 2,
-    randomize: true,
+    retries: 3,
     onFailedAttempt: (err: FailedAttemptError) => {
       const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
       logger.warn(message);

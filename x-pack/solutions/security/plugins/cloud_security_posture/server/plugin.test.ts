@@ -163,8 +163,8 @@ describe('Cloud Security Posture Plugin', () => {
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
 
-      // Assert - should retry 5 times total (initial + 4 retries)
-      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(5);
+      // Assert - should retry 4 times total (initial + 3 retries)
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(4);
       expect(spy).toHaveBeenCalledTimes(0);
     });
 
