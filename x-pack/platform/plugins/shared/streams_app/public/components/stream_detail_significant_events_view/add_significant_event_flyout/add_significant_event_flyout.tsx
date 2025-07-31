@@ -126,10 +126,6 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
             disabled={isSubmitting || !parsedQueries.success || !canSave}
             isLoading={isSubmitting}
             onClick={() => {
-              if (!parsedQueries.success) {
-                return;
-              }
-
               setIsSubmitting(true);
 
               onSave(queries).finally(() => {
