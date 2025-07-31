@@ -31,6 +31,7 @@ export const PipelineTreeNodeLabel = ({
     >
       <EuiFlexItem
         grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
+        css={{ textAlign: 'left' }}
       >
         {pipelineName}
       </EuiFlexItem>
