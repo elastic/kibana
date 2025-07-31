@@ -600,7 +600,13 @@ class AgentPolicyService {
         createdPackagePolicyIds.push(packagePolicy.id);
       }
 
-      return this.get(soClient, newAgentPolicy.id);
+      const agentPolicyWithPackagePolicies = await this.get(soClient, newAgentPolicy.id);
+
+      if (!agentPolicyWithPackagePolicies) {
+        throw new Error(`Could not retrieve created agent policy ${newAgentPolicy.id}`);
+      }
+
+      return agentPolicyWithPackagePolicies;
     } catch (e) {
       // If there is an error creating package policies, delete any created package policy
       // and the parent agent policy

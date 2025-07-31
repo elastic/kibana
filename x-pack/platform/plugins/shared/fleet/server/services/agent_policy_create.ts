@@ -22,8 +22,6 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { AgentlessAgentCreateOverProvisionnedError } from '../errors';
-
 import { type AgentPolicyServiceInterface, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
@@ -224,13 +222,11 @@ export async function createAgentPolicyWithPackages({
     try {
       await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
     } catch (err) {
-      if (err instanceof AgentlessAgentCreateOverProvisionnedError) {
-        await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
-          appContextService
-            .getLogger()
-            .error(`Error deleting agentless policy`, { error: agentPolicy });
-        });
-      }
+      await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
+        appContextService
+          .getLogger()
+          .error(`Error deleting agentless policy`, { error: agentPolicy });
+      });
       throw err;
     }
   }
