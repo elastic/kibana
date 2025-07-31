@@ -504,7 +504,7 @@ When user switch one or more fields to edit mode
 Then user should see INACTIVE CTA
 When user hover on the INACTIVE CTA
 Then explanation tooltip appears
-When user switches every field in readonly mode
+When user switches every field to readonly mode
 Then the INACTIVE CTA becomes ACTIVE
 ```
 
