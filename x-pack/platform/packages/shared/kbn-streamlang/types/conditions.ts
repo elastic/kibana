@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
+import { createIsNarrowSchema } from '@kbn/zod-helpers';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 

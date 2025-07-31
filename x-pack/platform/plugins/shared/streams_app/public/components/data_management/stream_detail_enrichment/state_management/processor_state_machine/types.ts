@@ -8,6 +8,7 @@
 import { ProcessorDefinition } from '@kbn/streams-schema';
 import { ActorRef, Snapshot } from 'xstate5';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
@@ -19,7 +20,7 @@ export type ProcessorToParentEvent =
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;
-  processor: ProcessorDefinitionWithUIAttributes;
+  processor: StreamlangProcessorDefinition;
   isNew?: boolean;
 }
 

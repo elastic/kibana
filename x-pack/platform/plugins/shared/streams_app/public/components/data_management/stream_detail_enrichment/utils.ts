@@ -19,6 +19,7 @@ import {
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import { GrokProcessor, StreamlangProcessorDefinition } from '@kbn/streamlang';
 import { EnrichmentDataSource } from '../../../../common/url_schema';
 import {
   DissectFormState,
@@ -163,66 +164,46 @@ export const getDefaultFormStateByType = (
 export const getFormStateFrom = (
   sampleDocuments: FlattenRecord[],
   formStateDependencies: FormStateDependencies,
-  processor?: ProcessorDefinitionWithUIAttributes
+  processor?: StreamlangProcessorDefinition
 ): ProcessorFormState => {
   if (!processor) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
 
-  if (isGrokProcessor(processor)) {
-    const { grok } = processor;
-
+  if (processor.action === 'grok') {
     const clone: GrokFormState = structuredClone({
-      ...omit(grok, 'patterns'),
+      ...omit(processor, 'patterns'),
       patterns: [],
-      type: 'grok',
     });
 
-    clone.patterns = grok.patterns.map(
+    clone.patterns = processor.patterns.map(
       (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
     );
 
     return clone;
   }
 
-  if (isDissectProcessor(processor)) {
-    const { dissect } = processor;
-
+  if (
+    processor.action === 'dissect' ||
+    processor.action === 'manual_ingest_pipeline' ||
+    processor.action === 'date'
+  ) {
     return structuredClone({
-      ...dissect,
-      type: 'dissect',
+      ...processor,
     });
   }
 
-  if (isManualIngestPipelineJsonProcessor(processor)) {
-    const { manual_ingest_pipeline } = processor;
-
-    return structuredClone({
-      ...manual_ingest_pipeline,
-      type: 'manual_ingest_pipeline',
-    });
-  }
-
-  if (isDateProcessor(processor)) {
-    const { date } = processor;
-
-    return structuredClone({
-      ...date,
-      type: 'date',
-    });
-  }
-
-  if (processor.type in configDrivenProcessors) {
+  if (processor.action in configDrivenProcessors) {
     return configDrivenProcessors[
-      processor.type as ConfigDrivenProcessorType
+      processor.action as ConfigDrivenProcessorType
     ].convertProcessorToFormState(processor as any);
   }
 
-  throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
+  throw new Error(`Form state for processor type "${processor.action}" is not implemented.`);
 };
 
 export const convertFormStateToProcessor = (
   formState: ProcessorFormState
 ): {
-  processorDefinition: ProcessorDefinition;
+  processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
   if (formState.type === 'grok') {
@@ -230,16 +211,14 @@ export const convertFormStateToProcessor = (
 
     return {
       processorDefinition: {
-        grok: {
-          if: formState.if,
-          patterns: patterns
-            .map((pattern) => pattern.getExpression().trim())
-            .filter((pattern) => !isEmpty(pattern)),
-          field,
-          pattern_definitions,
-          ignore_failure,
-          ignore_missing,
-        },
+        where: formState.where,
+        patterns: patterns
+          .map((pattern) => pattern.getExpression().trim())
+          .filter((pattern) => !isEmpty(pattern)),
+        field,
+        pattern_definitions,
+        ignore_failure,
+        ignore_missing,
       },
       processorResources: {
         grokExpressions: patterns,
@@ -373,15 +352,17 @@ export const dataSourceConverter = {
   toUrlSchema: dataSourceToUrlSchema,
 };
 
-export const getDefaultGrokProcessor = ({ sampleDocs }: { sampleDocs: FlattenRecord[] }) => ({
-  grok: {
-    field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-    patterns: [''],
-    pattern_definitions: {},
-    ignore_failure: true,
-    ignore_missing: true,
-    if: ALWAYS_CONDITION,
-  },
+export const getDefaultGrokProcessor = ({
+  sampleDocs,
+}: {
+  sampleDocs: FlattenRecord[];
+}): GrokProcessor => ({
+  action: 'grok',
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [''],
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
 });
 
 export const recalcColumnWidths = ({

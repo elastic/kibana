@@ -42,7 +42,7 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         wired: {
           fields: {},
           routing: [],
@@ -54,7 +54,7 @@ describe('State', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         classic: {},
       },
     };
