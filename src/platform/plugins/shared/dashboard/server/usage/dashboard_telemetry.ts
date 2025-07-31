@@ -40,6 +40,9 @@ export interface DashboardCollectorData {
     };
   };
   controls: ControlGroupTelemetry;
+  sections: {
+    total: number;
+  };
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -50,6 +53,9 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_type: {},
   },
   controls: initializeControlGroupTelemetry({}),
+  sections: {
+    total: 0,
+  },
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -90,6 +96,14 @@ export const collectPanelsByType = (
       collectorData.panels.by_type[type].details
     );
   }
+};
+
+export const collectDashboardSections = (
+  attributes: DashboardSavedObjectAttributes,
+  collectorData: DashboardCollectorData
+) => {
+  collectorData.sections.total += attributes.sections?.length ?? 0;
+  return collectorData;
 };
 
 export const controlsCollectorFactory =
