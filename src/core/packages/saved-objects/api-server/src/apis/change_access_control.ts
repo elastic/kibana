@@ -30,9 +30,9 @@ export interface SavedObjectsChangeAccessModeOptions extends SavedObjectsBaseOpt
  * @public
  */
 
-export type SavedObjectsChangeAccessControlOptions = SavedObjectsBaseOptions &
-  SavedObjectsChangeOwnershipOptions &
-  SavedObjectsChangeAccessModeOptions;
+export type SavedObjectsChangeAccessControlOptions =
+  | SavedObjectsChangeOwnershipOptions
+  | SavedObjectsChangeAccessModeOptions;
 
 /**
  * Return type of the Saved Objects `changeOwnership()` method.
