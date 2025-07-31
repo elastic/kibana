@@ -11,9 +11,9 @@ import * as recast from 'recast';
 const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
-import { FunctionDefinition } from '@kbn/esql-ast';
 import { functions } from '../src/sections/generated/scalar_functions';
 import { getLicenseInfo } from '../src/utils/get_license_info';
+import { FunctionDefinition } from '../src/types';
 
 interface DocsSectionContent {
   description: string;

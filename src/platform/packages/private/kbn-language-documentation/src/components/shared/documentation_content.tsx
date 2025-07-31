@@ -32,7 +32,7 @@ function createLicenseTooltip(license: LicenseInfo): string {
 
   if (license.isSignatureSpecific && license?.paramsWithLicense?.length) {
     tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
-      defaultMessage: ' only for specific values: {params}',
+      defaultMessage: ' to use the following values: {params}',
       values: { params: license.paramsWithLicense.join(', ') },
     })}`;
   }
