@@ -58,8 +58,7 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
       validate,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },
@@ -74,8 +73,7 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
       validate,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },
