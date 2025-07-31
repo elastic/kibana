@@ -9,14 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage, ESQLFunction, ESQLAst } from '../../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
-import { ICommandContext } from '../../types';
+import { ICommandContext, ICommandCallbacks } from '../../types';
 import { isFunctionExpression, isWhereExpression, isAssignment } from '../../../ast/is';
 import { checkAggExistence, checkFunctionContent } from './utils';
 
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const commandName = command.name.toUpperCase();
@@ -94,7 +95,7 @@ export const validate = (
     }
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };
