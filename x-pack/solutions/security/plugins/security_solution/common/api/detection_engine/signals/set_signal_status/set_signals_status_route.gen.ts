@@ -15,9 +15,13 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 import { AlertStatus } from '../../../model/alert.gen';
 
+/**
+ * The reason for closing the alerts
+ */
 export type ReasonEnum = z.infer<typeof ReasonEnum>;
 export const ReasonEnum = z.enum(['FALSE_POSITIVE', 'DUPLICATE', 'INVESTIGATION_REQUIRED']);
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
@@ -25,8 +29,11 @@ export const ReasonEnumEnum = ReasonEnum.enum;
 
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
 export const SetAlertsStatusByIds = z.object({
-  signal_ids: z.array(z.string()).min(1),
-  status: z.enum(['open', 'acknowledged']),
+  /**
+   * List of alert `id`s.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+  status: AlertStatus,
   reason: ReasonEnum.optional(),
 });
 
