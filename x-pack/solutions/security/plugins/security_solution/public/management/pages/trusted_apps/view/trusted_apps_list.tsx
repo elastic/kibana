@@ -125,6 +125,7 @@ export const TrustedAppsList = memo(() => {
       ArtifactFormComponent={TrustedAppsForm}
       labels={TRUSTED_APPS_PAGE_LABELS}
       data-test-subj="trustedAppsListPage"
+      flyoutSize="l"
       searchableFields={SEARCHABLE_FIELDS}
       secondaryPageInfo={<TrustedAppsArtifactsDocsLink />}
       allowCardDeleteAction={canWriteTrustedApplications}
