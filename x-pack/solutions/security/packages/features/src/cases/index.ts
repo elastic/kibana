@@ -8,8 +8,8 @@ import type { CasesSubFeatureId, ProductFeatureCasesKey } from '../product_featu
 import type { ProductFeatureParams } from '../types';
 import { getCasesBaseKibanaFeature } from './v1_features/kibana_features';
 import {
-  getCasesBaseKibanaSubFeatureIds,
-  getCasesSubFeaturesMap,
+  getCasesBaseKibanaSubFeatureIdsV1,
+  getCasesSubFeaturesMapV1,
 } from './v1_features/kibana_sub_features';
 import type { CasesFeatureParams } from './types';
 import { getCasesBaseKibanaFeatureV2 } from './v2_features/kibana_features';
@@ -28,8 +28,8 @@ export const getCasesFeature = (
   params: CasesFeatureParams
 ): ProductFeatureParams<ProductFeatureCasesKey, CasesSubFeatureId> => ({
   baseKibanaFeature: getCasesBaseKibanaFeature(params),
-  baseKibanaSubFeatureIds: getCasesBaseKibanaSubFeatureIds(),
-  subFeaturesMap: getCasesSubFeaturesMap(params),
+  baseKibanaSubFeatureIds: getCasesBaseKibanaSubFeatureIdsV1(),
+  subFeaturesMap: getCasesSubFeaturesMapV1(params),
   productFeatureConfig: getCasesProductFeaturesConfig(params),
 });
 

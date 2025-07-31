@@ -57,7 +57,7 @@ export class ProductFeatures {
         const versionExtensions = versionsExtensions[featureVersion.baseKibanaFeature.id] ?? {};
 
         const extendedConfig = extendProductFeatureConfigs<ProductFeatureKeyType, string>(
-          featureVersion.productFeatureConfig,
+          featureVersion.productFeatureConfig ?? {},
           allVersionsExtensions,
           versionExtensions
         );
@@ -75,12 +75,12 @@ export class ProductFeatures {
 
         const featureConfigMerger = new ProductFeaturesConfigMerger(
           this.logger,
-          featureVersion.subFeaturesMap
+          featureVersion.subFeaturesMap ?? new Map()
         );
 
         const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
           featureVersion.baseKibanaFeature,
-          featureVersion.baseKibanaSubFeatureIds,
+          featureVersion.baseKibanaSubFeatureIds ?? [],
           filteredConfig
         );
 

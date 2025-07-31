@@ -102,9 +102,9 @@ export interface ProductFeatureParams<
   S extends string = string
 > {
   baseKibanaFeature: BaseKibanaFeatureConfig;
-  baseKibanaSubFeatureIds: S[];
-  subFeaturesMap: AppSubFeaturesMap<S>;
-  productFeatureConfig: ProductFeaturesConfig<K, S>;
+  baseKibanaSubFeatureIds?: S[];
+  subFeaturesMap?: AppSubFeaturesMap<S>;
+  productFeatureConfig?: ProductFeaturesConfig<K, S>;
 }
 
 export interface ConfigExtensions<C extends ProductFeaturesConfig> {
@@ -132,3 +132,13 @@ export interface ProductFeaturesConfigurator {
 }
 
 export type ProductFeatureGroup = keyof ProductFeatureConfigExtensions;
+
+export interface SubFeatureReplacement {
+  /** The (top-level) feature id that will replace the sub-feature */
+  feature: string;
+  /** If true, the additional privileges will be added to the replacedBy array */
+  additionalPrivileges?: Record<string, string[]>;
+  /** If true, the current privilege id will not be copied to the replacedBy array */
+  omitPrivilegeCopy?: boolean;
+}
+export type SubFeatureReplacements = SubFeatureReplacement[];

@@ -12,7 +12,5 @@ import { notesProductFeaturesConfig } from './product_feature_config';
 
 export const getNotesFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
   baseKibanaFeature: getNotesBaseKibanaFeature(params),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
   productFeatureConfig: notesProductFeaturesConfig,
 });

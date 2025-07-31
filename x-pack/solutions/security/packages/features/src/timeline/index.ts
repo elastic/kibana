@@ -12,7 +12,5 @@ import { timelineProductFeaturesConfig } from './product_feature_config';
 
 export const getTimelineFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
   baseKibanaFeature: getTimelineBaseKibanaFeature(params),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
   productFeatureConfig: timelineProductFeaturesConfig,
 });

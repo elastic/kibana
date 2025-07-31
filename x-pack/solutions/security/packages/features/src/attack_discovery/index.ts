@@ -13,7 +13,5 @@ import type { ProductFeatureAttackDiscoveryKey } from '../product_features_keys'
 export const getAttackDiscoveryFeature =
   (): ProductFeatureParams<ProductFeatureAttackDiscoveryKey> => ({
     baseKibanaFeature: getAttackDiscoveryBaseKibanaFeature(),
-    baseKibanaSubFeatureIds: [],
-    subFeaturesMap: new Map(),
     productFeatureConfig: attackDiscoveryProductFeaturesConfig,
   });
