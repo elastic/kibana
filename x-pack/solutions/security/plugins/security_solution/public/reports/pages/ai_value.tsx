@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
+import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
 import { EXPORT_REPORT, METRICS_OVER_TIME } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -64,6 +65,8 @@ const AIValueComponent = () => {
 
   const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
 
+  // since we do not have a search bar in the AI Value page, we need to sync the timerange
+  useSyncTimerangeUrlParam();
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
