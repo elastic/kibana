@@ -28,7 +28,7 @@ import {
   workflowInsightsSubFeature,
 } from '../kibana_sub_features';
 import type { SubFeatureReplacements } from '../../types';
-import { addSubFeatureReplacements } from '../../tools';
+import { addSubFeatureReplacements } from '../../utils';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
   [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V3 }],
@@ -90,22 +90,12 @@ export const getSecurityV2SubFeaturesMap = ({
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
-
-    // ...((experimentalFeatures.defendInsights
-    //   ? [[SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()]]
-    //   : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
-
+    [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
-
-    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-      ? [
-          [
-            SecuritySubFeatureId.globalArtifactManagement,
-            globalArtifactManagementSubFeature(experimentalFeatures),
-          ],
-        ]
-      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
-
+    [
+      SecuritySubFeatureId.globalArtifactManagement,
+      globalArtifactManagementSubFeature(experimentalFeatures),
+    ],
     [SecuritySubFeatureId.trustedApplications, trustedApplicationsSubFeature()],
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
@@ -119,38 +109,31 @@ export const getSecurityV2SubFeaturesMap = ({
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
 
-  // Use the following code to add feature based on feature flag
-  // if (experimentalFeatures.featureFlagName) {
-  //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
-  // }
-
-  if (experimentalFeatures.defendInsights) {
-    // place with other All/Read/None options
-    securitySubFeaturesList.splice(1, 0, [
-      SecuritySubFeatureId.workflowInsights,
-      workflowInsightsSubFeature(),
-    ]);
-  }
-
-  const subFeatures = securitySubFeaturesList.map<[SecuritySubFeatureId, SubFeatureConfig]>(
-    ([id, rawSubFeature]) => {
-      let subFeature = rawSubFeature;
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList.map(([id, originalSubFeature]) => {
+      let subFeature = originalSubFeature;
 
       const featureReplacements = replacements[id];
       if (featureReplacements) {
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // If the feature is enabled for space awareness, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      // to avoid showing the "Requires all spaces" tooltip in the UI.
+      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
       if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         subFeature = { ...subFeature, requireAllSpaces: true, privilegesTooltip: undefined };
       }
 
       return [id, subFeature];
-    }
+    })
   );
 
-  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(subFeatures);
+  // Remove disabled experimental features
+  if (!experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.globalArtifactManagement);
+  }
+  if (!experimentalFeatures.defendInsights) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.workflowInsights);
+  }
+
   return Object.freeze(securitySubFeaturesMap);
 };

@@ -8,7 +8,7 @@
 import { ProductFeatureSecurityKey } from '../../product_features_keys';
 import { APP_ID } from '../../constants';
 import type { SecurityProductFeaturesConfig } from '../types';
-import { extendProductFeatureConfigs } from '../../tools';
+import { extendProductFeatureConfigs } from '../../utils';
 import { securityDefaultProductFeaturesConfig } from '../product_feature_config';
 
 export const securityV2ProductFeaturesConfig: SecurityProductFeaturesConfig =

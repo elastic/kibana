@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
+import { cloneDeep, mergeWith } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import type {
@@ -16,6 +16,7 @@ import type {
   MutableKibanaFeatureConfig,
   MutableSubFeatureConfig,
 } from '@kbn/security-solution-features';
+import { featureConfigMerger } from '@kbn/security-solution-features/utils';
 
 export class ProductFeaturesConfigMerger<T extends string = string> {
   constructor(
@@ -116,18 +117,5 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         `Trying to merge subFeaturesPrivileges ${subFeaturesPrivileges.id} but the subFeature privilege was not found`
       );
     }
-  }
-}
-
-/**
- * The customizer used by lodash.mergeWith to merge deep objects
- * Uses concatenation for arrays and removes duplicates, objects are merged using lodash.mergeWith default behavior
- * */
-function featureConfigMerger(objValue: unknown, srcValue: unknown) {
-  if (isArray(srcValue)) {
-    if (isArray(objValue)) {
-      return uniq(objValue.concat(srcValue));
-    }
-    return srcValue;
   }
 }

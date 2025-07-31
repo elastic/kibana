@@ -43,6 +43,7 @@ export const getSecurityV3SubFeaturesMap = ({
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
+    [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
@@ -61,33 +62,23 @@ export const getSecurityV3SubFeaturesMap = ({
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
 
-  // Use the following code to add feature based on feature flag
-  // if (experimentalFeatures.featureFlagName) {
-  //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
-  // }
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList.map(([id, originalSubFeature]) => {
+      let subFeature = originalSubFeature;
 
-  if (experimentalFeatures.defendInsights) {
-    // place with other All/Read/None options
-    securitySubFeaturesList.splice(1, 0, [
-      SecuritySubFeatureId.workflowInsights,
-      workflowInsightsSubFeature(),
-    ]);
-  }
-
-  const subFeatures = securitySubFeaturesList.map<[SecuritySubFeatureId, SubFeatureConfig]>(
-    ([id, rawSubFeature]) => {
-      let subFeature = rawSubFeature;
-
-      // If the feature is enabled for space awareness, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      // to avoid showing the "Requires all spaces" tooltip in the UI.
+      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
       if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         subFeature = { ...subFeature, requireAllSpaces: true, privilegesTooltip: undefined };
       }
 
       return [id, subFeature];
-    }
+    })
   );
 
-  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(subFeatures);
+  // Remove disabled experimental features
+  if (!experimentalFeatures.defendInsights) {
+    securitySubFeaturesMap.delete(SecuritySubFeatureId.workflowInsights);
+  }
+
   return Object.freeze(securitySubFeaturesMap);
 };

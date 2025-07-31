@@ -139,6 +139,6 @@ export interface SubFeatureReplacement {
   /** If true, the additional privileges will be added to the replacedBy array */
   additionalPrivileges?: Record<string, string[]>;
   /** If true, the current privilege id will not be copied to the replacedBy array */
-  omitPrivilegeCopy?: boolean;
+  skipPrivilegeCopy?: boolean;
 }
 export type SubFeatureReplacements = SubFeatureReplacement[];

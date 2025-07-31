@@ -10,7 +10,7 @@ import { SECURITY_FEATURE_ID_V3 } from '../../../constants';
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import type { SecurityFeatureParams } from '../types';
 import type { SubFeatureReplacements } from '../../types';
-import { addSubFeatureReplacements } from '../../tools';
+import { addSubFeatureReplacements } from '../../utils';
 import {
   endpointListSubFeature,
   endpointExceptionsSubFeature,
@@ -99,26 +99,22 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
 
-  const subFeatures = securitySubFeaturesList.map<[SecuritySubFeatureId, SubFeatureConfig]>(
-    ([id, rawSubFeature]) => {
-      let subFeature = rawSubFeature;
+  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
+    securitySubFeaturesList.map(([id, originalSubFeature]) => {
+      let subFeature = originalSubFeature;
 
       const featureReplacements = replacements[id];
       if (featureReplacements) {
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // If the feature is enabled for space awareness, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      // to avoid showing the "Requires all spaces" tooltip in the UI.
+      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
       if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         subFeature = { ...subFeature, requireAllSpaces: true, privilegesTooltip: undefined };
       }
 
       return [id, subFeature];
-    }
+    })
   );
-
-  const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(subFeatures);
-
   return Object.freeze(securitySubFeaturesMap);
 };

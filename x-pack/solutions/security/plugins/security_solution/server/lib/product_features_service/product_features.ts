@@ -18,7 +18,7 @@ import type {
   ProductFeaturesConfiguratorExtensions,
   ProductFeatureKibanaConfig,
 } from '@kbn/security-solution-features';
-import { extendProductFeatureConfigs } from '@kbn/security-solution-features/tools';
+import { extendProductFeatureConfigs } from '@kbn/security-solution-features/utils';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
 export class ProductFeatures {

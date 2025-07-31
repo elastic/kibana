@@ -9,7 +9,7 @@ import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { CasesSubFeatureId } from '../../product_features_keys';
 import { CASES_FEATURE_ID_V3 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
-import { addAllSubFeatureReplacements } from '../../tools';
+import { addAllSubFeatureReplacements } from '../../utils';
 import { getDeleteCasesSubFeature, getCasesSettingsCasesSubFeature } from '../kibana_sub_features';
 
 /**

@@ -15,7 +15,7 @@ import {
   getCasesAddCommentsCasesSubFeature,
   getCasesReopenCaseSubFeature,
 } from '../kibana_sub_features';
-import { addAllSubFeatureReplacements } from '../../tools';
+import { addAllSubFeatureReplacements } from '../../utils';
 
 /**
  * Sub-features that will always be available for Security Cases

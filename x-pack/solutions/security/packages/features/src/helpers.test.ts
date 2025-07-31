@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createEnabledProductFeaturesConfigMap } from './tools';
+import { createEnabledProductFeaturesConfigMap } from './utils';
 import { ProductFeatureSecurityKey } from './product_features_keys';
 import type { ProductFeatureKibanaConfig, ProductFeatureKeys } from './types';
 
