@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLProperNode,
+  ESQLSingleAstItem,
+} from '../../../types';
 import {
   isFunctionExpression,
   isFieldExpression,
@@ -166,11 +172,17 @@ export const rightAfterColumn = (
   expressionRoot: ESQLSingleAstItem | undefined,
   columnExists: (name: string) => boolean
 ): boolean => {
-  return (
-    isColumn(expressionRoot) &&
-    columnExists(expressionRoot.parts.join('.')) &&
-    /(?:by|,)\s+\S+$/i.test(innerText)
-  );
+  if (!expressionRoot) return false;
+
+  let col: ESQLProperNode | undefined;
+
+  Walker.walk(expressionRoot, {
+    visitColumn(node) {
+      if (node.location.max === innerText.length - 1) col = node;
+    },
+  });
+
+  return isColumn(col) && columnExists(col.parts.join('.'));
 };
 
 export const getCommaAndPipe = (

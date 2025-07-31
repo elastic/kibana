@@ -216,6 +216,7 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
+        advanceCursorAfterInitialField: false,
         ignoredColumns,
       });
     }

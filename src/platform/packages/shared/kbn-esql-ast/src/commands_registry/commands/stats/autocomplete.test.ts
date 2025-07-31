@@ -535,6 +535,11 @@ describe('STATS Autocomplete', () => {
           'integerField, ',
         ]);
 
+        await statsExpectSuggestions('from a | stats a=max(b) by col0 = integerField', [
+          'integerField | ',
+          'integerField, ',
+        ]);
+
         await statsExpectSuggestions('from a | stats a=max(b) by keywordField, integerField', [
           'integerField | ',
           'integerField, ',
