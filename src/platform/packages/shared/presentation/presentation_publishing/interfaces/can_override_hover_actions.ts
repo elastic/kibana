@@ -12,7 +12,7 @@ import { PublishingSubject } from '../publishing_subject';
 /**
  * An interface which determines whether the hover actions are overridden by the embeddable
  */
-export interface OverridesHoverActions {
+export interface CanOverrideHoverActions {
   overrideHoverActions$: PublishingSubject<boolean>;
   OverriddenHoverActionsComponent: React.ComponentType;
 }
@@ -20,10 +20,10 @@ export interface OverridesHoverActions {
 /**
  * A type guard which determines whether or not a given API overrides the hover actions.
  */
-export const overridesHoverActions = (unknownApi: unknown): unknownApi is OverridesHoverActions => {
+export const canOverrideHoverActions = (unknownApi: unknown): unknownApi is CanOverrideHoverActions => {
   return Boolean(
     unknownApi &&
-      (unknownApi as OverridesHoverActions)?.overrideHoverActions$ !== undefined &&
-      (unknownApi as OverridesHoverActions).OverriddenHoverActionsComponent !== undefined
+      (unknownApi as CanOverrideHoverActions)?.overrideHoverActions$ !== undefined &&
+      (unknownApi as CanOverrideHoverActions).OverriddenHoverActionsComponent !== undefined
   );
 };

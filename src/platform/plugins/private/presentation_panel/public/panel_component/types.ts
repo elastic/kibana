@@ -16,7 +16,7 @@ import {
   PublishesDisabledActionIds,
   PublishesDescription,
   PublishesTitle,
-  OverridesHoverActions,
+  CanOverrideHoverActions,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -80,7 +80,7 @@ export interface DefaultPresentationPanelApi
         PublishesDisabledActionIds &
         HasParentApi &
         CanLockHoverActions &
-        OverridesHoverActions
+        CanOverrideHoverActions
     > {}
 
 export type PresentationPanelProps<

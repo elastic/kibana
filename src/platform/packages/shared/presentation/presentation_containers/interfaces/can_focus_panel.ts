@@ -11,7 +11,7 @@
  * This API can focus a child panel
  */
 export interface CanFocusPanel {
-  setFocusedPanelId: (panelId?: string, scrollTo?: boolean) => void;
+  setFocusedPanelId: (panelId?: string) => void;
 }
 
 /**

@@ -38,7 +38,7 @@ export const MarkdownRenderer = ({
       css={styles.container}
       data-test-subj="markdownRenderer"
     >
-      {content ?? ''}
+      {content}
     </EuiMarkdownFormat>
   );
 };

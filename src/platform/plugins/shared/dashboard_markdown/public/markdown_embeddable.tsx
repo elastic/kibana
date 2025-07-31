@@ -45,9 +45,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    /**
-     * Initialize state managers.
-     */
     const titleManager = initializeTitleManager(initialState.rawState);
     const markdownStateManager = initializeStateManager(
       initialState.rawState,
@@ -111,14 +108,19 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       getTypeDisplayName: () => 'Markdown',
       overrideHoverActions$,
       OverriddenHoverActionsComponent: () => (
-        <MarkdownEditorPreviewSwitch isPreview$={isPreview$} isEditing$={isEditing$} />
+        <MarkdownEditorPreviewSwitch
+          isPreview$={isPreview$}
+          isEditing$={isEditing$}
+          onSwitch={(isPreview: boolean) => {
+            isPreview$.next(isPreview);
+          }}
+        />
       ),
     });
 
     return {
       api,
       Component: function MarkdownEmbeddableComponent() {
-        // get state for rendering
         const [content, isEditing, viewMode] = useBatchedPublishingSubjects(
           markdownStateManager.api.content$,
           isEditing$,
@@ -135,15 +137,13 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         }
 
         if (viewMode === 'view' || !isEditing) {
-          return (
-            <MarkdownRenderer processingPluginList={processingPluginList} content={content ?? ''} />
-          );
+          return <MarkdownRenderer processingPluginList={processingPluginList} content={content} />;
         }
 
         return (
           <MarkdownEditor
             processingPluginList={processingPluginList}
-            content={content ?? ''}
+            content={content}
             onCancel={() => {
               if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
                 parentApi.removePanel(api.uuid);

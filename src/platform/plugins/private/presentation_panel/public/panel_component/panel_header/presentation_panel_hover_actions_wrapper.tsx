@@ -10,7 +10,7 @@
 import React from 'react';
 
 import {
-  overridesHoverActions,
+  canOverrideHoverActions,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { PresentationPanelActionsSimpleWrapper } from './presentation_panel_actions_simple_wrapper';
@@ -24,7 +24,7 @@ export const PresentationPanelHoverActionsWrapper = (props: PresentationPanelHov
     props.api?.overrideHoverActions$
   );
 
-  if (overridesHoverActions(props.api) && overrideHoverActions) {
+  if (canOverrideHoverActions(props.api) && overrideHoverActions) {
     const CustomComponent = props.api?.OverriddenHoverActionsComponent;
     return (
       <PresentationPanelActionsSimpleWrapper

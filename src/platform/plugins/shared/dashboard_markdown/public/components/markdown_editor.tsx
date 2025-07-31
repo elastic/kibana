@@ -10,9 +10,8 @@
 import { EuiMarkdownEditor, EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useLayoutEffect, useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
@@ -114,7 +113,7 @@ export interface MarkdownEditorProps {
   content: string;
   onCancel: () => void;
   onSave: (value: string) => void;
-  isPreview$: BehaviorSubject<boolean>;
+  isPreview$: PublishingSubject<boolean>;
 }
 
 export const MarkdownEditor = ({
@@ -126,7 +125,7 @@ export const MarkdownEditor = ({
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
   const isPreview = useStateFromPublishingSubject(isPreview$);
-  const [value, onChange] = React.useState(content ?? '');
+  const [value, onChange] = React.useState(content);
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -157,7 +156,7 @@ export const MarkdownEditor = ({
         />
       </div>
       {isPreview && (
-        <MarkdownRenderer processingPluginList={processingPluginList} content={value ?? ''} />
+        <MarkdownRenderer processingPluginList={processingPluginList} content={value} />
       )}
       <MarkdownFooter
         onCancel={onCancel}

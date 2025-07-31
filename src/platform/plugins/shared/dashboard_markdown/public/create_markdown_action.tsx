@@ -42,8 +42,9 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
   },
   getDisplayName: () =>
     i18n.translate('dashboardMarkdown.displayNameAriaLabel', {
-      defaultMessage: 'Markdown text', // todo: define name
+      defaultMessage: 'Markdown text',
     }),
+
   getDisplayNameTooltip: () =>
     i18n.translate('dashboardMarkdown.tooltip', {
       defaultMessage: 'Add custom text to dashboards.',

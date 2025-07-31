@@ -10,7 +10,7 @@
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,
-  OverridesHoverActions,
+  CanOverrideHoverActions,
   PublishesUnsavedChanges,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -31,4 +31,4 @@ export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorSta
 export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
-  OverridesHoverActions;
+  CanOverrideHoverActions;

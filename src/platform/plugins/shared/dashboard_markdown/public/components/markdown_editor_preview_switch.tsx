@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 const generateId = htmlIdGenerator();
 const EDITOR_ID = generateId('markdown_editor__editor');
@@ -58,9 +57,11 @@ const switchStyles = {
 export const MarkdownEditorPreviewSwitch = ({
   isPreview$,
   isEditing$,
+  onSwitch,
 }: {
-  isPreview$: BehaviorSubject<boolean>;
-  isEditing$: BehaviorSubject<boolean>;
+  isPreview$: PublishingSubject<boolean>;
+  isEditing$: PublishingSubject<boolean>;
+  onSwitch: (isPreview: boolean) => void;
 }) => {
   const [isPreview, isEditing] = useBatchedPublishingSubjects(isPreview$, isEditing$);
   const styles = useMemoCss(switchStyles);
@@ -75,7 +76,7 @@ export const MarkdownEditorPreviewSwitch = ({
       options={editorPreviewOptions}
       idSelected={isPreview ? PREVIEW_ID : EDITOR_ID}
       onChange={(id) => {
-        isPreview$.next(id === PREVIEW_ID);
+        onSwitch(id === PREVIEW_ID);
       }}
       buttonSize="compressed"
       type="single"
