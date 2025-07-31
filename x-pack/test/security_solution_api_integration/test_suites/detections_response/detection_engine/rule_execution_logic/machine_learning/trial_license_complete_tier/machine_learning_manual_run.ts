@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).toEqual(2);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(2);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
