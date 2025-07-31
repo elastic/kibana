@@ -191,7 +191,7 @@ describe('usePageSummary', () => {
     jest.spyOn(useChatServiceHook, 'useChatService').mockReturnValue({
       ObservabilityAIAssistantChatServiceContext: undefined,
       chatService: {
-        complete: jest.fn(() => observable),
+        complete: jest.fn(() => observable) as ObservabilityAIAssistantChatService['complete'],
       } as ObservabilityAIAssistantChatService,
       observabilityAIAssistantService: mockObservabilityAIAssistant.service,
       isObsAIAssistantEnabled: true,
