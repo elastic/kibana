@@ -40,7 +40,6 @@ import {
 import { loadDataViewList, initializeTabs } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
-import type { DiscoverAppState } from '../discover_app_state_container';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -263,12 +262,9 @@ export const internalStateSlice = createSlice({
   },
 });
 
-export const setTabAppStateAndGlobalState = createAction<
-  TabActionPayload<{
-    internalState: TabState['initialInternalState'] | undefined;
-    appState: DiscoverAppState | undefined;
-  }>
->('internalState/setTabAppStateAndGlobalState');
+export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
+  'internalState/syncLocallyPersistedTabState'
+);
 
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
@@ -280,14 +276,8 @@ type InternalStateListenerEffect<
   InternalStateDependencies
 >;
 
-const createMiddleware = ({
-  tabsStorageManager,
-  runtimeStateManager,
-}: {
-  tabsStorageManager: TabsStorageManager;
-  runtimeStateManager: RuntimeStateManager;
-}) => {
-  const listenerMiddleware = createListenerMiddleware();
+const createMiddleware = (options: InternalStateDependencies) => {
+  const listenerMiddleware = createListenerMiddleware({ extra: options });
   const startListening = listenerMiddleware.startListening as TypedStartListening<
     DiscoverInternalState,
     InternalStateDispatch,
@@ -297,7 +287,8 @@ const createMiddleware = ({
   startListening({
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
-      (action) => {
+      (action, listenerApi) => {
+        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
         const getTabAppState = (tabId: string) =>
           selectTabRuntimeAppState(runtimeStateManager, tabId);
         const getTabInternalState = (tabId: string) =>
@@ -310,13 +301,15 @@ const createMiddleware = ({
   });
 
   startListening({
-    actionCreator: setTabAppStateAndGlobalState,
-    effect: throttle<InternalStateListenerEffect<typeof setTabAppStateAndGlobalState>>(
+    actionCreator: syncLocallyPersistedTabState,
+    effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
-        withTab(listenerApi.getState(), action, ({ globalState }) => {
+        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        withTab(listenerApi.getState(), action, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            ...action.payload,
-            globalState,
+            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            appState: selectTabRuntimeAppState(runtimeStateManager, tab.id),
+            globalState: tab.globalState,
           });
         });
       },
@@ -325,7 +318,7 @@ const createMiddleware = ({
     ),
   });
 
-  return listenerMiddleware;
+  return listenerMiddleware.middleware;
 };
 
 export interface InternalStateDependencies {
@@ -345,7 +338,7 @@ export const createInternalStateStore = (options: InternalStateDependencies) => 
       getDefaultMiddleware({
         thunk: { extraArgument: options },
         serializableCheck: !IS_JEST_ENVIRONMENT,
-      }).prepend(createMiddleware(options).middleware),
+      }).prepend(createMiddleware(options)),
     devTools: {
       name: 'DiscoverInternalState',
     },

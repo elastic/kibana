@@ -439,10 +439,8 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
-    const updateTabAppStateAndGlobalState = () =>
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateTabAppStateAndGlobalState)()
-      );
+    const syncLocallyPersistedTabState = () =>
+      internalState.dispatch(injectCurrentTab(internalStateActions.syncLocallyPersistedTabState)());
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
@@ -450,7 +448,7 @@ export function getDiscoverStateContainer({
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
-      updateTabAppStateAndGlobalState();
+      syncLocallyPersistedTabState();
     });
 
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
@@ -474,7 +472,7 @@ export function getDiscoverStateContainer({
 
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
-      .subscribe(updateTabAppStateAndGlobalState);
+      .subscribe(syncLocallyPersistedTabState);
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
