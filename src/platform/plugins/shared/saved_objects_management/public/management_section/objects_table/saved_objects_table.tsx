@@ -714,8 +714,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             ? i18n.translate(
                 'savedObjectsManagement.objectsTable.selected.selectedSavedObjectsLabel',
                 {
-                  defaultMessage:
-                    '{count, plural, one {# item} other {# items}} selected.',
+                  defaultMessage: '{count, plural, one {# item} other {# items}} selected.',
                   values: {
                     count: selectedSavedObjects.length,
                   },
