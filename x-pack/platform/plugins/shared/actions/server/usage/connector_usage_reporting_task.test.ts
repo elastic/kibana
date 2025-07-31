@@ -110,6 +110,7 @@ describe('ConnectorUsageReportingTask', () => {
         },
         taskType: CONNECTOR_USAGE_REPORTING_TASK_TYPE,
       },
+      abortController: new AbortController(),
     });
   };
 

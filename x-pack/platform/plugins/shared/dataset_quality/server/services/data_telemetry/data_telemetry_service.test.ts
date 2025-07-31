@@ -470,7 +470,10 @@ function setupMocks() {
   const runTask = () => {
     const taskDefinitions = taskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
     const taskType = Object.keys(taskDefinitions)[0];
-    const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
+    const taskRunner = taskDefinitions[taskType].createTaskRunner({
+      taskInstance: {} as any,
+      abortController: new AbortController(),
+    });
 
     return taskRunner.run();
   };
