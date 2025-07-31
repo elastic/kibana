@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-
 import { HostsContent } from './hosts_content';
 import { UnifiedSearchProvider } from '../hooks/use_unified_search';
 import { HostsTimeRangeMetadataProvider } from '../hooks/use_hosts_metadata_provider';

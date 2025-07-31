@@ -79,7 +79,6 @@ export const MetricRowWithCount = ({
           >
             <EuiSelect
               data-test-subj="infraMetricRowWithCountSelect"
-              compressed
               options={aggOptions}
               value={agg}
               onChange={handleAggChange}

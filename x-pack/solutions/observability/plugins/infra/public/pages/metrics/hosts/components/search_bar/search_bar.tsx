@@ -11,6 +11,7 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { UnifiedSearchBar } from '../../../../../components/shared/unified_search_bar';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
@@ -84,6 +85,9 @@ export const SearchBar = () => {
         <EuiFlexItem>
           <UnifiedSearchBar
             onQuerySubmit={handleRefresh}
+            placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+              defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+            })}
             showDatePicker
             showFilterBar
             showSubmitButton
