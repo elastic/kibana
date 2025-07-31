@@ -68,6 +68,7 @@ export const bootstrapPrebuiltRulesHandler = async (
         ruleAssetsClient,
         ruleObjectsClient,
         fleetServices: securityContext.getInternalFleetServices(),
+        logger,
       });
     } else {
       const endpointResult = await installEndpointPackage(securityContext, logger);

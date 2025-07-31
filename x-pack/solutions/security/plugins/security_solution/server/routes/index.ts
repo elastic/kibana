@@ -70,7 +70,7 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext
 ) => {
-  registerFleetIntegrationsRoutes(router);
+  registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
   registerPrebuiltRulesRoutes(router, logger);
   registerRuleExceptionsRoutes(router);
