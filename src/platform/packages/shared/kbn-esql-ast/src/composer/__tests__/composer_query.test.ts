@@ -73,6 +73,38 @@ describe('.pipe``', () => {
       `"Could not parse a single command completely: \\"WHERE foo > 123 | LIMIT 10\\". "`
     );
   });
+
+  test('can generate commands using a string `.pipe(str)`', () => {
+    const query = esql`FROM kibana_ecommerce_index`;
+
+    expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+
+    query.pipe('WHERE foo > 42').pipe('EVAL a = 123');
+
+    expect(query.print('basic')).toBe(
+      'FROM kibana_ecommerce_index | WHERE foo > 42 | EVAL a = 123'
+    );
+  });
+});
+
+describe('high-level helpers', () => {
+  describe('.limit()', () => {
+    test('appends command to the end', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+
+      query.limit(10);
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index | LIMIT 10');
+
+      query.limit(1).limit(2);
+
+      expect(query.print('basic')).toBe(
+        'FROM kibana_ecommerce_index | LIMIT 10 | LIMIT 1 | LIMIT 2'
+      );
+    });
+  });
 });
 
 describe('.toRequest()', () => {

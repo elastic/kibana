@@ -35,6 +35,10 @@ export class ComposerQuery {
     return this;
   };
 
+  public limit(limit: number): ComposerQuery {
+    return this.pipe`LIMIT ${limit}`;
+  }
+
   /**
    * Prints the query to a string in a specified format.
    *
