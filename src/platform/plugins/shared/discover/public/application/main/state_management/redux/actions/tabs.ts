@@ -21,6 +21,7 @@ import {
   internalStateSlice,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
+  setTabAppStateAndGlobalState,
 } from '../internal_state';
 import {
   createTabRuntimeState,
@@ -208,13 +209,12 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
 
 export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
-  (dispatch, getState, { runtimeStateManager }) => {
+  (dispatch, _, { runtimeStateManager }) => {
     dispatch(
-      internalStateSlice.actions.setTabAppStateAndGlobalState({
+      setTabAppStateAndGlobalState({
         tabId,
         internalState: selectTabRuntimeInternalState(runtimeStateManager, tabId),
         appState: selectTabRuntimeAppState(runtimeStateManager, tabId),
-        globalState: selectTab(getState(), tabId).globalState,
       })
     );
   };
