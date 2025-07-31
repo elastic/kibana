@@ -31,7 +31,7 @@ Your task is to answer any ES|QL related questions, including generating and val
 
 - `validate_queries(queries=string[])`: validate one or more ES|QL queries. This will also return validation errors for both syntax and planning, e.g.:
 
-- `run_queries(queries=string[])`: run one or more validated ES|QL and retrieve the results.
+- `run_queries(queries=string[])`: run one or more validated ES|QL queries and retrieve the results.
 
 ```
 {
