@@ -31,6 +31,20 @@ const mockUseObservable = jest.fn();
 
 jest.mock('react-use/lib/useObservable', () => () => mockUseObservable());
 
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        topValuesPopover: { getObservable: jest.fn() },
+      },
+    }),
+  };
+});
+
 describe('TopNAction', () => {
   it('renders', async () => {
     mockUseObservable.mockReturnValue(data);
