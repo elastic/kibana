@@ -62,6 +62,59 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   }
 );
 
+// Field definitions (mirroring TA structure)
+export const CONDITION_FIELD_TITLE = {
+  fieldOne: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldOne',
+    {
+      defaultMessage: 'Field One',
+    }
+  ),
+  fieldTwo: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldTwo',
+    {
+      defaultMessage: 'Field Two',
+    }
+  ),
+  fieldThree: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldThree',
+    {
+      defaultMessage: 'Field Three',
+    }
+  ),
+};
+
+export const CONDITION_FIELD_DESCRIPTION = {
+  fieldOne: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldOne',
+    {
+      defaultMessage: 'Description for field one',
+    }
+  ),
+  fieldTwo: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldTwo',
+    {
+      defaultMessage: 'Description for field two',
+    }
+  ),
+  fieldThree: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldThree',
+    {
+      defaultMessage: 'Description for field three',
+    }
+  ),
+};
+
+// Operator definitions (mirroring TA structure)
+export const OPERATOR_TITLES = {
+  is: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.is', {
+    defaultMessage: 'is',
+  }),
+  matches: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.matches', {
+    defaultMessage: 'matches',
+  }),
+};
+
 export const INPUT_ERRORS = {
   name: (itemName: string) =>
     i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
@@ -85,4 +138,39 @@ export const INPUT_ERRORS = {
   invalidField: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidField', {
     defaultMessage: 'Field entry must have a value',
   }),
+  // Backend schema-aligned validation messages
+  nameMaxLength: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameMaxLength', {
+    defaultMessage: 'Name cannot exceed 256 characters',
+  }),
+  descriptionMaxLength: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.descriptionMaxLength',
+    {
+      defaultMessage: 'Description cannot exceed 256 characters',
+    }
+  ),
+  osRequired: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.osRequired', {
+    defaultMessage: 'Operating system selection is required',
+  }),
+  entryValueEmpty: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.entryValueEmpty',
+    {
+      defaultMessage: 'Condition value cannot be empty',
+    }
+  ),
+  entriesAtLeastOne: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.errors.entriesAtLeastOne',
+    {
+      defaultMessage: 'At least one condition must be specified',
+    }
+  ),
+};
+
+// Validation warnings
+export const VALIDATION_WARNINGS = {
+  performanceWildcard: i18n.translate(
+    'xpack.securitySolution.trustedDevices.form.warnings.performanceWildcard',
+    {
+      defaultMessage: 'Double wildcards (**) may cause performance issues',
+    }
+  ),
 };

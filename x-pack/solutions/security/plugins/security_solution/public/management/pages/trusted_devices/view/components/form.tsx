@@ -5,13 +5,523 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiSuperSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import { FormattedError } from '../../../../components/formatted_error';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
+import { OS_TITLES } from '../../../../common/translations';
+import {
+  DETAILS_HEADER,
+  DETAILS_HEADER_DESCRIPTION,
+  NAME_LABEL,
+  DESCRIPTION_LABEL,
+  CONDITIONS_HEADER,
+  CONDITIONS_HEADER_DESCRIPTION,
+  SELECT_OS_LABEL,
+  POLICY_SELECT_DESCRIPTION,
+  CONDITION_FIELD_TITLE,
+  OPERATOR_TITLES,
+  INPUT_ERRORS,
+  VALIDATION_WARNINGS,
+} from '../translations';
+
+interface FormState {
+  visited: Record<string, boolean>;
+  isValid: boolean;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  errors: Record<string, string[]>;
+  warnings: Record<string, string[]>;
+}
+
+const OS_OPTIONS = [OperatingSystem.WINDOWS, OperatingSystem.MAC].map((os) => ({
+  value: os,
+  inputDisplay: OS_TITLES[os],
+}));
+
+const DetailsSection = memo<{
+  mode: string;
+  getTestId: (suffix?: string) => string | undefined;
+  item: ExceptionListItemSchema | CreateExceptionListItemSchema;
+  handleNameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleNameBlur: (event: React.FocusEvent<HTMLInputElement>) => void;
+  handleDescriptionChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  disabled: boolean;
+  formState: FormState;
+  validationResult: ValidationResult;
+}>(
+  ({
+    mode,
+    getTestId,
+    item,
+    handleNameChange,
+    handleNameBlur,
+    handleDescriptionChange,
+    disabled,
+    formState,
+    validationResult,
+  }) => (
+    <>
+      <EuiTitle size="xs">
+        <h3>{DETAILS_HEADER}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      {mode === 'create' && (
+        <EuiText size="s" data-test-subj={getTestId('about')}>
+          <p>{DETAILS_HEADER_DESCRIPTION}</p>
+        </EuiText>
+      )}
+      <EuiSpacer size="m" />
+
+      <EuiFormRow
+        label={NAME_LABEL}
+        fullWidth
+        data-test-subj={getTestId('nameRow')}
+        isInvalid={formState.visited.name && !!validationResult.errors.name}
+        error={formState.visited.name ? validationResult.errors.name : undefined}
+        helpText={
+          formState.visited.name && validationResult.warnings.name
+            ? validationResult.warnings.name[0]
+            : undefined
+        }
+      >
+        <EuiFieldText
+          name="name"
+          value={item.name || ''}
+          onChange={handleNameChange}
+          onBlur={handleNameBlur}
+          fullWidth
+          maxLength={256}
+          data-test-subj={getTestId('nameTextField')}
+          disabled={disabled}
+          isInvalid={formState.visited.name && !!validationResult.errors.name}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={DESCRIPTION_LABEL}
+        fullWidth
+        data-test-subj={getTestId('descriptionRow')}
+        isInvalid={!!validationResult.errors.description}
+        error={validationResult.errors.description}
+        helpText={
+          validationResult.warnings.description
+            ? validationResult.warnings.description[0]
+            : undefined
+        }
+      >
+        <EuiTextArea
+          isInvalid={!!validationResult.errors.description}
+          name="description"
+          value={item.description || ''}
+          onChange={handleDescriptionChange}
+          fullWidth
+          compressed
+          maxLength={256}
+          data-test-subj={getTestId('descriptionField')}
+          disabled={disabled}
+        />
+      </EuiFormRow>
+    </>
+  )
+);
+DetailsSection.displayName = 'DetailsSection';
+
+const ConditionsSection = memo<{
+  getTestId: (suffix?: string) => string | undefined;
+  selectedOs: OperatingSystem;
+  handleOsChange: (value: OperatingSystem) => void;
+  currentEntry: ExceptionListItemSchema['entries'][0];
+  handleFieldChange: (value: string) => void;
+  handleOperatorChange: (value: string) => void;
+  handleValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleValueBlur: () => void;
+  disabled: boolean;
+  formState: FormState;
+  validationResult: ValidationResult;
+}>(
+  ({
+    getTestId,
+    selectedOs,
+    handleOsChange,
+    currentEntry,
+    handleFieldChange,
+    handleOperatorChange,
+    handleValueChange,
+    handleValueBlur,
+    disabled,
+    formState,
+    validationResult,
+  }) => (
+    <>
+      <EuiTitle size="xs">
+        <h3>{CONDITIONS_HEADER}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="s">{CONDITIONS_HEADER_DESCRIPTION}</EuiText>
+      <EuiSpacer size="m" />
+
+      <EuiFormRow
+        label={SELECT_OS_LABEL}
+        fullWidth
+        data-test-subj={getTestId('osRow')}
+        isInvalid={formState.visited.os && !!validationResult.errors.os}
+        error={formState.visited.os ? validationResult.errors.os : undefined}
+        helpText={
+          formState.visited.os && validationResult.warnings.os
+            ? validationResult.warnings.os[0]
+            : undefined
+        }
+      >
+        <EuiSuperSelect
+          name="os"
+          options={OS_OPTIONS}
+          valueOfSelected={selectedOs}
+          onChange={handleOsChange}
+          fullWidth
+          data-test-subj={getTestId('osSelectField')}
+          disabled={disabled}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        data-test-subj={getTestId('conditionsRow')}
+        isInvalid={formState.visited.entries && !!validationResult.errors.entries}
+        error={formState.visited.entries ? validationResult.errors.entries : undefined}
+        helpText={
+          formState.visited.entries && validationResult.warnings.entries
+            ? validationResult.warnings.entries[0]
+            : undefined
+        }
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow label="Field">
+              <EuiSuperSelect
+                options={FIELD_OPTIONS}
+                valueOfSelected={currentEntry.field || 'fieldOne'}
+                onChange={handleFieldChange}
+                data-test-subj={getTestId('fieldSelect')}
+                disabled={disabled}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="Operator">
+              <EuiSuperSelect
+                options={OPERATOR_OPTIONS}
+                valueOfSelected={currentEntry.type === 'match' ? 'is' : 'match'}
+                onChange={handleOperatorChange}
+                data-test-subj={getTestId('operatorSelect')}
+                disabled={disabled}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="Value">
+              <EuiFieldText
+                value={('value' in currentEntry ? currentEntry.value : '') || ''}
+                onChange={handleValueChange}
+                onBlur={handleValueBlur}
+                data-test-subj={getTestId('valueField')}
+                disabled={disabled}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    </>
+  )
+);
+ConditionsSection.displayName = 'ConditionsSection';
+
+const FIELD_OPTIONS = [
+  { value: 'fieldOne', inputDisplay: CONDITION_FIELD_TITLE.fieldOne },
+  { value: 'fieldTwo', inputDisplay: CONDITION_FIELD_TITLE.fieldTwo },
+  { value: 'fieldThree', inputDisplay: CONDITION_FIELD_TITLE.fieldThree },
+];
+
+const OPERATOR_OPTIONS = [
+  { value: 'is', inputDisplay: OPERATOR_TITLES.is },
+  { value: 'match', inputDisplay: OPERATOR_TITLES.matches },
+];
 
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
-  ({ item, onChange, mode = 'create', disabled = false, error }) => {
-    return <div>{'Form placeholder'}</div>;
+  ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
+    const getTestId = useTestIdGenerator('trustedDevices-form');
+
+    const [formState, setFormState] = useState<FormState>({
+      visited: {},
+      isValid: false,
+    });
+
+    const [validationResult, setValidationResult] = useState<ValidationResult>({
+      isValid: false,
+      errors: {},
+      warnings: {},
+    });
+
+    const updateFormState = useCallback((updates: Partial<FormState>) => {
+      setFormState((prev) => ({ ...prev, ...updates }));
+    }, []);
+
+    const validateForm = useCallback(
+      (formData: typeof item): ValidationResult => {
+        const errors: Record<string, string[]> = {};
+        const warnings: Record<string, string[]> = {};
+
+        // Name validation
+        if (!formData.name?.trim()) {
+          errors.name = [INPUT_ERRORS.name('trusted device')];
+        } else if (formData.name.trim().length > 256) {
+          errors.name = [INPUT_ERRORS.nameMaxLength];
+        }
+
+        // Description validation
+        if (formData.description && formData.description.length > 256) {
+          errors.description = [INPUT_ERRORS.descriptionMaxLength];
+        }
+
+        // OS validation
+        if (!formData.os_types?.length) {
+          errors.os = [INPUT_ERRORS.osRequired];
+        }
+
+        // Condition validation (backend schema: entries minSize: 1, value length > 0)
+        const hasOsSelected = (formData.os_types?.length ?? 0) > 0;
+        const hasVisitedEntries = formState.visited.entries;
+
+        if (hasOsSelected || hasVisitedEntries) {
+          const entry = formData.entries?.[0];
+
+          if (!formData.entries?.length || !entry) {
+            errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
+          } else if ('value' in entry) {
+            // Handle string values (matching backend schema: length > 0)
+            if (typeof entry.value === 'string') {
+              if (!entry.value.trim()) {
+                errors.entries = [INPUT_ERRORS.entryValueEmpty];
+              }
+
+              // Wildcard validation for "match" operator
+              if (entry.type === 'wildcard' && entry.value.includes('**')) {
+                warnings.entries = [VALIDATION_WARNINGS.performanceWildcard];
+              }
+            }
+            // Handle array values
+            else if (Array.isArray(entry.value) && (!entry.value || entry.value.length === 0)) {
+              errors.entries = [INPUT_ERRORS.entryValueEmpty];
+            }
+          }
+        }
+
+        return {
+          isValid: Object.keys(errors).length === 0,
+          errors,
+          warnings,
+        };
+      },
+      [formState.visited]
+    );
+
+    const updateField = useCallback(
+      (field: string, value: string) => {
+        const updatedItem = { ...item, [field]: value };
+        const validation = validateForm(updatedItem);
+
+        updateFormState({ isValid: validation.isValid });
+        setValidationResult(validation);
+
+        onChange({ item: updatedItem, isValid: validation.isValid });
+      },
+      [item, onChange, validateForm, updateFormState]
+    );
+
+    const handleNameChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        updateField('name', event.target.value);
+      },
+      [updateField]
+    );
+
+    const handleNameBlur = useCallback(
+      (event: React.FocusEvent<HTMLInputElement>) => {
+        updateFormState({ visited: { ...formState.visited, name: true } });
+      },
+      [formState.visited, updateFormState]
+    );
+
+    const handleDescriptionChange = useCallback(
+      (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        updateField('description', event.target.value);
+      },
+      [updateField]
+    );
+
+    const handleOsChange = useCallback(
+      (value: OperatingSystem) => {
+        const updatedItem = {
+          ...item,
+          os_types: [value],
+          entries: [
+            { field: 'fieldOne', operator: 'included' as const, type: 'match' as const, value: '' },
+          ],
+        };
+        const validation = validateForm(updatedItem);
+
+        updateFormState({
+          isValid: validation.isValid,
+          visited: { ...formState.visited, os: true },
+        });
+
+        onChange({ item: updatedItem, isValid: validation.isValid });
+      },
+      [item, onChange, validateForm, updateFormState, formState.visited]
+    );
+
+    const updateConditionField = useCallback(
+      (updates: Record<string, string>) => {
+        const currentEntry = item.entries?.[0] || {
+          field: 'fieldOne',
+          operator: 'included',
+          type: 'match',
+          value: '',
+        };
+        const updatedEntry = { ...currentEntry, ...updates };
+        const updatedItem = { ...item, entries: [updatedEntry] };
+        const validation = validateForm(updatedItem);
+
+        updateFormState({ isValid: validation.isValid });
+        setValidationResult(validation);
+
+        onChange({ item: updatedItem, isValid: validation.isValid });
+      },
+      [item, onChange, validateForm, updateFormState, setValidationResult]
+    );
+
+    const handleFieldChange = useCallback(
+      (value: string) => {
+        updateConditionField({ field: value });
+      },
+      [updateConditionField]
+    );
+
+    const handleOperatorChange = useCallback(
+      (value: string) => {
+        const type = value === 'is' ? 'match' : 'wildcard';
+        updateConditionField({ type });
+      },
+      [updateConditionField]
+    );
+
+    const handleValueChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        updateConditionField({ value: event.target.value });
+      },
+      [updateConditionField]
+    );
+
+    const handleValueBlur = useCallback(() => {
+      updateFormState({ visited: { ...formState.visited, entries: true } });
+    }, [formState.visited, updateFormState]);
+
+    const handlePolicyChange = useCallback<EffectedPolicySelectProps['onChange']>(
+      (updatedItem) => {
+        const validation = validateForm(updatedItem);
+        updateFormState({ isValid: validation.isValid });
+
+        onChange({ item: updatedItem, isValid: validation.isValid });
+      },
+      [onChange, validateForm, updateFormState]
+    );
+
+    const selectedOs = useMemo(() => {
+      return (item.os_types?.[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
+    }, [item.os_types]);
+
+    const currentEntry = useMemo(() => {
+      const entry = item.entries?.[0];
+      if (entry && 'value' in entry) {
+        return entry;
+      }
+      return { field: '', operator: 'included' as const, type: 'match' as const, value: '' };
+    }, [item.entries]);
+
+    return (
+      <EuiForm
+        component="div"
+        data-test-subj={getTestId('')}
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
+        isInvalid={!!submitError}
+      >
+        <DetailsSection
+          mode={mode}
+          getTestId={getTestId}
+          item={item}
+          handleNameChange={handleNameChange}
+          handleNameBlur={handleNameBlur}
+          handleDescriptionChange={handleDescriptionChange}
+          disabled={disabled}
+          formState={formState}
+          validationResult={validationResult}
+        />
+
+        <EuiHorizontalRule />
+
+        <ConditionsSection
+          getTestId={getTestId}
+          selectedOs={selectedOs}
+          handleOsChange={handleOsChange}
+          currentEntry={currentEntry}
+          handleFieldChange={handleFieldChange}
+          handleOperatorChange={handleOperatorChange}
+          handleValueChange={handleValueChange}
+          handleValueBlur={handleValueBlur}
+          disabled={disabled}
+          formState={formState}
+          validationResult={validationResult}
+        />
+
+        <EuiHorizontalRule />
+
+        {/* Assignment Section */}
+        <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
+          <EffectedPolicySelect
+            item={item}
+            description={POLICY_SELECT_DESCRIPTION}
+            data-test-subj={getTestId('effectedPolicies')}
+            onChange={handlePolicyChange}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    );
   }
 );
 
