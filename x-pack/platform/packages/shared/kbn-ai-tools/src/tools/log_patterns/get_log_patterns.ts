@@ -16,12 +16,12 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import { ChangePointType } from '@kbn/es-types/src';
-import { pValueToLabel } from '../../utils/p_value_to_label';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
+import { pValueToLabel } from '../../utils/p_value_to_label';
 
 interface FieldPatternResultBase {
   field: string;
