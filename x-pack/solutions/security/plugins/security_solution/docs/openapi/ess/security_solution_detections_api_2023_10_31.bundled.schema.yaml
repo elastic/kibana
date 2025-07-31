@@ -4701,10 +4701,11 @@ components:
             - delete
           type: string
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4722,10 +4723,11 @@ components:
             - disable
           type: string
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4756,10 +4758,11 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4857,10 +4860,11 @@ components:
           minItems: 1
           type: array
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4883,10 +4887,11 @@ components:
             - enable
           type: string
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4906,10 +4911,11 @@ components:
             - export
           type: string
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4927,10 +4933,11 @@ components:
             - run
           type: string
         ids:
-          description: >-
+          description: >
             Array of rule `id`s to which a bulk action will be applied. Do not
-            use rule's `rule_id` here. Only valid when query property is
-            undefined.
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -8320,7 +8327,7 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-
+              
       type: object
     RuleActionFrequency:
       description: >-
