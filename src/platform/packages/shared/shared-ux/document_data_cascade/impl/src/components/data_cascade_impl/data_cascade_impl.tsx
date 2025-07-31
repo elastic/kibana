@@ -15,9 +15,10 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useMemo,
 } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import {
   useReactTable,
   createColumnHelper,
@@ -35,12 +36,12 @@ import {
   type GroupNode,
   type LeafNode,
 } from '../data_cascade_provider';
+import { CascadeRowPrimitive, type CascadeRowPrimitiveProps } from './data_cascade_row';
 import {
-  CascadeRowPrimitive,
   CascadeRowCellPrimitive,
-  type CascadeRowPrimitiveProps,
   type CascadeRowCellPrimitiveProps,
-} from './data_cascade_row';
+} from './data_cascade_row_cell';
+import { dataCascadeImplStyles } from './data_cascade_impl.styles';
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowCellPrimitiveProps<G, L>,
@@ -119,6 +120,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     throw new Error('DataCascadeRow only accepts `DataCascadeRowCell` as Child');
   }
 
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDataCascadeDispatch<G, L>();
   const state = useDataCascadeState<G, L>();
   const columnHelper = createColumnHelper<G>();
@@ -129,6 +131,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const virtualizerItemSizeCacheRef = useRef<Map<number, number>>(new Map());
   const activeStickyIndexRef = useRef<number | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
+
+  const styles = useMemo(() => dataCascadeImplStyles(euiTheme), [euiTheme]);
 
   useEffect(() => {
     dispatch({
@@ -157,9 +161,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               <EuiFlexGroup
                 justifyContent="spaceBetween"
                 alignItems="center"
-                css={({ euiTheme }) => ({
-                  padding: euiTheme.size.s,
-                })}
+                css={styles.cascadeHeaderWrapper}
               >
                 <EuiFlexItem>
                   <TableTitleSlot rows={rows} />
@@ -279,17 +281,12 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               css={{ width: containerSize.width, position: 'relative' }}
             >
               <EuiFlexItem
-                css={({ euiTheme }) => ({
-                  position: 'sticky',
-                  willChange: 'transform',
-                  zIndex: euiTheme.levels.header,
-                  background: euiTheme.colors.backgroundBaseSubdued,
-                })}
+                css={styles.cascadeTreeGridHeader}
                 style={getGridHeaderPositioningStyle()}
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem
-                    css={({ euiTheme }) =>
+                    css={
                       (rowVirtualizer.scrollOffset ?? 0) >
                       // apply border on scrolling a quarter of the first row height
                       (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4
@@ -311,9 +308,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     {activeStickyIndexRef.current !== null && stickyGroupRoot && (
                       <EuiFlexItem
                         ref={activeStickyRenderSlotRef}
-                        css={() => ({
-                          position: 'relative',
-                        })}
+                        css={styles.cascadeTreeGridHeaderStickyRenderSlot}
                       />
                     )}
                   </React.Fragment>
@@ -321,9 +316,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               </EuiFlexItem>
               <EuiFlexItem>
                 <div
-                  css={({ euiTheme }) => ({
-                    background: euiTheme.colors.backgroundBaseSubdued,
-                  })}
+                  css={styles.cascadeTreeGridWrapper}
                   style={{ height: rowVirtualizer.getTotalSize() }}
                 >
                   <div
