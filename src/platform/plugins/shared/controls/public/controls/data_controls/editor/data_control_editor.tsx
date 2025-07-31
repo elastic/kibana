@@ -39,15 +39,15 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
-  type ControlWidth,
-  type DefaultDataControlState,
   ControlValuesSource,
   ControlOutputOption,
   DEFAULT_CONTROL_VALUES_SOURCE,
   DEFAULT_CONTROL_OUTPUT,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-} from '../../../../common';
+} from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
+import { type DefaultDataControlState } from '../../../../common';
 import { dataViewsService } from '../../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../../control_factory_registry';
 import type { ControlGroupApi } from '../../../control_group/types';
