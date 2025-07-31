@@ -446,7 +446,7 @@ export interface SavedObjectsClientContract {
    * @param options {@link SavedObjectsChangeOwnershipOptions} - options for the update operation
    * @returns the {@link SavedObjectChangeOwnershipResponse}
    */
-  changeOwnership<T = unknown>(
+  changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
@@ -458,7 +458,7 @@ export interface SavedObjectsClientContract {
    * @param options {@link SavedObjectsChangeAccessControlOptions} - options for the change access control operation
    * @returns the {@link SavedObjectsChangeAccessControlResponse}
    */
-  changeAccessMode<T = unknown>(
+  changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessControlOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;

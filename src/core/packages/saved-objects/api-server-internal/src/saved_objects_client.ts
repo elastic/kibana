@@ -226,7 +226,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeOwnership} */
-  changeOwnership<T = unknown>(
+  changeOwnership(
     objects: Array<{
       type: string;
       id: string;
@@ -238,7 +238,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /** {@inheritDoc SavedObjectsClientContract.changeAccessMode} */
-  changeAccessMode<T = unknown>(
+  changeAccessMode(
     objects: Array<{
       type: string;
       id: string;
