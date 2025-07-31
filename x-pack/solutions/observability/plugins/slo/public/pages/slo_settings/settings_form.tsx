@@ -61,6 +61,12 @@ export function SettingsForm() {
     });
   };
 
+  const remoteClustersSwitchLabel = i18n.translate(
+    'xpack.slo.settingsForm.euiFormRow.useAllRemoteClustersLabel',
+    {
+      defaultMessage: 'Use all remote clusters',
+    }
+  );
   return (
     <EuiForm component="form">
       <EuiDescribedFormGroup
@@ -79,13 +85,9 @@ export function SettingsForm() {
           </p>
         }
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.slo.settingsForm.euiFormRow.useAllRemoteClustersLabel', {
-            defaultMessage: 'Use all remote clusters',
-          })}
-        >
+        <EuiFormRow label={remoteClustersSwitchLabel}>
           <EuiSwitch
-            label=""
+            label={remoteClustersSwitchLabel}
             checked={useAllRemoteClusters}
             onChange={(evt) => setUseAllRemoteClusters(evt.target.checked)}
           />

@@ -17,5 +17,6 @@ export interface JobParamsCSV {
   browserTimezone?: string;
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
+  forceNow?: string;
   pagingStrategy?: CsvPagingStrategy;
 }

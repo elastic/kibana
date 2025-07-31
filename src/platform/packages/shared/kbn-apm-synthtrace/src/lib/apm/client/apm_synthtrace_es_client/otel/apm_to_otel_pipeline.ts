@@ -18,15 +18,15 @@ import { getOtelTransforms } from './otel_to_apm_pipeline';
 
 export function apmToOtelPipeline(
   logger: Logger,
-  version: string,
-  includeSerialization: boolean = true
+  includeSerialization: boolean = true,
+  version: string = 'latest'
 ) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       // the exporter doesn't seem to output this metricset type
       createFilterTransform((chunk) => chunk['metricset.name'] !== 'span_breakdown'),

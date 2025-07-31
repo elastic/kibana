@@ -31,5 +31,4 @@ export type CanvasContainerApi = PublishesViewMode &
   Partial<PublishesUnifiedSearch> &
   Partial<HasAppContext & PublishesUnifiedSearch> & {
     setSerializedStateForChild: (childId: string, panelState: SerializedPanelState<object>) => void;
-    reload: () => void;
   };

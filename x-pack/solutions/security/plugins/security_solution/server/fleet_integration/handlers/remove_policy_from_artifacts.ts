@@ -9,6 +9,7 @@ import pMap from 'p-map';
 
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 
 /**
@@ -16,8 +17,13 @@ import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service
  */
 export const removePolicyFromArtifacts = async (
   exceptionsClient: ExceptionListClient,
-  policy: Parameters<PostPackagePolicyPostDeleteCallback>[0][0]
+  policy: Parameters<PostPackagePolicyPostDeleteCallback>[0][0],
+  _logger: Logger
 ) => {
+  const logger = _logger.get('removePolicyFromArtifacts');
+
+  logger.debug(`Finding all artifacts referencing endpoint policy [${policy.id}]`);
+
   let page = 1;
 
   const findArtifactsByPolicy = (currentPage: number) => {
@@ -35,6 +41,7 @@ export const removePolicyFromArtifacts = async (
   };
 
   let findResponse = await findArtifactsByPolicy(page);
+
   if (!findResponse) {
     return;
   }
@@ -48,17 +55,29 @@ export const removePolicyFromArtifacts = async (
     }
   }
 
+  logger.debug(
+    `Found [${artifacts.length}] artifacts that need to be updated to remove reference to policy [${policy.id}]`
+  );
+
+  const updateErrors: string[] = [];
+
   await pMap(
     artifacts,
     (artifact) =>
-      exceptionsClient.updateExceptionListItem({
-        ...artifact,
-        itemId: artifact.item_id,
-        namespaceType: artifact.namespace_type,
-        osTypes: artifact.os_types,
-        tags: artifact.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
-        expireTime: artifact.expire_time,
-      }),
+      exceptionsClient
+        .updateExceptionListItem({
+          ...artifact,
+          itemId: artifact.item_id,
+          namespaceType: artifact.namespace_type,
+          osTypes: artifact.os_types,
+          tags: artifact.tags.filter((currentPolicy) => currentPolicy !== `policy:${policy.id}`),
+          expireTime: artifact.expire_time,
+        })
+        .catch((error) => {
+          updateErrors.push(
+            `Attempt to update artifact [${artifact.list_id}][${artifact.item_id}] returned error: [${error.message}]\n${error.stack}`
+          );
+        }),
     {
       /** Number of concurrent executions till the end of the artifacts array */
       concurrency: 5,
@@ -67,4 +86,10 @@ export const removePolicyFromArtifacts = async (
       stopOnError: false,
     }
   );
+
+  if (updateErrors.length > 0) {
+    logger.error(updateErrors.join('\n\n'));
+  }
+
+  logger.debug(`Done with artifact updates`);
 };

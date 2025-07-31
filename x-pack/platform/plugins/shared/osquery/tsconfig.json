@@ -77,6 +77,11 @@
     "@kbn/zod-helpers",
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-http-server-utils",
+    "@kbn/spaces-utils",
+    "@kbn/core-http-server"
   ]
 }

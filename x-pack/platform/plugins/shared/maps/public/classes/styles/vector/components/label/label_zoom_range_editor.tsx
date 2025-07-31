@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { LabelZoomRangeStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { LabelZoomRangeProperty } from '../../properties/label_zoom_range_property';
+import { DisabledToolTip } from '../../disabled_tooltip';
 
 interface Props {
   disabled: boolean;
@@ -88,12 +89,5 @@ export function LabelZoomRangeEditor(props: Props) {
     return form;
   }
 
-  return (
-    <EuiToolTip
-      anchorClassName="mapStyleFormDisabledTooltip"
-      content={getDisabledByMessage(props.disabledBy)}
-    >
-      {form}
-    </EuiToolTip>
-  );
+  return <DisabledToolTip content={getDisabledByMessage(props.disabledBy)}>{form}</DisabledToolTip>;
 }

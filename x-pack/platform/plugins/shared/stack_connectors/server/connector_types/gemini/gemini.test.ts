@@ -89,6 +89,7 @@ describe('GeminiConnector', () => {
     logger,
     services: actionsMock.createServices(),
   });
+  const maxOutputTokens = 65535; // Example from Gemini 2.5 Pro
   let connectorUsageCollector: ConnectorUsageCollector;
 
   describe('Gemini', () => {
@@ -182,6 +183,11 @@ describe('GeminiConnector', () => {
         ],
       };
 
+      const withMaxOutputTokens = {
+        ...aiAssistantBody,
+        maxOutputTokens,
+      };
+
       it('the API call is successful with correct parameters', async () => {
         await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
@@ -199,7 +205,40 @@ describe('GeminiConnector', () => {
               ],
               generation_config: {
                 temperature: 0,
-                maxOutputTokens: 8192,
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal: undefined,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('the API call includes maxOutputTokens when provided', async () => {
+        await connector.invokeAI(withMaxOutputTokens, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            method: 'post',
+            responseSchema: RunApiResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens,
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
@@ -234,7 +273,44 @@ describe('GeminiConnector', () => {
               ],
               generation_config: {
                 temperature: 0,
-                maxOutputTokens: 8192,
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('maxOutputTokens is passed to runApi when provided', async () => {
+        const signal = jest.fn();
+        const timeout = 60000;
+        await connector.invokeAI(
+          { ...withMaxOutputTokens, timeout, signal },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            method: 'post',
+            responseSchema: RunApiResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens,
               },
               safety_settings: [
                 { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
@@ -274,6 +350,11 @@ describe('GeminiConnector', () => {
         },
       };
 
+      const withMaxOutputTokens = {
+        ...aiAssistantBody,
+        maxOutputTokens,
+      };
+
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
@@ -291,7 +372,47 @@ describe('GeminiConnector', () => {
               ],
               generation_config: {
                 temperature: 0,
-                maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            responseType: 'stream',
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal: undefined,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('the API call includes maxOutputTokens when provided', async () => {
+        await connector.invokeStream(withMaxOutputTokens, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens,
               },
               tool_config: {
                 function_calling_config: {
@@ -336,7 +457,51 @@ describe('GeminiConnector', () => {
               ],
               generation_config: {
                 temperature: 0,
-                maxOutputTokens: 8192,
+              },
+              tool_config: {
+                function_calling_config: {
+                  mode: 'ANY',
+                  allowed_function_names: ['foo', 'bar'],
+                },
+              },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
+            }),
+            responseType: 'stream',
+            headers: {
+              Authorization: 'Bearer mock_access_token',
+              'Content-Type': 'application/json',
+            },
+            signal,
+            timeout: 60000,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('maxOutputTokens is passed to streamApi when provided', async () => {
+        const signal = jest.fn();
+        const timeout = 60000;
+        await connector.invokeStream(
+          { ...withMaxOutputTokens, timeout, signal },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+              generation_config: {
+                temperature: 0,
+                maxOutputTokens,
               },
               tool_config: {
                 function_calling_config: {

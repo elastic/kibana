@@ -19,7 +19,7 @@ import React, {
 } from 'react';
 import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 
-import { DefaultContent } from './default_content';
+import { Panel } from './panel';
 
 export interface PanelContext {
   isOpen: boolean;
@@ -79,7 +79,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       return null;
     }
 
-    return <DefaultContent selectedNode={selectedNode} />;
+    return <Panel selectedNode={selectedNode} />;
   }, [selectedNode]);
 
   const ctx: PanelContext = useMemo(

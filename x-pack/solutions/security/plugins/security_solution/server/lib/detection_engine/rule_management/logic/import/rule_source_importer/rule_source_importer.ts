@@ -13,7 +13,6 @@
  */
 
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
-import type { ConfigType } from '../../../../../../config';
 import type {
   RuleResponse,
   RuleToImport,
@@ -95,7 +94,6 @@ const fetchMatchingAssets = async ({
  */
 export class RuleSourceImporter implements IRuleSourceImporter {
   private context: SecuritySolutionApiRequestHandlerContext;
-  private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
   private ruleObjectsClient: IPrebuiltRuleObjectsClient;
   private latestPackagesInstalled: boolean = false;
@@ -105,17 +103,14 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private availableRuleAssetIds: Set<string> = new Set();
 
   constructor({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
   }: {
-    config: ConfigType;
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
   }) {
-    this.config = config;
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
@@ -128,7 +123,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
     if (!this.latestPackagesInstalled) {
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.config, this.context);
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context);
       this.latestPackagesInstalled = true;
     }
 
@@ -209,18 +204,15 @@ export class RuleSourceImporter implements IRuleSourceImporter {
 }
 
 export const createRuleSourceImporter = ({
-  config,
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
 }: {
-  config: ConfigType;
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,

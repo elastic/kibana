@@ -195,21 +195,22 @@ export const EntityAnalyticsHeader = () => {
             </EuiFlexItem>
           </>
         )}
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem className="eui-textCenter">
-              <EuiTitle data-test-subj="anomalies_quantity" size="l">
-                <span>{totalAnomalies}</span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink data-test-subj="all_anomalies_link" onClick={scrollToAnomalies}>
-                {i18n.ANOMALIES}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+              <EuiFlexItem className="eui-textCenter">
+                <EuiTitle data-test-subj="anomalies_quantity" size="l">
+                  <span>{totalAnomalies}</span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiLink data-test-subj="all_anomalies_link" onClick={scrollToAnomalies}>
+                  {i18n.ANOMALIES}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        }
       </EuiFlexGroup>
     </EuiPanel>
   );

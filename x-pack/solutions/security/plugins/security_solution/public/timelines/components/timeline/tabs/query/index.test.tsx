@@ -559,7 +559,7 @@ describe('query tab with unified timeline', () => {
         const messageColumnIndex =
           customColumnOrder.findIndex((header) => header.id === 'message') +
           //  offset for additional leading columns on left
-          4;
+          3;
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
           'data-gridcell-column-index',

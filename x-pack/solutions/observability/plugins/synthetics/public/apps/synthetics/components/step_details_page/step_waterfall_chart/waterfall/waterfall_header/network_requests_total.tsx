@@ -48,7 +48,7 @@ export const NetworkRequestsTotal = ({
         />
         {totalNetworkRequests > fetchedNetworkRequests && (
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             color="warning"
             content={i18n.translate(
               'xpack.synthetics.synthetics.waterfall.requestsTotalMessage.info',

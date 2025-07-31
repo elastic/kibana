@@ -18,6 +18,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
 import { DashboardLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
@@ -34,7 +35,7 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
-    await assetClient.getAssetLinks(name, ['dashboard', 'query']),
+    assetClient.getAssetLinks(name, ['dashboard', 'query']),
   ]);
 
   const [dashboardLinks, queryLinks] = partition(
@@ -67,7 +68,7 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
-  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
+  if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
@@ -82,8 +83,13 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-    } satisfies Streams.UnwiredStream.GetResponse;
+    } satisfies Streams.ClassicStream.GetResponse;
   }
+
+  const inheritedFields = addAliasesForNamespacedFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
 
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
@@ -91,7 +97,7 @@ export async function readStream({
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    inherited_fields: inheritedFields,
   };
 
   return body;

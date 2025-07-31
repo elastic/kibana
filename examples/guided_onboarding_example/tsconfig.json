@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/guided-onboarding",
     "@kbn/shared-ux-router",
-    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

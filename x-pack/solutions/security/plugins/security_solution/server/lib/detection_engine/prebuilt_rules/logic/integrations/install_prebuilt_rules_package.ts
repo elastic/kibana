@@ -7,7 +7,6 @@
 
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
-import type { ConfigType } from '../../../../../config';
 import { findLatestPackageVersion } from './find_latest_package_version';
 
 /**
@@ -17,9 +16,9 @@ import { findLatestPackageVersion } from './find_latest_package_version';
  * @param context Request handler context
  */
 export async function installPrebuiltRulesPackage(
-  config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
+  const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
 
   if (!pkgVersion) {

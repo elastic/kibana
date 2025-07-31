@@ -4,14 +4,10 @@
 - Tools for parsing / converting Grok expressions (into Oniguruma / JS Regex).
 - UI components for working with Grok expressions.
 
-# NOTE
-
-The UI for this is still in the work in progress phase. UI / UX will be refined.
 
 ## Usage
 
-You can either use the parsing / conversion tools standalone, or use the UI component which wraps the tools. The UI component offers all of the definitions [defined in the ES repo](https://github.com/elastic/elasticsearch/tree/main/libs/grok/src/main/resources/patterns/ecs-v1).
-
+You can either use the parsing / conversion tools standalone, or use the UI components which wraps the tools. 
 
 ## Tools
 
@@ -43,6 +39,8 @@ draftGrokExpression.updateExpression(
 );
 ```
 
+This update is also emitted via an Observable.
+
 At this point you can grab a Regular Expression instance to use (this will have converted Oniguruma to a native JS Regex):
 
 `const regexp = draftGrokExpression.getRegex();`
@@ -62,23 +60,47 @@ const parsed = draftGrokExpression.parse([
 ]);
 ```
 
-## UI component 
+## UI components
 
-This component is built on top of the same tools.
+The UI components make no assumptions about state libraries etc, they simply require the use of `DraftGrokExpression` model instances.
+
+### Expression
+
+This component can be used to write Grok expressions.
+
+E.g.:
 
 ```tsx
-const GrokEditorExample = () => {
-  const [samples, setSamples] = useState('');
-  const [expression, setExpression] = useState('');
-
-  return (
-    <GrokEditor
-      samples={samples}
-      onChangeSamples={setSamples}
-      expression={expression}
-      onChangeExpression={setExpression}
-      onChangeOutput={(output) => console.log(output)}
-    />
-  );
-};
+<Expression
+  draftGrokExpression={draftGrokExpression}
+  grokCollection={grokCollection}
+/>
 ```
+
+### Read only sample
+
+This component applies highlights and tooltips (if any) from the Grok pattern to a single sample. This component can play nicely with things like Data Grid's cell rendering. It's more performant as it doesn't have a Monaco instance backing it.
+
+```tsx
+<Sample
+  grokCollection={grokCollection}
+  draftGrokExpressions={grokExpressions}
+  sample="a string you would like processed and highlighted"
+/>
+```
+
+### Sample, input version
+
+This component applies highlights and tooltips (if any) from the Grok pattern to multiple samples (one per line). This component is backed by a Monaco instance, so care should be taken with how many of these instances are rendered. This is useful when you need the user to be able to change the sample on the fly / in a "live" fashion.
+
+
+```tsx
+<SampleInput
+  grokCollection={grokCollection}
+  draftGrokExpressions={grokExpressions}
+  sample={sample}
+  onChangeSample={setSample}
+/>
+```
+
+`draftGrokExpressions` expects an array as, following the way Grok works, each pattern will be tested until the first (if any) successful pattern is found.

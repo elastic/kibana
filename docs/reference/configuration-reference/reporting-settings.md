@@ -65,7 +65,14 @@ Reporting generates reports on the {{kib}} server as background tasks, and jobs 
 :   If capturing a report fails for any reason, {{kib}} will re-queue the report job for retry, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.queue.indexInterval`
-:   [8.15.0] How often Reporting creates a new index to store report jobs and file contents. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`. **NOTE**: This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
+:   :::{admonition} Deprecated in 8.15.0
+    This setting was deprecated in 8.15.0.
+    :::
+
+    How often Reporting creates a new index to store report jobs and file contents. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`. 
+    :::{note}
+    This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
+    :::
 
 $$$xpack-reportingQueue-pollEnabled$$$ `xpack.reporting.queue.pollEnabled`
 :   When `true`, enables the {{kib}} instance to poll {{es}} for pending jobs and claim them for execution. When `false`, allows the {{kib}} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least one other {{kib}} instance in the Elastic cluster has this setting to `true`. The default is `true`.
@@ -111,7 +118,11 @@ If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur wh
 
 
 `xpack.screenshotting.capture.loadDelay`
-:   [8.0.0] Specify the [amount of time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) before taking a screenshot when visualizations are not evented. All visualizations that ship with {{kib}} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. **NOTE**: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
+:   :::{admonition} Deprecated in 8.0.0
+    This setting was deprecated in 8.0.0.
+    :::
+
+    Specify the [amount of time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) before taking a screenshot when visualizations are not evented. All visualizations that ship with {{kib}} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. **NOTE**: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
 
 
 ### Chromium headless browser settings [reporting-chromium-settings]
@@ -174,32 +185,32 @@ If the headless Chromium browser is asked to send a request that violates the ne
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
 
 ```yaml
-# Only allow requests to placeholder.com
+# Only allow requests to elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com" } ]
+  rules: [ { allow: true, host: "elastic.co" } ]
 ```
 
 ```yaml
-# Only allow requests to https://placeholder.com
+# Only allow HTTPS requests to https://elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
+  rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
 ```
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
-# Denies requests from http://placeholder.com, but anything else is allowed.
+# Denies requests from http://elastic.co, but anything else is allowed.
 xpack.screenshotting.networkPolicy:
-  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+  rules: [{ allow: false, host: "elastic.co", protocol: "http:" }, { allow: true }];
 ```
 
 A network policy can be composed of multiple rules:
 
 ```yaml
-# Allow any request to http://placeholder.com but for any other host, https is required
+# Allow any request to http://elastic.co but for any other host, https is required
 xpack.screenshotting.networkPolicy
   rules: [
-    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, host: "elastic.co", protocol: "http:" },
     { allow: true, protocol: "https:" },
   ]
 ```

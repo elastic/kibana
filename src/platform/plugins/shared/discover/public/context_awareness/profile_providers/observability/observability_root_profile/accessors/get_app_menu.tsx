@@ -12,7 +12,7 @@ import type { AppMenuRegistry } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -84,8 +84,10 @@ const registerCustomThresholdRuleAction = (
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
     ...services
   }: ProfileProviderServices,
-  { dataView }: AppMenuExtensionParams
+  { dataView, authorizedRuleTypeIds }: AppMenuExtensionParams
 ) => {
+  if (!authorizedRuleTypeIds.includes(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)) return;
+
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
     id: 'custom-threshold-rule',
     type: AppMenuActionType.custom,
@@ -113,7 +115,13 @@ const registerCustomThresholdRuleAction = (
               ruleTypeRegistry,
               actionTypeRegistry,
             }}
-            consumer={'logs'}
+            consumer={AlertConsumers.LOGS}
+            validConsumers={[
+              AlertConsumers.LOGS,
+              AlertConsumers.INFRASTRUCTURE,
+              AlertConsumers.OBSERVABILITY,
+              AlertConsumers.STACK_ALERTS,
+            ]}
             ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
             initialValues={{
               params: {
@@ -135,12 +143,13 @@ const registerCustomThresholdRuleAction = (
 
 const registerCreateSLOAction = (
   registry: AppMenuRegistry,
-  { data, discoverShared }: ProfileProviderServices,
+  { data, discoverShared, application }: ProfileProviderServices,
   { dataView, isEsqlMode }: AppMenuExtensionParams
 ) => {
   const sloFeature = discoverShared.features.registry.getById('observability-create-slo');
+  const hasSloPermission = application.capabilities.slo?.write;
 
-  if (sloFeature) {
+  if (sloFeature && hasSloPermission) {
     registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
       id: 'create-slo',
       type: AppMenuActionType.custom,

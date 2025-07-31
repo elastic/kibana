@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { CaseUI } from '@kbn/cases-plugin/common';
@@ -17,7 +17,7 @@ import { setInsertTimeline, showTimeline } from '../../../store/actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 
@@ -34,7 +34,6 @@ interface AttachToCaseButtonProps {
 export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelineId }) => {
   const dispatch = useDispatch();
   const {
-    graphEventId,
     savedObjectId,
     status: timelineStatus,
     title: timelineTitle,
@@ -62,22 +61,13 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
       });
       dispatch(
         setInsertTimeline({
-          graphEventId,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle,
         })
       );
     },
-    [
-      closeCaseModal,
-      dispatch,
-      graphEventId,
-      navigateToApp,
-      savedObjectId,
-      timelineId,
-      timelineTitle,
-    ]
+    [closeCaseModal, dispatch, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
   const attachToNewCase = useCallback(() => {
@@ -89,7 +79,6 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
     }).then(() => {
       dispatch(
         setInsertTimeline({
-          graphEventId,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : UNTITLED_TIMELINE,
@@ -97,15 +86,7 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
       );
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
     });
-  }, [
-    dispatch,
-    graphEventId,
-    navigateToApp,
-    savedObjectId,
-    timelineId,
-    timelineTitle,
-    togglePopover,
-  ]);
+  }, [dispatch, navigateToApp, savedObjectId, timelineId, timelineTitle, togglePopover]);
 
   const attachToExistingCase = useCallback(() => {
     togglePopover();

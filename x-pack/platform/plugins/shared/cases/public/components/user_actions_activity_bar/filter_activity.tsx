@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
@@ -32,24 +31,13 @@ export const FilterActivity = React.memo<FilterActivityProps>(
     );
 
     return (
-      <EuiFilterGroup
-        data-test-subj="user-actions-filter-activity-group"
-        css={css`
-          > .euiFilterButton-hasNotification {
-            min-width: 68px;
-          }
-        `}
-      >
+      <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
           withNext
-          css={css`
-            &,
-            & .euiFilterButton__text {
-              min-width: 28px;
-            }
-          `}
           grow={false}
           onClick={() => handleFilterChange('all')}
+          isToggle
+          isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
           numFilters={userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0}
           isLoading={isLoading}
@@ -62,6 +50,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
         <EuiFilterButton
           withNext
           grow={false}
+          isToggle
+          isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
           numFilters={
             userActionsStats && userActionsStats.totalComments > 0
@@ -76,6 +66,8 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           {i18n.COMMENTS}
         </EuiFilterButton>
         <EuiFilterButton
+          isToggle
+          isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
           numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0

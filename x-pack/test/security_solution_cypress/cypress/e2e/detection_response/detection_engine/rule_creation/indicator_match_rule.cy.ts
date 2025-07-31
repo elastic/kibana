@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription, getHumanizedDuration } from '../../../../helpers/rules';
+import { formatMitreAttackDescription } from '../../../../helpers/rules';
 import {
   getIndexPatterns,
   getNewThreatIndicatorRule,
@@ -31,7 +31,6 @@ import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
-  ADDITIONAL_LOOK_BACK_DETAILS,
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
@@ -488,13 +487,6 @@ describe(
             getDetails(RUNS_EVERY_DETAILS)
               .find(INTERVAL_ABBR_VALUE)
               .should('have.text', `${rule.interval}`);
-            const humanizedDuration = getHumanizedDuration(
-              rule.from ?? 'now-6m',
-              rule.interval ?? '5m'
-            );
-            getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
-              .find(INTERVAL_ABBR_VALUE)
-              .should('have.text', `${humanizedDuration}`);
           });
 
           waitForTheRuleToBeExecuted();

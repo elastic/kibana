@@ -1,0 +1,37 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+# Runtime dependencies for this package should be listed here.
+# For example, to depend on another internal package:
+#   "//src/platform/packages/private/another-package",
+# Or to depend on an npm package:
+#   "@npm//some-npm-package",
+BUNDLER_DEPS = [
+]
+
+js_library(
+  name = "kbn-dot-text",
+  package_name = "@kbn/dot-text",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

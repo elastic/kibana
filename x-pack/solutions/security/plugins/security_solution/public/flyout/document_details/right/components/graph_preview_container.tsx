@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EuiBetaBadge, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
-  uiMetricService,
   GRAPH_PREVIEW,
+  uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
@@ -35,15 +33,15 @@ export const GraphPreviewContainer: React.FC = () => {
     eventId,
     indexName,
     scopeId,
-    isPreview,
+    isRulePreview,
     isPreviewMode,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
 
-  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
-    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  const allowFlyoutExpansion = useMemo(
+    () => !isPreviewMode && !isRulePreview,
+    [isRulePreview, isPreviewMode]
   );
-  const allowFlyoutExpansion = visualizationInFlyoutEnabled && !isPreviewMode && !isPreview;
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
     eventId,
@@ -113,7 +111,7 @@ export const GraphPreviewContainer: React.FC = () => {
             )}
           />
         ),
-        iconType: allowFlyoutExpansion ? 'arrowStart' : 'indexMapping',
+        iconType: allowFlyoutExpansion ? 'arrowStart' : undefined,
         ...(allowFlyoutExpansion && {
           link: {
             callback: navigateToGraphVisualization,

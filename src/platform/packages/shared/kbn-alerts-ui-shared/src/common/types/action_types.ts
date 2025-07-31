@@ -111,6 +111,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   id: string;
   iconClass: IconType;
   selectMessage: string;
+  selectMessagePreconfigured?: string;
   actionTypeTitle?: string;
   validateParams: (
     actionParams: ActionParams

@@ -5,31 +5,20 @@
  * 2.0.
  */
 
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import {
-  apmEnableProfilingIntegration,
-  apmEnableTransactionProfiling,
-} from '@kbn/observability-plugin/common';
-import { ApmFeatureFlagName } from '../../common/apm_feature_flags';
+import { apmEnableTransactionProfiling } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
-import { useApmFeatureFlag } from './use_apm_feature_flag';
 
-export function useProfilingIntegrationSetting() {
-  const isProfilingIntegrationFeatureFlagEnabled = useApmFeatureFlag(
-    ApmFeatureFlagName.ProfilingIntegrationAvailable
-  );
-  const isProfilingIntegrationUiSettingEnabled = useUiSetting<boolean>(
-    apmEnableProfilingIntegration
-  );
+export function useProfilingPluginSetting() {
+  const { core } = useApmPluginContext();
 
-  return isProfilingIntegrationFeatureFlagEnabled && isProfilingIntegrationUiSettingEnabled;
+  return Boolean(core.application.capabilities.profiling?.show);
 }
 
 export function useTransactionProfilingSetting() {
   const { core } = useApmPluginContext();
-  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
 
   const isTransactionProfilingEnabled = core.uiSettings.get<boolean>(apmEnableTransactionProfiling);
 
-  return isProfilingIntegrationEnabled && isTransactionProfilingEnabled;
+  return isProfilingPluginEnabled && isTransactionProfilingEnabled;
 }

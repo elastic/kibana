@@ -13,6 +13,7 @@ import {
   AppUpdater,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -48,6 +49,7 @@ export class SearchInferenceEndpointsPlugin
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/elasticsearch/relevance',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
           id: 'inferenceEndpoints',
@@ -73,7 +75,8 @@ export class SearchInferenceEndpointsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: [],
+      order: 5,
+      visibleIn: ['sideNav'],
     });
 
     registerLocators(plugins.share);

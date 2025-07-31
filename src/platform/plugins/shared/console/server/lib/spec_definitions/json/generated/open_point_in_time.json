@@ -19,7 +19,10 @@
         "hidden",
         "none"
       ],
-      "allow_partial_search_results": "__flag__"
+      "allow_partial_search_results": "__flag__",
+      "max_concurrent_shard_requests": [
+        "5"
+      ]
     },
     "methods": [
       "POST"
@@ -27,7 +30,7 @@
     "patterns": [
       "{index}/_pit"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/point-in-time-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time",
     "availability": {
       "stack": true,
       "serverless": true

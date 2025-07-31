@@ -25,6 +25,7 @@ export function SchemaEditor({
   withControls = false,
   withFieldSimulation = false,
   withTableActions = false,
+  withToolbar = true,
 }: SchemaEditorProps) {
   const [controls, updateControls] = useControls();
 
@@ -49,7 +50,9 @@ export function SchemaEditor({
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
         <FieldsTable
+          isLoading={isLoading ?? false}
           controls={controls}
+          withToolbar={withToolbar}
           defaultColumns={defaultColumns}
           fields={fields}
           stream={stream}

@@ -9,6 +9,7 @@ import { _IGNORED } from './es_fields';
 import { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
+export const DATASET_QUALITY_ALL_SIGNALS_ID = 'datasetQuality:all-signals-available';
 export const DEFAULT_DATASET_TYPE: DataStreamType = 'logs';
 export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
@@ -49,6 +50,7 @@ export const KNOWN_TYPES: DataStreamType[] = ['logs', 'metrics', 'traces', 'synt
 
 export const DEGRADED_DOCS_QUERY = `${_IGNORED}: *`;
 
-export const ALL_PATTERNS_SELECTOR = '::*';
 export const FAILURE_STORE_SELECTOR = '::failures';
 export const DATA_SELECTOR = '::data';
+
+export const FAILURE_STORE_PRIVILEGE = 'read_failure_store';

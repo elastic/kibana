@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { FAILURE_STORE_PRIVILEGE } from '../../../../common/constants';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
@@ -54,7 +55,7 @@ export async function getDataStreams(options: {
     ? await datasetQualityPrivileges.getHasIndexPrivileges(
         esClient,
         filteredDataStreams.map(({ name }) => name),
-        ['monitor']
+        ['monitor', FAILURE_STORE_PRIVILEGE]
       )
     : {};
 
@@ -64,8 +65,10 @@ export async function getDataStreams(options: {
     // @ts-expect-error
     lastActivity: dataStream.maximum_timestamp,
     userPrivileges: {
-      canMonitor: dataStreamsPrivileges[dataStream.name],
+      canMonitor: dataStreamsPrivileges[dataStream.name].monitor,
+      canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
     },
+    hasFailureStore: dataStream.failure_store?.enabled,
   }));
 
   return {

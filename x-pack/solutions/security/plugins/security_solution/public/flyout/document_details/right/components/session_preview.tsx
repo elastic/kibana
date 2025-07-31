@@ -36,7 +36,7 @@ const ValueContainer: FC<PropsWithChildren<{ text?: ReactElement }>> = ({ text, 
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
-  const { isPreview } = useDocumentDetailsContext();
+  const { isRulePreview } = useDocumentDetailsContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
@@ -57,7 +57,7 @@ export const SessionPreview: FC = () => {
             />
           }
         >
-          <span style={emphasisStyles}>{processName}</span>
+          <span css={emphasisStyles}>{processName}</span>
         </ValueContainer>
       )
     );
@@ -82,7 +82,7 @@ export const SessionPreview: FC = () => {
     );
   }, [startAt]);
 
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
 
   const ruleFragment = useMemo(() => {
     return (
@@ -141,7 +141,7 @@ export const SessionPreview: FC = () => {
       <ValueContainer>
         <EuiIcon type="user" />
         &nbsp;
-        <span style={emphasisStyles}>{userName}</span>
+        <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>
       {processNameFragment}
       {timeFragment}

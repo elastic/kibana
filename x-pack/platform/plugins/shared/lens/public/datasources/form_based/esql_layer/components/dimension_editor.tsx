@@ -39,6 +39,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     indexPatterns,
     dateRange,
     expressions,
+    esqlVariables,
   } = props;
 
   useEffect(() => {
@@ -52,7 +53,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           undefined,
           Object.values(indexPatterns).length
             ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined
+            : undefined,
+          esqlVariables
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);
@@ -84,6 +86,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     indexPatterns,
     props,
     props.expressions,
+    esqlVariables,
     query,
   ]);
 
@@ -122,6 +125,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
+          data-test-subj="text-based-dimension-field"
           existingFields={allColumns ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {

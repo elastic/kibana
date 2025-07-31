@@ -17,7 +17,7 @@ import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
 import { AgentListPage } from '.';
 
 jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
-  useConfirmForceInstall: () => <>confirmForceInstall</>,
+  useConfirmForceInstall: jest.fn(),
 }));
 
 jest.mock('./hooks/use_missing_encryption_key_callout', () => ({
@@ -195,6 +195,8 @@ describe('agent_list_page', () => {
           totalInactive: 0,
         },
       });
+      jest.useFakeTimers({ legacyFakeTimers: true });
+
       ({ utils } = renderAgentList());
 
       await waitFor(() => {
@@ -210,6 +212,10 @@ describe('agent_list_page', () => {
 
       fireEvent.click(utils.getByText('Select everything on all pages'));
       utils.getByText('All agents selected');
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('should not set selection mode when agent selection changed automatically', async () => {

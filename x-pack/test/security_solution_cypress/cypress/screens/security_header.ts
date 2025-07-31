@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
 import { GLOBAL_KQL_WRAPPER } from './search_bar';
 
 // main links
@@ -53,6 +54,12 @@ export const EVENT_FILTERS = '[data-test-subj="solutionSideNavPanelLink-event_fi
 
 export const BLOCKLIST = '[data-test-subj="solutionSideNavPanelLink-blocklist"]';
 
+export const HOST_ISOLATION_EXCEPTIONS =
+  '[data-test-subj="solutionSideNavPanelLink-host_isolation_exceptions"]';
+
+export const RESPONSE_ACTIONS_HISTORY =
+  '[data-test-subj="solutionSideNavPanelLink-response_actions_history"]';
+
 export const CSP_BENCHMARKS =
   '[data-test-subj="solutionSideNavPanelLink-cloud_security_posture-benchmarks"]';
 
@@ -77,6 +84,11 @@ export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
 export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
+
+// Siem Migrations
+export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-rules'
+);
 
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (page: string) => {

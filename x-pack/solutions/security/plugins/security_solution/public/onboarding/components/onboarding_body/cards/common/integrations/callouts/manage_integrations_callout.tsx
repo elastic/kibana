@@ -40,34 +40,23 @@ export const ManageIntegrationsCallout = React.memo(
         text={
           <FormattedMessage
             data-test-subj="integrationsCompleteText"
-            id="xpack.securitySolution.onboarding.integrationsCard.callout.completeLabel"
-            defaultMessage={`
-      {desc} {link} {icon}
-    `}
-            values={{
-              desc: (
-                <FormattedMessage
-                  data-test-subj="integrationsCompleteText"
-                  id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
-                  defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
-                  values={{ count: activeIntegrationsCount }}
-                />
-              ),
-              link: (
-                <LinkAnchor
-                  onClick={onClick}
-                  href={integrationUrl}
-                  data-test-subj="manageIntegrationsLink"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
-                    defaultMessage="Manage integrations"
-                  />
-                </LinkAnchor>
-              ),
-              icon: <EuiIcon type="arrowRight" size="s" />,
-            }}
+            id="xpack.securitySolution.onboarding.integrationsCard.callout.completeText"
+            defaultMessage="{count} {count, plural, one {integration has} other {integrations have}} been added"
+            values={{ count: activeIntegrationsCount }}
           />
+        }
+        action={
+          <LinkAnchor
+            onClick={onClick}
+            href={integrationUrl}
+            data-test-subj="manageIntegrationsLink"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
+              defaultMessage="Manage integrations"
+            />
+            <EuiIcon type="arrowRight" size="s" />
+          </LinkAnchor>
         }
       />
     );

@@ -134,15 +134,15 @@ export const downloadCsvLensShareProvider = ({
         });
 
       return {
+        id: 'csvDownloadLens',
         name: panelTitle,
-        icon: 'document',
+        icon: 'tableDensityNormal',
         sortOrder: 1,
         label: 'CSV',
         exportType: 'lens_csv',
         supportedLayoutOptions: ['print'],
         requiresSavedState: false,
         generateAssetExport: downloadCSVHandler,
-        generateAssetURIValue: () => '',
         warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
@@ -157,7 +157,7 @@ export const downloadCsvLensShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateExportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
             }),

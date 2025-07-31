@@ -8,21 +8,19 @@
 import { Streams } from '@kbn/streams-schema';
 import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
-import { UnwiredStream } from '../streams/unwired_stream';
+import { ClassicStream } from '../streams/classic_stream';
 import { WiredStream } from '../streams/wired_stream';
 import { GroupStream } from '../streams/group_stream';
-import { migrateOnRead } from '../../helpers/migrate_on_read';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
   definition: Streams.all.Definition,
   dependencies: StateDependencies
 ): StreamActiveRecord {
-  definition = migrateOnRead(definition);
   if (Streams.WiredStream.Definition.is(definition)) {
     return new WiredStream(definition, dependencies);
-  } else if (Streams.UnwiredStream.Definition.is(definition)) {
-    return new UnwiredStream(definition, dependencies);
+  } else if (Streams.ClassicStream.Definition.is(definition)) {
+    return new ClassicStream(definition, dependencies);
   } else if (Streams.GroupStream.Definition.is(definition)) {
     return new GroupStream(definition, dependencies);
   }

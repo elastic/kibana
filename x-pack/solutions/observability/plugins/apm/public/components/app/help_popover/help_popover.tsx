@@ -34,7 +34,7 @@ export function HelpPopoverButton({
         data-test-subj="apmHelpPopoverButtonButton"
         className="apmHelpPopover__buttonIcon"
         size="s"
-        iconType="help"
+        iconType="question"
         aria-label={buttonText}
         onClick={onClick}
       >
@@ -48,7 +48,7 @@ export function HelpPopoverButton({
       data-test-subj="apmHelpPopoverButtonButton"
       className="apmHelpPopover__buttonIcon"
       size="s"
-      iconType="help"
+      iconType="question"
       aria-label={buttonText}
       onClick={onClick}
     />

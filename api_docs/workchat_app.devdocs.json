@@ -85,7 +85,7 @@
           "label": "integrations",
           "description": [],
           "signature": [
-            "{ register: (integration: ",
+            "{ register: (tool: ",
             {
               "pluginId": "@kbn/wci-server",
               "scope": "server",

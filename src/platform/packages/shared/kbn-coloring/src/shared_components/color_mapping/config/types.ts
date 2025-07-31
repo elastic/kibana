@@ -28,7 +28,7 @@ export interface AssignmentBase<R extends ColorRule | RuleOthers, C extends Colo
   touched: boolean;
 }
 
-type ColorStep = (CategoricalColor | ColorCode) & {
+export type ColorStep = (CategoricalColor | ColorCode) & {
   /**
    * A flag to know when assignment has been edited since last saved
    */

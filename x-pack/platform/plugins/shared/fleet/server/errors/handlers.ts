@@ -47,8 +47,11 @@ import {
   AgentlessPolicyExistsRequestError,
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
   OutputInvalidError,
   AgentlessAgentCreateOverProvisionnedError,
+  FleetErrorWithStatusCode,
+  PackageRollbackError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -92,6 +95,12 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyContentPackageError) {
+    return 400;
+  }
+  if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+    return 400;
+  }
+  if (error instanceof PackageRollbackError) {
     return 400;
   }
   // Unauthorized
@@ -151,6 +160,10 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
     // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502;
+  }
+
+  if (error instanceof FleetErrorWithStatusCode && error.statusCode) {
+    return error.statusCode;
   }
 
   return 400; // Bad Request

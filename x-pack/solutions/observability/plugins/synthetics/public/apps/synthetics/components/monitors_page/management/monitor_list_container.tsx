@@ -16,6 +16,7 @@ import { ListFilters } from '../common/monitor_filters/list_filters';
 import { MonitorList } from './monitor_list_table/monitor_list';
 import { MonitorStats } from './monitor_stats/monitor_stats';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
 export const MonitorListContainer = ({
   isEnabled,
@@ -37,6 +38,10 @@ export const MonitorListContainer = ({
   } = monitorListProps;
 
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
+
+  useSyntheticsPageReady({
+    meta: { description: '[ttfmp_synthetics] Synthetics monitor list has loaded.' },
+  });
 
   // TODO: Display inline errors in the management table
 

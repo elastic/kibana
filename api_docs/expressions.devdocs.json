@@ -6167,7 +6167,8 @@
             "text": "TablesAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
@@ -26481,7 +26482,8 @@
             "text": "ExpressionsInspectorAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/expressions_inspector_adapter.ts",
         "deprecated": false,
@@ -28467,7 +28469,8 @@
             "text": "TablesAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
@@ -30850,7 +30853,23 @@
             "tags": [],
             "label": "dimensionName",
             "description": [
-              "\nnames the domain this column represents"
+              "\ni18nized names the domain this column represents"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumnMeta.dimensionType",
+            "type": "string",
+            "tags": [],
+            "label": "dimensionType",
+            "description": [
+              "\ntypes of dimension this column represents"
             ],
             "signature": [
               "string | undefined"
@@ -36874,6 +36893,18 @@
           "\nEnum of supported CSS `background-size` properties."
         ],
         "path": "src/platform/plugins/shared/expressions/common/types/style.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.DimensionType",
+        "type": "Enum",
+        "tags": [],
+        "label": "DimensionType",
+        "description": [],
+        "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

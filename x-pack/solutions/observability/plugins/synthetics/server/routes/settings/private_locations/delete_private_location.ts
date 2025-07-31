@@ -6,10 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isEmpty } from 'lodash';
+import { getSavedObjectKqlFilter } from '../../common';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
-import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -28,7 +27,14 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
+    const {
+      savedObjectsClient,
+      syntheticsMonitorClient,
+      request,
+      response,
+      server,
+      monitorConfigRepository,
+    } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
@@ -49,13 +55,17 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       });
     }
 
-    const monitors = await getMonitorsByLocation(server, locationId);
+    const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
-    if (!isEmpty(monitors)) {
-      const count = monitors.find((monitor) => monitor.id === locationId)?.count;
+    const data = await monitorConfigRepository.find({
+      perPage: 0,
+      filter: locationFilter,
+    });
+
+    if (data.total > 0) {
       return response.badRequest({
         body: {
-          message: `Private location with id ${locationId} cannot be deleted because it is used by ${count} monitor(s).`,
+          message: `Private location with id ${locationId} cannot be deleted because it is used by ${data.total} monitor(s).`,
         },
       });
     }

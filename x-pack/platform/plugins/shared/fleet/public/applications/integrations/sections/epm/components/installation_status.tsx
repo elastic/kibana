@@ -7,9 +7,11 @@
 
 import React from 'react';
 
-import { COLOR_MODES_STANDARD, EuiCallOut, EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
+
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
@@ -90,8 +92,8 @@ const getCalloutText = ({
 
 const useInstallationStatusStyles = (): InstallationStatusStylesProps &
   CompressedInstallationStylesProps => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return React.useMemo(
     () => ({

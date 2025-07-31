@@ -15,6 +15,9 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
+import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
+import type { TabState } from './types';
+import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -24,6 +27,8 @@ interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
+  scopedProfilesManager: ScopedProfilesManager;
+  scopedEbtManager: ScopedDiscoverEBTManager;
   currentDataView: DataView;
 }
 
@@ -44,20 +49,81 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
   tabs: { byId: {} },
 });
 
-export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
-  stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
-  customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
-  unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
-    undefined
-  ),
-  currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-});
+export type InitialUnifiedHistogramLayoutProps = Pick<
+  UnifiedHistogramPartialLayoutProps,
+  'topPanelHeight'
+>;
+
+export const createTabRuntimeState = ({
+  profilesManager,
+  ebtManager,
+  initialValues,
+}: {
+  profilesManager: ProfilesManager;
+  ebtManager: DiscoverEBTManager;
+  initialValues?: {
+    unifiedHistogramLayoutProps?: InitialUnifiedHistogramLayoutProps;
+  };
+}): ReactiveTabRuntimeState => {
+  const scopedEbtManager = ebtManager.createScopedEBTManager();
+
+  return {
+    stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+    customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
+      undefined
+    ),
+    unifiedHistogramLayoutProps$: new BehaviorSubject<
+      UnifiedHistogramPartialLayoutProps | undefined
+    >(initialValues?.unifiedHistogramLayoutProps),
+    scopedProfilesManager$: new BehaviorSubject(
+      profilesManager.createScopedProfilesManager({ scopedEbtManager })
+    ),
+    scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
+    currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+  };
+};
 
 export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
   useObservable(stateSubject$, stateSubject$.getValue());
 
 export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
   runtimeStateManager.tabs.byId[tabId];
+
+export const selectTabRuntimeAppState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+) => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
+};
+
+export const selectTabRuntimeGlobalState = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): TabState['lastPersistedGlobalState'] | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
+
+  if (!globalState) {
+    return undefined;
+  }
+
+  const { time: timeRange, refreshInterval, filters } = globalState;
+  return {
+    timeRange,
+    refreshInterval,
+    filters,
+  };
+};
+
+export const selectRestorableTabRuntimeHistogramLayoutProps = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string
+): InitialUnifiedHistogramLayoutProps | undefined => {
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const layoutProps = tabRuntimeState?.unifiedHistogramLayoutProps$?.getValue();
+  return layoutProps ? { topPanelHeight: layoutProps.topPanelHeight } : undefined;
+};
 
 export const useCurrentTabRuntimeState = <T,>(
   runtimeStateManager: RuntimeStateManager,
@@ -67,7 +133,8 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
+export type CombinedRuntimeState = DiscoverRuntimeState &
+  Omit<TabRuntimeState, 'scopedProfilesManager' | 'scopedEbtManager'>;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 

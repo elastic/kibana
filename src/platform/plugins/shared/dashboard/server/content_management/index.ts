@@ -8,9 +8,9 @@
  */
 
 export type {
-  ControlGroupAttributes,
   GridData,
   DashboardPanel,
+  DashboardSection,
   DashboardAttributes,
   DashboardItem,
   DashboardGetIn,
@@ -25,6 +25,8 @@ export type {
   DashboardUpdateOut,
   DashboardUpdateOptions,
   DashboardOptions,
+  DashboardFilter,
+  DashboardQuery,
 } from './latest';
 
 export { DashboardStorage } from './dashboard_storage';

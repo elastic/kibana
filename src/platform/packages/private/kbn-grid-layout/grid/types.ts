@@ -7,36 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type { ActivePanelEvent, GridPanelData } from './grid_panel';
+import type {
+  ActiveSectionEvent,
+  CollapsibleSection,
+  GridSectionData,
+  MainSection,
+} from './grid_section';
 
-export interface GridCoordinate {
-  column: number;
-  row: number;
-}
-export interface GridRect extends GridCoordinate {
-  width: number;
-  height: number;
-}
-
-export interface GridPanelData extends GridRect {
-  id: string;
-}
-
-export interface GridRowData {
-  id: string;
-  order: number;
-  title: string;
-  isCollapsed: boolean;
-  panels: {
-    [key: string]: GridPanelData;
-  };
-}
-
-export interface GridLayoutData {
-  [rowId: string]: GridRowData;
-}
-
+/**
+ * The settings for how the grid should be rendered
+ */
 export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
@@ -51,84 +34,44 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanel {
-  id: string;
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
+/**
+ * A grid layout can be a mix of panels and sections, and we call these "widgets" as a general term
+ */
+export type GridLayoutWidget =
+  | (GridPanelData & { type: 'panel' })
+  | (GridSectionData & { type: 'section' });
+
+export interface GridLayoutData {
+  [key: string]: GridLayoutWidget;
 }
 
-export interface ActiveRowEvent {
-  id: string;
-  sensorType: 'mouse' | 'touch' | 'keyboard';
-  startingPosition: {
-    top: number;
-    left: number;
-  };
-  translate: {
-    top: number;
-    left: number;
-  };
+/**
+ * This represents `GridLayoutData` where every panel exists in an ordered section;
+ * i.e. panels and sections are no longer mixed on the same level
+ */
+export interface OrderedLayout {
+  [key: string]: MainSection | CollapsibleSection;
 }
 
+/**
+ * The GridLayoutStateManager is used for all state management
+ */
 export interface GridLayoutStateManager {
-  gridLayout$: BehaviorSubject<GridLayoutData>;
-  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
+  gridLayout$: BehaviorSubject<OrderedLayout>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanel | undefined>;
-  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
-  interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
+
+  activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
+  activeSectionEvent$: BehaviorSubject<ActiveSectionEvent | undefined>;
+  layoutUpdated$: Observable<GridLayoutData>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
-  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  panelRefs: React.MutableRefObject<{
-    [rowId: string]: { [panelId: string]: HTMLDivElement | null };
-  }>;
-}
-
-/**
- * The information required to start a panel interaction.
- */
-export interface PanelInteractionEvent {
-  /**
-   * The type of interaction being performed.
-   */
-  type: 'drag' | 'resize';
-
-  /**
-   * The id of the panel being interacted with.
-   */
-  id: string;
-
-  /**
-   * The index of the grid row this panel interaction is targeting.
-   */
-  targetRow: string;
-
-  /**
-   * The pixel rect of the panel being interacted with.
-   */
-  panelDiv: HTMLDivElement;
-
-  /**
-   * The pixel offsets from where the mouse was at drag start to the
-   * edges of the panel
-   */
-  sensorOffsets: {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-  };
-  sensorType: 'mouse' | 'touch' | 'keyboard';
+  sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
+  panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 
 /**

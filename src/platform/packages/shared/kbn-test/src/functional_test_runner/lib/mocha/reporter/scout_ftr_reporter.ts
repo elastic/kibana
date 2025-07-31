@@ -18,7 +18,6 @@ import {
   type ScoutTestRunInfo,
   generateTestRunId,
   getTestIDForTitle,
-  uploadScoutReportEvents,
   ScoutFileInfo,
 } from '@kbn/scout-reporting';
 import {
@@ -194,7 +193,7 @@ export class ScoutFTRReporter {
     });
   };
 
-  onRunEnd = async () => {
+  onRunEnd = () => {
     /**
      * Root suite execution has ended
      */
@@ -217,7 +216,6 @@ export class ScoutFTRReporter {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
-      await uploadScoutReportEvents(this.report.eventLogPath, this.log);
     } catch (e) {
       // Log the error but don't propagate it
       this.log.error(e);

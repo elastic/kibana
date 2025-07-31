@@ -9,12 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import {
-  makeSelectNotesByDocumentId,
   makeSelectDocumentNotesBySavedObjectId,
+  makeSelectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
@@ -23,7 +20,7 @@ import {
   getEventType,
   getPinOnClick,
 } from '../../../timelines/components/timeline/body/helpers';
-import { getScopedActions, isTimelineScope } from '../../../helpers';
+import { isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
@@ -34,17 +31,11 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { useStartTransaction } from '../../lib/apm/use_start_transaction';
 import { useLicense } from '../../hooks/use_license';
-import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
-import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
-import { useTourContext } from '../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
@@ -113,10 +104,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
-  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
-    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
-  );
-
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     isFlyoutOpen: false,
     eventId,
@@ -131,41 +118,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopeId: timelineId,
   });
 
-  const { setGlobalFullScreen } = useGlobalFullScreen();
-  const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-
-    if (visualizationInFlyoutEnabled) {
-      navigateToAnalyzer();
-    } else {
-      const scopedActions = getScopedActions(timelineId);
-
-      const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-      if (scopedActions) {
-        dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-      }
-      if (timelineId === TimelineId.active) {
-        if (dataGridIsFullScreen) {
-          setTimelineFullScreen(true);
-        }
-        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
-      } else {
-        if (dataGridIsFullScreen) {
-          setGlobalFullScreen(true);
-        }
-      }
-    }
-  }, [
-    startTransaction,
-    timelineId,
-    dispatch,
-    ecsData._id,
-    setTimelineFullScreen,
-    setGlobalFullScreen,
-    visualizationInFlyoutEnabled,
-    navigateToAnalyzer,
-  ]);
+    navigateToAnalyzer();
+  }, [startTransaction, navigateToAnalyzer]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -193,68 +149,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [ecsData, eventType]);
 
   const openSessionView = useCallback(() => {
-    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-
-    if (
-      visualizationInFlyoutEnabled &&
-      sessionViewConfig !== null &&
-      timelineId !== TableId.kubernetesPageSessions
-    ) {
-      navigateToSessionView();
-    } else {
-      const scopedActions = getScopedActions(timelineId);
-
-      if (timelineId === TimelineId.active) {
-        if (dataGridIsFullScreen) {
-          setTimelineFullScreen(true);
-        }
-        if (sessionViewConfig !== null) {
-          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
-        }
-      } else {
-        if (dataGridIsFullScreen) {
-          setGlobalFullScreen(true);
-        }
-      }
-      if (sessionViewConfig !== null) {
-        if (scopedActions) {
-          dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
-        }
-      }
-    }
-  }, [
-    startTransaction,
-    timelineId,
-    sessionViewConfig,
-    setTimelineFullScreen,
-    dispatch,
-    setGlobalFullScreen,
-    visualizationInFlyoutEnabled,
-    navigateToSessionView,
-  ]);
-
-  const { activeStep, isTourShown, incrementStep } = useTourContext();
-
-  const isTourAnchor = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      eventType === 'signal' &&
-      isDetectionsAlertsTable(timelineId) &&
-      ariaRowindex === 1,
-    [isTourShown, ariaRowindex, eventType, timelineId]
-  );
+    navigateToSessionView();
+  }, [navigateToSessionView, startTransaction]);
 
   const onExpandEvent = useCallback(() => {
-    if (
-      isTourAnchor &&
-      activeStep === AlertsCasesTourSteps.expandEvent &&
-      isTourShown(SecurityStepId.alertsCases)
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
     onEventDetailsPanelOpened();
-  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+  }, [onEventDetailsPanelOpened]);
 
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
@@ -293,53 +194,36 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   // we hide the analyzer icon if the data is not available for the resolver
   // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
-  const ecsHasDataForAnalyzer = useIsInvestigateInResolverActionEnabled(ecsData);
-  const showAnalyzerIcon = useMemo(() => {
-    return (
-      ecsHasDataForAnalyzer &&
-      (timelineId !== TableId.alertsOnCasePage ||
-        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
-    );
-  }, [ecsHasDataForAnalyzer, timelineId, visualizationInFlyoutEnabled]);
+  const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
 
   // we hide the session view icon if the session view is not available
   // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
   // or if the user is not on an enterprise license or on the kubernetes page
   const isEnterprisePlus = useLicense().isEnterprise();
-  const showSessionViewIcon = useMemo(() => {
-    return (
-      sessionViewConfig !== null &&
-      (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) &&
-      (timelineId !== TableId.alertsOnCasePage ||
-        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
-    );
-  }, [sessionViewConfig, isEnterprisePlus, timelineId, visualizationInFlyoutEnabled]);
+  const showSessionViewIcon = useMemo(
+    () => sessionViewConfig !== null && isEnterprisePlus,
+
+    [isEnterprisePlus, sessionViewConfig]
+  );
 
   return (
     <ActionsContainer data-test-subj="actions-container">
       <>
         {!disableExpandAction && (
-          <GuidedOnboardingTourStep
-            isTourAnchor={isTourAnchor}
-            onClick={onExpandEvent}
-            step={AlertsCasesTourSteps.expandEvent}
-            tourId={SecurityStepId.alertsCases}
-          >
-            <div key="expand-event">
-              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-                <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-                  <EuiButtonIcon
-                    aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                    data-test-subj="expand-event"
-                    iconType="expand"
-                    onClick={onExpandEvent}
-                    size="s"
-                    color="text"
-                  />
-                </EuiToolTip>
-              </EventsTdContent>
-            </div>
-          </GuidedOnboardingTourStep>
+          <div key="expand-event">
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="expand-event"
+                  iconType="expand"
+                  onClick={onExpandEvent}
+                  size="s"
+                  color="text"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
         )}
         <>
           {!disableTimelineAction && timelineId !== TimelineId.active && (

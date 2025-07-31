@@ -12,7 +12,8 @@ export type AwsCredentialsType =
   | 'direct_access_keys'
   | 'temporary_keys'
   | 'shared_credentials'
-  | 'cloud_formation';
+  | 'cloud_formation'
+  | 'cloud_connectors';
 
 export type AwsSetupFormat =
   | typeof AWS_SETUP_FORMAT.CLOUD_FORMATION

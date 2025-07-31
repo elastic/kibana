@@ -6,16 +6,16 @@
  */
 
 import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 jest.mock('../../data/rule_migrations_data_service');
 jest.mock('../../../../../../common/siem_migrations/rules/resources');
 
 const MockResourceIdentifier = ResourceIdentifier as jest.Mock;
 
-const migration = { original_rule: { vendor: 'splunk' } } as unknown as RuleMigration;
+const migration = { original_rule: { vendor: 'splunk' } } as unknown as RuleMigrationRule;
 
 describe('RuleResourceRetriever', () => {
   let retriever: RuleResourceRetriever;
@@ -25,7 +25,7 @@ describe('RuleResourceRetriever', () => {
   beforeEach(() => {
     mockDataClient = {
       resources: { searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }) },
-    } as unknown as RuleMigrationsDataClient;
+    } as unknown as jest.Mocked<RuleMigrationsDataClient>;
 
     retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient);
 

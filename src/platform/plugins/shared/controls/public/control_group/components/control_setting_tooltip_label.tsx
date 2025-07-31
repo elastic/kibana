@@ -12,6 +12,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+const rowStyles = css({ marginTop: '0px !important' });
+
 export const ControlSettingTooltipLabel = ({
   label,
   tooltip,
@@ -21,12 +23,7 @@ export const ControlSettingTooltipLabel = ({
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
+    <EuiFlexItem grow={false} css={rowStyles}>
       <EuiIconTip content={tooltip} position="right" />
     </EuiFlexItem>
   </EuiFlexGroup>

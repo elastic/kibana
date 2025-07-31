@@ -10,8 +10,10 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
   ActionParamsProps,
+  JsonEditorWithMessageVariables,
+  ActionConnectorMode,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox, EuiSwitch } from '@elastic/eui';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
@@ -22,6 +24,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
   index,
   errors,
   messageVariables,
+  executionMode,
 }) => {
   const alert = useMemo(
     () =>
@@ -33,12 +36,14 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
   );
+  const isTest = executionMode === ActionConnectorMode.Test;
 
   const [severity, setSeverity] = useState(alert.severity ?? severityOptions[1].value);
   const [tlp, setTlp] = useState(alert.tlp ?? tlpOptions[2].value);
   const [selectedOptions, setSelected] = useState<Array<{ label: string }>>(
     alert.tags?.map((tag) => ({ label: tag })) ?? []
   );
+  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(Boolean(alert.isRuleSeverity));
 
   const onCreateOption = (searchValue: string) => {
     setSelected([...selectedOptions, { label: searchValue }]);
@@ -149,22 +154,46 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         }}
         errors={errors['createAlertParam.sourceRef'] as string[]}
       />
-      <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="severitySelectInput"
-          value={severity}
-          options={severityOptions}
-          onChange={(e) => {
-            editAction(
-              'subActionParams',
-              { ...alert, severity: parseInt(e.target.value, 10) },
-              index
-            );
-            setSeverity(parseInt(e.target.value, 10));
-          }}
-        />
-      </EuiFormRow>
+      {!isTest && (
+        <EuiFormRow fullWidth>
+          <EuiSwitch
+            label={translations.IS_RULE_SEVERITY_LABEL}
+            checked={Boolean(isRuleSeverity)}
+            compressed={true}
+            data-test-subj="rule-severity-toggle"
+            onChange={(e) => {
+              setIsRuleSeverity(e.target.checked);
+              editAction(
+                'subActionParams',
+                {
+                  ...alert,
+                  isRuleSeverity: e.target.checked,
+                },
+                index
+              );
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {!Boolean(isRuleSeverity) && (
+        <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
+          <EuiSelect
+            fullWidth
+            data-test-subj="severitySelectInput"
+            disabled={isRuleSeverity}
+            value={severity}
+            options={severityOptions}
+            onChange={(e) => {
+              editAction(
+                'subActionParams',
+                { ...alert, severity: parseInt(e.target.value, 10) },
+                index
+              );
+              setSeverity(parseInt(e.target.value, 10));
+            }}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow fullWidth label={translations.TLP_LABEL}>
         <EuiSelect
           fullWidth
@@ -187,6 +216,24 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           noSuggestions
         />
       </EuiFormRow>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'body'}
+        inputTargetValue={alert.body}
+        label={translations.BODY_LABEL}
+        ariaLabel={translations.BODY_DESCRIPTION}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) =>
+          editAction('subActionParams', { ...alert, body: json }, index)
+        }
+        dataTestSubj="thehive-body"
+        onBlur={() => {
+          if (!alert.body) {
+            editAction('subActionParams', { ...alert, body: null }, index);
+          }
+        }}
+        isOptionalField
+      />
     </>
   );
 };

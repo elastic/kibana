@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiLink } from '@elastic/eui';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import { readableColor } from '../../lib/readable_color';
 import { ColorDot } from '../color_dot';
 import { ItemGrid } from '../item_grid';
@@ -44,25 +44,25 @@ export const ColorPalette: FC<Props> = ({
   }
 
   colors = colors.filter((color) => {
-    return tinycolor(color).isValid();
+    return chroma.valid(color);
   });
 
   return (
     <div className="canvasColorPalette">
       <ItemGrid items={colors} itemsPerRow={colorsPerRow}>
         {(color) => {
-          const match = tinycolor.equals(color, value);
+          const match = chroma(color).hex() === chroma(value).hex();
           const icon = match ? (
             <EuiIcon type="check" className="selected-color" color={readableColor(value)} />
           ) : null;
 
           return (
             <EuiLink
-              style={{ fontSize: 0 }}
+              css={{ fontSize: 0 }}
               key={color}
               onClick={() => !match && onChange(color)}
               className="canvasColorPalette__dot"
-              aria-label={tinycolor(color).toName() || color}
+              aria-label={chroma(color).name() || color}
             >
               <ColorDot value={color}>{icon}</ColorDot>
             </EuiLink>

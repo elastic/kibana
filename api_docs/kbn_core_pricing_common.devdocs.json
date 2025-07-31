@@ -1,0 +1,689 @@
+{
+  "id": "@kbn/core-pricing-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.PricingTiersClient",
+        "type": "Class",
+        "tags": [],
+        "label": "PricingTiersClient",
+        "description": [
+          "\nClient implementation for checking feature availability based on pricing tiers.\n\nThis client evaluates whether features are available based on the current pricing tier configuration\nand the registered product features.\n"
+        ],
+        "signature": [
+          "PricingTiersClient",
+          " implements ",
+          "IPricingTiersClient"
+        ],
+        "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreates a new PricingTiersClient instance.\n"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingTiersClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tiers",
+                "description": [
+                  "- The current pricing tiers configuration"
+                ],
+                "signature": [
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                ],
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingTiersClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "productFeaturesRegistry",
+                "description": [
+                  "- Registry containing the available product features"
+                ],
+                "signature": [
+                  "ProductFeaturesRegistry"
+                ],
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.setTiers",
+            "type": "Function",
+            "tags": [],
+            "label": "setTiers",
+            "description": [
+              "\nSets the pricing tiers configuration.\n"
+            ],
+            "signature": [
+              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingTiersClient.setTiers.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tiers",
+                "description": [
+                  "- The new pricing tiers configuration"
+                ],
+                "signature": [
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                ],
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nDetermines if a feature is available based on the current pricing tier configuration.\nWhen pricing tiers are disabled, all features are considered available.\nWhen pricing tiers are enabled, a feature is available if it's associated with at least one active product.\n"
+            ],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingTiersClient.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.getActiveProduct",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.ProductFeaturesRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "ProductFeaturesRegistry",
+        "description": [
+          "\nRegistry for managing pricing product features.\nProvides methods to register, retrieve, and manage features that are available in specific pricing tiers.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.ProductFeaturesRegistry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreates a new ProductFeaturesRegistry instance.\n"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.ProductFeaturesRegistry.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialFeatures",
+                "description": [
+                  "- Optional initial set of features to populate the registry"
+                ],
+                "signature": [
+                  "Record<string, ",
+                  "PricingProductFeature",
+                  ">"
+                ],
+                "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.ProductFeaturesRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieves a product feature by its ID.\n"
+            ],
+            "signature": [
+              "(featureId: string) => ",
+              "PricingProductFeature",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.ProductFeaturesRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The ID of the feature to retrieve"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The product feature if found, undefined otherwise"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.ProductFeaturesRegistry.register",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "register",
+            "description": [
+              "\nRegisters a new product feature in the registry.\nThrows an error if a feature with the same ID is already registered.\n"
+            ],
+            "signature": [
+              "(feature: ",
+              "PricingProductFeature",
+              ") => void"
+            ],
+            "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.ProductFeaturesRegistry.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [
+                  "- The product feature to register"
+                ],
+                "signature": [
+                  "PricingProductFeature"
+                ],
+                "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.ProductFeaturesRegistry.asObject",
+            "type": "Function",
+            "tags": [],
+            "label": "asObject",
+            "description": [
+              "\nConverts the registry to a plain JavaScript object.\n"
+            ],
+            "signature": [
+              "() => Record<string, ",
+              "PricingProductFeature",
+              ">"
+            ],
+            "path": "src/core/packages/pricing/common/src/product_features_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "A record mapping feature IDs to their corresponding feature objects"
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.GetPricingResponseV1",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetPricingResponseV1",
+        "description": [],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.GetPricingResponseV1.tiers",
+            "type": "Object",
+            "tags": [],
+            "label": "tiers",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; }"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.GetPricingResponseV1.product_features",
+            "type": "Object",
+            "tags": [],
+            "label": "product_features",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "PricingProductFeature",
+              "; }"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.IPricingTiersClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IPricingTiersClient",
+        "description": [
+          "\nClient interface for checking feature availability based on pricing tiers.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.IPricingTiersClient.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nDetermines if a feature is available based on the current pricing tier configuration.\n"
+            ],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.IPricingTiersClient.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.IPricingTiersClient.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/types.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/types.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.PricingProductFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "PricingProductFeature",
+        "description": [
+          "\nRepresents a feature that is registered for specific pricing tiers.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingProductFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingProductFeature.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingProductFeature.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.PricingServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PricingServiceStart",
+        "description": [
+          "\nAPIs to access pricing tier information during the start phase.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingServiceStart.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.\n"
+            ],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingServiceStart.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingServiceStart.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-mocks/src/pricing_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts"
+              }
+            ],
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.IPricingProduct",
+        "type": "Type",
+        "tags": [],
+        "label": "IPricingProduct",
+        "description": [
+          "\nRepresents a product with an associated pricing tier.\nUsed to determine feature availability based on the current pricing configuration.\n"
+        ],
+        "signature": [
+          "Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>"
+        ],
+        "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.TiersConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "TiersConfig",
+        "description": [
+          "\nConfiguration for pricing tiers that determines feature availability.\nWhen enabled, features are only available if they're associated with an active product.\nWhen disabled, all features are considered available.\n"
+        ],
+        "signature": [
+          "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; readonly enabled: boolean; }"
+        ],
+        "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';
@@ -21,7 +22,9 @@ export const getRulesListLazy = (props: {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
       <QueryClientProvider client={queryClient}>
-        <RulesList {...props.rulesListProps} />
+        <PerformanceContextProvider>
+          <RulesList {...props.rulesListProps} />
+        </PerformanceContextProvider>
       </QueryClientProvider>
     </ConnectorProvider>
   );

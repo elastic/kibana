@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
-import { NewChat } from '@kbn/elastic-assistant';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { NewChat, useFindPrompts } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -40,12 +41,34 @@ interface Props {
 
 const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, checkedAt }) => {
   const chatTitle = useMemo(() => {
-    return `${indexName} - ${getFormattedCheckTime(checkedAt)}`;
+    const checkedAtFormatted = getFormattedCheckTime(checkedAt);
+    return checkedAt && indexName ? `${indexName} - ${checkedAtFormatted}` : checkedAtFormatted;
   }, [checkedAt, indexName]);
 
   const styles = useStyles();
-  const { isAssistantEnabled } = useDataQualityContext();
+  const { isAssistantEnabled, httpFetch, toasts } = useDataQualityContext();
+  const {
+    data: { prompts },
+  } = useFindPrompts({
+    context: {
+      isAssistantEnabled,
+      httpFetch,
+      toasts,
+    },
+    params: {
+      prompt_group_id: 'aiAssistant',
+      prompt_ids: ['dataQualityAnalysis'],
+    },
+  });
   const getPromptContext = useCallback(async () => markdownComment, [markdownComment]);
+
+  const suggestedUserPrompt = useMemo(
+    () =>
+      prompts.find(({ promptId }) => promptId === 'dataQualityAnalysis')?.prompt ??
+      DATA_QUALITY_SUGGESTED_USER_PROMPT,
+    [prompts]
+  );
+
   return (
     <NewChat
       asLink={true}
@@ -53,12 +76,12 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, checkedAt 
       conversationTitle={chatTitle ?? DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
       description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
       getPromptContext={getPromptContext}
-      suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
+      suggestedUserPrompt={suggestedUserPrompt}
       tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
       isAssistantEnabled={isAssistantEnabled}
       iconType={null}
     >
-      <span css={styles.linkText}>
+      <span css={styles.linkText} data-testid="newChatLink">
         <AssistantIcon />
         {ASK_ASSISTANT}
       </span>

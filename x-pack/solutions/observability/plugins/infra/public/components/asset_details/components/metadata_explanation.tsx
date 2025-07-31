@@ -59,10 +59,10 @@ const MetadataExplanationTooltipContent = React.memo(
   }
 );
 
-export const MetadataExplanationMessage = ({ assetType }: { assetType: InventoryItemType }) => {
+export const MetadataExplanationMessage = ({ entityType }: { entityType: InventoryItemType }) => {
   const { metadata, loading } = useMetadataStateContext();
-  const docsLink = assetType === 'host' ? HOSTNAME_DOCS_LINK : CONTAINER_ID_DOCS_LINK;
-  const metadataField = assetType === 'host' ? 'host.name' : 'container.id';
+  const docsLink = entityType === 'host' ? HOSTNAME_DOCS_LINK : CONTAINER_ID_DOCS_LINK;
+  const metadataField = entityType === 'host' ? 'host.name' : 'container.id';
 
   return loading && !metadata ? (
     <EuiLoadingSpinner />
@@ -99,7 +99,7 @@ export const MetadataExplanationMessage = ({ assetType }: { assetType: Inventory
         <Popover
           iconSize="s"
           iconColor="subdued"
-          icon="iInCircle"
+          icon="info"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent docsLink={docsLink} metadataField={metadataField} />

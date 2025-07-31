@@ -24,6 +24,7 @@ import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_fil
 import { DetectionEnginePage } from './detection_engine';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -77,63 +78,65 @@ const mockDataViewsService = {
   clearInstanceCache: () => Promise.resolve(),
 };
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      navigateToUrl: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    dataViews: mockDataViewsService,
+    cases: {
+      ui: { getCasesContext: mockCasesContext },
+    },
+    timelines: { ...mockTimelines },
+    data: {
+      query: {
+        filterManager: mockFilterManager,
+      },
+    },
+    docLinks: {
+      links: {
+        [SECURITY_FEATURE_ID]: {
+          privileges: 'link',
+        },
+      },
+    },
+    storage: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry: {},
+      getAlertsStateTable: () => <></>,
+    },
+    sessionView: {
+      getSessionView: jest.fn(() => <div />),
+    },
+    notifications: {
+      toasts: {
+        addWarning: jest.fn(),
+        addError: jest.fn(),
+        addSuccess: jest.fn(),
+        addDanger: jest.fn(),
+        remove: jest.fn(),
+      },
+    },
+  },
+};
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
   return {
     ...original,
     useUiSetting$: jest.fn().mockReturnValue([]),
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToUrl: jest.fn(),
-          capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        dataViews: mockDataViewsService,
-        cases: {
-          ui: { getCasesContext: mockCasesContext },
-        },
-        timelines: { ...mockTimelines },
-        data: {
-          query: {
-            filterManager: mockFilterManager,
-          },
-        },
-        docLinks: {
-          links: {
-            siemV2: {
-              privileges: 'link',
-            },
-          },
-        },
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-        },
-        triggersActionsUi: {
-          alertsTableConfigurationRegistry: {},
-          getAlertsStateTable: () => <></>,
-        },
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-        notifications: {
-          toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
-            remove: jest.fn(),
-          },
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
   };
@@ -199,7 +202,7 @@ describe('DetectionEnginePageComponent', () => {
       browserFields: mockBrowserFields,
       sourcererDataView: {
         fields: {},
-        title: '',
+        title: 'mock-*',
       },
     });
     jest

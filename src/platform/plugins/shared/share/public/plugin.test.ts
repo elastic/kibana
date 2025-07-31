@@ -9,9 +9,11 @@
 
 import { registryMock, managerMock } from './plugin.test.mocks';
 import { SharePlugin } from './plugin';
-import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { anonymousAccessMock } from '../common/anonymous_access/index.mock';
+
+const licensingStartMock = licensingMock.createStart();
 
 describe('SharePlugin', () => {
   beforeEach(() => {
@@ -63,7 +65,9 @@ describe('SharePlugin', () => {
           })
         );
         await service.setup(coreSetup);
-        const start = await service.start({} as CoreStart);
+        const start = await service.start(coreMock.createStart(), {
+          licensing: licensingStartMock,
+        });
         expect(registryMock.start).toHaveBeenCalled();
         expect(managerMock.start).toHaveBeenCalledWith({
           resolveShareItemsForShareContext: expect.any(Function),
@@ -85,7 +89,9 @@ describe('SharePlugin', () => {
         const setup = await service.setup(coreSetup);
         const anonymousAccessServiceProvider = () => anonymousAccessMock.create();
         setup.setAnonymousAccessServiceProvider(anonymousAccessServiceProvider);
-        const start = await service.start({} as CoreStart);
+        const start = await service.start(coreMock.createStart(), {
+          licensing: licensingStartMock,
+        });
         expect(registryMock.start).toHaveBeenCalled();
         expect(managerMock.start).toHaveBeenCalledWith({
           resolveShareItemsForShareContext: expect.any(Function),

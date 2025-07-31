@@ -93,7 +93,7 @@ export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
   lens: LensPublicSetup;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
@@ -188,7 +188,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations?.registerAlias(mapsVisTypeAlias);
+    plugins.visualizations.registerAlias(mapsVisTypeAlias);
 
     core.application.register({
       id: APP_ID,
@@ -230,10 +230,10 @@ export class MapsPlugin
     plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
-    plugins.visualizations?.createBaseVisualization(regionMapVisType);
+    plugins.visualizations.createBaseVisualization(regionMapVisType);
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
-    plugins.visualizations?.createBaseVisualization(tileMapVisType);
+    plugins.visualizations.createBaseVisualization(tileMapVisType);
 
     setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 

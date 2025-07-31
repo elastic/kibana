@@ -49,6 +49,7 @@ interface OptionListWithFieldStatsProps
   isClearable?: boolean;
   isInvalid?: boolean;
   'data-test-subj'?: string;
+  titleId?: string;
 }
 
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
@@ -65,6 +66,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   compressed,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  titleId,
 }) => {
   const { renderOption } = useFieldStatsTrigger<DropDownLabel>();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -112,14 +114,16 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
             role="combobox"
             controlOnly
             aria-expanded={isPopoverOpen ? 'true' : 'false'}
-            aria-label={
-              placeholder ??
-              i18n.translate('xpack.ml.controls.optionsList.popover.selectOptionAriaLabel', {
-                defaultMessage: 'Select an option',
-              })
-            }
             onChange={() => {}}
             value={value}
+            aria-labelledby={titleId}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPopoverOpen.bind(null, true)();
+              }
+            }}
           />
         </EuiFormControlLayout>
       }

@@ -13,7 +13,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { BulkActionSkipResult } from '../../../common/bulk_edit';
+import type { BulkEditActionSkipResult } from '../../../common/bulk_action';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import type { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
@@ -28,14 +28,14 @@ type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
 }
 
 /**
@@ -61,7 +61,7 @@ export const retryIfBulkEditConflicts = async (
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
   accErrors: BulkOperationError[] = [],
-  accSkipped: BulkActionSkipResult[] = []
+  accSkipped: BulkEditActionSkipResult[] = []
 ): Promise<ReturnRetry> => {
   // run the operation, return if no errors or throw if not a conflict error
   try {

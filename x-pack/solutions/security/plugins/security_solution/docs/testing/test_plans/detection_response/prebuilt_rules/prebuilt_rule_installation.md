@@ -46,6 +46,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can see correct rule information in preview before installing**](#scenario-user-can-see-correct-rule-information-in-preview-before-installing)
     - [**Scenario: Optional tabs and sections without content should be hidden in preview before installing**](#scenario-optional-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
   - [Rule installation workflow: filtering, sorting, pagination](#rule-installation-workflow-filtering-sorting-pagination)
+    - [**Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT\&CK™ tactic or technique on the Prebuilt Rules installation page**](#scenario-user-can-search-prebuilt-rules-by-rule-name-index-pattern-or-mitre-attck-tactic-or-technique-on-the-prebuilt-rules-installation-page)
+    - [**Scenario: User can filter prebuilt rules by tags on the Prebuilt Rules installation page**](#scenario-user-can-filter-prebuilt-rules-by-tags-on-the-prebuilt-rules-installation-page)
+    - [**Scenario: User can sort prebuilt rules on Prebuilt Rules installation page**](#scenario-user-can-sort-prebuilt-rules-on-prebuilt-rules-installation-page)
+    - [**Scenario: User can paginate over prebuilt rules on Prebuilt Rules installation page**](#scenario-user-can-paginate-over-prebuilt-rules-on-prebuilt-rules-installation-page)
   - [Rule installation workflow: misc cases](#rule-installation-workflow-misc-cases)
     - [**Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
     - [**Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-rules-page-to-the-rule-management-page-via-breadcrumbs)
@@ -108,79 +112,6 @@ Previewing properties of a prebuilt rule before installing it:
 - If user chooses to preview a prebuilt rule to be installed, we currently show this preview in a flyout.
 - In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.
 
-Examples of rule properties we show in the prebuilt rule preview flyout:
-
-```Gherkin
-Examples:
-| rule_type         | property                          | tab                 | section             |
-│ All rule types    │ Author                            │ Overview            │ About               │
-│ All rule types    │ Building block                    │ Overview            │ About               │
-│ All rule types    │ Severity                          │ Overview            │ About               │
-│ All rule types    │ Severity override                 │ Overview            │ About               │
-│ All rule types    │ Risk score                        │ Overview            │ About               │
-│ All rule types    │ Risk score override               │ Overview            │ About               │
-│ All rule types    │ Reference URLs                    │ Overview            │ About               │
-│ All rule types    │ False positive examples           │ Overview            │ About               │
-│ All rule types    │ Custom highlighted fields         │ Overview            │ About               │
-│ All rule types    │ License                           │ Overview            │ About               │
-│ All rule types    │ Rule name override                │ Overview            │ About               │
-│ All rule types    │ MITRE ATT&CK™                     │ Overview            │ About               │
-│ All rule types    │ Timestamp override                │ Overview            │ About               │
-│ All rule types    │ Tags                              │ Overview            │ About               │
-│ All rule types    │ Type                              │ Overview            │ Definition          │
-│ All rule types    │ Related integrations              │ Overview            │ Definition          │
-│ All rule types    │ Required fields                   │ Overview            │ Definition          │
-│ All rule types    │ Timeline template                 │ Overview            │ Definition          │
-│ All rule types    │ Runs every                        │ Overview            │ Schedule            │
-│ All rule types    │ Additional look-back time         │ Overview            │ Schedule            │
-│ All rule types    │ Setup guide                       │ Overview            │ Setup guide         │
-│ All rule types    │ Investigation guide               │ Investigation guide │ Investigation guide │
-│ Custom Query      │ Index patterns                    │ Overview            │ Definition          │
-│ Custom Query      │ Data view ID                      │ Overview            │ Definition          │
-│ Custom Query      │ Data view index pattern           │ Overview            │ Definition          │
-│ Custom Query      │ Custom query                      │ Overview            │ Definition          │
-│ Custom Query      │ Filters                           │ Overview            │ Definition          │
-│ Custom Query      │ Saved query name                  │ Overview            │ Definition          │
-│ Custom Query      │ Saved query filters               │ Overview            │ Definition          │
-│ Custom Query      │ Saved query                       │ Overview            │ Definition          │
-│ Custom Query      │ Suppress alerts by                │ Overview            │ Definition          │
-│ Custom Query      │ Suppress alerts for               │ Overview            │ Definition          │
-│ Custom Query      │ If a suppression field is missing │ Overview            │ Definition          │
-│ Machine Learning  │ Anomaly score threshold           │ Overview            │ Definition          │
-│ Machine Learning  │ Machine Learning job              │ Overview            │ Definition          │
-│ Threshold         │ Threshold                         │ Overview            │ Definition          │
-│ Threshold         │ Index patterns                    │ Overview            │ Definition          │
-│ Threshold         │ Data view ID                      │ Overview            │ Definition          │
-│ Threshold         │ Data view index pattern           │ Overview            │ Definition          │
-│ Threshold         │ Custom query                      │ Overview            │ Definition          │
-│ Threshold         │ Filters                           │ Overview            │ Definition          │
-│ Event Correlation │ EQL query                         │ Overview            │ Definition          │
-│ Event Correlation │ Filters                           │ Overview            │ Definition          │
-│ Event Correlation │ Index patterns                    │ Overview            │ Definition          │
-│ Event Correlation │ Data view ID                      │ Overview            │ Definition          │
-│ Event Correlation │ Data view index pattern           │ Overview            │ Definition          │
-│ Indicator Match   │ Indicator index patterns          │ Overview            │ Definition          │
-│ Indicator Match   │ Indicator mapping                 │ Overview            │ Definition          │
-│ Indicator Match   │ Indicator filters                 │ Overview            │ Definition          │
-│ Indicator Match   │ Indicator index query             │ Overview            │ Definition          │
-│ Indicator Match   │ Index patterns                    │ Overview            │ Definition          │
-│ Indicator Match   │ Data view ID                      │ Overview            │ Definition          │
-│ Indicator Match   │ Data view index pattern           │ Overview            │ Definition          │
-│ Indicator Match   │ Custom query                      │ Overview            │ Definition          │
-│ Indicator Match   │ Filters                           │ Overview            │ Definition          │
-│ New Terms         │ Fields                            │ Overview            │ Definition          │
-│ New Terms         │ History Window Size               │ Overview            │ Definition          │
-│ New Terms         │ Index patterns                    │ Overview            │ Definition          │
-│ New Terms         │ Data view ID                      │ Overview            │ Definition          │
-│ New Terms         │ Data view index pattern           │ Overview            │ Definition          │
-│ New Terms         │ Custom query                      │ Overview            │ Definition          │
-│ New Terms         │ Filters                           │ Overview            │ Definition          │
-│ ESQL              │ ESQL query                        │ Overview            │ Definition          │
-│ ESQL              │ Suppress alerts by                │ Overview            │ Definition          │
-│ ESQL              │ Suppress alerts for               │ Overview            │ Definition          │
-│ ESQL              │ If a suppression field is missing │ Overview            │ Definition          │
-```
-
 ## Scenarios
 
 ### Rule installation notifications on the Rule Management page
@@ -197,7 +128,7 @@ Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
+And user should NOT see the Prebuilt Rules Upgrades page
 ```
 
 #### **Scenario: User is NOT notified when all prebuilt rules are installed and up to date**
@@ -212,7 +143,7 @@ Then user should NOT see a CTA to install prebuilt rules
 And user should NOT see a number of rules available to install
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
+And user should NOT see the Prebuilt Rules Upgrades page
 ```
 
 #### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
@@ -228,7 +159,7 @@ Then user should see a CTA to install prebuilt rules
 And user should see a number of rules available to install (X)
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
+And user should NOT see the Prebuilt Rules Upgrades page
 ```
 
 #### **Scenario: User is notified when some prebuilt rules can be installed**
@@ -245,7 +176,7 @@ Then user should see a CTA to install prebuilt rules
 And user should see the number of rules available to install (Y)
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
+And user should NOT see the Prebuilt Rules Upgrades page
 ```
 
 #### **Scenario: User is notified when both rules to install and upgrade are available**
@@ -418,7 +349,73 @@ And the Investigation Guide tab should NOT be displayed
 
 ### Rule installation workflow: filtering, sorting, pagination
 
-TODO: add scenarios https://github.com/elastic/kibana/issues/166215
+#### **Scenario: User can search prebuilt rules by rule name, index pattern or MITRE ATT&CK™ tactic or technique on the Prebuilt Rules installation page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules available for installation
+When user opens the Prebuilt Rules installation page
+Then the available prebuilt rules should be shown
+When user enters <text> in the search field
+Then only the available prebuilt rules matching the <text> should be shown
+```
+
+**Examples:**
+
+- `<text>`
+  - rule name or its part
+  - index pattern
+  - MITRE ATT&CK™ tactic or technique
+
+#### **Scenario: User can filter prebuilt rules by tags on the Prebuilt Rules installation page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules available for installation
+When user opens the Prebuilt Rules installation page
+Then the available prebuilt rules should be shown
+When user filters the available prebuilt rules by one or more tags
+Then only the available prebuilt rules having these tags should be shown
+```
+
+#### **Scenario: User can sort prebuilt rules on Prebuilt Rules installation page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules available for installation
+When user opens the Prebuilt Rules installation page
+Then the available prebuilt rules should be shown
+When user clicks on <field> header by picking the sorting direction
+Then the available prebuilt rules should be sorted by <field> in the expected order
+```
+
+**Examples:**
+
+- `<field>`
+  - rule name
+  - risk score
+  - severity
+
+#### **Scenario: User can paginate over prebuilt rules on Prebuilt Rules installation page**
+
+**Automation**: 1 e2e test with mock rules
+
+```Gherkin
+Given multiple prebuilt rules available for installation
+When user opens the Prebuilt Rules installation page
+Then the available prebuilt rules should be shown
+When user picks the desired number of <rows_per_page>
+Then the <rows_per_page> of the available prebuilt rules should be shown on the page
+When user navigates to the next pages
+Then the next page of the available prebuilt rules should be shown
+```
+
+**Examples:**
+
+`<rows_per_page>` = 5 | 10 | 20 | 50 | 100
 
 ### Rule installation workflow: misc cases
 
@@ -503,7 +500,6 @@ Notes:
 - New API:
   - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
   - status: `GET /internal/detection_engine/prebuilt_rules/status`
-
 
 #### **Scenario: API does not install prebuilt rules if they are up to date**
 

@@ -36,6 +36,7 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { panelConfigContainerStyles } from './_panel_config';
 
 export class MarkdownPanelConfig extends Component<
   PanelConfigProps,
@@ -103,7 +104,7 @@ export class MarkdownPanelConfig extends Component<
       );
     } else {
       view = (
-        <div className="tvbPanelConfig__container">
+        <div className="tvbPanelConfig__container" css={panelConfigContainerStyles}>
           <EuiPanel>
             <EuiTitle size="s">
               <span>

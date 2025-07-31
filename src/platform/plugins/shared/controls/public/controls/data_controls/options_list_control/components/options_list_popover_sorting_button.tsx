@@ -51,15 +51,19 @@ const sortOrderOptions: EuiButtonGroupOptionProps[] = [
   },
 ];
 
+const panelStyle = {
+  width: '224px',
+};
+
 export const OptionsListPopoverSortingButton = ({
   showOnlySelected,
 }: {
   showOnlySelected: boolean;
 }) => {
-  const { api, stateManager } = useOptionsListContext();
+  const { componentApi } = useOptionsListContext();
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
-  const [sort, field] = useBatchedPublishingSubjects(stateManager.sort, api.field$);
+  const [sort, field] = useBatchedPublishingSubjects(componentApi.sort$, componentApi.field$);
 
   const selectedSort = useMemo(() => sort ?? OPTIONS_LIST_DEFAULT_SORT, [sort]);
 
@@ -80,13 +84,13 @@ export const OptionsListPopoverSortingButton = ({
       setSortByOptions(updatedOptions);
       const selectedOption = updatedOptions.find(({ checked }) => checked === 'on');
       if (selectedOption) {
-        stateManager.sort.next({
+        componentApi.setSort({
           ...selectedSort,
           by: selectedOption.data.sortBy,
         });
       }
     },
-    [selectedSort, stateManager.sort]
+    [selectedSort, componentApi]
   );
 
   const SortButton = () => (
@@ -121,7 +125,7 @@ export const OptionsListPopoverSortingButton = ({
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
-      panelClassName={'optionsList--sortPopover'}
+      panelStyle={panelStyle}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">
@@ -135,7 +139,7 @@ export const OptionsListPopoverSortingButton = ({
                 idSelected={selectedSort.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
                 onChange={(value) => {
-                  stateManager.sort.next({
+                  componentApi.setSort({
                     ...selectedSort,
                     direction: value as Direction,
                   });

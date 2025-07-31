@@ -14,10 +14,10 @@ import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
+import { setDiagLogger } from '@kbn/telemetry';
 import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
 import { MIGRATION_EXCEPTION_CODE } from '../constants';
-import { setDiagLogger } from './set_diag_logger';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.

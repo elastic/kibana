@@ -110,11 +110,11 @@ export const createEditUserAction = (getStartServices: () => Promise<CoreStart>)
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
     execute: async ({ user, update }) => {
-      const { overlays, ...startServices } = await getStartServices();
+      const { overlays, rendering } = await getStartServices();
       const overlay = overlays.openModal(
         toMountPoint(
           <EditUserModal user={user} update={update} close={() => overlay.close()} />,
-          startServices
+          rendering
         )
       );
     },

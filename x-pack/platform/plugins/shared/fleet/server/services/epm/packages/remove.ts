@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
@@ -16,7 +17,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
-import { chunk } from 'lodash';
 import pMap from 'p-map';
 
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
@@ -35,8 +35,7 @@ import type {
   EsAssetReference,
   KibanaAssetReference,
   Installation,
-  ArchivePackage,
-  RegistryPackage,
+  InstallSource,
 } from '../../../types';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
@@ -51,9 +50,10 @@ import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
-import * as Registry from '../registry';
 
-import { getInstallation, kibanaSavedObjectTypes } from '.';
+import type { PackageSpecConditions } from '../../../../common';
+
+import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 
 const MAX_ASSETS_TO_DELETE = 1000;
@@ -64,6 +64,7 @@ export async function removeInstallation(options: {
   pkgVersion?: string;
   esClient: ElasticsearchClient;
   force?: boolean;
+  installSource?: InstallSource;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -102,7 +103,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, esClient);
+  await deleteAssets(savedObjectsClient, installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -143,22 +144,26 @@ export async function removeInstallation(options: {
  */
 export async function deleteKibanaAssets({
   installedObjects,
-  packageInfo,
+  packageSpecConditions,
+  logger,
   spaceId = DEFAULT_SPACE_ID,
 }: {
   installedObjects: KibanaAssetReference[];
+  logger: Logger;
+  packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
-  packageInfo: RegistryPackage | ArchivePackage;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
     appContextService.getSavedObjects().createInternalRepository()
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
+  if (namespace) {
+    logger.debug(`Deleting Kibana assets in namespace: ${namespace}`);
+  }
 
-  // TODO this should be the installed package info, not the package that is being installed
-  const minKibana = packageInfo.conditions?.kibana?.version
-    ? minVersion(packageInfo.conditions.kibana.version)
+  const minKibana = packageSpecConditions?.kibana?.version
+    ? minVersion(packageSpecConditions.kibana.version)
     : null;
 
   // Compare Kibana versions to determine if the package could been installed
@@ -166,7 +171,7 @@ export async function deleteKibanaAssets({
   // and delete the assets directly. Otherwise, we need to resolve the assets
   // which might create high memory pressure if a package has a lot of assets.
   if (minKibana && minKibana.major >= 8) {
-    await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient);
+    await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient, logger);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
       installedObjects,
@@ -189,23 +194,25 @@ export async function deleteKibanaAssets({
     // we filter these out before calling delete
     const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
 
-    await bulkDeleteSavedObjects(assetsToDelete, namespace, savedObjectsClient);
+    await bulkDeleteSavedObjects(assetsToDelete, namespace, savedObjectsClient, logger);
   }
 }
 
 async function bulkDeleteSavedObjects(
   assetsToDelete: Array<{ id: string; type: string }>,
   namespace: string | undefined,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
 ) {
+  logger.debug(`Starting bulk deletion of assets and saved objects`);
   for (const asset of assetsToDelete) {
+    logger.debug(`Delete asset - id: ${asset?.id}, type: ${asset?.type},`);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: asset.id,
       savedObjectType: asset.type,
     });
   }
-
   // Delete assets in chunks to avoid high memory pressure. This is mostly
   // relevant for packages containing many assets, as large payload and response
   // objects are created in memory during the delete operation. While chunking
@@ -332,6 +339,7 @@ export async function deletePrerequisiteAssets(
 }
 
 async function deleteAssets(
+  savedObjectsClient: SavedObjectsClientContract,
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
@@ -339,6 +347,7 @@ async function deleteAssets(
     additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
     name,
     version,
+    install_source: installSource,
   }: Installation,
   esClient: ElasticsearchClient
 ) {
@@ -356,17 +365,29 @@ async function deleteAssets(
     esClient
   );
 
-  // delete the other asset types
   try {
-    const packageInfo = await Registry.fetchInfo(name, version);
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient,
+      pkgName: name,
+      pkgVersion: version,
+      skipArchive: installSource !== 'registry',
+    });
+
+    // delete the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      deleteKibanaAssets({ installedObjects: installedKibana, spaceId, packageInfo }),
+      deleteKibanaAssets({
+        installedObjects: installedKibana,
+        spaceId,
+        packageSpecConditions: packageInfo?.conditions,
+        logger,
+      }),
       Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
         deleteKibanaAssets({
           installedObjects: kibanaAssets,
           spaceId: additionalSpaceId,
-          packageInfo,
+          logger,
+          packageSpecConditions: packageInfo?.conditions,
         })
       ),
     ]);
@@ -383,8 +404,8 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
   if (name && name !== '*') {
     try {
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
-    } catch {
-      throw new FleetError(`Error deleting index template ${name}`);
+    } catch (error) {
+      throw new FleetError(`Error deleting index template ${name}: ${error.message}`);
     }
   }
 }
@@ -395,15 +416,17 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}`);
+      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
     }
   }
 }
 
 export async function deleteKibanaSavedObjectsAssets({
+  savedObjectsClient,
   installedPkg,
   spaceId,
 }: {
+  savedObjectsClient: SavedObjectsClientContract;
   installedPkg: SavedObject<Installation>;
   spaceId?: string;
 }) {
@@ -426,15 +449,18 @@ export async function deleteKibanaSavedObjectsAssets({
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    const packageInfo = await Registry.fetchInfo(
-      installedPkg.attributes.name,
-      installedPkg.attributes.version
-    );
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient,
+      pkgName: installedPkg.attributes.name,
+      pkgVersion: installedPkg.attributes.version,
+      skipArchive: installedPkg.attributes.install_source !== 'registry',
+    });
 
     await deleteKibanaAssets({
       installedObjects: assetsToDelete,
       spaceId: spaceIdToDelete,
-      packageInfo,
+      packageSpecConditions: packageInfo?.conditions,
+      logger,
     });
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -486,6 +512,45 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+/**
+ * This function deletes assets for a given installation and updates the package SO accordingly.
+ *
+ * It is used to delete assets installed for input packages when they are no longer relevant,
+ * e.g. when a package policy is deleted and the package has no more policies.
+ */
+export async function cleanupAssets(
+  datasetName: string,
+  installationToDelete: Installation,
+  originalInstallation: Installation,
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  await deleteAssets(soClient, installationToDelete, esClient);
+
+  const {
+    installed_es: installedEs,
+    installed_kibana: installedKibana,
+    es_index_patterns: installedIndexPatterns,
+  } = originalInstallation;
+  const { installed_es: ESToRemove, installed_kibana: kibanaToRemove } = installationToDelete;
+
+  if (installedIndexPatterns && installedIndexPatterns[datasetName]) {
+    delete installedIndexPatterns[datasetName];
+  }
+
+  await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, originalInstallation.name, {
+    installed_es: differenceBy(installedEs, ESToRemove, 'id'),
+    installed_kibana: differenceBy(installedKibana, kibanaToRemove, 'id'),
+    es_index_patterns: installedIndexPatterns,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: originalInstallation.name,
+    name: originalInstallation.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 async function updateUninstallStatusToFailed(

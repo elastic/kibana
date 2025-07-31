@@ -26,6 +26,7 @@ import { SymbolIcon } from '../legend/symbol_icon';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
+import { PrependButton } from './prepend_button';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -116,15 +117,7 @@ export class IconSelect extends Component {
         compressed
         readOnly
         fullWidth
-        prepend={
-          <SymbolIcon
-            key={value}
-            className="mapIconSelectSymbol__inputButton"
-            symbolId={value}
-            svg={svg}
-            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          />
-        }
+        prepend={<PrependButton value={value} svg={svg} />}
         append={this.props.append}
       />
     );

@@ -9,7 +9,9 @@ import { EuiAccordion, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state';
 import { useDatasetQualityWarnings } from '../../../hooks/use_dataset_quality_warnings';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -32,7 +34,7 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
                 values={{
                   accordion: (
                     <EuiAccordion
-                      style={{ marginTop: '12px ' }}
+                      css={{ marginTop: '12px ' }}
                       buttonContent={i18n.translate(
                         'xpack.datasetQuality.nonAggregatable.showAffectedDatasets',
                         {
@@ -82,6 +84,7 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
 // eslint-disable-next-line import/no-default-export
 export default function Warnings() {
   const { loading, nonAggregatableDatasets } = useDatasetQualityWarnings();
+  const { statsLoading, canUserReadFailureStore } = useDatasetQualityState();
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
@@ -90,6 +93,11 @@ export default function Warnings() {
           <EuiCallOut title={nonAggregatableWarningTitle} color="warning" iconType="warning">
             <p>{nonAggregatableWarningDescription(nonAggregatableDatasets)}</p>
           </EuiCallOut>
+        </EuiFlexItem>
+      )}
+      {!statsLoading && !canUserReadFailureStore && (
+        <EuiFlexItem>
+          <FailureStoreWarning />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

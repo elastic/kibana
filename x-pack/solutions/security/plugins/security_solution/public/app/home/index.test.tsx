@@ -14,9 +14,9 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
 import {
-  setSearchBarFilter,
   setAbsoluteRangeDatePicker,
   setRelativeRangeDatePicker,
+  setSearchBarFilter,
 } from '../../common/store/inputs/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Filter } from '@kbn/es-query';
@@ -641,8 +641,11 @@ describe('HomePage', () => {
 
       expect(mockUpdateUrlParam).toHaveBeenCalledWith({
         activeTab: 'query',
-        graphEventId: '',
         isOpen: false,
+        query: {
+          expression: '',
+          kind: 'kuery',
+        },
       });
     });
 

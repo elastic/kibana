@@ -6,12 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { METADATA_FIELDS, fieldTypes } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { ESQLFieldWithMetadata } from '../validation/types';
-import { fieldTypes } from '../definitions/types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLCallbacks } from '../shared/types';
+
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
+  name: field,
+  type: 'keyword',
+}));
 
 export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
@@ -90,6 +96,36 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Logs Count by Host',
+      query: 'from logs* | STATS count(*) by host',
+    },
+  ],
+  recommendedFields: [
+    {
+      name: 'host.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'user.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'kubernetes.something.something',
+      pattern: 'logs*',
+    },
+  ],
+};
+
+export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
+  {
+    inference_id: 'inference_1',
+    task_type: 'completion',
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -107,6 +143,9 @@ export function getCallbackMocks(): ESQLCallbacks {
         };
         return [field];
       }
+      if (/METADATA/i.test(query)) {
+        return [...fields, ...metadataFields];
+      }
       return fields;
     }),
     getSources: jest.fn(async () =>
@@ -119,5 +158,15 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
+        };
+      }
+      return { recommendedQueries: [], recommendedFields: [] };
+    }),
+    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }

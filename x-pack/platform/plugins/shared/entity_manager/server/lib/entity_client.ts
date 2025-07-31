@@ -22,20 +22,15 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
-import { EntityClient as EntityClient_v2 } from './v2/entity_client';
 
 export class EntityClient {
-  public v2: EntityClient_v2;
-
   constructor(
     private options: {
       clusterClient: IScopedClusterClient;
       soClient: SavedObjectsClientContract;
       logger: Logger;
     }
-  ) {
-    this.v2 = new EntityClient_v2(options);
-  }
+  ) {}
 
   async createEntityDefinition({
     definition,

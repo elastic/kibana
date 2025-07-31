@@ -49,7 +49,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         eventId,
-        isPreview: false,
+        isRulePreview: false,
       })
     );
 
@@ -67,7 +67,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         eventId,
-        isPreview: false,
+        isRulePreview: false,
       })
     );
 
@@ -86,7 +86,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         eventId,
-        isPreview: false,
+        isRulePreview: false,
       })
     );
 
@@ -105,7 +105,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         eventId,
-        isPreview: true,
+        isRulePreview: true,
       })
     );
 

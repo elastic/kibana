@@ -47,6 +47,7 @@ describe('useCasesFeatures', () => {
         caseAssignmentAuthorized: false,
         pushToServiceAuthorized: false,
         observablesAuthorized: false,
+        isObservablesFeatureEnabled: true,
       });
     }
   );
@@ -67,6 +68,7 @@ describe('useCasesFeatures', () => {
       caseAssignmentAuthorized: false,
       pushToServiceAuthorized: false,
       observablesAuthorized: false,
+      isObservablesFeatureEnabled: true,
     });
   });
 
@@ -95,6 +97,7 @@ describe('useCasesFeatures', () => {
         caseAssignmentAuthorized: expectedResult,
         pushToServiceAuthorized: expectedResult,
         observablesAuthorized: expectedResult,
+        isObservablesFeatureEnabled: true,
       });
     }
   );

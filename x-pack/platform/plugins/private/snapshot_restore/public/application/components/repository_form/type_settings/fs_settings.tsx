@@ -89,6 +89,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.location}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.location)}
             defaultValue={location || ''}
             fullWidth
             onChange={(e) => {
@@ -133,7 +134,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
                 defaultMessage="Compress snapshots"
               />
             }
-            checked={!!compress}
+            checked={!(compress === false)}
             onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,

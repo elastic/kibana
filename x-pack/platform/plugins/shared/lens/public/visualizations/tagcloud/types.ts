@@ -17,6 +17,9 @@ export interface TagcloudState {
   maxFontSize: number;
   minFontSize: number;
   orientation: $Values<typeof Orientation>;
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput;
   showLabel: boolean;
   colorMapping?: ColorMapping.Config;

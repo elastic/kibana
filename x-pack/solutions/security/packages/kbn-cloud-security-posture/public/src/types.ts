@@ -22,11 +22,15 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { CspFinding, RuleResponse } from '@kbn/cloud-security-posture-common';
+import {
+  CspFinding,
+  CspVulnerabilityFinding,
+  RuleResponse,
+} from '@kbn/cloud-security-posture-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-
 import type { BoolQuery } from '@kbn/es-query';
+import type { GenericBuckets } from '@kbn/grouping/src';
 export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
@@ -81,7 +85,7 @@ export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-interface BaseFlyoutProps {
+interface BaseMisconfigurationFlyoutProps {
   ruleId: string;
   resourceId: string;
 }
@@ -101,12 +105,12 @@ interface NonPreviewModeProps {
 }
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel';
-  params: BaseFlyoutProps & NonPreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & NonPreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel-preview';
-  params: BaseFlyoutProps & PreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & PreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutProps =
@@ -130,4 +134,135 @@ export interface FindingMisconfigurationFlyoutContentProps {
   finding: CspFinding;
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   isPreviewMode?: boolean;
+}
+
+export interface FindingVulnerabilityFlyoutProps extends Record<string, unknown> {
+  vulnerabilityId: string | string[];
+  resourceId: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId: string;
+}
+
+export interface FindingsVulnerabilityFlyoutHeaderProps {
+  finding: CspVulnerabilityFinding;
+}
+
+export interface FindingsVulnerabilityFlyoutContentProps {
+  finding: CspVulnerabilityFinding;
+  isPreviewMode?: boolean;
+}
+
+export interface FindingsVulnerabilityFlyoutFooterProps {
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+}
+
+export interface FindingVulnerabilityFullFlyoutContentProps {
+  finding: CspVulnerabilityFinding;
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+  isPreviewMode?: boolean;
+}
+
+interface BaseVulnerabilityFlyoutProps {
+  vulnerabilityId: string | string[];
+  resourceId?: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId?: string;
+}
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel';
+  params: BaseVulnerabilityFlyoutProps & NonPreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel-preview';
+  params: BaseVulnerabilityFlyoutProps & PreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutProps =
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsPreview;
+
+// Elasticsearch returns `null` when a sub-aggregation cannot be computed
+export type NumberOrNull = number | null;
+export interface FindingsGroupingAggregation {
+  unitsCount?: {
+    value?: NumberOrNull;
+  };
+  groupsCount?: {
+    value?: NumberOrNull;
+  };
+  failedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  passedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  groupByFields?: {
+    buckets?: GenericBuckets[];
+  };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceName?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceSubType?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkName?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkVersion?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkId?: {
+    buckets?: GenericBuckets[];
+  };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  clusterName?: {
+    buckets?: GenericBuckets[];
+  };
+  isLoading?: boolean;
+}
+
+export interface VulnerabilitiesGroupingAggregation {
+  unitsCount?: {
+    value?: NumberOrNull;
+  };
+  groupsCount?: {
+    value?: NumberOrNull;
+  };
+  groupByFields?: {
+    buckets?: GenericBuckets[];
+  };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceName?: {
+    buckets?: GenericBuckets[];
+  };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  isLoading?: boolean;
+  critical?: {
+    doc_count?: NumberOrNull;
+  };
+  high?: {
+    doc_count?: NumberOrNull;
+  };
+  medium?: {
+    doc_count?: NumberOrNull;
+  };
+  low?: {
+    doc_count?: NumberOrNull;
+  };
+  cloudProvider?: {
+    buckets?: GenericBuckets[];
+  };
 }

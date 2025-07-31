@@ -10,7 +10,8 @@ import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
 
 jest.mock('../../../onboarding_context');
-jest.mock('../../../../../common/lib/integrations/components');
+jest.mock('../../../../../common/lib/integrations/components/security_integrations');
+
 const props = {
   setComplete: jest.fn(),
   checkComplete: jest.fn(),

@@ -70,6 +70,8 @@ export interface MlInfoResponse {
   isCloudTrial?: boolean;
   cloudUrl?: string;
   isMlAutoscalingEnabled: boolean;
+  showNodeInfo: boolean;
+  showLicenseInfo: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {

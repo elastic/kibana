@@ -18,6 +18,8 @@ describe('ShareActionsRegistry', () => {
       getCapabilities: jest.fn(),
       getState: jest.fn(),
     }),
+    capabilities: { navLinks: {}, management: {}, catalogue: {} },
+    getLicense: jest.fn(),
   };
 
   describe('registerShareIntegration', () => {
@@ -41,6 +43,110 @@ describe('ShareActionsRegistry', () => {
   });
 
   describe('start', () => {
+    describe('availableIntegrations', () => {
+      it('returns by default the registered integrations without a prerequisite check', () => {
+        const shareRegistry = new ShareRegistry();
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations } = shareRegistry.start(startDeps);
+
+        // register a global integration without a prerequisite
+        registerShareIntegration({
+          id: 'csvReports',
+          config: () => ({}),
+        });
+
+        // we expect to have 2 default share actions (link and embed) + 1 registered integration
+        expect(availableIntegrations('someRandomObjectType')).toHaveLength(2 + 1);
+      });
+
+      it('omits a registered integration that defines a prerequisite check which returns false', () => {
+        const shareRegistry = new ShareRegistry();
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations } = shareRegistry.start(startDeps);
+
+        const prerequisiteCheckFn = jest.fn(() => false);
+
+        // register a global integration with a prerequisiteCheck
+        registerShareIntegration({
+          id: 'csvReports',
+          config: () => ({}),
+          prerequisiteCheck: prerequisiteCheckFn,
+        });
+
+        // we expect to have just the 2 default share actions (link and embed)
+        expect(availableIntegrations('someRandomObjectType')).toHaveLength(2);
+        expect(prerequisiteCheckFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            capabilities: startDeps.capabilities,
+            license: startDeps.getLicense(),
+            objectType: 'someRandomObjectType',
+          })
+        );
+      });
+
+      it('will include a registered integration that defines a prerequisite check which returns true', () => {
+        const shareRegistry = new ShareRegistry();
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations } = shareRegistry.start(startDeps);
+
+        const prerequisiteCheckFn = jest.fn(() => true);
+
+        // register a global integration with a prerequisiteCheck
+        registerShareIntegration({
+          id: 'csvReports',
+          config: () => ({}),
+          prerequisiteCheck: prerequisiteCheckFn,
+        });
+
+        // we expect to have 2 default share actions (link and embed) + 1 registered integration with a passing prerequisite
+        expect(availableIntegrations('anotherRandomObjectType')).toHaveLength(2 + 1);
+        expect(prerequisiteCheckFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            capabilities: startDeps.capabilities,
+            license: startDeps.getLicense(),
+            objectType: 'anotherRandomObjectType',
+          })
+        );
+      });
+
+      it('will return only the registered integrations that match the requested integration groupId', () => {
+        const shareRegistry = new ShareRegistry();
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations } = shareRegistry.start(startDeps);
+
+        // register a global integration with a groupId
+        registerShareIntegration({
+          id: 'csvReports',
+          groupId: 'export',
+          config: () => ({}),
+        });
+
+        // we only expect to have the global integration we registered with the groupId 'export'
+        expect(availableIntegrations('someRandomObjectType', 'export')).toHaveLength(1);
+      });
+
+      it('will return only the registered integrations that match the requested integration groupId and objectType', () => {
+        const shareRegistry = new ShareRegistry();
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations } = shareRegistry.start(startDeps);
+
+        // register a scoped integration with a groupId
+        registerShareIntegration('scoped', {
+          id: 'csvReports',
+          groupId: 'export',
+          config: () => ({}),
+        });
+
+        expect(availableIntegrations('scoped', 'export')).toHaveLength(1);
+        expect(availableIntegrations('someRandomObjectType', 'export')).toHaveLength(0);
+      });
+    });
+
     describe('resolveShareItemsForShareContext', () => {
       test('it returns the default share actions for any requested app scope without performing any prior registrations', () => {
         const { resolveShareItemsForShareContext } = new ShareRegistry().start(startDeps);

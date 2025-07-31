@@ -43,6 +43,7 @@ import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { panelConfigContainerStyles } from './_panel_config';
 
 export class GaugePanelConfig extends Component<
   PanelConfigProps,
@@ -112,7 +113,7 @@ export class GaugePanelConfig extends Component<
           onChange={this.props.onChange}
         />
       ) : (
-        <div className="tvbPanelConfig__container">
+        <div className="tvbPanelConfig__container" css={panelConfigContainerStyles}>
           <EuiPanel>
             <EuiTitle size="s">
               <span>

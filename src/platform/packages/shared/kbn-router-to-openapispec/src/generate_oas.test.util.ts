@@ -138,7 +138,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
   ],
 });
 
-interface CreatTestRouterArgs {
+export interface CreateTestRouterArgs {
   routers?: { [routerId: string]: { routes: Array<Partial<RoutesMeta>> } };
   versionedRouters?: {
     [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
@@ -147,7 +147,7 @@ interface CreatTestRouterArgs {
 }
 
 export const createTestRouters = (
-  { routers = {}, versionedRouters = {}, bodySchema }: CreatTestRouterArgs = {
+  { routers = {}, versionedRouters = {}, bodySchema }: CreateTestRouterArgs = {
     routers: { testRouter: { routes: [{}] } },
     versionedRouters: { testVersionedRouter: { routes: [{}] } },
   }

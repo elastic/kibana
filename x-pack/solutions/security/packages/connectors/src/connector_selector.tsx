@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
+  EuiSuperSelectProps,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -25,17 +26,33 @@ export interface ConnectorDetails {
   description: string;
 }
 
-export interface ConnectorSelectorProps {
+const popoverProps: EuiSuperSelectProps['popoverProps'] = {
+  panelMinWidth: 400,
+  anchorPosition: 'downRight',
+};
+
+export interface ConnectorSelectorProps
+  extends Partial<Pick<EuiSuperSelectProps<string>, 'isLoading' | 'isInvalid'>> {
   connectors: ConnectorDetails[];
   onChange: (connectorId: string) => void;
   selectedId?: string;
   onNewConnectorClicked?: () => void;
   isDisabled?: boolean;
+  mode?: 'combobox' | 'default';
 }
 
 export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
-  ({ connectors, onChange, selectedId, onNewConnectorClicked, isDisabled }) => {
-    const styles = useConnectorSelectorStyles();
+  ({
+    connectors,
+    onChange,
+    selectedId,
+    onNewConnectorClicked,
+    isDisabled,
+    mode = 'default',
+    isLoading,
+    isInvalid,
+  }) => {
+    const styles = useConnectorSelectorStyles(mode);
     const { euiTheme } = useEuiTheme();
 
     const addNewConnectorOption = useMemo(() => {
@@ -57,12 +74,12 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/* Right offset to compensate for 'selected' icon of EuiSuperSelect since native footers aren't supported*/}
-              <div css={styles.offset} />
+              <div css={styles?.offset} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
       };
-    }, [isDisabled, styles.offset]);
+    }, [isDisabled, styles?.offset]);
 
     const connectorExists = useMemo(
       () => some(connectors, ['id', selectedId]),
@@ -71,16 +88,20 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
 
     const mappedConnectorOptions = connectors.map((connector) => ({
       value: connector.id,
-      'data-test-subj': connector.id,
+      'data-test-subj': `connector-option-${connector.name}`,
       inputDisplay: (
-        <EuiText css={styles.optionDisplay} size="s" color={euiTheme.colors.primary}>
+        <EuiText
+          css={styles?.optionDisplay}
+          size="s"
+          color={mode === 'default' ? euiTheme.colors.primary : undefined}
+        >
           {connector.name}
         </EuiText>
       ),
       dropdownDisplay: (
         <React.Fragment key={connector.id}>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false} data-test-subj={`connector-${connector.name}`}>
+            <EuiFlexItem grow={false}>
               <strong>{connector.name}</strong>
               <EuiText size="xs" color="subdued">
                 <p>{connector.description}</p>
@@ -111,21 +132,21 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     );
 
     return (
-      <div css={styles.inputContainer}>
-        {!connectorExists && !connectors.length ? (
+      <div css={styles?.inputContainer}>
+        {!connectorExists && !connectors.length && onNewConnectorClicked ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"
             isDisabled={isDisabled}
             size="xs"
-            onClick={() => onNewConnectorClicked?.()}
+            onClick={onNewConnectorClicked}
           >
             {i18n.ADD_CONNECTOR}
           </EuiButtonEmpty>
         ) : (
           <EuiSuperSelect
             aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            css={styles.placeholder}
+            css={styles?.placeholder}
             compressed={true}
             data-test-subj="connector-selector"
             disabled={isDisabled}
@@ -134,7 +155,9 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             options={allConnectorOptions}
             valueOfSelected={selectedId}
             placeholder={i18n.CONNECTOR_SELECTOR_PLACEHOLDER}
-            popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
+            popoverProps={popoverProps}
+            isLoading={isLoading}
+            isInvalid={isInvalid}
           />
         )}
       </div>

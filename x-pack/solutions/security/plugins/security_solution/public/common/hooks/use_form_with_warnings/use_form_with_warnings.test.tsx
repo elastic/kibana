@@ -18,7 +18,9 @@ describe('useFormWithWarn', () => {
     it('is `undefined` initially', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      });
     });
 
     it('is `true` when input is valid', async () => {
@@ -38,7 +40,9 @@ describe('useFormWithWarn', () => {
       await typeText('warning');
       await submitForm();
 
-      expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      });
     });
 
     it('is `false` when input has error', async () => {
@@ -47,7 +51,9 @@ describe('useFormWithWarn', () => {
       await typeText('error');
       await submitForm();
 
-      expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      });
     });
   });
 

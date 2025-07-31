@@ -15,7 +15,7 @@ import { BasicDataStream } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
-  const { service, telemetryClient, isFailureStoreEnabled } = useDatasetQualityDetailsContext();
+  const { service, telemetryClient } = useDatasetQualityDetailsContext();
 
   const {
     services: { fieldFormats },
@@ -99,6 +99,10 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations
   );
 
+  const canUserReadFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -156,10 +160,12 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
+  const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+
   return {
     service,
     telemetryClient,
-    isFailureStoreEnabled,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,
@@ -178,6 +184,9 @@ export const useDatasetQualityDetailsState = () => {
     integrationDetails,
     canUserAccessDashboards,
     canUserViewIntegrations,
+    canUserReadFailureStore,
+    hasFailureStore,
+    canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
   };

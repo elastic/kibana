@@ -10,7 +10,7 @@
 import {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
-} from '@kbn/embeddable-plugin/common';
+} from '@kbn/embeddable-plugin/server';
 import { SavedObjectReference } from '@kbn/core/types';
 
 export const createEsqlControlInject = (): EmbeddablePersistableStateService['inject'] => {

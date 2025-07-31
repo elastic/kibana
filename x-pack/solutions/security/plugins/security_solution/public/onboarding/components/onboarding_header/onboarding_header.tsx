@@ -6,16 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  COLOR_MODES_STANDARD,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
 import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
@@ -30,8 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export const OnboardingHeader = React.memo(() => {
   const currentUser = useCurrentUser();
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const isDarkMode = useKibanaIsDarkMode();
 
   const styles = useOnboardingHeaderStyles();
 

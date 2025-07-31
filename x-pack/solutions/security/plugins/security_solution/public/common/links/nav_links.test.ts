@@ -29,6 +29,13 @@ const mockNavLinks: AppLinkItems = [
     path: '/path',
     title: 'title',
   },
+  {
+    description: 'unauthorized link',
+    unauthorized: true,
+    id: SecurityPageName.hosts,
+    path: '/path',
+    title: 'title',
+  },
 ];
 
 describe('formatNavigationLinks', () => {

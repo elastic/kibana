@@ -8,7 +8,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render as testLibRender } from '@testing-library/react';
+import { RenderResult, render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -41,7 +41,7 @@ const queryClient = new QueryClient({
 export const render = (
   component: React.ReactNode,
   mocks?: { coreStart?: DeepPartial<CoreStartWithStartDeps>; appContextValue?: AppContextValue }
-) => {
+): RenderResult => {
   const history = createMemoryHistory();
 
   const startDeps = {
@@ -76,7 +76,7 @@ export const render = (
     },
   };
 
-  return testLibRender(
+  const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     // @ts-ignore
     <IntlProvider locale="en-US">
       <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
@@ -87,7 +87,7 @@ export const render = (
                 history={history}
                 router={aIAssistantManagementObservabilityRouter as any}
               >
-                {component}
+                {children}
               </RouterProvider>
             </QueryClientProvider>
           </AppContextProvider>
@@ -95,4 +95,13 @@ export const render = (
       </RedirectToHomeIfUnauthorized>
     </IntlProvider>
   );
+
+  const renderResult = testLibRender(component, { wrapper: TestWrapper });
+
+  return {
+    ...renderResult,
+    rerender: (newComponent: React.ReactNode) => {
+      renderResult.rerender(newComponent);
+    },
+  };
 };

@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 import { KnowledgeBaseState } from '../../common';
-import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
+import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context/context';
 import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
 import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
@@ -108,13 +108,19 @@ ${
     if (isKnowledgeBaseReady) {
       if (availableFunctionNames.includes(SUMMARIZE_FUNCTION_NAME)) {
         instructions.push(`You can use the "${SUMMARIZE_FUNCTION_NAME}" function to store new information you have learned in a knowledge database.
-          Only use this function when the user asks to remember or store some information.
+          If the user asks to remember or store some information, always use this function.
           All summaries MUST be created in English, even if the conversation was carried out in a different language.`);
       }
 
       if (availableFunctionNames.includes(CONTEXT_FUNCTION_NAME)) {
         instructions.push(
-          `Additionally, you can use the "${CONTEXT_FUNCTION_NAME}" function to retrieve relevant information from the knowledge database.`
+          `You can use the "${CONTEXT_FUNCTION_NAME}" function to retrieve relevant information from the knowledge database. The response will include a "learnings" field containing information
+          from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
+          The information in the "learnings" field contains up-to-date information that you should consider when formulating your responses. DO NOT add disclaimers about the currency or certainty of this information.
+          Present this information directly without qualifiers like "I don't have specific, up-to-date information" or "I can't be completely certain".
+          
+          Stick strictly to the information provided in the "learnings" field. DO NOT assume, infer, or add any details that are not explicitly stated in the response.
+          If the user asks for information that is not covered in the "learnings" field, acknowledge the gap and ask for clarification rather than making assumptions or offering suggestions that aren't based on the provided knowledge.`
         );
       }
     } else {

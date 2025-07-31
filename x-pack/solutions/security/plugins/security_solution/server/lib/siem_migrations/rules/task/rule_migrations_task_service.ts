@@ -33,7 +33,7 @@ export class RuleMigrationsTaskService {
   /** Stops all running migrations */
   stopAll() {
     this.migrationsRunning.forEach((migrationRunning) => {
-      migrationRunning.abortController.abort();
+      migrationRunning.abortController.abort('Server shutdown');
     });
     this.migrationsRunning.clear();
   }

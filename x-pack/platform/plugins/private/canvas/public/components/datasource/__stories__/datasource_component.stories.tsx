@@ -14,7 +14,7 @@ import { templateFromReactComponent } from '../../../lib/template_from_react_com
 import { Datasource } from '../../../expression_types/datasource';
 
 const TestDatasource = ({ args }: any) => (
-  <EuiCallOut title="My Test Data Source" iconType="iInCircle">
+  <EuiCallOut title="My Test Data Source" iconType="info">
     <EuiText size="s">
       <p>Hello! I am a datasource with a query arg of: {args.query}</p>
     </EuiText>

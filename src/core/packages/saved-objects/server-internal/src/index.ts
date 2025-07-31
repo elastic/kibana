@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MIGRATION_CLIENT_OPTIONS } from './constants';
+export { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 export { SavedObjectsService } from './saved_objects_service';
 export type {
   InternalSavedObjectsServiceStart,

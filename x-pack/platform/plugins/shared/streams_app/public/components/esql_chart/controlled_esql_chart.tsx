@@ -140,7 +140,7 @@ export function ControlledEsqlChart<T extends string>({
                   style={{ fontWeight: 'normal' }}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
+                    <EuiIcon type="info" />
                   </EuiFlexItem>
                   <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                 </EuiFlexGroup>
@@ -183,12 +183,14 @@ export function ControlledEsqlChart<T extends string>({
             key={serie.id}
             color="#61A2FF"
             id={serie.id}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={serie.metricNames}
             data={serie.data}
             curve={CurveType.CURVE_MONOTONE_X}
+            enableHistogramMode
           />
         );
       })}

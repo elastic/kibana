@@ -54,7 +54,7 @@ export type AlertsQuery = Exclude<RuleRegistrySearchRequest['query'], undefined>
 export class AnomalyDetectionAlertsStateService extends StateService {
   /**
    * Subject that holds the anomaly detection alerts from the alert-as-data index.
-   * @private
+   * @internal
    */
   private readonly _aadAlerts$ = new BehaviorSubject<AnomalyDetectionAlert[]>([]);
 

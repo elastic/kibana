@@ -287,23 +287,12 @@ export function DataPreviewChart({
                 })}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
-                timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
-                style={{
-                  tickLine: { size: 0, padding: 4, visible: true },
-                  tickLabel: {
-                    alignment: {
-                      horizontal: Position.Left,
-                      vertical: Position.Bottom,
-                    },
-                    padding: 0,
-                    offset: { x: 0, y: 0 },
-                  },
-                }}
               />
 
               <LineSeries
                 id="All groups"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="date"
@@ -319,6 +308,7 @@ export function DataPreviewChart({
                 <LineSeries
                   key={group}
                   id={group}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="date"

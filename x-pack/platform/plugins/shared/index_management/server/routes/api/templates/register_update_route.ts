@@ -11,7 +11,7 @@ import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
-import { saveTemplate, doesTemplateExist } from './lib';
+import { saveTemplate, doesTemplateExist, getTemplateDataStreamOptions } from './lib';
 
 const bodySchema = templateSchema;
 const paramsSchema = schema.object({
@@ -47,8 +47,19 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.notFound();
         }
 
+        const dataStreamOptions = await getTemplateDataStreamOptions({
+          name,
+          client,
+          isLegacy,
+        });
+
         // Next, update index template
-        const responseBody = await saveTemplate({ template, client, isLegacy });
+        const responseBody = await saveTemplate({
+          template,
+          client,
+          isLegacy,
+          dataStreamOptions,
+        });
 
         return response.ok({ body: responseBody });
       } catch (error) {

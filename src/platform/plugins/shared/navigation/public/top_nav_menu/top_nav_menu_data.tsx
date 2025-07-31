@@ -14,6 +14,7 @@ export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
 export interface TopNavMenuData {
   id?: string;
+  htmlId?: string;
   label: string;
   run: TopNavMenuAction;
   description?: string;

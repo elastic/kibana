@@ -133,7 +133,7 @@
               "Type of the module"
             ],
             "signature": [
-              "\"non-package\" | \"tests or mocks\" | \"static\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
+              "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,
@@ -248,7 +248,7 @@
         "label": "ModuleType",
         "description": [],
         "signature": [
-          "\"non-package\" | \"tests or mocks\" | \"static\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
+          "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
         ],
         "path": "packages/kbn-repo-source-classifier/src/module_type.ts",
         "deprecated": false,

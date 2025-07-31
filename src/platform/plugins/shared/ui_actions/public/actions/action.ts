@@ -20,6 +20,10 @@ export interface ActionExecutionMeta {
    * Trigger that executed the action
    */
   trigger: Trigger;
+  /**
+   * The event that caused the action to execute (e.g., mouse click, keyboard event)
+   */
+  event?: React.MouseEvent;
 }
 
 /**

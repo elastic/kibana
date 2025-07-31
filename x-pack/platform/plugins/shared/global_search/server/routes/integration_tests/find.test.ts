@@ -7,13 +7,12 @@
 
 import { of, throwError } from 'rxjs';
 import supertest from 'supertest';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { GlobalSearchResult, GlobalSearchBatchedResults } from '../../../common/types';
 import { GlobalSearchFindError } from '../../../common/errors';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalFindRoute } from '../find';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
 const createResult = (id: string): GlobalSearchResult => ({
@@ -32,21 +31,22 @@ const expectedResults = (...ids: string[]) => ids.map((id) => expect.objectConta
 
 describe('POST /internal/global_search/find', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let globalSearchHandlerContext: ReturnType<
     typeof globalSearchPluginMock.createRouteHandlerContext
   >;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(pluginId));
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
-    httpSetup.registerRouteHandlerContext<
+    registerRouteHandlerContext<
       ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>,
       'globalSearch'
     >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
-    const router = httpSetup.createRouter<any>('/');
+    const router = createRouter<any>('/');
 
     registerInternalFindRoute(router);
 
@@ -58,7 +58,7 @@ describe('POST /internal/global_search/find', () => {
   });
 
   it('calls the handler context with correct parameters', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -86,7 +86,7 @@ describe('POST /internal/global_search/find', () => {
       of(createBatch('1', '2'), createBatch('3', '4'))
     );
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(server.listener)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -105,7 +105,7 @@ describe('POST /internal/global_search/find', () => {
       throwError(GlobalSearchFindError.invalidLicense('invalid-license-message'))
     );
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(server.listener)
       .post('/internal/global_search/find')
       .send({
         params: {
@@ -125,7 +125,7 @@ describe('POST /internal/global_search/find', () => {
   it('returns the default error when the observable throws any other error', async () => {
     globalSearchHandlerContext.find.mockReturnValue(throwError('any-error'));
 
-    const response = await supertest(httpSetup.server.listener)
+    const response = await supertest(server.listener)
       .post('/internal/global_search/find')
       .send({
         params: {

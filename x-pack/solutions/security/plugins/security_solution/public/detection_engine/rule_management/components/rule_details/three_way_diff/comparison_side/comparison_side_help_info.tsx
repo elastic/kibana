@@ -32,16 +32,12 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
   const optionsWithDescriptions = options.map((option) => getOptionDetails(option));
 
   const button = (
-    <EuiButtonIcon
-      iconType="questionInCircle"
-      onClick={togglePopover}
-      aria-label="Open help popover"
-    />
+    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
   );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
           defaultMessage="The {title} lets you compare the values of a field across different versions of a rule:"

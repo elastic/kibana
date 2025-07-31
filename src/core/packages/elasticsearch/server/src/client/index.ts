@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ElasticsearchClient } from './client';
+export type { ElasticsearchClient, ElasticsearchRequestLoggingOptions } from './client';
 export type { IClusterClient, ICustomClusterClient } from './cluster_client';
 export type { ScopeableRequest, FakeRequest } from './scopeable_request';
 export type { IScopedClusterClient } from './scoped_cluster_client';

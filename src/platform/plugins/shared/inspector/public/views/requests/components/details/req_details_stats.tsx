@@ -40,7 +40,7 @@ const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
               aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
                 defaultMessage: 'Description',
               })}
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={stat.description}
             />

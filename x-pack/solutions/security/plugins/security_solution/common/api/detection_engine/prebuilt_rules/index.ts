@@ -23,3 +23,5 @@ export * from './model/diff/three_way_diff/three_way_diff';
 export * from './model/diff/three_way_diff/three_way_diff_conflict';
 export * from './model/diff/three_way_diff/three_way_merge_outcome';
 export * from './common/prebuilt_rules_filter';
+export * from './revert_prebuilt_rule/revert_prebuilt_rule_route';
+export * from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';

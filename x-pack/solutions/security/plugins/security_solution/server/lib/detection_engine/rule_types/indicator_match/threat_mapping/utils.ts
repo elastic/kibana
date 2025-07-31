@@ -21,10 +21,11 @@ import type {
   ThreatMatchedFields,
   ThreatTermNamedQuery,
   DecodedThreatNamedQuery,
-  SignalValuesMap,
-  GetSignalValuesMap,
+  FieldAndValueToDocIdsMap,
+  GetFieldAndValueToDocIdsMap,
   ThreatMatchNamedQuery,
 } from './types';
+import { checkErrorDetails } from '../../utils/check_error_details';
 
 export const MANY_NESTED_CLAUSES_ERR =
   'Query contains too many nested clauses; maxClauseCount is set to';
@@ -127,12 +128,15 @@ export const combineConcurrentResults = (
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
+        userError:
+          accum.userError || item.errors.every((err) => checkErrorDetails(err).isUserError),
         suppressedAlertsCount:
           (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
     },
     {
       success: true,
+      userError: false,
       warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
@@ -226,11 +230,11 @@ export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFie
     { source: [], threat: [] }
   );
 
-export const getSignalValueMap = ({
+export const getFieldAndValueToDocIdsMap = ({
   eventList,
   threatMatchedFields,
-}: GetSignalValuesMap): SignalValuesMap =>
-  eventList.reduce<SignalValuesMap>((acc, event) => {
+}: GetFieldAndValueToDocIdsMap): FieldAndValueToDocIdsMap =>
+  eventList.reduce<FieldAndValueToDocIdsMap>((acc, event) => {
     threatMatchedFields.source.forEach((field) => {
       const fieldValue = get(event.fields, field)?.[0];
       if (!fieldValue) return;

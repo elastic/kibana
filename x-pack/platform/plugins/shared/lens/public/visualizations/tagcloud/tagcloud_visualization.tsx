@@ -305,23 +305,20 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
     const palettes = getKbnPalettes(theme);
 
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
           isDarkMode={theme.darkMode}
-          paletteService={paletteService}
           palettes={palettes}
           state={props.state}
           setState={props.setState}
           frame={props.frame}
           panelRef={props.panelRef}
           isInlineEditing={props.isInlineEditing}
+          paletteService={paletteService}
           formatFactory={formatFactory}
         />
       );

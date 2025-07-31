@@ -82,7 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
 
-  describe('@ess @serverless @serverlessQA EQL type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220943
+  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -92,17 +93,21 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load(auditPath);
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_6'
       );
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(auditPath);
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_6'
       );
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -776,11 +781,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -802,11 +807,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -885,13 +894,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('using data without a @timestamp field', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/no_at_timestamp_field'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/no_at_timestamp_field'
         );
       });
 
@@ -957,13 +966,15 @@ export default ({ getService }: FtrProviderContext) => {
     describe('manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
       });
 
       afterEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
       });
 
@@ -1227,9 +1238,10 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(logs[0].requests).equal(undefined);
       });
       it('should return requests property when enable_logged_requests set to true', async () => {
+        const eqlRule = getEqlRuleForAlertTesting(['auditbeat-*']);
         const { logs } = await previewRule({
           supertest,
-          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+          rule: eqlRule,
           enableLoggedRequests: true,
         });
 
@@ -1240,6 +1252,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(requests![0].request).to.contain(
           'POST /auditbeat-*/_eql/search?allow_no_indices=true'
         );
+        kbnExpect(requests![0].request).to.contain(eqlRule.query);
       });
     });
   });

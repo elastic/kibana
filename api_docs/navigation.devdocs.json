@@ -386,6 +386,20 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.htmlId",
+            "type": "string",
+            "tags": [],
+            "label": "htmlId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-public.TopNavMenuData.label",
             "type": "string",
             "tags": [],
@@ -518,7 +532,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -534,7 +548,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -554,7 +568,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -572,7 +586,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -592,7 +606,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -612,7 +626,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsNode, LabelAsString> & LabelAsString) | (",
               "CommonProps",
@@ -630,7 +644,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -650,7 +664,7 @@
               "ToolTipPositions",
               " | undefined; anchorProps?: (",
               "CommonProps",
-              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"middle\" | \"baseline\" | undefined; } & ",
+              " & React.HTMLAttributes<HTMLSpanElement>) | undefined; title?: string | undefined; color?: \"warning\" | \"subdued\" | \"accent\" | \"hollow\" | undefined; size?: \"m\" | \"s\" | undefined; alignment?: \"baseline\" | \"middle\" | undefined; } & ",
               "DisambiguateSet",
               "<LabelAsString, LabelAsNode> & ",
               "DisambiguateSet",
@@ -815,9 +829,10 @@
         "label": "AddSolutionNavigationArg",
         "description": [],
         "signature": [
-          "Omit<",
-          "SolutionNavigation",
-          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; }"
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
+          ">"
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
@@ -832,7 +847,7 @@
         "label": "SolutionType",
         "description": [],
         "signature": [
-          "\"security\" | \"analytics\" | \"es\" | \"oblt\""
+          "\"security\" | \"analytics\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
@@ -1066,13 +1081,7 @@
           ],
           "signature": [
             "(solutionNavigationAgg: ",
-            {
-              "pluginId": "navigation",
-              "scope": "public",
-              "docId": "kibNavigationPluginApi",
-              "section": "def-public.AddSolutionNavigationArg",
-              "text": "AddSolutionNavigationArg"
-            },
+            "SolutionNavigation",
             ") => void"
           ],
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
@@ -1082,18 +1091,12 @@
             {
               "parentPluginId": "navigation",
               "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
-              "type": "CompoundType",
+              "type": "Object",
               "tags": [],
               "label": "solutionNavigationAgg",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "navigation",
-                  "scope": "public",
-                  "docId": "kibNavigationPluginApi",
-                  "section": "def-public.AddSolutionNavigationArg",
-                  "text": "AddSolutionNavigationArg"
-                }
+                "SolutionNavigation"
               ],
               "path": "src/platform/plugins/shared/navigation/public/types.ts",
               "deprecated": false,
@@ -1191,10 +1194,34 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-common.DEFAULT_ROUTES.oblt",
             "type": "string",
             "tags": [],
             "label": "oblt",
+            "description": [
+              "// O11y aliases"
+            ],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.observability",
+            "type": "string",
+            "tags": [],
+            "label": "observability",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,

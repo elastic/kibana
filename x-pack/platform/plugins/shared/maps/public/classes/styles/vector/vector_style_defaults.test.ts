@@ -20,12 +20,12 @@ describe('getDefaultStaticProperties', () => {
   test('Should use first color in DEFAULT_*_COLORS when no colors are used on the map', () => {
     const styleProperties = getDefaultStaticProperties([]);
     expect(styleProperties[VECTOR_STYLES.FILL_COLOR].options.color).toBe('#16C5C0');
-    expect(styleProperties[VECTOR_STYLES.LINE_COLOR].options.color).toBe('#119793');
+    expect(styleProperties[VECTOR_STYLES.LINE_COLOR].options.color).toBe('#009490');
   });
 
   test('Should next color in DEFAULT_*_COLORS when colors are used on the map', () => {
     const styleProperties = getDefaultStaticProperties(['#54B399']);
     expect(styleProperties[VECTOR_STYLES.FILL_COLOR].options.color).toBe('#16C5C0');
-    expect(styleProperties[VECTOR_STYLES.LINE_COLOR].options.color).toBe('#119793');
+    expect(styleProperties[VECTOR_STYLES.LINE_COLOR].options.color).toBe('#009490');
   });
 });

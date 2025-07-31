@@ -809,6 +809,33 @@ describe('Detections Rules API', () => {
       );
     });
 
+    test('passes gap range with query', async () => {
+      const gapRange = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-02T00:00:00.000Z' };
+      await performBulkAction({
+        bulkAction: {
+          type: BulkActionTypeEnum.enable,
+          query: '',
+          gapRange,
+        },
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/detection_engine/rules/_bulk_action',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'enable',
+            query: '',
+            gaps_range_start: '2025-01-01T00:00:00.000Z',
+            gaps_range_end: '2025-01-02T00:00:00.000Z',
+          }),
+          query: {
+            dry_run: false,
+          },
+        })
+      );
+    });
+
     test('executes dry run', async () => {
       await performBulkAction({
         bulkAction: { type: BulkActionTypeEnum.disable, query: 'some query' },

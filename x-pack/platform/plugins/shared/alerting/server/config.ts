@@ -83,6 +83,9 @@ export const configSchema = schema.object({
   disabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),
+  enabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

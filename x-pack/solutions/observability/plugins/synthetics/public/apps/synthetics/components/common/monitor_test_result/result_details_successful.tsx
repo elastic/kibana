@@ -59,7 +59,7 @@ export const ResultDetailsSuccessful = ({
           <EuiSpacer size="m" />
           <JourneyStepScreenshotContainer
             checkGroup={data?.monitor.check_group}
-            initialStepNumber={data?.synthetics?.step?.index}
+            initialStepNumber={stepIndex}
             stepStatus={data?.synthetics?.payload?.status}
             allStepsLoaded={!loading}
             retryFetchOnRevisit={false}

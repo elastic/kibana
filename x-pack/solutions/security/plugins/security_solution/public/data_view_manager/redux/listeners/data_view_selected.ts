@@ -12,8 +12,26 @@ import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
+import type { DataViewManagerScopeName } from '../../constants';
 
+/**
+ * Creates a Redux listener for handling data view selection logic in the data view manager.
+ *
+ * This listener responds to the `selectDataViewAsync` action for a specific scope. It attempts to resolve
+ * the selected data view by:
+ *   1. Checking for a cached data view (either ad-hoc or persisted) in the Redux state.
+ *   2. If not found, attempting to fetch a lazy data view by ID from the DataViews service.
+ *   3. If still not found, creating a new ad-hoc data view using fallback patterns.
+ *
+ * The listener ensures that only one effect runs per scope at a time to prevent race conditions.
+ * If a data view is successfully resolved, it dispatches an action to set it as selected for the current scope.
+ * If an error occurs during fetching or creation, it dispatches an error action for the current scope.
+ *
+ * @param dependencies - The dependencies required for the listener, including the scope and DataViews service.
+ * @returns An object with the action creator and effect for Redux middleware.
+ */
 export const createDataViewSelectedListener = (dependencies: {
+  scope: DataViewManagerScopeName;
   dataViews: DataViewsServicePublic;
 }) => {
   return {
@@ -22,6 +40,13 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
+      if (dependencies.scope !== action.payload.scope) {
+        return;
+      }
+
+      // Cancel effects running for the current scope to prevent race conditions
+      listenerApi.cancelActiveListeners();
+
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;
       let dataViewById: DataViewLazy | null = null;
@@ -46,7 +71,7 @@ export const createDataViewSelectedListener = (dependencies: {
         // This is required to compute browserFields later.
         // If the view is not returned here, it will be fetched further down this file, and that
         // should return the full data view.
-        if (isEmpty(cachedDataView?.fields)) {
+        if (cachedDataView === cachedPersistedDataView && isEmpty(cachedDataView?.fields)) {
           return null;
         }
 
@@ -89,19 +114,23 @@ export const createDataViewSelectedListener = (dependencies: {
 
       const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
 
-      action.payload.scope.forEach((scope) => {
-        const currentScopeActions = scopes[scope].actions;
-        if (resolvedIdToUse && resolvedIdToUse) {
-          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
-        } else if (dataViewByIdError || adhocDataViewCreationError) {
-          const err = dataViewByIdError || adhocDataViewCreationError;
-          listenerApi.dispatch(
-            currentScopeActions.dataViewSelectionError(
-              `An error occured when setting data view: ${err}`
-            )
-          );
+      const currentScopeActions = scopes[action.payload.scope].actions;
+      if (resolvedIdToUse) {
+        // NOTE: this skips data view selection if an override selection
+        // has been dispatched
+        if (listenerApi.signal.aborted) {
+          return;
         }
-      });
+
+        listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
+      } else if (dataViewByIdError || adhocDataViewCreationError) {
+        const err = dataViewByIdError || adhocDataViewCreationError;
+        listenerApi.dispatch(
+          currentScopeActions.dataViewSelectionError(
+            `An error occured when setting data view: ${err}`
+          )
+        );
+      }
     },
   };
 };

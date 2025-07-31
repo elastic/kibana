@@ -282,7 +282,7 @@ export const EmbedContent = ({
               />
             }
           >
-            <EuiIcon type="questionInCircle" />
+            <EuiIcon type="question" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

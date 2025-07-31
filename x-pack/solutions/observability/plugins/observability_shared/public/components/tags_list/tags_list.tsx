@@ -52,7 +52,7 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" style={{ maxWidth: 400 }} alignItems="baseline">
+    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="baseline">
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
         <EuiFlexItem key={tag} grow={false}>
@@ -69,17 +69,12 @@ const TagsList = ({
               onClickAriaLabel={getFilterLabel(tag)}
               color={color}
               className="eui-textTruncate"
-              style={{ maxWidth: 120 }}
+              css={{ maxWidth: 120 }}
             >
               {tag}
             </EuiBadge>
           ) : (
-            <EuiBadge
-              key={tag}
-              color={color}
-              className="eui-textTruncate"
-              style={{ maxWidth: 120 }}
-            >
+            <EuiBadge key={tag} color={color} className="eui-textTruncate" css={{ maxWidth: 120 }}>
               {tag}
             </EuiBadge>
           )}

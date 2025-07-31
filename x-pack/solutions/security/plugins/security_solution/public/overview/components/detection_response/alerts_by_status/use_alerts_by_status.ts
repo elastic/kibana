@@ -41,11 +41,13 @@ export const getAlertsByStatusQuery = ({
   from,
   to,
   entityFilter,
+  runtimeMappings,
 }: {
   from: string;
   to: string;
   entityFilter?: EntityFilter;
   additionalFilters?: ESBoolQuery[];
+  runtimeMappings?: Record<string, unknown>;
 }) => ({
   size: 0,
   query: {
@@ -79,6 +81,7 @@ export const getAlertsByStatusQuery = ({
       },
     },
   },
+  ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
 });
 
 export const parseAlertsData = (
@@ -115,6 +118,7 @@ export interface UseAlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
+  runtimeMappings?: Record<string, unknown>;
 }
 
 export type UseAlertsByStatus = (props: UseAlertsByStatusProps) => {
@@ -131,6 +135,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   skip = false,
   to,
   from,
+  runtimeMappings,
 }) => {
   const dispatch = useDispatch();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
@@ -168,6 +173,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
       to,
       entityFilter,
       additionalFilters,
+      runtimeMappings,
     }),
     indexName: signalIndexName,
     skip,
@@ -181,8 +187,10 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         to,
         entityFilter,
         additionalFilters,
+        runtimeMappings,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
 
   useEffect(() => {

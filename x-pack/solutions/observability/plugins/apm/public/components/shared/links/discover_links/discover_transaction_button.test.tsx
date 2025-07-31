@@ -5,24 +5,46 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { screen } from '@testing-library/react';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverTransactionLink, getDiscoverQuery } from './discover_transaction_link';
 import mockTransaction from './__fixtures__/mock_transaction.json';
+import { renderWithContext } from '../../../../utils/test_helpers';
 
-describe('DiscoverTransactionLink component', () => {
-  it('should render with data', () => {
-    const transaction = mockTransaction as Transaction;
+jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: {
+      id: 'apm_0',
+      title: 'apm_0',
+    },
+  }),
+}));
 
-    expect(shallow(<DiscoverTransactionLink transaction={transaction} />)).toMatchSnapshot();
+describe('DiscoverTransactionLink', () => {
+  const transaction = mockTransaction as Transaction;
+
+  it('renders link with correct query params', () => {
+    renderWithContext(<DiscoverTransactionLink transaction={transaction} />);
+
+    const link = screen.getByTestId('apmDiscoverLinkLink');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', expect.stringContaining('transaction.id:'));
   });
-});
 
-describe('getDiscoverQuery', () => {
-  it('should return the correct query params object', () => {
-    const transaction = mockTransaction as Transaction;
-    const result = getDiscoverQuery(transaction);
-    expect(result).toMatchSnapshot();
+  it('generates correct discover query params', () => {
+    const queryParams = getDiscoverQuery(transaction);
+
+    expect(queryParams).toMatchObject({
+      _a: expect.objectContaining({
+        interval: 'auto',
+        query: {
+          language: 'kuery',
+          query: expect.stringContaining(
+            'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'
+          ),
+        },
+      }),
+    });
   });
 });

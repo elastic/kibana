@@ -29,4 +29,33 @@ export const mockAttackDiscoveries: AttackDiscovery[] = [
     entitySummaryMarkdown:
       'Critical malware and phishing alerts detected on {{ host.name e1cb3cf0-30f3-4f99-a9c8-518b955c6f90 }} involving user {{ user.name 039c15c5-3964-43e7-a891-42fe2ceeb9ff }}.',
   },
+  {
+    alertIds: [
+      '093abac9d2431f4e87e696aee648c44a77cc9d4e7d12ba90ad71821c399baffe',
+      '57fbcbdc22ececf1cbc4d3978c8085b64e33f03f927997769353348d003b80ac',
+      '5fb3aa96aa5db16a2b8f6f6dabc1b575c80325897839e4ed4fd1c4e264ce591f',
+      '61666b168da4e77afb540a5c04b845c32d9e0113e1434f04f2e25b35980527a7',
+      '65acae68c6f518871a70f139913a031d68275808d584731f049b24fd3690f67b',
+      '87f2d1a10a41fd3ed6077cf85d96df744255fec1072834ca30d5a88525dc9c9d',
+      '8b164dbdaff8b57b7b881d11ceecca8cab0364422d2bf87a009f4f897066cf23',
+      'b1c21a113f3858b6fd0a2f3854b71f9da52bdf46fdfa2c702a3f966f8809e153',
+      'b47c3d991f071dcae02d5de601c6ebdec565e31262ae6cd3a304f6373225c65b',
+      'd7985a0a305644d27945ca0ffcb861c75f6144199d16e8ac9f681fcf26333308',
+    ],
+    detailsMarkdown:
+      '- On {{ host.name 1f217ee0-af2d-424b-b733-b0fdd726df69 }}, a suspicious process {{ process.name mimikatz.exe }} with {{ process.args "C:\\mimikatz.exe",--tr1 }} was executed by {{ user.name a2b0848d-e54f-4cb2-83db-01186ad3a33c }} from {{ user.domain 7nabs9z95j }} at {{ kibana.alert.original_time 2025-06-10T11:27:41.520Z }}, resulting in authentication failures.\n- Shortly after, the same host saw file activity on {{ file.path C:\\My Documents\\business\\January\\processName }} by process {{ process.name lsass.exe }} ({{ process.args "C:\\lsass.exe",--1ge }}) under {{ user.name 24fcfb78-d478-485f-a811-863e7f455e84 }} from {{ user.domain qevk4kbvcm }} at {{ kibana.alert.original_time 2025-06-10T11:30:47.520Z }}.\n- At {{ kibana.alert.original_time 2025-06-10T12:10:20.520Z }}, on the same host, {{ process.name powershell.exe }} and {{ file.name fake_behavior.exe }} were executed by {{ user.name 054b9510-4e58-4a0a-bc28-0286a6566e19 }} from {{ user.domain aacuihaf3x }}, with network connections from {{ source.ip 10.234.158.79 }} to {{ destination.ip 10.66.11.163 }}.\n- Simultaneously, on {{ host.name e70b7f81-e5a1-4c83-9168-568156cdc17a }}, malware {{ process.name iexlorer.exe }} was detected as {{ user.name 1e30f444-04b7-43d0-9b97-1d335d96e72c }} from {{ user.domain cwi41t2i0r }} at {{ kibana.alert.original_time 2025-06-10T12:10:12.534Z }}, suggesting propagation.\n- At {{ kibana.alert.original_time 2025-06-10T12:13:06.520Z }}, on {{ host.name 1f217ee0-af2d-424b-b733-b0fdd726df69 }}, {{ process.name explorer.exe }} ({{ process.executable C:/fake_behavior/explorer.exe }}) and {{ file.name fake_behavior.exe }} were run by {{ user.name 5b4207f4-9cf0-47b0-b875-7384b2d292d7 }} from {{ user.domain 09yzh9bg35 }}, with network connections from {{ source.ip 10.63.82.62 }} to {{ destination.ip 10.43.183.158 }}.\n- The close timing, repeated use of credential access tools, and network activity between hosts indicate a coordinated attack chain involving credential dumping, malware propagation, and data collection/exfiltration.',
+    entitySummaryMarkdown:
+      'Credential access and malware on {{ host.name 1f217ee0-af2d-424b-b733-b0fdd726df69 }}.',
+    mitreAttackTactics: [
+      'Credential Access',
+      'Execution',
+      'Collection',
+      'Command and Control',
+      'Exfiltration',
+    ],
+    summaryMarkdown:
+      'Credential dumping, malware, and data exfiltration on {{ host.name 1f217ee0-af2d-424b-b733-b0fdd726df69 }} and related hosts.',
+    timestamp: '2025-06-10T12:34:53.366Z',
+    title: 'Credential Access and Data Exfiltration',
+  },
 ];

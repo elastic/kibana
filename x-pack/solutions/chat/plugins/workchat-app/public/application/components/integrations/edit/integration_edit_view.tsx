@@ -20,6 +20,7 @@ import {
   EuiConfirmModal,
   EuiButtonEmpty,
   EuiTextArea,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
@@ -33,13 +34,14 @@ import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 import { appPaths } from '../../../app_paths';
 import { toolLabels } from '../i18n';
-import { integrationTypeToLabel } from '../utils';
+import { integrationTypeToLabel, isIntegrationDisabled } from '../utils';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
 }
 
 export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integrationId }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { navigateToWorkchatUrl } = useNavigation();
   const {
     services: { notifications },
@@ -87,10 +89,12 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const integrationTypes = [
     { value: '', text: 'Pick a type' },
-    ...Object.values(IntegrationType).map((type) => ({
-      value: type,
-      text: integrationTypeToLabel(type),
-    })),
+    ...Object.values(IntegrationType)
+      .filter((type) => !isIntegrationDisabled(type))
+      .map((type) => ({
+        value: type,
+        text: integrationTypeToLabel(type),
+      })),
   ];
 
   const onDeleteSuccess = useCallback(() => {
@@ -272,7 +276,9 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
             {isDeleteModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={confirmModalTitleId}
                 title={toolLabels.editView.deleteModalTitle}
+                titleProps={{ id: confirmModalTitleId }}
                 onCancel={closeDeleteModal}
                 onConfirm={handleDelete}
                 cancelButtonText={toolLabels.editView.cancelButtonLabel}

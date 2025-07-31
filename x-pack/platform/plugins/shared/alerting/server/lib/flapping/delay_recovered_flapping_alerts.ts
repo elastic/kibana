@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { keys, map } from 'lodash';
-import type { Logger } from '@kbn/logging';
+import { keys } from 'lodash';
 import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 import { Alert } from '../../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../../types';
@@ -17,10 +16,8 @@ export function delayRecoveredFlappingAlerts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  logger: Logger,
   flappingSettings: RulesSettingsFlappingProperties,
   actionGroupId: string,
-  maxAlerts: number,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -66,19 +63,6 @@ export function delayRecoveredFlappingAlerts<
     }
   }
 
-  const earlyRecoveredAlertIds = getEarlyRecoveredAlertIds(
-    logger,
-    trackedRecoveredAlerts,
-    maxAlerts
-  );
-  for (const id of earlyRecoveredAlertIds) {
-    const alert = trackedRecoveredAlerts[id];
-    alert.setFlapping(false);
-    recoveredAlerts[id] = alert;
-
-    delete trackedRecoveredAlerts[id];
-  }
-
   return {
     newAlerts,
     activeAlerts,
@@ -86,36 +70,4 @@ export function delayRecoveredFlappingAlerts<
     recoveredAlerts,
     trackedRecoveredAlerts,
   };
-}
-
-export function getEarlyRecoveredAlertIds<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  logger: Logger,
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>,
-  maxAlerts: number
-) {
-  const alerts = map(trackedRecoveredAlerts, (alert, id) => {
-    return {
-      id,
-      flappingHistory: alert.getFlappingHistory() || [],
-    };
-  });
-
-  let earlyRecoveredAlertIds: string[] = [];
-  if (alerts.length > maxAlerts) {
-    alerts.sort((a, b) => {
-      return a.flappingHistory.length - b.flappingHistory.length;
-    });
-
-    earlyRecoveredAlertIds = alerts.slice(maxAlerts).map((alert) => alert.id);
-    logger.warn(
-      `Recovered alerts have exceeded the max alert limit of ${maxAlerts} : dropping ${
-        earlyRecoveredAlertIds.length
-      } ${earlyRecoveredAlertIds.length > 1 ? 'alerts' : 'alert'}.`
-    );
-  }
-  return earlyRecoveredAlertIds;
 }

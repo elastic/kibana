@@ -18,6 +18,5 @@
     "@kbn/ui-actions-examples-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render",
   ]
 }

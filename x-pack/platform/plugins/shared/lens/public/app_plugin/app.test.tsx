@@ -10,7 +10,7 @@ import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
-import { LensDocument, SavedObjectIndexStore } from '../persistence';
+import { LensDocument } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -19,7 +19,6 @@ import {
   mockStoreDeps,
   defaultDoc,
 } from '../mocks';
-import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
 import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -28,7 +27,6 @@ import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { setState, LensAppState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -40,9 +38,6 @@ import userEvent from '@testing-library/user-event';
 import { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 
-jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(),
-}));
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
   debounce: (fn: unknown) => fn,
@@ -54,7 +49,7 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
-  return cloneDeep({ ...defaultDoc, ...propsOverrides });
+  return structuredClone({ ...defaultDoc, ...propsOverrides });
 }
 
 describe('Lens App', () => {
@@ -82,11 +77,6 @@ describe('Lens App', () => {
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
       coreStart: coreMock.createStart(),
-      savedObjectStore: {
-        save: jest.fn(),
-        load: jest.fn(),
-        search: jest.fn(),
-      } as unknown as SavedObjectIndexStore,
     };
 
     services = makeDefaultServices(new Subject<string>(), 'sessionId-1');
@@ -244,7 +234,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -261,7 +251,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -278,7 +268,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -297,7 +287,7 @@ describe('Lens App', () => {
 
       expect(services.chrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Visualize Library',
+          text: 'Visualize library',
           href: '/testbasepath/app/visualize#/',
           onClick: expect.anything(),
         },
@@ -733,7 +723,7 @@ describe('Lens App', () => {
           },
         });
 
-        expect(checkForDuplicateTitle).toHaveBeenCalledWith(
+        expect(services.lensDocumentService.checkForDuplicateTitle).toHaveBeenCalledWith(
           {
             copyOnSave: true,
             displayName: 'Lens visualization',
@@ -741,8 +731,7 @@ describe('Lens App', () => {
             lastSavedTitle: '',
             title: 'hello there',
           },
-          expect.any(Function),
-          expect.anything()
+          expect.any(Function)
         );
       });
 

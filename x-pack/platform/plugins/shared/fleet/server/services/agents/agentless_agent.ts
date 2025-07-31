@@ -19,7 +19,7 @@ import apm from 'elastic-apm-node';
 import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
-import type { AgentlessApiResponse } from '../../../common/types';
+import type { AgentlessApiDeploymentResponse, FleetServerHost } from '../../../common/types';
 import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
@@ -30,6 +30,10 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  DEFAULT_OUTPUT_ID,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
 import { appContextService } from '../app_context';
@@ -44,6 +48,7 @@ import {
   RETRYABLE_HTTP_STATUSES,
   RETRYABLE_SERVER_CODES,
 } from '../../../common/constants/agentless';
+import { agentPolicyService } from '../agent_policy';
 
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
@@ -55,6 +60,27 @@ interface AgentlessAgentErrorHandlingMessages {
 }
 
 class AgentlessAgentService {
+  public getDefaultSettings() {
+    const cloudSetup = appContextService.getCloud();
+    const isCloud = cloudSetup?.isCloudEnabled;
+    const isServerless = cloudSetup?.isServerlessEnabled;
+    const outputId = isServerless
+      ? SERVERLESS_DEFAULT_OUTPUT_ID
+      : isCloud
+      ? DEFAULT_OUTPUT_ID
+      : undefined;
+    const fleetServerId = isServerless
+      ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+      : isCloud
+      ? DEFAULT_FLEET_SERVER_HOST_ID
+      : undefined;
+
+    return {
+      outputId,
+      fleetServerId,
+    };
+  }
+
   public async createAgentlessAgent(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -91,10 +117,9 @@ class AgentlessAgentService {
       );
     }
 
-    const policyId = agentlessAgentPolicy.id;
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
-      policyId,
+      agentlessAgentPolicy,
       soClient
     );
 
@@ -104,7 +129,7 @@ class AgentlessAgentService {
 
     if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
       logger.debug(
-        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${agentlessAgentPolicy.id}`
       );
     }
 
@@ -115,18 +140,21 @@ class AgentlessAgentService {
       and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
+    const secrets = this.getAgentlessSecrets();
+    const policyDetails = await this.getPolicyDetails(soClient, agentlessAgentPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
-        policy_id: policyId,
+        policy_id: agentlessAgentPolicy.id,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
         cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
+        secrets,
+        policy_details: policyDetails,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
@@ -143,7 +171,7 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios<AgentlessApiResponse>(requestConfig).catch(
+    const response = await axios<AgentlessApiDeploymentResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         this.catchAgentlessApiError(
           'create',
@@ -287,6 +315,21 @@ class AgentlessAgentService {
     return response;
   }
 
+  private getAgentlessSecrets() {
+    const deploymentSecrets = appContextService.getConfig()?.agentless?.deploymentSecrets;
+
+    if (!deploymentSecrets) return {};
+
+    return {
+      ...(deploymentSecrets?.fleetAppToken
+        ? { fleet_app_token: deploymentSecrets?.fleetAppToken }
+        : {}),
+      ...(deploymentSecrets?.elasticsearchAppToken
+        ? { elasticsearch_app_token: deploymentSecrets?.elasticsearchAppToken }
+        : {}),
+    };
+  }
+
   private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
     return {
       headers: {
@@ -300,6 +343,20 @@ class AgentlessAgentService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
+    };
+  }
+
+  private async getPolicyDetails(
+    soClient: SavedObjectsClientContract,
+    agentlessAgentPolicy: AgentPolicy
+  ) {
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      agentlessAgentPolicy.id
+    );
+
+    return {
+      output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
     };
   }
 
@@ -337,27 +394,31 @@ class AgentlessAgentService {
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,
-    policyId: string,
+    policy: AgentPolicy,
     soClient: SavedObjectsClientContract
   ) {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
       showInactive: true,
-      kuery: `policy_id:"${policyId}"`,
+      kuery: `policy_id:"${policy.id}"`,
     });
 
-    const { items: fleetHosts } = await fleetServerHostService.list(soClient);
-    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-    // https://github.com/elastic/security-team/issues/9695
-    const defaultFleetHost =
-      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
-
-    if (!defaultFleetHost) {
-      throw new AgentlessAgentConfigError('missing default Fleet server host');
-    }
     if (!enrollmentApiKeys.length) {
       throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
+
+    if (!policy.fleet_server_host_id) {
+      throw new AgentlessAgentConfigError('missing fleet_server_host_id');
+    }
+
+    let defaultFleetHost: FleetServerHost;
+
+    try {
+      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
+    } catch (e) {
+      throw new AgentlessAgentConfigError('missing default Fleet server host');
+    }
+
     const fleetToken = enrollmentApiKeys[0].api_key;
     const fleetUrl = defaultFleetHost?.host_urls[0];
     return { fleetUrl, fleetToken };

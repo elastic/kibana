@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type {
-  GetRuleMigrationResponse,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationTranslationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../../rules/types';
@@ -19,9 +19,9 @@ const getMockMigrationResultRule = ({
   status = 'completed',
 }: {
   migrationId: string;
-  status?: GetRuleMigrationResponse['data'][number]['status'];
-  translationResult?: GetRuleMigrationResponse['data'][number]['translation_result'];
-}): GetRuleMigrationResponse['data'][number] => {
+  status?: GetRuleMigrationRulesResponse['data'][number]['status'];
+  translationResult?: GetRuleMigrationRulesResponse['data'][number]['translation_result'];
+}): GetRuleMigrationRulesResponse['data'][number] => {
   const ruleId = uuidv4();
   return {
     migration_id: migrationId,
@@ -63,7 +63,6 @@ const getMockMigrationResultRule = ({
 export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
   {
     id: '1',
-    number: 1,
     status: SiemMigrationTaskStatus.FINISHED,
     rules: {
       total: 1,
@@ -74,10 +73,10 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
     },
     last_updated_at: '2025-03-06T15:01:37.321Z',
     created_at: '2025-03-06T15:01:37.321Z',
+    name: 'test',
   },
   {
     id: '2',
-    number: 2,
     status: SiemMigrationTaskStatus.FINISHED,
     rules: {
       total: 2,
@@ -86,13 +85,13 @@ export const mockedMigrationLatestStatsData: RuleMigrationStats[] = [
       completed: 2,
       failed: 0,
     },
-
+    name: 'test',
     created_at: '2025-03-06T15:01:37.321Z',
     last_updated_at: '2025-03-06T15:01:37.321Z',
   },
 ];
 
-export const mockedMigrationResultsObj: Record<string, GetRuleMigrationResponse> = {
+export const mockedMigrationResultsObj: Record<string, GetRuleMigrationRulesResponse> = {
   '1': {
     total: 2,
     data: [

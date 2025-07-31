@@ -17,29 +17,31 @@ import { applicationLinksUpdater } from './application_links_updater';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 const classicFormatter: (appLinks: AppLinkItems) => AppDeepLink[] = (appLinks) =>
-  appLinks.map((appLink) => {
-    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
-    if (!appLink.globalSearchDisabled) {
-      visibleIn.add('globalSearch');
-    }
-    if (appLink.globalNavPosition != null) {
-      visibleIn.add('sideNav');
-    }
-    const deepLink: AppDeepLink = {
-      id: appLink.id,
-      path: appLink.path,
-      title: appLink.title,
-      visibleIn: Array.from(visibleIn),
-      ...(appLink.globalNavPosition != null ? { order: appLink.globalNavPosition } : {}),
-      ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
-      ...(appLink.links && appLink.links?.length
-        ? {
-            deepLinks: classicFormatter(appLink.links),
-          }
-        : {}),
-    };
-    return deepLink;
-  });
+  appLinks
+    .filter(({ unauthorized }) => !unauthorized)
+    .map((appLink) => {
+      const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
+      if (!appLink.globalSearchDisabled) {
+        visibleIn.add('globalSearch');
+      }
+      if (appLink.globalNavPosition != null) {
+        visibleIn.add('sideNav');
+      }
+      const deepLink: AppDeepLink = {
+        id: appLink.id,
+        path: appLink.path,
+        title: appLink.title,
+        visibleIn: Array.from(visibleIn),
+        ...(appLink.globalNavPosition != null ? { order: appLink.globalNavPosition } : {}),
+        ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+        ...(appLink.links && appLink.links?.length
+          ? {
+              deepLinks: classicFormatter(appLink.links),
+            }
+          : {}),
+      };
+      return deepLink;
+    });
 
 /**
  * Converts the navigation tree to a deepLinks hierarchy format using the application normalized links.
@@ -93,8 +95,11 @@ const solutionNodesFormatter = (
 
     // Process security links
     const appLink = normalizedLinks[node.id as SecurityPageName];
-    if (appLink) {
+    if (appLink && !appLink.unauthorized) {
       const deepLink = formatDeepLink(appLink);
+      if (appLink.unavailable) {
+        deepLink.visibleIn = ['sideNav']; // Links marked as unavailable have an upselling page to display, show only in sideNav
+      }
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);
         if (childrenLinks.length > 0) {

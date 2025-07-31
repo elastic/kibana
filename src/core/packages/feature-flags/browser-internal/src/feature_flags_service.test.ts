@@ -249,6 +249,7 @@ describe('FeatureFlagsService Browser', () => {
           'myPlugin.myOverriddenFlag': true,
           myDestructuredObjPlugin: { myOverriddenFlag: true },
         },
+        initialFeatureFlags: {},
       });
       featureFlagsService.setup({ injectedMetadata });
       startContract = await featureFlagsService.start();

@@ -28,7 +28,7 @@ export const ShowLicenseInfo = () => {
         className="license-info-trial"
         title={labels.START_TRAIL}
         color="primary"
-        iconType="help"
+        iconType="question"
       >
         <p>{labels.START_TRAIL_DESC}</p>
         <EuiButton

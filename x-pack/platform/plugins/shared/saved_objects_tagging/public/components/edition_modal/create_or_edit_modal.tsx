@@ -23,7 +23,7 @@ import {
   EuiTextArea,
   EuiSpacer,
   EuiText,
-  htmlIdGenerator,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,7 +62,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   tag,
   mode,
 }) => {
-  const optionalMessageId = htmlIdGenerator()();
+  const optionalMessageId = useGeneratedHtmlId();
+  const editTagModalTitleId = useGeneratedHtmlId();
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const lastNameValue = useRef(tag.name);
@@ -112,9 +113,9 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
   );
 
   return (
-    <EuiModal onClose={onClose} initialFocus="[name=name]" style={{ minWidth: '600px' }}>
+    <EuiModal onClose={onClose} css={{ minWidth: '600px' }} aria-labelledby={editTagModalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={editTagModalTitleId}>
           {isEdit ? (
             <FormattedMessage
               id="xpack.savedObjectsTagging.management.editModal.title"
@@ -151,6 +152,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   value={tag.name}
                   onChange={(e) => setName(e.target.value)}
                   isLoading={isValidating}
+                  isInvalid={!!validation.errors.name}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>
@@ -168,7 +170,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   <EuiButtonEmpty
                     onClick={() => setColor(getRandomColor())}
                     size="xs"
-                    style={{ height: '18px', fontSize: '0.75rem' }}
+                    css={{ height: '18px', fontSize: '0.75rem' }}
                     aria-label={i18n.translate(
                       'xpack.savedObjectsTagging.management.createModal.color.randomizeAriaLabel',
                       {
@@ -188,6 +190,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fullWidth={true}
                   onChange={(text) => setColor(text)}
                   format="hex"
+                  isInvalid={!!validation.errors.color}
                   data-test-subj="createModalField-color"
                 />
               </EuiFormRow>
@@ -220,6 +223,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               resize="none"
               fullWidth={true}
               compressed={true}
+              isInvalid={!!validation.errors.description}
               aria-describedby={optionalMessageId}
             />
           </EuiFormRow>

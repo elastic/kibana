@@ -111,7 +111,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -176,7 +176,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,

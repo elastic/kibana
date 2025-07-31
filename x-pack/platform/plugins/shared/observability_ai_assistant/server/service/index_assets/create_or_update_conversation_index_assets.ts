@@ -19,7 +19,7 @@ export async function createOrUpdateConversationIndexAssets({
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }) {
   try {
-    logger.debug('Setting up index assets');
+    logger.debug('Setting up conversation index assets');
     const [coreStart] = await core.getStartServices();
     const { asInternalUser } = coreStart.elasticsearch.client;
 

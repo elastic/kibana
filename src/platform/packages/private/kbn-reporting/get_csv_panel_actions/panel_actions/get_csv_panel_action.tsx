@@ -9,13 +9,7 @@
 
 import { firstValueFrom, Observable } from 'rxjs';
 
-import {
-  AnalyticsServiceStart,
-  CoreSetup,
-  CoreStart,
-  I18nStart,
-  NotificationsSetup,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, NotificationsSetup } from '@kbn/core/public';
 import { DataPublicPluginStart, type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   loadSharingDataHelpers,
@@ -25,7 +19,7 @@ import {
   HasTimeRange,
 } from '@kbn/discover-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   apiCanAccessViewMode,
   apiHasType,
@@ -53,6 +47,7 @@ import {
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -64,10 +59,7 @@ type StartServices = [
   Pick<
     CoreStart,
     // required for modules that render React
-    | 'analytics'
-    | 'i18n'
-    | 'theme'
-    | 'userProfile'
+    | 'rendering'
     // used extensively in Reporting share panel action
     | 'application'
     | 'uiSettings'
@@ -86,8 +78,6 @@ interface Params {
 interface ExecutionParams {
   searchModeParams: CsvSearchModeParams;
   title: string;
-  analytics: AnalyticsServiceStart;
-  i18nStart: I18nStart;
 }
 
 type GetCsvActionApi = HasType &
@@ -168,7 +158,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   };
 
   private executeGenerate = async (params: ExecutionParams) => {
-    const [startServices] = await firstValueFrom(this.startServices$);
+    const [{ rendering }] = await firstValueFrom(this.startServices$);
     const { searchModeParams, title } = params;
     const { reportType, decoratedJobParams } = getSearchCsvJobParams({
       apiClient: this.apiClient,
@@ -182,7 +172,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
         if (job) {
           this.notifications.toasts.addSuccess({
             title: this.i18nStrings.generate.toasts.success.title,
-            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, startServices),
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, rendering),
             'data-test-subj': 'csvReportStarted',
           });
         }
@@ -226,10 +216,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       return;
     }
 
-    const [{ i18n: i18nStart, analytics }] = await firstValueFrom(this.startServices$);
-
     const title = embeddable.title$.getValue() ?? '';
-    const executionParamsCommon = { title, i18nStart, analytics };
 
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
     const searchSource = getSearchSource({
@@ -239,7 +226,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
 
     if (this.isEsqlMode(savedSearch)) {
       return this.executeGenerate({
-        ...executionParamsCommon,
+        title,
         searchModeParams: {
           isEsqlMode: true,
           locatorParams: [
@@ -253,7 +240,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     }
 
     return this.executeGenerate({
-      ...executionParamsCommon,
+      title,
       searchModeParams: { isEsqlMode: false, searchSource, columns },
     });
   };

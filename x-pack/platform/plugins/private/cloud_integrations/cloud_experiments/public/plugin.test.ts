@@ -9,6 +9,7 @@ import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { LaunchDarklyClientProviderMocked } from './plugin.test.mocks';
 import { CloudExperimentsPlugin } from './plugin';
 import { MetadataService } from '../common/metadata_service';
 
@@ -68,6 +69,32 @@ describe('Cloud Experiments public plugin', () => {
           cloud: cloudMock.createSetup(),
         })
       ).toBeUndefined();
+    });
+
+    test('leverages the injected initial feature flags when creating the new client', () => {
+      const coreSetup = coreMock.createSetup();
+      coreSetup.featureFlags.getInitialFeatureFlags.mockReturnValue({
+        'my-initial-flag': true,
+      });
+      plugin.setup(coreSetup, { cloud: cloudMock.createSetup() });
+      expect(LaunchDarklyClientProviderMocked).toHaveBeenCalledWith(
+        '1234',
+        expect.objectContaining({
+          bootstrap: { 'my-initial-flag': true },
+        })
+      );
+    });
+
+    test('use undefined bootstrap when creating the new client and no provided initial feature flags', () => {
+      const coreSetup = coreMock.createSetup();
+      coreSetup.featureFlags.getInitialFeatureFlags.mockReturnValue({});
+      plugin.setup(coreSetup, { cloud: cloudMock.createSetup() });
+      expect(LaunchDarklyClientProviderMocked).toHaveBeenCalledWith(
+        '1234',
+        expect.objectContaining({
+          bootstrap: undefined,
+        })
+      );
     });
   });
 

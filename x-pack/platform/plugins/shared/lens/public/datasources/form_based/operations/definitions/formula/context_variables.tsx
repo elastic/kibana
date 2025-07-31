@@ -222,7 +222,6 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         dataType: 'number',
         operationType: type,
         isBucketed: false,
-        scale: 'ratio',
         references: [],
       } as unknown as ColumnType;
     },

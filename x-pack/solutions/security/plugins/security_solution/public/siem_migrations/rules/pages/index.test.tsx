@@ -133,7 +133,7 @@ const mockUseGetMigrationRules: typeof useGetMigrationRulesModule.useGetMigratio
     const { data, total } = mockedMigrationResultsObj[migrationId];
     return {
       data: {
-        ruleMigrations: data,
+        migrationRules: data,
         total,
       },
       isLoading: false,

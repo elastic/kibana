@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+export const LEGACY_CUSTOM_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
+
 export const ELSER_ON_ML_NODE_INFERENCE_ID = '.elser-2-elasticsearch';
-export const ELSER_IN_EIS_INFERENCE_ID = '.elser-v2-elastic';
+export const ELSER_IN_EIS_INFERENCE_ID = '.elser-2-elastic';
 
 export const E5_SMALL_INFERENCE_ID = '.multilingual-e5-small-elasticsearch';
 export const E5_LARGE_IN_EIS_INFERENCE_ID = '.multilingual-e5-large-elastic'; // TODO: verify the inference ID once it's created in EIS
+
+export const EIS_PRECONFIGURED_INFERENCE_IDS = [
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+];

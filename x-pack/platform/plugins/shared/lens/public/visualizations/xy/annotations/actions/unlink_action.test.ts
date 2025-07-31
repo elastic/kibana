@@ -12,7 +12,6 @@ import {
 } from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 import { getUnlinkLayerAction } from './unlink_action';
 
 describe('annotation group unlink actions', () => {
@@ -39,7 +38,7 @@ describe('annotation group unlink actions', () => {
     ...byValueLayer,
     annotationGroupId: 'shouldnt show up',
     __lastSaved: {
-      ...cloneDeep(byValueLayer),
+      ...structuredClone(byValueLayer),
       title: 'My library group',
       description: '',
       tags: [],

@@ -19,12 +19,12 @@ const structuredOutput = z.object({
     .describe('Whether the index pattern contains the required fields for the query'),
 });
 
-export const getAnalyzeCompressedIndexMappingAgent = ({
+export const getAnalyzeCompressedIndexMappingAgent = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { fieldDescriptors, input } = state;
     if (fieldDescriptors === undefined) {

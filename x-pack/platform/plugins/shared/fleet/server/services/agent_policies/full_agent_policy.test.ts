@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
 import omit from 'lodash/omit';
 
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
-import { createAppContextStartContractMock } from '../../mocks';
+import {
+  createAppContextStartContractMock,
+  createMessageSigningServiceMock,
+  createSavedObjectClientMock,
+} from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
@@ -36,7 +38,7 @@ const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as j
 >;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
-const soClientMock = savedObjectsClientMock.create();
+const soClientMock = createSavedObjectClientMock();
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
 const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as jest.Mock<
   ReturnType<typeof getFleetServerHostsForAgentPolicy>
@@ -166,6 +168,9 @@ function getAgentPolicyUpdateMock() {
 
 describe('getFullAgentPolicy', () => {
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
+
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
       name: 'default Fleet Server',
       id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
@@ -222,7 +227,7 @@ describe('getFullAgentPolicy', () => {
     mockAgentPolicy({
       revision: 1,
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -254,7 +259,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['logs'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -291,7 +296,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -328,7 +333,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['traces'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -364,7 +369,7 @@ describe('getFullAgentPolicy', () => {
       keep_monitoring_alive: true,
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.agent?.monitoring).toEqual({
       enabled: true,
@@ -380,7 +385,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(mockedGetElasticAgentMonitoringPermissions).toHaveBeenCalledWith(
       expect.anything(),
@@ -400,7 +405,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -412,7 +417,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       data_output_id: 'data-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -425,7 +430,7 @@ describe('getFullAgentPolicy', () => {
       data_output_id: 'data-output-id',
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -442,7 +447,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_output_id: 'test-id',
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
@@ -459,7 +464,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_output_id: 'test-remote-id',
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy?.outputs['test-remote-id']).toBeDefined();
   });
@@ -578,7 +583,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     const agentPolicy = await getFullAgentPolicy(
-      savedObjectsClientMock.create(),
+      createSavedObjectClientMock(),
       'integration-output-policy'
     );
     expect(agentPolicy).toMatchSnapshot();
@@ -698,7 +703,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     const agentPolicy = await getFullAgentPolicy(
-      savedObjectsClientMock.create(),
+      createSavedObjectClientMock(),
       'integration-output-policy'
     );
     expect(agentPolicy).toMatchSnapshot();
@@ -711,7 +716,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       download_source_id: 'test-ds-1',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -753,7 +758,7 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       download_source_id: 'test-ds-secrets',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -799,7 +804,7 @@ describe('getFullAgentPolicy', () => {
         { name: 'feature2', enabled: true },
       ],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -836,10 +841,11 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    appContextService.start(createAppContextStartContractMock());
-
+    (appContextService.getMessageSigningService as jest.Mock).mockReturnValue(
+      createMessageSigningServiceMock()
+    );
     mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy!.agent!.protection).toMatchObject({
       enabled: false,
@@ -853,10 +859,8 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should not populate agent.protection and signed properties for standalone policies', async () => {
-    appContextService.start(createAppContextStartContractMock());
-
     mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy', {
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy', {
       standalone: true,
     });
 
@@ -975,7 +979,7 @@ describe('getFullAgentPolicy', () => {
       is_protected: false,
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(omit(agentPolicy, 'signed', 'secret_references', 'agent.protection')).toEqual({
       agent: {
@@ -1093,7 +1097,7 @@ describe('getFullAgentPolicy', () => {
         agent_logging_files_interval: '7h',
       },
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -1126,7 +1130,7 @@ describe('getFullAgentPolicy', () => {
     });
 
     mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
     expect(agentPolicy?.outputs).toMatchObject({
       default: {
         hosts: ['http://127.0.0.1:9201'],

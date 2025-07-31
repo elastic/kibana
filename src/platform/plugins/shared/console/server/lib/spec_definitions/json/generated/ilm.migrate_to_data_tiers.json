@@ -5,7 +5,12 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "dry_run": "__flag__"
+      "dry_run": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -13,7 +18,7 @@
     "patterns": [
       "_ilm/migrate_to_data_tiers"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-migrate-to-data-tiers.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-migrate-to-data-tiers",
     "availability": {
       "stack": true,
       "serverless": false

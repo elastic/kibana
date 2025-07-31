@@ -1473,6 +1473,73 @@ describe('ManifestManager', () => {
       );
     });
 
+    test(`should dispatch bulkUpdate per-space when space awareness is enabled`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      // @ts-expect-error
+      context.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          spaceIds: ['bar'],
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          spaceIds: ['foo'],
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['bar'],
+          }),
+        ]
+      );
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['foo'],
+          }),
+        ]
+      );
+    });
+
     test(`Should return partial errors`, async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);

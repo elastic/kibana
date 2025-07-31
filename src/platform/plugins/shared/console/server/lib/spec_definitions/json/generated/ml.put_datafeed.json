@@ -22,7 +22,7 @@
     "patterns": [
       "_ml/datafeeds/{datafeed_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-datafeed.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-datafeed",
     "availability": {
       "stack": true,
       "serverless": true

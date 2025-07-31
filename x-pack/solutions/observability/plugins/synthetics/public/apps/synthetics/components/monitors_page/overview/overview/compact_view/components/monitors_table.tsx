@@ -33,7 +33,7 @@ export const MonitorsTable = ({
 
   const getRowProps = useCallback(
     (monitor: OverviewStatusMetaData): EuiTableRowProps => {
-      const { configId, locationLabel, locationId, spaceId } = monitor;
+      const { configId, locationLabel, locationId, spaces } = monitor;
       return {
         onClick: (e) => {
           // This is a workaround to prevent the flyout from opening when clicking on the action buttons
@@ -49,7 +49,7 @@ export const MonitorsTable = ({
                 id: configId,
                 location: locationLabel,
                 locationId,
-                spaceId,
+                spaces,
               })
             );
           }

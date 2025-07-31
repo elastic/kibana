@@ -40,6 +40,7 @@ export function FitToData(props: Props) {
         iconType="expand"
         aria-label={label}
         title={title}
+        color="text"
         display={props.autoFitToDataBounds ? 'fill' : 'empty'}
       />
     </EuiPanel>

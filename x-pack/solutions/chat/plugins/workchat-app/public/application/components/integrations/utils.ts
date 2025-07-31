@@ -63,3 +63,17 @@ export const getIntegrationIcon = (type: IntegrationType) => {
       return '';
   }
 };
+
+export const isIntegrationDisabled = (type: IntegrationType) => {
+  switch (type) {
+    case IntegrationType.google_drive:
+    case IntegrationType.sharepoint:
+    case IntegrationType.slack:
+    case IntegrationType.confluence:
+    case IntegrationType.jira:
+    case IntegrationType.github:
+      return true;
+    default:
+      return false;
+  }
+};

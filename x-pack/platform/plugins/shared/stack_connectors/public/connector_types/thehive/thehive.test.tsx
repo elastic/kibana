@@ -92,6 +92,19 @@ describe('thehive createAlert action params validation', () => {
         type: 'type test',
         source: 'source test',
         sourceRef: 'source reference test',
+        body: JSON.stringify(
+          {
+            observables: [
+              {
+                dataType: 'ip',
+                data: '127.0.0.1',
+                tags: ['source.ip'],
+              },
+            ],
+          },
+          null,
+          2
+        ),
       },
       comments: [],
     };

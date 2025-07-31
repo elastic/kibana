@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm, Transaction } from '@elastic/apm-rum';
 import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
 import { takeWhile, tap, toArray } from 'rxjs';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
@@ -45,6 +46,13 @@ export class AnalyticsPluginA implements Plugin {
             description: 'The lifecycle step in which the plugin is',
           },
         },
+        traceId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The trace ID of the APM transaction',
+            optional: true,
+          },
+        },
       },
     });
 
@@ -52,6 +60,7 @@ export class AnalyticsPluginA implements Plugin {
     reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'setup',
+      traceId: this.getTransactionTraceId(),
     });
     let found = false;
     window.__analyticsPluginA__ = {
@@ -96,9 +105,14 @@ export class AnalyticsPluginA implements Plugin {
     analytics.reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'start',
+      traceId: this.getTransactionTraceId(),
     });
   }
   public stop() {}
+
+  private getTransactionTraceId(): string | undefined {
+    return (apm.getCurrentTransaction() as Transaction & { traceId: string })?.traceId;
+  }
 }
 
 function isTestPluginLifecycleReportEventAction({ action, meta }: Action): boolean {

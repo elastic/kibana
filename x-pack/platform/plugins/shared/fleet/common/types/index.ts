@@ -41,6 +41,13 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    deploymentSecrets?: {
+      fleetAppToken?: string;
+      elasticsearchAppToken?: string;
+    };
+    customIntegrations?: {
+      enabled?: boolean;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
@@ -82,15 +89,27 @@ export interface FleetConfigType {
         max?: string;
       };
       excludePackages: string[];
+      searchAiLakePackageAllowlistEnabled?: boolean;
     };
+    excludeDataStreamTypes?: string[];
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
     taskInterval?: string;
     retryDelays?: string[];
   };
+  syncIntegrations?: {
+    taskInterval?: string;
+  };
+  autoInstallContentPackages?: {
+    taskInterval?: string;
+  };
+  agentStatusChange?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
+  hideDashboards?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

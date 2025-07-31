@@ -355,6 +355,9 @@ describe('Cookie based SessionStorage', () => {
 
       expect(loggingSystemMock.collect(logger).warn).toEqual([
         ['Found multiple auth sessions. Found:[2] sessions. Checking equality...'],
+      ]);
+
+      expect(loggingSystemMock.collect(logger).error).toEqual([
         ['Found multiple auth sessions. Found:[2] unequal sessions'],
       ]);
     });

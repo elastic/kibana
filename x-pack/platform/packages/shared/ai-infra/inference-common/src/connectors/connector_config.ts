@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
+
+const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 
 /**
  * Returns the default model as defined in the connector's config, if available.
@@ -16,6 +19,14 @@ import { type InferenceConnector, InferenceConnectorType } from './connectors';
 export const getConnectorDefaultModel = (connector: InferenceConnector): string | undefined => {
   switch (connector.type) {
     case InferenceConnectorType.OpenAI:
+      if (connector.config?.defaultModel) {
+        return connector.config.defaultModel;
+      }
+      // openAI provider has an implicitly defaults in the connector schema...
+      if (connector.config?.apiProvider === 'OpenAI') {
+        return DEFAULT_OPENAI_MODEL;
+      }
+      return undefined;
     case InferenceConnectorType.Gemini:
     case InferenceConnectorType.Bedrock:
       return connector.config?.defaultModel ?? undefined;
@@ -30,15 +41,60 @@ export const getConnectorDefaultModel = (connector: InferenceConnector): string 
  * Inferred from the type for "legacy" connectors,
  * and from the provider config field for inference connectors.
  */
-export const getConnectorProvider = (connector: InferenceConnector): string => {
+export const getConnectorProvider = (connector: InferenceConnector): ModelProvider => {
   switch (connector.type) {
     case InferenceConnectorType.OpenAI:
-      return 'openai';
+      return ModelProvider.OpenAI;
     case InferenceConnectorType.Gemini:
-      return 'gemini';
+      return ModelProvider.Google;
     case InferenceConnectorType.Bedrock:
-      return 'bedrock';
+      return ModelProvider.Anthropic;
     case InferenceConnectorType.Inference:
-      return connector.config?.provider ?? 'unknown';
+      return ModelProvider.Elastic;
   }
+};
+
+/**
+ * Returns the platform for the given connector
+ */
+export const getConnectorPlatform = (connector: InferenceConnector): ModelPlatform => {
+  switch (connector.type) {
+    case InferenceConnectorType.OpenAI:
+      return connector.config?.apiProvider === 'OpenAI'
+        ? ModelPlatform.OpenAI
+        : connector.config?.apiProvider === 'Azure OpenAI'
+        ? ModelPlatform.AzureOpenAI
+        : ModelPlatform.Other;
+
+    case InferenceConnectorType.Gemini:
+      return ModelPlatform.GoogleVertex;
+
+    case InferenceConnectorType.Bedrock:
+      return ModelPlatform.AmazonBedrock;
+
+    case InferenceConnectorType.Inference:
+      return ModelPlatform.Elastic;
+  }
+};
+
+export const getConnectorFamily = (
+  connector: InferenceConnector,
+  // use this later to get model family from model name
+  _modelName?: string
+): ModelFamily => {
+  const provider = getConnectorProvider(connector);
+
+  switch (provider) {
+    case ModelProvider.Anthropic:
+    case ModelProvider.Elastic:
+      return ModelFamily.Claude;
+
+    case ModelProvider.Google:
+      return ModelFamily.Gemini;
+
+    case ModelProvider.OpenAI:
+      return ModelFamily.GPT;
+  }
+
+  return ModelFamily.GPT;
 };

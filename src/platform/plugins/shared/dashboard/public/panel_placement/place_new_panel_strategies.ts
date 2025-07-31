@@ -15,15 +15,18 @@ import { PanelPlacementProps, PanelPlacementReturn } from './types';
 
 export const runPanelPlacementStrategy = (
   strategy: PanelPlacementStrategy,
-  { width, height, currentPanels }: PanelPlacementProps
+  { width, height, currentPanels, sectionId }: PanelPlacementProps
 ): PanelPlacementReturn => {
   switch (strategy) {
     case PanelPlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
-        const { gridData, ...currentPanel } = cloneDeep(panel);
-        const newGridData = { ...gridData, y: gridData.y + height };
-        otherPanels[id] = { ...currentPanel, gridData: newGridData };
+        // only consider collisions with panels in the same section
+        if (!sectionId || panel.gridData.sectionId === sectionId) {
+          const { gridData, ...currentPanel } = cloneDeep(panel);
+          const newGridData = { ...gridData, y: gridData.y + height };
+          otherPanels[id] = { ...currentPanel, gridData: newGridData };
+        }
       }
       return {
         newPanelPlacement: { x: 0, y: 0, w: width, h: height },
@@ -35,7 +38,10 @@ export const runPanelPlacementStrategy = (
 
       const currentPanelsArray = Object.values(currentPanels);
       currentPanelsArray.forEach((panel) => {
-        maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
+        // only consider panels in the same section when calculating maxY
+        if (panel.gridData.sectionId === sectionId) {
+          maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
+        }
       });
 
       // Handle case of empty grid.
@@ -52,17 +58,19 @@ export const runPanelPlacementStrategy = (
       }
 
       currentPanelsArray.forEach((panel) => {
-        for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
-          for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
-            const row = grid[y];
-            if (row === undefined) {
-              throw new Error(
-                `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
-                  panel
-                )}`
-              );
+        if (panel.gridData.sectionId === sectionId) {
+          for (let x = panel.gridData.x; x < panel.gridData.x + panel.gridData.w; x++) {
+            for (let y = panel.gridData.y; y < panel.gridData.y + panel.gridData.h; y++) {
+              const row = grid[y];
+              if (row === undefined) {
+                throw new Error(
+                  `Attempted to access a row that doesn't exist at ${y} for panel ${JSON.stringify(
+                    panel
+                  )}`
+                );
+              }
+              grid[y][x] = 1;
             }
-            grid[y][x] = 1;
           }
         }
       });

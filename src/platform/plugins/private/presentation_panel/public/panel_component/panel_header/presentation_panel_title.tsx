@@ -137,7 +137,7 @@ export const PresentationPanelTitle = ({
             </h2>
           ) : null}
           <EuiIcon
-            type="iInCircle"
+            type="info"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}

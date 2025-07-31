@@ -32,8 +32,6 @@ export const bootstrapPrebuiltRulesHandler = async (
   try {
     const ctx = await context.resolve(['securitySolution', 'alerting', 'core']);
     const securityContext = ctx.securitySolution;
-    const config = securityContext.getConfig();
-    const securityAIPromptsEnabled = config.experimentalFeatures.securityAIPromptsEnabled;
 
     const savedObjectsClient = ctx.core.savedObjects.client;
     const detectionRulesClient = securityContext.getDetectionRulesClient();
@@ -49,7 +47,7 @@ export const bootstrapPrebuiltRulesHandler = async (
     const packageResults: PackageInstallStatus[] = [];
 
     // Install packages sequentially to avoid high memory usage
-    const prebuiltRulesResult = await installPrebuiltRulesPackage(config, securityContext);
+    const prebuiltRulesResult = await installPrebuiltRulesPackage(securityContext);
     packageResults.push({
       name: prebuiltRulesResult.package.name,
       version: prebuiltRulesResult.package.version,
@@ -74,9 +72,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       });
     }
 
-    const securityAiPromptsResult = securityAIPromptsEnabled
-      ? await installSecurityAiPromptsPackage(config, securityContext)
-      : null;
+    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext);
 
     if (securityAiPromptsResult !== null) {
       packageResults.push({

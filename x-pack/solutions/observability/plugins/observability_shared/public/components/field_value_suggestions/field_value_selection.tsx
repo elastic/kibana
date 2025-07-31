@@ -136,6 +136,7 @@ export function FieldValueSelection({
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
       })}
+      isSelected={isPopoverOpen || forceOpen}
       hasActiveFilters={numOfFilters > 0}
       iconType="arrowDown"
       numActiveFilters={numOfFilters}

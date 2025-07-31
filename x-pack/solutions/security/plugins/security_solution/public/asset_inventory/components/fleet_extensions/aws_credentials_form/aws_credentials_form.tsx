@@ -21,14 +21,14 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getAssetPolicy } from '../utils';
+import { getAssetPolicy, getAwsCredentialsType } from '../utils';
 import type { AssetRadioOption } from '../asset_boxed_radio_group';
 import { RadioGroup } from '../asset_boxed_radio_group';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from './constants';
+import { AWS_CREDENTIALS_TYPE, AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from './constants';
 import type { AwsCredentialsTypeOptions } from './aws_credentials_form_options';
 import { getAwsCredentialsFormManualOptions } from './aws_credentials_form_options';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -78,6 +78,24 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
   },
 ];
 
+export const getAgentlessCredentialsType = (
+  postureInput: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>,
+  showCloudConnectors: boolean
+): AwsCredentialsType => {
+  const credentialsType = getAwsCredentialsType(postureInput);
+  if (
+    (!credentialsType && showCloudConnectors) ||
+    (credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_FORMATION && showCloudConnectors)
+  ) {
+    return AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+  }
+
+  if (credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_FORMATION || !credentialsType) {
+    return AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+  }
+
+  return credentialsType;
+};
 export interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>;
@@ -198,7 +216,7 @@ export const AwsCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  disabled,
+  disabled = false,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const {
@@ -253,6 +271,7 @@ export const AwsCredentialsForm = ({
       {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             label={i18n.translate(
               'xpack.securitySolution.assetInventory.fleetIntegration.awsCredentialTypeSelectorLabel',
               {
@@ -294,17 +313,20 @@ export const AwsCredentialTypeSelector = ({
   onChange,
   label,
   options,
+  disabled = false,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
   label: string;
   options: AwsCredentialsTypeOptions;
+  disabled?: boolean;
 }) => (
   <EuiFormRow fullWidth label={label}>
     <EuiSelect
       fullWidth
       options={options}
       value={type}
+      disabled={disabled}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}

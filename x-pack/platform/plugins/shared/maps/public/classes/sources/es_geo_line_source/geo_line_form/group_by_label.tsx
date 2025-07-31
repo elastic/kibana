@@ -43,7 +43,7 @@ export function GroupByLabel() {
     >
       <span>
         <FormattedMessage id="xpack.maps.source.esGeoGrid.groupByLabel" defaultMessage="Group by" />{' '}
-        <EuiIcon type="questionInCircle" color="subdued" />
+        <EuiIcon type="question" color="subdued" />
       </span>
     </EuiToolTip>
   );

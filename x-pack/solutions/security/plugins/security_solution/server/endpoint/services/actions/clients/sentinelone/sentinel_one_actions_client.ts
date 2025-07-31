@@ -36,6 +36,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
@@ -49,7 +50,9 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
 } from '../lib/types';
 import type {
@@ -71,6 +74,8 @@ import type {
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
   ResponseActionParametersWithProcessName,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -91,6 +96,7 @@ import type {
   ResponseActionGetFileRequestBody,
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
+  RunScriptActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -242,7 +248,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
@@ -333,7 +339,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to SentinelOne directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,
@@ -914,8 +920,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                processName: reqIndexOptions.parameters.process_name,
+                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName)
+                  .process_name,
               }),
             },
           });
@@ -1017,6 +1023,78 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
+  async runscript(
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  > {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `'runscript' response action not supported for [${this.agentType}]`
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      ResponseActionRunScriptOutputContent
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'runscript',
+    };
+
+    // Below code is temporary only in order to ensure tests don't fail.
+    // implementation will be done with team issue #13284
+    throw (await this.validateRequest(reqIndexOptions)).error;
+  }
+
+  async getCustomScripts({
+    osType,
+  }: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {}): Promise<CustomScriptsResponse> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `'runscript' response action not supported for [${this.agentType}]`
+      );
+    }
+
+    this.log.debug(`Retrieving list of scripts`);
+
+    const s1ScriptQueryOptions: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
+      sortBy: 'scriptName',
+      sortOrder: 'asc',
+      limit: 1000,
+    };
+
+    if (osType) {
+      s1ScriptQueryOptions.osTypes = osType;
+    }
+
+    const { data: scriptSearchResults } =
+      await this.sendAction<SentinelOneGetRemoteScriptsResponse>(
+        SUB_ACTION.GET_REMOTE_SCRIPTS,
+        s1ScriptQueryOptions
+      );
+
+    return {
+      data: (scriptSearchResults?.data ?? []).map((scriptInfo) => {
+        return {
+          id: scriptInfo.id,
+          name: scriptInfo.scriptName,
+          description: `${scriptInfo.scriptDescription ?? ''} ${
+            scriptInfo.inputInstructions
+              ? `Input instructions: ${scriptInfo.inputInstructions}`
+              : ''
+          }`.trim(),
+        };
+      }),
+    };
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -1107,7 +1185,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * retrieve script info. for scripts that are used to handle Elastic response actions
    * @param scriptType
    * @param osType
-   * @private
+   * @internal
    */
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
@@ -1221,7 +1299,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
-        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
         404
       );
     }
@@ -1234,7 +1312,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
    * @param actionRequests
    * @param command
-   * @private
+   * @internal
    */
   private async checkPendingIsolateOrReleaseActions(
     actionRequests: Array<
@@ -1721,7 +1799,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Calculates the state of a SentinelOne Task using the response from their task status API. It
    * returns a normalized object with basic info derived from the task status value
    * @param taskStatusRecord
-   * @private
+   * @internal
    */
   private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
     isPending: boolean;

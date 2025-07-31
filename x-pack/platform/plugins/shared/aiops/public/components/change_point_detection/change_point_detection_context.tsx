@@ -74,14 +74,14 @@ export const ChangePointDetectionContext = createContext<{
 export interface ChangePointAnnotation {
   id: string;
   label: string;
-  reason: string;
-  timestamp: string;
+  reason?: string;
+  timestamp?: string;
   group?: {
     name: string;
     value: string;
   };
   type: ChangePointType;
-  p_value: number;
+  p_value?: number;
 }
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;

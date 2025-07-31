@@ -85,7 +85,10 @@
     "@kbn/visualizations-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/shared-ux-markdown"
+    "@kbn/shared-ux-markdown",
+    "@kbn/content-management-utils",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-saved-objects-api-server"
   ],
   "exclude": ["target/**/*"]
 }

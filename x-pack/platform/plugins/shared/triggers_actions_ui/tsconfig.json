@@ -48,7 +48,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/field-types",
     "@kbn/core-ui-settings-common",
-    "@kbn/dashboard-plugin",
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-api-server",
@@ -84,7 +83,13 @@
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/response-ops-alerts-delete",
+    "@kbn/content-management-plugin",
+    "@kbn/esql-types",
+    "@kbn/elastic-assistant-common",
+    "@kbn/ebt-tools",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

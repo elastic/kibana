@@ -1,0 +1,117 @@
+{
+  "id": "@kbn/spaces-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/spaces-utils",
+        "id": "def-common.addSpaceIdToPath",
+        "type": "Function",
+        "tags": [],
+        "label": "addSpaceIdToPath",
+        "description": [
+          "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
+        ],
+        "signature": [
+          "(basePath: string, spaceId: string, requestedPath: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/spaces-utils",
+            "id": "def-common.addSpaceIdToPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the server's base path."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/spaces-utils",
+            "id": "def-common.addSpaceIdToPath.$2",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "the space id."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/spaces-utils",
+            "id": "def-common.addSpaceIdToPath.$3",
+            "type": "string",
+            "tags": [],
+            "label": "requestedPath",
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "the space-aware version of the requested path, inclusive of the server's base path."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/spaces-utils",
+        "id": "def-common.DEFAULT_SPACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_SPACE_ID",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

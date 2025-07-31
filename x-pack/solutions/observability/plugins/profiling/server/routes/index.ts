@@ -24,6 +24,7 @@ import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
+  registerTraceEventsTopNExecutablesSearchRoute,
   registerTraceEventsTopNHostsSearchRoute,
   registerTraceEventsTopNStackTracesSearchRoute,
   registerTraceEventsTopNThreadsSearchRoute,
@@ -55,6 +56,7 @@ export function registerRoutes(params: RouteRegisterParameters) {
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);
   registerTraceEventsTopNDeploymentsSearchRoute(params);
+  registerTraceEventsTopNExecutablesSearchRoute(params);
   registerTraceEventsTopNHostsSearchRoute(params);
   registerTraceEventsTopNStackTracesSearchRoute(params);
   registerTraceEventsTopNThreadsSearchRoute(params);

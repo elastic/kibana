@@ -17,6 +17,7 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
   OWNER_SPACE_ID_TAG_PREFIX,
+  ADVANCED_MODE_TAG,
 } from './constants';
 
 export type TagFilter = (tag: string) => boolean;
@@ -31,6 +32,14 @@ export const isArtifactByPolicy = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
 ): boolean => {
   return !isArtifactGlobal(item);
+};
+
+export const hasGlobalOrPerPolicyTag = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
+  return (item.tags ?? []).some(
+    (tag) => tag === GLOBAL_ARTIFACT_TAG || tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)
+  );
 };
 
 export const getPolicyIdsFromArtifact = (
@@ -113,6 +122,12 @@ export const getEffectedPolicySelectionByTags = (
     selected,
   };
 };
+
+export const isAdvancedModeEnabled = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => (item.tags ?? []).includes(ADVANCED_MODE_TAG);
+
+export const isAdvancedModeTag: TagFilter = (tag) => tag === ADVANCED_MODE_TAG;
 
 export const isFilterProcessDescendantsEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>

@@ -10,11 +10,17 @@ applies_to:
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
 `xpack.productDocBase.artifactRepositoryUrl`
-:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Supports both HTTP(S) URLs and local file paths (`file://`).  Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`
+:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co` Supports:
+    
+    * HTTP(S) URLs
+    * {applies_to}`stack: ga 9.1` Local file paths (`file://`).
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-Installing product documentation requires network access to its artifact repository. In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+Installing product documentation requires network access to its artifact repository. 
+
+* {applies_to}`stack: ga 9.1` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+* {applies_to}`stack: ga 9.0` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 
@@ -24,11 +30,19 @@ Deploying a custom product documentation repository can be done in 2 ways: using
 
 The artifact names follow this pattern: `kb-product-doc-{{productName}}-{{versionMajor}}.{{versionMinor}}.zip`
 
-The available products are: - elasticsearch - kibana - observability - security
+The available products are:
+- elasticsearch
+- kibana
+- observability
+- security
 
 You must download, from the source repository (`https://kibana-knowledge-base-artifacts.elastic.co/`), the artifacts for your current version of Kibana.
 
-For example, for Kibana 8.16: - `kb-product-doc-elasticsearch-8.16.zip` - `kb-product-doc-kibana-8.16.zip` - `kb-product-doc-observability-8.16.zip` - `kb-product-doc-security-8.16.zip`
+For example, for Kibana 8.16:
+- `kb-product-doc-elasticsearch-8.16.zip`
+- `kb-product-doc-kibana-8.16.zip`
+- `kb-product-doc-observability-8.16.zip`
+- `kb-product-doc-security-8.16.zip`
 
 **2. Upload the artifacts to your local S3 bucket**
 
@@ -40,7 +54,7 @@ Add the following line to your {{kib}} configuration file:
 
 ```yaml
 # Replace with the root of your custom bucket
-xpack.productDocBase.artifactRepositoryUrl: "https://my-custom-repository.example.com"
+xpack.productDocBase.artifactRepositoryUrl: "<MY_CUSTOM_REPOSITORY_URL>"
 ```
 
 **4. Restart {{kib}}**
@@ -95,7 +109,7 @@ Add the following line to your {{kib}} configuration file:
 
 ```yaml
 # Replace with the path to the CDN folder previously configured
-xpack.productDocBase.artifactRepositoryUrl: "https://my-custom-repository.example.com"
+xpack.productDocBase.artifactRepositoryUrl: "<MY_CUSTOM_REPOSITORY_URL>"
 ```
 
 **5. Restart {{kib}}**

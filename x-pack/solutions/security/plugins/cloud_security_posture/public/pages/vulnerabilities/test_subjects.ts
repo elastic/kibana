@@ -24,7 +24,10 @@ export const VULNERABILITY_HEADER_TITLE = 'vulnerability-header-reference-title'
 export const VULNERABILITY_HEADER_ID = 'vulnerability-header-reference-id';
 export const VULNERABILITY_HEADER_CVE_BADGE = 'vulnerability-header-cve-badge';
 export const getVulnerabilityLinkTestId = (id: string) => `vulnerability-reference-link-${id}`;
+export const getVulnerabilityIdTestId = (id: string) => `vulnerability-id-${id}`;
 export const VULNERABILITY_OVERVIEW_TAB_ID = 'vulnerability-overview-tab-id';
 export const VULNERABILITY_OVERVIEW_TAB_ID_MORE_BTN = 'vulnerability-overview-tab-id-more-btn';
 export const VULNERABILITY_OVERVIEW_TAB_ID_LESS_BTN = 'vulnerability-overview-tab-id-more-less';
 export const VULNERABILITY_OVERVIEW_PUBLISHED_DATE = 'vulnerability-overview-tab-published-date';
+export const VULNERABILITY_EMPTY_VALUE = 'vulnerability-empty-value';
+export const VULNERABILITY_RESOURCE_TABLE = 'vulnerability-resource-table';

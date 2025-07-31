@@ -144,7 +144,6 @@ describe('indexpattern_datasource utils', () => {
         );
 
         render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
-        screen.debug();
         // Make sure the message is there before checking the absence of the link/button
         expect(screen.getByText(/might be an approximation./)).toBeInTheDocument();
         expect(screen.queryByText('Enable accuracy mode')).toBe(null);
@@ -479,7 +478,6 @@ describe('indexpattern_datasource utils', () => {
                 params: {
                   emptyAsNull: true,
                 },
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
@@ -498,7 +496,6 @@ describe('indexpattern_datasource utils', () => {
                   isFormulaBroken: false,
                 },
                 references: ['62f73507-09c4-4bf9-9e6f-a9692e348d94X0'],
-                scale: 'ratio',
                 // here's the issue - this should not be here
                 sourceField: '___records___',
               },

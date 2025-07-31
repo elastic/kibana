@@ -12,15 +12,17 @@ import { i18n } from '@kbn/i18n';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly,
+  type EuiDataGridControlColumn,
   EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
+  RenderCellValue,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
@@ -41,6 +43,7 @@ import {
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
+import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -63,24 +66,10 @@ export const getColumnDisplayName = (
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
+const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
-
-const openDetails = {
-  id: OPEN_DETAILS,
-  width: DEFAULT_CONTROL_COLUMN_WIDTH,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.controlColumnHeader', {
-          defaultMessage: 'Control column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
-  rowCellRender: ExpandButton,
-};
 
 const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
@@ -95,11 +84,14 @@ export function getLeadControlColumns({
 }: {
   rows: DataTableRecord[];
   canSetExpandedDoc: boolean;
-}) {
-  if (!canSetExpandedDoc) {
-    return [getSelect(rows)];
-  }
-  return [openDetails, getSelect(rows)];
+}): {
+  leadColumns: EuiDataGridControlColumn[];
+  leadColumnsExtraContent: RenderCellValue[];
+} {
+  return {
+    leadColumns: [getSelect(rows)],
+    leadColumnsExtraContent: canSetExpandedDoc ? [ExpandButton] : [],
+  };
 }
 
 function buildEuiGridColumn({
@@ -266,6 +258,15 @@ function buildEuiGridColumn({
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
+
+  if (column.id === SOURCE_COLUMN) {
+    column.display = (
+      <DataTableSummaryColumnHeaderMemoized
+        columnDisplayName={columnDisplayName}
+        headerRowHeight={headerRowHeight}
+      />
+    );
+  }
 
   if (column.id === dataView.timeFieldName) {
     column.display = (

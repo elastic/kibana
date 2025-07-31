@@ -1,0 +1,115 @@
+{
+  "id": "@kbn/core-pricing-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-pricing-browser",
+        "id": "def-public.PricingServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PricingServiceStart",
+        "description": [
+          "\nAPIs to access pricing tier information during the start phase.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-browser",
+            "id": "def-public.PricingServiceStart.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.\n"
+            ],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-browser",
+                "id": "def-public.PricingServiceStart.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-browser",
+            "id": "def-public.PricingServiceStart.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-mocks/src/pricing_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts"
+              }
+            ],
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

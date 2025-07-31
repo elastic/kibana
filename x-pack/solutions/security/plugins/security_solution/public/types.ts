@@ -44,7 +44,6 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -63,6 +62,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -141,7 +141,6 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   cloud?: CloudStart;
   cloudSecurityPosture: CspClientPluginStart;
-  threatIntelligence: ThreatIntelligencePluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
   discover: DiscoverStart;
@@ -155,6 +154,7 @@ export interface StartPlugins {
   automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

@@ -16,11 +16,13 @@ import {
   EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
@@ -40,6 +42,7 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { ESQLEditor } from './esql_editor';
 
 export function LayerPanel(props: LayerPanelProps) {
@@ -77,6 +80,13 @@ export function LayerPanel(props: LayerPanelProps) {
     onlyAllowSwitchToSubtypes,
     ...editorProps
   } = props;
+
+  const { parentApi } = editorProps;
+  const esqlVariables = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
+  );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
@@ -542,7 +552,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             }}
                             position="top"
                             size="s"
-                            type="questionInCircle"
+                            type="question"
                           />
                         </>
                       )}
@@ -812,6 +822,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
+                esqlVariables,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

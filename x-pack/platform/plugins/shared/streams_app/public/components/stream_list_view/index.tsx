@@ -7,22 +7,36 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBetaBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiBetaBadge, EuiLink, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  ObservabilityOnboardingLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
-import { StreamsEmptyPrompt } from './empty_prompt';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function StreamListView() {
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        share,
       },
     },
+    core: { docLinks },
   } = useKibana();
-
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const handleAddData = () => {
+    onboardingLocator?.navigate({});
+  };
+  const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
       const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
@@ -30,15 +44,32 @@ export function StreamListView() {
       });
       return streams;
     },
-    [streamsRepositoryClient]
+    // time state change is used to trigger a refresh of the listed
+    // streams metadata but we operate on stale data if we don't
+    // also refresh the streams
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streamsRepositoryClient, timeState.start, timeState.end]
   );
 
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
-        bottomBorder="extended"
+      <EuiPageHeader
+        paddingSize="l"
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+          .euiSpacer--l {
+            display: none !important;
+          }
+        `}
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            css={css`
+              margin-bottom: ${euiTheme.size.s};
+            `}
+          >
             {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
               defaultMessage: 'Streams',
             })}
@@ -55,10 +86,30 @@ export function StreamListView() {
             />
           </EuiFlexGroup>
         }
-      />
+      >
+        <p
+          css={css`
+            margin: 0 0 ${euiTheme.size.s} 0;
+            font-size: ${euiTheme.font.scale.s};
+            color: ${euiTheme.colors.textSubdued};
+            line-height: ${euiTheme.size.l};
+          `}
+        >
+          {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+            defaultMessage:
+              'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+          })}{' '}
+          <EuiLink target="_blank" href={docLinks.links.observability.logsStreams}>
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
+              defaultMessage: 'See docs',
+            })}
+          </EuiLink>
+        </p>
+      </EuiPageHeader>
+
       <StreamsAppPageTemplate.Body grow>
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
-          <StreamsEmptyPrompt />
+          <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
         )}

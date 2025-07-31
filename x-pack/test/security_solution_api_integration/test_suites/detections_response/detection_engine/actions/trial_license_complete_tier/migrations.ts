@@ -26,8 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
-    // code that lives in multiple routes. This code is also tested in each of the routes it lives in
-    // but not in as much detail and relying on mocks. This test loads an es_archive containing rules
+    // code that lives in multiple routes. This test loads an es_archive containing rules
     // created in 7.15 with legacy actions.
     // For new routes that do any updates on a rule, please ensure that you are including the legacy
     // action migration code. We are monitoring legacy action telemetry to clean up once we see their
@@ -35,13 +34,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('legacy actions', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_actions'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_actions'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_actions'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_actions'
         );
       });
 
@@ -366,11 +365,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('7.16.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/migrations');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/migrations');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
+        );
       });
 
       it('migrates legacy siem-detection-engine-rule-actions to use saved object references', async () => {

@@ -41,6 +41,7 @@ export function packageFilter(pkg: string) {
     !pkg.startsWith('@kbn/') &&
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
+    pkg !== '@elastic/eui-amsterdam' &&
     pkg !== '@elastic/eui-theme-borealis' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'

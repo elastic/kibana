@@ -107,6 +107,7 @@
     "@kbn/zod-helpers",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
@@ -121,5 +122,9 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
     "@kbn/lock-manager",
+    "@kbn/saved-search-component",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/core-chrome-layout-constants",
   ]
 }

@@ -28,15 +28,17 @@
       "searchprofiler",
       "security",
       "serverless",
-      "share"
+      "searchHomepage",
+      "share",
+      "visualizations",
     ],
     "optionalPlugins": [
+      "onechat",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
-      "usageCollection",
-      "visualizations"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaReact"

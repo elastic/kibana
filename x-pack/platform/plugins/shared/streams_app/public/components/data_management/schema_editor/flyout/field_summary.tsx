@@ -128,7 +128,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               <span>
                 {FIELD_SUMMARIES.fieldStatus.label}{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                   content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
                     defaultMessage:

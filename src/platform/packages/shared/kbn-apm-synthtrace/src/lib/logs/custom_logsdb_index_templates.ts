@@ -11,6 +11,8 @@ import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/
 
 export enum IndexTemplateName {
   LogsDb = 'logsdb',
+  Synht2 = 'synth.2',
+  SomeFailureStore = 'synth.fs',
 }
 
 export const indexTemplates: {
@@ -31,6 +33,44 @@ export const indexTemplates: {
     priority: 500,
     index_patterns: ['logs-logsdb.*-*'],
     composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
+    allow_auto_create: true,
+    data_stream: {
+      hidden: false,
+    },
+  },
+  [IndexTemplateName.Synht2]: {
+    name: IndexTemplateName.Synht2,
+    _meta: {
+      managed: false,
+      description: 'custom synth.2 template created by synthtrace tool.',
+    },
+    template: {
+      settings: {
+        default_pipeline: 'synth.2@pipeline',
+      },
+    },
+    priority: 500,
+    index_patterns: ['logs-synth.2-*'],
+    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings', 'synth.2@custom'],
+    allow_auto_create: true,
+    data_stream: {
+      hidden: false,
+    },
+  },
+  [IndexTemplateName.SomeFailureStore]: {
+    name: IndexTemplateName.SomeFailureStore,
+    _meta: {
+      managed: false,
+      description: 'custom index template created by synthtrace tool',
+    },
+    template: {
+      settings: {
+        default_pipeline: 'synth.fs@pipeline',
+      },
+    },
+    priority: 500,
+    index_patterns: ['logs-synth.2*', 'logs-synth.3*'],
+    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings', 'synth.fs@custom'],
     allow_auto_create: true,
     data_stream: {
       hidden: false,

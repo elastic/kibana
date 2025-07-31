@@ -27,6 +27,7 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
@@ -98,12 +99,6 @@ export const tagcloudRenderer: (
     handlers.event(chartSizeEvent);
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
-    let isDarkMode = false;
-    plugins.charts.theme.darkModeEnabled$
-      .subscribe((val) => {
-        isDarkMode = val.darkMode;
-      })
-      .unsubscribe();
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
@@ -125,7 +120,7 @@ export const tagcloudRenderer: (
                 fireEvent={handlers.event}
                 syncColors={config.syncColors}
                 overrides={config.overrides}
-                isDarkMode={isDarkMode}
+                isDarkMode={useKibanaIsDarkMode()}
               />
             </VisualizationContainer>
           )}

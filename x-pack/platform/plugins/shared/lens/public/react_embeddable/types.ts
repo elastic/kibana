@@ -32,7 +32,7 @@ import type {
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
@@ -47,9 +47,9 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
   OverlayRef,
-  SavedObjectReference,
   ThemeServiceStart,
 } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
@@ -64,9 +64,6 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
-import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
@@ -190,7 +187,7 @@ interface ContentManagementProps {
 }
 
 export type LensPropsVariants = (LensByValue & LensByReference) & {
-  references?: SavedObjectReference[];
+  references?: Reference[];
 };
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
@@ -367,6 +364,13 @@ export type LensRuntimeState = Simplify<
     ContentManagementProps
 >;
 
+export interface LensHasEditPanel {
+  getEditPanel?: (options?: {
+    closeFlyout?: () => void;
+    showOnly?: boolean;
+  }) => Promise<JSX.Element | undefined>;
+}
+
 export interface LensInspectorAdapters {
   getInspectorAdapters: () => Adapters;
   inspect: (options?: InspectorOptions) => OverlayRef;
@@ -376,15 +380,6 @@ export interface LensInspectorAdapters {
   // a typical use case is the inline editing, where the editor
   // needs to be updated on data changes
   adapters$: PublishingSubject<Adapters>;
-}
-
-export type LensCreateAlertRuleInitialValues = Partial<RuleFormData<Partial<EsQueryRuleParams>>>;
-export interface LensAlertRulesApi {
-  createAlertRule: (
-    initialValues: LensCreateAlertRuleInitialValues,
-    ruleTypeRegistry: RuleTypeRegistryContract,
-    actionTypeRegistry: ActionTypeRegistryContract
-  ) => void;
 }
 
 export type LensApi = Simplify<
@@ -420,7 +415,7 @@ export type LensApi = Simplify<
     LensInspectorAdapters &
     LensRequestHandlersProps &
     LensApiCallbacks &
-    LensAlertRulesApi
+    LensHasEditPanel
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere

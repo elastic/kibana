@@ -18,9 +18,15 @@ interface Props {
   fields: Field[];
   changeHandler(i: string): void;
   selectedField: string;
+  timeFieldTitleId: string;
 }
 
-export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const TimeFieldSelect: FC<Props> = ({
+  fields,
+  changeHandler,
+  selectedField,
+  timeFieldTitleId,
+}) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = createFieldOptions(
     fields,
@@ -47,6 +53,7 @@ export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedFiel
       onChange={onChange}
       isClearable={false}
       data-test-subj="mlTimeFieldNameSelect"
+      aria-labelledby={timeFieldTitleId}
     />
   );
 };

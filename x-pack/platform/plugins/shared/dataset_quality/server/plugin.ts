@@ -7,16 +7,18 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
-import { DataTelemetryService } from './services';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetQualityRouteHandlerResources } from './routes/types';
+import { registerBuiltInRuleTypes } from './rule_types';
+import { DataTelemetryService } from './services';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginSetupDependencies,
   DatasetQualityPluginStart,
   DatasetQualityPluginStartDependencies,
 } from './types';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../common/constants';
 
 export class DatasetQualityServerPlugin
   implements
@@ -39,6 +41,15 @@ export class DatasetQualityServerPlugin
     core: CoreSetup<DatasetQualityPluginStartDependencies, DatasetQualityPluginStart>,
     plugins: DatasetQualityPluginSetupDependencies
   ) {
+    core.pricing.registerProductFeatures([
+      {
+        id: DATASET_QUALITY_ALL_SIGNALS_ID,
+        description:
+          'Dataset Quality All Signals - Enables all signals for the dataset quality page.',
+        products: [{ name: 'observability', tier: 'complete' }],
+      },
+    ]);
+
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -67,6 +78,10 @@ export class DatasetQualityServerPlugin
 
     // Setup Data Telemetry Service
     this.dataTelemetryService.setup(plugins.taskManager, plugins.usageCollection);
+
+    if (plugins.alerting) {
+      registerBuiltInRuleTypes(plugins.alerting, plugins.share?.url.locators);
+    }
 
     return {};
   }

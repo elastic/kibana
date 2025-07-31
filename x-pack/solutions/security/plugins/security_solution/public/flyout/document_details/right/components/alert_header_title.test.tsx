@@ -78,7 +78,10 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('should render title correctly if flyout is in preview', () => {
-    const { queryByTestId, getByTestId } = renderHeader({ ...mockContextValue, isPreview: true });
+    const { queryByTestId, getByTestId } = renderHeader({
+      ...mockContextValue,
+      isRulePreview: true,
+    });
     expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
 
     expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();

@@ -23,6 +23,8 @@ const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
 };
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
+const error = new Error('Meta error');
+error.stack = 'Meta error stack';
 const records: LogRecord[] = [
   {
     context: 'context-1',
@@ -30,6 +32,9 @@ const records: LogRecord[] = [
       message: 'Some error message',
       name: 'Some error name',
       stack: 'Some error stack',
+    },
+    meta: {
+      error,
     },
     level: LogLevel.Fatal,
     message: 'message-1',

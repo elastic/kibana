@@ -88,6 +88,16 @@ export const AssetCriticalityRecordEcsParts = z.object({
         .optional(),
     })
     .optional(),
+  entity: z
+    .object({
+      id: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;

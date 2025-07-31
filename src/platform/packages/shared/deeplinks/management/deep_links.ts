@@ -66,6 +66,7 @@ export type ManagementId =
   | 'trained_models'
   | 'transform'
   | 'triggersActions'
+  | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
   | 'upgrade_assistant'
   | 'users'

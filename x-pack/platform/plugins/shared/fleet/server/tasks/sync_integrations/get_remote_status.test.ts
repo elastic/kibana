@@ -18,6 +18,8 @@ import type { Output } from '../../types';
 
 import { FleetNotFoundError } from '../../errors';
 
+import { licenseService } from '../../services/license';
+
 import { getRemoteSyncedIntegrationsInfoByOutputId } from './get_remote_status';
 
 jest.mock('../../services/app_context');
@@ -66,6 +68,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -82,15 +85,26 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     });
   });
 
-  it('should throw error if the passed outputId is not found', async () => {
+  it('should return empty integrations array if license is not at least Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return response with error if the passed outputId is not found', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
-    ).rejects.toThrowError('No output found with id remote-es-not-existent');
+    expect(
+      await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
+    ).toEqual({ error: 'No output found with id remote-es-not-existent', integrations: [] });
   });
 
   it('should throw error if the passed outputId is not of type remote_elasticsearch', async () => {
@@ -151,7 +165,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     );
   });
 
-  it('should throw error if it cannot establish a connection with remote kibana', async () => {
+  it('should return an error if it cannot establish a connection with remote kibana', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
@@ -168,11 +182,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       );
     });
 
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError(
-      'request to http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed, reason: getaddrinfo ENOTFOUND remote-kibana-host'
-    );
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with error: request to http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed, reason: getaddrinfo ENOTFOUND remote-kibana-host',
+    });
   });
 
   it('should return the response from the remote status api', async () => {
@@ -183,6 +197,28 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       ...output,
       sync_integrations: true,
       kibana_url: 'http://remote-kibana-host',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => statusRes,
+      status: 200,
+      ok: true,
+    } as any);
+
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual(
+      statusRes
+    );
+  });
+
+  it('should work if kibanaUrl has a trailing slash', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host/',
       kibana_api_key: 'APIKEY',
     } as any);
 
@@ -226,7 +262,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     });
   });
 
-  it('should throw if the remote api returns error', async () => {
+  it('should return an error if the remote api returns error', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
@@ -240,9 +276,34 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     mockedFetch.mockImplementation(() => {
       throw new Error(`some error`);
     });
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError('some error');
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with error: some error',
+    });
+  });
+
+  it('should return an error if kibanaUrl is not found', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => ({ ok: false, message: 'Unknown resource.' }),
+      status: 404,
+      ok: false,
+    } as any);
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with status 404: Unknown resource.',
+    });
   });
 
   it('should return error if the fetch returns invalid-json error', async () => {

@@ -83,7 +83,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       anchorPosition="downCenter"
       button={
         <Icon
-          type="iInCircle"
+          type="info"
         />
       }
       closePopover={[Function]}

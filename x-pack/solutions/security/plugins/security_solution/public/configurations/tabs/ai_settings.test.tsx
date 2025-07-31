@@ -16,6 +16,9 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 
 const mockNavigateTo = jest.fn();
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 describe('AISettings', () => {
   beforeEach(() => {

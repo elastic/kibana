@@ -8,45 +8,47 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { GridLayoutStateManager, PanelInteractionEvent } from '../../types';
-import type { UserInteractionEvent, PointerPosition } from '../types';
-import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
-import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+
+import type { ActivePanelEvent } from '../../grid_panel';
+import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
+import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
+import type { PointerPosition, UserInteractionEvent } from '../types';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
-  interactionEvent,
+  activePanel,
   pointerPixel,
   maxRight,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
+  activePanel: ActivePanelEvent;
   maxRight: number;
 }) => {
-  const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+  const panelRect = activePanel.panelDiv.getBoundingClientRect();
 
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: Math.min(pointerPixel.clientX - interactionEvent.sensorOffsets.right, maxRight),
+    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
+    right: Math.min(pointerPixel.clientX - activePanel.sensorOffsets.right, maxRight),
   };
 };
 
 // Calculates the preview rect coordinates for a dragged panel
 export const getDragPreviewRect = ({
   pointerPixel,
-  interactionEvent,
+  activePanel,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
+  activePanel: ActivePanelEvent;
 }) => {
   return {
-    left: pointerPixel.clientX - interactionEvent.sensorOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.sensorOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.sensorOffsets.right,
+    left: pointerPixel.clientX - activePanel.sensorOffsets.left,
+    top: pointerPixel.clientY - activePanel.sensorOffsets.top,
+    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
+    right: pointerPixel.clientX - activePanel.sensorOffsets.right,
   };
 };
 
@@ -73,15 +75,14 @@ export const getNextKeyboardPositionForPanel = (
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    interactionEvent$: { value: interactionEvent },
-    activePanel$: { value: activePanel },
+    activePanelEvent$: { value: activePanel },
     runtimeSettings$: {
       value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
     },
   } = gridLayoutStateManager;
 
-  const { type } = interactionEvent || {};
-  const panelPosition = activePanel?.position || interactionEvent?.panelDiv.getBoundingClientRect();
+  const { type } = activePanel ?? {};
+  const panelPosition = activePanel?.position ?? activePanel?.panelDiv.getBoundingClientRect();
 
   if (!panelPosition) return handlePosition;
 

@@ -15,7 +15,7 @@ import {
   RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
   TOASTER,
-  SUCCESS_TOASTER,
+  SUCCESS_TOASTER_HEADER,
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 import {
@@ -64,10 +64,55 @@ export const interceptInstallationRequestToFail = (rules: Array<typeof SAMPLE_PR
   cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
     body: {
       summary: {
-        succeeded: [],
-        skipped: [],
+        succeeded: 0,
+        skipped: 0,
         failed: rules.length,
       },
+      errors: [
+        {
+          message: 'Something went wrong during installation 🤷‍♀️',
+          rules: rules.map((rule) => ({
+            rule_id: rule['security-rule'].rule_id,
+            name: rule['security-rule'].name,
+          })),
+        },
+      ],
+    },
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
+  }).as('installPrebuiltRules');
+};
+
+export const interceptInstallationRequestToFailPartially = ({
+  rulesToSucceed,
+  rulesToFail,
+}: {
+  rulesToSucceed: Array<typeof SAMPLE_PREBUILT_RULE>;
+  rulesToFail: Array<typeof SAMPLE_PREBUILT_RULE>;
+}) => {
+  cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
+    body: {
+      summary: {
+        total: rulesToSucceed.length,
+        succeeded: rulesToSucceed.length,
+        skipped: 0,
+        failed: rulesToFail.length,
+      },
+      results: {
+        created: rulesToSucceed.map((rule) => ({
+          rule_id: rule['security-rule'].rule_id,
+          name: rule['security-rule'].name,
+        })),
+        skipped: [],
+      },
+      errors: [
+        {
+          message: 'Something went wrong during installation 🤷‍♀️',
+          rules: rulesToFail.map((rule) => ({
+            rule_id: rule['security-rule'].rule_id,
+            name: rule['security-rule'].name,
+          })),
+        },
+      ],
     },
     delay: 500, // Add delay to give Cypress time to find the loading spinner
   }).as('installPrebuiltRules');
@@ -77,19 +122,59 @@ export const interceptUpgradeRequestToFail = (rules: Array<typeof SAMPLE_PREBUIL
   cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
     body: {
       summary: {
-        succeeded: [],
-        skipped: [],
+        succeeded: 0,
+        skipped: 0,
         failed: rules.length,
       },
       results: {
         updated: [],
         skipped: [],
       },
-      errors: {
-        message: 'Test error',
-        status_code: 400,
-        rules: [{ rule_id: 'test_rule', name: 'Test rule' }],
+      errors: [
+        {
+          message: 'Something went wrong during upgrade 🤷‍♀️',
+          rules: rules.map((rule) => ({
+            rule_id: rule['security-rule'].rule_id,
+            name: rule['security-rule'].name,
+          })),
+        },
+      ],
+    },
+    delay: 500, // Add delay to give Cypress time to find the loading spinner
+  }).as('updatePrebuiltRules');
+};
+
+export const interceptUpgradeRequestToFailPartially = ({
+  rulesToSucceed,
+  rulesToFail,
+}: {
+  rulesToSucceed: Array<typeof SAMPLE_PREBUILT_RULE>;
+  rulesToFail: Array<typeof SAMPLE_PREBUILT_RULE>;
+}) => {
+  cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
+    body: {
+      summary: {
+        total: rulesToSucceed.length + rulesToFail.length,
+        succeeded: rulesToSucceed.length,
+        skipped: 0,
+        failed: rulesToFail.length,
       },
+      results: {
+        updated: rulesToSucceed.map((rule) => ({
+          rule_id: rule['security-rule'].rule_id,
+          name: rule['security-rule'].name,
+        })),
+        skipped: [],
+      },
+      errors: [
+        {
+          message: 'Something went wrong during upgrade 🤷‍♀️',
+          rules: rulesToFail.map((rule) => ({
+            rule_id: rule['security-rule'].rule_id,
+            name: rule['security-rule'].name,
+          })),
+        },
+      ],
     },
     delay: 500, // Add delay to give Cypress time to find the loading spinner
   }).as('updatePrebuiltRules');
@@ -99,9 +184,9 @@ export const assertRuleInstallationSuccessToastShown = (
   rules: Array<typeof SAMPLE_PREBUILT_RULE>
 ) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  cy.get(SUCCESS_TOASTER)
+  cy.get(SUCCESS_TOASTER_HEADER)
     .should('be.visible')
-    .should('have.text', `${rules.length} ${rulesString} installed successfully.`);
+    .should('have.text', `${rules.length} ${rulesString} installed successfully`);
 };
 
 export const assertRuleInstallationFailureToastShown = (
@@ -110,21 +195,21 @@ export const assertRuleInstallationFailureToastShown = (
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   cy.get(TOASTER)
     .should('be.visible')
-    .should('have.text', `${rules.length} ${rulesString} failed to install.`);
+    .should('have.text', `${rules.length} ${rulesString} failed to install`);
 };
 
 export const assertRuleUpgradeSuccessToastShown = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
-  cy.get(SUCCESS_TOASTER)
+  cy.get(SUCCESS_TOASTER_HEADER)
     .should('be.visible')
-    .should('contain', `${rules.length} ${rulesString} updated successfully.`);
+    .should('contain', `${rules.length} ${rulesString} updated successfully`);
 };
 
 export const assertRuleUpgradeFailureToastShown = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
   const rulesString = rules.length > 1 ? 'rules' : 'rule';
   cy.get(TOASTER)
     .should('be.visible')
-    .should('have.text', `${rules.length} ${rulesString} failed to update.`);
+    .should('have.text', `${rules.length} ${rulesString} failed to update`);
 };
 
 export const assertRulesPresentInInstalledRulesTable = (

@@ -31,7 +31,7 @@ export const ToggleFlyoutTranslations = {
     }
   ),
   alertsAndRules: i18n.translate('xpack.synthetics.alerts.toggleAlertFlyoutButtonText', {
-    defaultMessage: 'Alerts and rules',
+    defaultMessage: 'Alerts',
   }),
 };
 

@@ -1,18 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AgentMarker renders 1`] = `
-<Component
-  theme={[Function]}
->
-  <AgentMarker
-    mark={
-      Object {
-        "id": "agent",
-        "offset": 1000,
-        "type": "agentMark",
-        "verticalLine": true,
-      }
-    }
-  />
-</Component>
+exports[`AgentMarker renders correctly 1`] = `
+<div>
+  <span
+    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+  >
+    <div
+      class="css-1ejn3a9-Container en0jakt1"
+    >
+      <span
+        class="css-xbgcmn-Indicator en0jakt0"
+        color="#8E9FBC"
+        shape="circle"
+      />
+    </div>
+  </span>
+</div>
 `;

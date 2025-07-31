@@ -9,6 +9,7 @@ import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/serve
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -66,7 +67,7 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
-      index: {},
+      index: 'valid-index-name',
       query: {
         query: mockQuery,
         language: 'kuery',
@@ -447,6 +448,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -457,6 +459,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -476,6 +479,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -486,6 +490,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -505,6 +510,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -515,6 +521,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -534,6 +541,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -544,6 +552,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -736,7 +745,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'valid-index-name',
               query: {
                 query: filterQuery,
                 language: 'kuery',
@@ -1086,6 +1095,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
               context: {
                 tags: ['host-01_tag1', 'host-01_tag2'],
               },
@@ -1099,6 +1109,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'host-02' },
+              flattenGrouping: { 'host.name': 'host-02' },
               context: {
                 tags: ['host-02_tag1', 'host-02_tag2'],
               },
@@ -1126,6 +1137,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-01',
             },
           ],
+          'kibana.alert.grouping': {
+            host: { name: 'host-01' },
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-01)',
           tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
@@ -1147,6 +1161,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-02',
             },
           ],
+          'kibana.alert.grouping': {
+            host: { name: 'host-02' },
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
@@ -1310,6 +1327,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -1320,6 +1338,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
           {
@@ -1339,6 +1358,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -1356,6 +1376,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -1375,6 +1396,9 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
+          'kibana.alert.grouping': {
+            groupByField: 'a',
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName, group: a)',
           tags: [],
@@ -1459,7 +1483,7 @@ describe('The custom threshold alert type', () => {
               timestamp: new Date().toISOString(),
               shouldFire: true,
               isNoData: false,
-              bucketKey: { groupBy0: 'a' },
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1475,7 +1499,7 @@ describe('The custom threshold alert type', () => {
               timestamp: new Date().toISOString(),
               shouldFire: false,
               isNoData: false,
-              bucketKey: { groupBy0: 'a' },
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1521,6 +1545,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdCountCriterion,
@@ -1531,6 +1556,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);
@@ -1548,6 +1574,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdCountCriterion,
@@ -1558,6 +1585,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);
@@ -1604,6 +1632,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { 'host.name': 'a' },
+              flattenGrouping: { 'host.name': 'a' },
               context: {
                 host: {
                   name: 'a',
@@ -1653,7 +1682,7 @@ describe('The custom threshold alert type', () => {
           id: 'a',
         });
         expect(getViewInAppUrl).lastCalledWith({
-          dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+          dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
             {
@@ -1661,11 +1690,11 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -1691,6 +1720,12 @@ describe('The custom threshold alert type', () => {
               },
               hit: {
                 'host.name': 'host-0',
+                [ALERT_GROUP]: [
+                  {
+                    field: 'host.name',
+                    value: 'host-0',
+                  },
+                ],
               },
             },
           ];
@@ -1716,11 +1751,11 @@ describe('The custom threshold alert type', () => {
               value: 'host-0',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -2018,6 +2053,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -2028,6 +2064,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2059,6 +2096,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -2076,6 +2114,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2103,6 +2142,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -2120,6 +2160,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdNonCountCriterion,
@@ -2137,6 +2178,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -2156,6 +2198,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdNonCountCriterion,
@@ -2166,6 +2209,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2262,6 +2306,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdNonCountCriterion,
@@ -2272,6 +2317,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);
@@ -2301,6 +2347,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdNonCountCriterion,
@@ -2318,6 +2365,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);
@@ -2483,6 +2531,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2493,6 +2542,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2512,6 +2562,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2522,6 +2573,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2541,6 +2593,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2551,6 +2604,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2570,6 +2624,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2580,6 +2635,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2610,6 +2666,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2627,6 +2684,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -2644,6 +2702,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -2671,6 +2730,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2681,6 +2741,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -2691,6 +2752,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -2721,6 +2783,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2731,6 +2794,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2772,7 +2836,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'mockedIndexId',
               query: {
                 query: filterQuery,
                 language: 'kuery',
@@ -2800,6 +2864,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2817,6 +2882,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -2834,6 +2900,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -2855,6 +2922,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2865,6 +2933,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -2875,6 +2944,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -2899,6 +2969,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2909,6 +2980,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -2946,6 +3018,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -2963,6 +3036,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -2980,6 +3054,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -3001,6 +3076,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3011,6 +3087,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -3021,6 +3098,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -3048,6 +3126,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3058,6 +3137,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -3122,6 +3202,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'host-01' },
+              flattenGrouping: { 'host.name': 'host-01' },
               context: {
                 tags: ['host-01_tag1', 'host-01_tag2'],
               },
@@ -3135,6 +3216,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'host-02' },
+              flattenGrouping: { 'host.name': 'host-02' },
               context: {
                 tags: ['host-02_tag1', 'host-02_tag2'],
               },
@@ -3162,6 +3244,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-01',
             },
           ],
+          'kibana.alert.grouping': {
+            host: { name: 'host-01' },
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-01)',
           tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
@@ -3183,6 +3268,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-02',
             },
           ],
+          'kibana.alert.grouping': {
+            host: { name: 'host-02' },
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
@@ -3346,6 +3434,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3356,6 +3445,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
           {
@@ -3375,6 +3465,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3392,6 +3483,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -3411,6 +3503,9 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
+          'kibana.alert.grouping': {
+            groupByField: 'a',
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 1, above or equal the threshold of 1; Last value of test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName, group: a)',
           tags: [],
@@ -3709,6 +3804,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3719,6 +3815,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -3750,6 +3847,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3767,6 +3865,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: false,
               isNoData: true,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -3794,6 +3893,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3811,6 +3911,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
             c: {
               ...customThresholdLastValueCriterion,
@@ -3828,6 +3929,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'c' },
+              flattenGrouping: { groupByField: 'c' },
             },
           },
         ]);
@@ -3847,6 +3949,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'a' },
+              flattenGrouping: { groupByField: 'a' },
             },
             b: {
               ...customThresholdLastValueCriterion,
@@ -3857,6 +3960,7 @@ describe('The custom threshold alert type', () => {
               shouldFire: true,
               isNoData: false,
               bucketKey: { groupBy0: 'b' },
+              flattenGrouping: { groupByField: 'b' },
             },
           },
         ]);
@@ -3953,6 +4057,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdLastValueCriterion,
@@ -3963,6 +4068,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: true,
                 isNoData: false,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);
@@ -3992,6 +4098,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'a' },
+                flattenGrouping: { groupByField: 'a' },
               },
               b: {
                 ...customThresholdLastValueCriterion,
@@ -4009,6 +4116,7 @@ describe('The custom threshold alert type', () => {
                 shouldFire: false,
                 isNoData: true,
                 bucketKey: { groupBy0: 'b' },
+                flattenGrouping: { groupByField: 'b' },
               },
             },
           ]);

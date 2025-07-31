@@ -11,11 +11,13 @@ import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   createSyntheticsPrivateLocation,
   deleteSyntheticsPrivateLocation,
+  editSyntheticsPrivateLocation,
   getSyntheticsPrivateLocations,
 } from './api';
 import {
   createPrivateLocationAction,
   deletePrivateLocationAction,
+  editPrivateLocationAction,
   getPrivateLocationsAction,
 } from './actions';
 
@@ -47,6 +49,23 @@ export function* createPrivateLocationEffect() {
   );
 }
 
+export function* editPrivateLocationEffect() {
+  yield takeLeading(
+    editPrivateLocationAction.get,
+    fetchEffectFactory(
+      editSyntheticsPrivateLocation,
+      editPrivateLocationAction.success,
+      editPrivateLocationAction.fail,
+      i18n.translate('xpack.synthetics.editPrivateLocationSuccess', {
+        defaultMessage: 'Successfully edited private location.',
+      }),
+      i18n.translate('xpack.synthetics.editPrivateLocationFailure', {
+        defaultMessage: 'Failed to edit private location.',
+      })
+    )
+  );
+}
+
 export function* deletePrivateLocationEffect() {
   yield takeLeading(
     deletePrivateLocationAction.get,
@@ -61,5 +80,6 @@ export function* deletePrivateLocationEffect() {
 export const privateLocationsEffects = [
   fetchPrivateLocationsEffect,
   createPrivateLocationEffect,
+  editPrivateLocationEffect,
   deletePrivateLocationEffect,
 ];

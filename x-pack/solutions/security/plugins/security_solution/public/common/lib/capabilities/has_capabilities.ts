@@ -21,23 +21,52 @@ import type { Capabilities } from '@kbn/core/public';
  */
 export type RequiredCapabilities = string | Array<string | string[]>;
 
+/**
+ * Checks if the capabilities exist and are enabled in the capabilities object.
+ * It checks if the capabilities are enabled or not.
+ * It does not distinguish between missing and disabled capabilities.
+ */
 export const hasCapabilities = (
   capabilities: Capabilities,
   requiredCapabilities?: RequiredCapabilities
 ): boolean => {
-  if (!requiredCapabilities) {
+  if (!requiredCapabilities || requiredCapabilities.length === 0) {
     return true;
   }
   if (!isArray(requiredCapabilities)) {
     return !!get(capabilities, requiredCapabilities, false);
   } else {
-    return requiredCapabilities.some((linkCapabilityKeyOr) => {
-      if (isArray(linkCapabilityKeyOr)) {
-        return linkCapabilityKeyOr.every((linkCapabilityKeyAnd) =>
-          get(capabilities, linkCapabilityKeyAnd, false)
+    return requiredCapabilities.some((requiredCapsOr) => {
+      if (isArray(requiredCapsOr)) {
+        return requiredCapsOr.every((requiredCapsAnd) => get(capabilities, requiredCapsAnd, false));
+      }
+      return get(capabilities, requiredCapsOr, false);
+    });
+  }
+};
+
+/**
+ * Checks if the capabilities exist in the capabilities object.
+ * It does not check if the capabilities are enabled or not.
+ * This is used to check if the capabilities have been registered in the Kibana feature privileges configuration.
+ */
+export const existCapabilities = (
+  capabilities: Capabilities,
+  requiredCapabilities?: RequiredCapabilities
+): boolean => {
+  if (!requiredCapabilities || requiredCapabilities.length === 0) {
+    return true;
+  }
+  if (!isArray(requiredCapabilities)) {
+    return get(capabilities, requiredCapabilities) != null;
+  } else {
+    return requiredCapabilities.some((requiredCapsOr) => {
+      if (isArray(requiredCapsOr)) {
+        return requiredCapsOr.every(
+          (requiredCapsAnd) => get(capabilities, requiredCapsAnd) != null
         );
       }
-      return get(capabilities, linkCapabilityKeyOr, false);
+      return get(capabilities, requiredCapsOr) != null;
     });
   }
 };

@@ -1,7 +1,4 @@
 #!/bin/bash
-#
-# ** THIS IS AN AUTO-GENERATED FILE **
-#
 
 # Run Kibana, using environment variables to set longopts defining Kibana's
 # configuration.
@@ -212,6 +209,10 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.email.domain_allowlist
+    xpack.actions.email.recipient_allowlist
+    xpack.actions.email.services.ses.host
+    xpack.actions.email.services.ses.port
+    xpack.actions.email.services.enabled
     xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
@@ -224,6 +225,7 @@ kibana_vars=(
     xpack.actions.responseTimeout
     xpack.actions.ssl.proxyVerificationMode
     xpack.actions.ssl.verificationMode
+    xpack.actions.webhook.ssl.pfx.enabled
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
@@ -237,6 +239,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerting.rules.maxScheduledPerMinute
     xpack.alerting.disabledRuleTypes
+    xpack.alerting.enabledRuleTypes
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding

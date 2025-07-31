@@ -16,6 +16,7 @@ import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,7 +25,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -37,6 +37,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -88,6 +89,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -131,7 +133,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: () => ReactElement;
+  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -157,7 +159,6 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -171,6 +172,8 @@ interface PluginsStart {
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPublicStart;
+  share: SharePluginStart;
 }
 
 export class Plugin
@@ -187,19 +190,24 @@ export class Plugin
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
+  private readonly isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const isServerless = this.isServerless;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      enabledEmailServices: plugins.actions.enabledEmailServices,
+      isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -286,7 +294,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            dashboard: pluginsStart.dashboard,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -310,6 +317,8 @@ export class Plugin
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
+            contentManagement: pluginsStart.contentManagement,
+            share: pluginsStart.share,
           });
         },
       });
@@ -341,7 +350,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
+          cloud: plugins.cloud,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -357,7 +366,9 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          share: pluginsStart.share,
           kibanaFeatures,
+          isServerless,
         });
       },
     });
@@ -385,7 +396,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
@@ -404,7 +414,7 @@ export class Plugin
             kibanaFeatures,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
-            isServerless: !!pluginsStart.serverless,
+            isServerless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             fieldsMetadata: pluginsStart.fieldsMetadata,
@@ -432,7 +442,10 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
       return action;
     };
 
@@ -470,6 +483,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
@@ -477,6 +491,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
+          isServerless: !!plugins.serverless,
         });
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
@@ -534,8 +549,8 @@ export class Plugin
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
       },
-      getRulesSettingsLink: () => {
-        return getRulesSettingsLinkLazy();
+      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
+        return getRulesSettingsLinkLazy(props);
       },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {

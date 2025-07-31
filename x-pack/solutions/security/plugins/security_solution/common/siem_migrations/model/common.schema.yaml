@@ -24,7 +24,7 @@ components:
           type: string
           description: The API key to use for tracing.
 
-    LangSmithEvaluationSettings:
+    LangSmithEvaluationOptions:
       description: The LangSmith settings object for evaluations.
       allOf:
         - $ref: '#/components/schemas/LangSmithOptions'
@@ -35,3 +35,45 @@ components:
             dataset:
               type: string
               description: The dataset name to use for evaluations.
+
+    MigrationStatus:
+      type: string
+      description: The status of migration.
+      enum: # should match SiemMigrationsStatus enum at ../constants.ts
+        - pending
+        - processing
+        - completed
+        - failed
+
+    MigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+        - interrupted
+
+    MigrationLastExecution:
+      type: object
+      description: The last execution of a migration task.
+      properties:
+        started_at:
+          type: string
+          description: The moment the last execution started.
+        finished_at:
+          type: string
+          nullable: true
+          description: The moment the last execution finished.
+        connector_id:
+          type: string
+          description: The connector ID used for the last execution.
+        error:
+          type: string
+          nullable: true
+          description: The error message if the last execution failed.
+        is_stopped:
+          type: boolean
+          description: Indicates if the last execution was stopped by the user.
+

@@ -7,10 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('./process_router', () => {
+  const module = jest.requireActual('./process_router');
+  return {
+    ...module,
+    processRouter: jest.fn(module.processRouter),
+  };
+});
+
+jest.mock('./process_versioned_router', () => {
+  const module = jest.requireActual('./process_versioned_router');
+  return {
+    ...module,
+    processVersionedRouter: jest.fn(module.processVersionedRouter),
+  };
+});
+
 import { schema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { generateOpenApiDocument } from './generate_oas';
-import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
+import { processRouter } from './process_router';
+import { processVersionedRouter } from './process_versioned_router';
+import {
+  createTestRouters,
+  createRouter,
+  createVersionedRouter,
+  CreateTestRouterArgs,
+} from './generate_oas.test.util';
 import {
   sharedOas,
   createSharedZodSchema,
@@ -21,6 +44,10 @@ interface RecursiveType {
   name: string;
   self: undefined | RecursiveType;
 }
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
@@ -380,129 +407,221 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('availability', () => {
-    it('creates the expected availability entries', async () => {
-      const [routers, versionedRouters] = createTestRouters({
-        routers: {
-          testRouter1: {
-            routes: [
-              {
-                path: '/1-1/{id}/{path*}',
-                options: { availability: { stability: 'experimental' }, access: 'public' },
-              },
-              {
-                path: '/1-2/{id}/{path*}',
-                options: { availability: { stability: 'beta' }, access: 'public' },
-              },
-              {
-                path: '/1-3/{id}/{path*}',
-                options: { availability: { stability: 'stable' }, access: 'public' },
-              },
-            ],
+    const testCases = [
+      {
+        name: 'router with experimental stability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [
+                {
+                  path: '/test-path/{id}/{path*}',
+                  options: { availability: { stability: 'experimental' }, access: 'public' },
+                },
+              ],
+            },
           },
-          testRouter2: {
-            routes: [{ path: '/2-1/{id}/{path*}' }],
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: 'Technical Preview',
+      },
+      {
+        name: 'router with beta stability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [
+                {
+                  path: '/test-path/{id}/{path*}',
+                  options: { availability: { stability: 'beta' }, access: 'public' },
+                },
+              ],
+            },
           },
-        },
-        versionedRouters: {
-          testVersionedRouter1: {
-            routes: [
-              {
-                path: '/v1-1',
-                options: {
-                  access: 'public',
-                  options: { availability: { stability: 'experimental' } },
-                  security: {
-                    authz: {
-                      requiredPrivileges: ['foo'],
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: 'Beta',
+      },
+      {
+        name: 'router with stable stability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [
+                {
+                  path: '/test-path/{id}/{path*}',
+                  options: { availability: { stability: 'stable' }, access: 'public' },
+                },
+              ],
+            },
+          },
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: 'Generally available',
+      },
+      {
+        name: 'router without availability',
+        routerConfig: {
+          routers: {
+            testRouter: {
+              routes: [{ path: '/test-path/{id}/{path*}' }],
+            },
+          },
+          versionedRouters: {},
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path/{id}/{path}',
+        expectedState: null, // No x-state expected
+      },
+      {
+        name: 'versioned router with experimental stability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    options: { availability: { stability: 'experimental' } },
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
                     },
                   },
                 },
-              },
-              {
-                path: '/v1-2',
-                options: {
-                  access: 'public',
-                  options: { availability: { stability: 'beta' } },
-                  security: {
-                    authz: {
-                      requiredPrivileges: ['foo'],
-                    },
-                  },
-                },
-              },
-              {
-                path: '/v1-3',
-                options: {
-                  access: 'public',
-                  options: { availability: { stability: 'stable' } },
-                  security: {
-                    authz: {
-                      requiredPrivileges: ['foo'],
-                    },
-                  },
-                },
-              },
-            ],
+              ],
+            },
           },
-          testVersionedRouter2: {
-            routes: [
-              {
-                path: '/v2-1',
-                options: {
-                  access: 'public',
-                  security: {
-                    authz: {
-                      requiredPrivileges: ['foo'],
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: 'Technical Preview',
+      },
+      {
+        name: 'versioned router with beta stability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    options: { availability: { stability: 'beta' } },
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
                     },
                   },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-      });
-      const result = await generateOpenApiDocument(
-        {
-          routers,
-          versionedRouters,
-        },
-        {
-          title: 'test',
-          baseUrl: 'https://test.oas',
-          version: '99.99.99',
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: 'Beta',
+      },
+      {
+        name: 'versioned router with stable stability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    options: { availability: { stability: 'stable' } },
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: 'Generally available',
+      },
+      {
+        name: 'versioned router without availability',
+        routerConfig: {
+          routers: {},
+          versionedRouters: {
+            testVersionedRouter: {
+              routes: [
+                {
+                  path: '/test-path',
+                  options: {
+                    access: 'public',
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as CreateTestRouterArgs,
+        expectedPath: '/test-path',
+        expectedState: null, // No x-state expected
+      },
+    ];
+
+    it.each(testCases)(
+      '$name: $expectedState',
+      async ({ routerConfig, expectedPath, expectedState }) => {
+        const [routers, versionedRouters] = createTestRouters(routerConfig);
+        const env = { serverless: false, dummy: true };
+        const result = await generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+            env,
+          }
+        );
+
+        // Assert that the env has been passed down as expected
+        if ((processRouter as jest.Mock).mock.calls.length) {
+          (processRouter as jest.Mock).mock.calls.forEach(([{ env: routerEnv }]) =>
+            expect(routerEnv).toEqual({ serverless: false, dummy: true })
+          );
         }
-      );
+        if ((processVersionedRouter as jest.Mock).mock.calls.length) {
+          (processVersionedRouter as jest.Mock).mock.calls.forEach(
+            ([{ env: versionedRouterEnv }]) =>
+              expect(versionedRouterEnv).toEqual({ serverless: false, dummy: true })
+          );
+        }
 
-      // router paths
-      expect(result.paths['/1-1/{id}/{path}']!.get).toMatchObject({
-        'x-state': 'Technical Preview',
-      });
-      expect(result.paths['/1-2/{id}/{path}']!.get).toMatchObject({
-        'x-state': 'Beta',
-      });
-
-      expect(result.paths['/1-3/{id}/{path}']!.get).not.toMatchObject({
-        'x-state': expect.any(String),
-      });
-      expect(result.paths['/2-1/{id}/{path}']!.get).not.toMatchObject({
-        'x-state': expect.any(String),
-      });
-
-      // versioned router paths
-      expect(result.paths['/v1-1']!.get).toMatchObject({
-        'x-state': 'Technical Preview',
-      });
-      expect(result.paths['/v1-2']!.get).toMatchObject({
-        'x-state': 'Beta',
-      });
-
-      expect(result.paths['/v1-3']!.get).not.toMatchObject({
-        'x-state': expect.any(String),
-      });
-      expect(result.paths['/v2-1']!.get).not.toMatchObject({
-        'x-state': expect.any(String),
-      });
-    });
+        if (expectedState) {
+          expect(result.paths[expectedPath]!.get).toMatchObject({
+            'x-state': expectedState,
+          });
+        } else {
+          expect(result.paths[expectedPath]!.get).not.toMatchObject({
+            'x-state': expect.any(String),
+          });
+        }
+      }
+    );
   });
 
   it('merges operation objects', async () => {

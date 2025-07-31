@@ -69,10 +69,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'AI Assistant',
             }),
           },
-          {
-            link: 'inventory',
-            spaceBefore: 'm',
-          },
           ...(streamsAvailable
             ? [
                 {
@@ -90,6 +86,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -97,6 +94,20 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             children: [
               {
                 children: [
+                  {
+                    link: 'apm:service-map',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    link: 'apm:service-groups-list',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
                   {
                     link: 'apm:services',
                     getIsActive: ({ pathNameSerialized }) => {
@@ -147,10 +158,34 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                 ],
               },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
             ],
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
@@ -161,7 +196,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                      defaultMessage: 'Infrastructure inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -189,7 +224,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal profiling',
+                    defaultMessage: 'Universal Profiling',
                   }
                 ),
                 children: [
@@ -381,6 +416,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:cross_cluster_replication' },
                       { link: 'management:remote_clusters' },
                       { link: 'management:migrate_data' },
+                      { link: 'management:content_connectors' },
                     ],
                   },
                   {

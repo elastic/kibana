@@ -34,6 +34,7 @@ import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team'
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 import { getPathsByPackage } from './get_paths_by_package';
+import { countEnzymeImports, EnzymeImportCounts } from './count_enzyme_imports';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -144,7 +145,9 @@ export function runBuildApiDocsCli() {
 
       const reporter = CiStatsReporter.fromEnv(log);
 
-      const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
+      const allPluginStats: {
+        [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts & EnzymeImportCounts;
+      } = {};
       for (const plugin of plugins) {
         const id = plugin.id;
 
@@ -162,6 +165,7 @@ export function runBuildApiDocsCli() {
 
         allPluginStats[id] = {
           ...(await countEslintDisableLines(paths)),
+          ...(await countEnzymeImports(paths)),
           ...collectApiStatsForPlugin(
             pluginApi,
             missingApiItems,
@@ -282,6 +286,12 @@ export function runBuildApiDocsCli() {
             meta: { pluginTeam },
             group: 'Total ESLint disabled count',
             value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Enzyme imports',
+            value: pluginStats.enzymeImportCount,
           },
         ]);
 

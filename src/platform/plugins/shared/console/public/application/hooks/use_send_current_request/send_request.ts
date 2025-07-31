@@ -50,10 +50,21 @@ const extractStatusCodeAndText = (response: Response | undefined, path: string) 
   // For ES requests, we need to extract the status code and text from the response
   // headers, due to the way the proxy set up to avoid mirroring the status code which could be 401
   // and trigger a login prompt. See for more details: https://github.com/elastic/kibana/issues/140536
-  const statusCode = parseInt(response?.headers.get('x-console-proxy-status-code') ?? '500', 10);
-  const statusText = response?.headers.get('x-console-proxy-status-text') ?? 'error';
+  const proxyStatusCode = response?.headers.get('x-console-proxy-status-code');
+  const proxyStatusText = response?.headers.get('x-console-proxy-status-text');
 
-  return { statusCode, statusText };
+  // If proxy headers are missing (e.g., validation errors), use the actual response status
+  if (!proxyStatusCode) {
+    return {
+      statusCode: parseInt(String(response?.status ?? 500), 10),
+      statusText: response?.statusText ?? 'error',
+    };
+  }
+
+  return {
+    statusCode: parseInt(proxyStatusCode, 10),
+    statusText: proxyStatusText ?? 'error',
+  };
 };
 
 let CURRENT_REQ_ID = 0;

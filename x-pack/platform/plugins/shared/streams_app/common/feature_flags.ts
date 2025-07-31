@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+// add into kibana.dev.yml: feature_flags.overrides.featureFlagsStreams.contentPackUIEnabled: true
+
 export const FeatureFlagStreamsContentPackUIEnabled = 'featureFlagsStreams.contentPackUIEnabled';

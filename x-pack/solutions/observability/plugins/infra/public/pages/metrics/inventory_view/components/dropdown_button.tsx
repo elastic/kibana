@@ -13,8 +13,10 @@ import {
   withEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import type { ReactNode } from 'react';
 import React from 'react';
+import type { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {
@@ -30,12 +32,13 @@ type PropsWithTheme = Props & WithEuiThemeProps;
 const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed }) => (
   <EuiFlexItem
     grow={false}
-    style={{
+    css={{
       padding: 12,
       background: theme?.colors.backgroundBaseFormsPrepend,
       fontSize: '0.75em',
       fontWeight: 600,
       color: theme?.colors.textHeading,
+      borderRight: theme?.border.thin,
     }}
   >
     {label}
@@ -48,7 +51,7 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
     <EuiFlexGroup
       alignItems="center"
       gutterSize="none"
-      style={{
+      css={{
         border: theme?.euiTheme.border.thin,
       }}
     >
@@ -61,12 +64,21 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.dropdownButton.button.ariaLabel', {
+            defaultMessage: '{label} options',
+            values: { label },
+          })}
           data-test-subj={props['data-test-subj']}
           color="text"
           iconType="arrowDown"
           onClick={onClick}
           iconSide="right"
           size="xs"
+          css={css`
+            &::before {
+              background: none !important;
+            }
+          `}
         >
           {children}
         </EuiButtonEmpty>

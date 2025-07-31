@@ -62,7 +62,7 @@ export const WORKFLOW_INSIGHTS = {
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
-        defaultMessage: 'No issues had been found',
+        defaultMessage: 'Troubleshooting scan complete, no issues found.',
       }
     ),
     remediationButton: {
