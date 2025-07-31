@@ -34,12 +34,11 @@ export interface TabStateGlobalState {
 }
 
 export interface TabState extends TabItem {
-  // Initial internal, app, and global state for the tab (provided before the tab is initialized).
+  // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
   };
   initialAppState?: DiscoverAppState;
-  initialGlobalState?: TabStateGlobalState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
