@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/sync', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
     });
 
     beforeEach(async () => {
