@@ -104,22 +104,32 @@ export const createRestorableStateProvider = <TState extends object>() => {
   ) => {
     const ComponentMemoized = React.memo(Component);
     type TProps = ComponentProps<typeof ComponentMemoized>;
+    type TRef = React.ElementRef<TComponent>;
 
     return forwardRef<
-      RestorableStateProviderApi,
+      TRef & RestorableStateProviderApi,
       TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
     >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
       const restorableStateProviderRef = useRef<RestorableStateProviderApi>(null);
-      const componentRef = useRef<any>(null);
+      const componentRef = useRef<TRef>(null);
 
-      useImperativeHandle(ref, () => ({
-        ...(componentRef.current || {}),
-        ...(restorableStateProviderRef.current || {}),
-      }));
+      useImperativeHandle(
+        ref,
+        () =>
+          ({
+            ...(componentRef.current || {}),
+            ...(restorableStateProviderRef.current || {}),
+          } as TRef & RestorableStateProviderApi)
+      );
 
       // Function components cannot forward refs and show a warning if you try to do so.
       const canForwardRef =
         typeof Component !== 'function' || Component.prototype?.isReactComponent;
+
+      const componentProps = {
+        ...props,
+        ...(canForwardRef ? { ref: componentRef } : {}),
+      } as TProps;
 
       return (
         <RestorableStateProvider
@@ -127,11 +137,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
-          {/* @ts-ignore */}
-          <ComponentMemoized
-            {...(props as TProps)}
-            ref={canForwardRef ? componentRef : undefined}
-          />
+          <ComponentMemoized {...componentProps} />
         </RestorableStateProvider>
       );
     });
