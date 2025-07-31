@@ -18,6 +18,8 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 import { i18n } from '@kbn/i18n';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { getFlattenedObject } from '@kbn/std';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -282,6 +284,14 @@ export const getPostureInputHiddenVars = (
     default:
       return undefined;
   }
+};
+
+export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
+  if (!validationResults) return 0;
+
+  const flattenedValidation = getFlattenedObject(validationResults);
+  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  return errors.length;
 };
 
 export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>

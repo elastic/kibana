@@ -66,8 +66,6 @@ interface UseLoadCloudSetupProps {
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   uiSettings: IUiSettingsClient;
   cloud: CloudSetup;
-  // setIsValid: (isValid: boolean) => void;
-  // isValid: boolean;
 }
 
 export const useLoadCloudSetup = ({
@@ -82,9 +80,7 @@ export const useLoadCloudSetup = ({
   handleSetupTechnologyChange,
   uiSettings,
   cloud,
-}: // isValid,
-// setIsValid,
-UseLoadCloudSetupProps) => {
+}: UseLoadCloudSetupProps) => {
   const isServerless = !!cloud.serverless.projectType;
   const integration =
     integrationToEnable &&
@@ -96,25 +92,6 @@ UseLoadCloudSetupProps) => {
   const cloudConnectorsEnabled =
     uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
   const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
-
-  // const updatePolicy = useCallback(
-  //   ({
-  //     updatedPolicy,
-  //     isValid: resetIsValid,
-  //     isExtensionLoaded,
-  //   }: {
-  //     updatedPolicy: NewPackagePolicy;
-  //     isValid?: boolean;
-  //     isExtensionLoaded?: boolean;
-  //   }) => {
-  //     onChange({
-  //       isValid: resetIsValid ? resetIsValid : isValid,
-  //       updatedPolicy,
-  //       isExtensionLoaded: isExtensionLoaded || true,
-  //     });
-  //   },
-  //   [isValid, onChange]
-  // );
 
   const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
     input,

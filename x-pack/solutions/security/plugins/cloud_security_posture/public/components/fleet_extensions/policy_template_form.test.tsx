@@ -150,7 +150,6 @@ describe('<CspPolicyTemplateForm />', () => {
               isEditPage={true}
               isAgentlessEnabled={isAgentlessEnabled}
               integrationToEnable={integrationToEnable}
-              formState="VALID"
             />
           )}
           {!edit && (
@@ -163,7 +162,6 @@ describe('<CspPolicyTemplateForm />', () => {
               integrationToEnable={integrationToEnable || integrationToEnableState}
               defaultSetupTechnology={defaultSetupTechnology}
               setIntegrationToEnable={setIntegrationToEnable}
-              formState="VALID"
             />
           )}
         </TestProvider>
@@ -676,51 +674,51 @@ describe('<CspPolicyTemplateForm />', () => {
       },
     });
 
-    // // 2nd call happens on mount and increments cspm template enabled input
-    // expect(onChange).toHaveBeenCalledWith({
-    //   isExtensionLoaded: true,
-    //   isValid: true,
-    //   updatedPolicy: {
-    //     ...getMockPolicyAWS(),
-    //     inputs: policy.inputs.map((input) => {
-    //       if (input.type === CLOUDBEAT_AWS) {
-    //         return {
-    //           ...input,
-    //           enabled: true,
-    //           config: { cloud_formation_template_url: { value: 's3_url' } },
-    //         };
-    //       }
-    //       return input;
-    //     }),
-    //     name: 'cloud_security_posture-1',
-    //   },
-    // });
+    // 2nd call happens on mount and increments cspm template enabled input
+    expect(onChange).toHaveBeenCalledWith({
+      isExtensionLoaded: true,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        inputs: policy.inputs.map((input) => {
+          if (input.type === CLOUDBEAT_AWS) {
+            return {
+              ...input,
+              enabled: true,
+              config: { cloud_formation_template_url: { value: 's3_url' } },
+            };
+          }
+          return input;
+        }),
+        name: 'cloud_security_posture-1',
+      },
+    });
 
-    // onChange({
-    //   isExtensionLoaded: true,
-    //   isValid: true,
-    //   updatedPolicy: {
-    //     ...getMockPolicyAWS(),
-    //     inputs: policy.inputs.map((input) => ({
-    //       ...input,
-    //       enabled: input.policy_template === 'cspm',
-    //     })),
-    //     name: 'cspm-2',
-    //   },
-    // });
+    onChange({
+      isExtensionLoaded: true,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.policy_template === 'cspm',
+        })),
+        name: 'cspm-2',
+      },
+    });
 
-    // expect(onChange).toHaveBeenCalledWith({
-    //   isExtensionLoaded: true,
-    //   isValid: true,
-    //   updatedPolicy: {
-    //     ...getMockPolicyAWS(),
-    //     inputs: policy.inputs.map((input) => ({
-    //       ...input,
-    //       enabled: input.policy_template === 'cspm',
-    //     })),
-    //     name: 'cspm-2',
-    //   },
-    // });
+    expect(onChange).toHaveBeenCalledWith({
+      isExtensionLoaded: true,
+      isValid: true,
+      updatedPolicy: {
+        ...getMockPolicyAWS(),
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          enabled: input.policy_template === 'cspm',
+        })),
+        name: 'cspm-2',
+      },
+    });
   });
 
   describe('K8S', () => {
@@ -1537,8 +1535,8 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: false,
-        updatedPolicy: policy,
+        isValid: true,
+        updatedPolicy: { ...policy, name: 'cspm-1' },
       });
     });
 

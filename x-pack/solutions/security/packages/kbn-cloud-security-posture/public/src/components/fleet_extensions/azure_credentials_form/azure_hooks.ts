@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { getPosturePolicy } from '../utils';
 import {
@@ -57,6 +57,13 @@ const updateAzureArmTemplateUrlInPolicy = (
   updatePolicy: UpdatePolicy,
   templateUrl: string | undefined
 ) => {
+  if (
+    newPolicy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.config?.arm_template_url ===
+    templateUrl
+  ) {
+    return;
+  }
+
   updatePolicy?.({
     updatedPolicy: {
       ...newPolicy,
@@ -84,26 +91,29 @@ const useUpdateAzureArmTemplate = ({
   updatePolicy: UpdatePolicy;
   setupFormat: AzureSetupFormat;
 }) => {
-  const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
+  useEffect(() => {
+    const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
 
-  if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
-    if (azureArmTemplateUrl) {
-      updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
+    if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
+      if (azureArmTemplateUrl) {
+        updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
+      }
+      return;
     }
-    return;
-  }
-  const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo);
+    const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo);
 
-  if (templateUrl === '') return;
+    if (templateUrl === '') return;
 
-  if (azureArmTemplateUrl === templateUrl) return;
+    if (azureArmTemplateUrl === templateUrl) return;
 
-  if (
-    templateUrl !==
-    newPolicy?.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.config?.arm_template_url
-  ) {
-    updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
-  }
+    if (
+      templateUrl !==
+      newPolicy?.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.config?.arm_template_url
+    ) {
+      updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.arm_template_url, newPolicy, packageInfo, setupFormat]);
 };
 
 export const useAzureCredentialsForm = ({
@@ -133,9 +143,17 @@ export const useAzureCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
-  if (isValid && setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl) {
-    updatePolicy({ updatedPolicy: newPolicy, isValid: false });
-  }
+  useEffect(() => {
+    const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
+    // setIsValid(!isInvalid);
+    if (isInvalid !== isValid) {
+      updatePolicy({
+        isValid: !isInvalid,
+        updatedPolicy: newPolicy,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setupFormat, input.type]);
 
   const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
 

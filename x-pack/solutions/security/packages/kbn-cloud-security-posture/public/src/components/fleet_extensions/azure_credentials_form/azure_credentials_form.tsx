@@ -218,6 +218,7 @@ export const AzureCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AzureCredentialsFormProps) => {
+  const [isValidAzure, setIsValidAzure] = React.useState(isValid);
   const {
     group,
     fields,
@@ -250,10 +251,12 @@ export const AzureCredentialsForm = ({
   );
 
   if (
+    isValidAzure &&
     isValid &&
     !isPackageVersionValidForAzure &&
     setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
+    setIsValidAzure(false);
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
 

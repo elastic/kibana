@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiAccordion, EuiCallOut, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import {
   NamespaceComboBox,
@@ -13,7 +13,6 @@ import {
   SetupTechnologySelector,
 } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
@@ -99,8 +98,6 @@ export const CloudSetup = memo<CloudSetupProps>(
       integrationToEnable,
       cloud,
       uiSettings,
-      // setIsValid,
-      // isValid,
     });
 
     const { euiTheme } = useEuiTheme();
@@ -108,30 +105,6 @@ export const CloudSetup = memo<CloudSetupProps>(
     return (
       <>
         {isEditPage && <EditScreenStepTitle />}
-
-        {isEditPage && (
-          <>
-            <EuiCallOut
-              title={i18n.translate(
-                'securitySolutionPackages.fleetIntegration.editWarning.calloutTitle',
-                {
-                  defaultMessage: 'Modifying Integration Details',
-                }
-              )}
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="securitySolutionPackages.fleetIntegration.editWarning.calloutDescription"
-                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
         {/* Shows info on the active policy template */}
         <FormattedMessage
           id="securitySolutionPackages.fleetIntegration.configureCspmIntegrationDescription"

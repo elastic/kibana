@@ -183,8 +183,6 @@ interface GcpFormProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
-  // setIsValid: (isValid: boolean) => void;
-  // onChange: any;
   disabled: boolean;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;

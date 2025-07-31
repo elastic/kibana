@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -12,7 +12,7 @@ import {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import { PackagePolicyFormState } from '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/types';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../../../common/types_old';
@@ -28,6 +28,7 @@ import {
   getPostureInputHiddenVars,
   getPosturePolicy,
   getVulnMgmtCloudFormationDefaultValue,
+  hasErrors,
   isPostureInput,
 } from './utils';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
@@ -157,19 +158,22 @@ interface UseLoadFleetExtensionProps {
   isEditPage: boolean;
   packageInfo: PackageInfo;
   integrationToEnable?: CloudSecurityPolicyTemplate;
-  formState?: PackagePolicyFormState;
+  validationResults?: PackagePolicyValidationResults;
 }
 
 const getFormState = (
-  formState: PackagePolicyFormState | undefined,
-  policyTemplate: CloudSecurityPolicyTemplate | undefined
+  policyTemplate?: CloudSecurityPolicyTemplate,
+  validationResults?: PackagePolicyValidationResults
 ): boolean => {
   if (policyTemplate === 'kspm' || policyTemplate === 'vuln_mgmt') {
     return true; // Default to valid for KSPM and Vulnerability Management
   }
-  if (formState === 'VALID') return true;
-  if (formState === 'INVALID') return false;
-  return false;
+  // This a workaround for a bug in Fleet where CSPM is not getting the VALID formState change from Fleet
+  if (policyTemplate === 'cspm' && !hasErrors(validationResults)) {
+    return true; // CSPM is valid if formState is INVALID but no required vars are invalid
+  }
+
+  return false; // Default to false for other cases
 };
 
 const DEFAULT_INPUT_TYPE = {
@@ -184,7 +188,7 @@ export const useLoadFleetExtension = ({
   isEditPage,
   packageInfo,
   integrationToEnable,
-  formState,
+  validationResults,
 }: UseLoadFleetExtensionProps) => {
   const { cloud, uiSettings } = useKibana().services;
   const integration =
@@ -200,10 +204,8 @@ export const useLoadFleetExtension = ({
   const getIsSubscriptionValid = useIsSubscriptionStatusValid();
   const isSubscriptionValid = !!getIsSubscriptionValid.data;
   const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
-  const isValidFormState = getFormState(
-    formState,
-    integration as CloudSecurityPolicyTemplate | undefined
-  );
+  const isValidFormState = getFormState(input.policy_template, validationResults);
+  const setInitialEnabledInputRef = useRef(false);
 
   const updatePolicy = useCallback(
     ({
@@ -243,7 +245,7 @@ export const useLoadFleetExtension = ({
     !isSubscriptionLoading &&
     (enabledPolicyInputCount === 0 || enabledPolicyInputCount > 1)
   ) {
-    // setInitialEnabledInputRef.current = true;
+    setInitialEnabledInputRef.current = true;
     setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
     refetch();
   }

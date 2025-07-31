@@ -12,8 +12,6 @@ import type { FleetServerAgentComponentUnit } from '../../common/types/models/ag
 
 import type { PackagePolicyValidationResults } from '../services';
 
-import type { PackagePolicyFormState } from '../applications/fleet/sections/agent_policy/create_package_policy_page/types';
-
 import type {
   Agent,
   AgentPolicy,
@@ -50,7 +48,6 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   defaultSetupTechnology?: SetupTechnology;
   integrationToEnable?: string;
   setIntegrationToEnable?: (integration: string) => void;
-  formState?: PackagePolicyFormState;
 };
 
 /**
