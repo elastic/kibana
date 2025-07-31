@@ -41,6 +41,10 @@ export class DashboardAddPanelService extends FtrService {
     });
   }
 
+  async clickAddCustomVisualization() {
+    await this.clickEditorMenuButton();
+    await this.clickAddNewPanelFromUIActionLink('Custom visualization');
+  }
   async clickAddMarkdownPanel() {
     await this.clickEditorMenuButton();
     await this.clickAddNewPanelFromUIActionLink('Markdown text');

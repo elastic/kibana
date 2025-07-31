@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
       // Use the custom log package to test the fleet final pipeline
       await supertest
@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       const res = await es.search({
         index: TEST_INDEX,
       });

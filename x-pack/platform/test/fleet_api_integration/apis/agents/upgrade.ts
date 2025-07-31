@@ -26,12 +26,12 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_upgrade_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await fleetAndAgents.setup();
     });
 
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await supertest
         .post(`/api/fleet/agent_download_sources`)
         .set('kbn-xsrf', 'xxxx')
@@ -52,10 +52,10 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     describe('one agent', () => {

@@ -9,7 +9,7 @@
 
 import { State } from './state';
 import { GroupStream } from './streams/group_stream';
-import { UnwiredStream } from './streams/unwired_stream';
+import { ClassicStream } from './streams/classic_stream';
 import { WiredStream } from './streams/wired_stream';
 import * as streamFromDefinition from './stream_active_record/stream_from_definition';
 import {
@@ -49,13 +49,13 @@ describe('State', () => {
         },
       },
     };
-    const unwiredStream: Streams.UnwiredStream.Definition = {
-      name: 'unwired_stream',
+    const classicStream: Streams.ClassicStream.Definition = {
+      name: 'classic_stream',
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        unwired: {},
+        classic: {},
       },
     };
     const groupStream: Streams.GroupStream.Definition = {
@@ -68,7 +68,7 @@ describe('State', () => {
 
     searchMock.mockImplementationOnce(() => ({
       hits: {
-        hits: [{ _source: wiredStream }, { _source: unwiredStream }, { _source: groupStream }],
+        hits: [{ _source: wiredStream }, { _source: classicStream }, { _source: groupStream }],
         total: { value: 3 },
       },
     }));
@@ -77,7 +77,7 @@ describe('State', () => {
 
     expect(currentState.all().length).toEqual(3);
     expect(currentState.get('wired_stream') instanceof WiredStream).toEqual(true);
-    expect(currentState.get('unwired_stream') instanceof UnwiredStream).toEqual(true);
+    expect(currentState.get('classic_stream') instanceof ClassicStream).toEqual(true);
     expect(currentState.get('group_stream') instanceof GroupStream).toEqual(true);
 
     const clonedState = currentState.clone();

@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
-import type { Adapters } from '../types';
+import type { RuleMigrationAdapters } from '../types';
 
 export class RuleMigrationIndexMigrator {
   constructor(
-    private ruleMigrationIndexAdapters: Adapters,
+    private ruleMigrationIndexAdapters: RuleMigrationAdapters,
     private esClient: ElasticsearchClient,
     private logger: Logger
   ) {}

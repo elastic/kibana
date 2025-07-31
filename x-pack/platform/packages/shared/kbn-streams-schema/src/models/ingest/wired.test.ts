@@ -62,7 +62,7 @@ describe('WiredStream', () => {
             inherit: {},
           },
           processing: [],
-          unwired: {},
+          classic: {},
           wired: {
             fields: {},
             routing: [],

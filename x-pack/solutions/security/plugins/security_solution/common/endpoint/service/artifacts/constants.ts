@@ -7,11 +7,13 @@
 
 import type { EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
-import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import { ENDPOINT_ARTIFACT_OPERATORS } from '@kbn/securitysolution-list-utils';
 
 export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
+
+export const ADVANCED_MODE_TAG = 'form_mode:advanced';
 
 export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
 
@@ -28,7 +30,7 @@ export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY: EntryMatch = Object.fr
 export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT: string = `${
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.field
 } ${
-  EVENT_FILTERS_OPERATORS.find(
+  ENDPOINT_ARTIFACT_OPERATORS.find(
     ({ type }) => type === PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.type
   )?.message
 } ${PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY.value}`;

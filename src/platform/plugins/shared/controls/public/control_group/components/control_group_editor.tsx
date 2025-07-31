@@ -28,7 +28,7 @@ import {
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import type { ControlLabelPosition, ParentIgnoreSettings } from '../../../common';
+import type { ControlsLabelPosition, ControlsIgnoreParentSettings } from '@kbn/controls-schemas';
 import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
 import type { ControlGroupApi, ControlGroupEditorState } from '../types';
@@ -60,7 +60,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
   const controlCount = useMemo(() => Object.keys(children).length, [children]);
 
   const updateIgnoreSetting = useCallback(
-    (newSettings: Partial<ParentIgnoreSettings>) => {
+    (newSettings: Partial<ControlsIgnoreParentSettings>) => {
       stateManager.api.setIgnoreParentSettings({
         ...(selectedIgnoreParentSettings ?? {}),
         ...newSettings,
@@ -86,7 +86,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
               idSelected={selectedLabelPosition}
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
               onChange={(newPosition: string) => {
-                stateManager.api.setLabelPosition(newPosition as ControlLabelPosition);
+                stateManager.api.setLabelPosition(newPosition as ControlsLabelPosition);
               }}
             />
           </EuiFormRow>

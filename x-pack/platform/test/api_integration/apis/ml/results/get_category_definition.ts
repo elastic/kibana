@@ -78,7 +78,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get category_definition', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });

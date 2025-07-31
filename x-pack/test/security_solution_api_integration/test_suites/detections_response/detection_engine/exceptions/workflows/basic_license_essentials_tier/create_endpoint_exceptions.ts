@@ -77,16 +77,20 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@serverless @serverlessQA @ess create_endpoint_exceptions', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/endpoint_without_host_type'
       );
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/agent');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/agent'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_exceptions/endpoint_without_host_type'
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/endpoint_without_host_type'
       );
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/agent');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/agent'
+      );
     });
 
     beforeEach(async () => {

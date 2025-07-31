@@ -87,10 +87,14 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
                     gutterSize="xs"
                     alignItems="center"
                   >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
-                      defaultMessage="Compatibility:"
-                    />{' '}
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility"
+                          defaultMessage="Compatibility:"
+                        />{' '}
+                      </p>
+                    </EuiText>
                     {compatibility.map((compatibilityItem: string) => (
                       <EuiFlexItem grow={false} key={compatibilityItem}>
                         <EuiBadge color="default">{compatibilityItem}</EuiBadge>

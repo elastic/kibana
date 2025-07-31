@@ -187,6 +187,7 @@
   "translations": [
     "@kbn/translations-plugin/translations/zh-CN.json",
     "@kbn/translations-plugin/translations/ja-JP.json",
-    "@kbn/translations-plugin/translations/fr-FR.json"
+    "@kbn/translations-plugin/translations/fr-FR.json",
+    "@kbn/translations-plugin/translations/de-DE.json"
   ]
 }

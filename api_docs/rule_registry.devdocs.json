@@ -912,6 +912,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.getAlertFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertFields",
+            "description": [],
+            "signature": [
+              "(ruleTypeIds: string[]) => Promise<Readonly<{} & { fields: Readonly<{ subType?: Readonly<{ nested?: Readonly<{} & { path: string; }> | undefined; multi?: Readonly<{} & { parent: string; }> | undefined; } & {}> | undefined; timeZone?: string[] | undefined; defaultFormatter?: string | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | \"position\" | undefined; fixedInterval?: string[] | undefined; metadata_field?: boolean | undefined; } & { type: string; name: string; esTypes: string[]; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; }>[]; }>>"
+            ],
+            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.getAlertFields.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ruleTypeIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

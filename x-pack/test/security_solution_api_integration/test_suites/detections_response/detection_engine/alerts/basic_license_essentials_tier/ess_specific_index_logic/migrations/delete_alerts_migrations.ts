@@ -48,7 +48,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       outdatedAlertsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+        )
       );
 
       await createAlertsIndex(supertest, log);
@@ -83,7 +85,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+      );
       await deleteMigrationsIfExistent({
         kbnClient,
         ids: [createdMigration.migration_id],

@@ -226,7 +226,7 @@ export class SampleTaskManagerFixturePlugin
         timeout: '1s',
         createTaskRunner: () => ({
           async run() {
-            return await new Promise((resolve) => {});
+            return await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
           },
         }),
       },
