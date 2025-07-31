@@ -20,7 +20,6 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
@@ -1300,30 +1299,6 @@ export const getSavedObjectTypes = (
               },
             },
           ],
-        },
-      },
-    },
-    [KNOWLEDGE_BASE_SAVED_OBJECT_TYPE]: {
-      name: KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-      indexPattern: INGEST_SAVED_OBJECT_INDEX,
-      hidden: false,
-      namespaceType: 'agnostic',
-      management: {
-        importableAndExportable: false,
-      },
-      mappings: {
-        dynamic: false,
-        properties: {
-          package_name: { type: 'keyword' },
-          version: { type: 'keyword' },
-          installed_at: { type: 'date' },
-          knowledge_base_content: {
-            type: 'nested',
-            properties: {
-              filename: { type: 'keyword' },
-              content: { type: 'text', index: false },
-            },
-          },
         },
       },
     },

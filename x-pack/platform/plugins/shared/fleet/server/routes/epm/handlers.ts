@@ -642,10 +642,10 @@ export const getKnowledgeBaseHandler: FleetRequestHandler<
   TypeOf<typeof GetInfoRequestSchema.params>
 > = async (context, request, response) => {
   const { pkgName } = request.params;
-  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   try {
-    const knowledgeBase = await getPackageKnowledgeBase({ savedObjectsClient, pkgName });
+    const knowledgeBase = await getPackageKnowledgeBase({ esClient, pkgName });
 
     if (!knowledgeBase) {
       return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
