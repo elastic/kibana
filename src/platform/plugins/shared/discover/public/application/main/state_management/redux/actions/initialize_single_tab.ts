@@ -11,6 +11,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -38,6 +39,7 @@ import type { ConnectedCustomizationService } from '../../../../../customization
 import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 import type { TabState } from '../types';
+import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -260,13 +262,18 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       overrideDataView: dataView,
       services,
     });
+    const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
     const savedSearch = updateSavedSearch({
       savedSearch: persistedTabSavedSearch
         ? copySavedSearch(persistedTabSavedSearch)
         : services.savedSearch.getNew(),
       dataView,
-      state: initialState,
-      globalStateContainer: stateContainer.globalState,
+      appState: initialState,
+      globalState: {
+        filters: globalState?.filters,
+        timeRange: globalState?.time,
+        refreshInterval: globalState?.refreshInterval,
+      },
       services,
     });
 
@@ -279,8 +286,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     services.data.query.queryString.clearQuery();
 
     // Sync global filters (coming from URL) to filter manager.
-    // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is called later.
-    const globalFilters = stateContainer.globalState?.get()?.filters;
+    // It needs to be done manually here as `syncState` is called later.
+    const globalFilters = globalState?.filters;
     const shouldUpdateWithGlobalFilters =
       globalFilters?.length && !services.filterManager.getGlobalFilters()?.length;
     if (shouldUpdateWithGlobalFilters) {

@@ -26,8 +26,7 @@ import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
-import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import type { InternalStateStore } from './redux';
+import type { InternalStateStore, TabState } from './redux';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -127,12 +126,12 @@ export interface DiscoverSavedSearchContainer {
 
 export function getSavedSearchContainer({
   services,
-  globalStateContainer,
   internalState,
+  getCurrentTab,
 }: {
   services: DiscoverServices;
-  globalStateContainer: DiscoverGlobalStateContainer;
   internalState: InternalStateStore;
+  getCurrentTab: () => TabState;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -206,7 +205,7 @@ export function getSavedSearchContainer({
 
     updateSavedSearch({
       savedSearch: nextSavedSearch,
-      globalStateContainer,
+      globalState: getCurrentTab().lastPersistedGlobalState,
       services,
       useFilterAndQueryServices: true,
       dataView: replacementDataView,
@@ -248,8 +247,8 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
-      state: nextState || {},
-      globalStateContainer,
+      appState: nextState || {},
+      globalState: getCurrentTab().lastPersistedGlobalState,
       services,
       useFilterAndQueryServices,
     });

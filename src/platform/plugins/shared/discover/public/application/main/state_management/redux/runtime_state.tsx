@@ -97,25 +97,6 @@ export const selectTabRuntimeAppState = (
   return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
 };
 
-export const selectTabRuntimeGlobalState = (
-  runtimeStateManager: RuntimeStateManager,
-  tabId: string
-): TabState['lastPersistedGlobalState'] | undefined => {
-  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
-
-  if (!globalState) {
-    return undefined;
-  }
-
-  const { time: timeRange, refreshInterval, filters } = globalState;
-  return {
-    timeRange,
-    refreshInterval,
-    filters,
-  };
-};
-
 export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string

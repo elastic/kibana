@@ -13,6 +13,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { TabStateGlobalState } from '../redux';
 
 describe('updateSavedSearch', () => {
   const query: Query = {
@@ -47,10 +48,7 @@ describe('updateSavedSearch', () => {
       store: FilterStateStore.GLOBAL_STATE,
     },
   };
-  const createGlobalStateContainer = () => ({
-    get: jest.fn(() => ({ filters: [globalFilter] })),
-    set: jest.fn(),
-  });
+  const globalState: TabStateGlobalState = { filters: [globalFilter] };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,9 +63,9 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.searchSource.getField('filter')).toBeUndefined();
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -88,9 +86,9 @@ describe('updateSavedSearch', () => {
     });
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -113,9 +111,9 @@ describe('updateSavedSearch', () => {
     });
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         query,
         filters: [appFilter],
       },
@@ -134,9 +132,9 @@ describe('updateSavedSearch', () => {
     expect(savedSearch.breakdownField).toBeUndefined();
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         breakdownField: 'test',
       },
     });
@@ -151,9 +149,9 @@ describe('updateSavedSearch', () => {
     };
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
-      state: {
+      appState: {
         breakdownField: undefined,
       },
     });
@@ -173,7 +171,7 @@ describe('updateSavedSearch', () => {
     jest.spyOn(discoverServiceMock.data.query.queryString, 'getQuery').mockReturnValue(query);
     updateSavedSearch({
       savedSearch,
-      globalStateContainer: createGlobalStateContainer(),
+      globalState,
       services: discoverServiceMock,
       useFilterAndQueryServices: true,
     });
