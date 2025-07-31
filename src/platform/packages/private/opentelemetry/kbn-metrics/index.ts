@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { initMetrics } from './src/init_metrics';
+export { initMetrics, type InitMetricsOptions } from './src/init_metrics';

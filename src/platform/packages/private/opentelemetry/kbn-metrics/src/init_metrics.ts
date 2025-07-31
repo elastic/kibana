@@ -16,17 +16,24 @@ import type { MetricsConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
 
 /**
- * Initialize the OpenTelemetry meter provider
- * @param resource The OpenTelemetry resource information
- * @param metricsConfig The OpenTelemetry metrics configuration
+ * Options to the initMetrics method
  */
-export function initMetrics({
-  resource,
-  metricsConfig,
-}: {
+export interface InitMetricsOptions {
+  /**
+   * The OpenTelemetry resource information
+   */
   resource: resources.Resource;
+  /** The OpenTelemetry metrics configuration */
   metricsConfig: MetricsConfig;
-}) {
+}
+
+/**
+ * Initialize the OpenTelemetry meter provider
+ * @param initMetricsOptions {@link InitMetricsOptions}
+ */
+export function initMetrics(initMetricsOptions: InitMetricsOptions) {
+  const { resource, metricsConfig } = initMetricsOptions;
+
   const exportIntervalMillis = metricsConfig.interval.asMilliseconds();
 
   const readers = castArray(metricsConfig.exporters).map((exporterConfig) => {
