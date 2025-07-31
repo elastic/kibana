@@ -9,7 +9,7 @@
 
 import { faker } from '@faker-js/faker';
 import { type Row } from '@tanstack/react-table';
-import { type GroupNode } from '../../data_cascade_provider';
+import { type GroupNode } from '../components/data_cascade_provider';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from './utils';
 
 describe('cascade row utils', () => {
@@ -21,12 +21,15 @@ describe('cascade row utils', () => {
     original: {
       customer_full_name: faker.person.fullName(),
       customer_birth_date: faker.date.past().toISOString(),
+      customer_address: faker.location.streetAddress(),
+      customer_phone: faker.phone.number(),
+      customer_email: faker.internet.email(),
     },
     getParentRows: jest.fn(),
   };
 
   // TODO: implement mock for getParentRows
-  jest.spyOn(mockedRowInstance, 'getParentRows').mockImplementation(() => {});
+  jest.spyOn(mockedRowInstance, 'getParentRows').mockImplementation(() => []);
 
   describe('getCascadeRowNodePath', () => {
     it('should return the path of the row node in the group by hierarchy', () => {
@@ -45,8 +48,8 @@ describe('cascade row utils', () => {
         mockedRowInstance as unknown as Row<GroupNode>
       );
       expect(result).toEqual({
-        customer_full_name: 'John Doe',
-        customer_birth_date: '1990-01-01',
+        customer_full_name: mockedRowInstance.original.customer_full_name,
+        customer_birth_date: mockedRowInstance.original.customer_birth_date,
       });
     });
   });
