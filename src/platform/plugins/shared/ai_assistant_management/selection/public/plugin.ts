@@ -14,9 +14,9 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
