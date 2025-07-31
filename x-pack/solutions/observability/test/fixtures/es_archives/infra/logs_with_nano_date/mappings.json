@@ -1,0 +1,419 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-gaming-activity",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-gaming-activity"
+      ],
+      "name": "logs-gaming-activity",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-gaming-events",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-gaming-events"
+      ],
+      "name": "logs-gaming-events",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-gaming-scores",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-gaming-scores"
+      ],
+      "name": "logs-gaming-scores",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-manufacturing-downtime",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-manufacturing-downtime"
+      ],
+      "name": "logs-manufacturing-downtime",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-manufacturing-output",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-manufacturing-output"
+      ],
+      "name": "logs-manufacturing-output",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-manufacturing-quality",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-manufacturing-quality"
+      ],
+      "name": "logs-manufacturing-quality",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-retail-customers",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-retail-customers"
+      ],
+      "name": "logs-retail-customers",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-retail-inventory",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-retail-inventory"
+      ],
+      "name": "logs-retail-inventory",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-retail-promotions",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-retail-promotions"
+      ],
+      "name": "logs-retail-promotions",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-retail-sales",
+    "template": {
+      "_meta": {
+        "description": "Template for my time series data",
+        "my-custom-meta-field": "More arbitrary metadata"
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "index_patterns": [
+        "logs-retail-sales"
+      ],
+      "name": "logs-retail-sales",
+      "priority": 500,
+      "template": {
+        "mappings": {
+          "properties": {
+            "@timestamp": {
+              "format": "strict_date_optional_time_nanos",
+              "type": "date_nanos"
+            },
+            "data_stream": {
+              "properties": {
+                "namespace": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "message": {
+              "type": "wildcard"
+            }
+          }
+        }
+      }
+    }
+  }
+}
