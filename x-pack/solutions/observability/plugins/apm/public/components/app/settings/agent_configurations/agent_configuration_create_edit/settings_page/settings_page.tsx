@@ -8,18 +8,23 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiStat,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
@@ -68,12 +73,14 @@ export function SettingsPage({
     [newConfig.agent_name]
   );
 
+  const agentSettingKeys = useMemo(
+    () => settingsDefinitionsByAgent.map((setting) => setting.key),
+    [settingsDefinitionsByAgent]
+  );
+
   const unknownAgentSettings = useMemo(() => {
-    const agentSettingKeys = settingsDefinitionsByAgent.map((setting) => setting.key);
-    return Object.fromEntries(
-      Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key))
-    );
-  }, [settingsDefinitionsByAgent, newConfig.settings]);
+    return Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key));
+  }, [agentSettingKeys, newConfig.settings]);
 
   const isFormValid = useMemo(() => {
     return (
@@ -209,7 +216,106 @@ export function SettingsPage({
                 setNewConfig,
                 settingsDefinitionsByAgent,
               })}
-              <pre>{JSON.stringify(unknownAgentSettings, null, 2)}</pre>
+              <EuiHorizontalRule />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.apm.agentConfig.settingsPage.advancedConfigurationTitle"
+                        defaultMessage="Advanced Configuration"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="m">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.apm.agentConfig.settingsPage.advancedConfigurationDescription"
+                        defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT collector. Use with caution as incorrect configuration may affect your collector's behavior."
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div>
+                    <EuiButton
+                      data-test-subj="apmSettingsAddAdvancedConfigurationButton"
+                      iconType="plusInCircle"
+                    >
+                      {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
+                        defaultMessage: 'Add configuration',
+                      })}
+                    </EuiButton>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              {unknownAgentSettings.map(([key, value]) => (
+                <EuiFlexGroup key={key}>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
+                        defaultMessage: 'Key',
+                      })}
+                      isDisabled
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        data-test-subj="apmSettingsPageFieldText"
+                        aria-label={i18n.translate(
+                          'xpack.apm.agentConfig.settingsPage.keyAriaLabel',
+                          { defaultMessage: 'Advanced configuration key' }
+                        )}
+                        fullWidth
+                        value={key}
+                        onChange={(e) => {
+                          setNewConfig((prev) => {
+                            delete prev.settings[key];
+                            return {
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                [e.target.value]: value,
+                              },
+                            };
+                          });
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
+                        defaultMessage: 'Value',
+                      })}
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        data-test-subj="apmSettingsPageFieldText"
+                        aria-label={i18n.translate(
+                          'xpack.apm.agentConfig.settingsPage.valueAriaLabel',
+                          { defaultMessage: 'Advanced configuration value' }
+                        )}
+                        fullWidth
+                        value={value}
+                        onChange={(e) => {
+                          setNewConfig((prev) => {
+                            console.log(e.target.value);
+                            return {
+                              ...prev,
+                              settings: {
+                                ...prev.settings,
+                                [key]: e.target.value,
+                              },
+                            };
+                          });
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ))}
             </>
           )}
         </form>
