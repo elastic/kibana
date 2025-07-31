@@ -262,9 +262,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         }}
       />
 
-      {showFlyout && (
+      {showFlyout && pipelineNameFromLocation && (
         <PipelineFlyout
-          pipelineNameFromLocation={pipelineNameFromLocation ?? ''}
+          ingestPipeline={pipelineNameFromLocation}
           onClose={goHome}
           onCreateClick={goToCreatePipeline}
           onEditClick={goToEditPipeline}

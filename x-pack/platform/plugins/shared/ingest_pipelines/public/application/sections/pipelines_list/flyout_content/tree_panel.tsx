@@ -23,38 +23,23 @@ interface Props {
 export const TreePanel = React.memo(
   ({ pipelineTree, selectedPipeline, clickTreeNode, setTreeRootStack, isExtension }: Props) => {
     const {
-      services: { history, documentation },
+      services: { documentation },
     } = useKibana();
 
     const pushTreeStack = useCallback(
       (name: string) => {
-        const params = new URLSearchParams(history.location.search);
-        params.set('pipeline', name);
-        history.push({ pathname: '', search: params.toString() });
-
         clickTreeNode(name);
         setTreeRootStack((prevStack: string[]) => [...prevStack, name]);
       },
-      [history, clickTreeNode, setTreeRootStack]
+      [clickTreeNode, setTreeRootStack]
     );
 
     const popTreeStack = useCallback(() => {
       setTreeRootStack((prevStack: string[]) => {
         if (prevStack.length <= 1) return prevStack; // can't pop the last one
-
-        const newStack = prevStack.slice(0, -1);
-        const prevPipeline = newStack.at(-1);
-
-        if (prevPipeline) {
-          const params = new URLSearchParams(history.location.search);
-          params.set('pipeline', prevPipeline);
-          history.push({ pathname: '', search: params.toString() });
-          clickTreeNode(prevPipeline);
-        }
-
-        return newStack;
+        return prevStack.slice(0, -1);
       });
-    }, [history, clickTreeNode, setTreeRootStack]);
+    }, [clickTreeNode, setTreeRootStack]);
 
     return (
       <EuiSplitPanel.Inner color="subdued" data-test-subj="pipelineTreePanel">

@@ -68,7 +68,7 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
       >
         <KibanaContextProvider services={services}>
           <PipelineFlyout
-            pipelineNameFromLocation={ingestPipelineName}
+            ingestPipeline={ingestPipelineName}
             onClose={onClose}
             onCreateClick={createPipeline}
             onEditClick={editPipeline}

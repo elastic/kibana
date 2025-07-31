@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
@@ -13,7 +13,7 @@ import { Pipeline } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
 export interface Props {
-  pipelineNameFromLocation: string;
+  ingestPipeline: string;
   onClose: () => void;
   onCreateClick: (pipelineName: string) => void;
   onEditClick: (pipelineName: string) => void;
@@ -25,7 +25,7 @@ const DETAILS_VIEW = 1;
 const TREE_VIEW = 2;
 
 export const PipelineFlyout: FunctionComponent<Props> = ({
-  pipelineNameFromLocation,
+  ingestPipeline,
   onClose,
   onCreateClick,
   onEditClick,
@@ -36,8 +36,14 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
     services: { api },
   } = useKibana();
 
-  const [pipelineName, setPipelineName] = useState(pipelineNameFromLocation);
-  const [treeRootStack, setTreeRootStack] = useState([pipelineNameFromLocation]);
+  const [pipelineName, setPipelineName] = useState(ingestPipeline);
+  const [treeRootStack, setTreeRootStack] = useState([ingestPipeline]);
+
+  useEffect(() => {
+    if (treeRootStack.length > 0) {
+      setPipelineName(treeRootStack.at(-1));
+    }
+  }, [treeRootStack]);
 
   const { data: pipeline, isLoading, error } = api.useLoadPipeline(pipelineName);
   const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1) ?? '');
@@ -89,7 +95,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
               pipelineName={pipelineName}
               onCreatePipeline={() => onCreateClick(pipelineName)}
               error={error}
-              displayWarning={pipelineName !== pipelineNameFromLocation}
+              displayWarning={pipelineName !== ingestPipeline}
             />
           ) : (
             pipeline && <DetailsPanel pipeline={pipeline} />
