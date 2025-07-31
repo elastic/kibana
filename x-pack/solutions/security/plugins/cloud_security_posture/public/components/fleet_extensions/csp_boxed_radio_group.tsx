@@ -8,6 +8,7 @@
 import React from 'react';
 import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
+import camelCase from 'lodash/camelCase';
 
 export interface CspRadioGroupProps {
   disabled?: boolean;
@@ -25,6 +26,7 @@ export interface CspRadioOption {
   tooltip?: string;
   isBeta?: boolean;
   testId?: string;
+  name?: string;
 }
 
 export const RadioGroup = ({
@@ -33,6 +35,7 @@ export const RadioGroup = ({
   options,
   disabled,
   onChange,
+  name,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -90,7 +93,7 @@ export const RadioGroup = ({
               `}
             >
               <EuiRadio
-                name="cspRadioGroup"
+                name={name || camelCase(option.label || 'optionsGroup')}
                 data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}

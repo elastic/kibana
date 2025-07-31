@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import camelCase from 'lodash/camelCase';
 import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -25,6 +26,7 @@ export interface AssetRadioOption {
   tooltip?: string;
   isBeta?: boolean;
   testId?: string;
+  name?: string;
 }
 
 export const RadioGroup = ({
@@ -33,6 +35,7 @@ export const RadioGroup = ({
   options,
   disabled,
   onChange,
+  name,
 }: AssetRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -91,7 +94,7 @@ export const RadioGroup = ({
             >
               <EuiRadio
                 data-test-subj={option.testId}
-                name="assetRadioGroup"
+                name={name || camelCase(option.label || 'optionsGroup')}
                 label={option.label}
                 id={option.id}
                 checked={isChecked}
