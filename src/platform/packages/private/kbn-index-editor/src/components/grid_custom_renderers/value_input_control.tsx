@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiDataGridCellPopoverElementProps,
   EuiCallOut,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -41,7 +42,7 @@ export const getValueInputPopover =
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
-  ({ columnId, rowIndex, colIndex, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
+  ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
     const cellValue = row.flattened[columnId]?.toString();
@@ -50,11 +51,14 @@ export const getValueInputPopover =
       (value: string) => {
         onValueChange(docId!, { [columnId]: value });
 
-        dataTableRef.current?.closeCellPopover();
-        // Cell needs to be focused again after popover close,
-        // also focus must be put in another cell first for it to work.
-        dataTableRef.current?.setFocusedCell({ rowIndex: 0, colIndex: 0 });
-        dataTableRef.current?.setFocusedCell({ rowIndex, colIndex });
+        if (dataTableRef.current) {
+          dataTableRef.current.closeCellPopover();
+
+          // Cell needs to be focused again after popover close,
+          // Also focus must be put in another cell first for it to work.
+          dataTableRef.current.setFocusedCell({ rowIndex: 0, colIndex: 0 });
+          dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
+        }
       },
       [docId, columnId, rowIndex, colIndex]
     );
@@ -63,26 +67,27 @@ export const getValueInputPopover =
 
     let inputWidth: number | undefined;
     if (cellContentsElement) {
-      inputWidth = cellContentsElement.getBoundingClientRect().width;
+      inputWidth = cellContentsElement.offsetWidth;
     }
 
     if (!isPlaceholder) {
       return (
-        <ValueInput
-          onEnter={onEnter}
-          columnName={columnId}
-          columns={columns}
-          value={cellValue}
-          autoFocus
-          width={inputWidth}
-        />
+        <EuiFocusTrap autoFocus={true} initialFocus="input">
+          <ValueInput
+            onEnter={onEnter}
+            columnName={columnId}
+            columns={columns}
+            value={cellValue}
+            width={inputWidth}
+          />
+        </EuiFocusTrap>
       );
     } else {
       return (
         <EuiCallOut
           size="s"
           title={i18n.translate('indexEditor.flyout.grid.cell.noColumnDefined', {
-            defaultMessage: 'You must name the field before adding cell values.',
+            defaultMessage: 'Name the field before adding cell values',
           })}
         />
       );
