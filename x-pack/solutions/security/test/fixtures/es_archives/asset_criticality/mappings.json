@@ -1,0 +1,32 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".asset-criticality.asset-criticality-default",
+    "mappings": {
+      "properties": {
+        "id_value": {
+          "type": "keyword"
+        },
+        "id_field": {
+          "type": "keyword"
+        },
+        "criticality_level": {
+          "type": "keyword"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
