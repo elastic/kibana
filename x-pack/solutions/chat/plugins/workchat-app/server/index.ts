@@ -15,3 +15,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export type { WorkChatAppPluginSetup, WorkChatAppPluginStart } from './types';
+export type { DataSourceDefinition } from './services/data_source';

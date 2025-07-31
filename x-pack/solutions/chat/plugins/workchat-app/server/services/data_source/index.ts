@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import type { DataSourcesRegistry } from './data_source';
-
-export interface InternalServices {
-  dataSourcesRegistry: DataSourcesRegistry;
-}
+export { DataSourcesRegistry } from './registry';
+export type { DataSourceType, DataSourceDefinition } from './types';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { DataSourcesRegistry } from './data_source';
-
-export interface InternalServices {
-  dataSourcesRegistry: DataSourcesRegistry;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/chat/plugins/workchat-data-connectors'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+};

@@ -12,6 +12,7 @@ export const queryKeys = {
   dataSources: {
     list: ['dataSources', 'list'] as const,
     byId: (id: string) => ['dataSources', id] as const,
+    uiConfig: (type: string) => ['dataSources', 'uiConfig', type] as const,
   },
   dataConnections: {
     list: ['dataConnections', 'list'] as const,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DataSourcesRegistry } from './data_source';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkchatDataConnectorsPluginSetup {}
 
-export interface InternalServices {
-  dataSourcesRegistry: DataSourcesRegistry;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkchatDataConnectorsPluginStart {}

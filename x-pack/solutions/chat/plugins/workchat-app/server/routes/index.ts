@@ -6,7 +6,10 @@
  */
 
 import type { RouteDependencies } from './types';
+import { registerDataSourcesRoutes } from './data_sources';
+import { registerIndicesRoutes } from './indices';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
-  // todo: add routes
+  registerDataSourcesRoutes(dependencies);
+  registerIndicesRoutes(dependencies);
 };

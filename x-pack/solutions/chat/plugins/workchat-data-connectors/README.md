@@ -1,0 +1,3 @@
+# workchatDataConnectors
+
+A Kibana plugin

@@ -10,12 +10,27 @@
  */
 export const appPaths = {
   home: '/',
-  dataSources: {
-    list: '/data-sources',
-    edit: ({ id }: { id: string }) => `/data-sources/${id}/edit`,
+  data: {
+    sources: '/data/sources',
+    connections: '/data/connections',
+    sourceConfig: ({ type }: { type: string }) => `/data/source/${type}`,
   },
-  dataConnections: {
-    list: '/data-connections',
-    edit: ({ id }: { id: string }) => `/data-connections/${id}/edit`,
+  chat: {
+    new: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/chat`,
+    conversation: ({ agentId, conversationId }: { agentId: string; conversationId: string }) =>
+      `/assistants/${agentId}/chat/${conversationId}`,
+  },
+  assistants: {
+    list: '/assistants',
+    create: '/assistants/create',
+    edit: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/edit`,
+    workflow: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/workflow`,
+  },
+
+  tools: {
+    list: '/tools',
+    create: '/tools/create',
+    catalog: '/tools/catalog',
+    edit: ({ integrationId }: { integrationId: string }) => `/tools/${integrationId}/edit`,
   },
 };

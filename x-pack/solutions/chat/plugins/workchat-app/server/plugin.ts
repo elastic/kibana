@@ -18,6 +18,7 @@ import type { InternalServices } from './services/types';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
 import { AppLogger } from './utils';
+import { DataSourcesRegistry } from './services/data_source';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -36,12 +37,14 @@ export class WorkChatAppPlugin
 {
   private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
+  private readonly dataSourcesRegistry: DataSourcesRegistry;
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
     this.loggerFactory = context.logger;
     AppLogger.setInstance(this.loggerFactory.get('workchat.app'));
     this.config = context.config.get<WorkChatAppConfig>();
+    this.dataSourcesRegistry = new DataSourcesRegistry();
   }
 
   public setup(
@@ -64,11 +67,11 @@ export class WorkChatAppPlugin
     registerFeatures({ features: setupDeps.features });
 
     return {
-      // integrations: {
-      //   register: (tool) => {
-      //     return this.integrationRegistry.register(tool);
-      //   },
-      // },
+      dataSourcesRegistry: {
+        register: (dataSource) => {
+          return this.dataSourcesRegistry.register(dataSource);
+        },
+      },
     };
   }
 
@@ -76,12 +79,15 @@ export class WorkChatAppPlugin
     core: CoreStart,
     pluginsDependencies: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
+    // Block further registrations after start
+    this.dataSourcesRegistry.blockRegistration();
+
     this.services = createServices({
       core,
       config: this.config,
       loggerFactory: this.loggerFactory,
       pluginsDependencies,
-      // integrationRegistry: this.integrationRegistry,
+      dataSourcesRegistry: this.dataSourcesRegistry,
     });
 
     return {};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DataSourcesRegistry } from './data_source';
+import type { IRouter } from '@kbn/core/server';
 
-export interface InternalServices {
-  dataSourcesRegistry: DataSourcesRegistry;
+export function defineRoutes(router: IRouter) {
+  // Define plugin routes here if needed
 }

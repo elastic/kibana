@@ -23,3 +23,4 @@ export const plugin: PluginInitializer<
 };
 
 export type { WorkChatAppPluginSetup, WorkChatAppPluginStart } from './types';
+export { componentRegistry } from './application/services/component_registry';

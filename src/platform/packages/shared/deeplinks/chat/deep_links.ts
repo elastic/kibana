@@ -12,7 +12,7 @@ import { ONECHAT_APP_ID, WORKCHAT_APP_ID } from './constants';
 export type WorkchatApp = typeof WORKCHAT_APP_ID;
 export type OnechatApp = typeof ONECHAT_APP_ID;
 
-export type WorkchatLinkId = 'agents' | 'integrations';
+export type WorkchatLinkId = 'dataSources' | 'dataConnections';
 export type OnechatLinkId = 'conversations' | 'tools' | 'agents';
 
 export type DeepLinkId =

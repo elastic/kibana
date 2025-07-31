@@ -10,13 +10,14 @@ import type { LoggerFactory } from '@kbn/core/server';
 import type { WorkChatAppPluginStartDependencies } from '../types';
 import type { WorkChatAppConfig } from '../config';
 import type { InternalServices } from './types';
+import type { DataSourcesRegistry } from './data_source';
 
 interface CreateServicesParams {
   core: CoreStart;
   config: WorkChatAppConfig;
   loggerFactory: LoggerFactory;
   pluginsDependencies: WorkChatAppPluginStartDependencies;
-  // integrationRegistry: IntegrationRegistry;
+  dataSourcesRegistry: DataSourcesRegistry;
 }
 
 export function createServices({
@@ -24,6 +25,9 @@ export function createServices({
   config,
   loggerFactory,
   pluginsDependencies,
+  dataSourcesRegistry,
 }: CreateServicesParams): InternalServices {
-  return {};
+  return {
+    dataSourcesRegistry,
+  };
 }

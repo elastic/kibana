@@ -25,6 +25,14 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             title: 'Home',
           },
           {
+            children: [{ link: 'workchat:dataSources' }, { link: 'workchat:dataConnections' }],
+            id: 'workchat:data',
+            title: i18n.translate('xpack.workchat.searchNav.data', {
+              defaultMessage: 'Data',
+            }),
+            isCollapsible: false,
+          },
+          {
             link: 'discover',
             spaceBefore: 'l',
           },

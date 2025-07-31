@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { DataSourcesRegistry } from './data_source';
-
-export interface InternalServices {
-  dataSourcesRegistry: DataSourcesRegistry;
-}
+export { ConnectorConfigPage } from './connector_config_page';
