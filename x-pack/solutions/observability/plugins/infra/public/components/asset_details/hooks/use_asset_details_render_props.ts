@@ -6,9 +6,12 @@
  */
 
 import createContainer from 'constate';
+import { useEffect, useMemo } from 'react';
 import type { AssetDetailsProps } from '../types';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 import { useMetadataStateContext } from './use_metadata_state';
+import { useTimeRangeMetadataContext } from '../../../hooks/use_time_range_metadata';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
@@ -16,9 +19,22 @@ export type UseAssetDetailsRenderProps = Pick<
 >;
 
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
-  const [urlState] = useAssetDetailsUrlState();
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { metadata } = useMetadataStateContext();
+  const { featureFlags } = usePluginConfig();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { entityId, entityName, entityType, ...rest } = props;
+
+  const schema = useMemo(() => {
+    if (!timeRangeMetadata) return null;
+    return timeRangeMetadata.schemas[0];
+  }, [timeRangeMetadata]);
+
+  useEffect(() => {
+    if (featureFlags.hostOtelEnabled && schema) {
+      setUrlState({ schema });
+    }
+  }, [schema, featureFlags.hostOtelEnabled, setUrlState]);
 
   // When the asset entity.name is known we can load the page faster
   // Otherwise we need to use metadata response.

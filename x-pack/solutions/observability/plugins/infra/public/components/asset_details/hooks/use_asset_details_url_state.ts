@@ -16,6 +16,7 @@ import {
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { ContentTabIds } from '../types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
 import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
@@ -99,6 +100,11 @@ const AssetDetailsUrlStateRT = rt.partial({
   alertStatus: AlertStatusRT,
   dashboardId: rt.string,
   alertMetric: rt.string,
+  schema: rt.union([
+    rt.literal(DataSchemaFormat.ECS),
+    rt.literal(DataSchemaFormat.SEMCONV),
+    rt.null,
+  ]),
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
