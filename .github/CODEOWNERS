@@ -881,7 +881,6 @@ x-pack/platform/packages/private/ml/query_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/route_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/string_hash @elastic/ml-ui
 x-pack/platform/packages/private/ml/time_buckets @elastic/ml-ui
-x-pack/platform/packages/shared/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/private/rollup @elastic/kibana-management
@@ -954,7 +953,9 @@ x-pack/platform/packages/shared/ml/error_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/hooks @elastic/ml-ui
 x-pack/platform/packages/shared/ml/kibana_context @elastic/ml-ui
 x-pack/platform/packages/shared/ml/license @elastic/ml-ui
+x-pack/platform/packages/shared/ml/locator @elastic/ml-ui
 x-pack/platform/packages/shared/ml/ml_client @elastic/ml-ui
+x-pack/platform/packages/shared/ml/plugin_contracts @elastic/ml-ui
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
@@ -962,6 +963,7 @@ x-pack/platform/packages/shared/ml/saved_objects @elastic/ml-ui
 x-pack/platform/packages/shared/ml/server_api_schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/services @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat @elastic/workchat-eng
 x-pack/platform/packages/shared/onechat/onechat-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/onechat/onechat-common @elastic/workchat-eng
