@@ -129,12 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Search Inference endpoints', () => {
+    describe('Search inference endpoints', () => {
       before(async () => {
         await common.navigateToApp('elasticsearch/relevance/inference_endpoints');
       });
 
-      it('loads Inference endpoints page', async function () {
+      it('loads inference endpoints page', async function () {
         await retry.waitFor(
           'Inference endpoints page header',
           async () => await testSubjects.exists('allInferenceEndpointsPage')
