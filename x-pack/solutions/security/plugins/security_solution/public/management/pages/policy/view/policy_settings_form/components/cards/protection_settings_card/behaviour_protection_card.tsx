@@ -115,8 +115,6 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           osList={BEHAVIOUR_OS_VALUES}
           data-test-subj={getTestId('notifyUser')}
         />
-
-        <EuiSpacer size="m" />
       </SettingCard>
     );
   }

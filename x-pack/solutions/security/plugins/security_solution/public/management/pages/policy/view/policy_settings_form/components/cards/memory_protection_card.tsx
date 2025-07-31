@@ -104,8 +104,6 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
           osList={MEMORY_PROTECTION_OS_VALUES}
           data-test-subj={getTestId('notifyUser')}
         />
-
-        <EuiSpacer size="m" />
       </SettingCard>
     );
   }
