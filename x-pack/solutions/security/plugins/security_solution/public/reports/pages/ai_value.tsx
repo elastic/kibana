@@ -36,7 +36,7 @@ import { getTimeRangeAsDays } from '../components/ai_value/metrics';
  * Analyst time saved (e.g., minutes saved per alert × volume)
  * Total alerts filtered vs escalated
  * Real attacks detected by AI
- * Alert response time trends (before vs after AI adoption)
+ * Alert response time trends
  *
  * Metrics are calculated using dynamic values from the user’s actual data and can be customized per deployment.
  * Visualizations are executive-friendly: concise, interactive, and exportable.
