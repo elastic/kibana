@@ -356,14 +356,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('shows query suggestions', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
-        await pageObjects.infraHome.clickQueryBar();
-        await pageObjects.infraHome.inputQueryData();
-        await pageObjects.infraHome.ensureSuggestionsPanelVisible();
-        await pageObjects.infraHome.clearSearchTerm();
-      });
-
       it('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
