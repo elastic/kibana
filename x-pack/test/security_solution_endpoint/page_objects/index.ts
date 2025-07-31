@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SvlCommonPageProvider } from '@kbn/test-suites-serverless/functional/page_objects/svl_common_page';
+import { SvlCommonPageProvider } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects/svl_common_page';
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointPageUtils } from './page_utils';
