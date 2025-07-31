@@ -82,20 +82,19 @@ export function createAddLogRateAnalysisEmbeddableAction(
             return;
           }
 
-          const deletePanel = () => {
-            presentationContainerParent.removePanel(embeddable.uuid);
-          };
           return (
             <EmbeddableLogRateAnalysisUserInput
               isNewPanel={true}
               pluginStart={pluginStart}
               logRateAnalysisControlsApi={embeddable}
-              deletePanel={deletePanel}
               onConfirm={(updatedState) => {
                 embeddable.updateUserInput(updatedState);
                 closeFlyout();
               }}
-              onCancel={closeFlyout}
+              onCancel={() => {
+                presentationContainerParent.removePanel(embeddable.uuid);
+                closeFlyout();
+              }}
             />
           );
         },

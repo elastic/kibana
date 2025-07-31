@@ -12,37 +12,22 @@ import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from
 
 export function EmbeddableLogRateAnalysisUserInput({
   pluginStart,
-  isNewPanel,
   logRateAnalysisControlsApi,
   onCancel,
   onConfirm,
-  deletePanel,
   initialState,
+  isNewPanel,
 }: {
   pluginStart: AiopsPluginStartDeps;
-  isNewPanel: boolean;
   logRateAnalysisControlsApi: LogRateAnalysisComponentApi;
   onCancel: () => void;
   onConfirm: (newUpdate: LogRateAnalysisEmbeddableState) => void;
-  deletePanel?: () => void;
   initialState?: LogRateAnalysisEmbeddableState;
+  isNewPanel?: boolean;
 }) {
-  const hasChanged = React.useRef(false);
-
-  const cancelChanges = () => {
-    if (isNewPanel && deletePanel) {
-      deletePanel();
-      onCancel();
-    } else if (hasChanged.current && logRateAnalysisControlsApi && initialState) {
-      logRateAnalysisControlsApi.updateUserInput(initialState);
-      onCancel();
-    }
-  };
-
-  const preview = async (nextUpdate: LogRateAnalysisEmbeddableState) => {
+  const handlePreview = async (nextUpdate: LogRateAnalysisEmbeddableState) => {
     if (logRateAnalysisControlsApi) {
       logRateAnalysisControlsApi.updateUserInput(nextUpdate);
-      hasChanged.current = true;
     }
   };
 
@@ -52,9 +37,9 @@ export function EmbeddableLogRateAnalysisUserInput({
       IndexPatternSelect={pluginStart.unifiedSearch.ui.IndexPatternSelect}
       initialInput={initialState}
       onCreate={onConfirm}
-      onCancel={cancelChanges}
-      onPreview={preview}
-      isNewPanel={isNewPanel}
+      onCancel={onCancel}
+      onPreview={handlePreview}
+      isNewPanel={Boolean(isNewPanel)}
     />
   );
 }

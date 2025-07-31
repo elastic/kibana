@@ -143,17 +143,20 @@ export const getLogRateAnalysisEmbeddableFactory = (
               'aria-labelledby': 'logRateAnalysisConfig',
             },
             loadContent: async ({ closeFlyout }) => {
+              const initState = serializeLogRateAnalysisChartState();
               return (
                 <EmbeddableLogRateAnalysisUserInput
                   pluginStart={pluginStart}
-                  isNewPanel={false}
                   logRateAnalysisControlsApi={logRateAnalysisControlsApi}
                   onConfirm={(result) => {
                     logRateAnalysisControlsApi.updateUserInput(result);
                     closeFlyout();
                   }}
-                  onCancel={closeFlyout}
-                  initialState={serializeLogRateAnalysisChartState()}
+                  onCancel={() => {
+                    logRateAnalysisControlsApi.updateUserInput(initState);
+                    closeFlyout();
+                  }}
+                  initialState={initState}
                 />
               );
             },
