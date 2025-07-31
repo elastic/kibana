@@ -52,7 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
-          unwired: {},
+          classic: {},
         },
       });
     });
@@ -81,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     },
                   },
                 ],
-                unwired: {},
+                classic: {},
               },
             },
           },
@@ -99,7 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getResponse.status).to.eql(200);
 
       const body = getResponse.body;
-      Streams.UnwiredStream.GetResponse.asserts(body);
+      Streams.ClassicStream.GetResponse.asserts(body);
 
       const {
         dashboards,
@@ -128,7 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           ],
-          unwired: {},
+          classic: {},
         },
       });
 
@@ -174,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                unwired: {},
+                classic: {},
               },
             },
           },
@@ -270,7 +270,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
               ],
-              unwired: {},
+              classic: {},
             },
           },
         });
@@ -314,7 +314,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
               ],
-              unwired: {},
+              classic: {},
             },
           },
         });
@@ -436,7 +436,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     },
                   ],
-                  unwired: {},
+                  classic: {},
                 },
               },
             },
@@ -491,7 +491,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [],
-                  unwired: {},
+                  classic: {},
                 },
               },
             },
@@ -580,7 +580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const classicStream = getResponse.body.streams.find(
           (stream) => stream.name === ORPHANED_STREAM_NAME
         );
-        expect(Streams.UnwiredStream.Definition.is(classicStream!)).to.be(true);
+        expect(Streams.ClassicStream.Definition.is(classicStream!)).to.be(true);
       });
 
       it('should still return the stream on internal listing API', async () => {
@@ -589,7 +589,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const classicStream = getResponse.body.streams.find(
           (stream) => stream.stream.name === ORPHANED_STREAM_NAME
         );
-        expect(Streams.UnwiredStream.Definition.is(classicStream!.stream)).to.be(true);
+        expect(Streams.ClassicStream.Definition.is(classicStream!.stream)).to.be(true);
       });
 
       it('should allow deleting', async () => {

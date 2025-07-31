@@ -4566,6 +4566,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-navigation@link:src/core/packages/chrome/navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
@@ -5027,10 +5031,6 @@
   uid ""
 
 "@kbn/core-plugin-route-timeouts-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-plugin-static-assets-plugin@link:src/platform/test/plugin_functional/plugins/core_plugin_static_assets":
   version "0.0.0"
   uid ""
 
@@ -5799,6 +5799,10 @@
   uid ""
 
 "@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
+  version "0.0.0"
+  uid ""
+
+"@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
   version "0.0.0"
   uid ""
 

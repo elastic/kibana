@@ -9146,7 +9146,7 @@ paths:
               type: object
               properties:
                 objects:
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -20578,6 +20578,20 @@ paths:
                             - updating
                             - starting
                           type: string
+                        last_known_status:
+                          enum:
+                            - offline
+                            - error
+                            - online
+                            - inactive
+                            - enrolling
+                            - unenrolling
+                            - unenrolled
+                            - updating
+                            - degraded
+                            - uninstalled
+                            - orphaned
+                          type: string
                         local_metadata:
                           additionalProperties: {}
                           type: object
@@ -21037,6 +21051,20 @@ paths:
                           - updating
                           - starting
                         type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
+                        type: string
                       local_metadata:
                         additionalProperties: {}
                         type: object
@@ -21377,6 +21405,20 @@ paths:
                           - degraded
                           - updating
                           - starting
+                        type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       local_metadata:
                         additionalProperties: {}
@@ -48340,12 +48382,12 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
-                                            unwired:
+                                            classic:
                                               additionalProperties: false
                                               type: object
                                               properties: {}
                                           required:
-                                            - unwired
+                                            - classic
                                       required:
                                         - ingest
                           required:
@@ -52166,12 +52208,12 @@ paths:
                             - processing
                         - type: object
                           properties:
-                            unwired:
+                            classic:
                               additionalProperties: false
                               type: object
                               properties: {}
                           required:
-                            - unwired
+                            - classic
               required:
                 - ingest
       responses: {}
@@ -59842,7 +59884,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59866,7 +59910,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59903,7 +59949,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60001,7 +60049,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60030,7 +60080,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60056,7 +60108,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60097,7 +60151,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60122,7 +60178,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1

@@ -330,7 +330,7 @@ export class VisualizationsPlugin
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize Library',
+      title: 'Visualize library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -434,7 +434,7 @@ export class VisualizationsPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize Library',
+        title: 'Visualize library',
         description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -504,7 +504,7 @@ export class VisualizationsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Visualize Library',
+      name: 'Visualize library',
     });
 
     return {

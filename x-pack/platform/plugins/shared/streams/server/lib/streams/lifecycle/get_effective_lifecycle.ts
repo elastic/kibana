@@ -19,7 +19,7 @@ export async function getEffectiveLifecycle({
   streamsClient: StreamsClient;
   dataStream: IndicesDataStream;
 }) {
-  if (Streams.UnwiredStream.Definition.is(definition)) {
+  if (Streams.ClassicStream.Definition.is(definition)) {
     return getDataStreamLifecycle(dataStream);
   }
 
