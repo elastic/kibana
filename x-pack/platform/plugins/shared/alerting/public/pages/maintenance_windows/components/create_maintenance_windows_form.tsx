@@ -57,6 +57,7 @@ export interface CreateMaintenanceWindowFormProps {
   onSuccess: () => void;
   initialValue?: FormProps;
   maintenanceWindowId?: string;
+  showMultipleSolutionsWarning?: boolean;
 }
 
 const useDefaultTimezone = () => {
@@ -72,7 +73,13 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
 })) ?? [{ label: 'UTC' }];
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
-  const { onCancel, onSuccess, initialValue, maintenanceWindowId } = props;
+  const {
+    onCancel,
+    onSuccess,
+    initialValue,
+    maintenanceWindowId,
+    showMultipleSolutionsWarning = false,
+  } = props;
 
   const [defaultStartDateValue] = useState<string>(moment().toISOString());
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
@@ -161,6 +168,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           recurringSchedule: formData.recurringSchedule,
         }),
         scopedQuery: scopedQueryPayload ?? null,
+        ...(showMultipleSolutionsWarning || formData.solutionId ? { categoryIds: null } : {}),
       };
 
       if (isEditMode) {
@@ -178,6 +186,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       scopedQueryPayload,
       defaultTimezone,
       isEditMode,
+      showMultipleSolutionsWarning,
       updateMaintenanceWindow,
       maintenanceWindowId,
       onSuccess,
@@ -402,17 +411,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </UseField>
           </EuiFlexItem>
         </>
-        {isScopedQueryEnabled ? (
-          <EuiFlexItem>
-            <EuiHorizontalRule margin="xl" />
-            <EuiCallOut
-              data-test-subj="maintenanceWindowSolutionCategoryRemovedCallout"
-              title={i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_TITLE}
-              color="warning"
-            >
-              <p>{i18n.MULTIPLE_SOLUTION_CATEGORIES_REMOVED_SUBTITLE}</p>
-            </EuiCallOut>
-          </EuiFlexItem>
+        {isScopedQueryEnabled || showMultipleSolutionsWarning ? (
+          <>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="xl" />
+              <EuiCallOut
+                data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
+                title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+                color="warning"
+              >
+                <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+              </EuiCallOut>
+            </EuiFlexItem>
+          </>
         ) : null}
         <EuiSpacer size="s" />
       </EuiFlexGroup>

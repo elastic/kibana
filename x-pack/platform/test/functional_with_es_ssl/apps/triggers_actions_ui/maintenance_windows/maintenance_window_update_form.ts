@@ -106,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       expect(
-        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsWarning')
+        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsRemovedWarning')
       ).to.contain('Support for multiple solution categories is removed.');
     });
 
@@ -132,15 +132,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('createMaintenanceWindowForm');
       });
 
-      await testSubjects.existOrFail('maintenanceWindowSolutionCategoryRemovedCallout');
       await testSubjects.existOrFail('maintenanceWindowScopeQuery');
 
-      // Turn on repeat
-      await (await testSubjects.find('createMaintenanceWindowRepeatSwitch')).click();
-
-      await retry.try(async () => {
-        await testSubjects.existOrFail('recurringScheduleRepeatSelect');
-      });
+      expect(
+        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsRemovedWarning')
+      ).to.contain('Support for multiple solution categories is removed.');
 
       await (await testSubjects.find('create-submit')).click();
 

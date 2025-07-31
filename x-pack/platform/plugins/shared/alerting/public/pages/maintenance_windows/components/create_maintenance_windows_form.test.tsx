@@ -37,7 +37,6 @@ const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
     startDate: '2023-03-24',
     endDate: '2023-03-26',
     recurring: false,
-    solutionId: 'observability',
     scopedQuery: {
       kql: 'kibana.alert.job_errors_results.job_id : * ',
       filters: [],
@@ -155,7 +154,6 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
-          solutionId: undefined,
         }}
       />
     );
@@ -194,19 +192,29 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('should show warning correctly to inform user that multiple solution categories are not available', async () => {
+  it('should show warning correctly when scoped query filter is on', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
     expect(
-      await screen.findByTestId('maintenanceWindowSolutionCategoryRemovedCallout')
+      await screen.findByTestId('maintenanceWindowMultipleSolutionsRemovedWarning')
     ).toBeInTheDocument();
   });
 
-  it('should hide warning correctly when no scope query', async () => {
+  it('should show warning correctly when showMultipleSolutionsWarning is true', async () => {
+    appMockRenderer.render(
+      <CreateMaintenanceWindowForm {...formProps} showMultipleSolutionsWarning={true} />
+    );
+
+    expect(
+      await screen.findByTestId('maintenanceWindowMultipleSolutionsRemovedWarning')
+    ).toBeInTheDocument();
+  });
+
+  it('should hide warning correctly by default', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     expect(
-      screen.queryByTestId('maintenanceWindowSolutionCategoryRemovedCallout')
+      screen.queryByTestId('maintenanceWindowMultipleSolutionsRemovedWarning')
     ).not.toBeInTheDocument();
   });
 });

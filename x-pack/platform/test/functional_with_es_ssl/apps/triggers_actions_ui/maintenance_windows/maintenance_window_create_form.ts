@@ -120,7 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('maintenanceWindowScopeQuery');
       });
 
-      await testSubjects.existOrFail('maintenanceWindowSolutionCategoryRemovedCallout');
+      await testSubjects.existOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
 
       const filtersInput = await testSubjects.find('queryInput');
       await filtersInput.click();
