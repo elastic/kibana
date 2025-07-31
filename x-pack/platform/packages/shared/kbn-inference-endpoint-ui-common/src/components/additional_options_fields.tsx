@@ -81,7 +81,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             <h4>
               <FormattedMessage
                 id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthLabel"
-                defaultMessage={LABELS.CONTEXT_WINDOW_LABEL}
+                defaultMessage="Context window length"
               />
             </h4>
           </EuiTitle>
