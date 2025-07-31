@@ -84,7 +84,7 @@ const PackTypeSelectableComponent = ({
               title={
                 <EuiRadio
                   id={'osquery_pack_type_policy'}
-                  name="policyPackType"
+                  name="packType"
                   label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
                     defaultMessage: 'Policy',
                   })}
@@ -108,7 +108,7 @@ const PackTypeSelectableComponent = ({
               title={
                 <EuiRadio
                   id={'osquery_pack_type_global'}
-                  name="globalPackType"
+                  name="packType"
                   label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
                     defaultMessage: 'Global',
                   })}
