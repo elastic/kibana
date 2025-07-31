@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React, { memo, useRef } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
@@ -20,7 +13,6 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { CloudSetup } from '@kbn/cloud-security-posture';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
@@ -125,25 +117,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               }}
               disabled={isEditPage}
             />
-            <EuiSpacer size="l" />
-          </>
-        )}
-        {isEditPage && (
-          <>
-            <EuiCallOut
-              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                defaultMessage: 'Modifying Integration Details',
-              })}
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
-                />
-              </p>
-            </EuiCallOut>
             <EuiSpacer size="l" />
           </>
         )}

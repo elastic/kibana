@@ -258,6 +258,10 @@ export const useLoadFleetExtension = ({
     setIsLoading(false);
   }
 
+  if (isEditPage && isLoading && isSubscriptionValid) {
+    setIsLoading(false);
+  }
+
   return {
     cloud,
     isLoading,
