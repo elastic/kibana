@@ -85,11 +85,6 @@ export const initialExcludeOnUpgradeQueryMock = {
       },
       {
         term: {
-          type: 'guided-setup-state',
-        },
-      },
-      {
-        term: {
           type: 'maps-telemetry',
         },
       },
