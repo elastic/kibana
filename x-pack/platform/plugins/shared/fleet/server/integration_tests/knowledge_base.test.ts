@@ -8,6 +8,7 @@
 import {
   saveKnowledgeBaseContentToIndex,
   INTEGRATION_KNOWLEDGE_INDEX,
+  updatePackageKnowledgeBaseVersion,
 } from '../services/epm/packages/knowledge_base_index';
 import { getPackageKnowledgeBase } from '../services/epm/packages/get';
 import type { KnowledgeBaseItem } from '../../common/types/models/epm';
@@ -192,5 +193,84 @@ describe('Knowledge Base End-to-End Integration Test', () => {
   it('should verify the system index name is correct', () => {
     // Verify that the knowledge base system index name is correct
     expect(INTEGRATION_KNOWLEDGE_INDEX).toBe('.integration_knowledge');
+  });
+
+  it('should handle package version upgrades correctly', async () => {
+    // Mock knowledge base content for version 1.0.0
+    const knowledgeBaseContentV1: KnowledgeBaseItem[] = [
+      {
+        filename: 'old-guide.md',
+        content: '# Old Guide\n\nThis is the old version of the guide.',
+      },
+    ];
+
+    // Mock knowledge base content for version 2.0.0
+    const knowledgeBaseContentV2: KnowledgeBaseItem[] = [
+      {
+        filename: 'new-guide.md',
+        content: '# New Guide\n\nThis is the updated version of the guide.',
+      },
+      {
+        filename: 'features.md',
+        content: '# New Features\n\nNew features in version 2.0.0.',
+      },
+    ];
+
+    // Step 1: Install package version 1.0.0
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: knowledgeBaseContentV1,
+    });
+
+    // Step 2: Upgrade to version 2.0.0 using the upgrade function
+    await updatePackageKnowledgeBaseVersion({
+      esClient,
+      pkgName: 'test-package',
+      oldVersion: '1.0.0',
+      newVersion: '2.0.0',
+      knowledgeBaseContent: knowledgeBaseContentV2,
+    });
+
+    // Verify that old version content was deleted (called twice - once for v1.0.0, once for upgrade)
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: INTEGRATION_KNOWLEDGE_INDEX,
+      query: {
+        term: { 'package_name.keyword': 'test-package' },
+      },
+      refresh: true,
+    });
+
+    // Verify that new version content was indexed
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      operations: expect.arrayContaining([
+        {
+          index: {
+            _index: INTEGRATION_KNOWLEDGE_INDEX,
+            _id: 'test-package-2.0.0-new-guide.md',
+          },
+        },
+        {
+          package_name: 'test-package',
+          filename: 'new-guide.md',
+          content: expect.stringContaining('New Guide'),
+          version: '2.0.0',
+        },
+        {
+          index: {
+            _index: INTEGRATION_KNOWLEDGE_INDEX,
+            _id: 'test-package-2.0.0-features.md',
+          },
+        },
+        {
+          package_name: 'test-package',
+          filename: 'features.md',
+          content: expect.stringContaining('New Features'),
+          version: '2.0.0',
+        },
+      ]),
+      refresh: 'wait_for',
+    });
   });
 });

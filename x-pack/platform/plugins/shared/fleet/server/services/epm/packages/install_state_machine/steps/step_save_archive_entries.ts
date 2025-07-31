@@ -17,6 +17,7 @@ import {
 import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
+  updatePackageKnowledgeBaseVersion,
 } from '../../knowledge_base_index';
 
 import type { InstallContext } from '../_state_machine_package_install';
@@ -27,8 +28,14 @@ import { withPackageSpan } from '../../utils';
 export async function stepSaveArchiveEntries(
   context: InstallContext
 ): Promise<{ packageAssetRefs: Array<{ id: string; path: string; type: string }> }> {
-  const { packageInstallContext, savedObjectsClient, installSource, useStreaming, esClient } =
-    context;
+  const {
+    packageInstallContext,
+    savedObjectsClient,
+    installSource,
+    useStreaming,
+    esClient,
+    installedPkg,
+  } = context;
 
   await appContextService.getLogger().info(`Installing package from: ${installSource}`);
   await appContextService.getLogger().debug(`Streaming package: ${useStreaming}`);
@@ -120,12 +127,28 @@ export async function stepSaveArchiveEntries(
   // Save knowledge base content if present
   if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
     try {
-      await saveKnowledgeBaseContentToIndex({
-        esClient,
-        pkgName: packageInfo.name,
-        pkgVersion: packageInfo.version,
-        knowledgeBaseContent: packageInfo.knowledge_base,
-      });
+      // Check if this is an upgrade (existing package with different version)
+      const isUpgrade = installedPkg && installedPkg.attributes.version !== packageInfo.version;
+      const oldVersion = installedPkg?.attributes.version;
+
+      if (isUpgrade) {
+        // Handle package upgrade - this will delete all old versions and save new one
+        await updatePackageKnowledgeBaseVersion({
+          esClient,
+          pkgName: packageInfo.name,
+          oldVersion,
+          newVersion: packageInfo.version,
+          knowledgeBaseContent: packageInfo.knowledge_base,
+        });
+      } else {
+        // Handle fresh install - use existing logic
+        await saveKnowledgeBaseContentToIndex({
+          esClient,
+          pkgName: packageInfo.name,
+          pkgVersion: packageInfo.version,
+          knowledgeBaseContent: packageInfo.knowledge_base,
+        });
+      }
     } catch (error) {
       throw new Error(`Error saving knowledge base content: ${error}`);
     }

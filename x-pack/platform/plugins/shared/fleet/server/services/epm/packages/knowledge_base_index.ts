@@ -176,3 +176,54 @@ export async function deletePackageKnowledgeBase(
     refresh: true,
   });
 }
+
+export async function updatePackageKnowledgeBaseVersion({
+  esClient,
+  pkgName,
+  oldVersion,
+  newVersion,
+  knowledgeBaseContent,
+}: {
+  esClient: ElasticsearchClient;
+  pkgName: string;
+  oldVersion?: string;
+  newVersion: string;
+  knowledgeBaseContent: KnowledgeBaseItem[];
+}) {
+  if (!knowledgeBaseContent || knowledgeBaseContent.length === 0) {
+    // If no new knowledge base content, just delete any existing content for this package
+    await deletePackageKnowledgeBase(esClient, pkgName);
+    return;
+  }
+
+  // Ensure the system index exists
+  await ensureIntegrationKnowledgeIndex(esClient);
+
+  // Delete ALL existing documents for this package (regardless of version)
+  // This handles both fresh installs and upgrades
+  await deletePackageKnowledgeBase(esClient, pkgName);
+
+  // Index the new knowledge base content with the new version
+  const operations = [];
+
+  for (const item of knowledgeBaseContent) {
+    const docId = `${pkgName}-${newVersion}-${item.filename}`;
+
+    operations.push(
+      { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },
+      {
+        package_name: pkgName,
+        filename: item.filename,
+        content: item.content,
+        version: newVersion,
+      }
+    );
+  }
+
+  if (operations.length > 0) {
+    await esClient.bulk({
+      operations,
+      refresh: 'wait_for',
+    });
+  }
+}
