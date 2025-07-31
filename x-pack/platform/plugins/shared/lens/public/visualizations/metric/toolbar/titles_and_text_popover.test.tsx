@@ -46,7 +46,7 @@ describe('TitlesAndTextPopover', () => {
     titlesTextAlign: 'left',
     primaryAlign: 'right',
     secondaryAlign: 'right',
-    primaryPosition: 'top',
+    primaryPosition: 'bottom',
     titleWeight: 'bold',
     iconAlign: 'left',
     valueFontMode: 'default',
