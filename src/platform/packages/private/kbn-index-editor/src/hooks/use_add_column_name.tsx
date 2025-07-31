@@ -40,7 +40,7 @@ export const useAddColumnName = (initialColumnName = '') => {
     return null;
   }, [columnName, columns, initialColumnName]);
 
-  const saveColumn = useCallback(async () => {
+  const saveColumn = useCallback(() => {
     if (validationError) {
       return;
     }
