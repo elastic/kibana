@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -26,6 +25,8 @@ import {
   EuiTabs,
   EuiNotificationBadge,
   EuiText,
+  EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -53,34 +54,31 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
+          <EuiLink
+            onClick={toggleHistory}
+            external={false}
+            data-test-subj="ESQLEditor-feedback-link"
           >
-            <EuiIcon
+            <EuiIconTip
               type="clockCounter"
               color="primary"
               size="m"
-              onClick={toggleHistory}
-              css={css`
-                margin-right: ${euiTheme.size.s};
-                cursor: pointer;
-              `}
+              content={
+                isHistoryOpen
+                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                      defaultMessage: 'Hide recent queries',
+                    })
+                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                      defaultMessage: 'Show recent queries',
+                    })
+              }
+              position="top"
             />
-          </EuiToolTip>
+          </EuiLink>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -139,51 +137,42 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
+                type="checkInCircleFilled"
+                color="success"
+                size="m"
+                data-test-subj="ESQLEditor-queryHistory-success"
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-              >
-                <EuiIcon
-                  type="checkInCircleFilled"
-                  color="success"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-success"
-                />
-              </EuiToolTip>
+              />
             );
           case 'error':
             return (
-              <EuiToolTip
+              <EuiIconTip
+                type="error"
+                color="danger"
+                size="m"
                 position="top"
+                data-test-subj="ESQLEditor-queryHistory-error"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="error"
-                  color="danger"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-error"
-                />
-              </EuiToolTip>
+              />
             );
           case 'warning':
             return (
-              <EuiToolTip
-                position="top"
+              <EuiIconTip
+                type="warning"
+                color="warning"
+                size="m"
+                data-test-subj="ESQLEditor-queryHistory-warning"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="warning"
-                  color="warning"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-warning"
-                />
-              </EuiToolTip>
+                position="top"
+              />
             );
         }
       },
