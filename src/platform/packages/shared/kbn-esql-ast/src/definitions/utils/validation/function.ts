@@ -315,10 +315,45 @@ function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType
   return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
+export function validateFunction({
+  fn,
+  parentCommand,
+  parentOption,
+  context,
+  callbacks,
+  forceConstantOnly = false,
+  isNested,
+  parentAst,
+}: {
+  fn: ESQLFunction;
+  parentCommand: string;
+  parentOption?: string;
+  context: ICommandContext;
+  callbacks: ICommandCallbacks;
+  forceConstantOnly?: boolean;
+  isNested?: boolean;
+  parentAst?: ESQLCommand[];
+}): ESQLMessage[] {
+  const definition = getFunctionDefinition(fn.name);
+
+  if (!definition) {
+    return [];
+  }
+
+  const A = getSignaturesWithMatchingArity(definition, fn);
+
+  if (!A.length) {
+    return [errors.noMatchingCallSignatures(fn, definition)];
+  }
+
+  return [];
+}
+
 /**
  * Performs validation on a function
+ * @deprecated
  */
-export function validateFunction({
+export function validateFunctionOld({
   fn,
   parentCommand,
   parentOption,
@@ -465,7 +500,7 @@ export function validateFunction({
       const subArg = removeInlineCasts(_subArg);
 
       if (isFunctionExpression(subArg)) {
-        const messagesFromArg = validateFunction({
+        const messagesFromArg = validateFunctionOld({
           fn: subArg,
           parentCommand,
           parentOption,

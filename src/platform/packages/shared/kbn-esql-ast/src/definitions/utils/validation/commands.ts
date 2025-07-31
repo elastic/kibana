@@ -13,13 +13,15 @@ import {
   isIdentifier,
   isTimeInterval,
 } from '../../../ast/is';
-import { validateFunction } from './function';
+import { validateFunction, validateFunctionOld } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import { getMessageFromId } from '../errors';
 import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+
+const USE_NEW_VALIDATION = true;
 
 export const validateCommandArguments = (
   command: ESQLCommand,
@@ -34,8 +36,10 @@ export const validateCommandArguments = (
   for (const arg of command.args) {
     if (!Array.isArray(arg)) {
       if (isFunctionExpression(arg)) {
+        const validate = USE_NEW_VALIDATION ? validateFunction : validateFunctionOld;
+
         messages.push(
-          ...validateFunction({
+          ...validate({
             fn: arg,
             parentCommand: command.name,
             parentOption: undefined,

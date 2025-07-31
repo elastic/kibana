@@ -261,6 +261,14 @@ export interface ValidationErrors {
       extraArgs: number;
     };
   };
+  noMatchingCallSignature: {
+    message: string;
+    type: {
+      functionName: string;
+      argTypes: string;
+      validSignatures: string[];
+    };
+  };
   wrongArgumentNumberTooFew: {
     message: string;
     type: {

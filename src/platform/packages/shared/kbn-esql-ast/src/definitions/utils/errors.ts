@@ -17,7 +17,7 @@ import type {
   ESQLSource,
   ESQLIdentifier,
 } from '../../types';
-import type { ErrorTypes, ErrorValues } from '../types';
+import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -62,6 +62,25 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function [{name}]',
           values: { name: out.name },
+        }),
+      };
+    case 'noMatchingCallSignature':
+      const signatureList = (out.validSignatures as unknown as string[])
+        .map((sig) => `- ${sig}`)
+        .join('\n  ');
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
+          defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
+
+Received {argTypes}.
+
+Expected one of:
+  {validSignatures}`,
+          values: {
+            functionName: out.functionName,
+            argTypes: out.argTypes,
+            validSignatures: signatureList,
+          },
         }),
       };
     case 'wrongArgumentNumber':
@@ -429,12 +448,6 @@ export const errors = {
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
-  noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
-    errors.byId('noAggFunction', fn.location, {
-      commandName: cmd.name,
-      expression: fn.text,
-    }),
-
   expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('expressionNotAggClosed', fn.location, {
       commandName: cmd.name,
@@ -459,4 +472,18 @@ export const errors = {
     errors.byId('invalidJoinIndex', identifier.location, {
       identifier: identifier.name,
     }),
+
+  noMatchingCallSignatures: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
+    return errors.byId('noMatchingCallSignature', fn.location, {
+      functionName: fn.name,
+      argTypes: 'boolean, keyword',
+      validSignatures: [
+        'boolean, boolean',
+        'keyword, keyword',
+        'text, text',
+        'double, double',
+        'integer, integer',
+      ],
+    });
+  },
 };

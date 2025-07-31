@@ -10,7 +10,7 @@ import type { ESQLCommand, ESQLCommandOption, ESQLMessage } from '../../../types
 import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import { validateColumnForCommand } from './column';
-import { validateFunction } from './function';
+import { validateFunctionOld } from './function';
 
 export function validateOption(
   option: ESQLCommandOption,
@@ -37,7 +37,7 @@ export function validateOption(
       messages.push(...validateColumnForCommand(arg, command.name, context));
     } else if (isFunctionExpression(arg)) {
       messages.push(
-        ...validateFunction({
+        ...validateFunctionOld({
           fn: arg,
           parentCommand: command.name,
           parentOption: option.name,
