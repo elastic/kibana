@@ -16,6 +16,7 @@ import {
   EuiDataGridCellPopoverElementProps,
   EuiCallOut,
   EuiFocusTrap,
+  EuiForm,
 } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -52,9 +53,20 @@ export const getValueInputPopover =
 
     const editedValue = useRef(cellValue);
 
-    const onEnter = useCallback(
-      (value: string) => {
-        onValueChange(docId!, { [columnId]: value });
+    const saveValue = useCallback(
+      (newValue: string) => {
+        if (docId && newValue !== cellValue) {
+          onValueChange(docId, { [columnId]: editedValue.current });
+        }
+      },
+      [docId, columnId, cellValue]
+    );
+
+    const onSubmit = useCallback(
+      (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        saveValue(editedValue.current);
 
         if (dataTableRef.current) {
           dataTableRef.current.closeCellPopover();
@@ -65,15 +77,15 @@ export const getValueInputPopover =
           dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
         }
       },
-      [docId, columnId, rowIndex, colIndex]
+      [saveValue, rowIndex, colIndex]
     );
 
-    // Update the value when the user navigates away from the cell without pressing Enter
+    // Update the value when the user navigates away from the cell
     useEffect(() => {
       return () => {
-        onValueChange(docId!, { [columnId]: editedValue.current });
+        saveValue(editedValue.current);
       };
-    }, [columnId, docId]);
+    }, [columnId, docId, saveValue]);
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -85,16 +97,17 @@ export const getValueInputPopover =
     if (!isPlaceholder) {
       return (
         <EuiFocusTrap autoFocus={true} initialFocus="input">
-          <ValueInput
-            onEnter={onEnter}
-            columnName={columnId}
-            columns={columns}
-            value={cellValue}
-            width={inputWidth}
-            onChange={(value) => {
-              editedValue.current = value;
-            }}
-          />
+          <EuiForm component="form" onSubmit={onSubmit}>
+            <ValueInput
+              columnName={columnId}
+              columns={columns}
+              value={cellValue}
+              width={inputWidth}
+              onChange={(value) => {
+                editedValue.current = value;
+              }}
+            />
+          </EuiForm>
         </EuiFocusTrap>
       );
     } else {
