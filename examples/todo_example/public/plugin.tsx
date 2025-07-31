@@ -21,9 +21,9 @@ export class ToDoPlugin implements Plugin<void, void, SetupDeps> {
     // Register an application into the side navigation menu
     core.application.register({
       id: 'todo',
-      title: 'To Do',
+      title: 'My Todo List',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div data-test-subj="todoDiv">To Do!</div>, element);
+        ReactDOM.render(<div data-test-subj="todoDiv">My Todo List!</div>, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
