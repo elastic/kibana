@@ -11,12 +11,27 @@ import { tracingConfigSchema } from '@kbn/tracing-config';
 import { metricsConfigSchema } from '@kbn/metrics-config';
 import type { TelemetryConfig } from './types';
 
+/**
+ * Properties to use in the {@link telemetryTracingSchema}.
+ * They are exported separately because they are used by the telemetry plugin to extend its config schema
+ * since everything is in the same `telemetry.*` config path.
+ *
+ * @internal
+ */
 export const telemetryTracingSchemaProps = {
+  /**
+   * Global toggle for telemetry. It disables all form of telemetry: product analytics, OTel tracing and OTel metrics.
+   */
   enabled: schema.boolean({ defaultValue: true }),
+  /** The {@link tracingConfigSchema | tracing config schema} */
   tracing: tracingConfigSchema,
+  /** The {@link metricsConfigSchema | metrics config schema} */
   metrics: metricsConfigSchema,
 };
 
+/**
+ * Schema for the OpenTelemetry configuration
+ */
 export const telemetryTracingSchema: Type<TelemetryConfig> = schema.object(
   telemetryTracingSchemaProps
 );
