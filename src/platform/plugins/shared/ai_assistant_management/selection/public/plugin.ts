@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -33,7 +33,6 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   licensing: LicensingPluginStart;
-  management: ManagementStart;
 }
 
 export class AIAssistantManagementPlugin
