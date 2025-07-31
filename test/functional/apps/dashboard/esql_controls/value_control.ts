@@ -77,6 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
 
       // create the control
+      await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await testSubjects.click('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
 
@@ -121,6 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.editExistingControl(firstId);
 
+      await esql.waitESQLEditorLoaded();
       await esql.setEsqlEditorQuery('FROM logstash-*');
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
