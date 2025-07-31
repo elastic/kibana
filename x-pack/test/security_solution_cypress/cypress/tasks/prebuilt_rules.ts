@@ -15,6 +15,7 @@ import {
   RULES_UPDATES_TAB,
   TOASTER,
   SUCCESS_TOASTER_HEADER,
+  RULE_NAME,
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 import {
@@ -240,7 +241,7 @@ export const assertRulesNotPresentInRuleUpdatesTable = (
 ) => {
   cy.url().should('include', RULES_UPDATES);
   for (const rule of rules) {
-    cy.get(rule['security-rule'].name).should('not.exist');
+    cy.contains(RULE_NAME, rule['security-rule'].name).should('not.exist');
   }
 };
 
