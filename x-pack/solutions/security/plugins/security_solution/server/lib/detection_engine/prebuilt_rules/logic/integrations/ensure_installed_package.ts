@@ -30,7 +30,7 @@ export async function ensureInstalledPackage(
 
     return packageInstallationResult;
   } catch (error) {
-    logger?.error(
+    logger.error(
       `ensureInstalledPackage: error installing package "${PREBUILT_RULES_PACKAGE_NAME}" version: ${pkgVersion}}`,
       error
     );
