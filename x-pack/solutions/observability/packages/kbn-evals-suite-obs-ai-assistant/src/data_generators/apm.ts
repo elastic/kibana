@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { apm, timerange, log } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { SynthtraceFixture } from '@kbn/scout-oblt';
 import { faker } from '@faker-js/faker';
 
 const APM_SERVICE_NAME = 'my-apm-service';
@@ -16,7 +16,7 @@ const APM_INSTANCE_NAME = 'my-apm-instance';
 export async function generateApmData({
   apmSynthtraceEsClient,
 }: {
-  apmSynthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
 }) {
   const myServiceInstance = apm
     .service(APM_SERVICE_NAME, 'production', 'go')
@@ -60,7 +60,7 @@ export async function generateApmData({
 export async function generateCustomApmLogs({
   logsSynthtraceEsClient,
 }: {
-  logsSynthtraceEsClient: LogsSynthtraceEsClient;
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'];
 }) {
   const tagOptions = ['db', 'auth', 'cache', 'queue', 'search'];
   await logsSynthtraceEsClient.index(

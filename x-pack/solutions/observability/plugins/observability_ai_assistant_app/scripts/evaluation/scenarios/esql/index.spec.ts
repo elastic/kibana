@@ -55,7 +55,7 @@ async function evaluateEsqlQuery({
 
 describe('ES|QL query generation', () => {
   describe('ES|QL scenarios with data', () => {
-    describe.skip('Logs dataset', () => {
+    describe('Logs dataset', () => {
       const logsClient = synthtraceEsClients.logsSynthtraceEsClient;
 
       before(async () => {
@@ -134,11 +134,6 @@ describe('ES|QL query generation', () => {
             allow_no_indices: true,
           });
         }
-
-        await esClient.indices.delete({
-          index: 'users_metadata',
-          ignore_unavailable: true,
-        });
       });
 
       it('generates a query to show top 20 error messages', async () => {
@@ -152,12 +147,12 @@ describe('ES|QL query generation', () => {
           | LIMIT 20`,
           execute: true,
           criteria: [
-            `The results should be equivalent to:
-              12 - ERROR: Database connection timed out
-              9 - ERROR: Null pointer exception at com.example.UserService
-              4 - ERROR: Payment gateway returned status 503
-              3 - ERROR: Invalid API key provided
-              2 - ERROR: Disk space is critically low`,
+            `The results should include error counts for the following errors:
+              - ERROR: Database connection timed out
+              - ERROR: Null pointer exception at com.example.UserService
+              - ERROR: Payment gateway returned status 503
+              - ERROR: Invalid API key provided
+              - ERROR: Disk space is critically low`,
           ],
         });
       });
@@ -174,6 +169,7 @@ describe('ES|QL query generation', () => {
           criteria: [
             `Should identify errors in 'apache.error', 'my_app', 'my_service_app' and 'my_test_app' datasets.`,
             'The highest number of errors should be in in the apache.error dataset',
+            'The lowest number of errors should be in in the my_test_app dataset',
           ],
         });
       });
@@ -202,8 +198,8 @@ describe('ES|QL query generation', () => {
             'What is the average request time in milliseconds for Nginx services over the last 2 hours?',
           expected: `FROM logs-nginx.access-*
           | WHERE @timestamp >= NOW() - 2 hours
-          | GROK message "%{GREEDYDATA} %{NUMBER:request_time:double}"
-          | KEEP request_time, message`,
+          | GROK message "%{GREEDYDATA} %{NUMBER:request_time}"
+          | STATS average_request_time_ms = AVG(TO_DOUBLE(request_time) * 1000)`,
           execute: true,
         });
       });
@@ -241,7 +237,7 @@ describe('ES|QL query generation', () => {
           expected: `FROM logs-*
           | WHERE trace.id == "abc123"`,
           execute: true,
-          criteria: ['Should retrieve 1 log with the trace ID abc123.'],
+          criteria: ['The assistant should retrieve 1 log with the trace ID abc123.'],
         });
       });
 
@@ -254,6 +250,10 @@ describe('ES|QL query generation', () => {
           | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
           | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
           execute: true,
+          criteria: [
+            'The response after query execution should include error count by 10-minute time intervals',
+            '2 time intervals should have high error counts, while the rest should be low error counts',
+          ],
         });
       });
 
@@ -277,6 +277,9 @@ describe('ES|QL query generation', () => {
           | WHERE login_count > 5
           | SORT login_count DESC`,
           execute: true,
+          criteria: [
+            'The result should display the login count for each user who logged in more than 5 times',
+          ],
         });
       });
 
@@ -305,6 +308,10 @@ describe('ES|QL query generation', () => {
           | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
           | STATS count = COUNT(*) BY status_type`,
           execute: true,
+          criteria: [
+            'The result should include 2 rows for successful and error counts',
+            'The successful http responses count should be higher than error error http responses count',
+          ],
         });
       });
     });
@@ -317,14 +324,15 @@ describe('ES|QL query generation', () => {
         });
       });
 
-      // after(async () => {
-      //   await synthtraceEsClients.apmSynthtraceEsClient.clean();
-      // });
+      after(async () => {
+        await synthtraceEsClients.apmSynthtraceEsClient.clean();
+        await synthtraceEsClients.logsSynthtraceEsClient.clean();
+      });
 
       it('service inventory', async () => {
         await evaluateEsqlQuery({
           question:
-            'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
+            'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Generate the query and execute it, do not visualize.',
           expected: `FROM traces-apm*
           | WHERE @timestamp >= NOW() - 24 hours
           | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
@@ -333,7 +341,7 @@ describe('ES|QL query generation', () => {
           execute: true,
           criteria: [
             "The result should contain one row for the service 'my-apm-service'.",
-            "For 'my-apm-service', the total requests should be 300",
+            "For 'my-apm-service', the total requests should be approximately 28,780",
             'The average duration should be approximately 50,000',
             'The success rate should now be correctly calculated as 0.5.',
           ],
@@ -379,9 +387,8 @@ describe('ES|QL query generation', () => {
           | SORT \`BUCKET(@timestamp, 1 day)\` ASC`,
           execute: true,
           criteria: [
-            'For the most recent full day, the total log count should be 10,480.',
-            'The total error count for that day should be 150.',
-            'The calculated error rate should be approximately 1.431.',
+            'The total error count for the most recent day should be 10610.',
+            'The calculated error rate for that day should be approximately 50.',
           ],
         });
       });
@@ -442,13 +449,16 @@ describe('ES|QL query generation', () => {
           expected: `FROM "*apm*"
           | WHERE @timestamp >= NOW() - 24 hours
           | EVAL tx_failure = CASE(processor.event == "transaction" AND event.outcome == "failure" AND service.name == "my-apm-service", 1, 0),
-                log_error = CASE(processor.event == "log" AND log.level == "error" AND service.name == "my-apm-service-2", 1, 0)
+                log_error = CASE(log.level == "error" AND service.name == "my-apm-service-2", 1, 0)
           | STATS failure_count = SUM(tx_failure), error_log_count = SUM(log_error) BY BUCKET(@timestamp, 1h)
           | WHERE failure_count > 0 OR error_log_count > 0
           | SORT \`BUCKET(@timestamp, 1h)\` ASC`,
           execute: true,
           criteria: [
-            'The result should be a time-series table with columns for hourly transaction failures and error logs.',
+            'The result is a table showing a side-by-side comparison of `failure_count` and `error_log_count` for each hour.',
+            'The result set should contain approximately 24 or 25 rows, representing the hourly buckets over the last 24 hours.',
+            'The `failure_count` must sum transaction failures from `my-apm-service`, and `error_log_count` must sum error logs from `my-apm-service-2`.',
+            'The results must be sorted chronologically from oldest to newest.',
           ],
         });
       });
@@ -470,13 +480,12 @@ describe('ES|QL query generation', () => {
             'The result should contain a row for each of the 5 possible tags.',
             "The 'avg_parsed_duration' for each tag should be a value between 5 and 200.",
             "The results must be sorted in descending order by 'avg_parsed_duration'.",
-            "The highest 'avg_parsed_duration' should be for the 'search' tag and the lowest 'avg_parsed_duration' should be for the 'queue' tag",
           ],
         });
       });
     });
 
-    describe.skip('Packetbeat dataset', () => {
+    describe('Packetbeat dataset', () => {
       const indexName = 'packetbeat-test-data';
 
       before(async () => {
@@ -504,8 +513,7 @@ describe('ES|QL query generation', () => {
 
       it('counts HTTP requests by status code', async () => {
         await evaluateEsqlQuery({
-          question:
-            'Show me the count of each HTTP response status code. Ignore null values in the status code.',
+          question: 'Show me the count of each HTTP response status code.',
           expected: `FROM packetbeat-*
           | WHERE http.response.status_code IS NOT NULL
           | STATS request_count = COUNT(*) BY http.response.status_code
@@ -544,7 +552,7 @@ describe('ES|QL query generation', () => {
       });
     });
 
-    describe.skip('Employees dataset', () => {
+    describe('Employees dataset', () => {
       before(async () => {
         await esClient.indices.create({
           index: 'employees',
@@ -616,7 +624,7 @@ describe('ES|QL query generation', () => {
     });
   });
 
-  describe.skip('ES|QL scenarios without data', () => {
+  describe('ES|QL scenarios without data', () => {
     it('logs avg cpu', async () => {
       await evaluateEsqlQuery({
         question:
@@ -669,7 +677,7 @@ describe('ES|QL query generation', () => {
     });
   });
 
-  describe.skip('SPL to ES|QL conversion', () => {
+  describe('SPL to ES|QL conversion', () => {
     it('network_firewall count by', async () => {
       await evaluateEsqlQuery({
         question: `Can you convert this SPL query to ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,

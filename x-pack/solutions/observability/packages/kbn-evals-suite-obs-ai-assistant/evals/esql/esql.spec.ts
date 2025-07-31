@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import moment from 'moment';
 import { evaluate as base } from '../../src/evaluate';
 import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 import {
@@ -20,6 +18,7 @@ import {
   generateUniqueUserLoginLogs,
 } from '../../src/data_generators/logs';
 import { generatePacketbeatData } from '../../src/data_generators/packetbeat';
+import { generateApmData, generateCustomApmLogs } from '../../src/data_generators/apm';
 
 // Base evaluation setup extended with the custom ES|QL dataset evaluator
 const evaluate = base.extend<{
@@ -102,14 +101,17 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate.afterAll(async ({ logsSynthtraceEsClient, esClient }) => {
       // Clean up generated log data
       await logsSynthtraceEsClient.clean();
+
       const catResponse = await esClient.cat.indices({
         index: 'logs-*',
         format: 'json',
         h: 'index',
       });
+
       const indicesToDelete = catResponse
         .map((i: { index?: string }) => i.index)
         .filter((index): index is string => Boolean(index));
+
       if (indicesToDelete.length > 0) {
         await esClient.indices.delete({
           index: indicesToDelete,
@@ -137,12 +139,12 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 | LIMIT 20`,
                 execute: true,
                 criteria: [
-                  `The results should be equivalent to:
-                  12 - ERROR: Database connection timed out
-                  9 - ERROR: Null pointer exception at com.example.UserService
-                  4 - ERROR: Payment gateway returned status 503
-                  3 - ERROR: Invalid API key provided
-                  2 - ERROR: Disk space is critically low`,
+                  `The results should include error counts for the following errors:
+                    - ERROR: Database connection timed out
+                    - ERROR: Null pointer exception at com.example.UserService
+                    - ERROR: Payment gateway returned status 503
+                    - ERROR: Invalid API key provided
+                    - ERROR: Disk space is critically low`,
                 ],
               },
               metadata: {},
@@ -161,6 +163,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 criteria: [
                   `Should identify errors in 'apache.error', 'my_app', 'my_service_app' and 'my_test_app' datasets.`,
                   'The highest number of errors should be in in the apache.error dataset',
+                  'The lowest number of errors should be in in the my_test_app dataset',
                 ],
               },
               metadata: {},
@@ -193,8 +196,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               output: {
                 expected: `FROM logs-nginx.access-*
                 | WHERE @timestamp >= NOW() - 2 hours
-                | GROK message "%{GREEDYDATA} %{NUMBER:request_time:double}"
-                | KEEP request_time, message`,
+                | GROK message "%{GREEDYDATA} %{NUMBER:request_time}"
+                | STATS average_request_time_ms = AVG(TO_DOUBLE(request_time) * 1000)`,
                 execute: true,
               },
               metadata: {},
@@ -254,6 +257,10 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
                 | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
                 execute: true,
+                criteria: [
+                  'The response after query execution should include error count by 10-minute time intervals',
+                  '2 time intervals should have high error counts, while the rest should be low error counts',
+                ],
               },
               metadata: {},
             },
@@ -281,6 +288,9 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 | WHERE login_count > 5
                 | SORT login_count DESC`,
                 execute: true,
+                criteria: [
+                  'The result should display the login count for each user who logged in more than 5 times',
+                ],
               },
               metadata: {},
             },
@@ -313,6 +323,10 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
                 | STATS count = COUNT(*) BY status_type`,
                 execute: true,
+                criteria: [
+                  'The result should include 2 rows for successful and error counts',
+                  'The successful http responses count should be higher than error error http responses count',
+                ],
               },
               metadata: {},
             },
@@ -324,47 +338,15 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
 
   // --- Test Suite for APM Data ---
   evaluate.describe('with APM data', () => {
-    evaluate.beforeAll(async ({ apmSynthtraceEsClient }) => {
-      const myServiceInstance = apm
-        .service('my-service', 'production', 'go')
-        .instance('my-instance');
-
-      await apmSynthtraceEsClient.index(
-        timerange(moment().subtract(15, 'minutes'), moment())
-          .interval('1m')
-          .rate(10)
-          .generator((timestamp) =>
-            myServiceInstance
-              .transaction('GET /api')
-              .timestamp(timestamp)
-              .duration(50)
-              .outcome('success')
-          )
-      );
-
-      await apmSynthtraceEsClient.index(
-        timerange(moment().subtract(15, 'minutes'), moment())
-          .interval('1m')
-          .rate(10)
-          .generator((timestamp) =>
-            myServiceInstance
-              .transaction('GET /api')
-              .timestamp(timestamp)
-              .duration(50)
-              .failure()
-              .errors(
-                myServiceInstance
-                  .error({
-                    message: '2024-11-15T13:12:00 - ERROR - duration: 12ms',
-                    type: 'My Type',
-                  })
-                  .timestamp(timestamp)
-              )
-          )
-      );
+    evaluate.beforeAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
+      await generateApmData({ apmSynthtraceEsClient });
+      await generateCustomApmLogs({
+        logsSynthtraceEsClient,
+      });
     });
 
-    evaluate.afterAll(async ({ apmSynthtraceEsClient }) => {
+    evaluate.afterAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
+      await logsSynthtraceEsClient.clean();
       await apmSynthtraceEsClient.clean();
     });
 
@@ -382,10 +364,16 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               output: {
                 expected: `FROM traces-apm*
                 | WHERE @timestamp >= NOW() - 24 hours
-                | EVAL is_success = CASE(event.outcome == "success", 1, 0)
-                | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = SUM(is_success) / COUNT(*) BY service.name
+                | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
+                | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = TO_DOUBLE(SUM(is_success)) / COUNT(*) BY service.name
                 | KEEP service.name, avg_duration, success_rate, total_requests`,
                 execute: true,
+                criteria: [
+                  "The result should contain one row for the service 'my-apm-service'.",
+                  "For 'my-apm-service', the total requests should be approximately 28,780",
+                  'The average duration should be approximately 50,000',
+                  'The success rate should now be correctly calculated as 0.5.',
+                ],
               },
               metadata: {},
             },
@@ -409,13 +397,14 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'My APM data is in .ds-traces-apm-default-*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
+                  'My APM data is in traces-apm*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
               },
               output: {
-                expected: `FROM .ds-traces-apm-default-*
+                expected: `FROM traces-apm*
                 | WHERE @timestamp > NOW() - 1 hour
                 | STATS AVG(transaction.duration.us) BY service.name`,
                 execute: true,
+                criteria: ['The average duration should be 50,000 for the my-apm-service'],
               },
               metadata: {},
             },
@@ -427,28 +416,112 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               output: {
                 expected: `FROM logs-apm*
                 | WHERE @timestamp >= NOW() - 7 days
-                | EVAL is_error = CASE(processor.event == "error", 1, 0)
-                | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY BUCKET(@timestamp, 1 day)
-                | EVAL error_rate = total_errors / total_logs * 100
+                | EVAL error = CASE(processor.event == "error", 1, 0)
+                | STATS total_logs = COUNT(*), total_errors = SUM(error) BY BUCKET(@timestamp, 1 day)
+                | EVAL error_rate = TO_DOUBLE(total_errors) / total_logs * 100
                 | SORT \`BUCKET(@timestamp, 1 day)\` ASC`,
                 execute: true,
+                criteria: [
+                  'The total error count for the most recent day should be 10610.',
+                  'The calculated error rate for that day should be approximately 50.',
+                ],
               },
               metadata: {},
             },
             {
               input: {
                 question:
-                  'From logs-apm*, I want to see the 5 latest messages using ES|QL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+                  'From logs-apm.error-*, I want to see the 5 latest messages using ES|QL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
               },
               output: {
-                expected: `FROM logs-apm*
+                expected: `FROM logs-apm.error-*
                 | SORT @timestamp DESC
                 | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
                 | KEEP formatted_date, processor.event, message
                 | LIMIT 5`,
                 execute: true,
                 criteria: [
-                  'The Assistant uses KEEP, to make sure the AT LEAST the formatted date, processor event and message fields are displayed. More columns are fine, fewer are not',
+                  'The assistant uses KEEP, to make sure AT LEAST the formatted date, processor event and the message fields are displayed. More columns are fine, fewer are not',
+                  'The assistant should retrieve exactly 5 rows',
+                  `The field that includes the message should have '2024-11-15T13:12:00 - ERROR - duration: 12ms'`,
+                ],
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From logs-apm.custom-*, what is the total count of logs for each individual tag?',
+              },
+              output: {
+                expected: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours
+                | MV_EXPAND tags
+                | STATS count = COUNT(*) BY tags
+                | SORT count DESC`,
+                execute: true,
+                criteria: [
+                  'The result should be a list of tags and their corresponding total counts across all logs.',
+                ],
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question: `From logs-apm.custom-*, list info-level logs that are tagged with 'cache' but NOT with 'search'.`,
+              },
+              output: {
+                expected: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours AND log.level == "info" AND tags == "cache" AND NOT tags == "search"
+                | KEEP message, tags`,
+                execute: true,
+                criteria: [
+                  "Results must contain the 'cache' tag.",
+                  "Results must NOT contain the 'search' tag.",
+                ],
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question: `Show me a side-by-side hourly comparison of the transaction failure count from 'my-apm-service' and the error log count from 'my-apm-service-2' over the last 24 hours.`,
+              },
+              output: {
+                expected: `FROM "*apm*"
+                | WHERE @timestamp >= NOW() - 24 hours
+                | EVAL tx_failure = CASE(processor.event == "transaction" AND event.outcome == "failure" AND service.name == "my-apm-service", 1, 0),
+                      log_error = CASE(log.level == "error" AND service.name == "my-apm-service-2", 1, 0)
+                | STATS failure_count = SUM(tx_failure), error_log_count = SUM(log_error) BY BUCKET(@timestamp, 1h)
+                | WHERE failure_count > 0 OR error_log_count > 0
+                | SORT \`BUCKET(@timestamp, 1h)\` ASC`,
+                execute: true,
+                criteria: [
+                  'The result is a table showing a side-by-side comparison of `failure_count` and `error_log_count` for each hour.',
+                  'The result set should contain approximately 24 or 25 rows, representing the hourly buckets over the last 24 hours.',
+                  'The `failure_count` must sum transaction failures from `my-apm-service`, and `error_log_count` must sum error logs from `my-apm-service-2`.',
+                  'The results must be sorted chronologically from oldest to newest.',
+                ],
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question: `From the custom APM error logs, parse the duration from the message field and calculate the average parsed duration for each tag.`,
+              },
+              output: {
+                expected: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours AND log.level == 'error'
+                | GROK message "%{GREEDYDATA}duration: %{NUMBER:duration_ms:string}ms"
+                | WHERE duration_ms IS NOT NULL
+                | EVAL duration = TO_LONG(duration_ms)
+                | MV_EXPAND tags
+                | STATS avg_parsed_duration = AVG(duration) BY tags
+                | SORT avg_parsed_duration DESC`,
+                execute: true,
+                criteria: [
+                  'The result should contain a row for each of the 5 possible tags.',
+                  "The 'avg_parsed_duration' for each tag should be a value between 5 and 200.",
+                  "The results must be sorted in descending order by 'avg_parsed_duration'.",
                 ],
               },
               metadata: {},

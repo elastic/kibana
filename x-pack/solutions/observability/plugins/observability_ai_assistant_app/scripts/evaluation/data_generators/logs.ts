@@ -243,8 +243,7 @@ export async function generateUniqueUserLoginLogs({
     const endOfDay = moment().subtract(day, 'days').endOf('day');
     const timeRange = timerange(startOfDay, endOfDay);
 
-    // Simulate a random number of total logins for the day.
-    const dailyLogins = 10 + Math.floor(Math.random() * 20);
+    const dailyLogins = 25;
     const intervalInSeconds = Math.max(1, Math.floor(timeRangeInSeconds / dailyLogins));
 
     const logStream = timeRange.interval(`${intervalInSeconds}s`).generator((timestamp) => {
