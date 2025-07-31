@@ -15,11 +15,12 @@ import {
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SiemRuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
+import type { StoredSiemMigration } from '../types';
 import type { RuleMigrationTaskStartParams } from './types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('./rule_migrations_task_runner', () => {
   return {
@@ -34,7 +35,7 @@ jest.mock('./rule_migrations_task_runner', () => {
 });
 
 const currentUser = {} as AuthenticatedUser;
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 const migrationId = 'migration1';
 
 describe('RuleMigrationsTaskClient', () => {

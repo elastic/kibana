@@ -118,6 +118,13 @@ export const createNavigationTree = ({
                       defaultMessage: 'Service inventory',
                     }),
                   },
+                  {
+                    link: 'apm:service-map',
+                    title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
+                      defaultMessage: 'Service map',
+                    }),
+                    sideNavStatus: 'hidden',
+                  },
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
                   { link: 'apm:settings', sideNavStatus: 'hidden' },
