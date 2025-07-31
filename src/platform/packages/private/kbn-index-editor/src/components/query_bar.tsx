@@ -22,7 +22,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { FilePicker } from './file_picker';
 import { KibanaContextExtra } from '../types';
 
-export const CustomPanel = () => {
+export const QueryBar = () => {
   const {
     services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
