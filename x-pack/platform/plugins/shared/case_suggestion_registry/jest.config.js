@@ -8,12 +8,12 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/context_registry'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/case_suggestion_registry'],
   setupFiles: [],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/context_registry',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/case_suggestion_registry',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/context_registry/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/case_suggestion_registry/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

@@ -1,18 +1,18 @@
 {
   "type": "plugin",
-  "id": "@kbn/context-registry-plugin",
+  "id": "@kbn/case-suggestion-registry-plugin",
   "owner": [
     "@elastic/obs-ux-management-team"
   ],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "contextRegistry",
+    "id": "caseSuggestionRegistry",
     "browser": true,
     "server": true,
     "configPath": [
       "xpack",
-      "contextRegistry"
+      "caseSuggestionRegistry"
     ],
     "requiredPlugins": [
     ],
