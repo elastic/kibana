@@ -670,6 +670,7 @@ export interface ESQLSearchResponse {
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
   took?: number;
+  documents_found?: number;
   _clusters?: estypes.ClusterStatistics;
 }
 

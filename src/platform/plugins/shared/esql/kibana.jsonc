@@ -22,8 +22,7 @@
       "contentManagement",
       "share",
       "fileUpload",
-      "fieldFormats",
-      "unifiedSearch"
+      "fieldFormats"
     ],
     "requiredBundles": [
       "kibanaReact",

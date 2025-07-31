@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -17,17 +24,8 @@ import { KibanaContextExtra } from '../types';
 
 export const CustomPanel = () => {
   const {
-    services: {
-      share,
-      data,
-      indexUpdateService,
-      unifiedSearch: {
-        ui: { QueryStringInput },
-      },
-    },
+    services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
-
-  const [localQuery, setLocalQuery] = useState<string>('');
 
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const dataView = useObservable(indexUpdateService.dataView$);
@@ -56,22 +54,11 @@ export const CustomPanel = () => {
     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
       <EuiFlexItem grow>
         {dataView ? (
-          <QueryStringInput
-            disableLanguageSwitcher
-            timeRangeForSuggestionsOverride={false}
-            indexPatterns={[dataView]}
-            appName={'discover'}
-            query={{ language: 'kuery', query: localQuery }}
-            onChange={(queryUpdate) => {
-              setLocalQuery(queryUpdate.query as string);
+          <EuiSearchBar
+            defaultQuery={''}
+            onChange={({ queryText, query, error }) => {
+              indexUpdateService.setQuery(queryText);
             }}
-            onSubmit={(queryUpdate) => {
-              indexUpdateService.setQuery(queryUpdate.query as string);
-            }}
-            submitOnBlur
-            isClearable
-            autoSubmit
-            bubbleSubmitEvent={false}
           />
         ) : null}
       </EuiFlexItem>

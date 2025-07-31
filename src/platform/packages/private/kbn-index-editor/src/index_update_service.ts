@@ -13,16 +13,11 @@ import type {
   BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
-import {
-  type DataPublicPluginStart,
-  type ISearchSource,
-  KBN_FIELD_TYPES,
-} from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
-import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy } from 'lodash';
+import { groupBy, zipObject } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -48,6 +43,8 @@ import {
   catchError,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -85,7 +82,6 @@ export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
 export class IndexUpdateService {
   constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
-    this._searchSource = this.data.search.searchSource.createEmpty();
     this.listenForUpdates();
   }
 
@@ -134,8 +130,6 @@ export class IndexUpdateService {
   private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
   private readonly _subscription = new Subscription();
-
-  private readonly _searchSource: ISearchSource;
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
@@ -372,35 +366,71 @@ export class IndexUpdateService {
         // Only when the dataview is set for the first time
         this.dataView$.pipe(take(1)),
         // Time range updates
-        this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
+        this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(
+          startWith(null),
+          map(() => {
+            return this.data.query.timefilter.timefilter.getTime();
+          })
+        ),
         // Query updates
         this._query$,
         this._refreshSubject$,
       ])
         .pipe(
           skipWhile(() => !this.isIndexCreated()),
-          tap(([dataView, timeRangeEmit, query]) => {
+          tap(() => {
             this._isFetching$.next(true);
-
-            const timeRangeFilter = this.data.query.timefilter.timefilter.createFilter(
-              dataView,
-              this.data.query.timefilter.timefilter.getTime()
-            ) as Filter;
-            this._searchSource.setField('index', dataView);
-            this._searchSource.setField('filter', [timeRangeFilter]);
-            this._searchSource.setField('size', DOCS_PER_FETCH);
-            this._searchSource.setField('query', { language: 'kuery', query });
           }),
-          switchMap(() => {
-            // Set the query to match all documents
-            return this._searchSource
-              .fetch$({
-                disableWarningToasts: true,
-              })
+          switchMap(([dataView, timeRange, query]) => {
+            // FROM
+            const fromCmd = Builder.command({
+              name: 'from',
+              args: [Builder.expression.source.node(dataView.getIndexPattern())],
+            });
+
+            // WHERE qstr("message: …")
+            const whereCmd = Builder.command({
+              name: 'where',
+              args: [
+                Builder.expression.func.call('qstr', [Builder.expression.literal.string(query)]),
+              ],
+            });
+
+            // LIMIT 10
+            const limitCmd = Builder.command({
+              name: 'limit',
+              args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
+            });
+            // Combine the commands into a query node
+            const queryExpression = Builder.expression.query([
+              fromCmd,
+              ...(query ? [whereCmd] : []),
+              limitCmd,
+            ]);
+            const queryText: string = BasicPrettyPrinter.print(queryExpression);
+
+            return this.data.search
+              .search<{ params: ESQLSearchParams }, { rawResponse: ESQLSearchResponse }>(
+                {
+                  params: {
+                    query: queryText,
+                  },
+                },
+                {
+                  strategy: 'esql_async',
+                  retrieveResults: true,
+                }
+              )
               .pipe(
                 catchError((e) => {
                   // query might be invalid, so we return an empty response
-                  return of({ rawResponse: { hits: { hits: [], total: 0 } } });
+                  return of({
+                    rawResponse: {
+                      columns: [],
+                      values: [],
+                      documents_found: 0,
+                    } satisfies ESQLSearchResponse,
+                  });
                 })
               );
           }),
@@ -408,17 +438,22 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ([response, dataView]) => {
-            const { hits, total } = response.rawResponse.hits;
+            const { documents_found: total, values, columns } = response.rawResponse;
 
-            const resultRows: DataTableRecord[] = hits.map((hit) => {
-              return buildDataTableRecord(hit, dataView);
-            });
+            const columnNames = columns.map(({ name }) => name);
+
+            const resultRows: DataTableRecord[] = values
+              .map((row) => zipObject(columnNames, row))
+              .map((row, idx: number) => {
+                return {
+                  id: String(idx),
+                  raw: row,
+                  flattened: row,
+                } as unknown as DataTableRecord;
+              });
 
             this._rows$.next(resultRows);
-            // `total` can be either a number or an object of type `SearchTotalHits`.
-            // We need to explicitly narrow the type before accessing `.value`.
-            const totalHitsCount = typeof total === 'number' ? total : total?.value ?? 0;
-            this._totalHits$.next(totalHitsCount);
+            this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
           },
           error: (error) => {
