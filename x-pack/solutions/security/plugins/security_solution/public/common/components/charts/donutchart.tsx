@@ -36,7 +36,7 @@ const donutTheme: PartialTheme = {
   },
 };
 
-export interface DonutChartData {
+interface DonutChartData {
   key: string;
   value: number;
   group?: string;
