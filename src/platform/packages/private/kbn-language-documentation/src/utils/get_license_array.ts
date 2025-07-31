@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowEventLoggerService } from './workflow_event_logger_service';
-export {
-  WorkflowEventLogger,
-  type IWorkflowEventLogger,
-  type WorkflowEventLoggerContext,
-  type WorkflowLogEvent,
-} from './workflow_event_logger';
-export { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
+// Helper function to get licenses array from either format
+
+export interface LicenseInfo {
+  name: string;
+  isSignatureSpecific?: boolean;
+  paramsWithLicense?: string[];
+}
+
+export interface MultipleLicenseInfo {
+  licenses: LicenseInfo[];
+  hasMultipleLicenses: boolean;
+}
+
+export function getLicensesArray(license: MultipleLicenseInfo | undefined): LicenseInfo[] {
+  if (license && Array.isArray(license.licenses)) {
+    return license.licenses;
+  }
+  return [];
+}
