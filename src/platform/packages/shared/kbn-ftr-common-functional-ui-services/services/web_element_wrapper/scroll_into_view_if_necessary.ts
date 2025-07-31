@@ -7,60 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function scrollIntoViewIfNecessary(
-  target: HTMLElement,
-  scrollContainerId?: string,
-  scrollFixedHeader: number = 0,
-  scrollFixedFooter: number = 0
-) {
-  const scrollContainer =
+export function scrollIntoViewIfNecessary(target: HTMLElement, scrollContainerId?: string) {
+  if (!target?.isConnected) return;
+
+  const scroller =
     (scrollContainerId && document.getElementById(scrollContainerId)) || document.documentElement;
 
-  // Measure helper, logic is different for scrolling the viewport vs a scroller element
+  /** Helper: are we looking at viewport or a nested scroller? */
+  const isViewport = scroller === document.documentElement || scroller === document.body;
+
   const getRects = () => {
     const targetRect = target.getBoundingClientRect();
-    const scrollIsViewport =
-      scrollContainer === document.documentElement || scrollContainer === document.body;
-    const scrollReact = scrollIsViewport
+    const scrollRect = isViewport
       ? { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight }
-      : scrollContainer.getBoundingClientRect();
-    return { targetRect, scrollReact };
+      : scroller.getBoundingClientRect();
+    return { targetRect, scrollRect };
   };
 
-  const isVisible = ({ targetRect, scrollReact }: ReturnType<typeof getRects>) =>
-    targetRect.top >= scrollReact.top + scrollFixedHeader &&
-    targetRect.bottom <= scrollReact.bottom - scrollFixedFooter &&
-    targetRect.left >= scrollReact.left &&
-    targetRect.right <= scrollReact.right;
+  /* ---------- 1. basic visibility ---------- */
+  const rects = getRects();
+  const relTop = rects.targetRect.top - rects.scrollRect.top;
+  const relBottom = rects.targetRect.bottom - rects.scrollRect.top;
 
-  let { targetRect, scrollReact } = getRects();
+  const fullyVisible = relTop && relBottom <= rects.scrollRect.bottom - rects.scrollRect.top;
 
-  if (isVisible({ targetRect, scrollReact })) {
-    return;
+  if (!fullyVisible) {
+    target.scrollIntoView();
   }
 
-  // First try native scrollIntoView on the correct container
-  target.scrollIntoView();
+  /* ---------- 2. occlusion check ---------- */
+  const { targetRect } = getRects(); // fresh numbers after scroll
+  const points: Array<[number, number]> = [
+    [targetRect.left + targetRect.width / 2, targetRect.top + targetRect.height / 2],
+    [targetRect.left + 1, targetRect.top + 1],
+    [targetRect.right - 1, targetRect.top + 1],
+    [targetRect.left + 1, targetRect.bottom - 1],
+    [targetRect.right - 1, targetRect.bottom - 1],
+  ];
 
-  if (scrollFixedHeader) {
-    // remeasure
-    ({ targetRect, scrollReact } = getRects());
+  let coveredAbove = false;
+  let coveredBelow = false;
 
-    // Now adjust for fixed headers
-    const deltaTop = targetRect.top - (scrollReact.top + scrollFixedHeader);
-    if (deltaTop < 0) {
-      scrollContainer.scrollBy({ top: deltaTop });
+  for (const [x, y] of points) {
+    let el = document.elementFromPoint(x, y);
+    while (el && getComputedStyle(el).pointerEvents === 'none') el = el.parentElement;
+    if (el && el !== target && !target.contains(el)) {
+      const br = el.getBoundingClientRect();
+      if (br.top <= targetRect.top) coveredAbove = true;
+      if (br.bottom >= targetRect.bottom) coveredBelow = true;
+      if (coveredAbove && coveredBelow) break;
     }
   }
 
-  if (scrollFixedFooter) {
-    // remeasure again
-    ({ targetRect, scrollReact } = getRects());
+  /* ---------- 3. nudge ---------- */
+  if (coveredAbove || coveredBelow) {
+    const vpH = isViewport
+      ? window.visualViewport?.height ?? window.innerHeight
+      : scroller.clientHeight;
 
-    // Adjust for fixed footers
-    const deltaBottom = targetRect.bottom - (scrollReact.bottom - scrollFixedFooter);
-    if (deltaBottom > 0) {
-      scrollContainer.scrollBy({ top: deltaBottom });
+    const extraMargin = 16;
+
+    if (coveredAbove) {
+      const offset = targetRect.top - extraMargin;
+      scroller.scrollBy({ top: -offset });
+    } else if (coveredBelow) {
+      const offset = vpH - targetRect.bottom - extraMargin;
+      scroller.scrollBy({ top: -offset });
     }
   }
 }
