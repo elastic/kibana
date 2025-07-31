@@ -15,7 +15,7 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AwsAccountType, NewPackagePolicyPostureInput } from '../types';
+import { AwsAccountType, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
@@ -64,7 +64,7 @@ export const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -81,14 +81,14 @@ export const AwsAccountTypeSelect = ({
 
   useEffect(() => {
     if (!getAwsAccountType(input)) {
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'aws.account_type': {
             value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
-        })
-      );
+        }),
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, updatePolicy]);
@@ -118,14 +118,14 @@ export const AwsAccountTypeSelect = ({
         idSelected={getAwsAccountType(input) || ''}
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(newPolicy, input.type, {
               'aws.account_type': {
                 value: accountType,
                 type: 'text',
               },
-            })
-          );
+            }),
+          });
         }}
         size="m"
       />

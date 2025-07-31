@@ -6,7 +6,7 @@
  */
 
 import { CloudSetup } from '@kbn/cloud-plugin/public/types';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import {
@@ -22,6 +22,16 @@ import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
 } from './constants';
+
+export type UpdatePolicy = ({
+  updatedPolicy,
+  isValid,
+  isExtensionLoaded,
+}: {
+  updatedPolicy: NewPackagePolicy;
+  isValid?: boolean;
+  isExtensionLoaded?: boolean;
+}) => void;
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }

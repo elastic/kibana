@@ -21,7 +21,7 @@ import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { AwsSetupFormat, NewPackagePolicyPostureInput } from '../types';
+import { AwsSetupFormat, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -41,11 +41,11 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
-  setIsValid: (valid: boolean) => void;
+  isValid: boolean;
 }
 
 const CloudFormationSetup = ({
@@ -127,7 +127,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   disabled = false,
   hasInvalidRequiredVars,
-  setIsValid,
+  isValid,
 }: AwsFormProps) => {
   const {
     awsCredentialsType,
@@ -142,7 +142,7 @@ export const AwsCredentialsForm = ({
     input,
     packageInfo,
     updatePolicy,
-    setIsValid,
+    isValid,
   });
 
   return (
@@ -192,11 +192,11 @@ export const AwsCredentialsForm = ({
             options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
             onChange={(optionId) => {
-              updatePolicy(
-                getPosturePolicy(newPolicy, input.type, {
+              updatePolicy({
+                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
                   'aws.credentials.type': { value: optionId },
-                })
-              );
+                }),
+              });
             }}
           />
           <EuiSpacer size="m" />
@@ -208,7 +208,9 @@ export const AwsCredentialsForm = ({
             fields={fields}
             packageInfo={packageInfo}
             onChange={(key, value) => {
-              updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
+              updatePolicy({
+                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+              });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />

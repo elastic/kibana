@@ -24,12 +24,12 @@ import { GcpInputVarFields } from './gcp_input_var_fields';
 import { ReadDocumentation } from '../common';
 import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
 import { getInputVarsFields, gcpField } from './gcp_utils';
-import { NewPackagePolicyPostureInput } from '../types';
+import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 
 interface GcpFormAgentlessProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   disabled: boolean;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars: boolean;
@@ -124,7 +124,9 @@ export const GcpCredentialsFormAgentless = ({
         disabled={disabled}
         fields={fields}
         onChange={(key, value) =>
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+          })
         }
         isOrganization={isOrganization}
         packageInfo={packageInfo}

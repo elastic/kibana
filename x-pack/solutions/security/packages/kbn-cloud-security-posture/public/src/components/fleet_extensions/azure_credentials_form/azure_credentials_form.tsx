@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -25,7 +25,12 @@ import {
 } from './azure_test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import { AzureCredentialsType, AzureSetupFormat, NewPackagePolicyPostureInput } from '../types';
+import {
+  AzureCredentialsType,
+  AzureSetupFormat,
+  NewPackagePolicyPostureInput,
+  UpdatePolicy,
+} from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -45,12 +50,10 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
-  // onChange: any;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
-  setIsValid: (valid: boolean) => void;
   isValid: boolean;
 }
 
@@ -213,7 +216,6 @@ export const AzureCredentialsForm = ({
   packageInfo,
   disabled,
   hasInvalidRequiredVars,
-  setIsValid,
   isValid,
 }: AzureCredentialsFormProps) => {
   const {
@@ -229,7 +231,6 @@ export const AzureCredentialsForm = ({
     input,
     packageInfo,
     updatePolicy,
-    setIsValid,
     isValid,
   });
 
@@ -253,8 +254,7 @@ export const AzureCredentialsForm = ({
     !isPackageVersionValidForAzure &&
     setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
-    setIsValid(isPackageVersionValidForAzure);
-    updatePolicy(newPolicy);
+    updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
 
   if (!isPackageVersionValidForAzure) {
@@ -296,11 +296,11 @@ export const AzureCredentialsForm = ({
           <AzureCredentialTypeSelector
             type={azureCredentialsType}
             onChange={(optionId) => {
-              updatePolicy(
-                getPosturePolicy(newPolicy, input.type, {
+              updatePolicy({
+                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
                   'azure.credentials.type': { value: optionId },
-                })
-              );
+                }),
+              });
             }}
           />
           <EuiSpacer size="m" />
@@ -308,7 +308,9 @@ export const AzureCredentialsForm = ({
             fields={fields}
             packageInfo={packageInfo}
             onChange={(key, value) => {
-              updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
+              updatePolicy({
+                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+              });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />

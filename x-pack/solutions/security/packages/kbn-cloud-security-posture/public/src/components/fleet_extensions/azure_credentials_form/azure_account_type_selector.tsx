@@ -12,7 +12,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy, isBelowMinVersion } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AzureAccountType, NewPackagePolicyPostureInput } from '../types';
+import { AzureAccountType, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_ORGANIZATION_ACCOUNT,
@@ -69,7 +69,7 @@ export const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  updatePolicy: UpdatePolicy;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -83,8 +83,8 @@ export const AzureAccountTypeSelect = ({
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'azure.account_type': {
             value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
             type: 'text',
@@ -95,8 +95,8 @@ export const AzureAccountTypeSelect = ({
               : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
             type: 'text',
           },
-        })
-      );
+        }),
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, updatePolicy]);
@@ -115,14 +115,14 @@ export const AzureAccountTypeSelect = ({
         idSelected={getAzureAccountType(input) || ''}
         options={azureAccountTypeOptions}
         onChange={(accountType) => {
-          updatePolicy(
-            getPosturePolicy(newPolicy, input.type, {
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(newPolicy, input.type, {
               'azure.account_type': {
                 value: accountType,
                 type: 'text',
               },
-            })
-          );
+            }),
+          });
         }}
         size="m"
       />

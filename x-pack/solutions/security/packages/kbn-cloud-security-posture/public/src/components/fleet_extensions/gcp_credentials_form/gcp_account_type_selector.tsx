@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { gcpField, getInputVarsFields } from './gcp_utils';
-import { NewPackagePolicyPostureInput } from '../types';
+import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
@@ -68,7 +68,7 @@ export const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -96,8 +96,8 @@ export const GcpAccountTypeSelect = ({
       );
       // We need to store the last manual credentials type to restore it later
       lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
             value: 'single-account',
             type: 'text',
@@ -105,11 +105,11 @@ export const GcpAccountTypeSelect = ({
           // Clearing fields from previous setup format to prevent exposing credentials
           // when switching from manual to cloud formation
           ...Object.fromEntries(fieldsToHide.map((field) => [field.id, { value: undefined }])),
-        })
-      );
+        }),
+      });
     } else {
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
             // Restoring last manual credentials type
             value: lastSetupAccessType.current || 'organization-account',
@@ -117,21 +117,21 @@ export const GcpAccountTypeSelect = ({
           },
           // Restoring fields from manual setup format if any
           ...fieldsSnapshot.current,
-        })
-      );
+        }),
+      });
     }
   };
 
   useEffect(() => {
     if (!getGcpAccountType(input)) {
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'gcp.account_type': {
             value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
             type: 'text',
           },
-        })
-      );
+        }),
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, updatePolicy]);

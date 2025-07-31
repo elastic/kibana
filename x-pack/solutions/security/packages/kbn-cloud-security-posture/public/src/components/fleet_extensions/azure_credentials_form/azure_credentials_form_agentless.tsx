@@ -22,14 +22,14 @@ import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { NewPackagePolicyPostureInput } from '../types';
+import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars: boolean;
 }
@@ -54,7 +54,9 @@ export const AzureCredentialsFormAgentless = ({
         packageInfo={packageInfo}
         fields={fields}
         onChange={(key, value) => {
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+          });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}
       />

@@ -71,14 +71,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
 
     const isParentSecurityPosture = !integrationParam;
-    const isInitiallyLoadingDefaultPolicyTemplateRef = useRef(!isParentSecurityPosture);
+    const isDefaultIntegrationSetRef = useRef(false);
 
-    if (
-      isParentSecurityPosture &&
-      !isInitiallyLoadingDefaultPolicyTemplateRef.current &&
-      setIntegrationToEnable
-    ) {
-      isInitiallyLoadingDefaultPolicyTemplateRef.current = true;
+    if (!isDefaultIntegrationSetRef.current && !integrationToEnable && setIntegrationToEnable) {
+      isDefaultIntegrationSetRef.current = true;
       setIntegrationToEnable(CSPM_POLICY_TEMPLATE);
     }
 

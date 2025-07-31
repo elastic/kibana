@@ -173,7 +173,9 @@ export const useLoadFleetExtension = ({
 
   const isValidRef = useRef(true);
   const setIsValid = useCallback((valid: boolean) => {
-    isValidRef.current = valid;
+    if (valid !== isValidRef.current) {
+      isValidRef.current = valid;
+    }
   }, []);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -188,14 +190,17 @@ export const useLoadFleetExtension = ({
   });
 
   const updatePolicy = useCallback(
-    (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+    (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean, isValid?: boolean) => {
+      if (isValid !== undefined && isValid !== isValidRef.current) {
+        setIsValid(isValid);
+      }
       onChange({
-        isValid: isValidRef.current,
+        isValid: isValid !== undefined ? isValid : isValidRef.current,
         updatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isLoading, isValidRef, onChange]
+    [isLoading, onChange, setIsValid]
   );
 
   useCloudFormationTemplate({

@@ -24,19 +24,9 @@ export const AzureInputVarFields = ({
   onChange: (key: string, value: string) => void;
   hasInvalidRequiredVars: boolean;
 }) => {
-  const azureFields = fields.map((field) => {
-    const varDef = findVariableDef(packageInfo, field.id);
-    if (varDef) {
-      return {
-        ...field,
-        varDef,
-      };
-    }
-    return null;
-  });
   return (
     <div>
-      {azureFields.map((field, index) => {
+      {fields.map((field, index) => {
         if (!field) {
           return null;
         }
@@ -71,7 +61,8 @@ export const AzureInputVarFields = ({
                   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                     <LazyPackagePolicyInputVarField
                       varDef={{
-                        ...field.varDef,
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        ...findVariableDef(packageInfo, field.id)!,
                         required: true,
                         type: 'password',
                       }}

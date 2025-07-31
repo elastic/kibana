@@ -62,7 +62,7 @@ interface CloudSetupProps {
     isExtensionLoaded?: boolean;
   }) => void;
   packageInfo: PackageInfo;
-  setIsValid: (valid: boolean) => void;
+  setIsValid: (isValid: boolean) => void;
   validationResults?: PackagePolicyValidationResults;
   uiSettings: IUiSettingsClient;
 }
@@ -106,6 +106,8 @@ export const CloudSetup = memo<CloudSetupProps>(
       integrationToEnable,
       cloud,
       uiSettings,
+      setIsValid,
+      isValid,
     });
 
     const { euiTheme } = useEuiTheme();
@@ -187,7 +189,9 @@ export const CloudSetup = memo<CloudSetupProps>(
         <IntegrationSettings
           newPolicy={newPolicy}
           validationResults={validationResults}
-          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+          onChange={(field, value) =>
+            updatePolicy({ updatedPolicy: { ...newPolicy, [field]: value } })
+          }
         />
 
         {/* Namespace selector */}
@@ -220,7 +224,7 @@ export const CloudSetup = memo<CloudSetupProps>(
                 isEditPage={isEditPage}
                 validationError={validationResults?.namespace}
                 onNamespaceChange={(namespace: string) => {
-                  updatePolicy({ ...newPolicy, namespace });
+                  updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                 }}
                 data-test-subj="namespaceInput"
                 labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
@@ -241,8 +245,8 @@ export const CloudSetup = memo<CloudSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
-                updatePolicy(
-                  getPosturePolicy(
+                updatePolicy({
+                  updatedPolicy: getPosturePolicy(
                     newPolicy,
                     input.type,
                     getDefaultCloudCredentialsType(
@@ -254,8 +258,8 @@ export const CloudSetup = memo<CloudSetupProps>(
                       packageInfo,
                       showCloudConnectors
                     )
-                  )
-                );
+                  ),
+                });
               }}
             />
           </>
@@ -282,7 +286,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
-            setIsValid={setIsValid}
+            isValid={isValid}
           />
         )}
         {input.type === 'cloudbeat/cis_gcp' && setupTechnology === SetupTechnology.AGENTLESS && (
@@ -322,7 +326,6 @@ export const CloudSetup = memo<CloudSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
-            setIsValid={setIsValid}
             isValid={isValid}
           />
         )}

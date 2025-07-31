@@ -30,7 +30,7 @@ import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from './gcp_test_subjects';
-import { GcpFields, GcpInputFields, NewPackagePolicyPostureInput } from '../types';
+import { GcpFields, GcpInputFields, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 import { gcpField, getGcpCredentialsType, getInputVarsFields } from './gcp_utils';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
@@ -181,7 +181,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 interface GcpFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   // setIsValid: (isValid: boolean) => void;
   // onChange: any;
@@ -216,20 +216,22 @@ const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
 
 const updateCloudShellUrl = (
   newPolicy: NewPackagePolicy,
-  updatePolicy: (policy: NewPackagePolicy) => void,
+  updatePolicy: UpdatePolicy,
   templateUrl: string | undefined
 ) => {
   updatePolicy?.({
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((input) => {
-      if (input.type === CLOUDBEAT_GCP) {
-        return {
-          ...input,
-          config: { cloud_shell_url: { value: templateUrl } },
-        };
-      }
-      return input;
-    }),
+    updatedPolicy: {
+      ...newPolicy,
+      inputs: newPolicy.inputs.map((input) => {
+        if (input.type === CLOUDBEAT_GCP) {
+          return {
+            ...input,
+            config: { cloud_shell_url: { value: templateUrl } },
+          };
+        }
+        return input;
+      }),
+    },
   });
 };
 
@@ -241,7 +243,7 @@ const useCloudShellUrl = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: UpdatePolicy;
   setupFormat: SetupFormatGCP;
 }) => {
   useEffect(() => {
@@ -292,18 +294,6 @@ export const GcpCredentialsForm = ({
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
-  // // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
-  // useEffect(() => {
-  //   const isInvalidPolicy = isInvalid;
-
-  //   setIsValid(!isInvalidPolicy);
-
-  //   onChange({
-  //     isValid: !isInvalidPolicy,
-  //     updatedPolicy: newPolicy,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [setupFormat, input.type]);
 
   useCloudShellUrl({
     packageInfo,
@@ -320,8 +310,8 @@ export const GcpCredentialsForm = ({
       // We need to store the last manual credentials type to restore it later
       lastCredentialsType.current = getGcpCredentialsType(input);
 
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -329,11 +319,11 @@ export const GcpCredentialsForm = ({
           // Clearing fields from previous setup format to prevent exposing credentials
           // when switching from manual to cloud formation
           ...Object.fromEntries(fieldsToHide.map((field) => [field.id, { value: undefined }])),
-        })
-      );
+        }),
+      });
     } else {
-      updatePolicy(
-        getPosturePolicy(newPolicy, input.type, {
+      updatePolicy({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
@@ -341,8 +331,8 @@ export const GcpCredentialsForm = ({
           },
           // Restoring fields from manual setup format if any
           ...fieldsSnapshot.current,
-        })
-      );
+        }),
+      });
     }
   };
 
@@ -378,7 +368,9 @@ export const GcpCredentialsForm = ({
           disabled={disabled}
           fields={fields}
           onChange={(key, value) =>
-            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+            updatePolicy({
+              updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+            })
           }
           input={input}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
@@ -388,7 +380,9 @@ export const GcpCredentialsForm = ({
           disabled={disabled}
           fields={fields}
           onChange={(key, value) =>
-            updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
+            updatePolicy({
+              updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+            })
           }
           isOrganization={isOrganization}
           packageInfo={packageInfo}

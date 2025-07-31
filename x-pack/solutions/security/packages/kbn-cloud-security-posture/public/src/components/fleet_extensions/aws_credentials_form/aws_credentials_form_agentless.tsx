@@ -48,13 +48,13 @@ import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import { getAwsCredentialsType } from './aws_utils';
-import { NewPackagePolicyPostureInput } from '../types';
+import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
 
 interface AwsAgentlessFormProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
-  updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  updatePolicy: UpdatePolicy;
   isEditPage?: boolean;
   setupTechnology: SetupTechnology;
   hasInvalidRequiredVars: boolean;
@@ -82,16 +82,18 @@ export const AwsCredentialsFormAgentless = ({
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
-      ...getPosturePolicy(newPolicy, input.type, {
-        'aws.credentials.type': {
-          value: awsCredentialsType,
-          type: 'text',
-        },
-        'aws.supports_cloud_connectors': {
-          value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-          type: 'bool',
-        },
-      }),
+      updatedPolicy: {
+        ...getPosturePolicy(newPolicy, input.type, {
+          'aws.credentials.type': {
+            value: awsCredentialsType,
+            type: 'text',
+          },
+          'aws.supports_cloud_connectors': {
+            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+            type: 'bool',
+          },
+        }),
+      },
     });
   }
 
@@ -210,8 +212,8 @@ export const AwsCredentialsFormAgentless = ({
         options={selectorOptions()}
         disabled={!!disabled}
         onChange={(optionId) => {
-          updatePolicy(
-            getPosturePolicy(
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(
               newPolicy,
               input.type,
               getCloudCredentialVarsConfig({
@@ -220,8 +222,8 @@ export const AwsCredentialsFormAgentless = ({
                 showCloudConnectors,
                 inputType: input.type,
               })
-            )
-          );
+            ),
+          });
         }}
       />
       <EuiSpacer size="m" />
@@ -270,7 +272,9 @@ export const AwsCredentialsFormAgentless = ({
         fields={fields}
         packageInfo={packageInfo}
         onChange={(key, value) => {
-          updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
+          updatePolicy({
+            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+          });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
