@@ -165,7 +165,7 @@ export const createTabsStorageManager = ({
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
       appState: getAppStateForTabWithoutRuntimeState(tabState.id),
-      globalState: tabState.globalState || tabState.initialGlobalState,
+      globalState: tabState.globalState,
     };
   };
 
@@ -202,7 +202,6 @@ export const createTabsStorageManager = ({
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
       initialAppState: appState,
-      initialGlobalState: globalState,
       globalState: globalState || {},
     };
   };

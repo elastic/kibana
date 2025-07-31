@@ -119,7 +119,6 @@ describe('TabsStorageManager', () => {
     id: storedTab.id,
     label: storedTab.label,
     initialAppState: mockGetAppState(storedTab.id),
-    initialGlobalState: storedTab.globalState,
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
