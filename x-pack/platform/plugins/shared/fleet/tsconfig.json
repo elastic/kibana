@@ -124,6 +124,6 @@
     "@kbn/saved-search-component",
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/core-chrome-layout-constants"
+    "@kbn/core-chrome-layout-constants",
   ]
 }
