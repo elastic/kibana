@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import { withSpaceUrl } from '../spaces';
+import { withSpaceUrl } from '../../../../../common/utils/security_solution/spaces';
 
 export interface CreateConnectorBody {
   readonly name: string;
