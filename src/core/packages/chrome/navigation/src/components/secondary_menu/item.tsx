@@ -12,8 +12,6 @@ import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { ISecondaryMenuItem } from '../../../types';
 
-import { useMenuItemClick } from '../../hooks/use_menu_item_click';
-
 export interface SecondaryMenuItemProps extends ISecondaryMenuItem {
   children: ReactNode;
   href: string;
@@ -34,7 +32,6 @@ export const SecondaryMenuItem = ({
   iconType,
   id,
   isCurrent,
-  onClick,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -57,18 +54,14 @@ export const SecondaryMenuItem = ({
     }
   `;
 
-  const handleClick = useMenuItemClick(onClick);
-
   return (
     <li>
       {isCurrent ? (
-        // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButton
           css={styles}
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
           href={href}
-          onClick={handleClick}
           size="s"
           tabIndex={0}
           textProps={false}
@@ -78,13 +71,11 @@ export const SecondaryMenuItem = ({
           {children}
         </EuiButton>
       ) : (
-        // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButtonEmpty
           css={styles}
           color="text"
           data-test-subj={`${testSubjPrefix}-${id}`}
           href={href}
-          onClick={handleClick}
           size="s"
           tabIndex={0}
           textProps={false}

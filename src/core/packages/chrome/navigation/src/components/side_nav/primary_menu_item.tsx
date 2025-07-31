@@ -11,7 +11,6 @@ import React, { forwardRef, ForwardedRef, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { useMenuItemClick } from '../../hooks/use_menu_item_click';
 import { IMenuItem } from '../../../types';
 
 export interface SideNavPrimaryMenuItemProps extends IMenuItem {
@@ -28,23 +27,10 @@ export const SideNavPrimaryMenuItem = forwardRef<
   SideNavPrimaryMenuItemProps
 >(
   (
-    {
-      children,
-      hasContent,
-      horizontal,
-      href,
-      iconType,
-      id,
-      isCollapsed,
-      isCurrent,
-      onClick,
-      ...props
-    },
+    { children, hasContent, horizontal, href, iconType, id, isCollapsed, isCurrent, ...props },
     ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
   ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
-
-    const handleClick = useMenuItemClick(onClick);
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
@@ -166,7 +152,6 @@ export const SideNavPrimaryMenuItem = forwardRef<
     const menuItem = hasContent ? (
       <button
         data-menu-item
-        onClick={handleClick}
         type="button"
         css={buttonStyles}
         data-test-subj={`primaryMenuItem-${id}`}
@@ -182,7 +167,6 @@ export const SideNavPrimaryMenuItem = forwardRef<
         data-menu-item
         data-test-subj={`primaryMenuItem-${id}`}
         href={href}
-        onClick={handleClick}
         ref={ref as ForwardedRef<HTMLAnchorElement>}
         {...props}
       >
