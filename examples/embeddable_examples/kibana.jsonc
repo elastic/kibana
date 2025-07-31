@@ -18,7 +18,6 @@
       "fieldFormats",
       "developerExamples",
       "dataViewFieldEditor",
-      "visualizations",
     ],
     "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
   }
