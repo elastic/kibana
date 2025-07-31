@@ -426,7 +426,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
         const nextItem: ArtifactFormComponentProps['item'] = {
           ...item,
-          entries: selectedId === 'advancedMode' ? lastAdvancedFormConditions : lastBasicFormConditions,
+          entries:
+            selectedId === 'advancedMode' ? lastAdvancedFormConditions : lastBasicFormConditions,
           tags: getTagsUpdatedBy(
             'advancedMode',
             selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : []
