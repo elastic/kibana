@@ -205,7 +205,7 @@ export const useBulkActionItems = ({
       [
         {
           id: ALERT_CLOSING_REASON_PANEL_ID,
-          title: 'Choose one option to mark closed as',
+          title: i18n.BULK_ACTION_CLOSING_PANEL_TITLE,
           items: [
             {
               name: i18n.BULK_ACTION_CLOSE_SELECTED_AS_NONE,
