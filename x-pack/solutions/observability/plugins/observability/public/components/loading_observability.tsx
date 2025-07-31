@@ -17,25 +17,25 @@ export function LoadingObservability() {
     <ObservabilityPageTemplate
       pageSectionProps={{
         alignment: 'center',
-        contentProps: {
-          style: {
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-          },
+        style: {
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
         },
       }}
       showSolutionNav={false}
     >
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiText>{observabilityLoadingMessage}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+            <EuiText>{observabilityLoadingMessage}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </ObservabilityPageTemplate>
   );
 }
