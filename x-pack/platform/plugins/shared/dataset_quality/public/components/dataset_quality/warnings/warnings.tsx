@@ -87,7 +87,7 @@ export default function Warnings() {
   const { statsLoading, canUserReadFailureStore, canUserReadAnyDataset, canUserMonitorAnyDataset } =
     useDatasetQualityState();
 
-  const noDatasetsAccess = !(canUserReadAnyDataset || canUserMonitorAnyDataset);
+  const canAccessAnyDataset = canUserReadAnyDataset || canUserMonitorAnyDataset;
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
@@ -98,7 +98,7 @@ export default function Warnings() {
           </EuiCallOut>
         </EuiFlexItem>
       )}
-      {!statsLoading && !canUserReadFailureStore && !noDatasetsAccess && (
+      {!statsLoading && !canUserReadFailureStore && canAccessAnyDataset && (
         <EuiFlexItem>
           <FailureStoreWarning />
         </EuiFlexItem>

@@ -79,7 +79,7 @@ export default function Header() {
         />
       }
       rightSideItems={
-        isAlertingAvailable
+        isAlertingAvailable && validTypes.length
           ? [
               <>
                 <EuiButton
