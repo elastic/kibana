@@ -13,10 +13,16 @@ import {
   type Logger,
 } from '@kbn/core/server';
 import type { InterceptSetup, InterceptStart } from '@kbn/intercepts-plugin/server';
-import { TRIGGER_DEF_ID, UPGRADE_TRIGGER_DEF_PREFIX_ID } from '../common/constants';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
+  TRIGGER_DEF_ID,
+  UPGRADE_TRIGGER_DEF_PREFIX_ID,
+  TRIAL_TRIGGER_DEF_ID,
+} from '../common/constants';
 import { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
+  cloud: CloudSetup;
   intercepts: InterceptSetup;
 }
 
@@ -34,6 +40,8 @@ export class ProductInterceptServerPlugin
   private readonly config: ServerConfigSchema;
   private readonly buildVersion: string;
   private readonly upgradeInterval: string = '14d';
+  private readonly trialInterval: string = '7d';
+  private trialEndDate?: Date;
 
   constructor(initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
@@ -41,7 +49,9 @@ export class ProductInterceptServerPlugin
     this.buildVersion = initContext.env.packageInfo.version;
   }
 
-  setup(core: CoreSetup, {}: ProductInterceptServerPluginSetup) {
+  setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
+    this.trialEndDate = cloud?.trialEndDate;
+
     return {};
   }
 
@@ -59,6 +69,16 @@ export class ProductInterceptServerPlugin
           return { triggerAfter: this.upgradeInterval, isRecurrent: false };
         }
       );
+
+      if (this.trialEndDate && Date.now() <= this.trialEndDate?.getTime()) {
+        void intercepts.registerTriggerDefinition?.(TRIAL_TRIGGER_DEF_ID, () => {
+          this.logger.debug('Registering global product trial intercept trigger definition');
+          return {
+            triggerAfter: this.trialInterval,
+            isRecurrent: false,
+          };
+        });
+      }
     }
 
     return {};

@@ -13,7 +13,11 @@ import { InterceptsStart } from '@kbn/intercepts-plugin/public';
 import { type CloudStart } from '@kbn/cloud-plugin/public';
 
 import { PromptTelemetry } from './telemetry';
-import { TRIGGER_DEF_ID, UPGRADE_TRIGGER_DEF_PREFIX_ID } from '../common/constants';
+import {
+  TRIGGER_DEF_ID,
+  UPGRADE_TRIGGER_DEF_PREFIX_ID,
+  TRIAL_TRIGGER_DEF_ID,
+} from '../common/constants';
 
 interface ProductInterceptPluginStartDeps {
   intercepts: InterceptsStart;
@@ -53,6 +57,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
       [this.upgradeInterceptSubscription, this.interceptSubscription] = [
         TRIGGER_DEF_ID,
         `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
+        TRIAL_TRIGGER_DEF_ID,
       ].map((triggerId) =>
         intercepts
           .registerIntercept?.({
