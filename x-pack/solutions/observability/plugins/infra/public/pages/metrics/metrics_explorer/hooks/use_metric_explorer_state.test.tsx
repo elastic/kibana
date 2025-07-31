@@ -12,6 +12,14 @@ import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
 import React from 'react';
 import { resp, createSeries } from '../../../../utils/fixtures/metrics_explorer';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+
+jest.mock('../../../../hooks/use_kibana');
+
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+  typeof useKibanaContextForPlugin
+>;
 
 jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
@@ -89,6 +97,12 @@ describe('useMetricsExplorerState', () => {
     }));
     performance.mark = jest.fn();
     performance.clearMeasures = jest.fn();
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: {
+        data: dataPluginMock.createStartContract(),
+      },
+    } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
   });
 
   afterEach(() => {

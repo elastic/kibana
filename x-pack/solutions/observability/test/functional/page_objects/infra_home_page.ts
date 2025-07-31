@@ -153,6 +153,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async clearSearchTerm() {
       const input = await testSubjects.find('queryInput');
       await input.clearValueWithKeyboard();
+      await input.pressKeys(browser.keys.ENTER);
       return input;
     },
 
