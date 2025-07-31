@@ -15,9 +15,11 @@ import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
-import { IClickActionDescriptor } from './types';
-import { UISession } from '../../../types';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { UISession } from '../../types';
+import { IClickActionDescriptor } from '..';
+import './inspect_button.scss';
+import { SearchSessionsMgmtAPI } from '../../lib/api';
+import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
@@ -52,10 +54,17 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
-            <FormattedMessage
-              id="data.sessions.management.flyoutTitle"
-              defaultMessage="Inspect search session"
-            />
+            {BACKGROUND_SEARCH_ENABLED ? (
+              <FormattedMessage
+                id="data.sessions.management.backgroundSearchFlyoutTitle"
+                defaultMessage="Inspect background search"
+              />
+            ) : (
+              <FormattedMessage
+                id="data.sessions.management.flyoutTitle"
+                defaultMessage="Inspect search session"
+              />
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -63,10 +72,17 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
         <EuiText>
           <EuiText size="xs">
             <p>
-              <FormattedMessage
-                id="data.sessions.management.flyoutText"
-                defaultMessage="Configuration for this search session"
-              />
+              {BACKGROUND_SEARCH_ENABLED ? (
+                <FormattedMessage
+                  id="data.sessions.management.backgroundSearchFlyoutText"
+                  defaultMessage="Configuration for this background search"
+                />
+              ) : (
+                <FormattedMessage
+                  id="data.sessions.management.flyoutText"
+                  defaultMessage="Configuration for this search session"
+                />
+              )}
             </p>
           </EuiText>
           <EuiSpacer />

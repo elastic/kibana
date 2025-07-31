@@ -28,7 +28,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import { UISession } from '../../types';
+import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
 
 interface RenameButtonProps {
   searchSession: UISession;
@@ -49,6 +50,10 @@ const RenameDialog = ({
   const title = i18n.translate('data.mgmt.searchSessions.renameModal.title', {
     defaultMessage: 'Edit search session name',
   });
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.renameModal.backgroundSearchTitle', {
+    defaultMessage: 'Edit background search name',
+  });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.renameModal.renameButton', {
     defaultMessage: 'Save',
   });
@@ -59,6 +64,12 @@ const RenameDialog = ({
   const label = i18n.translate('data.mgmt.searchSessions.renameModal.searchSessionNameInputLabel', {
     defaultMessage: 'Search session name',
   });
+  const bgsLabel = i18n.translate(
+    'data.mgmt.searchSessions.renameModal.backgroundSearchNameInputLabel',
+    {
+      defaultMessage: 'Background search name',
+    }
+  );
 
   const isNewNameValid = newName && originalName !== newName;
 
@@ -69,12 +80,14 @@ const RenameDialog = ({
       initialFocus="[name=newName]"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          {BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow label={label}>
+          <EuiFormRow label={BACKGROUND_SEARCH_ENABLED ? bgsLabel : label}>
             <EuiFieldText
               name="newName"
               placeholder={originalName}

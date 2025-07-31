@@ -15,7 +15,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
+import { UISession } from '../../types';
+import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;
@@ -31,6 +32,10 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
   const title = i18n.translate('data.mgmt.searchSessions.cancelModal.title', {
     defaultMessage: 'Delete search session',
   });
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.cancelModal.backgroundSearchTitle', {
+    defaultMessage: 'Delete background search',
+  });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.cancelModal.deleteButton', {
     defaultMessage: 'Delete',
   });
@@ -43,12 +48,21 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       name,
     },
   });
+  const bgsMessage = i18n.translate(
+    'data.mgmt.searchSessions.cancelModal.backgroundSearchMessage',
+    {
+      defaultMessage: `Deleting the background search ''{name}'' deletes all cached results.`,
+      values: {
+        name,
+      },
+    }
+  );
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={title}
+      title={BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
@@ -61,7 +75,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      {message}
+      {BACKGROUND_SEARCH_ENABLED ? bgsMessage : message}
     </EuiConfirmModal>
   );
 };

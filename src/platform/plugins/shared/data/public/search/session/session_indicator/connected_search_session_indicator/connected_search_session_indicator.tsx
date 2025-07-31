@@ -20,6 +20,7 @@ import { useSearchSessionTour } from './search_session_tour';
 import { SearchUsageCollector } from '../../../collectors';
 import { ISessionService } from '../../session_service';
 import { SearchSessionState } from '../../search_session_state';
+import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -68,12 +69,16 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (disableSaveAfterSearchesExpire) {
       saveDisabled = true;
-      saveDisabledReasonText = i18n.translate(
-        'data.searchSessionIndicator.disabledDueToTimeoutMessage',
-        {
-          defaultMessage: 'Search session results expired.',
-        }
-      );
+      saveDisabledReasonText = BACKGROUND_SEARCH_ENABLED
+        ? i18n.translate(
+            'data.searchSessionIndicator.backgroundSearchDisabledDueToTimeoutMessage',
+            {
+              defaultMessage: 'Background search results expired.',
+            }
+          )
+        : i18n.translate('data.searchSessionIndicator.disabledDueToTimeoutMessage', {
+            defaultMessage: 'Search session results expired.',
+          });
     }
 
     if (isSaveDisabledByApp.disabled) {
@@ -85,12 +90,16 @@ export const createConnectedSearchSessionIndicator = ({
     // this happens in case there is no app that allows current user to use search session
     if (!sessionService.hasAccess()) {
       managementDisabled = saveDisabled = true;
-      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
-        'data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
-        {
-          defaultMessage: "You don't have permissions to manage search sessions",
-        }
-      );
+      managementDisabledReasonText = saveDisabledReasonText = BACKGROUND_SEARCH_ENABLED
+        ? i18n.translate(
+            'data.searchSessionIndicator.backgroundSearchDisabledDueToDisabledGloballyMessage',
+            {
+              defaultMessage: "You don't have permissions to manage background searches",
+            }
+          )
+        : i18n.translate('data.searchSessionIndicator.disabledDueToDisabledGloballyMessage', {
+            defaultMessage: "You don't have permissions to manage search sessions",
+          });
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(

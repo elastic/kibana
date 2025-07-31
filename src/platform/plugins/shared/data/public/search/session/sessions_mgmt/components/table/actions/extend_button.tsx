@@ -17,8 +17,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
-import { UISession } from '../../../types';
-import extendSessionIcon from './icons/extend_session.svg';
+import { UISession } from '../../types';
+import extendSessionIcon from '../../icons/extend_session.svg';
+import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
 
 interface ExtendButtonProps {
   searchSession: UISession;
@@ -38,6 +39,10 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   const title = i18n.translate('data.mgmt.searchSessions.extendModal.title', {
     defaultMessage: 'Extend search session expiration',
   });
+  const bgsTitle = i18n.translate('data.mgmt.searchSessions.extendModal.backgroundSearchTitle', {
+    defaultMessage: 'Extend background search expiration',
+  });
+
   const confirm = i18n.translate('data.mgmt.searchSessions.extendModal.extendButton', {
     defaultMessage: 'Extend expiration',
   });
@@ -52,11 +57,22 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
       newExpires: newExpiration.toLocaleString(),
     },
   });
+  const bgsMessage = i18n.translate(
+    'data.mgmt.searchSessions.extendModal.backgroundSearchMessage',
+    {
+      defaultMessage:
+        "The background search ''{name}'' expiration would be extended until {newExpires}.",
+      values: {
+        name,
+        newExpires: newExpiration.toLocaleString(),
+      },
+    }
+  );
 
   return (
     <EuiConfirmModal
       aria-labelledby={confirmModalTitleId}
-      title={title}
+      title={BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
       titleProps={{ id: confirmModalTitleId }}
       onCancel={onActionDismiss}
       onConfirm={async () => {
@@ -71,7 +87,7 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
       defaultFocusedButton="confirm"
       buttonColor="primary"
     >
-      {message}
+      {BACKGROUND_SEARCH_ENABLED ? bgsMessage : message}
     </EuiConfirmModal>
   );
 };
