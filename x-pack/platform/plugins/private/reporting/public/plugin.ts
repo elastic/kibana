@@ -27,11 +27,11 @@ import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import {
+  getSharedComponents,
   reportingCsvExportShareIntegration,
   reportingPDFExportShareIntegration,
   reportingPNGExportShareIntegration,
-} from '@kbn/reporting-public/share/integrations';
-import { getSharedComponents } from '@kbn/reporting-public/share';
+} from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
