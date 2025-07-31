@@ -131,7 +131,6 @@ export class WorkflowExecutionRuntimeManager {
     // Get step details from the graph
     const stepNode = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = stepNode?.name || stepId;
-    const stepType = stepNode?.type || 'unknown';
 
     const stepExecution = {
       id: workflowStepExecutionId,
