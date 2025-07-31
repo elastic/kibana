@@ -23,7 +23,6 @@ interface TaskSetupContract {
 }
 
 export class TempSummaryCleanupTask {
-  private abortController = new AbortController();
   private logger: Logger;
   private config: SLOConfig;
   private wasStarted: boolean = false;
@@ -40,14 +39,20 @@ export class TempSummaryCleanupTask {
         title: 'SLO temp summary cleanup task',
         timeout: '2m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
 
             cancel: async () => {
-              this.abortController.abort('Timed out');
+              abortController.abort('Timed out');
             },
           };
         },
@@ -95,7 +100,11 @@ export class TempSummaryCleanupTask {
     return `${TYPE}:${VERSION}`;
   }
 
-  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup) {
+  public async runTask(
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -110,16 +119,11 @@ export class TempSummaryCleanupTask {
 
     this.logger.debug(`runTask started`);
 
-    this.abortController = new AbortController();
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
     try {
-      const cleanUpTempSummary = new CleanUpTempSummary(
-        esClient,
-        this.logger,
-        this.abortController
-      );
+      const cleanUpTempSummary = new CleanUpTempSummary(esClient, this.logger, abortController);
       await cleanUpTempSummary.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {

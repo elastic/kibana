@@ -44,7 +44,6 @@ export const getDeleteQueryFilter = (
 };
 
 export class SloOrphanSummaryCleanupTask {
-  private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
   private soClient?: SavedObjectsClientContract;
@@ -60,14 +59,20 @@ export class SloOrphanSummaryCleanupTask {
         title: 'SLO Definitions Cleanup Task',
         timeout: '3m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask();
+              return this.runTask(abortController);
             },
 
             cancel: async () => {
-              this.abortController.abort('orphan-slo-summary-cleanup task timed out');
+              abortController.abort('orphan-slo-summary-cleanup task timed out');
             },
           };
         },
@@ -75,12 +80,11 @@ export class SloOrphanSummaryCleanupTask {
     });
   }
 
-  public async runTask() {
+  public async runTask(abortController: AbortController) {
     if (!this.soClient || !this.esClient) {
       return;
     }
 
-    this.abortController = new AbortController();
     let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
     do {

@@ -394,7 +394,14 @@ export class TaskManagerRunner implements TaskRunner {
         modifiedContext.taskInstance.apiKey,
         modifiedContext.taskInstance.userScope?.spaceId
       );
-      this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
+
+      const abortController = new AbortController();
+
+      this.task = definition.createTaskRunner({
+        taskInstance: sanitizedTaskInstance,
+        fakeRequest,
+        abortController,
+      });
 
       const ctx = {
         type: 'task manager',

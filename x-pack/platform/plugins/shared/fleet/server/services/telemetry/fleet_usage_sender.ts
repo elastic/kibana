@@ -34,7 +34,6 @@ export class FleetUsageSender {
   private wasStarted: boolean = false;
   private interval = '1h';
   private timeout = '1m';
-  private abortController = new AbortController();
 
   constructor(
     taskManager: TaskManagerSetupContract,
@@ -46,16 +45,16 @@ export class FleetUsageSender {
         title: 'Fleet Usage Sender',
         timeout: this.timeout,
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({ taskInstance, abortController }) => {
           return {
             run: async () => {
               return withSpan({ name: this.taskType, type: 'telemetry' }, () =>
-                this.runTask(taskInstance, core, () => fetchUsage(this.abortController))
+                this.runTask(taskInstance, core, () => fetchUsage(abortController))
               );
             },
 
             cancel: async () => {
-              this.abortController.abort('task timed out');
+              abortController.abort('task timed out');
             },
           };
         },

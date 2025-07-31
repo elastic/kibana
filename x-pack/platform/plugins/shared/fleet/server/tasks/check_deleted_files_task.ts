@@ -41,7 +41,6 @@ interface CheckDeletedFilesTaskStartContract {
 export class CheckDeletedFilesTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
 
   constructor(setupContract: CheckDeletedFilesTaskSetupContract) {
     const { core, taskManager, logFactory } = setupContract;
@@ -51,13 +50,19 @@ export class CheckDeletedFilesTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
             cancel: async () => {
-              this.abortController.abort('task timed out');
+              abortController.abort('task timed out');
             },
           };
         },
@@ -94,7 +99,11 @@ export class CheckDeletedFilesTask {
     return `${TYPE}:${VERSION}`;
   }
 
-  private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  private runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
       return;
@@ -118,7 +127,7 @@ export class CheckDeletedFilesTask {
     const esClient = elasticsearch.client.asInternalUser;
 
     try {
-      const readyFiles = await getFilesByStatus(esClient, this.abortController);
+      const readyFiles = await getFilesByStatus(esClient, abortController);
 
       if (!readyFiles.length) {
         endRun('no files to process');
@@ -126,7 +135,7 @@ export class CheckDeletedFilesTask {
       }
 
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
-        await fileIdsWithoutChunksByIndex(esClient, this.abortController, readyFiles);
+        await fileIdsWithoutChunksByIndex(esClient, abortController, readyFiles);
 
       if (!allDeletedFileIds.size) {
         endRun('No files with deleted chunks');
@@ -138,7 +147,7 @@ export class CheckDeletedFilesTask {
 
       const updatedFilesResponses = await updateFilesStatus(
         esClient,
-        this.abortController,
+        abortController,
         deletedFileIdsByIndex,
         'DELETED'
       );
