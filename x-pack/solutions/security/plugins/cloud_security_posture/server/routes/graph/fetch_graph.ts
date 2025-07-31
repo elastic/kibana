@@ -149,7 +149,7 @@ const checkEnrichPolicyExists = async (
   spaceId: string
 ): Promise<boolean> => {
   try {
-    const { policies } = await esClient.asCurrentUser.enrich.getPolicy({
+    const { policies } = await esClient.asInternalUser.enrich.getPolicy({
       name: getEnrichPolicyId(spaceId),
     });
 
