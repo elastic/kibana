@@ -56,7 +56,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       setCanSave(false);
       setQueries([defaultQuery()]);
     }
-  }, [selectedFlow, setQueries, flowRef, queries.length, isEditMode]);
+  }, [selectedFlow, setQueries, queries.length, isEditMode]);
 
   return (
     <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose?.()} size="m">
@@ -78,7 +78,10 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           {!isEditMode && (
-            <FlowSelector selected={selectedFlow} onSelect={(flow) => setSelectedFlow(flow)} />
+            <FlowSelector
+              selected={selectedFlow}
+              updateSelected={(flow) => setSelectedFlow(flow)}
+            />
           )}
 
           {selectedFlow === 'manual' && (
