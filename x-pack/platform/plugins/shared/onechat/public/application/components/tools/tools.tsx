@@ -22,6 +22,7 @@ import {
   EuiSearchBarOnChangeArgs,
   EuiSkeletonLoading,
   EuiSkeletonText,
+  EuiSwitch,
   EuiTableSelectionType,
   EuiText,
   Search,
@@ -37,6 +38,7 @@ import { isEsqlTool } from '@kbn/onechat-common/tools';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
@@ -258,6 +260,8 @@ const ToolsTableHeader = ({
   selectedTools,
   setSelectedTools,
   deleteSelectedTools,
+  includeSystemTools,
+  toggleIncludeSystemTools,
 }: {
   isLoading: boolean;
   pageIndex: number;
@@ -266,6 +270,8 @@ const ToolsTableHeader = ({
   selectedTools: ToolDefinitionWithSchema[];
   setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
   deleteSelectedTools: (toolIds: string[]) => void;
+  includeSystemTools: boolean;
+  toggleIncludeSystemTools: (state?: boolean) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -289,6 +295,9 @@ const ToolsTableHeader = ({
     >
       <EuiSkeletonLoading
         isLoading={isLoading}
+        css={css`
+          width: 100%;
+        `}
         loadingContent={
           <EuiSkeletonText
             css={css`
@@ -300,80 +309,97 @@ const ToolsTableHeader = ({
           />
         }
         loadedContent={
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            css={css`
-              min-height: 24px;
-            `}
-          >
-            <EuiText size="xs">
-              <FormattedMessage
-                id="xpack.onechat.tools.toolsTableSummary"
-                defaultMessage="Showing {start}-{end} of {total} {tools}"
-                values={{
-                  start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,
-                  end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
-                  total,
-                  tools: (
-                    <strong>
-                      {i18n.translate('xpack.onechat.tools.toolsLabel', {
-                        defaultMessage: 'Tools',
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              css={css`
+                min-height: 24px;
+              `}
+            >
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.onechat.tools.toolsTableSummary"
+                  defaultMessage="Showing {start}-{end} of {total} {tools}"
+                  values={{
+                    start: <strong>{Math.min(pageIndex * 10 + 1, tools.length)}</strong>,
+                    end: <strong>{Math.min((pageIndex + 1) * 10, tools.length)}</strong>,
+                    total,
+                    tools: (
+                      <strong>
+                        {i18n.translate('xpack.onechat.tools.toolsLabel', {
+                          defaultMessage: 'Tools',
+                        })}
+                      </strong>
+                    ),
+                  }}
+                />
+              </EuiText>
+              {selectedTools.length > 0 && (
+                <EuiFlexGroup gutterSize="none">
+                  <EuiButtonEmpty
+                    iconType="trash"
+                    iconSize="m"
+                    size="xs"
+                    color="danger"
+                    onClick={deleteSelection}
+                  >
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                      `}
+                    >
+                      {i18n.translate('xpack.onechat.tools.deleteSelectedToolsButtonLabel', {
+                        defaultMessage: 'Delete {count, plural, one {# Tool} other {# Tools}}',
+                        values: {
+                          count: selectedTools.length,
+                        },
                       })}
-                    </strong>
-                  ),
-                }}
-              />
-            </EuiText>
-            {selectedTools.length > 0 && (
-              <EuiFlexGroup gutterSize="none">
-                <EuiButtonEmpty
-                  iconType="trash"
-                  iconSize="m"
-                  size="xs"
-                  color="danger"
-                  onClick={deleteSelection}
-                >
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {i18n.translate('xpack.onechat.tools.deleteSelectedToolsButtonLabel', {
-                      defaultMessage: 'Delete {count, plural, one {# Tool} other {# Tools}}',
-                      values: {
-                        count: selectedTools.length,
-                      },
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
-                <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {i18n.translate('xpack.onechat.tools.selectAllToolsButtonLabel', {
-                      defaultMessage: 'Select all',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
-                <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
-                  <EuiText
-                    size="xs"
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.semiBold};
-                    `}
-                  >
-                    {i18n.translate('xpack.onechat.tools.clearSelectionButtonLabel', {
-                      defaultMessage: 'Clear selection',
-                    })}
-                  </EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexGroup>
-            )}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                  <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                      `}
+                    >
+                      {i18n.translate('xpack.onechat.tools.selectAllToolsButtonLabel', {
+                        defaultMessage: 'Select all',
+                      })}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                  <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                      `}
+                    >
+                      {i18n.translate('xpack.onechat.tools.clearSelectionButtonLabel', {
+                        defaultMessage: 'Clear selection',
+                      })}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexGroup>
+            <EuiSwitch
+              label={
+                <EuiText size="s">
+                  {i18n.translate('xpack.onechat.tools.includeSystemToolsSwitchLabel', {
+                    defaultMessage: 'Include system tools',
+                  })}
+                </EuiText>
+              }
+              css={css`
+                align-items: center;
+              `}
+              compressed
+              checked={includeSystemTools}
+              onChange={() => toggleIncludeSystemTools()}
+            />
           </EuiFlexGroup>
         }
       />
@@ -448,7 +474,14 @@ const getColumns = ({
 
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
-  const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatTools();
+  const [includeSystemTools, toggleIncludeSystemTools] = useToggle(true);
+  const {
+    tools,
+    isLoading: isLoadingTools,
+    error: toolsError,
+  } = useOnechatTools({
+    includeSystemTools,
+  });
   const { tags } = useToolTags();
   const [pageIndex, setPageIndex] = useState(0);
   const [tableItems, setTableItems] = useState<ToolDefinitionWithSchema[]>([]);
@@ -710,12 +743,16 @@ export const OnechatTools = () => {
               defaultMessage: 'ES|QL',
             }),
           },
-          {
-            value: ToolType.builtin,
-            name: i18n.translate('xpack.onechat.tools.builtinLabel', {
-              defaultMessage: 'System',
-            }),
-          },
+          ...(includeSystemTools
+            ? [
+                {
+                  value: ToolType.builtin,
+                  name: i18n.translate('xpack.onechat.tools.builtinLabel', {
+                    defaultMessage: 'System',
+                  }),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -787,6 +824,8 @@ export const OnechatTools = () => {
               selectedTools={selectedTools}
               setSelectedTools={setSelectedTools}
               deleteSelectedTools={bulkDeleteTools}
+              includeSystemTools={includeSystemTools}
+              toggleIncludeSystemTools={toggleIncludeSystemTools}
             />
           }
           loading={isLoadingTools}

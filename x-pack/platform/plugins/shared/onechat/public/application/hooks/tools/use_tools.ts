@@ -12,19 +12,29 @@ import { useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
-export const useOnechatTools = () => {
+export interface UseOnechatToolsOptions {
+  includeSystemTools?: boolean;
+}
+
+export const useOnechatTools = ({ includeSystemTools = true }: UseOnechatToolsOptions = {}) => {
   const { toolsService } = useOnechatServices();
 
-  const {
-    data: tools,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
   });
 
-  return { tools: tools ?? [], isLoading, error };
+  const tools = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    if (includeSystemTools) {
+      return data;
+    }
+    return data.filter((tool) => tool.type !== ToolType.builtin);
+  }, [data, includeSystemTools]);
+
+  return { tools, isLoading, error };
 };
 
 export const useBaseTools = () => {
