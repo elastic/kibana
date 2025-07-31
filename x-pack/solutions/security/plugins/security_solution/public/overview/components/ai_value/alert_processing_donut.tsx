@@ -14,6 +14,10 @@ import { DonutChart } from '../../../common/components/charts/donutchart';
 interface Props {
   valueMetrics: ValueMetrics;
 }
+
+/**
+ * Renders a donut chart visualization showing the proportion of escalated alerts versus AI-filtered alerts.
+ */
 export const AlertProcessingDonut: React.FC<Props> = ({ valueMetrics }) => {
   const {
     euiTheme: { colors },

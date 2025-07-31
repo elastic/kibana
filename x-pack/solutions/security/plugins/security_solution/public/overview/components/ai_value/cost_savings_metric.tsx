@@ -23,6 +23,13 @@ interface Props {
   analystHourlyRate: number;
 }
 const ID = 'CostSavingsMetricQuery';
+
+/**
+ * Renders a Lens embeddable metric visualization showing estimated cost savings
+ * based on the number of AI filtered alerts, minutes saved per alert,
+ * and analyst hourly rate for a given time range.
+ */
+
 const CostSavingsMetricComponent: React.FC<Props> = ({
   attackAlertIds,
   minutesPerAlert,

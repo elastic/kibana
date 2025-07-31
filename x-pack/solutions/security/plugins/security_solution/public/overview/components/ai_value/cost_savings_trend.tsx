@@ -22,6 +22,13 @@ interface Props {
   analystHourlyRate: number;
 }
 const ID = 'CostSavingsTrendQuery';
+
+/**
+ * Renders a Lens embeddable area chart visualization showing the estimated cost savings trend
+ * over time, based on the number of AI filtered alerts, minutes saved per alert, and analyst hourly rate
+ * for a given time range.
+ */
+
 const CostSavingsTrendComponent: React.FC<Props> = ({
   attackAlertIds,
   minutesPerAlert,

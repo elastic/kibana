@@ -22,6 +22,11 @@ interface Props {
   minutesPerAlert: number;
 }
 const ID = 'TimeSavedMetricQuery';
+
+/**
+ * Renders a Lens embeddable metric visualization showing the estimated time saved
+ * based on the number of AI filtered alerts and minutes saved per alert for a given time range.
+ */
 const TimeSavedMetricComponent: React.FC<Props> = ({
   attackAlertIds,
   from,
