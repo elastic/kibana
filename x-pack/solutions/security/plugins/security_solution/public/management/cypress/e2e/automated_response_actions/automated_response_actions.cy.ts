@@ -92,7 +92,7 @@ describe(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event', { timeout: 60000 }).should('exist');
