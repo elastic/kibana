@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -160,6 +160,18 @@ interface UseLoadFleetExtensionProps {
   formState?: PackagePolicyFormState;
 }
 
+const getFormState = (
+  formState: PackagePolicyFormState | undefined,
+  policyTemplate: CloudSecurityPolicyTemplate | undefined
+): boolean => {
+  if (policyTemplate === 'kspm' || policyTemplate === 'vuln_mgmt') {
+    return true; // Default to valid for KSPM and Vulnerability Management
+  }
+  if (formState === 'VALID') return true;
+  if (formState === 'INVALID') return false;
+  return false;
+};
+
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
@@ -185,13 +197,13 @@ export const useLoadFleetExtension = ({
 
   const [isLoading, setIsLoading] = useState(true);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
-  const setInitialEnabledInputRef = useRef(false);
-
   const getIsSubscriptionValid = useIsSubscriptionStatusValid();
   const isSubscriptionValid = !!getIsSubscriptionValid.data;
   const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
-  const isValidFormState =
-    formState === 'VALID' ? true : formState === 'INVALID' ? false : undefined;
+  const isValidFormState = getFormState(
+    formState,
+    integration as CloudSecurityPolicyTemplate | undefined
+  );
 
   const updatePolicy = useCallback(
     ({
@@ -204,7 +216,7 @@ export const useLoadFleetExtension = ({
       isValid?: boolean;
     }) => {
       onChange({
-        isValid: isValid !== undefined && isValid !== isValidFormState ? isValid : true,
+        isValid: isValid !== undefined ? isValid : isValidFormState,
         updatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
@@ -229,10 +241,9 @@ export const useLoadFleetExtension = ({
     !isEditPage &&
     !isLoading &&
     !isSubscriptionLoading &&
-    !setInitialEnabledInputRef.current &&
     (enabledPolicyInputCount === 0 || enabledPolicyInputCount > 1)
   ) {
-    setInitialEnabledInputRef.current = true;
+    // setInitialEnabledInputRef.current = true;
     setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
     refetch();
   }
