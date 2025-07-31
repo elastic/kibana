@@ -57,7 +57,10 @@ export const performDelete = async <T>(
       {
         index: commonHelper.getIndexForType(type),
         id: serializer.generateRawId(namespace, type, id),
-        _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+        _source_includes: [
+          ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+          'accessControl',
+        ],
       },
       { ignore: [404], meta: true }
     );
@@ -86,6 +89,7 @@ export const performDelete = async <T>(
       id,
       namespace,
     });
+
     if (
       preflightResult.checkResult === 'found_outside_namespace' ||
       preflightResult.checkResult === 'not_found'

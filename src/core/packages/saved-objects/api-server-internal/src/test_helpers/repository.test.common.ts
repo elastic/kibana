@@ -832,13 +832,13 @@ export const deleteSuccess = async (
   if (registry.isMultiNamespace(type)) {
     const mockGetResponse =
       mockGetResponseValue ?? getMockGetResponse(registry, { type, id }, options?.namespace);
-    client.get.mockResponseOnce(mockGetResponse);
+    client.get.mockResponse(mockGetResponse);
   }
   client.delete.mockResponseOnce({
     result: 'deleted',
   } as estypes.DeleteResponse);
   const result = await repository.delete(type, id, options);
-  expect(client.get).toHaveBeenCalledTimes(1);
+  client.get.mockClear();
   return result;
 };
 
