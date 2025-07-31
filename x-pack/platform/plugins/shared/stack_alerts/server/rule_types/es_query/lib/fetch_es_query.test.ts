@@ -87,7 +87,20 @@ describe('fetchEsQuery', () => {
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        aggs: {},
+        aggs: expect.objectContaining({
+          'http.response.status_code': {
+            terms: {
+              field: 'http.response.status_code',
+              size: 10,
+            },
+          },
+          'vulnerability.scanner.vendor': {
+            terms: {
+              field: 'vulnerability.scanner.vendor.keyword',
+              size: 10,
+            },
+          },
+        }),
         docvalue_fields: [
           {
             field: '@timestamp',
@@ -178,7 +191,20 @@ describe('fetchEsQuery', () => {
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        aggs: {},
+        aggs: expect.objectContaining({
+          'http.response.status_code': {
+            terms: {
+              field: 'http.response.status_code',
+              size: 10,
+            },
+          },
+          'vulnerability.scanner.vendor': {
+            terms: {
+              field: 'vulnerability.scanner.vendor.keyword',
+              size: 10,
+            },
+          },
+        }),
         docvalue_fields: [
           {
             field: '@timestamp',
@@ -243,7 +269,20 @@ describe('fetchEsQuery', () => {
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        aggs: {},
+        aggs: expect.objectContaining({
+          'http.response.status_code': {
+            terms: {
+              field: 'http.response.status_code',
+              size: 10,
+            },
+          },
+          'vulnerability.scanner.vendor': {
+            terms: {
+              field: 'vulnerability.scanner.vendor.keyword',
+              size: 10,
+            },
+          },
+        }),
         docvalue_fields: [
           {
             field: '@timestamp',
@@ -310,7 +349,7 @@ describe('fetchEsQuery', () => {
         allow_no_indices: true,
         aggs: {
           groupAgg: {
-            aggs: {
+            aggs: expect.objectContaining({
               conditionSelector: {
                 bucket_selector: {
                   buckets_path: {
@@ -319,12 +358,24 @@ describe('fetchEsQuery', () => {
                   script: 'params.compareValue < 0L',
                 },
               },
+              'http.response.status_code': {
+                terms: {
+                  field: 'http.response.status_code',
+                  size: 10,
+                },
+              },
               topHitsAgg: {
                 top_hits: {
                   size: 100,
                 },
               },
-            },
+              'vulnerability.scanner.vendor': {
+                terms: {
+                  field: 'vulnerability.scanner.vendor.keyword',
+                  size: 10,
+                },
+              },
+            }),
             terms: {
               field: 'host.name',
               size: 10,
@@ -409,7 +460,7 @@ describe('fetchEsQuery', () => {
         allow_no_indices: true,
         aggs: {
           groupAgg: {
-            aggs: {
+            aggs: expect.objectContaining({
               conditionSelector: {
                 bucket_selector: {
                   buckets_path: {
@@ -418,12 +469,24 @@ describe('fetchEsQuery', () => {
                   script: 'params.compareValue < 0L',
                 },
               },
+              'http.response.status_code': {
+                terms: {
+                  field: 'http.response.status_code',
+                  size: 10,
+                },
+              },
               topHitsAgg: {
                 top_hits: {
                   size: 100,
                 },
               },
-            },
+              'vulnerability.scanner.vendor': {
+                terms: {
+                  field: 'vulnerability.scanner.vendor.keyword',
+                  size: 10,
+                },
+              },
+            }),
             terms: {
               field: 'host.name',
               size: 10,

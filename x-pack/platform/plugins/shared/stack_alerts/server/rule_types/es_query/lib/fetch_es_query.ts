@@ -18,11 +18,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { getParsedQuery, checkForShardFailures } from '../util';
+import { getParsedQuery, checkForShardFailures, getSourceFields } from '../util';
 
 export interface FetchEsQueryOpts {
   ruleId: string;
@@ -201,16 +200,3 @@ export function generateLink(
 
   return redirectUrl;
 }
-
-export const getSourceFields = () => {
-  const alertFields = Object.keys(alertFieldMap);
-  return (
-    Object.keys(ecsFieldMap)
-      // exclude the alert fields that we don't want to override
-      .filter((key) => !alertFields.includes(key))
-      .map((key) => {
-        const field = ecsFieldMap[key];
-        return { label: key, searchPath: field.type === 'keyword' ? `${key}.keyword` : key };
-      })
-  );
-};

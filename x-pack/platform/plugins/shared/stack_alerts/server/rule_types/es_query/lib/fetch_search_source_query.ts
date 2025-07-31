@@ -28,10 +28,9 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
-import { checkForShardFailures } from '../util';
+import { checkForShardFailures, getSourceFields } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -265,16 +264,3 @@ export function getSmallerDataViewSpec(
 ): DiscoverAppLocatorParams['dataViewSpec'] {
   return dataView.toMinimalSpec({ keepFieldAttrs: ['customLabel'] });
 }
-
-export const getSourceFields = () => {
-  const alertFields = Object.keys(alertFieldMap);
-  return (
-    Object.keys(ecsFieldMap)
-      // exclude the alert fields that we don't want to override
-      .filter((key) => !alertFields.includes(key))
-      .map((key) => {
-        const field = ecsFieldMap[key];
-        return { label: key, searchPath: field.type === 'keyword' ? `${key}.keyword` : key };
-      })
-  );
-};
