@@ -26,6 +26,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
     metadata,
+    stopSequences,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -41,6 +42,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       modelName,
+      stopSequences,
     });
 
     return defer(() => {

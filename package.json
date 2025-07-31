@@ -531,6 +531,7 @@
     "@kbn/es-query-server": "link:src/platform/packages/shared/kbn-es-query-server",
     "@kbn/es-types": "link:src/platform/packages/shared/kbn-es-types",
     "@kbn/es-ui-shared-plugin": "link:src/platform/plugins/shared/es_ui_shared",
+    "@kbn/es-utils": "link:src/platform/packages/private/kbn-es-utils",
     "@kbn/eso-model-version-example": "link:examples/eso_model_version_example",
     "@kbn/eso-plugin": "link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
     "@kbn/esql": "link:src/platform/plugins/shared/esql",

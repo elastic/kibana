@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ToolCall, ToolCallsOf, ToolNamesOf, ToolOptions, ToolResponsesOf } from './tools';
+import { ValuesType } from 'utility-types';
+import type { ToolCall, ToolCallsOf, ToolNamesOf, ToolOptions } from './tools';
 
 /**
  * Enum for all possible {@link Message} roles.
@@ -114,15 +115,23 @@ export type AssistantMessageOf<TToolOptions extends ToolOptions> = Omit<
  * Utility type to get the Tool message type of a {@link ToolOptions} type.
  */
 
-export type ToolMessageOf<TToolOptions extends ToolOptions> = ToolMessage<
-  ToolNamesOf<TToolOptions>,
-  ToolResponsesOf<TToolOptions['tools']>
->;
+export type ToolMessageOf<
+  TToolOptions extends ToolOptions,
+  TToolResponses extends Record<ToolNamesOf<TToolOptions>, any> = Record<
+    ToolNamesOf<TToolOptions>,
+    unknown
+  >
+> = ValuesType<{
+  [key in ToolNamesOf<TToolOptions>]: ToolMessage<key, TToolResponses[key], {}>;
+}>;
 
 /**
  * Utility type to get the mixin Message type of a {@link ToolOptions} type.
  */
-export type MessageOf<TToolOptions extends ToolOptions> =
-  | UserMessage
-  | AssistantMessageOf<TToolOptions>
-  | ToolMessageOf<TToolOptions>;
+export type MessageOf<
+  TToolOptions extends ToolOptions,
+  TToolResponses extends Record<ToolNamesOf<TToolOptions>, any> = Record<
+    ToolNamesOf<TToolOptions>,
+    unknown
+  >
+> = UserMessage | AssistantMessageOf<TToolOptions> | ToolMessageOf<TToolOptions, TToolResponses>;

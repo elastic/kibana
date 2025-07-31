@@ -7,7 +7,12 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
+import type {
+  ChatCompleteOptions,
+  AnonymizationRule,
+  ChatCompletionEvent,
+  Message,
+} from '@kbn/inference-common';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -16,6 +21,7 @@ import {
   MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -83,7 +89,7 @@ export function createChatCompleteCallbackApi({
       abortSignal,
       stream,
       maxRetries = 3,
-      retryConfiguration = {},
+      retryConfiguration = { retryOn: 'auto' },
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
@@ -104,6 +110,7 @@ export function createChatCompleteCallbackApi({
             temperature,
             toolChoice,
             tools,
+            stopSequences,
           } = callback(executor);
 
           const messages = givenMessages.map((message) => {
@@ -144,41 +151,45 @@ export function createChatCompleteCallbackApi({
                 ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
                 : system;
 
-              return withChatCompleteSpan(
-                {
-                  system: systemWithAnonymizationInstructions,
-                  messages: anonymization.messages,
-                  tools,
-                  toolChoice,
-                  model: {
-                    family: getConnectorFamily(connector),
-                    provider: getConnectorProvider(connector),
+              const executeChat = (currentMessages: Message[]): Observable<ChatCompletionEvent> => {
+                return withChatCompleteSpan(
+                  {
+                    system: systemWithAnonymizationInstructions,
+                    messages: currentMessages,
+                    tools,
+                    toolChoice,
+                    model: {
+                      family: getConnectorFamily(connector),
+                      provider: getConnectorProvider(connector),
+                    },
+                    ...metadata?.attributes,
                   },
-                  ...metadata?.attributes,
-                },
-                () => {
-                  return inferenceAdapter
-                    .chatComplete({
-                      system: systemWithAnonymizationInstructions,
-                      executor,
-                      messages: anonymization.messages,
-                      toolChoice,
-                      tools,
-                      temperature,
-                      logger,
-                      functionCalling,
-                      modelName,
-                      abortSignal,
-                      metadata,
-                    })
-                    .pipe(
-                      chunksIntoMessage({
-                        toolOptions: { toolChoice, tools },
+                  () =>
+                    inferenceAdapter
+                      .chatComplete({
+                        system: systemWithAnonymizationInstructions,
+                        executor,
+                        messages: currentMessages,
+                        toolChoice,
+                        tools,
+                        temperature,
                         logger,
+                        functionCalling,
+                        modelName,
+                        abortSignal,
+                        metadata,
+                        stopSequences,
                       })
-                    );
-                }
-              ).pipe(deanonymizeMessage(anonymization));
+                      .pipe(
+                        chunksIntoMessage({
+                          toolOptions: { toolChoice, tools },
+                          logger,
+                        })
+                      )
+                );
+              };
+
+              return executeChat(anonymization.messages).pipe(deanonymizeMessage(anonymization));
             })
           );
         })

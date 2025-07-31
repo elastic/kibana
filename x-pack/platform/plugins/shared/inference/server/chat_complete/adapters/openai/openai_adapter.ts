@@ -32,6 +32,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     logger,
     abortSignal,
     metadata,
+    stopSequences,
   }) => {
     const connector = executor.getConnector();
     const useSimulatedFunctionCalling =
@@ -53,6 +54,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+        stop: stopSequences,
       };
     } else {
       request = {
@@ -62,6 +64,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
+        stop: stopSequences,
       };
     }
 

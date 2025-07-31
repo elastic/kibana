@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   BoundInferenceClient,
-  PromptResponse,
   ToolCallbacksOf,
   ToolDefinition,
   ToolOptions,
 } from '@kbn/inference-common';
-import { truncateList } from '@kbn/inference-common';
-import type { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
-import { EsqlDocumentBase, runAndValidateEsqlQuery } from '@kbn/inference-plugin/server';
+import type { PromptOptions } from '@kbn/inference-common/src/prompt/api';
+import { EsqlDocumentBase } from '@kbn/inference-plugin/server';
+import type { ReasoningPromptResponseOf } from '@kbn/inference-prompt-utils';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { omit, once } from 'lodash';
-import moment from 'moment';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '../../..';
+import { once } from 'lodash';
+import { createDescribeDatasetToolCallback } from './create_describe_dataset_tool_callback';
+import { createGetDocumentationToolCallback } from './create_get_documentation_callback';
+import { createListDatasetsToolCallback } from './create_list_datasets_tool_callback';
+import { createRunQueriesToolCallback } from './create_run_queries_tool_callback';
+import { createValidateQueriesToolCallback } from './create_validate_queries_tool_callbacks';
 import { EsqlPrompt } from './prompt';
+import type {
+  EsqlReasoningPromptResponse,
+  EsqlReasoningToolCallbacks,
+  EsqlReasoningToolOptions,
+} from './types';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
 
-export async function executeAsEsqlAgent<TTools extends Record<string, ToolDefinition> | undefined>(
+export async function executeAsEsqlAgent<
+  TTools extends Record<string, ToolDefinition> | undefined,
+  TToolCallbacks extends ToolCallbacksOf<{ tools: TTools }>
+>(
   options: {
     inferenceClient: BoundInferenceClient;
     esClient: ElasticsearchClient;
@@ -35,10 +44,17 @@ export async function executeAsEsqlAgent<TTools extends Record<string, ToolDefin
     signal: AbortSignal;
     prompt: string;
     tools?: TTools;
-  } & (TTools extends Record<string, ToolDefinition>
-    ? { toolCallbacks: ToolCallbacksOf<{ tools: TTools }> }
-    : {})
-): PromptCompositeResponse<PromptOptions<typeof EsqlPrompt> & { tools: TTools; stream: false }>;
+  } & (TTools extends Record<string, ToolDefinition> ? { toolCallbacks: TToolCallbacks } : {})
+): Promise<
+  ReasoningPromptResponseOf<
+    typeof EsqlPrompt,
+    PromptOptions<typeof EsqlPrompt> & {
+      tools: TTools & EsqlReasoningToolOptions['tools'];
+      stream: false;
+    },
+    TToolCallbacks & EsqlReasoningToolCallbacks
+  >
+>;
 
 export async function executeAsEsqlAgent({
   inferenceClient,
@@ -49,6 +65,7 @@ export async function executeAsEsqlAgent({
   prompt,
   tools,
   toolCallbacks,
+  logger,
 }: {
   inferenceClient: BoundInferenceClient;
   esClient: ElasticsearchClient;
@@ -58,30 +75,9 @@ export async function executeAsEsqlAgent({
   prompt: string;
   tools?: Record<string, ToolDefinition>;
   toolCallbacks?: ToolCallbacksOf<ToolOptions>;
-}): Promise<PromptResponse> {
+  logger: Logger;
+}): Promise<EsqlReasoningPromptResponse> {
   const docBase = await loadEsqlDocBase();
-
-  async function runEsqlQuery(query: string) {
-    return await runAndValidateEsqlQuery({
-      query,
-      client: esClient,
-    }).then((response) => {
-      if (response.error || response.errorMessages?.length) {
-        return {
-          error:
-            response.error && response.error instanceof errors.ResponseError
-              ? omit(response.error, 'meta')
-              : response.error,
-          errorMessages: response.errorMessages,
-        };
-      }
-
-      return {
-        columns: response.columns,
-        rows: response.rows,
-      };
-    });
-  }
 
   const assistantReply = await executeAsReasoningAgent({
     inferenceClient,
@@ -90,100 +86,11 @@ export async function executeAsEsqlAgent({
     tools,
     toolCallbacks: {
       ...toolCallbacks,
-      list_datasets: async (toolCall) => {
-        return esClient.indices
-          .resolveIndex({
-            name: toolCall.function.arguments.name.flatMap((index) => index.split(',')),
-            allow_no_indices: true,
-          })
-          .then((response) => {
-            return {
-              ...response,
-              data_streams: response.data_streams.map((dataStream) => {
-                return {
-                  name: dataStream.name,
-                  timestamp_field: dataStream.timestamp_field,
-                };
-              }),
-            };
-          });
-      },
-      describe_dataset: async (toolCall) => {
-        const analysis = await describeDataset({
-          esClient,
-          index: toolCall.function.arguments.index,
-          kql: toolCall.function.arguments.kql,
-          start: start ?? moment().subtract(24, 'hours').valueOf(),
-          end: Date.now(),
-        });
-
-        return {
-          analysis: sortAndTruncateAnalyzedFields(analysis),
-        };
-      },
-      get_documentation: async (toolCall) => {
-        return docBase.getDocumentation(
-          toolCall.function.arguments.commands.concat(toolCall.function.arguments.functions),
-          { generateMissingKeywordDoc: true }
-        );
-      },
-      run_queries: async (toolCall) => {
-        const results = await Promise.all(
-          toolCall.function.arguments.queries.map(async (query) => {
-            const response = await runEsqlQuery(query);
-
-            const cols = response.columns ?? [];
-            const docs =
-              response.rows?.map((row) => {
-                const doc: Record<string, any> = {};
-                row.forEach((value, idx) => {
-                  const col = cols[idx];
-                  if (value !== null) {
-                    doc[col.name] = value;
-                  }
-                });
-              }) ?? [];
-
-            return {
-              query,
-              response: {
-                docs: truncateList(docs, 50),
-              },
-            };
-          })
-        );
-
-        return {
-          queries: results,
-        };
-      },
-      validate_queries: async (toolCall) => {
-        const results = await Promise.all(
-          toolCall.function.arguments.queries.map(async (query) => {
-            return {
-              query,
-              validation: await runEsqlQuery(query + ' | LIMIT 0').then((response) => {
-                if ('error' in response) {
-                  return {
-                    valid: false,
-                    ...response,
-                  };
-                }
-
-                const cols = truncateList(response.columns?.map((col) => col.name) ?? [], 10);
-                return {
-                  valid: true,
-                  ...(cols.length ? { columns: cols } : {}),
-                };
-              }),
-            };
-          })
-        );
-
-        return {
-          results,
-        };
-      },
+      list_datasets: createListDatasetsToolCallback({ esClient }),
+      describe_dataset: createDescribeDatasetToolCallback({ esClient, start, end }),
+      get_documentation: createGetDocumentationToolCallback({ docBase }),
+      run_queries: createRunQueriesToolCallback({ esClient }),
+      validate_queries: createValidateQueriesToolCallback({ esClient }),
     },
     input: {
       prompt,

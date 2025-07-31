@@ -49,26 +49,10 @@ export const EsqlPrompt = createPrompt({
               },
             },
           },
-          required: ['commands', 'functions'],
-        },
-      },
-      validate_queries: {
-        description: 'Validate one or more ES|QL queries for syntax errors and/or mapping issues',
-        schema: {
-          type: 'object',
-          properties: {
-            queries: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-            },
-          },
-          required: ['queries'],
         },
       },
       run_queries: {
-        description: 'Run one or more validated ES|QL queries and retrieve the results',
+        description: 'Run one or more ES|QL queries and retrieve the results',
         schema: {
           type: 'object',
           properties: {
@@ -80,6 +64,25 @@ export const EsqlPrompt = createPrompt({
             },
           },
           required: ['queries'],
+        },
+      },
+      validate_queries: {
+        description: 'Validate one or more ES|QL queries, without executing them',
+        schema: {
+          type: 'object',
+          properties: {
+            queries: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+            ignoreMissingIndex: {
+              type: 'boolean',
+              description: 'Whether to ignore errors related to missing indices or data streams',
+            },
+          },
+          required: ['queries', 'ignoreMissingIndex'],
         },
       },
       list_datasets: {
@@ -88,14 +91,18 @@ export const EsqlPrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
-            name: {
+            include_kibana_indices: {
+              description: 'Whether to include Kibana system indices (saved objects, alerts, etc)',
+              type: 'boolean',
+            },
+            index: {
               type: 'array',
               items: {
                 type: 'string',
               },
             },
           },
-          required: ['name'],
+          required: ['index'],
         },
       },
       describe_dataset: {

@@ -6,11 +6,11 @@
  */
 
 import type { Flags } from '@kbn/dev-cli-runner';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from '@kbn/tooling-log';
 import type { Logger } from '@kbn/core/server';
 import type { LogLevelId, LogMessageSource } from '@kbn/logging';
 
-export function toolingLogToLogger({ flags, log }: { flags: Flags; log: ToolingLog }): Logger {
+export function toolingLogToLogger({ flags, log }: { flags?: Flags; log: ToolingLog }): Logger {
   const toolingLogLevels = {
     off: 'silent',
     all: 'verbose',
@@ -32,9 +32,13 @@ export function toolingLogToLogger({ flags, log }: { flags: Flags; log: ToolingL
     'verbose',
   ] as const;
 
-  const flagLogLevel = pickLevelFromFlags(flags);
+  const textWriter = log.getWriters().find((writer): writer is ToolingLogTextWriter => {
+    return writer instanceof ToolingLogTextWriter;
+  });
 
-  const logLevelEnabledFrom = toolingLevelsSorted.indexOf(flagLogLevel);
+  const logLevel = textWriter?.level.name || (flags && pickLevelFromFlags(flags)) || 'info';
+
+  const logLevelEnabledFrom = toolingLevelsSorted.indexOf(logLevel);
 
   function isLevelEnabled(level: LogLevelId) {
     const levelAt = toolingLevelsSorted.indexOf(toolingLogLevels[level]);
@@ -85,12 +89,12 @@ export function toolingLogToLogger({ flags, log }: { flags: Flags; log: ToolingL
         flags,
         log: new ToolingLog(
           {
-            level: pickLevelFromFlags(flags),
+            level: logLevel,
             writeTo: {
               write: log.write,
             },
           },
-          { parent: log }
+          { parent: log, context: paths.join('.') }
         ),
       });
     },
