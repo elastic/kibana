@@ -443,6 +443,68 @@ export const getEndpointConsoleCommands = ({
         privileges: endpointPrivileges,
       }),
     },
+
+    {
+      name: 'scan',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.scan.about,
+        isSupported: doesEndpointSupportCommand('scan'),
+      }),
+      RenderComponent: ScanActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      args: {
+        path: {
+          required: true,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: CONSOLE_COMMANDS.scan.args.path.about,
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 8,
+      helpDisabled: !doesEndpointSupportCommand('scan'),
+      helpHidden: !getRbacControl({
+        commandName: 'scan',
+        privileges: endpointPrivileges,
+      }),
+    },
+
+    {
+      name: 'runscript',
+      about: getCommandAboutInfo({
+        aboutInfo: CONSOLE_COMMANDS.runscript.about,
+        isSupported: doesEndpointSupportCommand('runscript'),
+      }),
+      RenderComponent: RunScriptActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleInstruction: CONSOLE_COMMANDS.runscript.about,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 9,
+      helpDisabled: !doesEndpointSupportCommand('runscript'),
+      helpHidden: !getRbacControl({
+        commandName: 'runscript',
+        privileges: endpointPrivileges,
+      }),
+    },
   ];
 
   // `upload` command
@@ -496,71 +558,6 @@ export const getEndpointConsoleCommands = ({
       }),
     });
   }
-
-  consoleCommands.push({
-    name: 'scan',
-    about: getCommandAboutInfo({
-      aboutInfo: CONSOLE_COMMANDS.scan.about,
-      isSupported: doesEndpointSupportCommand('scan'),
-    }),
-    RenderComponent: ScanActionResult,
-    meta: {
-      agentType,
-      endpointId: endpointAgentId,
-      capabilities: endpointCapabilities,
-      privileges: endpointPrivileges,
-    },
-    exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
-    exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-    validate: capabilitiesAndPrivilegesValidator(agentType),
-    mustHaveArgs: true,
-    args: {
-      path: {
-        required: true,
-        allowMultiples: false,
-        mustHaveValue: 'non-empty-string',
-        about: CONSOLE_COMMANDS.scan.args.path.about,
-      },
-      ...commandCommentArgument(),
-    },
-    helpGroupLabel: HELP_GROUPS.responseActions.label,
-    helpGroupPosition: HELP_GROUPS.responseActions.position,
-    helpCommandPosition: 8,
-    helpDisabled: !doesEndpointSupportCommand('scan'),
-    helpHidden: !getRbacControl({
-      commandName: 'scan',
-      privileges: endpointPrivileges,
-    }),
-  });
-  consoleCommands.push({
-    name: 'runscript',
-    about: getCommandAboutInfo({
-      aboutInfo: CONSOLE_COMMANDS.runscript.about,
-      isSupported: doesEndpointSupportCommand('runscript'),
-    }),
-    RenderComponent: RunScriptActionResult,
-    meta: {
-      agentType,
-      endpointId: endpointAgentId,
-      capabilities: endpointCapabilities,
-      privileges: endpointPrivileges,
-    },
-    exampleInstruction: CONSOLE_COMMANDS.runscript.about,
-    validate: capabilitiesAndPrivilegesValidator(agentType),
-    mustHaveArgs: true,
-    helpGroupLabel: HELP_GROUPS.responseActions.label,
-    helpGroupPosition: HELP_GROUPS.responseActions.position,
-    helpCommandPosition: 9,
-    helpDisabled:
-      !doesEndpointSupportCommand('runscript') ||
-      (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
-    helpHidden:
-      !getRbacControl({
-        commandName: 'runscript',
-        privileges: endpointPrivileges,
-      }) ||
-      (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
-  });
 
   switch (agentType) {
     case 'sentinel_one':
@@ -651,6 +648,37 @@ const adjustCommandsForSentinelOne = ({
         });
         command.validate = () => {
           return message;
+        };
+      } else if (command.name === 'runscript') {
+        command.helpDisabled = false;
+        command.exampleUsage = `runscript --script='copy.sh' --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+        command.args = {
+          script: {
+            required: true,
+            allowMultiples: false,
+            about: i18n.translate(
+              'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.scriptArg',
+              { defaultMessage: 'The script to run (selected from popup list)' }
+            ),
+            mustHaveValue: 'non-empty-string',
+            // FIXME:PT enable once PR #227463 is merged.
+            // SelectorComponent: CustomScriptSelector('sentinel_one'),
+          },
+          inputParams: {
+            required: false,
+            allowMultiples: false,
+            about: i18n.translate(
+              'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.inputParamsArg',
+              { defaultMessage: 'Input arguments for the selected script' }
+            ),
+            mustHaveValue: 'non-empty-string',
+          },
+          ...commandCommentArgument(),
+        };
+        command.validate = (enteredCommand) => {
+          // FIXME:PT implement
+          // Ensure that `script` value is a valid script ID from the list retrieved?
+          return true;
         };
       }
     }

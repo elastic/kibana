@@ -30,9 +30,16 @@ export interface MicrosoftDefenderEndpointRunScriptActionParameters {
   Args?: string[];
 }
 
+export interface SentinelOneRunScriptActionParameters {
+  script: string[];
+  inputParams?: string[];
+}
+
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
-    CrowdStrikeRunScriptActionParameters | MicrosoftDefenderEndpointRunScriptActionParameters,
+    | CrowdStrikeRunScriptActionParameters
+    | MicrosoftDefenderEndpointRunScriptActionParameters
+    | SentinelOneRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -42,8 +49,9 @@ export const RunScriptActionResult = memo<
     const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
 
     if (!endpointId) {
-      return;
+      return {} as unknown as RunScriptActionRequestBody;
     }
+
     // Note TC: I had much issues moving this outside of useMemo - caused by command type. If you think this is a problem - please try to move it out.
     const getParams = () => {
       const args = command.args.args;
@@ -69,21 +77,24 @@ export const RunScriptActionResult = memo<
         };
       }
 
-      return {};
-    };
+      if (agentType === 'sentinel_one') {
+        const { script, inputParams } = args as SentinelOneRunScriptActionParameters;
 
-    const parameters = getParams();
-    // Early return if we have no parameters
-    if (Object.keys(parameters).length === 0) {
-      return;
-    }
+        return {
+          scriptId: script?.[0],
+          scriptInput: inputParams?.[0],
+        };
+      }
+
+      return {} as unknown as RunScriptActionRequestBody;
+    };
 
     return {
       agent_type: agentType,
       endpoint_ids: [endpointId],
-      parameters,
+      parameters: getParams(),
       comment: command.args.args?.comment?.[0],
-    };
+    } as unknown as RunScriptActionRequestBody;
   }, [command]);
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<

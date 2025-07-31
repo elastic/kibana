@@ -111,7 +111,9 @@ export interface CommandDefinition<TMeta = any> {
   helpDisabled?: boolean;
 
   /**
-   * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
+   * If defined, the command will be hidden from in the Help menu and help text. It will warn the
+   * user and not execute the command if manually typed in.
+   * Usually set as a result of checking if user has Authz to the given response action
    */
   helpHidden?: boolean;
 
