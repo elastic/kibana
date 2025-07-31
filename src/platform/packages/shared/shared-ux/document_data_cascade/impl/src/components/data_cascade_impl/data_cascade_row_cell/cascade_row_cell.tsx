@@ -10,11 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, type EuiThemeShape } from '@elastic/eui';
 import type { CellContext, Row } from '@tanstack/react-table';
-import {
-  getCascadeRowLeafDataCacheKey,
-  getCascadeRowNodePath,
-  getCascadeRowNodePathValueRecord,
-} from './utils';
+import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
 import {
   type GroupNode,
   type LeafNode,
@@ -45,6 +41,20 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
   children: (args: { data: L[] | null }) => React.ReactNode;
+}
+
+/**
+ * @description This function generates a cache key to persist and retrieve the leaf data of a cascade row.
+ */
+export function getCascadeRowLeafDataCacheKey(
+  nodePath: string[],
+  nodePathMap: Record<string, string>,
+  leafId: string
+) {
+  return nodePath
+    .map((path) => nodePathMap[path])
+    .concat(leafId)
+    .join(':');
 }
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({

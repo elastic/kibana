@@ -12,14 +12,19 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { flexRender, type Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
-import { type CascadeRowCellPrimitiveProps } from './cascade_row_cell';
+import { type CascadeRowCellPrimitiveProps } from '../data_cascade_row_cell/cascade_row_cell';
 import {
   type LeafNode,
   type GroupNode,
   useDataCascadeDispatch,
   useDataCascadeState,
 } from '../../data_cascade_provider';
-import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from './utils';
+import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
+import {
+  styles as cascadeRowStyles,
+  rootRowAttribute,
+  childRowAttribute,
+} from './cascade_row.styles';
 
 interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
@@ -95,6 +100,15 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
   const isRowExpanded = rowInstance.getIsExpanded();
   const hasAllParentsExpanded = rowInstance.getIsAllParentsExpanded();
 
+  const styles = useMemo(() => {
+    return cascadeRowStyles(
+      euiTheme,
+      Boolean(rowInstance.parentId && hasAllParentsExpanded),
+      rowInstance.depth,
+      size
+    );
+  }, [euiTheme, hasAllParentsExpanded, rowInstance.depth, rowInstance.parentId, size]);
+
   const fetchGroupNodeData = useCallback(() => {
     const dataFetchFn = async () => {
       const groupNodeData = await onCascadeGroupNodeExpanded({
@@ -155,144 +169,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     <div
       {...rowARIAProps}
       data-index={virtualRow.index}
-      data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
+      data-row-type={rowInstance.depth === 0 ? rootRowAttribute : childRowAttribute}
       ref={innerRef}
       style={virtualRowStyle}
       {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
-      css={{
-        display: 'flex',
-        position: 'absolute',
-        width: '100%',
-        padding: euiTheme.size[size],
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-        '&[data-row-type="sub-group"]': {
-          paddingTop: 0,
-          paddingBottom: 0,
-        },
-        '&:before': {
-          content: '""',
-          display: 'block',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: -1,
-          borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-          borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        },
-        '&[data-row-type="root"]:not([data-active-sticky]):before': {
-          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        },
-        '&[data-row-type="root"]:first-of-type:not([data-active-sticky]):before': {
-          borderTopLeftRadius: euiTheme.border.radius.small,
-          borderTopRightRadius: euiTheme.border.radius.small,
-        },
-        '&[data-row-type="root"]:last-of-type:not([data-active-sticky]):before': {
-          borderBottomLeftRadius: euiTheme.border.radius.small,
-          borderBottomRightRadius: euiTheme.border.radius.small,
-        },
-        '&[data-row-type="root"]:last-of-type:before': {
-          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        },
-      }}
+      css={styles.rowWrapper}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize={size}
-        css={{
-          position: 'relative',
-          ...(rowInstance.parentId && hasAllParentsExpanded
-            ? {
-                padding: euiTheme.size[size],
-                ...(rowInstance.depth % 2 === 1
-                  ? {
-                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                    }
-                  : {
-                      paddingTop: 0,
-                      paddingBottom: 0,
-                    }),
-
-                '&:before': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                },
-
-                '[data-row-type="root"] + [data-row-type="sub-group"] &:before': {
-                  borderTopLeftRadius: euiTheme.border.radius.small,
-                  borderTopRightRadius: euiTheme.border.radius.small,
-                },
-
-                '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
-                  marginBottom: euiTheme.size[size],
-                },
-
-                '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &:before': {
-                  borderBottomLeftRadius: euiTheme.border.radius.small,
-                  borderBottomRightRadius: euiTheme.border.radius.small,
-                  borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                },
-
-                '[data-row-type="sub-group"][aria-level="3"] &': {
-                  gap: 0,
-                },
-
-                '[data-row-type="sub-group"][aria-level="3"] & > *': {
-                  padding: euiTheme.size[size],
-                  backgroundColor: euiTheme.colors.backgroundBasePlain,
-                },
-
-                '[data-row-type="sub-group"][aria-level="3"] &:before': {
-                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                  zIndex: -1,
-                  borderTop: 0,
-                },
-
-                '[data-row-type="sub-group"][aria-level="3"] &:after': {
-                  content: '""',
-                  display: 'block',
-                  position: 'absolute',
-                  top: 0,
-                  left: euiTheme.size[size],
-                  width: `calc(100% - ${euiTheme.size[size]} * 2)`,
-                  height: '100%',
-                  pointerEvents: 'none',
-                  borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                },
-
-                '[data-row-type="sub-group"]:not([aria-level="3"]) + [data-row-type="sub-group"][aria-level="3"]  &:after':
-                  {
-                    borderTopLeftRadius: euiTheme.border.radius.small,
-                    borderTopRightRadius: euiTheme.border.radius.small,
-                  },
-
-                '[data-row-type="sub-group"][aria-level="3"]:has(+ [data-row-type="root"]:not([aria-level="3"]), + [data-row-type="sub-group"]:not([aria-level="3"])) & > *:last-child':
-                  {
-                    marginBottom: euiTheme.size[size],
-                  },
-
-                '[data-row-type="sub-group"][aria-level="3"]:has(+ [data-row-type="root"]:not([aria-level="3"]), + [data-row-type="sub-group"]:not([aria-level="3"])) &:after':
-                  {
-                    height: `calc(100% - ${euiTheme.size[size]})`,
-                    borderBottomLeftRadius: euiTheme.border.radius.small,
-                    borderBottomRightRadius: euiTheme.border.radius.small,
-                    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  },
-              }
-            : {}),
-        }}
-      >
+      <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
         <EuiFlexItem>
           <React.Fragment>
             {isPendingRowGroupDataFetch && (

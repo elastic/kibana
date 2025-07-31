@@ -8,7 +8,7 @@
  */
 
 import type { Row } from '@tanstack/react-table';
-import type { GroupNode } from '../../data_cascade_provider';
+import type { GroupNode } from '../components/data_cascade_provider';
 
 /**
  * @description This function returns the path of the row node in the group by hierarchy.
@@ -32,23 +32,9 @@ export function getCascadeRowNodePathValueRecord<G extends GroupNode>(
   if (row.depth === 0) {
     return { [nodePath[0]]: row.original[nodePath[0]] };
   } else {
-    return [row, ...row.getParentRows()].reduce((acc, parentRow) => {
-      acc[nodePath[parentRow.depth]] = parentRow.original[nodePath[parentRow.depth]];
+    return nodePath.reduce((acc, columnName) => {
+      acc[columnName] = row.original[columnName];
       return acc;
     }, {} as Record<string, string>);
   }
-}
-
-/**
- * @description This function generates a cache key to persist and retrieve the leaf data of a cascade row.
- */
-export function getCascadeRowLeafDataCacheKey(
-  nodePath: string[],
-  nodePathMap: Record<string, string>,
-  leafId: string
-) {
-  return nodePath
-    .map((path) => nodePathMap[path])
-    .concat(leafId)
-    .join(':');
 }
