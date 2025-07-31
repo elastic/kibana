@@ -41,7 +41,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
 
   useEffect(() => {
     if (treeRootStack.length > 0) {
-      setPipelineName(treeRootStack.at(-1));
+      setPipelineName(treeRootStack.at(-1)!);
     }
   }, [treeRootStack]);
 

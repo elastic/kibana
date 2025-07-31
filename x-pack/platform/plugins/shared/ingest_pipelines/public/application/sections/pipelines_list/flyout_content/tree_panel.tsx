@@ -39,7 +39,7 @@ export const TreePanel = React.memo(
         if (prevStack.length <= 1) return prevStack; // can't pop the last one
         return prevStack.slice(0, -1);
       });
-    }, [clickTreeNode, setTreeRootStack]);
+    }, [setTreeRootStack]);
 
     return (
       <EuiSplitPanel.Inner color="subdued" data-test-subj="pipelineTreePanel">
