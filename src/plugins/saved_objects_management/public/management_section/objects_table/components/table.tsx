@@ -70,6 +70,7 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: QueryType;
+  deleteButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 interface TableState {
@@ -203,6 +204,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       columnRegistry,
       taggingApi,
       allowedTypes,
+      deleteButtonRef,
     } = this.props;
 
     const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
@@ -429,6 +431,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                       )
                 }
                 data-test-subj="savedObjectsManagementDelete"
+                buttonRef={deleteButtonRef}
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
