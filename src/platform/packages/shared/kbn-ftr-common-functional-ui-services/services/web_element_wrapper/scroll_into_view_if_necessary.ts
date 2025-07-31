@@ -25,18 +25,25 @@ export function scrollIntoViewIfNecessary(target: HTMLElement, scrollContainerId
   };
 
   /* ---------- 1. basic visibility ---------- */
-  const rects = getRects();
-  const relTop = rects.targetRect.top - rects.scrollRect.top;
-  const relBottom = rects.targetRect.bottom - rects.scrollRect.top;
+  let { targetRect, scrollRect } = getRects();
+  // Co-ordinates relative to the container’s top-left corner
+  const relTop = targetRect.top - scrollRect.top;
+  const relBottom = targetRect.bottom - scrollRect.top;
+  const relLeft = targetRect.left - scrollRect.left;
+  const relRight = targetRect.right - scrollRect.left;
 
-  const fullyVisible = relTop && relBottom <= rects.scrollRect.bottom - rects.scrollRect.top;
+  const contHeight = targetRect.bottom - scrollRect.top;
+  const contWidth = targetRect.right - scrollRect.left;
 
-  if (!fullyVisible) {
+  const fullyVisibleVert = relTop >= 0 && relBottom <= contHeight;
+  const fullyVisibleHoriz = relLeft >= 0 && relRight <= contWidth;
+
+  if (!fullyVisibleVert || !fullyVisibleHoriz) {
     target.scrollIntoView();
   }
 
   /* ---------- 2. occlusion check ---------- */
-  const { targetRect } = getRects(); // fresh numbers after scroll
+  ({ targetRect, scrollRect } = getRects()); // fresh numbers after scroll
   const points: Array<[number, number]> = [
     [targetRect.left + targetRect.width / 2, targetRect.top + targetRect.height / 2],
     [targetRect.left + 1, targetRect.top + 1],
