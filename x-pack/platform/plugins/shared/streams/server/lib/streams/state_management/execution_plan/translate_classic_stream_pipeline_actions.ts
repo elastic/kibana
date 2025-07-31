@@ -8,7 +8,7 @@
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { castArray, groupBy, uniq } from 'lodash';
+import { castArray, groupBy, omit, uniq } from 'lodash';
 import { ASSET_VERSION } from '../../../../../common/constants';
 import type {
   ActionsByType,
@@ -270,13 +270,22 @@ async function updateExistingUserManagedPipeline({
     }
   }
 
+  // some keys on the pipeline can't be modified, so we need to clean them up
+  // to avoid errors when updating the pipeline
+  const cleanedPipeline = omit(targetPipeline || {}, [
+    'created_date_millis',
+    'created_date',
+    'modified_date_millis',
+    'modified_date',
+  ]);
+
   actionsByType.upsert_ingest_pipeline.push({
     type: 'upsert_ingest_pipeline',
     // All of these are ClassicStreams so take any stream name to use for the ordering of operations
     stream: actions[0].dataStream,
     request: {
       id: targetPipelineName,
-      ...(targetPipeline ?? {}),
+      ...cleanedPipeline,
       processors,
     },
   });
