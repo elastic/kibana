@@ -242,9 +242,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     []
   );
 
-  // ADD FIELD DETECTION INFO CALLOUT
-  // CACHE FIRST ESQL VARIABLE OPTION
-
   useEffect(() => {
     // Set the default input mode to ES|QL for showESQLOnly editors
     if (isDSLValuesSource && showESQLOnly) {

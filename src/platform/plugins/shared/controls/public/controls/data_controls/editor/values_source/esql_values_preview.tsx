@@ -34,6 +34,10 @@ export const ESQLValuesPreview: React.FC<{
   runQuery: () => void;
   runButtonDisabled: boolean;
   isQueryRunning: boolean;
+  previewFieldMismatchWarning?: {
+    esqlField: string;
+    dslField: string;
+  };
 }> = ({
   previewOptions,
   previewError,
@@ -42,6 +46,7 @@ export const ESQLValuesPreview: React.FC<{
   runQuery,
   runButtonDisabled,
   isQueryRunning,
+  previewFieldMismatchWarning,
 }) => {
   const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
 
@@ -87,12 +92,12 @@ export const ESQLValuesPreview: React.FC<{
         {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
           previewColumns.length
         )}
-        <ChooseColumnPopover
-          isLoading={isQueryRunning}
-          columns={previewColumns}
-          updateQuery={updateQuery}
-        />
       </p>
+      <ChooseColumnPopover
+        isLoading={isQueryRunning}
+        columns={previewColumns}
+        updateQuery={updateQuery}
+      />
     </EuiCallOut>
   ) : isEmpty ? (
     <>
@@ -144,16 +149,32 @@ export const ESQLValuesPreview: React.FC<{
   const panelColor = previewError ? 'danger' : multiColumnResult ? 'warning' : undefined;
 
   return (
-    <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}>
-      <EuiPanel
-        hasBorder
-        color={panelColor}
-        css={css`
-          text-align: center;
-        `}
+    <>
+      {previewFieldMismatchWarning && (
+        <>
+          <EuiCallOut
+            title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMismatchedFieldWarning(
+              previewFieldMismatchWarning.esqlField,
+              previewFieldMismatchWarning.dslField
+            )}
+            size="s"
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiFormRow
+        label={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getTitle()}
       >
-        {body}
-      </EuiPanel>
-    </EuiFormRow>
+        <EuiPanel
+          hasBorder
+          color={panelColor}
+          css={css`
+            text-align: center;
+          `}
+        >
+          {body}
+        </EuiPanel>
+      </EuiFormRow>
+    </>
   );
 };

@@ -201,6 +201,16 @@ export const DataControlEditorStrings = {
           i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.maxText', {
             defaultMessage: 'Maximum value',
           }),
+        getMismatchedFieldWarning: (esqlField: string, dslField: string) => (
+          <FormattedMessage
+            id="controls.controlGroup.manageControl.dataSource.valuesPreview.mismatchedFieldWarning"
+            defaultMessage="This query seems to be returning values that match the field {esqlField}, but your control is configured to filter the field {dslField}. Make sure this is intentional before saving."
+            values={{
+              esqlField: <strong>{esqlField}</strong>,
+              dslField: <strong>{dslField}</strong>,
+            }}
+          />
+        ),
       },
     },
     displaySettings: {

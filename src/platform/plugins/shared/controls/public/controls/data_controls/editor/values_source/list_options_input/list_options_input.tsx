@@ -63,6 +63,11 @@ export const INITIAL_OPTIONS: ListOptionsInputOption[] = [
   },
 ];
 
+/**
+ * Render a list options configuration UI, with:
+ * - Drag and drop reordering at 50 items or less
+ * - Virtualization through react-window at more than 50 items, and no drag-drop ordering (incompatible with virtualization)
+ */
 export const ListOptionsInput = ({
   value,
   label,

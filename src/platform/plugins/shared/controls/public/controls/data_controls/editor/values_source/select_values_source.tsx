@@ -71,6 +71,9 @@ export const SelectValuesSource = <
   const [previewOptions, setPreviewOptions] = useState<string[]>([]);
   const [previewColumns, setPreviewColumns] = useState<string[]>([]);
   const [previewError, setPreviewError] = useState<Error | undefined>();
+  const [previewMatchingFieldName, setPreviewMatchingFieldName] = useState<string | undefined>(
+    undefined
+  );
   const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(
     isEdit && valuesSource === ControlValuesSource.ESQL
   );
@@ -83,6 +86,20 @@ export const SelectValuesSource = <
   const isESQLOutputMode = useMemo(
     () => editorState.output === ControlOutputOption.ESQL,
     [editorState.output]
+  );
+
+  const previewFieldMismatchWarning = useMemo(
+    () =>
+      !isESQLOutputMode &&
+      !!previewMatchingFieldName &&
+      !!editorState.fieldName &&
+      previewMatchingFieldName !== editorState.fieldName
+        ? {
+            esqlField: previewMatchingFieldName!,
+            dslField: editorState.fieldName!,
+          }
+        : undefined,
+    [editorState.fieldName, isESQLOutputMode, previewMatchingFieldName]
   );
 
   const { fieldRegistry } = useDataViewAndFieldContext();
@@ -107,6 +124,7 @@ export const SelectValuesSource = <
       });
       setPreviewOptions(nextOptions);
       setPreviewColumns(nextColumns);
+      setPreviewMatchingFieldName(undefined);
     },
     [updateEditorState]
   );
@@ -137,16 +155,18 @@ export const SelectValuesSource = <
         if (!editorState.esqlVariableString) {
           nextEditorState.esqlVariableString = fieldToESQLVariable(result.column);
         }
+        updateEditorState(nextEditorState);
+
+        // Try to detect the matching field for the returned column
         if (fieldRegistry) {
           if (Object.hasOwn(fieldRegistry, result.column)) {
-            nextEditorState.fieldName = result.column;
+            setPreviewMatchingFieldName(result.column);
           } else if (!result.column.endsWith('.keyword')) {
             const columnWithKeyword = `${result.column}.keyword`;
             if (Object.hasOwn(fieldRegistry, columnWithKeyword))
-              nextEditorState.fieldName = columnWithKeyword;
+              setPreviewMatchingFieldName(columnWithKeyword);
           }
         }
-        updateEditorState(nextEditorState);
 
         if (!selectedControlType) {
           setSelectedControlType(OPTIONS_LIST_CONTROL);
@@ -181,11 +201,16 @@ export const SelectValuesSource = <
       setHasTouchedValuesSource(true);
       updateEditorState({ ...editorState, esqlQuery: q.esql });
       setPreviewError(undefined);
-      setPreviewOptions([]);
-      setPreviewColumns([]);
+      updatePreviewOptionsAndColumns([], []);
       setESQLQueryValidation(EditorComponentStatus.INCOMPLETE);
     },
-    [setHasTouchedValuesSource, updateEditorState, editorState, setESQLQueryValidation]
+    [
+      setHasTouchedValuesSource,
+      updateEditorState,
+      editorState,
+      updatePreviewOptionsAndColumns,
+      setESQLQueryValidation,
+    ]
   );
 
   const appendColumnToESQLQuery = useCallback(
@@ -316,6 +341,7 @@ export const SelectValuesSource = <
             runQuery={onClickPreviewESQLQuery}
             runButtonDisabled={!editorState.esqlQuery}
             isQueryRunning={isPreviewQueryRunning}
+            previewFieldMismatchWarning={previewFieldMismatchWarning}
           />
         </>
       )}
