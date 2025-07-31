@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { ContextDefinitionPublic } from '@kbn/context-registry-plugin/public';
+import { CaseSuggestionDefinitionPublic } from '@kbn/case-suggestion-registry-plugin/public';
 import { SyntheticsMonitorContext } from '../../common/types';
 
-export const syntheticsMonitorContextDefinition: ContextDefinitionPublic<SyntheticsMonitorContext> =
+export const syntheticsMonitorContextDefinition: CaseSuggestionDefinitionPublic<SyntheticsMonitorContext> =
   {
     key: 'example',
     owner: 'observability',
-    children: React.lazy(() => import('./context_children')),
+    children: React.lazy(() => import('./case_suggestion_children')),
   };

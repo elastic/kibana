@@ -7,46 +7,49 @@
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { ContextRegistryPublicStart } from '@kbn/context-registry-plugin/public';
+import type {
+  CaseSuggestionRegistryPublicSetup,
+  CaseSuggestionRegistryPublicStart,
+} from '@kbn/case-suggestion-registry-plugin/public';
 import { mount } from './mount';
-import { syntheticsMonitorContextDefinition } from './example_context/context_definition';
+import { syntheticsMonitorContextDefinition } from './example_suggestion/case_suggestion_definition';
 import { SyntheticsMonitorContext } from '../common/types';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
-  contextRegistry: ContextRegistryPublicStart;
+  caseSuggestionRegistry: CaseSuggestionRegistryPublicSetup;
 }
 
 export interface StartDependencies {
-  contextRegistry: ContextRegistryPublicStart;
+  caseSuggestionRegistry: CaseSuggestionRegistryPublicStart;
   http: CoreSetup['http'];
 }
 
-export class ContextRegistryExamplePlugin
+export class CaseSuggestionRegistryExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
-      id: 'context_registry_example',
-      title: 'Context Registry example',
+      id: 'case_suggestion_registry_example',
+      title: 'Case Suggestion Registry example',
       visibleIn: [],
       mount: mount(core),
       order: 1000,
     });
 
     developerExamples.register({
-      appId: 'context_registry_example',
-      title: 'Context Example View',
+      appId: 'case_suggestion_registry_example',
+      title: 'Case Suggestion Registry Example View',
       description:
-        'Register context handlers that can be used to fetch Kibana assets based on provided context.',
+        'Register case suggestion handlers that can be used to fetch Kibana assets based on provided context from a case.',
     });
   }
 
   public start(coreStart: CoreStart, pluginsStart: StartDependencies) {
-    const { contextRegistry } = pluginsStart;
+    const { caseSuggestionRegistry } = pluginsStart;
 
-    // Register the context definition with the context registry
-    contextRegistry.registry.registerHandler<SyntheticsMonitorContext>(
+    // Register the case suggestion definition with the case suggestion registry
+    caseSuggestionRegistry.registry.registerHandler<SyntheticsMonitorContext>(
       syntheticsMonitorContextDefinition
     );
 

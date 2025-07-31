@@ -6,7 +6,7 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
-import { ContextResponse } from '@kbn/context-registry-plugin/server';
+import { CaseSuggestionResponse } from '@kbn/case-suggestion-registry-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { SyntheticsMonitorContext } from '../../common/types';
 
@@ -24,7 +24,7 @@ export const getExampleByServiceName = async ({
     timeRange: TimeRange;
     serviceName: string;
   };
-}): Promise<ContextResponse<SyntheticsMonitorContext>> => {
+}): Promise<CaseSuggestionResponse<SyntheticsMonitorContext>> => {
   const mockResult = {
     saved_objects: [
       {
@@ -48,13 +48,13 @@ export const getExampleByServiceName = async ({
     saved_objects: Array<{ attributes: { name: string; id: string } }>;
   }>((resolve) => resolve(mockResult));
 
-  /* Generate the data for the context response. You can include one or more context items as part of the response.
-   * Here we are including one context item per monitor we've found, all as part of the same context response.
-   * However, you can also limit the amount of context items you return as you see fit, and in many case may only
+  /* Generate the data for the suggestion response. You can include one or more suggestion items as part of the response.
+   * Here we are including one suggestion item per monitor we've found, all as part of the same suggestion response.
+   * However, you can also limit the amount of suggestion items you return as you see fit, and in many case may only
    * want to return one */
   const data = result.saved_objects.map((obj) => {
     return {
-      // a plaintext description of why the individual context is relevant
+      // a plaintext description of why the individual suggestion is relevant
       description: `Monitor "${obj.attributes.name}" is down 5 times between ${params.timeRange.from} and ${params.timeRange.to}`,
       payload: obj.attributes,
     };
@@ -62,7 +62,7 @@ export const getExampleByServiceName = async ({
 
   return {
     key: 'example',
-    // a plaintext summary of the entire payload, which may include multiple individual context items
+    // a plaintext summary of the entire payload, which may include multiple individual suggestion items
     description: `Found ${data.length} synthetics monitors for service "${params.serviceName}" in the last ${params.timeRange.from} to ${params.timeRange.to}`,
     data,
   };

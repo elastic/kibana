@@ -6,26 +6,26 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { contextRequestSchema } from '@kbn/context-registry-plugin/server';
+import { caseSuggestionRequestSchema } from '@kbn/case-suggestion-registry-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type {
-  ContextRegistryServerStart,
-  ContextRegistryServerSetup,
-} from '@kbn/context-registry-plugin/server';
+  CaseSuggestionRegistryServerStart,
+  CaseSuggestionRegistryServerSetup,
+} from '@kbn/case-suggestion-registry-plugin/server';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
-import { getExampleByServiceName } from './example_context/context_definition';
+import { getExampleByServiceName } from './example_suggestion/case_suggestion_definition';
 
 export interface SetupDependencies {
-  contextRegistry: ContextRegistryServerSetup;
+  caseSuggestionRegistry: CaseSuggestionRegistryServerSetup;
   share: SharePluginSetup;
 }
 
 export interface StartDependencies {
-  contextRegistry: ContextRegistryServerStart;
+  caseSuggestionRegistry: CaseSuggestionRegistryServerStart;
   share: SharePluginStart;
 }
 
-export class ContextRegistryExamplePlugin
+export class CaseSuggestionRegistryExamplePlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   public setup(
@@ -34,25 +34,25 @@ export class ContextRegistryExamplePlugin
   ) {
     const router = http.createRouter();
 
-    // Example usage of context registry in an api
+    // Example usage of case suggestion registry in an api
     router.post(
       {
-        path: `/internal/examples/get_example_context`,
+        path: `/internal/examples/get_example_suggestion`,
         validate: {
-          body: contextRequestSchema,
+          body: caseSuggestionRequestSchema,
         },
         security: {
           authz: {
             enabled: false,
             reason:
-              'Authorization is handled by the individual context handlers, which will check for the appropriate permissions',
+              'Authorization is handled by the individual suggestion handlers, which will check for the appropriate permissions',
           },
         },
       },
       async (_, request, response) => {
-        const [, { contextRegistry }] = await getStartServices();
+        const [, { caseSuggestionRegistry }] = await getStartServices();
 
-        const results = await contextRegistry.registry.getContextByKey({
+        const results = await caseSuggestionRegistry.registry.getCaseSuggestionByKey({
           key: 'example',
           context: request.body as {
             'service.name'?: string;
@@ -71,13 +71,13 @@ export class ContextRegistryExamplePlugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: StartDependencies) {
-    const { contextRegistry } = pluginsStart;
+    const { caseSuggestionRegistry } = pluginsStart;
 
-    // example of providing depdencies you may need to your context handler
+    // example of providing depdencies you may need to your suggestion handler
     const savedObjectsClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository(['synthetics-monitor'])
     );
-    contextRegistry.registry.register(
+    caseSuggestionRegistry.registry.register(
       getExampleByServiceName({
         savedObjectsClient,
         share: pluginsStart.share,

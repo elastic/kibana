@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ContextRegistryExamplePlugin } from './plugin';
+import { CaseSuggestionRegistryExamplePlugin } from './plugin';
 
-export const plugin = () => new ContextRegistryExamplePlugin();
+export const plugin = () => new CaseSuggestionRegistryExamplePlugin();

@@ -19,27 +19,27 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ContextResponse } from '@kbn/context-registry-plugin/common';
+import { CaseSuggestionResponse } from '@kbn/case-suggestion-registry-plugin/common';
 import { StartDependencies } from './plugin';
 import { SyntheticsMonitorContext } from '../common/types';
 
 export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependencies }) => {
   const {
-    services: { contextRegistry, http },
+    services: { caseSuggestionRegistry, http },
   } = useKibana<StartDependencies>();
-  const [syntheticsMonitorContext, setSyntheticsMonitorContext] = useState<
-    Array<ContextResponse<SyntheticsMonitorContext>>
+  const [syntheticsMonitorCaseSuggestions, setSyntheticsMonitorCaseSuggestions] = useState<
+    Array<CaseSuggestionResponse<SyntheticsMonitorContext>>
   >([]);
 
   /* The api, api calling, and type definition is simplified for the example
-   * A generic context api is not yet available */
+   * A generic case suggestion api is not yet available */
   const loadContext = useCallback(
     async ({
       httpService,
     }: {
       httpService: HttpSetup;
-    }): Promise<{ data: Array<ContextResponse<SyntheticsMonitorContext>> }> => {
-      return await httpService.post(`/internal/examples/get_example_context`, {
+    }): Promise<{ data: Array<CaseSuggestionResponse<SyntheticsMonitorContext>> }> => {
+      return await httpService.post(`/internal/examples/get_example_suggestion`, {
         body: JSON.stringify({
           timeRange: {
             from: 'now-15m',
@@ -54,20 +54,20 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
 
   useEffect(() => {
     loadContext({ httpService: http }).then((response) => {
-      setSyntheticsMonitorContext(response.data);
+      setSyntheticsMonitorCaseSuggestions(response.data);
     });
-  }, [http, loadContext, setSyntheticsMonitorContext]);
+  }, [http, loadContext, setSyntheticsMonitorCaseSuggestions]);
 
   const Children = useMemo(
     () =>
-      contextRegistry.registry.getContextByKey<SyntheticsMonitorContext>({
+      caseSuggestionRegistry.registry.getCaseSuggestionByKey<SyntheticsMonitorContext>({
         owner: 'observability',
         key: 'example',
       }).children,
-    [contextRegistry]
+    [caseSuggestionRegistry]
   );
 
-  if (!syntheticsMonitorContext.length) {
+  if (!syntheticsMonitorCaseSuggestions.length) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
@@ -77,19 +77,20 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
         <EuiPageHeader>
           <EuiPageHeaderSection>
             <EuiTitle size="l">
-              <h1>Context Registry Example</h1>
+              <h1>Case Suggestion Registry Example</h1>
             </EuiTitle>
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <EuiPageSection>
           <p>
-            This example demonstrates how to use the Context Registry to fetch context data for a
-            specific service. The context data is fetched from the server and displayed below.
+            This example demonstrates how to use the Case Suggestion Registry to fetch a suggestion
+            based on provided case context. The suggestion is fetched from the server and displayed
+            below.
           </p>
           <EuiSpacer size="l" />
-          {syntheticsMonitorContext.map((context, index) => (
+          {syntheticsMonitorCaseSuggestions.map((context, index) => (
             <Suspense>
-              <Children key={index} context={context} />
+              <Children key={index} caseSuggestion={context} />
             </Suspense>
           ))}
         </EuiPageSection>

@@ -8,6 +8,6 @@
 import { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<void, void> = async () => {
-  const { ContextRegistryExamplePlugin } = await import('./plugin');
-  return new ContextRegistryExamplePlugin();
+  const { CaseSuggestionRegistryExamplePlugin } = await import('./plugin');
+  return new CaseSuggestionRegistryExamplePlugin();
 };

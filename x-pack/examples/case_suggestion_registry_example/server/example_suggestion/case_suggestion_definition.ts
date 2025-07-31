@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { ContextDefinitionServer, ContextRequest } from '@kbn/context-registry-plugin/server';
+import type {
+  CaseSuggestionDefinitionServer,
+  CaseSuggestionRequest,
+} from '@kbn/case-suggestion-registry-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 
 export const getExampleByServiceName = (dependencies: {
   savedObjectsClient: SavedObjectsClientContract;
   share: SharePluginStart;
-}): ContextDefinitionServer => {
+}): CaseSuggestionDefinitionServer => {
   return {
     key: 'example',
     owner: 'observability',
@@ -34,7 +37,7 @@ export const getExampleByServiceName = (dependencies: {
       searchExampleByServiceName: async ({
         'service.name': serviceName,
         timeRange,
-      }: ContextRequest) => {
+      }: CaseSuggestionRequest) => {
         const { getExampleByServiceName: getExampleByServiceNameHandler } = await import(
           './handlers'
         );

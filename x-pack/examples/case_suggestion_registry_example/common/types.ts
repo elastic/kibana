@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* common type for the context item payload, shared between server and client
+/* common type for the suggestion item payload, shared between server and client
  * in order to support rendering UI components with predictable props
  * Could also use a runtime type check library like io-ts or zod for
  * further validation */
