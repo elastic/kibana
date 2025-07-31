@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { isEditorFieldSetting } from '../../common/management/advanced_settings';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
