@@ -17,7 +17,7 @@ import React, {
   useState,
 } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiAutoSizer } from '@elastic/eui';
 import {
   useReactTable,
   createColumnHelper,
@@ -28,7 +28,6 @@ import {
   type ExpandedState,
 } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import {
   useDataCascadeState,
@@ -271,7 +270,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   return (
     <div css={{ flex: '1 1 auto' }}>
-      <AutoSizer>
+      <EuiAutoSizer>
         {(containerSize) => (
           <div ref={scrollElementRef} style={{ ...containerSize, overflowY: 'auto' }}>
             <EuiFlexGroup
@@ -382,7 +381,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             </EuiFlexGroup>
           </div>
         )}
-      </AutoSizer>
+      </EuiAutoSizer>
     </div>
   );
 }
