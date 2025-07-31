@@ -24,7 +24,8 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
-  const ecommerceSOPath = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');

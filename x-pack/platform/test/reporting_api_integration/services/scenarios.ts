@@ -33,7 +33,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
-  const ecommerceSOPath = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
   const logsSOPath = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';

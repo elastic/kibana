@@ -39,7 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
     unmappedFields: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/unmapped_fields',
-      savedObjects: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/unmapped_fields.json',
+      savedObjects:
+        'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/unmapped_fields.json',
     },
     logs: {
       data: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
@@ -55,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
     bigIntIdField: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/big_int_id_field',
-      savedObjects: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/big_int_id_field',
+      savedObjects:
+        'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/big_int_id_field',
     },
   };
 
