@@ -58,10 +58,12 @@ export const initTelemetry = (
 
       // Provides metrics about the Event Loop, GC Collector, and Heap stats.
       desiredInstrumentations.add('@opentelemetry/instrumentation-runtime-node');
-      // HTTP Server and Client durations
-      desiredInstrumentations.add('@opentelemetry/instrumentation-http');
-      // Undici client's request duration
-      desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
+
+      // Uncomment the ones below when we clarify the performance impact of having them enabled
+      // // HTTP Server and Client durations
+      // desiredInstrumentations.add('@opentelemetry/instrumentation-http');
+      // // Undici client's request duration
+      // desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
     }
 
     if (desiredInstrumentations.size > 0) {

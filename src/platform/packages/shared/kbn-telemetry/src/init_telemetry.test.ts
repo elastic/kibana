@@ -56,9 +56,7 @@ describe('initTelemetry', () => {
         { enabled: true, tracing: { enabled: false }, metrics: { enabled: true } },
         [
           // This test will scream at us if any of these have been removed or renamed and no-longer registered
-          '@opentelemetry/instrumentation-http',
           '@opentelemetry/instrumentation-runtime-node',
-          '@opentelemetry/instrumentation-undici',
         ],
       ],
     ])('validate registered instrumentations when %s', (_, config, expected) => {
