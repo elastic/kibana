@@ -159,9 +159,9 @@ export const getControlGroupEmbeddableFactory = () => {
       /** Combine ESQL variables from all children that publish them. */
       const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
         PublishesESQLVariable,
-        Array<ESQLControlVariable | undefined>
+        ESQLControlVariable[]
       >(api, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
-        esqlVariables$.next(newESQLVariables.filter(Boolean) as ESQLControlVariable[]);
+        esqlVariables$.next(newESQLVariables);
       });
 
       return {

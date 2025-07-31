@@ -16,7 +16,7 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { PublishesESQLVariable } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
 import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
@@ -43,7 +43,9 @@ interface PublishesStaticValues {
   staticValues$: PublishingSubject<Array<{ value: string; text: string }> | undefined>;
 }
 
-interface MaybePublishesESQLVariable 
+interface PublishesMaybeESQLVariable {
+  esqlVariable$: PublishingSubject<ESQLControlVariable | undefined>;
+}
 
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
@@ -51,7 +53,7 @@ export type DataControlApi = DefaultControlApi &
   PublishesDataViews &
   PublishesField &
   PublishesAsyncFilters &
-  PublishesESQLVariable &
+  PublishesMaybeESQLVariable &
   PublishesESQLQuery &
   PublishesControlInputOutput &
   PublishesStaticValues;

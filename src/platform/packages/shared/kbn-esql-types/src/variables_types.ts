@@ -40,7 +40,7 @@ export interface ESQLControlVariable {
 }
 
 export interface PublishesESQLVariable {
-  esqlVariable$: PublishingSubject<ESQLControlVariable | undefined>;
+  esqlVariable$: PublishingSubject<ESQLControlVariable>;
 }
 
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
