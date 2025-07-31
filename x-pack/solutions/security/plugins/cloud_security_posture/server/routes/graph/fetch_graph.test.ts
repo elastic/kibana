@@ -25,7 +25,7 @@ describe('fetchGraph', () => {
     });
 
     // Mock the enrich.getPolicy method with default behavior (policy exists)
-    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
       policies: [
         {
           config: {
@@ -140,7 +140,7 @@ describe('fetchGraph', () => {
 
   it('should include entity enrichment when isAssetInventoryEnabled and isEnrichPolicyExists are both true', async () => {
     // Mock the enrich.getPolicy method to return a policy that exists
-    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
       policies: [
         {
           config: {
@@ -193,7 +193,7 @@ describe('fetchGraph', () => {
   });
 
   it('should not include entity enrichment when isAssetInventoryEnabled is true but isEnrichPolicyExists is false', async () => {
-    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
       policies: [],
     });
 
@@ -267,7 +267,7 @@ describe('fetchGraph', () => {
   });
 
   it('should not include entity enrichment when the enrich policy check fails', async () => {
-    (esClient.asCurrentUser.enrich as jest.Mocked<any>).getPolicy = jest
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
       .fn()
       .mockRejectedValue(new Error('Failed to get enrich policy'));
 
