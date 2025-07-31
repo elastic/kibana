@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
-import { ValueReportExporter } from './value_report_exporter';
+import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
 import { EXPORT_REPORT, METRICS_OVER_TIME } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
