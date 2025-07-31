@@ -22,7 +22,12 @@ import { getDiscoverGlobalStateContainer } from './discover_global_state_contain
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { VIEW_MODE } from '../../../../common/constants';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from './redux';
+import {
+  createInternalStateStore,
+  createRuntimeStateManager,
+  internalStateActions,
+  selectTab,
+} from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { omit } from 'lodash';
 import { createTabsStorageManager } from './tabs_storage_manager';
@@ -47,12 +52,16 @@ describe('DiscoverSavedSearchContainer', () => {
     internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
   );
 
+  const getCurrentTab = () =>
+    selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
+
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {
       const container = getSavedSearchContainer({
         services,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       expect(container.getTitle()).toBe(undefined);
     });
@@ -62,6 +71,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       container.set(savedSearch);
       expect(container.getTitle()).toBe(savedSearch.title);
@@ -74,6 +84,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
       const result = container.set(newSavedSearch);
@@ -91,6 +102,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
 
@@ -107,6 +119,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -133,6 +146,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
 
       const result = await savedSearchContainer.persist(persistedSavedSearch, saveOptions);
@@ -146,6 +160,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -166,6 +181,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
@@ -191,6 +207,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       savedSearchContainer.set(savedSearch);
       savedSearchContainer.update({ nextState: { hideChart: true } });
@@ -213,6 +230,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       savedSearchContainer.set(savedSearch);
       const updated = savedSearchContainer.update({ nextState: { hideChart: true } });
@@ -229,6 +247,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const updated = savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
@@ -300,6 +319,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const unsubscribe = savedSearchContainer.initUrlTracking();
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
@@ -315,6 +335,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const unsubscribe = savedSearchContainer.initUrlTracking();
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
@@ -330,6 +351,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const unsubscribe = savedSearchContainer.initUrlTracking();
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
@@ -350,6 +372,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const unsubscribe = savedSearchContainer.initUrlTracking();
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
@@ -366,6 +389,7 @@ describe('DiscoverSavedSearchContainer', () => {
         services: discoverServiceMock,
         globalStateContainer,
         internalState,
+        tabId: getCurrentTab().id,
       });
       const unsubscribe = savedSearchContainer.initUrlTracking();
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();

@@ -67,6 +67,7 @@ describe('Test discover app state container', () => {
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
+      tabId: getCurrentTab().id,
     });
     getCurrentTab = () =>
       selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);

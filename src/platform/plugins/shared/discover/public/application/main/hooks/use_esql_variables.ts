@@ -19,6 +19,7 @@ import {
 } from '../state_management/redux';
 import { CONTROLS_STORAGE_KEY } from '../../../../common/constants';
 import { TABS_ENABLED } from '../../../constants';
+import { useSavedSearch } from '../state_management/discover_state_provider';
 
 /**
  * @param panels - The control panels state, which may be null.
@@ -90,11 +91,47 @@ export const useESQLVariables = ({
   // When tabs are not enabled, the above hook returns a random string after refresh
   const currentTabId = TABS_ENABLED ? currentTabIdWhenTabsEnabled : 'default';
 
-  const [controlsStateMap, setControlsStateMap] = useSessionStorage<
-    ESQLControlSessionStorage | undefined
-  >(CONTROLS_STORAGE_KEY);
+  const savedSearchState = useSavedSearch();
+
+  const [controlsStateMap, setControlsStateMap] = useSessionStorage<ESQLControlSessionStorage>(
+    CONTROLS_STORAGE_KEY,
+    {}
+  );
+
+  // useEffect(() => {
+  //   console.log('controlsStateMap', controlsStateMap);
+  //   console.log('savedSearchState?.controlGroupJson', savedSearchState?.controlGroupJson);
+  //   // Initialize the controls state map with the initial state if it is empty
+  //   if (
+  //     Object.keys(controlsStateMap).length === 0 &&
+  //     isEsqlMode &&
+  //     savedSearchState?.controlGroupJson &&
+  //     Object.keys(savedSearchState?.controlGroupJson).length !== 0
+  //   ) {
+  //     console.log('meow');
+  //     const initialControlsState = savedSearchState?.controlGroupJson
+  //       ? { [currentTabId]: JSON.parse(savedSearchState.controlGroupJson) }
+  //       : undefined;
+  //     if (initialControlsState) {
+  //       setControlsStateMap({
+  //         ...controlsStateMap,
+  //         ...initialControlsState,
+  //       });
+  //     }
+  //   }
+  // }, [
+  //   controlsStateMap,
+  //   currentTabId,
+  //   isEsqlMode,
+  //   savedSearchState,
+  //   savedSearchState.controlGroupJson,
+  //   setControlsStateMap,
+  // ]);
   // Effect to subscribe to control group input changes
   useEffect(() => {
+    if (!isEsqlMode && Object.keys(controlsStateMap || {}).length > 0) {
+      setControlsStateMap({});
+    }
     // Only proceed if in ESQL mode and controlGroupAPI is available
     if (!controlGroupAPI || !isEsqlMode) {
       return;

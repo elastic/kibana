@@ -138,11 +138,15 @@ export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.exten
   ),
 });
 
+export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  controlGroupJson: schema.maybe(schema.string()),
+});
+
 const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   id: schema.string(),
   label: schema.string(),
   // Remove `title` and `description` from the tab schema as they exist at the top level of the saved object
-  attributes: SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+  attributes: SCHEMA_SEARCH_MODEL_VERSION_7.extends({
     title: undefined,
     description: undefined,
   }),
@@ -150,6 +154,20 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
 
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 
-export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
+export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
+
+// Addition of controlGroupJson to the schema
+// export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
+//   controlGroupJson: schema.maybe(schema.string()),
+//   // also add the controlGroupJson to the tabs schema
+//   tabs: schema.maybe(
+//     schema.arrayOf(
+//       SCHEMA_DISCOVER_SESSION_TAB.extends({
+//         controlGroupJson: schema.maybe(schema.string()),
+//       }),
+//       { minSize: 1 }
+//     )
+//   ),
+// });

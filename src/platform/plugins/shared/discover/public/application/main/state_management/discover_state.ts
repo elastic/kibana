@@ -266,6 +266,7 @@ export function getDiscoverStateContainer({
     services,
     globalStateContainer,
     internalState,
+    tabId,
   });
 
   /**

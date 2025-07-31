@@ -301,28 +301,32 @@ export const DiscoverTopNav = ({
         onDraftChange={TABS_ENABLED ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
-        esqLVariablesConfig={{
-          esqlVariables: esqlVariables ?? [],
-          onSaveControl,
-          onCancelControl,
-          controlsWrapper: (
-            <ControlGroupRenderer
-              onApiAvailable={setControlGroupAPI}
-              timeRange={timeRange}
-              getCreationOptions={async (initialState) => {
-                const initialChildControlState =
-                  getActivePanels() ?? initialState.initialChildControlState ?? {};
-                return {
-                  initialState: {
-                    ...initialState,
-                    initialChildControlState,
-                  },
-                };
-              }}
-              viewMode="edit"
-            />
-          ),
-        }}
+        esqLVariablesConfig={
+          isEsqlMode
+            ? {
+                esqlVariables: esqlVariables ?? [],
+                onSaveControl,
+                onCancelControl,
+                controlsWrapper: (
+                  <ControlGroupRenderer
+                    onApiAvailable={setControlGroupAPI}
+                    timeRange={timeRange}
+                    getCreationOptions={async (initialState) => {
+                      const initialChildControlState =
+                        getActivePanels() ?? initialState.initialChildControlState ?? {};
+                      return {
+                        initialState: {
+                          ...initialState,
+                          initialChildControlState,
+                        },
+                      };
+                    }}
+                    viewMode="edit"
+                  />
+                ),
+              }
+            : undefined
+        }
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

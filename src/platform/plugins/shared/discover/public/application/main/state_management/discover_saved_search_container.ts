@@ -129,10 +129,12 @@ export function getSavedSearchContainer({
   services,
   globalStateContainer,
   internalState,
+  tabId,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
   internalState: InternalStateStore;
+  tabId: string;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -210,6 +212,7 @@ export function getSavedSearchContainer({
       services,
       useFilterAndQueryServices: true,
       dataView: replacementDataView,
+      tabId,
     });
 
     const currentFilters = nextSavedSearch.searchSource.getField('filter');
@@ -252,6 +255,7 @@ export function getSavedSearchContainer({
       globalStateContainer,
       services,
       useFilterAndQueryServices,
+      tabId,
     });
 
     assignNextSavedSearch({ nextSavedSearch });

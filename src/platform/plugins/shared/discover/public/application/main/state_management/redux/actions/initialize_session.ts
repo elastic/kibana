@@ -243,6 +243,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       state: initialState,
       globalStateContainer: stateContainer.globalState,
       services,
+      tabId,
     });
 
     /**

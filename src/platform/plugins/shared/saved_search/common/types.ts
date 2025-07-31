@@ -13,6 +13,8 @@ import type {
   SerializedSearchSourceFields,
   TimeRange,
 } from '@kbn/data-plugin/common';
+// import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+// import type { ESQLControlState } from '@kbn/esql-types';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -70,7 +72,7 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-
+  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
   tabs?: DiscoverSessionTab[];
 }
 
