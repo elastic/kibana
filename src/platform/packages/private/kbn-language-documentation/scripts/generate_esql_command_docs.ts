@@ -9,266 +9,245 @@
 
 /* eslint-disable no-console */
 
-import * as recast from 'recast';
-const n = recast.types.namedTypes;
 import * as fs from 'fs';
 import * as path from 'path';
-import { ElasticsearchCommandDefinition } from '@kbn/esql-ast';
+import {
+  processingCommandsIntro,
+  processingCommandsItems,
+} from './resources/commands/processing_data';
+import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
+import { CommandDefinition, MultipleLicenseInfo } from '../src/types';
+import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
+import {
+  DEFINITION_DIR_SUFFIX,
+  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
+  OUTPUT_DIR,
+} from './scripts.constants';
+import { loadElasticDefinitions } from '../src/utils/load_elastic_definitions';
 
-// Constants for paths
-const COMMANDS_DEFINITION_PATH = '/docs/reference/query-languages/esql/kibana/definition/commands';
-const SECTIONS_FILE_PATH = '../src/sections/esql_documentation_sections.tsx';
+const ELASTIC_COMMAND_DIR_PATH = path.join(
+  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
+  DEFINITION_DIR_SUFFIX,
+  'commands'
+);
 
-// Type definitions for AST nodes
-interface ASTProperty {
-  key: recast.types.namedTypes.Identifier;
-  value: recast.types.namedTypes.Node;
-}
-
-interface ASTObjectExpression {
-  type: 'ObjectExpression';
-  properties: ASTProperty[];
-}
-
-interface LicenseInfo {
+interface CommandData {
   name: string;
+  labelDefaultMessage: string;
+  descriptionDefaultMessage: string;
+  descriptionOptions?: {
+    ignoreTag?: boolean;
+    description?: string;
+  };
+  openLinksInNewTab?: boolean;
+  preview?: boolean;
+  license?: MultipleLicenseInfo;
 }
+
+interface CommandsData {
+  labelKey: string;
+  labelDefaultMessage: string;
+  descriptionKey: string;
+  descriptionDefaultMessage: string;
+  items: CommandData[];
+  outputFile: string;
+}
+
+const commandsData: CommandsData[] = [
+  {
+    ...sourceCommandsIntro,
+    items: sourceCommandsItems,
+    outputFile: `${OUTPUT_DIR}/source_commands.tsx`,
+  },
+  {
+    ...processingCommandsIntro,
+    items: processingCommandsItems,
+    outputFile: `${OUTPUT_DIR}/processing_commands.tsx`,
+  },
+];
 
 /**
- * Creates a LicenseInfo object from a license name.
+ * This script generates the ESQL inline command documentation files by merging
+ * the source and processing commands with Elasticsearch definitions.
+ *
+ * Step 1: Load the Elasticsearch command definitions from the specified path.
+ * Step 2: Merge the loaded definitions with the source and processing commands.
+ * Step 3: Generate separate documentation files for each command type, including the extra information, such as license details.
+ * Step 4: Write the generated content to the output files in the specified directory.
  */
-function createCommandLicenseInfo(licenseName: string | undefined): LicenseInfo | undefined {
-  if (!licenseName) {
-    return undefined;
-  }
-
-  return {
-    name: licenseName,
-  };
-}
-
 (function () {
-  const pathToElasticsearch = process.argv[2];
-  if (!pathToElasticsearch) {
-    throw new Error('Path to Elasticsearch must be provided as the first argument.');
-  }
+  try {
+    console.log(`Start generating commands documentation`);
 
-  // Load command definitions
-  const commandDefinitions = loadCommandDefinitions(pathToElasticsearch);
-  // Update the esql_documentation_sections.tsx file with license info
-  updateDocumentationSections(commandDefinitions);
+    const pathToElasticsearch = process.argv[2];
+    if (!pathToElasticsearch) {
+      throw new Error(
+        'No Elasticsearch path provided, generating without license info for testing...'
+      );
+    }
+
+    const esCommandDirPath = path.join(pathToElasticsearch, ELASTIC_COMMAND_DIR_PATH);
+    const cmdDefinitions = loadElasticDefinitions<CommandDefinition>(esCommandDirPath);
+    const commands = commandsData.map((cmd) => addDefinitionsToCommands(cmd, cmdDefinitions));
+    const docContents = commands.map((cmd) => generateDoc(cmd));
+
+    // Ensure the output directory exists
+    if (!fs.existsSync(OUTPUT_DIR)) {
+      fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+    }
+
+    // Write each generated documentation file
+    docContents.forEach((content, i) => fs.writeFileSync(`${commands[i].outputFile}`, content));
+    console.log(`Sucessfully generated commands documentation files`);
+  } catch (error) {
+    console.error(`Error writing documentation files: ${error.message}`);
+    process.exit(1);
+  }
 })();
 
 /**
- * Loads command definitions from the specified path.
- * Returns a map of command names to their definitions.
+ * Adds Elasticsearch information, such as license details, to commands
  */
-function loadCommandDefinitions(basePath: string): Map<string, ElasticsearchCommandDefinition> {
-  const commandsPath = path.join(basePath, COMMANDS_DEFINITION_PATH);
+function addDefinitionsToCommands(
+  data: CommandsData,
+  definitions: Map<string, CommandDefinition>
+): CommandsData {
+  return {
+    ...data,
+    items: data.items.map((item) => {
+      const commandDef = definitions.get(item.name);
+      const licenseInfo = getLicenseInfoForCommand(commandDef);
 
-  const commandDefinitions = new Map<string, ElasticsearchCommandDefinition>();
-
-  try {
-    const files = fs.readdirSync(commandsPath);
-
-    // Read each JSON file from elasticsearch and parse its content
-    files.forEach((file) => {
-      if (path.extname(file) === '.json') {
-        const filePath = path.join(commandsPath, file);
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const commandDef: ElasticsearchCommandDefinition = JSON.parse(content);
-
-        commandDefinitions.set(commandDef.name, commandDef);
+      if (licenseInfo) {
+        return {
+          ...item,
+          license: licenseInfo,
+        };
       }
-    });
-  } catch (error) {
-    console.warn(
-      `Warning: Could not load command definitions from ${commandsPath}: ${error.message}`
-    );
-  }
-
-  return commandDefinitions;
+      return item;
+    }),
+  };
 }
 
 /**
- * Updates the command section in the AST with license information.
- * It finds the section by name and updates each command item with its license info.
+ * Generates the full content for a single command documentation file.
  */
-function updateCommandSection(
-  ast: recast.types.namedTypes.File,
-  sectionName: string,
-  commandDefinitions: Map<string, ElasticsearchCommandDefinition>
-) {
-  recast.visit(ast, {
-    visitVariableDeclarator(astPath) {
-      if (n.Identifier.check(astPath.node.id) && astPath.node.id.name === sectionName) {
-        // Find the items array in the section
-        if (astPath.node.init) {
-          recast.visit(astPath.node.init, {
-            visitObjectProperty(objectPath) {
-              // Check if the property is 'items' and is an array
-              if (
-                n.Identifier.check(objectPath.node.key) &&
-                objectPath.node.key.name === 'items' &&
-                n.ArrayExpression.check(objectPath.node.value)
-              ) {
-                // Update each item in the array
-                objectPath.node.value.elements.forEach((element) => {
-                  if (element && n.ObjectExpression.check(element)) {
-                    updateCommandItem(
-                      element as unknown as ASTObjectExpression,
-                      commandDefinitions
-                    );
-                  }
-                });
-                return false;
-              }
-              // Continue traversing the AST
-              return this.traverse(objectPath);
-            },
-          });
-        }
-        // Stop traversing further as we found the section
-        return false;
-      }
-      return this.traverse(astPath);
-    },
-  });
+function generateDoc(data: CommandsData): string {
+  return `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { Markdown as SharedUXMarkdown } from '@kbn/shared-ux-markdown';
+
+const Markdown = (props: Parameters<typeof SharedUXMarkdown>[0]) => (
+  <SharedUXMarkdown {...props} readOnly enableSoftLineBreaks />
+);
+
+// Do not edit manually... automatically generated by scripts/generate_esql_command_docs.ts
+
+export const commands = ${generateCommandsDoc(data)};
+`;
 }
 
 /**
- * Updates the esql_documentation_sections.tsx file with command license information.
- * It reads the file, updates the command items with license info, and writes it back.
+ * Generates a documentation for a specific group of commands.
  */
-function updateDocumentationSections(
-  commandDefinitions: Map<string, ElasticsearchCommandDefinition>
-) {
-  const sectionsFilePath = path.join(__dirname, SECTIONS_FILE_PATH);
-  const content = fs.readFileSync(sectionsFilePath, 'utf-8');
+function generateCommandsDoc({
+  items,
+  labelKey,
+  labelDefaultMessage,
+  descriptionKey,
+  descriptionDefaultMessage,
+}: CommandsData): string {
+  const commandsContentDoc = items.map((item) => generateCommandDoc(item)).join(',\n    ');
 
-  const ast = recast.parse(content, {
-    parser: require('recast/parsers/babel'),
-  });
-
-  // Find and update sourceCommands and processingCommands
-  updateCommandSection(ast, 'sourceCommands', commandDefinitions);
-  updateCommandSection(ast, 'processingCommands', commandDefinitions);
-
-  const newContent = recast.print(ast);
-  fs.writeFileSync(sectionsFilePath, newContent.code);
-
-  console.log(
-    'Successfully updated esql_documentation_sections.tsx with command license information'
-  );
+  return `{
+  label: i18n.translate('${labelKey}', {
+    defaultMessage: '${labelDefaultMessage}',
+  }),
+  description: i18n.translate('${descriptionKey}', {
+    defaultMessage: \`${descriptionDefaultMessage}\`,
+  }),
+  items: [
+    ${commandsContentDoc}
+  ],
+}`;
 }
 
-function createCommandMapping(
-  commandDefinitions: Map<string, ElasticsearchCommandDefinition>
-): Record<string, string> {
-  const mapping: Record<string, string> = {};
-
-  // Create mapping from display names to internal names
-  for (const internalName of commandDefinitions.keys()) {
-    mapping[internalName.toLowerCase()] = internalName;
-    mapping[internalName] = internalName;
+/**
+ * Generates a single command documentation.
+ */
+function generateCommandDoc({
+  name,
+  labelDefaultMessage,
+  descriptionDefaultMessage,
+  openLinksInNewTab,
+  descriptionOptions,
+  preview,
+  license,
+}: CommandData): string {
+  function generateMarkdownProps(props: { openLinksInNewTab?: boolean }): string {
+    return props.openLinksInNewTab ? ' openLinksInNewTab={true}' : '';
   }
 
-  // Handle special display name cases
-  mapping['stats ... by'] = 'stats';
-  mapping['lookup join'] = 'lookup';
-
-  return mapping;
-}
-
-function extractCommandName(itemObject: ASTObjectExpression): string {
-  const labelProp = itemObject.properties.find(
-    (prop: ASTProperty) =>
-      n.Identifier.check(prop.key) &&
-      prop.key.name === 'label' &&
-      n.CallExpression.check(prop.value)
-  );
-
-  if (labelProp?.value.arguments?.[1]?.properties) {
-    const defaultMessageProp = labelProp.value.arguments[1].properties.find(
-      (p: ASTProperty) => n.Identifier.check(p.key) && p.key.name === 'defaultMessage'
+  function generateDescriptionOptions(
+    options: {
+      ignoreTag?: boolean;
+      description?: string;
+    } = {}
+  ) {
+    const formattedDescriptionOptions = Object.entries(options || {}).map(([key, value]) =>
+      typeof value === 'boolean'
+        ? `${key}: ${value},`
+        : `${key}: '${String(value).replace(/'/g, "\\'")}',`
     );
 
-    if (n.StringLiteral.check(defaultMessageProp?.value)) {
-      return defaultMessageProp.value.value.toLowerCase();
-    }
+    return formattedDescriptionOptions.length > 0
+      ? `,\n ${formattedDescriptionOptions.join('\n')}`
+      : '';
   }
 
-  return '';
-}
+  /**
+   * Generates labelKey and descriptionKey from command name, handling special cases.
+   * These special cases are necessary to ensure that the i18n keys follow the naming conventions from the Elasticsearch definitions.
+   */
+  function generateLabelAndDescriptionKeys(cmdName: string): {
+    labelKey: string;
+    descriptionKey: string;
+  } {
+    const labelKeySuffixMap: Record<string, string> = {
+      change_point: 'changePoint',
+      completion: 'completionCommand',
+      lookup: 'lookupJoin',
+      mv_expand: 'mvExpand',
+      sample: 'sampleCommand',
+      stats: 'statsby',
+    };
 
-function updateCommandItem(
-  itemObject: ASTObjectExpression,
-  commandDefinitions: Map<string, ElasticsearchCommandDefinition>
-) {
-  const commandName = extractCommandName(itemObject);
-  const commandMapping = createCommandMapping(commandDefinitions);
-  const internalCommandName = commandMapping[commandName] || commandName;
-  const commandDef = commandDefinitions.get(internalCommandName);
+    const labelSuffix = labelKeySuffixMap[cmdName] || cmdName;
+    const labelKey = `languageDocumentation.documentationESQL.${labelSuffix}`;
+    const descriptionKey = `${labelKey}.markdown`;
 
-  if (commandDef && commandDef.license) {
-    // Check if license property already exists
-    const licenseProperty = itemObject.properties.find(
-      (prop: ASTProperty) => n.Identifier.check(prop.key) && prop.key.name === 'license'
-    );
-
-    const licenseInfo = createCommandLicenseInfo(commandDef.license);
-
-    if (licenseProperty) {
-      // Update existing license property
-      if (licenseInfo) {
-        const licenseValueAst = recast.parse(`(${JSON.stringify(licenseInfo)})`).program.body[0]
-          .expression;
-        licenseProperty.value = licenseValueAst;
-      } else {
-        licenseProperty.value = recast.parse('undefined').program.body[0].expression;
-      }
-    } else {
-      // Add new license property
-      const previewProperty = itemObject.properties.find(
-        (prop: ASTProperty) => n.Identifier.check(prop.key) && prop.key.name === 'preview'
-      );
-
-      let licensePropertyAst;
-      if (licenseInfo) {
-        const licenseValueAst = recast.parse(`(${JSON.stringify(licenseInfo)})`).program.body[0]
-          .expression;
-        licensePropertyAst = {
-          type: 'ObjectProperty',
-          key: { type: 'Identifier', name: 'license' },
-          value: licenseValueAst,
-          computed: false,
-          shorthand: false,
-        };
-      } else {
-        const undefinedAst = recast.parse('undefined').program.body[0].expression;
-        licensePropertyAst = {
-          type: 'ObjectProperty',
-          key: { type: 'Identifier', name: 'license' },
-          value: undefinedAst,
-          computed: false,
-          shorthand: false,
-        };
-      }
-
-      if (previewProperty) {
-        // Insert after preview property
-        const previewIndex = itemObject.properties.indexOf(previewProperty);
-        itemObject.properties.splice(previewIndex + 1, 0, licensePropertyAst);
-      } else {
-        // Insert after label property
-        const labelProperty = itemObject.properties.find(
-          (prop: ASTProperty) => n.Identifier.check(prop.key) && prop.key.name === 'label'
-        );
-        if (labelProperty) {
-          const labelIndex = itemObject.properties.indexOf(labelProperty);
-          itemObject.properties.splice(labelIndex + 1, 0, licensePropertyAst);
-        }
-      }
-    }
+    return { labelKey, descriptionKey };
   }
+
+  const { labelKey, descriptionKey } = generateLabelAndDescriptionKeys(name);
+
+  const previewProp = preview !== undefined ? `\n preview: ${preview},` : '';
+  const licenseProp = license ? `\n license: ${JSON.stringify(license)},` : '';
+  // replace(/`/g, '\\`') escape backticks for nested template literals in the generated file
+  // replace(/%\{/g, '%\\{') escape i18n placeholder patterns like %{variable}
+  const description = descriptionDefaultMessage.replace(/`/g, '\\`').replace(/%\{/g, '%\\{');
+
+  return `{
+      label: i18n.translate('${labelKey}', {
+        defaultMessage: '${labelDefaultMessage}',
+      }),${previewProp}
+      description: (
+        <Markdown${generateMarkdownProps({ openLinksInNewTab })}
+          markdownContent={i18n.translate('${descriptionKey}', {
+            defaultMessage: \`${description}\`${generateDescriptionOptions(descriptionOptions)}
+          })}
+        />
+      ),${licenseProp}
+}`;
 }

@@ -11,8 +11,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBetaBadge } from '@elastic/eui';
-import type { LanguageDocumentationSections } from '../../types';
-import { LicenseInfo, MultipleLicenseInfo, getLicensesArray } from '../../utils/get_license_array';
+import type { LanguageDocumentationSections, LicenseInfo, MultipleLicenseInfo } from '../../types';
+import { getLicensesArray } from '../../utils/get_license_array';
 
 function toTitleCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -34,30 +34,6 @@ function createLicenseTooltip(license: LicenseInfo): string {
     tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
       defaultMessage: ' to use the following values: {params}',
       values: { params: license.paramsWithLicense.join(', ') },
-    })}`;
-  }
-
-  tooltip += `.`;
-
-  return tooltip;
-}
-
-interface LicenseInfo {
-  name: string;
-  isSignatureSpecific: boolean;
-  paramsWithLicense: string[];
-}
-
-function createLicenseTooltip(license: LicenseInfo): string {
-  let tooltip = i18n.translate('languageDocumentation.licenseRequiredTooltip', {
-    defaultMessage: 'This feature requires {license} license',
-    values: { license: license.name },
-  });
-
-  if (license.isSignatureSpecific && license.paramsWithLicense.length > 0) {
-    tooltip += ` ${i18n.translate('languageDocumentation.licenseParamsNote', {
-      defaultMessage: ' only for specific values: {params}',
-      values: { license: license.name, params: license.paramsWithLicense.join(', ') },
     })}`;
   }
 

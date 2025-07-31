@@ -10,5 +10,5 @@ fi
 ELASTICSEARCH_PATH="$1"
 
 # Run both scripts with the provided path
-ts-node --transpileOnly ./scripts/generate_esql_docs.ts "$ELASTICSEARCH_PATH" && \
-ts-node --transpileOnly ./scripts/generate_esql_command_docs.ts "$ELASTICSEARCH_PATH"
+ts-node --transpileOnly ./scripts/generate_esql_command_docs.ts "$ELASTICSEARCH_PATH" && \
+ts-node --transpileOnly ./scripts/generate_esql_docs.ts "$ELASTICSEARCH_PATH"
