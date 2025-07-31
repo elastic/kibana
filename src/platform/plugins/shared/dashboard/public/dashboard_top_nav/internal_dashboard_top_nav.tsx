@@ -14,7 +14,6 @@ import {
   EuiBadge,
   EuiBreadcrumb,
   EuiHorizontalRule,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiToolTipProps,
@@ -37,14 +36,11 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
-  topNavStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
-import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
-import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
@@ -56,6 +52,11 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import {
+  confirmDiscardOrSaveUnsavedChanges,
+  confirmDiscardUnsavedChanges,
+} from '../dashboard_listing/confirm_overlays';
+import { ViewModeToggle } from './view_mode_toggle';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -80,39 +81,32 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
+  const { showWriteControls } = getDashboardCapabilities();
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
 
-  const [
-    allDataViews,
-    focusedPanelId,
-    fullScreenMode,
-    hasUnsavedChanges,
-    lastSavedId,
-    query,
-    title,
-    viewMode,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.dataViews$,
-    dashboardApi.focusedPanelId$,
-    dashboardApi.fullScreenMode$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId$,
-    dashboardApi.query$,
-    dashboardApi.title$,
-    dashboardApi.viewMode$
-  );
+  const [allDataViews, fullScreenMode, hasUnsavedChanges, lastSavedId, query, title, viewMode] =
+    useBatchedPublishingSubjects(
+      dashboardApi.dataViews$,
+      dashboardApi.fullScreenMode$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId$,
+      dashboardApi.query$,
+      dashboardApi.title$,
+      dashboardApi.viewMode$
+    );
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const dashboardTitle = useMemo(() => {
-    return getDashboardTitle(title, viewMode, !lastSavedId);
-  }, [title, viewMode, lastSavedId]);
+    return getDashboardTitle(title, !lastSavedId);
+  }, [title, lastSavedId]);
 
   const styles = useMemoCss(topNavStyles);
 
@@ -152,23 +146,7 @@ export function InternalDashboardTopNav({
   useEffect(() => {
     const dashboardTitleBreadcrumbs = [
       {
-        text:
-          viewMode === 'edit' ? (
-            <>
-              {dashboardTitle}
-              <EuiIcon
-                tabIndex={0}
-                role="button"
-                aria-label={topNavStrings.settings.description}
-                size="s"
-                type="pencil"
-                onClick={() => openSettingsFlyout(dashboardApi)}
-                css={styles.updateIcon}
-              />
-            </>
-          ) : (
-            dashboardTitle
-          ),
+        text: dashboardTitle,
       },
     ];
 
@@ -226,18 +204,17 @@ export function InternalDashboardTopNav({
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide && (dataService.query.filterManager.getFilters().length > 0 || !fullScreenMode);
 
-    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
+    const showDatePicker = Boolean(forceHideUnifiedSearch)
+      ? false
+      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
+    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryInput = Boolean(forceHideUnifiedSearch)
       ? false
       : shouldShowNavBarComponent(
           Boolean(embedSettings?.forceShowQueryInput || viewMode === 'edit')
         );
-    const showDatePicker = Boolean(forceHideUnifiedSearch)
-      ? false
-      : shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
-    const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
-    const showSearchBar = showQueryBar || showFilterBar;
+    const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
+    const showSearchBar = showQueryInput || showDatePicker || showFilterBar;
     return {
       showTopNavMenu,
       showSearchBar,
@@ -268,6 +245,8 @@ export function InternalDashboardTopNav({
     setIsLabsShown,
     maybeRedirect,
     showResetChange,
+    isResetting,
+    setIsResetting,
   });
 
   UseUnmount(() => {
@@ -286,10 +265,22 @@ export function InternalDashboardTopNav({
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',
         } as EuiToolTipProps,
+        onClick: () => {
+          confirmDiscardOrSaveUnsavedChanges({
+            discardCallback: async () => {
+              setIsResetting(true);
+              await dashboardApi.asyncResetToLastSavedState();
+              setIsResetting(false);
+            },
+            saveCallback: async () => {
+              await dashboardApi.runQuickSave();
+            },
+          });
+        },
+        onClickAriaLabel: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
       });
     }
 
-    const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
       const badgeProps = {
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
@@ -336,7 +327,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [hasUnsavedChanges, viewMode, showWriteControls, dashboardApi, isPopoverOpen, maybeRedirect]);
 
   const setFavoriteButtonMountPoint = useCallback(
     (mountPoint: MountPoint<HTMLElement> | undefined) => {
@@ -344,6 +335,18 @@ export function InternalDashboardTopNav({
         return coreServices.chrome.setBreadcrumbsAppendExtension({
           content: mountPoint,
           order: 0,
+        });
+      }
+    },
+    []
+  );
+
+  const setViewModeToggleMountPoint = useCallback(
+    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+      if (mountPoint) {
+        return coreServices.chrome.setBreadcrumbsAppendExtension({
+          content: mountPoint,
+          order: 1,
         });
       }
     },
@@ -391,11 +394,21 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
       </MountPointPortal>
+      {showWriteControls && !dashboardApi.isManaged && (
+        <MountPointPortal setMountPoint={setViewModeToggleMountPoint}>
+          <ViewModeToggle
+            viewMode={viewMode}
+            dashboardApi={dashboardApi}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isResetting={isResetting}
+            setIsResetting={setIsResetting}
+          />
+        </MountPointPortal>
+      )}
     </div>
   );
 }
