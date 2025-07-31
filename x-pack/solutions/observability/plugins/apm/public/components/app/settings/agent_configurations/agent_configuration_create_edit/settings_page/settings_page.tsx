@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -65,6 +66,7 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const [countRemovedSettings, addRemovedSettings] = useState<number>(0);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
 
@@ -262,7 +264,7 @@ export function SettingsPage({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              {unknownAgentSettings.map(([key, value], index) => (
+              {unknownAgentSettings.map(([settingKey, settingValue], index) => (
                 <Fragment key={index}>
                   {index > 0 && <EuiSpacer size="s" />}
                   <EuiFlexGroup>
@@ -274,21 +276,21 @@ export function SettingsPage({
                         fullWidth
                       >
                         <EuiFieldText
-                          data-test-subj="apmSettingsPageFieldText"
+                          data-test-subj="apmSettingsAdvancedConfigurationKeyField"
                           aria-label={i18n.translate(
                             'xpack.apm.agentConfig.settingsPage.keyAriaLabel',
                             { defaultMessage: 'Advanced configuration key' }
                           )}
                           fullWidth
-                          value={key}
+                          value={settingKey}
                           onChange={(e) => {
                             setNewConfig((prev) => {
-                              delete prev.settings[key];
+                              delete prev.settings[settingKey];
                               return {
                                 ...prev,
                                 settings: {
                                   ...prev.settings,
-                                  [e.target.value]: value,
+                                  [e.target.value]: settingValue,
                                 },
                               };
                             });
@@ -304,24 +306,49 @@ export function SettingsPage({
                         fullWidth
                       >
                         <EuiFieldText
-                          data-test-subj="apmSettingsPageFieldText"
+                          data-test-subj="apmSettingsAdvancedConfigurationValueField"
                           aria-label={i18n.translate(
                             'xpack.apm.agentConfig.settingsPage.valueAriaLabel',
                             { defaultMessage: 'Advanced configuration value' }
                           )}
                           fullWidth
-                          value={value}
+                          value={settingValue}
                           onChange={(e) => {
                             setNewConfig((prev) => {
                               return {
                                 ...prev,
                                 settings: {
                                   ...prev.settings,
-                                  [key]: e.target.value,
+                                  [settingKey]: e.target.value,
                                 },
                               };
                             });
                           }}
+                          append={
+                            <EuiButtonIcon
+                              data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
+                              aria-label={i18n.translate(
+                                'xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel',
+                                {
+                                  defaultMessage: 'Remove advanced configuration',
+                                }
+                              )}
+                              iconType="trash"
+                              color={'danger'}
+                              onClick={() => {
+                                if (settingValue && settingKey) {
+                                  addRemovedSettings((prev) => prev + 1);
+                                }
+                                setNewConfig((prev) => {
+                                  const { [settingKey]: deleted, ...rest } = prev.settings;
+                                  return {
+                                    ...prev,
+                                    settings: rest,
+                                  };
+                                });
+                              }}
+                            />
+                          }
                         />
                       </EuiFormRow>
                     </EuiFlexItem>
@@ -335,15 +362,18 @@ export function SettingsPage({
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {unsavedChangesCount > 0 && (
+      {(unsavedChangesCount > 0 || countRemovedSettings > 0) && (
         <BottomBarActions
           isLoading={isSaving}
-          onDiscardChanges={resetSettings}
+          onDiscardChanges={() => {
+            addRemovedSettings(0);
+            resetSettings();
+          }}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount}
+          unsavedChangesCount={unsavedChangesCount + countRemovedSettings}
           appTestSubj="apm"
         />
       )}
