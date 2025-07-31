@@ -7,7 +7,7 @@
 
 import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { DeleteToolResponse } from '../../../../common/http_api/tools';
+import { BulkDeleteToolResponse, DeleteToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
@@ -23,6 +23,19 @@ type DeleteToolMutationOptions = UseMutationOptions<
 
 type DeleteToolMutationSuccessCallback = NonNullable<DeleteToolMutationOptions['onSuccess']>;
 type DeleteToolMutationErrorCallback = NonNullable<DeleteToolMutationOptions['onError']>;
+
+interface DeleteToolsMutationVariables {
+  toolIds: string[];
+}
+
+type DeleteToolsMutationOptions = UseMutationOptions<
+  BulkDeleteToolResponse,
+  Error,
+  DeleteToolsMutationVariables
+>;
+
+type DeleteToolsMutationSuccessCallback = NonNullable<DeleteToolsMutationOptions['onSuccess']>;
+type DeleteToolsMutationErrorCallback = NonNullable<DeleteToolsMutationOptions['onError']>;
 
 export const useDeleteTool = ({
   onSuccess,
@@ -46,6 +59,30 @@ export const useDeleteTool = ({
   });
 
   return { deleteTool: mutateAsync, isLoading };
+};
+
+export const useDeleteTools = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: DeleteToolsMutationSuccessCallback;
+  onError?: DeleteToolsMutationErrorCallback;
+}) => {
+  const queryClient = useQueryClient();
+  const { toolsService } = useOnechatServices();
+
+  const { mutateAsync, isLoading } = useMutation<
+    BulkDeleteToolResponse,
+    Error,
+    DeleteToolsMutationVariables
+  >({
+    mutationFn: ({ toolIds }) => toolsService.bulkDelete(toolIds),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
+    onSuccess,
+    onError,
+  });
+
+  return { deleteTools: mutateAsync, isLoading };
 };
 
 export type DeleteToolSuccessCallback = (toolId: string) => void;
@@ -105,6 +142,77 @@ export const useDeleteToolModal = ({
     isLoading,
     toolId: deleteToolId,
     deleteTool,
+    confirmDelete,
+    cancelDelete,
+  };
+};
+
+export type DeleteToolsSuccessCallback = (toolIds: string[]) => void;
+export type DeleteToolsErrorCallback = (
+  error: Error,
+  variables: DeleteToolsMutationVariables
+) => void;
+
+export const useDeleteToolsModal = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: DeleteToolsSuccessCallback;
+  onError?: DeleteToolsErrorCallback;
+}) => {
+  const [deleteToolIds, setDeleteToolIds] = useState<string[]>([]);
+
+  const isModalOpen = deleteToolIds.length > 0;
+
+  const deleteTools = useCallback((toolIds: string[]) => {
+    setDeleteToolIds(toolIds);
+  }, []);
+
+  const onDeleteSuccess: DeleteToolsMutationSuccessCallback = (data, { toolIds }) => {
+    if (Object.values(data).some((success) => !success)) {
+      const failedTools = toolIds.filter((toolId, index) => !data[toolId]);
+      if (failedTools.length === toolIds.length) {
+        onError?.(new Error('Delete operation failed for all tools.'), {
+          toolIds,
+        });
+      } else {
+        onError?.(new Error('Delete operation failed for some tools: ' + failedTools.join(', ')), {
+          toolIds: failedTools,
+        });
+      }
+      return;
+    }
+
+    onSuccess?.(toolIds);
+    setDeleteToolIds([]);
+  };
+
+  const onDeleteError: DeleteToolsMutationErrorCallback = (error, { toolIds }) => {
+    onError?.(error, { toolIds });
+  };
+
+  const { deleteTools: deleteToolsMutation, isLoading } = useDeleteTools({
+    onSuccess: onDeleteSuccess,
+    onError: onDeleteError,
+  });
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteToolIds.length) {
+      return;
+    }
+
+    await deleteToolsMutation({ toolIds: deleteToolIds });
+  }, [deleteToolIds, deleteToolsMutation]);
+
+  const cancelDelete = useCallback(() => {
+    setDeleteToolIds([]);
+  }, []);
+
+  return {
+    isOpen: isModalOpen,
+    isLoading,
+    toolIds: deleteToolIds,
+    deleteTools,
     confirmDelete,
     cancelDelete,
   };
