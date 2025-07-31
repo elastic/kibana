@@ -10,12 +10,13 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { result } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { result } from './utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestViewer: Pick<Agent, 'post'>;
@@ -34,7 +35,11 @@ export default function ({ getService }: FtrProviderContext) {
     // see details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI']);
     before(async () => {
-      await esArchiver.loadIfNeeded(
+      await esArchiver.load(
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts',
+        { docsOnly: true }
+      );
+      await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
       supertestViewer = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
@@ -44,6 +49,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
+      // Instead we delete all alerts from the index
+      await es.deleteByQuery({
+        index: '.internal.alerts-*',
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );

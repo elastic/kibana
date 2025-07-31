@@ -26,11 +26,12 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { NO_DATA_SHORT_LABEL, DOCUMENTS_NO_DATA_ICON_ARIA_LABEL } from './translations';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
+import { getFormattedError } from '../../util/errors';
 
 export function DocumentsColumn({
   indexPattern,
@@ -112,6 +113,7 @@ export function DocumentsColumn({
     [streamsRepositoryClient, indexPattern, minInterval],
     {
       withTimeRange: true,
+      disableToastOnError: true,
     }
   );
 
@@ -136,6 +138,20 @@ export function DocumentsColumn({
   const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
+
+  const noDocCountData = histogramQueryFetch.error ? '' : <EuiI18nNumber value={docCount} />;
+
+  const noHistogramData = histogramQueryFetch.error ? (
+    <TooltipOrPopoverIcon
+      dataTestSubj="streamsDocCount-error"
+      icon="warning"
+      title={getFormattedError(histogramQueryFetch.error).message}
+      mode="popover"
+      iconColor="danger"
+    />
+  ) : (
+    <EuiIcon type="visLine" size="m" />
+  );
 
   const chartDescription = React.useMemo(() => {
     if (!hasData) {
@@ -191,7 +207,7 @@ export function DocumentsColumn({
               text-align: right;
             `}
           >
-            {hasData ? <EuiI18nNumber value={docCount} /> : NO_DATA_SHORT_LABEL}
+            {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
@@ -241,7 +257,7 @@ export function DocumentsColumn({
                 </Chart>
               </div>
             ) : (
-              <EuiIcon type="visLine" size="m" aria-label={DOCUMENTS_NO_DATA_ICON_ARIA_LABEL} />
+              noHistogramData
             )}
           </EuiFlexItem>
         </>

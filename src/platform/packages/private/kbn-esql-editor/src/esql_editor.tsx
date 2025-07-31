@@ -32,7 +32,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
@@ -62,7 +62,12 @@ import {
   EDITOR_MAX_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
+import type {
+  ESQLEditorProps as ESQLEditorPropsInternal,
+  ESQLEditorDeps,
+  ControlsContext,
+} from './types';
+import { useRestorableState, withRestorableState } from './restorable_state';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -87,7 +92,8 @@ const triggerControl = async (
   });
 };
 
-export const ESQLEditor = memo(function ESQLEditor({
+// React.memo is applied inside the withRestorableState HOC (called below)
+const ESQLEditorInternal = function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
@@ -112,7 +118,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
-}: ESQLEditorProps) {
+}: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -145,12 +151,14 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
-  const [editorHeight, setEditorHeight] = useState(
+  const [editorHeight, setEditorHeight] = useRestorableState(
+    'editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
   // the resizable container is the container that holds the history component or the inline docs
   // they are never open simultaneously
-  const [resizableContainerHeight, setResizableContainerHeight] = useState(
+  const [resizableContainerHeight, setResizableContainerHeight] = useRestorableState(
+    'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
@@ -159,7 +167,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
@@ -251,10 +259,6 @@ export const ESQLEditor = memo(function ESQLEditor({
       variablesService?.disableSuggestions();
     }
   }, [variablesService, controlsContext, esqlVariables]);
-
-  const toggleHistory = useCallback((status: boolean) => {
-    setIsHistoryOpen(status);
-  }, []);
 
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
@@ -416,7 +420,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         }
       />
     );
-  }, [onMouseDownResize, editorHeight, onKeyDownResize]);
+  }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
 
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
@@ -981,7 +985,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={toggleHistory}
+        setIsHistoryOpen={setIsHistoryOpen}
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
@@ -1065,4 +1069,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   );
 
   return editorPanel;
-});
+};
+
+export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+
+export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;
