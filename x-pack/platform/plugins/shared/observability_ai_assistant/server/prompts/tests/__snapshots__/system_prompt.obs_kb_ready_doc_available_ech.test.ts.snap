@@ -51,7 +51,7 @@ You have access to a set of tools to interact with the Elastic environment and t
 
 <FunctionUsageGuidelines>
 
-**Time Range Handling:** As stated in Core Principles, for tools requiring time ranges (\`alerts\`), first try \`context\` to find time range. If no time range is found in context, use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. Use the Elasticseach datemath format for the time range when calling the \`alerts\` tool (e.g.: 'now', 'now-15m', 'now-24h', 'now-2d')
+**Time Range Handling:** As stated in Core Principles, for tools requiring time ranges (\`alerts\`), first try \`context\` to find time range. If no time range is found in context, use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. Use the Elasticsearch datemath format for the time range when calling the \`alerts\` tool (e.g.: 'now', 'now-15m', 'now-24h', 'now-2d')
 
 **Get Dataset Information:** Use the \`get_dataset_info\` tool to get information about indices/datasets available and the fields available on them. 
          * Providing an empty string as index name will retrieve all indices. Otherwise list of all fields for the given index will be given.
