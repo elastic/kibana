@@ -7,7 +7,10 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
-import { SNAPSHOT_STATE } from '../../public/application/constants';
+import {
+  SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+  SNAPSHOT_STATE,
+} from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
@@ -560,34 +563,6 @@ describe('<SnapshotRestoreHome />', () => {
         );
       });
 
-      test('should show a prompt if a repository contains errors and there are no other repositories', async () => {
-        httpRequestsMockHelpers.setLoadSnapshotsResponse({
-          snapshots,
-          errors: {
-            repository_with_errors: {
-              type: 'repository_exception',
-              reason:
-                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
-            },
-          },
-        });
-        httpRequestsMockHelpers.setLoadRepositoriesResponse({
-          repositories: [],
-        });
-
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          testBed.actions.selectTab('snapshots');
-        });
-
-        testBed.component.update();
-
-        const { find, exists } = testBed;
-        expect(exists('repositoryErrorsPrompt')).toBe(true);
-        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
-      });
-
       test('each row should have a link to the repository', async () => {
         const { component, find, exists, table, router } = testBed;
 
@@ -915,7 +890,7 @@ describe('<SnapshotRestoreHome />', () => {
         testBed.component.update();
       });
 
-      test('should show a prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
+      test('should show a generic error prompt if snapshots request fails while still showing the search bar', async () => {
         const { find, exists } = testBed;
 
         // Check that the search bar is still present
@@ -924,6 +899,38 @@ describe('<SnapshotRestoreHome />', () => {
         // Check that the error message is displayed
         expect(exists('snapshotsLoadingError')).toBe(true);
         expect(find('snapshotsLoadingError').text()).toContain('Error loading snapshots');
+      });
+
+      test('should show a repository error prompt if snapshots request fails due to repository exception while still showing the search bar', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse(undefined, {
+          statusCode: 500,
+          message: '[repository_with_errors] cannot retrieve snapshots list from this repository',
+          attributes: {
+            error: {
+              type: SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+            },
+          },
+        });
+        httpRequestsMockHelpers.setLoadRepositoriesResponse({
+          repositories: [{ name: REPOSITORY_NAME }, { name: 'repository_with_errors' }],
+        });
+
+        testBed = await setup(httpSetup);
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+
+        // Check that the search bar is still present
+        expect(exists('snapshotListSearch')).toBe(true);
+
+        // Check that the error message is displayed
+        expect(exists('repositoryErrorsPrompt')).toBe(true);
+        expect(find('repositoryErrorsPrompt').text()).toContain('Some repositories contain errors');
       });
     });
   });

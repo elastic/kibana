@@ -18,7 +18,11 @@ import {
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
-import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
+import {
+  BASE_PATH,
+  SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+  UIM_SNAPSHOT_LIST_LOAD,
+} from '../../../constants';
 import { useLoadRepositories, useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
@@ -138,25 +142,31 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         </span>
       </PageLoading>
     );
-  } else if (!error && Object.keys(errors).length && repositoriesNames.length === 0) {
-    content = <RepositoryError />;
   } else if (!error && repositoriesNames.length === 0) {
     content = <RepositoryEmptyPrompt />;
   } else if (!error && totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
     content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
   } else {
-    const snapshotsLoadingError = error ? (
-      <PageError
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
-            defaultMessage="Error loading snapshots"
+    let snapshotsLoadingError = null;
+
+    if (error) {
+      if (error?.attributes?.error?.type === SNAPSHOT_REPOSITORY_EXCEPTION_ERROR) {
+        snapshotsLoadingError = <RepositoryError errorMessage={error?.message} />;
+      } else {
+        snapshotsLoadingError = (
+          <PageError
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
+                defaultMessage="Error loading snapshots"
+              />
+            }
+            data-test-subj="snapshotsLoadingError"
+            error={error as Error}
           />
-        }
-        data-test-subj="snapshotsLoadingError"
-        error={error as Error}
-      />
-    ) : null;
+        );
+      }
+    }
 
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
