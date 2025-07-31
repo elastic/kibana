@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PLUGIN_TITLE } from '../../../common';
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 
@@ -57,7 +58,7 @@ export const RulesetDetailEmptyPrompt = () => {
         <EuiFlexItem grow css={positionRelative}>
           <img
             src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
-            alt="Query Rules"
+            alt={PLUGIN_TITLE}
             css={imgProps}
           />
           <div css={gradientOverlay}>&nbsp;</div>

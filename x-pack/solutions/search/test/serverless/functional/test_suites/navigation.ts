@@ -96,7 +96,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           deepLinkId: 'searchQueryRules',
-          breadcrumbs: ['Relevance', 'Query Rules'],
+          breadcrumbs: ['Relevance', 'Query rules'],
           pageTestSubject: 'queryRulesBasePage',
         },
         {
@@ -222,7 +222,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
