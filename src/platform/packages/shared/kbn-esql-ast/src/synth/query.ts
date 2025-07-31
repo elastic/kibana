@@ -8,7 +8,8 @@
  */
 
 import { ParseOptions, Parser } from '../parser';
-import { createTag, makeSynthNode } from './tag';
+import { createTag } from './tag';
+import { SynthNode } from './synth_node';
 import type { SynthGenerator } from './types';
 import type { ESQLAstQueryExpression } from '../types';
 
@@ -17,9 +18,8 @@ const generator: SynthGenerator<ESQLAstQueryExpression> = (
   { withFormatting = true, ...rest }: ParseOptions = {}
 ): ESQLAstQueryExpression => {
   src = src.trimStart();
-  const { root: node } = Parser.parseQuery(src, { withFormatting, ...rest });
-
-  makeSynthNode(node);
+  const { root } = Parser.parseQuery(src, { withFormatting, ...rest });
+  const node = SynthNode.from(root);
 
   return node;
 };

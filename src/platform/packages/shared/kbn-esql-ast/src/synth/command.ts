@@ -8,7 +8,8 @@
  */
 
 import { ParseOptions, Parser } from '../parser';
-import { createTag, makeSynthNode } from './tag';
+import { createTag } from './tag';
+import { SynthNode } from './synth_node';
 import type { SynthGenerator } from './types';
 import type { ESQLCommand } from '../types';
 
@@ -18,15 +19,15 @@ const generator: SynthGenerator<ESQLCommand> = (
 ): ESQLCommand => {
   src = src.trimStart();
 
-  const { root: command } = Parser.parseCommand(src, { withFormatting, ...rest });
+  const { root } = Parser.parseCommand(src, { withFormatting, ...rest });
 
-  if (command.type !== 'command') {
+  if (root.type !== 'command') {
     throw new Error('Expected a command node');
   }
 
-  makeSynthNode(command);
+  const node = SynthNode.from(root);
 
-  return command;
+  return node;
 };
 
 export const command = createTag<ESQLCommand>(generator);

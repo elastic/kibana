@@ -8,10 +8,9 @@
  */
 
 import { Builder } from '../builder';
-import { LeafPrinter } from '../pretty_print';
+import { BasicPrettyPrinter, LeafPrinter } from '../pretty_print';
 import { isProperNode } from '../ast/is';
 import { SynthNode } from './synth_node';
-import { serialize } from './helpers';
 import type { SynthTemplateHole } from './types';
 
 class UnexpectedSynthHoleError extends Error {
@@ -56,7 +55,7 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
 
         return list;
       } else if (hole instanceof SynthNode || isProperNode(hole)) {
-        return serialize(hole);
+        return BasicPrettyPrinter.print(hole);
       }
 
       throw new UnexpectedSynthHoleError(hole);
