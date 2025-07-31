@@ -10,7 +10,7 @@
 import React, { KeyboardEvent } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 
-import { IMenuItem, INavigationStructure } from '../../types';
+import { MenuItem, NavigationStructure } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -24,7 +24,7 @@ const FOOTER_ITEM_LIMIT = 5;
 
 interface NavigationProps {
   isCollapsed: boolean;
-  items: INavigationStructure;
+  items: NavigationStructure;
   logoLabel: string;
   logoType: string;
   setWidth: (width: number) => void;
@@ -53,12 +53,12 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
-  const handleMainItemClick = (item: IMenuItem) => {
+  const handleMainItemClick = (item: MenuItem) => {
     navigateTo(item);
     focusMainContent();
   };
 
-  const handleSubMenuItemClick = (item: IMenuItem, subItem: IMenuItem) => {
+  const handleSubMenuItemClick = (item: MenuItem, subItem: MenuItem) => {
     if (item.href && subItem.href === item.href) {
       navigateTo(item);
     } else {
@@ -67,7 +67,7 @@ export const Navigation = ({
     focusMainContent();
   };
 
-  const handleFooterItemKeyDown = (item: IMenuItem, e: KeyboardEvent) => {
+  const handleFooterItemKeyDown = (item: MenuItem, e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       // Required for entering the popover with Enter or Space key
       // Otherwise the navigation happens immediately

@@ -10,9 +10,9 @@
 import { EuiButton, EuiButtonEmpty, IconType, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { ISecondaryMenuItem } from '../../../types';
+import { SecondaryMenuItem } from '../../../types';
 
-export interface SecondaryMenuItemProps extends ISecondaryMenuItem {
+export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
   href: string;
   iconType?: IconType;
@@ -26,7 +26,7 @@ export interface SecondaryMenuItemProps extends ISecondaryMenuItem {
  * `EuiButton` and `EuiButtonEmpty` are used for consistency with the component library.
  * The only style overrides are making the button labels left-aligned.
  */
-export const SecondaryMenuItem = ({
+export const SecondaryMenuItemComponent = ({
   children,
   href,
   iconType,

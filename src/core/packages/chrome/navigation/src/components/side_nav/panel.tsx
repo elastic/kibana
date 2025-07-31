@@ -10,6 +10,7 @@
 import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode, useRef } from 'react';
 import { css } from '@emotion/react';
+
 import { useRovingIndex } from '../../utils/use_roving_index';
 
 export interface SideNavPanelProps {

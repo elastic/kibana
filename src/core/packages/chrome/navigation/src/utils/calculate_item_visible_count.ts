@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IMenuCalculations } from '../../types';
+import { MenuCalculations } from '../../types';
 import { EXPANDED_MENU_ITEM_HEIGHT } from '../constants';
 
 /**
@@ -16,7 +16,7 @@ import { EXPANDED_MENU_ITEM_HEIGHT } from '../constants';
  * @param actualItemHeights - Array of actual heights of menu items
  */
 export const calculateVisibleItemCount = (
-  calculations: IMenuCalculations,
+  calculations: MenuCalculations,
   actualItemHeights: number[]
 ): number => {
   const { availableHeight, itemGap, maxVisibleItems } = calculations;

@@ -10,9 +10,10 @@
 import React, { KeyboardEvent, forwardRef, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
-import { IMenuItem } from '../../../types';
 
-export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, IMenuItem {
+import { MenuItem } from '../../../types';
+
+export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
   iconType?: IconType;
   isCurrent: boolean;

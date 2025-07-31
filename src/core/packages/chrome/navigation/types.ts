@@ -9,35 +9,34 @@
 
 import { IconType } from '@elastic/eui';
 
-export interface ISecondaryMenuItem {
+export interface SecondaryMenuItem {
   'data-test-subj'?: string;
   external?: boolean;
   href: string;
-  iconType?: IconType;
   id: string;
   label: string;
 }
 
-export interface ISecondaryMenuSection {
+export interface SecondaryMenuSection {
   id: string;
-  items: ISecondaryMenuItem[];
+  items: SecondaryMenuItem[];
   label: string | null;
 }
 
-export interface IMenuItem {
+export interface MenuItem {
   'data-test-subj'?: string;
   href: string;
   iconType?: IconType;
   id: string;
   label: string;
-  sections?: ISecondaryMenuSection[];
+  sections?: SecondaryMenuSection[];
 }
-export interface INavigationStructure {
-  footerItems: IMenuItem[];
-  primaryItems: IMenuItem[];
+export interface NavigationStructure {
+  footerItems: MenuItem[];
+  primaryItems: MenuItem[];
 }
 
-export interface IMenuCalculations {
+export interface MenuCalculations {
   availableHeight: number;
   itemGap: number;
   maxVisibleItems: number;

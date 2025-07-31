@@ -11,9 +11,9 @@ import React, { forwardRef, ForwardedRef, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { IMenuItem } from '../../../types';
+import { MenuItem } from '../../../types';
 
-export interface SideNavPrimaryMenuItemProps extends IMenuItem {
+export interface SideNavPrimaryMenuItemProps extends MenuItem {
   children: ReactNode;
   hasContent?: boolean;
   horizontal?: boolean;

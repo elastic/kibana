@@ -28,7 +28,7 @@ export interface SecondaryMenuSectionProps {
  * `EuiTitle` provides styles inconsistent with design, and `EuiText` doesn't allow
  * `h5` usage so semantically, the structure could use improvement.
  */
-export const SecondaryMenuSection = ({
+export const SecondaryMenuSectionComponent = ({
   children,
   hasGap,
   label,

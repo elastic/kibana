@@ -11,8 +11,8 @@ import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { FC, ReactNode } from 'react';
 import { css } from '@emotion/react';
 
-import { SecondaryMenuItem } from './item';
-import { SecondaryMenuSection } from './section';
+import { SecondaryMenuItemComponent } from './item';
+import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface SecondaryMenuProps {
@@ -22,8 +22,8 @@ export interface SecondaryMenuProps {
 }
 
 interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
-  Item: typeof SecondaryMenuItem;
-  Section: typeof SecondaryMenuSection;
+  Item: typeof SecondaryMenuItemComponent;
+  Section: typeof SecondaryMenuSectionComponent;
 }
 
 /**
@@ -52,5 +52,5 @@ export const SecondaryMenu: SecondaryMenuComponent = ({ children, isPanel = fals
   );
 };
 
-SecondaryMenu.Item = SecondaryMenuItem;
-SecondaryMenu.Section = SecondaryMenuSection;
+SecondaryMenu.Item = SecondaryMenuItemComponent;
+SecondaryMenu.Section = SecondaryMenuSectionComponent;

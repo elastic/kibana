@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IMenuItem } from '../../types';
+import { MenuItem } from '../../types';
 
 export const LOGO = {
   label: 'Security',
   logoType: 'logoSecurity',
 };
 
-export const PRIMARY_MENU_ITEMS: IMenuItem[] = [
+export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'discover',
     label: 'Discover',
@@ -330,7 +330,7 @@ export const PRIMARY_MENU_ITEMS: IMenuItem[] = [
   },
 ];
 
-export const PRIMARY_MENU_FOOTER_ITEMS: IMenuItem[] = [
+export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
   {
     id: 'getting_started',
     label: 'Getting started',
