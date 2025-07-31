@@ -132,7 +132,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 title: i18n.translate(
                   'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
                   {
-                    defaultMessage: 'Inference Endpoints',
+                    defaultMessage: 'Inference endpoints',
                   }
                 ),
                 link: 'searchInferenceEndpoints',

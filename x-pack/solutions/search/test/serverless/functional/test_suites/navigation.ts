@@ -101,7 +101,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           deepLinkId: 'searchInferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          breadcrumbs: ['Relevance', 'Inference endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
         },
         {
@@ -223,7 +223,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });

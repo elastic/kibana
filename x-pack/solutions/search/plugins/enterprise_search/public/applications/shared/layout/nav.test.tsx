@@ -86,7 +86,7 @@ const baseNavItems = [
         href: '/app/elasticsearch/relevance/inference_endpoints',
         id: 'inference_endpoints',
         items: undefined,
-        name: 'Inference Endpoints',
+        name: 'Inference endpoints',
       },
     ],
     name: 'Relevance',
@@ -130,7 +130,7 @@ const mockNavLinks = [
   },
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
-    title: 'Inference Endpoints',
+    title: 'Inference endpoints',
     url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {

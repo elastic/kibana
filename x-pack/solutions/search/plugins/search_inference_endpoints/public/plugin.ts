@@ -17,8 +17,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import { PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import {
   AppPluginSetupDependencies,
@@ -54,14 +53,12 @@ export class SearchInferenceEndpointsPlugin
         {
           id: 'inferenceEndpoints',
           path: `/${INFERENCE_ENDPOINTS_PATH}`,
-          title: i18n.translate('xpack.searchInferenceEndpoints.InferenceEndpointsLinkLabel', {
-            defaultMessage: 'Inference Endpoints',
-          }),
+          title: PLUGIN_TITLE,
           visibleIn: ['globalSearch'],
         },
       ],
       status: AppStatus.inaccessible,
-      title: PLUGIN_NAME,
+      title: PLUGIN_TITLE,
       updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');

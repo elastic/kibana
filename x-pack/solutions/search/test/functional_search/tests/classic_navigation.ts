@@ -51,7 +51,7 @@ export default function searchSolutionNavigation({
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'QueryRules', label: 'Query rules' },
-        { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        { id: 'InferenceEndpoints', label: 'Inference endpoints' },
       ]);
     });
     it('has expected navigation', async () => {
@@ -96,7 +96,7 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'InferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          breadcrumbs: ['Relevance', 'Inference endpoints'],
           pageTestSubject: 'inferenceEndpointsPage',
         },
       ];
