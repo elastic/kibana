@@ -344,25 +344,6 @@ export class WorkflowsService {
     );
   }
 
-  public async getWorkflowExecutionHistory(
-    workflowExecutionId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    if (!this.esClient) {
-      throw new Error('Elasticsearch client not initialized');
-    }
-
-    this.logger.info(`Searching workflows in index ${this.stepsExecutionIndex}`);
-    const results = await searchWorkflowExecutions({
-      esClient: this.esClient,
-      logger: this.logger,
-      stepsExecutionIndex: this.stepsExecutionIndex,
-      workflowExecutionId,
-    });
-    this.logger.info(`Found ${results.length} workflows, ${results.map((r) => r.id).join(', ')}`);
-
-    return results;
-  }
-
   public async searchWorkflowExecutions(params: {
     workflowId: string;
   }): Promise<WorkflowExecutionListDto> {
