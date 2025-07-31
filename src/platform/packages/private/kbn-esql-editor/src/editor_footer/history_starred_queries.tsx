@@ -27,6 +27,7 @@ import {
   EuiText,
   EuiIconTip,
   EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -137,42 +138,51 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiIconTip
+              <EuiToolTip
                 position="top"
-                type="checkInCircleFilled"
-                color="success"
-                size="m"
-                data-test-subj="ESQLEditor-queryHistory-success"
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-              />
+              >
+                <EuiIcon
+                  type="checkInCircleFilled"
+                  color="success"
+                  size="m"
+                  data-test-subj="ESQLEditor-queryHistory-success"
+                />
+              </EuiToolTip>
             );
           case 'error':
             return (
-              <EuiIconTip
-                type="error"
-                color="danger"
-                size="m"
+              <EuiToolTip
                 position="top"
-                data-test-subj="ESQLEditor-queryHistory-error"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              />
+              >
+                <EuiIcon
+                  type="error"
+                  color="danger"
+                  size="m"
+                  data-test-subj="ESQLEditor-queryHistory-error"
+                />
+              </EuiToolTip>
             );
           case 'warning':
             return (
-              <EuiIconTip
-                type="warning"
-                color="warning"
-                size="m"
-                data-test-subj="ESQLEditor-queryHistory-warning"
+              <EuiToolTip
+                position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-                position="top"
-              />
+              >
+                <EuiIcon
+                  type="warning"
+                  color="warning"
+                  size="m"
+                  data-test-subj="ESQLEditor-queryHistory-warning"
+                />
+              </EuiToolTip>
             );
         }
       },
