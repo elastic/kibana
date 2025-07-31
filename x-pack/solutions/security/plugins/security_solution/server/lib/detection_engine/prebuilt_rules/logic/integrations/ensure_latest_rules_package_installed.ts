@@ -15,21 +15,13 @@ export async function ensureLatestRulesPackageInstalled(
   securityContext: SecuritySolutionApiRequestHandlerContext,
   logger?: Logger
 ) {
-  logger?.debug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets');
   let latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
-  logger?.debug(
-    `ENSURE LATEST PACKAGE INSTALLED - fetched latest assets. Assets count: ${latestPrebuiltRules.length}`
-  );
   if (latestPrebuiltRules.length === 0) {
     // Seems no packages with prepackaged rules were installed, try to install the default rules package
     await installPrebuiltRulesPackage(securityContext, logger);
 
-    logger?.debug('ENSURE LATEST PACKAGE INSTALLED - fetching latest assets again');
     // Try to get the prepackaged rules again
     latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
   }
-  logger?.debug(
-    `ENSURE LATEST PACKAGE INSTALLED complete. Assets count: ${latestPrebuiltRules.length}`
-  );
   return latestPrebuiltRules;
 }

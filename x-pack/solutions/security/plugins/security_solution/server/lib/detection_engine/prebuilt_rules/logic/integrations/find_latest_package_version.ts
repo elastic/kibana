@@ -23,6 +23,9 @@ export async function findLatestPackageVersion(
       securityAppClient.getKibanaBranch() === 'main');
 
   try {
+    logger?.debug(
+      `fetchFindLatestPackage: Querying Fleet for latest available version of package "${packageName}" with prerelease=${isPrerelease}`
+    );
     const result = await packageClient.fetchFindLatestPackage(packageName, {
       prerelease: isPrerelease,
     });

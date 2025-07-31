@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type {
+  Logger,
+  IKibanaResponse,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
@@ -25,7 +30,8 @@ import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebui
 export const bootstrapPrebuiltRulesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   _: KibanaRequest,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ): Promise<IKibanaResponse<BootstrapPrebuiltRulesResponse>> => {
   const siemResponse = buildSiemResponse(response);
 
@@ -64,7 +70,7 @@ export const bootstrapPrebuiltRulesHandler = async (
         fleetServices: securityContext.getInternalFleetServices(),
       });
     } else {
-      const endpointResult = await installEndpointPackage(securityContext);
+      const endpointResult = await installEndpointPackage(securityContext, logger);
       packageResults.push({
         name: endpointResult.package.name,
         version: endpointResult.package.version,
@@ -72,7 +78,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       });
     }
 
-    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext);
+    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext, logger);
 
     if (securityAiPromptsResult !== null) {
       packageResults.push({

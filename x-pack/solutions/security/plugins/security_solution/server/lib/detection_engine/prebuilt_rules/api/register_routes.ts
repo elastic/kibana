@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route';
 import { getPrebuiltRulesStatusRoute } from './get_prebuilt_rules_status/get_prebuilt_rules_status_route';
@@ -17,7 +18,10 @@ import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules/bootstra
 import { getPrebuiltRuleBaseVersion } from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';
 import { revertPrebuiltRule } from './revert_prebuilt_rule/revert_prebuilt_rule_route';
 
-export const registerPrebuiltRulesRoutes = (router: SecuritySolutionPluginRouter) => {
+export const registerPrebuiltRulesRoutes = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   // Legacy endpoints that we're going to deprecate
   getPrebuiltRulesAndTimelinesStatusRoute(router);
   installPrebuiltRulesAndTimelinesRoute(router);
@@ -28,7 +32,7 @@ export const registerPrebuiltRulesRoutes = (router: SecuritySolutionPluginRouter
   performRuleUpgradeRoute(router);
   reviewRuleInstallationRoute(router);
   reviewRuleUpgradeRoute(router);
-  bootstrapPrebuiltRulesRoute(router);
+  bootstrapPrebuiltRulesRoute(router, logger);
   getPrebuiltRuleBaseVersion(router);
   revertPrebuiltRule(router);
 };
