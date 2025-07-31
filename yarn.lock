@@ -5838,6 +5838,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-onechat@link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals@link:x-pack/platform/packages/shared/kbn-evals":
   version "0.0.0"
   uid ""
