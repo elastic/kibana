@@ -15,9 +15,17 @@ interface RoundIconProps {
   isError: boolean;
 }
 
-const loadingLabel = i18n.translate('xpack.onechat.round.icon.loading', {
-  defaultMessage: 'Round is loading',
-});
+const labels = {
+  error: i18n.translate('xpack.onechat.round.icon.error', {
+    defaultMessage: 'Round has an error',
+  }),
+  loading: i18n.translate('xpack.onechat.round.icon.loading', {
+    defaultMessage: 'Round is loading',
+  }),
+  content: i18n.translate('xpack.onechat.round.icon.content', {
+    defaultMessage: 'Round content',
+  }),
+};
 
 export const RoundIcon: React.FC<RoundIconProps> = ({ isLoading, isError }) => {
   const { euiTheme } = useEuiTheme();
@@ -31,7 +39,8 @@ export const RoundIcon: React.FC<RoundIconProps> = ({ isLoading, isError }) => {
   if (isError) {
     return (
       <EuiAvatar
-        name="Round error"
+        name={labels.error}
+        aria-label={labels.error}
         iconType="warningFilled"
         iconColor={euiTheme.colors.textDanger}
         iconSize="m"
@@ -43,13 +52,14 @@ export const RoundIcon: React.FC<RoundIconProps> = ({ isLoading, isError }) => {
   if (isLoading) {
     return (
       <div css={loadingStyles}>
-        <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+        <EuiLoadingElastic size="l" aria-label={labels.loading} />
       </div>
     );
   }
   return (
     <EuiAvatar
-      name="Round content"
+      name={labels.content}
+      aria-label={labels.content}
       iconType="logoElastic"
       iconSize="l"
       color={euiTheme.colors.backgroundBasePlain}
