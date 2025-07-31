@@ -10,16 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover rule creation', function () {
-    const esArchiver = getService('esArchiver');
     const { common } = getPageObjects(['common', 'settings', 'shareSavedObjectsToSpace']);
     const find = getService('find');
-
-    before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-    });
-    after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-    });
 
     it('navigate to Discover', () => {
       return common.navigateToApp('discover');
