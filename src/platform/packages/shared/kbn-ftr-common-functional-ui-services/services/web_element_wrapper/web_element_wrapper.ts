@@ -47,6 +47,7 @@ export class WebElementWrapper {
     driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
+    fixedFooterHeight: number,
     logger: ToolingLog,
     browserType: Browsers
   ): WebElementWrapper {
@@ -60,6 +61,7 @@ export class WebElementWrapper {
       driver,
       timeout,
       fixedHeaderHeight,
+      fixedFooterHeight,
       logger,
       browserType
     );
@@ -71,6 +73,7 @@ export class WebElementWrapper {
     private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
+    private fixedFooterHeight: number,
     private logger: ToolingLog,
     private browserType: Browsers
   ) {
@@ -98,6 +101,7 @@ export class WebElementWrapper {
       this.driver,
       this.timeout,
       this.fixedHeaderHeight,
+      this.fixedFooterHeight,
       this.logger,
       this.browserType
     );
@@ -782,7 +786,7 @@ export class WebElementWrapper {
       this._webElement,
       APP_MAIN_SCROLL_CONTAINER_ID,
       topOffset || this.fixedHeaderHeight,
-      bottomOffset
+      bottomOffset || this.fixedFooterHeight
     );
   }
 
