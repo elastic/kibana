@@ -92,6 +92,8 @@ export const SideNavPopover = ({
       if (e.key === 'Enter' || e.key === ' ') {
         trigger.props.onKeyDown?.(e);
         if (hasContent && !e.defaultPrevented) {
+          // Required for entering the popover with Enter or Space key
+          // Otherwise the navigation happens immediately
           e.preventDefault();
           open();
           setTimeout(() => focusFirstElement(popoverRef), 0);

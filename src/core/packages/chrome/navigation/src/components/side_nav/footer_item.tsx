@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent, MouseEvent, forwardRef, ForwardedRef } from 'react';
+import React, { KeyboardEvent, forwardRef, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
 import { IMenuItem } from '../../../types';
@@ -25,20 +25,12 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
-  (
-    { hasContent, iconType, id, isCurrent, label, onClick, ...props },
-    ref: ForwardedRef<HTMLDivElement>
-  ) => {
+  ({ hasContent, iconType, id, isCurrent, label, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
       width: 100%;
     `;
-
-    const handleClick = (e: MouseEvent) => {
-      e.preventDefault();
-      onClick();
-    };
 
     const menuItem = (
       <EuiButtonIcon
@@ -47,7 +39,6 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
         data-test-subj={`footerMenuItem-${id}`}
         display={isCurrent ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
-        onClick={handleClick}
         size="s"
         {...props}
       />

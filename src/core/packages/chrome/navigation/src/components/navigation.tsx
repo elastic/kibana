@@ -68,7 +68,9 @@ export const Navigation = ({
   };
 
   const handleFooterItemKeyDown = (item: IMenuItem, e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === ' ') {
+      // Required for entering the popover with Enter or Space key
+      // Otherwise the navigation happens immediately
       e.preventDefault();
       navigateTo(item);
       focusMainContent();
