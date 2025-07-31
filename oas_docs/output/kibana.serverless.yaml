@@ -52691,6 +52691,11 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: currentDate
+          required: false
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
