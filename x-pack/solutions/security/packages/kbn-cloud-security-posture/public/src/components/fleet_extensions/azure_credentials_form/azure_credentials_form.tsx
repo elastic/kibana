@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -218,7 +218,7 @@ export const AzureCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AzureCredentialsFormProps) => {
-  const [isValidAzure, setIsValidAzure] = React.useState(isValid);
+  const isValidAzureRef = useRef(isValid);
   const {
     group,
     fields,
@@ -251,12 +251,12 @@ export const AzureCredentialsForm = ({
   );
 
   if (
-    isValidAzure &&
+    isValidAzureRef.current &&
     isValid &&
     !isPackageVersionValidForAzure &&
     setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
-    setIsValidAzure(false);
+    isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
 
