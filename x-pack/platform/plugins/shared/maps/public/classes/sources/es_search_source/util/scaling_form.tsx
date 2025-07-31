@@ -276,7 +276,7 @@ export class ScalingForm extends Component<Props, State> {
           <div>
             <EuiRadio
               id={SCALING_TYPES.MVT}
-              name="mvtScalingType"
+              name="scalingType"
               label={this._getMvtOptionLabel()}
               checked={this.props.scalingType === SCALING_TYPES.MVT}
               onChange={() => this._onScalingTypeSelect(SCALING_TYPES.MVT)}
@@ -284,7 +284,7 @@ export class ScalingForm extends Component<Props, State> {
             {this._renderClusteringRadio()}
             <EuiRadio
               id={SCALING_TYPES.LIMIT}
-              name="limitScalingType"
+              name="scalingType"
               label={this._getLimitOptionLabel()}
               checked={this.props.scalingType === SCALING_TYPES.LIMIT}
               onChange={() => this._onScalingTypeSelect(SCALING_TYPES.LIMIT)}
