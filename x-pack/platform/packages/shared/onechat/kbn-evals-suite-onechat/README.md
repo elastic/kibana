@@ -10,6 +10,8 @@ For general information about writing evaluation tests, configuration, and usage
 
 ## Prerequisites
 
+### Configure Phoenix Exporter
+
 Configure Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
@@ -20,6 +22,8 @@ telemetry.tracing.exporters:
     project_name: '<my-name>'
     api_key: '<my-api-key>'
 ```
+
+### Configure AI Connectors
 
 Configure your AI connectors in `kibana.dev.yml` or via the `KIBANA_TESTING_AI_CONNECTORS` environment variable:
 
@@ -44,11 +48,33 @@ export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector"
 
 ## Running OneChat Evaluations
 
+### Start Scout Server
+
 Start Scout server:
 
 ```bash
 node scripts/scout.js start-server --stateful
 ```
+
+### Load OneChat Datasets
+
+Load the required OneChat datasets into Elasticsearch using the HuggingFace dataset loader:
+
+```bash
+# Load Wix knowledge base and users datasets
+HUGGING_FACE_ACCESS_TOKEN=<your-token> \
+node --require ./src/setup_node_env/index.js \
+  x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
+  --datasets onechat/knowledge-base/wix_knowledge_base,onechat/knowledge-base/users \
+  --clear
+  --kibana-url http://elastic:changeme@localhost:5620
+```
+
+**Note**: You need to be a member of the Elastic organization on HuggingFace to access OneChat datasets. Sign up with your `@elastic.co` email address.
+
+For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
+
+### Run Evaluations
 
 Then run the evaluations:
 

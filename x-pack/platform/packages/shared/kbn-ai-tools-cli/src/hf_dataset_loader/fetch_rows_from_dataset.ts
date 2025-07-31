@@ -13,10 +13,28 @@ import { createGunzip } from 'zlib';
 import * as readline from 'node:readline';
 import { pickBy } from 'lodash';
 import { format } from 'util';
+import Papa from 'papaparse';
 import { HuggingFaceDatasetSpec } from './types';
 
 function toMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + 'mb';
+}
+
+function convertToDocument(
+  rawRecord: Record<string, unknown>,
+  dataset: HuggingFaceDatasetSpec,
+  logger: Logger
+): Record<string, unknown> {
+  const doc = dataset.mapDocument(rawRecord);
+  const cleanedDoc = pickBy(doc, (val) => val !== undefined && val !== null && val !== '');
+
+  logger.info(
+    `Processing document with ID: ${cleanedDoc._id}, keys: ${Object.keys(cleanedDoc).join(', ')}`
+  );
+  logger.info(`Original doc: ${JSON.stringify(doc, null, 2)}`);
+  logger.info(`Cleaned doc: ${JSON.stringify(cleanedDoc, null, 2)}`);
+
+  return cleanedDoc;
 }
 
 export async function fetchRowsFromDataset({
@@ -48,7 +66,13 @@ export async function fetchRowsFromDataset({
 
   const { url, size } = fileInfo;
 
-  const res = await fetch(url);
+  // Add authentication headers for fetch request
+  const fetchHeaders: Record<string, string> = {};
+  if (accessToken) {
+    fetchHeaders.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const res = await fetch(url, { headers: fetchHeaders });
   if (!res.ok || !res.body) {
     throw new Error(`HTTP ${res.status} while fetching ${url}`);
   }
@@ -84,17 +108,79 @@ export async function fetchRowsFromDataset({
 
   const decompressed: Readable = isGzip ? inputStream.pipe(createGunzip()) : inputStream;
 
-  const rl = readline.createInterface({ input: decompressed, crlfDelay: Infinity });
-
   const docs: Array<Record<string, unknown>> = [];
-  for await (const line of rl) {
-    if (!line) continue;
-    const raw = JSON.parse(line);
-    const doc = dataset.mapDocument(raw);
-    docs.push(pickBy(doc, (val) => val !== undefined && val !== null && val !== ''));
 
-    if (docs.length === limit) {
-      break;
+  // Check if this is a CSV file based on the file extension
+  const isCSV = dataset.file.toLowerCase().endsWith('.csv');
+
+  if (isCSV) {
+    await new Promise<void>((resolve, reject) => {
+      let rowCount = 0;
+
+      const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      });
+
+      csvStream.on('data', (row: Record<string, unknown>) => {
+        rowCount++;
+
+        try {
+          const document = convertToDocument(row, dataset, logger);
+          docs.push(document);
+
+          if (docs.length >= limit) {
+            logger.info(`Reached limit of ${limit} documents`);
+            csvStream.destroy();
+            resolve();
+            return;
+          }
+        } catch (error) {
+          logger.error(`Error processing CSV row ${rowCount}: ${error}`);
+        }
+      });
+
+      csvStream.on('end', () => {
+        logger.info(`CSV parsing complete. Processed ${rowCount} rows, ${docs.length} documents`);
+        resolve();
+      });
+
+      csvStream.on('error', (error: Error) => {
+        logger.error(`CSV stream error: ${error.message}`);
+        reject(error);
+      });
+
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        logger.error('CSV parsing timeout after 3 minutes');
+        reject(new Error('CSV parsing timeout'));
+      }, 3 * 60 * 1000); // 3 minutes
+
+      const originalResolve = resolve;
+      resolve = () => {
+        clearTimeout(timeout);
+        originalResolve();
+      };
+
+      // Pipe the decompressed stream directly to papaparse
+      decompressed.pipe(csvStream);
+    });
+  } else {
+    // Handle JSONL files
+    const rl = readline.createInterface({ input: decompressed, crlfDelay: Infinity });
+
+    for await (const line of rl) {
+      if (!line) continue;
+      const raw = JSON.parse(line);
+
+      const document = convertToDocument(raw, dataset, logger);
+      docs.push(document);
+
+      if (docs.length >= limit) {
+        logger.info(`Reached limit of ${limit} documents`);
+        break;
+      }
     }
   }
 

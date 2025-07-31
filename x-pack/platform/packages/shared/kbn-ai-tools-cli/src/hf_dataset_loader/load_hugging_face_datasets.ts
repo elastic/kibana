@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createLocalDirDiskCacheStore, fromCache } from '@kbn/cache-cli';
 import { createCache } from 'cache-manager';
 import { errors } from '@elastic/elasticsearch';
-import { ALL_HUGGING_FACE_DATASETS } from './config';
+import { STATIC_HUGGING_FACE_DATASETS } from './config';
 import { HuggingFaceDatasetSpec } from './types';
 import { ensureDatasetIndexExists } from './ensure_dataset_index_exists';
 import { fetchRowsFromDataset } from './fetch_rows_from_dataset';
@@ -36,7 +36,7 @@ export async function loadHuggingFaceDatasets({
   esClient,
   logger,
   accessToken,
-  datasets = ALL_HUGGING_FACE_DATASETS,
+  datasets = STATIC_HUGGING_FACE_DATASETS,
   limit = 1000,
   clear = false,
 }: {
@@ -78,7 +78,9 @@ export async function loadHuggingFaceDatasets({
       })
     );
 
-    logger.debug('Generating embeddings');
+    logger.info(
+      `Generating embeddings for ${documents.length} documents in dataset ${dataset.name}`
+    );
 
     const docsWithEmbeddings = await fromCache(dataset.name, DATASET_EMBEDDINGS_CACHE, () =>
       getEmbeddings({
@@ -88,8 +90,7 @@ export async function loadHuggingFaceDatasets({
         logger,
       })
     );
-
-    logger.debug(`Indexing documents with embeddings`);
+    logger.info(`Indexing ${docsWithEmbeddings.length} documents with embeddings`);
 
     await indexDocuments({
       esClient,
@@ -98,6 +99,6 @@ export async function loadHuggingFaceDatasets({
       logger,
     });
 
-    logger.debug(`Indexed dataset`);
+    logger.info(`Indexed dataset`);
   }
 }

@@ -44,7 +44,8 @@ export async function getEmbeddings({
         Object.entries(source._inference_fields ?? {}).forEach(([fieldName, config]) => {
           delete (config as Record<string, any>).inference.model_settings.service;
         });
-        return source;
+        // Preserve the _id from Elasticsearch metadata
+        return { ...source, _id: hit._id };
       })
     );
 
