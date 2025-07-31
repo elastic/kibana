@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiBadge, useEuiTheme, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
@@ -80,19 +80,13 @@ const useStyles = () => {
           transition: all 0.3s ease;
         }
       `,
-      // last tooltip should be displayed initially even without hover
-      lastTooltip: css`
-        &:last-child > div {
+      visibleTooltip: css`
+        & > div {
           opacity: 1;
+          top: calc(-${euiTheme.base + 2}px - 13px);
         }
-        &:last-child::after {
+        &::after {
           opacity: 1;
-        }
-        &:hover ~ div:last-child > div {
-          opacity: 0;
-        }
-        &:hover ~ div:last-child::after {
-          opacity: 0;
         }
       `,
     },
@@ -131,7 +125,6 @@ const useStyles = () => {
 
 const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) => {
   const styles = useStyles();
-
   const emptyBarStyle = [styles.part.base, styles.part.empty];
 
   return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}`} />;
@@ -147,7 +140,20 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
 ) {
   const styles = useStyles();
   const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
-  const parts = stats.map((stat) => {
+
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const hasCurrentFilter = stats.some((item) => item.isCurrentFilter === true);
+
+  const parts = stats.map((stat, index) => {
+    const isLast = index === stats.length - 1;
+    const isHovered = hoveredKey === stat.key;
+
+    // Only show tooltip for segments thats hovered OR Set as Filter OR Last
+    const showTooltip =
+      isHovered ||
+      (!hoveredKey &&
+        ((stat.isCurrentFilter ?? false) || (!hideLastTooltip && !hasCurrentFilter && isLast)));
+
     const partStyle = [
       styles.part.base,
       styles.part.tick,
@@ -157,8 +163,9 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
         flex: ${stat.count};
       `,
     ];
-    if (!hideLastTooltip) {
-      partStyle.push(styles.part.lastTooltip);
+
+    if (showTooltip) {
+      partStyle.push(styles.part.visibleTooltip);
     }
 
     const prettyNumber = numeral(stat.count).format('0,0a');
@@ -169,6 +176,8 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
         css={partStyle}
         data-test-subj={`${dataTestSubj}__part`}
         onClick={stat.filter}
+        onMouseEnter={() => setHoveredKey(stat.key)}
+        onMouseLeave={() => setHoveredKey(null)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             stat.filter?.();
@@ -177,30 +186,25 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
         tabIndex={0}
         role="button"
       >
-        <div css={styles.tooltip}>
-          <EuiFlexGroup
-            gutterSize={'none'}
-            justifyContent={'flexEnd'}
-            wrap={false}
-            responsive={false}
-          >
+        <div css={[styles.tooltip, showTooltip && styles.part.visibleTooltip]}>
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" wrap={false} responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={'hollow'} css={styles.tooltipBadgeLeft}>
+              <EuiBadge color="hollow" css={styles.tooltipBadgeLeft}>
                 {prettyNumber}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={'hollow'} css={styles.tooltipBadgeRight}>
-                <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
+              <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={'dot'} size={'s'} color={stat.color} />
+                    <EuiIcon type="dot" size="s" color={stat.color} />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{stat.label ? stat.label : stat.key}</EuiFlexItem>
-                  {stat.isCurrentFilter ? (
+                  <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
+                  {stat.isCurrentFilter && stat.reset && (
                     <EuiFlexItem grow={false}>
                       <EuiIcon type="cross" size="m" onClick={stat.reset} />
                     </EuiFlexItem>
-                  ) : undefined}
+                  )}
                 </EuiFlexGroup>
               </EuiBadge>
             </EuiFlexItem>
@@ -212,7 +216,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
 
   return (
     <EuiFlexGroup
-      alignItems={'center'}
+      alignItems="center"
       css={styles.bar}
       data-test-subj={dataTestSubj}
       responsive={false}
