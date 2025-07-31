@@ -7,11 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import {
-  defaultAgentListState,
-  useSessionAgentListState,
-  type AgentListTableState,
-} from './use_session_agent_list_state';
+import { defaultAgentListState, useSessionAgentListState } from './use_session_agent_list_state';
 
 // Mock react-use/lib/useSessionStorage
 const mockSetSessionState = jest.fn();
@@ -30,9 +26,7 @@ describe('useSessionAgentListState', () => {
 
   describe('initialization', () => {
     it('should initialize with default state', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       expect(result.current.search).toBe('');
       expect(result.current.selectedAgentPolicies).toEqual([]);
@@ -48,39 +42,11 @@ describe('useSessionAgentListState', () => {
       expect(result.current.sort).toEqual({ field: 'enrolled_at', direction: 'desc' });
       expect(result.current.page).toEqual({ index: 0, size: 20 });
     });
-
-    it('should use custom storage key and namespace', () => {
-      const customOptions = {
-        defaultState: defaultAgentListState,
-        storageKey: 'customKey',
-        namespace: 'customNamespace',
-      };
-
-      const { result } = renderHook(() => useSessionAgentListState(customOptions));
-
-      expect(result.current.search).toBe(defaultAgentListState.search);
-      expect(result.current.sort).toEqual(defaultAgentListState.sort);
-      expect(result.current.page).toEqual(defaultAgentListState.page);
-    });
-
-    it('should fallback to default state when session state is null', () => {
-      mockSessionState.mockReturnValue(null);
-
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
-
-      expect(result.current.search).toBe(defaultAgentListState.search);
-      expect(result.current.sort).toEqual(defaultAgentListState.sort);
-      expect(result.current.page).toEqual(defaultAgentListState.page);
-    });
   });
 
   describe('updateTableState', () => {
     it('should update search state', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ search: 'test query' });
@@ -93,9 +59,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update selected agent policies', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ selectedAgentPolicies: ['policy1', 'policy2'] });
@@ -108,9 +72,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update selected status', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ selectedStatus: ['healthy', 'offline'] });
@@ -123,9 +85,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update selected tags', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ selectedTags: ['tag1', 'tag2'] });
@@ -138,9 +98,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update show upgradeable flag', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ showUpgradeable: true });
@@ -153,9 +111,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update sort configuration', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({
@@ -170,9 +126,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update pagination configuration', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({
@@ -187,18 +141,16 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update multiple properties at once', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
-      const partialUpdate: Partial<AgentListTableState> = {
+      const partialUpdate = {
         search: 'new search',
         sort: { field: 'status', direction: 'asc' },
         page: { index: 1, size: 10 },
       };
 
       act(() => {
-        result.current.updateTableState(partialUpdate);
+        result.current.updateTableState(partialUpdate as any);
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
@@ -210,9 +162,7 @@ describe('useSessionAgentListState', () => {
 
   describe('onTableChange', () => {
     it('should update table state atomically with pagination changes', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.onTableChange({
@@ -227,9 +177,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update table state atomically with sort changes', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.onTableChange({
@@ -244,9 +192,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should update both pagination and sort atomically', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.onTableChange({
@@ -263,9 +209,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should not update if no changes are detected', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.onTableChange({
@@ -284,9 +228,7 @@ describe('useSessionAgentListState', () => {
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.onTableChange({
@@ -314,9 +256,7 @@ describe('useSessionAgentListState', () => {
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.clearFilters();
@@ -344,9 +284,7 @@ describe('useSessionAgentListState', () => {
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.clearFilters();
@@ -369,9 +307,7 @@ describe('useSessionAgentListState', () => {
 
   describe('state consistency', () => {
     it('should handle rapid sequential updates correctly', () => {
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ search: 'search1' });
@@ -389,9 +325,7 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should maintain state consistency across re-renders', () => {
-      const { result, rerender } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result, rerender } = renderHook(() => useSessionAgentListState());
 
       act(() => {
         result.current.updateTableState({ search: 'test' });
@@ -429,27 +363,9 @@ describe('useSessionAgentListState', () => {
     });
   });
 
-  describe('error handling', () => {
-    it('should handle session storage errors gracefully', () => {
-      // Simulate session storage failure by returning null instead of throwing
-      mockSessionState.mockReturnValue(null);
-
-      const { result } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
-
-      // Should fallback to default state without throwing
-      expect(result.current.search).toBe(defaultAgentListState.search);
-      expect(result.current.sort).toEqual(defaultAgentListState.sort);
-      expect(result.current.page).toEqual(defaultAgentListState.page);
-    });
-  });
-
   describe('function stability', () => {
     it('should have stable function references across re-renders', () => {
-      const { result, rerender } = renderHook(() =>
-        useSessionAgentListState({ defaultState: defaultAgentListState })
-      );
+      const { result, rerender } = renderHook(() => useSessionAgentListState());
 
       const initialFunctions = {
         updateTableState: result.current.updateTableState,

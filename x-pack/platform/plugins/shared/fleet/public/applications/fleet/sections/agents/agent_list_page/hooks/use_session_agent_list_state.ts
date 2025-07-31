@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
@@ -14,7 +14,7 @@ import type { Agent } from '../../../../types';
 const FLEET_NAMESPACE = 'fleet';
 const AGENT_LIST_SESSION_STORAGE_KEY = 'agentListState';
 
-export interface AgentListTableState {
+interface AgentListTableState {
   search: string;
   selectedAgentPolicies: string[];
   selectedStatus: string[];
@@ -28,12 +28,6 @@ export interface AgentListTableState {
     index: number;
     size: number;
   };
-}
-
-interface SessionAgentListStateOptions {
-  defaultState: AgentListTableState;
-  storageKey?: string;
-  namespace?: string;
 }
 
 type SessionAgentListState = AgentListTableState & {
@@ -58,49 +52,27 @@ export const defaultAgentListState: AgentListTableState = {
   },
 };
 
-export const useSessionAgentListState = ({
-  defaultState,
-  storageKey = AGENT_LIST_SESSION_STORAGE_KEY,
-  namespace = FLEET_NAMESPACE,
-}: SessionAgentListStateOptions): SessionAgentListState => {
-  const fullStorageKey = `${namespace}.${storageKey}`;
+export const useSessionAgentListState = (): SessionAgentListState => {
+  const fullStorageKey = `${FLEET_NAMESPACE}.${AGENT_LIST_SESSION_STORAGE_KEY}`;
 
   const [sessionState, setSessionState] = useSessionStorage<AgentListTableState>(
     fullStorageKey,
-    defaultState
+    defaultAgentListState
   );
-
-  // Use a ref to always have access to the latest state without stale closures
-  const stateRef = useRef<AgentListTableState>(sessionState || defaultState);
-
-  // Update the ref whenever sessionState changes
-  useEffect(() => {
-    stateRef.current = sessionState || defaultState;
-  }, [sessionState, defaultState]);
-
-  // Get current state, fallback to default if session storage fails
-  const currentState = useMemo(() => {
-    return sessionState || defaultState;
-  }, [sessionState, defaultState]);
-
-  // Create a function to get the latest state from ref - this avoids stale closure issues
-  const getLatestState = useCallback(() => {
-    return stateRef.current;
-  }, []);
 
   // Utility functions
   const updateTableState = useCallback(
     (partialState: Partial<AgentListTableState>) => {
-      const newState = { ...getLatestState(), ...partialState };
+      const newState = { ...sessionState, ...partialState };
       setSessionState(newState);
     },
-    [setSessionState, getLatestState]
+    [sessionState, setSessionState]
   );
 
   // Atomic update function for table changes - prevents multiple rapid updates
   const onTableChange = useCallback(
     (changes: Partial<CriteriaWithPagination<Agent>>) => {
-      const latestState = getLatestState();
+      const latestState = sessionState;
       const updates: Partial<AgentListTableState> = {};
 
       // Check if pagination has actually changed
@@ -134,13 +106,13 @@ export const useSessionAgentListState = ({
         setSessionState(newState);
       }
     },
-    [setSessionState, getLatestState]
+    [sessionState, setSessionState]
   );
 
   // Clear filters by resetting to defaults
   // Do not reset sort parameters, but reset page back to index 0
   const clearFilters = useCallback(() => {
-    const latestState = getLatestState();
+    const latestState = sessionState;
     const { search, selectedAgentPolicies, selectedStatus, selectedTags, showUpgradeable } =
       defaultAgentListState;
     updateTableState({
@@ -154,17 +126,17 @@ export const useSessionAgentListState = ({
         index: 0, // Reset to first page
       },
     });
-  }, [updateTableState, getLatestState]);
+  }, [sessionState, updateTableState]);
 
   return {
     // Current state
-    search: currentState.search,
-    selectedAgentPolicies: currentState.selectedAgentPolicies,
-    selectedStatus: currentState.selectedStatus,
-    selectedTags: currentState.selectedTags,
-    showUpgradeable: currentState.showUpgradeable,
-    sort: currentState.sort,
-    page: currentState.page,
+    search: sessionState.search,
+    selectedAgentPolicies: sessionState.selectedAgentPolicies,
+    selectedStatus: sessionState.selectedStatus,
+    selectedTags: sessionState.selectedTags,
+    showUpgradeable: sessionState.showUpgradeable,
+    sort: sessionState.sort,
+    page: sessionState.page,
 
     // Utility functions
     clearFilters,

@@ -29,11 +29,7 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../..
 
 import { getKuery } from '../utils/get_kuery';
 
-import {
-  defaultAgentListState,
-  useSessionAgentListState,
-  type AgentListTableState,
-} from './use_session_agent_list_state';
+import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -109,29 +105,10 @@ export function useFetchAgentsData() {
   const showAgentless = urlParams.showAgentless === 'true';
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
-
-  // Initialize default state for session storage
-  const getInitialState = useCallback((): AgentListTableState => {
-    return {
-      ...defaultAgentListState,
-      search: defaultKuery,
-      selectedStatus: [
-        'healthy',
-        'unhealthy',
-        'orphaned',
-        'updating',
-        'offline',
-        ...(urlHasInactive ? ['inactive'] : []),
-      ],
-    };
-  }, [defaultKuery, urlHasInactive]);
-
-  // Use session storage hook for table state
-  const sessionState = useSessionAgentListState({
-    defaultState: getInitialState(),
-  });
+  const isUsingParams = defaultKuery || urlHasInactive;
 
   // Extract state from session storage hook
+  const sessionState = useSessionAgentListState();
   const {
     search,
     selectedAgentPolicies,
@@ -142,6 +119,19 @@ export function useFetchAgentsData() {
     page,
     updateTableState,
   } = sessionState;
+
+  // If URL params are used, reset the table state to defaults with the param options
+  useEffect(() => {
+    if (isUsingParams) {
+      updateTableState({
+        ...defaultAgentListState,
+        search: defaultKuery,
+        selectedStatus: [...new Set([...selectedStatus, ...(urlHasInactive ? ['inactive'] : [])])],
+      });
+    }
+    // Empty array so that this only runs once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Flag to indicate if filters are applied by comparing with default state
   const isUsingFilter = useMemo(() => {
