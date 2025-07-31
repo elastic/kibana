@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CustomScriptSelector } from '../../console_argument_selectors/custom_script_selector';
+import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
