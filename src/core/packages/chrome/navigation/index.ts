@@ -9,4 +9,3 @@
 
 export { Navigation } from './src/components/navigation';
 export { useNavigation } from './src/hooks/use_navigation';
-export { fallbackContentQueries } from './src/utils/focus_main_content';

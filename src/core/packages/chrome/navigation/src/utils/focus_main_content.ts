@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const fallbackContentQueries = [
-  'main', // Ideal target for all plugins using KibanaPageTemplate
-  '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
-  '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
-];
+import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 
 export const focusMainContent = () => {
-  const mainElement = document.querySelector(fallbackContentQueries.join(','));
+  const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
 
   if (mainElement instanceof HTMLElement) {
     mainElement.focus();
