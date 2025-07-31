@@ -19,7 +19,6 @@ interface SampleDataManagerOpts {
   artifactRepositoryUrl: string;
   kibanaVersion: string;
   elserInferenceId?: string;
-  indexPrefixName: string;
   isServerlessPlatform: boolean;
 }
 
@@ -27,7 +26,6 @@ export class SampleDataManager {
   private readonly log: Logger;
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
-  private readonly indexPrefixName: string;
 
   constructor({
     artifactsFolder,
@@ -35,11 +33,9 @@ export class SampleDataManager {
     artifactRepositoryUrl,
     elserInferenceId,
     kibanaVersion,
-    indexPrefixName,
     isServerlessPlatform,
   }: SampleDataManagerOpts) {
     this.log = logger;
-    this.indexPrefixName = indexPrefixName;
 
     this.artifactManager = new ArtifactManager({
       artifactsFolder,
