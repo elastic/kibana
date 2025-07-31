@@ -23,7 +23,6 @@ import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant
 import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
 import { ReindexWorker } from './src/lib';
-import { createReindexWorker } from './src/create_reindex_worker';
 import { CredentialStore, credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 
