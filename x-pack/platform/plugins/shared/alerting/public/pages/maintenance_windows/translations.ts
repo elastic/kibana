@@ -500,16 +500,3 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alerting.maintenanceWindows.searchPlaceholder',
   { defaultMessage: 'Search' }
 );
-
-export const MULTIPLE_SOLUTION_CATEGORIES_REMOVED_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.multipleSolutionCategoriesRemoved.title',
-  { defaultMessage: 'Support for multiple solution categories is removed.' }
-);
-
-export const MULTIPLE_SOLUTION_CATEGORIES_REMOVED_SUBTITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.multipleSolutionCategoriesRemoved.subtitle',
-  {
-    defaultMessage:
-      'When you save the changes, the maintenance window will affect rules in all solutions.',
-  }
-);
