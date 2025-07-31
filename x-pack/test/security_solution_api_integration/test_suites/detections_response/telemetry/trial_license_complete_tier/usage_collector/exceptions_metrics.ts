@@ -67,11 +67,15 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/telemetry');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/telemetry'
+      );
     });
 
     beforeEach(async () => {
