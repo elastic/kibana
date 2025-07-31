@@ -16,8 +16,14 @@ import type {
   Duration,
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
-import type { InternalUpdateRuleMigrationRule, StoredRuleMigration } from '../types';
+import type {
+  InternalUpdateRuleMigrationRule,
+  RuleMigrationsClientDependencies,
+  StoredRuleMigration,
+} from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
@@ -32,6 +38,7 @@ import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
+import type { SiemMigrationsIndexNameProvider } from '../../common/types';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
@@ -55,6 +62,16 @@ const BULK_MAX_SIZE = 500 as const;
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient {
+  constructor(
+    protected getIndexName: SiemMigrationsIndexNameProvider,
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
+    protected logger: Logger,
+    protected dependencies: RuleMigrationsClientDependencies
+  ) {
+    super(getIndexName, currentUser, esScopedClient, logger);
+  }
+
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: AddRuleMigrationRulesInput[]): Promise<void> {
     const index = await this.getIndexName();

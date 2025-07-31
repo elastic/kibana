@@ -8,16 +8,17 @@
 import type { LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
+import type { RuleMigrationsCreateClientParams } from './rules/siem_rule_migrations_service';
 import {
   SiemRuleMigrationsService,
   type SiemRuleMigrationsClient,
 } from './rules/siem_rule_migrations_service';
 import type { SiemMigrationsSetupParams } from './types';
+import type { DashboardMigrationsCreateClientParams } from './dashboards/siem_dashboard_migration_service';
 import {
   SiemDashboardMigrationsService,
   type SiemDashboardMigrationsClient,
 } from './dashboards/siem_dashboard_migration_service';
-import type { SiemMigrationsCreateClientParams } from './common/types';
 
 export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
@@ -49,11 +50,13 @@ export class SiemMigrationsService {
     }
   }
 
-  createRulesClient(params: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
+  createRulesClient(params: RuleMigrationsCreateClientParams): SiemRuleMigrationsClient {
     return this.rulesService.createClient(params);
   }
 
-  createDashboardsClient(params: SiemMigrationsCreateClientParams): SiemDashboardMigrationsClient {
+  createDashboardsClient(
+    params: DashboardMigrationsCreateClientParams
+  ): SiemDashboardMigrationsClient {
     return this.dashboardsService.createClient(params);
   }
 

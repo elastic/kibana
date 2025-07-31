@@ -5,15 +5,28 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationLastExecution } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { StoredSiemMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { isNotFoundError } from '../../common/utils/is_not_found_error';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
+import type { SiemMigrationsIndexNameProvider } from '../../common/types';
 
 export class RuleMigrationsDataMigrationClient extends SiemMigrationsDataBaseClient {
+  constructor(
+    protected getIndexName: SiemMigrationsIndexNameProvider,
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
+    protected logger: Logger,
+    protected dependencies: RuleMigrationsClientDependencies
+  ) {
+    super(getIndexName, currentUser, esScopedClient, logger);
+  }
+
   async create(name: string): Promise<string> {
     const migrationId = uuidV4();
     const index = await this.getIndexName();

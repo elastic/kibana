@@ -6,11 +6,24 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { DashboardMigration } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { isNotFoundError } from '../../common/utils/is_not_found_error';
+import type { SiemMigrationsIndexNameProvider } from '../../common/types';
+import type { DashboardMigrationsClientDependencies } from '../types';
 
 export class DashboardMigrationsDataMigrationClient extends SiemMigrationsDataBaseClient {
+  constructor(
+    protected getIndexName: SiemMigrationsIndexNameProvider,
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
+    protected logger: Logger,
+    protected dependencies: DashboardMigrationsClientDependencies
+  ) {
+    super(getIndexName, currentUser, esScopedClient, logger);
+  }
   async create(name: string): Promise<string> {
     const migrationId = uuidV4();
     const index = await this.getIndexName();
