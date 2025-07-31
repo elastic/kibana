@@ -20,11 +20,12 @@ interface ValueInputProps {
   onBlur?: (event?: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
-  autoFocus: boolean;
+  autoFocus?: boolean;
   className?: string;
+  width?: number;
 }
 
-export const ValueInput = ({
+export const ValueInput: React.FC<ValueInputProps> = ({
   value = '',
   columnName = '',
   columns,
@@ -33,7 +34,8 @@ export const ValueInput = ({
   onChange,
   autoFocus = false,
   className = '',
-}: ValueInputProps) => {
+  width,
+}) => {
   const [editValue, setEditValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +46,6 @@ export const ValueInput = ({
   }, [columns, columnName]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    event.stopPropagation();
     if (event.key === 'Enter') {
       if (error) {
         return;
@@ -82,7 +83,10 @@ export const ValueInput = ({
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         className={className}
+        css={width ? { width } : undefined}
       />
     </EuiToolTip>
   );
 };
+
+ValueInput.displayName = 'ValueInput';

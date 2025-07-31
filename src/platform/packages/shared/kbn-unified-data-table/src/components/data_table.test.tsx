@@ -52,6 +52,8 @@ import { defaultTimeColumnWidth } from '../constants';
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { dataViewsMock } from '../../__mocks__/data_views';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -1605,5 +1607,14 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+  });
+
+  describe('Refs', () => {
+    it('should expose the EuiDataGrid ref', async () => {
+      const ref = React.createRef<EuiDataGridRefProps & RestorableStateProviderApi>();
+      render(<UnifiedDataTable {...getProps()} ref={ref} />);
+
+      expect(ref.current?.setFocusedCell).toBeDefined();
+    });
   });
 });

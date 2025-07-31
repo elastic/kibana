@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy } from 'lodash';
+import { groupBy, times } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -43,13 +43,15 @@ import {
   firstValueFrom,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { parsePrimitive } from './utils';
-import { ROW_PLACEHOLDER_PREFIX } from './constants';
+import { parsePrimitive, isPlaceholderColumn } from './utils';
+import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
 
 const DOCS_PER_FETCH = 1000;
+
+const MAX_COLUMN_PLACEHOLDERS = 4;
 
 interface DocUpdate {
   id?: string;
@@ -175,6 +177,7 @@ export class IndexUpdateService {
         return acc;
       }, new Map() as PendingSave);
     }),
+    startWith(new Map() as PendingSave),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -204,7 +207,7 @@ export class IndexUpdateService {
         }),
         { prevLength: 0, currLength: 0 }
       ),
-      filter(({ prevLength, currLength }) => currLength < prevLength || prevLength === 0),
+      filter(({ prevLength, currLength }) => currLength < prevLength),
       startWith({ prevLength: 0, currLength: 0 })
     ),
   ]).pipe(
@@ -413,38 +416,70 @@ export class IndexUpdateService {
 
     // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
     this._subscription.add(
-      this._actions$
+      this.dataView$
         .pipe(
-          withLatestFrom(this.dataView$),
-          scan((acc: ColumnAddition[], [action, dataView]) => {
-            if (action.type === 'add-column') {
-              return [...acc, action.payload];
-            }
-            if (action.type === 'edit-column') {
-              return acc.map((column) =>
-                column.name === action.payload.previousName
-                  ? { ...column, name: action.payload.name }
-                  : column
-              );
-            }
-            if (action.type === 'delete-column') {
-              return acc.filter((column) => column.name !== action.payload.name);
-            }
-            if (action.type === 'saved') {
-              // Filter out columns that were saved with a value.
-              return acc.filter((column) =>
-                action.payload.updates.every((update) => update.value[column.name] === undefined)
-              );
-            }
-            if (action.type === 'new-row-added') {
-              // Filter out columns that were populated when adding a new row
-              return acc.filter((column) => action.payload[column.name] === undefined);
-            }
-            if (action.type === 'discard-unsaved-columns') {
-              return [];
-            }
-            return acc;
-          }, [])
+          switchMap((dataView) => {
+            const columnsCount = dataView.fields.filter(
+              // @ts-ignore
+              (field) => field.spec.metadata_field !== true && !field.spec.subType
+            ).length;
+
+            const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - columnsCount;
+            const initialPlaceholders =
+              missingPlaceholders > 0
+                ? times(missingPlaceholders, (idx) => ({
+                    name: `${COLUMN_PLACEHOLDER_PREFIX}${idx}`,
+                  }))
+                : [];
+
+            return this._actions$.pipe(
+              scan((acc: ColumnAddition[], action) => {
+                if (action.type === 'add-column') {
+                  const lastPlaceholderIndex = acc.findIndex((column) =>
+                    isPlaceholderColumn(column.name)
+                  );
+
+                  // replace last placeholder with the new column
+                  if (lastPlaceholderIndex !== -1) {
+                    return [
+                      ...acc.slice(0, lastPlaceholderIndex),
+                      action.payload,
+                      ...acc.slice(lastPlaceholderIndex + 1),
+                    ];
+                  }
+
+                  return [...acc, action.payload];
+                }
+                if (action.type === 'edit-column') {
+                  return acc.map((column) =>
+                    column.name === action.payload.previousName
+                      ? { ...column, name: action.payload.name }
+                      : column
+                  );
+                }
+                if (action.type === 'delete-column') {
+                  return acc.filter((column) => column.name !== action.payload.name);
+                }
+                if (action.type === 'saved') {
+                  // Filter out columns that were saved with a value.
+                  return acc.filter((column) =>
+                    action.payload.updates.every(
+                      (update) => update.value[column.name] === undefined
+                    )
+                  );
+                }
+                if (action.type === 'new-row-added') {
+                  // Filter out columns that were populated when adding a new row
+                  return acc.filter((column) => action.payload[column.name] === undefined);
+                }
+                if (action.type === 'discard-unsaved-columns') {
+                  return acc.filter((column) => isPlaceholderColumn(column.name));
+                }
+                return acc;
+              }, initialPlaceholders),
+              startWith(initialPlaceholders)
+            );
+          })
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
@@ -566,9 +601,12 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.next(value);
   }
 
+  public discardUnsavedColumns() {
+    this._actions$.next({ type: 'discard-unsaved-columns' });
+  }
+
   public discardUnsavedChanges() {
     this._actions$.next({ type: 'discard-unsaved-values' });
-    this._actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public destroy() {

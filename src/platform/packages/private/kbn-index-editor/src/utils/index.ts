@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
+
 export function parsePrimitive(value: unknown): string | number | boolean | unknown {
   if (typeof value !== 'string') {
     return value;
@@ -22,4 +24,8 @@ export function parsePrimitive(value: unknown): string | number | boolean | unkn
     return Number(trimmed);
   }
   return value;
+}
+
+export function isPlaceholderColumn(columnName: string): boolean {
+  return columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX);
 }

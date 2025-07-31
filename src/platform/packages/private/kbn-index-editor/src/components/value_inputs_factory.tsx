@@ -25,15 +25,15 @@ export interface ValueInputProps {
   placeholder?: string;
 }
 
-export const StringInput: React.FC<ValueInputProps> = ({ onError, ...restOfProps }) => (
-  <EuiFieldText compressed {...restOfProps} />
+export const StringInput = ({ onError, ...restOfProps }: ValueInputProps) => (
+  <EuiFieldText compressed {...restOfProps} autoFocus />
 );
 
-export const NumberInput: React.FC<ValueInputProps> = ({ onError, ...restOfProps }) => (
+export const NumberInput = ({ onError, ...restOfProps }: ValueInputProps) => (
   <EuiFieldNumber compressed {...restOfProps} />
 );
 
-export const BooleanInput: React.FC<ValueInputProps> = ({ onError, onChange, ...restOfProps }) => {
+export const BooleanInput = ({ onError, onChange, ...restOfProps }: ValueInputProps) => {
   const [error, setError] = React.useState<string | null>(null);
 
   const onChangeHandler = useCallback(

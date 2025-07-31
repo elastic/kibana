@@ -12,24 +12,22 @@ import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isPlaceholderColumn } from '../../utils';
 import { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName } from '../../hooks/use_add_column_name';
-import { COLUMN_PLACEHOLDER_PREFIX } from '../../constants';
 
 export const getColumnInputRenderer = (
   columnName: string,
   indexUpdateService: IndexUpdateService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
-  const initialColumnName = !columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)
-    ? columnName
-    : undefined;
+  const isPlaceholder = isPlaceholderColumn(columnName);
 
   return ({ column }) => ({
     ...column,
-    display: <AddColumnHeader initialColumnName={initialColumnName} />,
+    display: <AddColumnHeader initialColumnName={columnName} containerId={column.id} />,
     actions: {
       showHide: false,
-      additional: initialColumnName
+      additional: !isPlaceholder
         ? [
             {
               label: (
@@ -47,33 +45,35 @@ export const getColumnInputRenderer = (
           ]
         : [],
     },
-    isExpandable: false,
   });
 };
 
 interface AddColumnHeaderProps {
-  initialColumnName?: string;
+  initialColumnName: string;
+  containerId: string;
 }
 
 export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
-  const { columnName, setColumnName, saveColumn, validationError } =
+  const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
 
   const [isEditing, setIsEditing] = useState(false);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    event.stopPropagation();
 
-    if (!validationError) {
+    if (columnName && !validationError) {
       await saveColumn();
-      setColumnName('');
       setIsEditing(false);
     }
   };
 
-  const columnLabel = initialColumnName || (
+  const columnLabel = isPlaceholderColumn(initialColumnName) ? (
     <FormattedMessage id="indexEditor.flyout.grid.columnHeader.add" defaultMessage="Add a field…" />
+  ) : (
+    columnName
   );
 
   if (isEditing) {
@@ -97,12 +97,20 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
             }}
             onBlur={() => {
               setIsEditing(false);
+              resetColumnName();
             }}
             onKeyDown={(e: KeyboardEvent) => {
               e.stopPropagation();
               if (e.key === 'Escape') {
+                e.preventDefault();
+                resetColumnName();
                 setIsEditing(false);
               }
+            }}
+            css={{
+              '&:focus-within': {
+                outline: 'none',
+              },
             }}
           />
         </EuiToolTip>
@@ -125,7 +133,11 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
       }}
       onClick={() => setIsEditing(true)}
       onKeyDown={(e: KeyboardEvent) => {
-        if (e.key === 'Enter') setIsEditing(true);
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+          setIsEditing(true);
+        }
       }}
     >
       {columnLabel}
