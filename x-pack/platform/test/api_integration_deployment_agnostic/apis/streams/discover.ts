@@ -64,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
-          unwired: {},
+          classic: {},
         },
       });
     });

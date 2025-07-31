@@ -20,7 +20,7 @@ import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import { getMessageFromId } from '../errors';
 import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 
 export const validateCommandArguments = (
   command: ESQLCommand,
@@ -28,7 +28,8 @@ export const validateCommandArguments = (
   context: ICommandContext = {
     userDefinedColumns: new Map(), // Ensure context is always defined
     fields: new Map(),
-  }
+  },
+  callbacks: ICommandCallbacks = {}
 ) => {
   const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
@@ -41,12 +42,13 @@ export const validateCommandArguments = (
             parentCommand: command.name,
             parentOption: undefined,
             context,
+            callbacks,
             parentAst: ast,
             currentCommandIndex,
           })
         );
       } else if (isOptionNode(arg)) {
-        messages.push(...validateOption(arg, command, context));
+        messages.push(...validateOption(arg, command, context, callbacks));
       } else if (isColumn(arg) || isIdentifier(arg)) {
         if (command.name === 'stats' || command.name === 'inlinestats') {
           messages.push(errors.unknownAggFunction(arg));
