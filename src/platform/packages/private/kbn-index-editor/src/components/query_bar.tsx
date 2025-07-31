@@ -8,14 +8,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { FilePicker } from './file_picker';
 import { KibanaContextExtra } from '../types';
 
-export const CustomPanel = () => {
+export const QueryBar = () => {
   const {
     services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
@@ -45,10 +52,20 @@ export const CustomPanel = () => {
 
   return (
     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+      <EuiFlexItem grow>
+        {dataView ? (
+          <EuiSearchBar
+            defaultQuery={''}
+            onChange={({ queryText, query, error }) => {
+              indexUpdateService.setQuery(queryText);
+            }}
+          />
+        ) : null}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          display="fill"
-          size={'s'}
+          display="base"
+          size={'m'}
           color={'text'}
           onClick={() => {
             indexUpdateService.refresh();
@@ -64,8 +81,7 @@ export const CustomPanel = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          fill
-          size={'s'}
+          size={'m'}
           color={'text'}
           href={discoverLink}
           target="_blank"

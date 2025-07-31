@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
-import { CustomPanel } from './custom_panel';
+import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
@@ -108,7 +108,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                 css={{ overflow: 'hidden', height: '100%' }}
               >
                 <EuiFlexItem grow={false}>
-                  <CustomPanel />
+                  <QueryBar />
                 </EuiFlexItem>
 
                 {dataViewColumns ? (

@@ -18,7 +18,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/data-views-plugin",
     "@kbn/discover-utils",
-    "@kbn/es-query",
     "@kbn/expressions-plugin",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
@@ -36,5 +35,7 @@
     "@kbn/file-upload-plugin",
     "@kbn/react-kibana-context-common",
     "@kbn/restorable-state",
+    "@kbn/esql-ast",
+    "@kbn/es-types",
   ]
 }
