@@ -2705,8 +2705,8 @@ paths:
               properties:
                 objects:
                   description: >-
-                    Array of `rule_id` fields. Exports all rules when
-                    unspecified.
+                    Array of objects with a rule's `rule_id` field. Do not use
+                    rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -4031,9 +4031,11 @@ components:
             - delete
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4051,9 +4053,11 @@ components:
             - disable
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4084,9 +4088,11 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4184,9 +4190,11 @@ components:
           minItems: 1
           type: array
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4209,9 +4217,11 @@ components:
             - enable
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4231,9 +4241,11 @@ components:
             - export
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4251,9 +4263,11 @@ components:
             - run
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
