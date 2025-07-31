@@ -37,7 +37,7 @@ export function MachineLearningDataVisualizerProvider({
     },
 
     async navigateToFileUploadByPath() {
-      PageObjects.common.navigateToApp('ml', {
+      await PageObjects.common.navigateToApp('ml', {
         path: 'filedatavisualizer',
       });
     },
