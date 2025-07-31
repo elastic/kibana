@@ -44,6 +44,8 @@ const TimeSavedMetricComponent: React.FC<Props> = ({
     [attackAlertIds]
   );
 
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
+
   return (
     <div
       data-test-subj="time-saved-metric-container"
@@ -64,7 +66,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({
         data-test-subj="time-saved-metric"
         extraOptions={extraVisualizationOptions}
         getLensAttributes={(args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert })}
-        timerange={{ from, to }}
+        timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
         scopeId={SourcererScopeName.detections}

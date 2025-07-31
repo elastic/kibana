@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
@@ -62,7 +62,7 @@ const AIValueComponent = () => {
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
-
+  const subtitle = useMemo(() => METRICS_OVER_TIME(getTimeRangeAsDays({ from, to })), [from, to]);
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
   if (!canReadAlerts && !canReadCases) {
@@ -79,7 +79,7 @@ const AIValueComponent = () => {
         <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
           <HeaderPage
             title={i18n.AI_VALUE_DASHBOARD}
-            subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
+            subtitle={subtitle}
             rightSideItems={[
               <SuperDatePicker
                 id={InputsModelId.valueReport}

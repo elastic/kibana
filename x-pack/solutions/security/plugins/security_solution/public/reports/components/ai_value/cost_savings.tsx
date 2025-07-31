@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getTimeRangeAsDays, formatDollars } from './metrics';
@@ -35,6 +35,8 @@ export const CostSavings: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
+  const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
+
   return (
     <EuiPanel
       css={css`
@@ -59,7 +61,7 @@ export const CostSavings: React.FC<Props> = ({
         previousCount={costSavingsCompare}
         stat={formatDollars(costSavingsCompare)}
         statType={i18n.TIME_SAVED_DESC.toLowerCase()}
-        timeRange={getTimeRangeAsDays({ from, to })}
+        timeRange={timerangeAsDays}
       />
     </EuiPanel>
   );

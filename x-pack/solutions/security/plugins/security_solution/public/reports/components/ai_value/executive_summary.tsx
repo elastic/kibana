@@ -89,6 +89,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
     valueMetrics.attackDiscoveryCount,
     valueMetricsCompare.attackDiscoveryCount,
   ]);
+  const timerangeAsDays = useMemo(() => getTimeRangeAsDays({ from, to }), [from, to]);
 
   return (
     <div
@@ -148,7 +149,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   <strong>
                     {formatThousands(valueMetrics.hoursSaved)} {i18n.EXECUTIVE_HOURS_SAVED_LABEL}
                   </strong>{' '}
-                  {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(getTimeRangeAsDays({ from, to })))}{' '}
+                  {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(timerangeAsDays))}{' '}
                   {i18n.EXECUTIVE_FILTERING}
                   <br />
                   {i18n.EXECUTIVE_CALC} <strong>{i18n.ESCALATED.toLowerCase()}</strong>{' '}
@@ -192,7 +193,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       previousCount={valueMetricsCompare.filteredAlerts}
                       stat={costSavingsCompare}
                       statType={i18n.COST_SAVINGS_TITLE.toLowerCase()}
-                      timeRange={getTimeRangeAsDays({ from, to })}
+                      timeRange={timerangeAsDays}
                     />
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryAlertFilteringStat">
@@ -205,7 +206,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       previousCount={valueMetricsCompare.filteredAlertsPerc}
                       stat={formatPercent(valueMetricsCompare.filteredAlertsPerc)}
                       statType={i18n.FILTERING_RATE.toLowerCase()}
-                      timeRange={getTimeRangeAsDays({ from, to })}
+                      timeRange={timerangeAsDays}
                     />
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryHoursSavedStat">
@@ -218,7 +219,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       previousCount={valueMetricsCompare.hoursSaved}
                       stat={formatThousands(valueMetricsCompare.hoursSaved)}
                       statType={i18n.TIME_SAVED_DESC.toLowerCase()}
-                      timeRange={getTimeRangeAsDays({ from, to })}
+                      timeRange={timerangeAsDays}
                     />
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryThreatsDetectedStat">
@@ -240,7 +241,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                       previousCount={valueMetricsCompare.attackDiscoveryCount}
                       stat={`${valueMetricsCompare.attackDiscoveryCount}`}
                       statType={i18n.ATTACK_DISCOVERY_COUNT.toLowerCase()}
-                      timeRange={getTimeRangeAsDays({ from, to })}
+                      timeRange={timerangeAsDays}
                     />
                   </li>
                 </ul>

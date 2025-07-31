@@ -43,6 +43,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
     }),
     [attackAlertIds]
   );
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   return (
     <EuiPanel paddingSize="l" hasBorder hasShadow={false} data-test-subj="cost-savings-trend-panel">
@@ -59,7 +60,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         getLensAttributes={(args) =>
           getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
         }
-        timerange={{ from, to }}
+        timerange={timerange}
         id={`${ID}-area-embeddable`}
         height={300}
         width={'95%'}

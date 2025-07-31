@@ -47,6 +47,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     }),
     [attackAlertIds]
   );
+  const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   return (
     <div
@@ -79,7 +80,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
         getLensAttributes={(args) =>
           getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
         }
-        timerange={{ from, to }}
+        timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
         scopeId={SourcererScopeName.detections}
