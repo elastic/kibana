@@ -2,6 +2,7 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/test_serverless/functional/test_suites/observability/cypress/oblt_config.base.ts
   - x-pack/platform/test/serverless/functional/config.oblt.base.ts
+  - x-pack/platform/test/serverless/functional/config.logs_essentials.base.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
@@ -37,6 +38,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group10.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group12.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.logs_essentials.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
