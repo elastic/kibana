@@ -589,7 +589,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeOwnershipOptions = {}
+    options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
   }
@@ -599,7 +599,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessModeOptions = {}
+    options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
   }
