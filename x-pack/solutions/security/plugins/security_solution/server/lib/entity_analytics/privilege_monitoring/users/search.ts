@@ -9,9 +9,9 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 
-export type SearchService = ReturnType<typeof SearchService>;
+export type SearchService = ReturnType<typeof createSearchService>;
 
-export const SearchService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createSearchService = (dataClient: PrivilegeMonitoringDataClient) => {
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
 
   const getMonitoredUsers = (batchUsernames: string[]) => {

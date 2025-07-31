@@ -15,14 +15,15 @@ import type { AuditLogger } from '@kbn/core/server';
 import { PrivilegeMonitoringDataClient } from './data_client';
 import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { InitialisationService } from './initialisation_service';
+import type { InitialisationService } from './initialisation_service';
+import { createInitialisationService } from './initialisation_service';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
 const mockUpsertIndex = jest.fn();
 jest.mock('./elasticsearch/indices', () => {
   return {
-    PrivmonIndexService: () => ({
+    createPrivmonIndexService: () => ({
       upsertIndex: () => mockUpsertIndex(),
       createIngestPipelineIfDoesNotExist: jest.fn(),
     }),
@@ -75,14 +76,16 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    initService = InitialisationService(dataClient);
+    initService = createInitialisationService(dataClient);
   });
   describe('init', () => {
     it('should throw if taskManager is not available', async () => {
       const { taskManager, ...optsWithoutTaskManager } = deps;
       dataClient = new PrivilegeMonitoringDataClient(optsWithoutTaskManager);
 
-      expect(() => InitialisationService(dataClient)).toThrow('Task Manager is not available');
+      expect(() => createInitialisationService(dataClient)).toThrow(
+        'Task Manager is not available'
+      );
     });
 
     it('should initialize the privilege monitoring engine successfully', async () => {

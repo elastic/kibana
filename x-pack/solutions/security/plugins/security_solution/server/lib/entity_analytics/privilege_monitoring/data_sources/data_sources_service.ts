@@ -8,9 +8,9 @@
 import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
-import { IndexSyncService } from './sync/index_sync';
+import { createIndexSyncService } from './sync/index_sync';
 
-export const DataSourcesService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClient) => {
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
 
   /**
@@ -56,6 +56,6 @@ export const DataSourcesService = (dataClient: PrivilegeMonitoringDataClient) =>
   return {
     createImportIndex,
     searchPrivilegesIndices,
-    ...IndexSyncService(dataClient),
+    ...createIndexSyncService(dataClient),
   };
 };

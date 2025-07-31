@@ -10,8 +10,8 @@ import type { PrivilegeMonitoringDataClient } from '../data_client';
 import { generateUserIndexMappings } from './mappings';
 import { PRIVMON_EVENT_INGEST_PIPELINE_ID, eventIngestPipeline } from './pipeline';
 
-export type PrivmonIndexService = ReturnType<typeof PrivmonIndexService>;
-export const PrivmonIndexService = (dataClient: PrivilegeMonitoringDataClient) => {
+export type PrivmonIndexService = ReturnType<typeof createPrivmonIndexService>;
+export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps, index } = dataClient;
   const internalUserClient = deps.clusterClient.asInternalUser;
 

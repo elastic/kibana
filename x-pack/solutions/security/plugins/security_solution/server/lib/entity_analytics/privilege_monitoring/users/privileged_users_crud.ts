@@ -16,7 +16,10 @@ import type {
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import type { PrivMonUserSource } from '../types';
 
-export const PrivilegedUsersCrud = ({ deps, index }: PrivilegeMonitoringDataClient) => {
+export const createPrivilegedUsersCrudService = ({
+  deps,
+  index,
+}: PrivilegeMonitoringDataClient) => {
   const esClient = deps.clusterClient.asCurrentUser;
 
   const create = async (

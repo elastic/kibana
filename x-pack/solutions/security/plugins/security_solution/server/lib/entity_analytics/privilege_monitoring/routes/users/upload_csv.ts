@@ -21,7 +21,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
-import { PrivilegedUsersCSV } from '../../users/csv_upload';
+import { createPrivilegedUsersCsvService } from '../../users/csv_upload';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -76,7 +76,7 @@ export const uploadUsersCSVRoute = (
           const fileStream = request.body.file as HapiReadableStream;
 
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const csvService = PrivilegedUsersCSV(dataClient);
+          const csvService = createPrivilegedUsersCsvService(dataClient);
 
           const body = await csvService.bulkUpload(fileStream, {
             retries: errorRetries,

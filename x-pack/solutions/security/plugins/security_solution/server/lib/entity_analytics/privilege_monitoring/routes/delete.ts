@@ -14,7 +14,7 @@ import { DeleteEntityEngineRequestQuery } from '../../../../../common/api/entity
 import type { DeleteMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { EngineCrudService } from '../engine/crud_service';
+import { createEngineCrudService } from '../engine/crud_service';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -58,7 +58,7 @@ export const deletePrivilegeMonitoringEngineRoute = (
         try {
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
           const soClient = dataClient.getScopedSoClient(request);
-          const service = EngineCrudService(dataClient, soClient);
+          const service = createEngineCrudService(dataClient, soClient);
           const body = await service.delete(request.query.data);
           return response.ok({ body });
         } catch (e) {

@@ -17,10 +17,10 @@ import { accumulateUpsertResults } from './bulk/utils';
 import { queryExistingUsers } from './bulk/query_existing_users';
 
 import { softDeleteOmittedUsers } from './bulk/soft_delete_omitted_users';
-import { PrivmonIndexService } from '../engine/elasticsearch/indices';
+import { createPrivmonIndexService } from '../engine/elasticsearch/indices';
 import type { BulkProcessingResults } from './bulk/types';
 
-export const PrivilegedUsersCSV = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps, index } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
 
@@ -76,7 +76,7 @@ export const PrivilegedUsersCSV = (dataClient: PrivilegeMonitoringDataClient) =>
    * We only need this for the CSV upload scenario
    */
   const checkAndInitPrivilegedMonitoringResources = async () => {
-    const IndexService = PrivmonIndexService(dataClient);
+    const IndexService = createPrivmonIndexService(dataClient);
 
     await IndexService.createIngestPipelineIfDoesNotExist();
     const found = await IndexService.doesIndexExist();

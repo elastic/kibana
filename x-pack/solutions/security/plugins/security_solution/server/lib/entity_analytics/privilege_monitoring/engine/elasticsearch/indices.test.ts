@@ -15,7 +15,8 @@ import {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { PrivilegeMonitoringGlobalDependencies } from '../data_client';
 import { PrivilegeMonitoringDataClient } from '../data_client';
-import { PrivmonIndexService } from './indices';
+import type { PrivmonIndexService } from './indices';
+import { createPrivmonIndexService } from './indices';
 import { PRIVMON_EVENT_INGEST_PIPELINE_ID, eventIngestPipeline } from './pipeline';
 
 const mockCreateOrUpdateIndex = jest.fn();
@@ -47,7 +48,7 @@ describe('Privileged User Monitoring: Indices Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    indexService = PrivmonIndexService(dataClient);
+    indexService = createPrivmonIndexService(dataClient);
   });
   describe('upsert index', () => {
     it('should log a message if index already exists', async () => {

@@ -18,7 +18,7 @@ import {
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../../telemetry/event_based/events';
-import { PrivmonIndexService } from './elasticsearch/indices';
+import { createPrivmonIndexService } from './elasticsearch/indices';
 
 import {
   MonitoringEntitySourceDescriptorClient,
@@ -26,15 +26,15 @@ import {
 } from '../saved_objects';
 import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
 
-export type InitialisationService = ReturnType<typeof InitialisationService>;
-export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
+export type InitialisationService = ReturnType<typeof createInitialisationService>;
+export const createInitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
   const { taskManager } = deps;
   if (!taskManager) {
     throw new Error('Task Manager is not available');
   }
 
-  const IndexService = PrivmonIndexService(dataClient);
+  const IndexService = createPrivmonIndexService(dataClient);
 
   const init = async (
     soClient: SavedObjectsClientContract

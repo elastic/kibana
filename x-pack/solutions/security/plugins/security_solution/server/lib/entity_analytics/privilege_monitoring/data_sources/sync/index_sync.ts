@@ -11,24 +11,23 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
-import { buildBulkUpsertOperations } from '../bulk/upsert';
-import { buildBulkSoftDeleteOperations } from '../bulk/soft_delete';
-import { findStaleUsersForIndex } from './stale_users';
-import { SearchService } from '../../users/search';
+
+import { createSearchService } from '../../users/search';
 
 import { MonitoringEntitySourceDescriptorClient } from '../../saved_objects';
+import { createBulkUtilsService } from '../bulk';
+import { findStaleUsersForIndexFactory } from './stale_users';
 
-export type IndexSyncService = ReturnType<typeof IndexSyncService>;
+export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
-export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
   const { deps } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
 
-  const bulkUpsert = buildBulkUpsertOperations(dataClient);
-  const bulkSoftDelete = buildBulkSoftDeleteOperations(dataClient);
-  const findStaleUsers = findStaleUsersForIndex(dataClient);
+  const bulkUtilsService = createBulkUtilsService(dataClient);
+  const findStaleUsers = findStaleUsersForIndexFactory(dataClient);
 
-  const searchService = SearchService(dataClient);
+  const searchService = createSearchService(dataClient);
 
   /**
    * Synchronizes users from monitoring index sources and soft-deletes (mark as not privileged) stale entries.
@@ -46,10 +45,6 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
    * @returns {Promise<void>} Resolves when synchronization and soft-deletion are complete.
    */
   const plainIndexSync = async (soClient: SavedObjectsClientContract) => {
-    // const soClient = deps.savedObjects.getScopedClient(request, {
-    //   includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
-    // });
-
     const monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient,
       namespace: deps.namespace,
@@ -94,7 +89,7 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
     // Soft delete stale users
     dataClient.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
-      const ops = bulkSoftDelete(allStaleUsers, dataClient.index);
+      const ops = bulkUtilsService.bulkSoftDeleteOperations(allStaleUsers, dataClient.index);
       await esClient.bulk({ body: ops });
     }
   };
@@ -167,7 +162,7 @@ export const IndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
 
       if (usersToWrite.length === 0) return batchUsernames;
 
-      const ops = bulkUpsert(usersToWrite, dataClient.index);
+      const ops = bulkUtilsService.bulkUpsertOperations(usersToWrite, dataClient.index);
       dataClient.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
         dataClient.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);

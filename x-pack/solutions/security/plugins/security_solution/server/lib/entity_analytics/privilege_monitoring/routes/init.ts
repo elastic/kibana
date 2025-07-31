@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-import { InitialisationService } from '../engine/initialisation_service';
+import { createInitialisationService } from '../engine/initialisation_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
 
@@ -62,7 +62,7 @@ export const initPrivilegeMonitoringEngineRoute = (
             monitoringEntitySourceType.name,
           ],
         });
-        const service = InitialisationService(dataClient);
+        const service = createInitialisationService(dataClient);
 
         try {
           const body = await service.init(soClient);

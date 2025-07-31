@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
-import { PrivilegedUsersCrud } from '../../users/privileged_users_crud';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -50,7 +50,7 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           );
           const secSol = await context.securitySolution;
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const crudService = PrivilegedUsersCrud(dataClient);
+          const crudService = createPrivilegedUsersCrudService(dataClient);
 
           const body = await crudService.create(request.body, 'api');
           return response.ok({ body });

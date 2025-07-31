@@ -13,7 +13,7 @@ import {
 } from '../saved_objects';
 import { removePrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
 
-export const EngineCrudService = (
+export const createEngineCrudService = (
   dataClient: PrivilegeMonitoringDataClient,
   soClient: SavedObjectsClientContract
 ) => {

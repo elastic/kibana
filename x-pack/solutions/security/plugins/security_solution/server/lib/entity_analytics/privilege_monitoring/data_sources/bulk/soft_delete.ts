@@ -25,7 +25,7 @@ import type { PrivMonBulkUser } from '../../types';
  * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
  * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
  */
-export const buildBulkSoftDeleteOperations =
+export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
   (users: PrivMonBulkUser[], userIndexName: string): object[] => {
     const ops: object[] = [];

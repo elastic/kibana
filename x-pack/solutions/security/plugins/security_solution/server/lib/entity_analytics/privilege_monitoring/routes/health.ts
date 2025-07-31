@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-import { EngineStatusService } from '../engine/status_service';
+import { createEngineStatusService } from '../engine/status_service';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,7 +51,7 @@ export const healthCheckPrivilegeMonitoringRoute = (
         const dataClient = secSol.getPrivilegeMonitoringDataClient();
         const soClient = dataClient.getScopedSoClient(request);
 
-        const statusService = EngineStatusService(dataClient, soClient);
+        const statusService = createEngineStatusService(dataClient, soClient);
 
         try {
           const body = await statusService.get();

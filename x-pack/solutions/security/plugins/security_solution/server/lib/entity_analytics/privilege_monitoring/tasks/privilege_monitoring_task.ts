@@ -26,7 +26,7 @@ import {
 } from './state';
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../engine/data_client';
-import { DataSourcesService } from '../data_sources/service';
+import { createDataSourcesService } from '../data_sources/data_sources_service';
 import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
@@ -211,7 +211,7 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    const dataSourcesService = DataSourcesService(dataClient);
+    const dataSourcesService = createDataSourcesService(dataClient);
     const request = buildFakeScopedRequest({
       namespace: state.namespace,
       coreStart: core,

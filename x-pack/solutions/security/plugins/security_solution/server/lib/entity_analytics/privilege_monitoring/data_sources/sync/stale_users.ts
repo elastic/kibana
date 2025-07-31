@@ -9,7 +9,7 @@ import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analy
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
 
-export const findStaleUsersForIndex =
+export const findStaleUsersForIndexFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
   async (indexName: string, userNames: string[]): Promise<PrivMonBulkUser[]> => {
     const esClient = dataClient.deps.clusterClient.asCurrentUser;

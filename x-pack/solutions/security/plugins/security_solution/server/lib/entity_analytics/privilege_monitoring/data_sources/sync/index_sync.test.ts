@@ -14,7 +14,8 @@ import {
 } from '@kbn/core/server/mocks';
 import type { PrivilegeMonitoringGlobalDependencies } from '../../engine/data_client';
 import { PrivilegeMonitoringDataClient } from '../../engine/data_client';
-import { IndexSyncService } from './index_sync';
+import type { IndexSyncService } from './index_sync';
+import { createIndexSyncService } from './index_sync';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/core/server';
 import type { SearchService } from '../../users/search';
@@ -33,10 +34,10 @@ jest.mock('../../saved_objects', () => {
   };
 });
 
-const mockFindStaleUsers = jest.fn();
+const mockFindStaleUsersForIndex = jest.fn();
 jest.mock('./stale_users', () => {
   return {
-    findStaleUsersForIndex: () => mockFindStaleUsers(),
+    findStaleUsersForIndexFactory: () => mockFindStaleUsersForIndex,
   };
 });
 
@@ -44,7 +45,7 @@ const mockSearchUsernamesInIndex = jest.fn();
 const mockGetMonitoredUsers = jest.fn();
 jest.mock('../../users/search', () => {
   return {
-    SearchService: () => ({
+    createSearchService: () => ({
       searchUsernamesInIndex: (obj: Parameters<SearchService['searchUsernamesInIndex']>[0]) =>
         mockSearchUsernamesInIndex(obj),
       getMonitoredUsers: (usernames: string[]) => mockGetMonitoredUsers(usernames),
@@ -52,11 +53,10 @@ jest.mock('../../users/search', () => {
   };
 });
 
-const mockBuildBulkUpsertOperations = jest.fn();
+const mockBulkUpsertOperations = jest.fn();
 jest.mock('../bulk/upsert', () => {
   return {
-    // buildBulkUpsertOperations is curried, hence the extra function. We only need to mock the last part so we can return mocked values.
-    buildBulkUpsertOperations: () => () => mockBuildBulkUpsertOperations(),
+    bulkUpsertOperationsFactory: () => mockBulkUpsertOperations,
   };
 });
 
@@ -86,7 +86,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    indexSyncService = IndexSyncService(dataClient);
+    indexSyncService = createIndexSyncService(dataClient);
   });
 
   describe('syncAllIndexUsers', () => {
@@ -119,7 +119,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
         { name: 'no-index', indexPattern: undefined },
         { name: 'with-index', indexPattern: 'foo' },
       ]);
-      mockFindStaleUsers.mockResolvedValue([]);
+      mockFindStaleUsersForIndex.mockResolvedValue([]);
 
       await indexSyncService.plainIndexSync(mockSavedObjectClient);
       // Should only be called for the source with indexPattern
@@ -164,7 +164,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
 
       mockGetMonitoredUsers.mockResolvedValue(mockMonitoredUserHits);
 
-      mockBuildBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
+      mockBulkUpsertOperations.mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.index = 'test-index';
 
       const usernames = await indexSyncService.syncUsernamesFromIndex({
@@ -175,7 +175,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       expect(mockSearchUsernamesInIndex).toHaveBeenCalledTimes(2);
       expect(esClientMock.bulk).toHaveBeenCalled();
       expect(mockGetMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
-      expect(mockBuildBulkUpsertOperations).toHaveBeenCalled();
+      expect(mockBulkUpsertOperations).toHaveBeenCalled();
     });
   });
 });

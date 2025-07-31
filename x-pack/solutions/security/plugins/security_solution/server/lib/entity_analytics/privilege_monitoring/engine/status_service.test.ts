@@ -16,7 +16,8 @@ import { PrivilegeMonitoringDataClient } from './data_client';
 import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { EngineStatusService } from './status_service';
+import type { EngineStatusService } from './status_service';
+import { createEngineStatusService } from './status_service';
 import type { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 
 const mockRemovePrivilegeMonitoringTask = jest.fn();
@@ -67,7 +68,7 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    statusService = EngineStatusService(dataClient, mockSavedObjectClient);
+    statusService = createEngineStatusService(dataClient, mockSavedObjectClient);
   });
   describe('disable', () => {
     it('should not disable the privilege monitoring engine if it is not started', async () => {
