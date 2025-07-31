@@ -9,7 +9,7 @@ import { EuiBadge, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import * as i18n from './translations';
-import { getPercChange } from '../detection_response/soc_trends/helpers';
+import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 
 interface Props {
   colorFamily?: 'default' | 'bright';

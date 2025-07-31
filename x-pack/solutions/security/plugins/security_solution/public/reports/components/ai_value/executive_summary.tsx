@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CostSavings } from './cost_savings';
-import { getPercChange } from '../detection_response/soc_trends/helpers';
+import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 import { ComparePercentage } from './compare_percentage';
 import {
   getTimeRangeAsDays,

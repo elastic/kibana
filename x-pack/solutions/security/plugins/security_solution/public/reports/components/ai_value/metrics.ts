@@ -6,7 +6,7 @@
  */
 import { formatNumber } from '@elastic/eui';
 import moment from 'moment';
-import { getPercChange } from '../detection_response/soc_trends/helpers';
+import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 
 // Define AlertData type if not already imported
 export interface AlertData {
