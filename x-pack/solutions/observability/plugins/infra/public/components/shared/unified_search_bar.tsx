@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -18,8 +18,9 @@ export const UnifiedSearchBar = ({
   showFilterBar = false,
   showQueryMenu = false,
   useDefaultBehaviors = true,
-  showPlaceholder = true,
   query,
+  placeholder,
+  showPlaceholder = true,
 }: Pick<
   SearchBarProps,
   | 'onQuerySubmit'
@@ -28,6 +29,7 @@ export const UnifiedSearchBar = ({
   | 'showFilterBar'
   | 'showQueryMenu'
   | 'query'
+  | 'placeholder'
 > &
   Pick<StatefulSearchBarProps, 'useDefaultBehaviors'> & { showPlaceholder?: boolean }) => {
   const { metricsView } = useMetricsDataViewContext();
@@ -45,8 +47,9 @@ export const UnifiedSearchBar = ({
       indexPatterns={metricsView && [metricsView.dataViewReference]}
       placeholder={
         showPlaceholder
-          ? i18n.translate('xpack.infra.hosts.searchPlaceholder', {
-              defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
+          ? placeholder ??
+            i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
+              defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)}',
             })
           : undefined
       }
