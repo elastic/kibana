@@ -46,7 +46,7 @@ const mockTab1: TabState = {
   ...DEFAULT_TAB_STATE,
   id: 'tab1',
   label: 'Tab 1',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-16T14:07:55.127Z', to: '2025-04-16T14:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -57,7 +57,7 @@ const mockTab2: TabState = {
   ...DEFAULT_TAB_STATE,
   id: 'tab2',
   label: 'Tab 2',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-17T03:07:55.127Z', to: '2025-04-17T03:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -68,7 +68,7 @@ const mockRecentlyClosedTab: RecentlyClosedTabState = {
   ...DEFAULT_TAB_STATE,
   id: 'closedTab1',
   label: 'Closed tab 1',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-07T03:07:55.127Z', to: '2025-04-07T03:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -110,7 +110,7 @@ describe('TabsStorageManager', () => {
     id: tab.id,
     label: tab.label,
     appState: mockGetAppState(tab.id),
-    globalState: tab.lastPersistedGlobalState,
+    globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
 
@@ -119,8 +119,8 @@ describe('TabsStorageManager', () => {
     id: storedTab.id,
     label: storedTab.label,
     initialAppState: mockGetAppState(storedTab.id),
-    initialGlobalState: storedTab.lastPersistedGlobalState,
-    lastPersistedGlobalState: storedTab.lastPersistedGlobalState,
+    initialGlobalState: storedTab.globalState,
+    globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
 
