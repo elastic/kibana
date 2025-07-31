@@ -54,6 +54,7 @@ export const createMockConfig = (): ConfigType => {
       },
       monitoring: {
         privileges: {
+          developer: { syncInterval: '10m' },
           users: {
             csvUpload: {
               errorRetries: 3,

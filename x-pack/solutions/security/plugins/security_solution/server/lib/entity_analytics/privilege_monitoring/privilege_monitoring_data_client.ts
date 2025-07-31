@@ -203,7 +203,6 @@ export class PrivilegeMonitoringDataClient {
         },
       });
     }
-    console.log(`DESCRIPTOR`, descriptor);
     return descriptor;
   }
 
