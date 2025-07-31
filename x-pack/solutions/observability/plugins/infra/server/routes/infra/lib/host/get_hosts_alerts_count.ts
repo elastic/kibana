@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS_SCHEMA } from '../../../../../common/alerting/metrics/alert_link';
 import { HOST_NAME_FIELD, INFRA_ALERT_CONSUMERS } from '../../../../../common/constants';
 import type { GetHostParameters } from '../types';
 
@@ -21,7 +22,8 @@ export async function getHostsAlertsCount({
   from,
   to,
   limit,
-}: Pick<GetHostParameters, 'alertsClient' | 'from' | 'to' | 'limit'> & {
+  schema,
+}: Pick<GetHostParameters, 'alertsClient' | 'from' | 'to' | 'limit' | 'schema'> & {
   hostNames: string[];
 }) {
   const rangeQuery = [
@@ -44,6 +46,7 @@ export async function getHostsAlertsCount({
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(HOST_NAME_FIELD, ...hostNames),
           ...rangeQuery,
+          ...(schema ? termsQuery(ALERT_RULE_PARAMETERS_SCHEMA, schema) : []),
         ],
       },
     },

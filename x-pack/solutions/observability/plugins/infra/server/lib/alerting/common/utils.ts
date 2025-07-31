@@ -22,7 +22,7 @@ import type {
   InventoryLocatorParams,
   MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   ALERT_RULE_PARAMETERS_NODE_TYPE,
   ALERT_RULE_PARAMETERS_SCHEMA,
@@ -110,7 +110,7 @@ export const getInventoryViewInAppUrlWithSpaceId = ({
   hostName,
   assetDetailsLocator,
   inventoryLocator,
-  schema = DataSchemaFormat.ECS,
+  schema,
 }: {
   criteria: InventoryMetricConditions[];
   nodeType: string;
