@@ -9,10 +9,4 @@
 
 export { CascadeRowPrimitive } from './cascade_row';
 export type { CascadeRowPrimitiveProps } from './cascade_row';
-export { CascadeRowCellPrimitive } from './cascade_row_cell';
-export type { CascadeRowCellPrimitiveProps } from './cascade_row_cell';
-export {
-  getCascadeRowLeafDataCacheKey,
-  getCascadeRowNodePath,
-  getCascadeRowNodePathValueRecord,
-} from './utils';
+export { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
