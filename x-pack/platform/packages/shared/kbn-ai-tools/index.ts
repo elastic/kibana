@@ -11,3 +11,12 @@ export type {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from './src/tools/describe_dataset/document_analysis';
+export {
+  getLogPatterns,
+  type FieldPatternResultWithChanges,
+} from './src/tools/log_patterns/get_log_patterns';
+export {
+  pValueToLabel,
+  P_VALUE_SIGNIFICANCE_HIGH,
+  P_VALUE_SIGNIFICANCE_MEDIUM,
+} from './src/utils/p_value_to_label';

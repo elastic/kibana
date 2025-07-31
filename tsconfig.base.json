@@ -322,6 +322,8 @@
       "@kbn/core-chrome-layout-components/*": ["src/core/packages/chrome/layout/core-chrome-layout-components/*"],
       "@kbn/core-chrome-layout-constants": ["src/core/packages/chrome/layout/core-chrome-layout-constants"],
       "@kbn/core-chrome-layout-constants/*": ["src/core/packages/chrome/layout/core-chrome-layout-constants/*"],
+      "@kbn/core-chrome-navigation": ["src/core/packages/chrome/navigation"],
+      "@kbn/core-chrome-navigation/*": ["src/core/packages/chrome/navigation/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],
@@ -554,8 +556,6 @@
       "@kbn/core-plugin-initializer-context-plugin/*": ["src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context/*"],
       "@kbn/core-plugin-route-timeouts-plugin": ["src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts"],
       "@kbn/core-plugin-route-timeouts-plugin/*": ["src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts/*"],
-      "@kbn/core-plugin-static-assets-plugin": ["src/platform/test/plugin_functional/plugins/core_plugin_static_assets"],
-      "@kbn/core-plugin-static-assets-plugin/*": ["src/platform/test/plugin_functional/plugins/core_plugin_static_assets/*"],
       "@kbn/core-plugins-base-server-internal": ["src/core/packages/plugins/base-server-internal"],
       "@kbn/core-plugins-base-server-internal/*": ["src/core/packages/plugins/base-server-internal/*"],
       "@kbn/core-plugins-browser": ["src/core/packages/plugins/browser"],
@@ -940,6 +940,8 @@
       "@kbn/esql-ast/*": ["src/platform/packages/shared/kbn-esql-ast/*"],
       "@kbn/esql-ast-inspector-plugin": ["examples/esql_ast_inspector"],
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
+      "@kbn/esql-composer": ["src/platform/packages/shared/kbn-esql-composer"],
+      "@kbn/esql-composer/*": ["src/platform/packages/shared/kbn-esql-composer/*"],
       "@kbn/esql-datagrid": ["src/platform/plugins/shared/esql_datagrid"],
       "@kbn/esql-datagrid/*": ["src/platform/plugins/shared/esql_datagrid/*"],
       "@kbn/esql-editor": ["src/platform/packages/private/kbn-esql-editor"],
@@ -1058,10 +1060,6 @@
       "@kbn/gen-ai-functional-testing/*": ["src/platform/packages/private/kbn-gen-ai-functional-testing/*"],
       "@kbn/gen-ai-streaming-response-example-plugin": ["x-pack/examples/gen_ai_streaming_response_example"],
       "@kbn/gen-ai-streaming-response-example-plugin/*": ["x-pack/examples/gen_ai_streaming_response_example/*"],
-      "@kbn/genai-utils-common": ["x-pack/platform/packages/shared/kbn-genai-utils-common"],
-      "@kbn/genai-utils-common/*": ["x-pack/platform/packages/shared/kbn-genai-utils-common/*"],
-      "@kbn/genai-utils-server": ["x-pack/platform/packages/shared/kbn-genai-utils-server"],
-      "@kbn/genai-utils-server/*": ["x-pack/platform/packages/shared/kbn-genai-utils-server/*"],
       "@kbn/generate": ["packages/kbn-generate"],
       "@kbn/generate/*": ["packages/kbn-generate/*"],
       "@kbn/generate-console-definitions": ["packages/kbn-generate-console-definitions"],
@@ -2299,7 +2297,7 @@
       "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

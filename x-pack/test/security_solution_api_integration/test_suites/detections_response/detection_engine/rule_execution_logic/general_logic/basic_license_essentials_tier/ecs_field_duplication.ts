@@ -36,13 +36,13 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Source ECS fields copied to other alert fields', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/ecs_fields_duplicated_for_alerts'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_fields_duplicated_for_alerts'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/ecs_fields_duplicated_for_alerts'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_fields_duplicated_for_alerts'
       );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);

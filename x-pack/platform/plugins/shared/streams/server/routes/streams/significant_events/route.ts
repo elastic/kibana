@@ -7,9 +7,9 @@
 
 import { badRequest } from '@hapi/boom';
 import type {
+  SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
@@ -18,12 +18,12 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../../common/constants';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
-import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
+import { SecurityError } from '../../../lib/streams/errors/security_error';
+import { createServerRoute } from '../../create_server_route';
+import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -170,6 +170,7 @@ const generateSignificantEventsRoute = createServerRoute({
     path: z.object({ name: z.string() }),
     query: z.object({
       connectorId: z.string(),
+      currentDate: dateFromString.optional(),
     }),
   }),
 
@@ -213,6 +214,7 @@ const generateSignificantEventsRoute = createServerRoute({
     const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions({
       name: params.path.name,
       connectorId: params.query.connectorId,
+      currentDate: params.query.currentDate ?? new Date(),
       inferenceClient,
       esClient: createTracedEsClient({
         client: scopedClusterClient.asCurrentUser,

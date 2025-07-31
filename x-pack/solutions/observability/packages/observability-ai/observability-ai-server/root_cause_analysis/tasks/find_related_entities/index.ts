@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { DocumentAnalysis, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
+import type {
+  DocumentAnalysis,
+  FieldPatternResultWithChanges,
+  TruncatedDocumentAnalysis,
+} from '@kbn/ai-tools';
 import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';

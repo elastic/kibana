@@ -18,5 +18,9 @@
     "@kbn/es-query",
     "@kbn/std",
     "@kbn/inference-common",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/es-types",
+    "@kbn/calculate-auto",
+    "@kbn/traced-es-client",
   ]
 }

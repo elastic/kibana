@@ -16458,6 +16458,22 @@
                             ],
                             "type": "string"
                           },
+                          "last_known_status": {
+                            "enum": [
+                              "offline",
+                              "error",
+                              "online",
+                              "inactive",
+                              "enrolling",
+                              "unenrolling",
+                              "unenrolled",
+                              "updating",
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
+                            ],
+                            "type": "string"
+                          },
                           "local_metadata": {
                             "additionalProperties": {},
                             "type": "object"
@@ -18553,6 +18569,22 @@
                           ],
                           "type": "string"
                         },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
+                          ],
+                          "type": "string"
+                        },
                         "local_metadata": {
                           "additionalProperties": {},
                           "type": "object"
@@ -19027,6 +19059,22 @@
                             "degraded",
                             "updating",
                             "starting"
+                          ],
+                          "type": "string"
+                        },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
@@ -51727,14 +51775,14 @@
                                           "ingest": {
                                             "additionalProperties": false,
                                             "properties": {
-                                              "unwired": {
+                                              "classic": {
                                                 "additionalProperties": false,
                                                 "properties": {},
                                                 "type": "object"
                                               }
                                             },
                                             "required": [
-                                              "unwired"
+                                              "classic"
                                             ],
                                             "type": "object"
                                           }
@@ -57753,14 +57801,14 @@
                           },
                           {
                             "properties": {
-                              "unwired": {
+                              "classic": {
                                 "additionalProperties": false,
                                 "properties": {},
                                 "type": "object"
                               }
                             },
                             "required": [
-                              "unwired"
+                              "classic"
                             ],
                             "type": "object"
                           }
@@ -58596,6 +58644,14 @@
             "in": "query",
             "name": "connectorId",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currentDate",
+            "required": false,
             "schema": {
               "type": "string"
             }

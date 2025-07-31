@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
-import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
+import type { FieldPatternResultWithChanges, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import { InferenceClient } from '@kbn/inference-common';
 import { RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';

@@ -59,12 +59,16 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load(path);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(path);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     it('should update an alert using real rule executions', async () => {
@@ -958,11 +962,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -991,11 +995,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {

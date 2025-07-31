@@ -8,11 +8,9 @@ import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
 import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
-} from '@kbn/genai-utils-common/p_value_to_label';
-import {
-  FieldPatternResultWithChanges,
   getLogPatterns,
-} from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
+  type FieldPatternResultWithChanges,
+} from '@kbn/ai-tools';
 import { ShortIdTable } from '@kbn/inference-common';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import { formatValueForKql } from '@kbn/observability-utils-common/es/format_value_for_kql';
