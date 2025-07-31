@@ -50,7 +50,7 @@ export default function searchSolutionNavigation({
         { id: 'SearchApplications', label: 'Search applications' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
-        { id: 'QueryRules', label: 'Query Rules' },
+        { id: 'QueryRules', label: 'Query rules' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
       ]);
     });
@@ -91,7 +91,7 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'QueryRules',
-          breadcrumbs: ['Relevance', 'Query Rules'],
+          breadcrumbs: ['Relevance', 'Query rules'],
           pageTestSubject: 'queryRulesBasePage',
         },
         {

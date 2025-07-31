@@ -123,7 +123,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               {
                 id: 'searchQueryRules',
                 title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
-                  defaultMessage: 'Query Rules',
+                  defaultMessage: 'Query rules',
                 }),
                 link: 'searchQueryRules',
               },

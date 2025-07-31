@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('elasticsearch/query_rules');
       });
 
-      it('loads Query Rules page', async function () {
+      it('loads query rules page', async function () {
         await retry.waitFor(
           'query rules docs link',
           async () => await testSubjects.exists('searchQueryRulesEmptyPromptFooterLink')

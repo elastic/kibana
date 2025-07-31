@@ -79,7 +79,7 @@ const baseNavItems = [
         href: '/app/elasticsearch/query_rules',
         id: 'searchQueryRules',
         items: undefined,
-        name: 'Query Rules',
+        name: 'Query rules',
       },
       {
         'data-test-subj': 'searchSideNav-InferenceEndpoints',
@@ -140,7 +140,7 @@ const mockNavLinks = [
   },
   {
     id: 'searchQueryRules',
-    title: 'Query Rules',
+    title: 'Query rules',
     url: '/app/elasticsearch/query_rules',
   },
 ];
