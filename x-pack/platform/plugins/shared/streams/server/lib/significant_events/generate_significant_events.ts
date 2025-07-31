@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { getLogPatterns } from '@kbn/ai-tools';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
-import KQL_GUIDE from './prompts/kql_guide.text';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
+import KQL_GUIDE from './prompts/kql_guide.text';
 
 const LOOKBACK_DAYS = 7;
 
@@ -27,17 +26,19 @@ export interface GeneratedSignificantEventQuery {
 export async function generateSignificantEventDefinitions({
   name,
   connectorId,
+  currentDate = new Date(),
   inferenceClient,
   esClient,
   logger,
 }: {
   name: string;
   connectorId: string;
+  currentDate: Date;
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
 }): Promise<GeneratedSignificantEventQuery[]> {
-  const mend = moment();
+  const mend = moment(currentDate);
   const mstart = mend.clone().subtract(24, 'hours');
 
   const start = mstart.valueOf();
