@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
-import type { ESQLFunction, ESQLMessage, ESQLNumericLiteralType } from '../types';
+import type { ESQLNumericLiteralType } from '../types';
 import { Location } from '../commands_registry/types';
 
 /**
@@ -218,7 +218,6 @@ export interface FunctionDefinition {
   locationsAvailable: Location[];
   signatures: Signature[];
   examples?: string[];
-  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
   license?: ESQLSignatureLicenseType;
