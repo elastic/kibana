@@ -361,7 +361,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]event_collection_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]setting_locked_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]protection_updates[\/\\]protection_updates_layout.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]trusted_apps[\/\\]view[\/\\]components[\/\\]condition_entry_input[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]trusted_apps[\/\\]view[\/\\]components[\/\\]condition_group[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]resolver[\/\\]view[\/\\]controls[\/\\]styles.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]resolver[\/\\]view[\/\\]edge_line.tsx/,
