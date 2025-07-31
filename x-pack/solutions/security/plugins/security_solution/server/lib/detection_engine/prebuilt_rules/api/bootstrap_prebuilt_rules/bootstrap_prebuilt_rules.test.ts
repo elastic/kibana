@@ -70,7 +70,6 @@ describe('bootstrap_prebuilt_rules_route', () => {
         }),
       ]),
     });
-    expect(true).toBe(false);
   });
 
   it('installs pre-release packages in dev mode', async () => {
