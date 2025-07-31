@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
@@ -20,7 +20,7 @@ interface ValueInputProps {
   onBlur?: (event?: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
-  autoFocus: boolean;
+  autoFocus?: boolean;
   className?: string;
   width?: number;
 }
@@ -60,14 +60,6 @@ export const ValueInput: React.FC<ValueInputProps> = ({
     }
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  useLayoutEffect(() => {
-    // On mount, focus the input
-    if (autoFocus) {
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
-  }, [autoFocus]);
-
   const InputComponent = useMemo(() => {
     return getInputComponentForType(columnType);
   }, [columnType]);
@@ -75,7 +67,6 @@ export const ValueInput: React.FC<ValueInputProps> = ({
   return (
     <EuiToolTip position="top" content={error}>
       <InputComponent
-        ref={inputRef}
         autoFocus={autoFocus}
         placeholder={columnName}
         label={columnName}

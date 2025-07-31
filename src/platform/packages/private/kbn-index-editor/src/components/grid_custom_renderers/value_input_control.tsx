@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiDataGridCellPopoverElementProps,
   EuiCallOut,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -41,7 +42,7 @@ export const getValueInputPopover =
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
-  ({ columnId, rowIndex, colIndex, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
+  ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
     const cellValue = row.flattened[columnId]?.toString();
@@ -68,14 +69,15 @@ export const getValueInputPopover =
 
     if (!isPlaceholder) {
       return (
-        <ValueInput
-          onEnter={onEnter}
-          columnName={columnId}
-          columns={columns}
-          value={cellValue}
-          autoFocus
-          width={inputWidth}
-        />
+        <EuiFocusTrap autoFocus={true} initialFocus="input">
+          <ValueInput
+            onEnter={onEnter}
+            columnName={columnId}
+            columns={columns}
+            value={cellValue}
+            width={inputWidth}
+          />
+        </EuiFocusTrap>
       );
     } else {
       return (
