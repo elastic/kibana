@@ -9,6 +9,7 @@ import {
   CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiContextMenuItem,
@@ -17,16 +18,15 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPopover,
+  EuiSearchBar,
+  EuiSearchBarOnChangeArgs,
   EuiSkeletonLoading,
   EuiSkeletonText,
   EuiTableSelectionType,
   EuiText,
   Search,
-  EuiSearchBar,
-  EuiSearchBarOnChangeArgs,
   useEuiTheme,
   useGeneratedHtmlId,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -45,13 +45,17 @@ import {
 import {
   DeleteToolErrorCallback,
   DeleteToolSuccessCallback,
+  DeleteToolsErrorCallback,
+  DeleteToolsSuccessCallback,
   useDeleteToolModal,
+  useDeleteToolsModal,
 } from '../../hooks/tools/use_delete_tools';
 import {
   EditToolErrorCallback,
   EditToolSuccessCallback,
   useEditToolFlyout,
 } from '../../hooks/tools/use_edit_tools';
+import { useToolTags } from '../../hooks/tools/use_tool_tags';
 import { useOnechatTools } from '../../hooks/tools/use_tools';
 import { useToasts } from '../../hooks/use_toasts';
 import {
@@ -62,7 +66,6 @@ import { truncateAtNewline } from '../../utils/truncate_at_newline';
 import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql/esql_tool_flyout';
 import { OnechatEsqlToolFormData } from './esql/form/types/esql_tool_form_types';
 import { OnechatToolTags } from './tags/tool_tags';
-import { useToolTags } from '../../hooks/tools/use_tool_tags';
 
 const ToolId = ({
   tool,
@@ -254,6 +257,7 @@ const ToolsTableHeader = ({
   total,
   selectedTools,
   setSelectedTools,
+  deleteSelectedTools,
 }: {
   isLoading: boolean;
   pageIndex: number;
@@ -261,6 +265,7 @@ const ToolsTableHeader = ({
   total: number;
   selectedTools: ToolDefinitionWithSchema[];
   setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
+  deleteSelectedTools: (toolIds: string[]) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -271,6 +276,10 @@ const ToolsTableHeader = ({
   const clearSelection = useCallback(() => {
     setSelectedTools([]);
   }, [setSelectedTools]);
+
+  const deleteSelection = useCallback(() => {
+    deleteSelectedTools(selectedTools.map((tool) => tool.id));
+  }, [deleteSelectedTools, selectedTools]);
 
   return (
     <EuiFlexGroup
@@ -323,7 +332,7 @@ const ToolsTableHeader = ({
                   iconSize="m"
                   size="xs"
                   color="danger"
-                  onClick={() => {}}
+                  onClick={deleteSelection}
                 >
                   <EuiText
                     size="xs"
@@ -440,7 +449,7 @@ const getColumns = ({
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatTools();
-  const { tags, isLoading: isLoadingTags } = useToolTags();
+  const { tags } = useToolTags();
   const [pageIndex, setPageIndex] = useState(0);
   const [tableItems, setTableItems] = useState<ToolDefinitionWithSchema[]>([]);
   const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
@@ -487,6 +496,44 @@ export const OnechatTools = () => {
     confirmDelete,
     cancelDelete,
   } = useDeleteToolModal({ onSuccess: onDeleteSuccess, onError: onDeleteError });
+
+  const onBulkDeleteSuccess = useCallback<DeleteToolsSuccessCallback>(
+    (toolIds) => {
+      addSuccessToast({
+        title: i18n.translate('xpack.onechat.tools.bulkDeleteToolsSuccessToast', {
+          defaultMessage: 'Deleted {count, plural, one {# tool} other {# tools}}',
+          values: {
+            count: toolIds.length,
+          },
+        }),
+      });
+    },
+    [addSuccessToast]
+  );
+
+  const onBulkDeleteError = useCallback<DeleteToolsErrorCallback>(
+    (error, { toolIds }) => {
+      addErrorToast({
+        title: i18n.translate('xpack.onechat.tools.bulkDeleteToolsErrorToast', {
+          defaultMessage: 'Unable to delete {count, plural, one {# tool} other {# tools}}',
+          values: {
+            count: toolIds.length,
+          },
+        }),
+        text: formatOnechatErrorMessage(error),
+      });
+    },
+    [addErrorToast]
+  );
+
+  const {
+    isOpen: isBulkDeleteToolsModalOpen,
+    isLoading: isBulkDeletingTools,
+    toolIds: bulkDeleteToolIds,
+    deleteTools: bulkDeleteTools,
+    confirmDelete: confirmBulkDeleteTools,
+    cancelDelete: cancelBulkDeleteTools,
+  } = useDeleteToolsModal({ onSuccess: onBulkDeleteSuccess, onError: onBulkDeleteError });
 
   const handleCreateSuccess = useCallback<CreateToolSuccessCallback>(
     (tool) => {
@@ -596,6 +643,10 @@ export const OnechatTools = () => {
 
   const deleteEsqlToolTitleId = useGeneratedHtmlId({
     prefix: 'deleteEsqlToolTitle',
+  });
+
+  const bulkDeleteEsqlToolsTitleId = useGeneratedHtmlId({
+    prefix: 'bulkDeleteEsqlToolsTitle',
   });
 
   const errorMessage = toolsError
@@ -735,6 +786,7 @@ export const OnechatTools = () => {
               total={tools.length}
               selectedTools={selectedTools}
               setSelectedTools={setSelectedTools}
+              deleteSelectedTools={bulkDeleteTools}
             />
           }
           loading={isLoadingTools}
@@ -808,6 +860,34 @@ export const OnechatTools = () => {
           >
             <EuiText>
               {i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmationText', {
+                defaultMessage: "You can't recover deleted data.",
+              })}
+            </EuiText>
+          </EuiConfirmModal>
+        )}
+        {isBulkDeleteToolsModalOpen && (
+          <EuiConfirmModal
+            title={i18n.translate('xpack.onechat.tools.bulkDeleteEsqlToolsTitle', {
+              defaultMessage: 'Delete {count, plural, one {# tool} other {# tools}}?',
+              values: {
+                count: bulkDeleteToolIds.length,
+              },
+            })}
+            aria-labelledby={bulkDeleteEsqlToolsTitleId}
+            titleProps={{ id: bulkDeleteEsqlToolsTitleId }}
+            onCancel={cancelBulkDeleteTools}
+            onConfirm={confirmBulkDeleteTools}
+            isLoading={isBulkDeletingTools}
+            cancelButtonText={i18n.translate('xpack.onechat.tools.deleteEsqlToolCancelButton', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmButton', {
+              defaultMessage: 'Delete',
+            })}
+            buttonColor="danger"
+          >
+            <EuiText>
+              {i18n.translate('xpack.onechat.tools.bulkDeleteEsqlToolsConfirmationText', {
                 defaultMessage: "You can't recover deleted data.",
               })}
             </EuiText>
