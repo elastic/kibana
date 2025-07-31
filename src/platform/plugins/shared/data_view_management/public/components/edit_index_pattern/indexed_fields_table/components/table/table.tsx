@@ -145,6 +145,13 @@ const isExcludedAriaLabel = i18n.translate(
   }
 );
 
+const actionsLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.actionsLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
 const editLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.table.editLabel', {
   defaultMessage: 'Edit',
 });
@@ -477,7 +484,7 @@ class TableClass extends PureComponent<
         render: (value: string) => this.renderBooleanTemplate(value, isExcludedAriaLabel),
       },
       {
-        name: 'Actions',
+        name: actionsLabel,
         actions: [
           {
             name: editLabel,
