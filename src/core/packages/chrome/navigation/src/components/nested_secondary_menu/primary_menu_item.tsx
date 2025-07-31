@@ -27,10 +27,7 @@ export interface PrimaryMenuItemProps
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   children,
   hasSubmenu = false,
-  href,
-  iconType,
   isCurrent = false,
-  isCollapsed,
   onClick,
   submenuPanelId,
   ...props
@@ -62,15 +59,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
 
   return (
     <div css={wrapperStyle}>
-      <SideNav.PrimaryMenuItem
-        horizontal
-        href={href}
-        iconType={iconType}
-        isCurrent={isCurrent}
-        isCollapsed={isCollapsed}
-        onClick={handleClick}
-        {...props}
-      >
+      <SideNav.PrimaryMenuItem horizontal isCurrent={isCurrent} onClick={handleClick} {...props}>
         {children}
       </SideNav.PrimaryMenuItem>
       {hasSubmenu && (

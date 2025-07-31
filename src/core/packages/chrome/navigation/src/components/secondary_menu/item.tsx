@@ -28,7 +28,6 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
  */
 export const SecondaryMenuItemComponent = ({
   children,
-  href,
   iconType,
   id,
   isCurrent,
@@ -61,7 +60,6 @@ export const SecondaryMenuItemComponent = ({
           css={styles}
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
-          href={href}
           size="s"
           tabIndex={0}
           textProps={false}
@@ -75,7 +73,6 @@ export const SecondaryMenuItemComponent = ({
           css={styles}
           color="text"
           data-test-subj={`${testSubjPrefix}-${id}`}
-          href={href}
           size="s"
           tabIndex={0}
           textProps={false}

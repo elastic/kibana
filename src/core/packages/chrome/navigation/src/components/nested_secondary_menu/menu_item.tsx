@@ -29,7 +29,6 @@ export const Item: FC<ItemProps> = ({
   children,
   hasSubmenu = false,
   href,
-  iconType,
   id,
   isCurrent = false,
   onClick,
@@ -63,7 +62,6 @@ export const Item: FC<ItemProps> = ({
     <SecondaryMenu.Item
       id={id}
       href={href || ''}
-      iconType={iconType}
       isCurrent={isCurrent}
       onClick={handleClick}
       {...props}
