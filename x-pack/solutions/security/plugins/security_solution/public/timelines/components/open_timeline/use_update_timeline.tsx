@@ -71,19 +71,20 @@ export const useUpdateTimeline = () => {
           fallbackPatterns: _timeline.indexNames,
           scope: DataViewManagerScopeName.timeline,
         });
-      }
-
-      if (!isEmpty(_timeline.indexNames)) {
-        if (!newDataViewPickerEnabled) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
-              selectedDataViewId: _timeline.dataViewId,
-              selectedPatterns: _timeline.indexNames,
-            })
-          );
+      } else {
+        if (!isEmpty(_timeline.indexNames)) {
+          if (!newDataViewPickerEnabled) {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: SourcererScopeName.timeline,
+                selectedDataViewId: _timeline.dataViewId,
+                selectedPatterns: _timeline.indexNames,
+              })
+            );
+          }
         }
       }
+
       if (
         _timeline.status === TimelineStatusEnum.immutable &&
         _timeline.timelineType === TimelineTypeEnum.template
