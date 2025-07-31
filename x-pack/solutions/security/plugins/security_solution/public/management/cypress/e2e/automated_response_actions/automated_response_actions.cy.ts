@@ -60,7 +60,7 @@ describe(
           })
         )
         .then(() => {
-          loadRule().then((data) => {
+          loadRule({ agentId: createdHost.agentId }).then((data) => {
             ruleId = data.id;
             ruleName = data.name;
           });
@@ -92,7 +92,7 @@ describe(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event', { timeout: 60000 }).should('exist');
