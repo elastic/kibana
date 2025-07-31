@@ -9,15 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ComparePercentage } from './compare_percentage';
 
-jest.mock('./translations', () => ({
-  NO_CHANGE: (statType: string) => `No change in ${statType}`,
-  STAT_DIFFERENCE: ({ upOrDown, percentageChange, stat, statType }: any) =>
-    `${upOrDown} ${percentageChange} ${stat} ${statType}`,
-  UP: 'up',
-  DOWN: 'down',
-  TIME_RANGE: (range: string) => `in ${range}`,
-}));
-
 jest.mock('../detection_response/soc_trends/helpers', () => ({
   getPercChange: (current: number, previous: number) => {
     if (previous === 0) return undefined;
