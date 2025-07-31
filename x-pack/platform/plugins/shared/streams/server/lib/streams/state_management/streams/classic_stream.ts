@@ -287,7 +287,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       },
       {
-        type: 'delete_significant_events',
+        type: 'delete_queries',
         request: {
           name: this._definition.name,
         },

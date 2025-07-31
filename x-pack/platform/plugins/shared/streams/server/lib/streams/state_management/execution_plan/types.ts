@@ -108,8 +108,8 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
-export interface DeleteSignificantEventsAction {
-  type: 'delete_significant_events';
+export interface DeleteQueriesAction {
+  type: 'delete_queries';
   request: {
     name: string;
   };
@@ -130,7 +130,7 @@ export type ElasticsearchAction =
   | DeleteDatastreamAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
-  | DeleteSignificantEventsAction;
+  | DeleteQueriesAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -147,5 +147,5 @@ export interface ActionsByType {
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
-  delete_significant_events: DeleteSignificantEventsAction[];
+  delete_queries: DeleteQueriesAction[];
 }

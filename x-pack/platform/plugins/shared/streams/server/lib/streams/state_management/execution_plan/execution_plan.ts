@@ -36,7 +36,7 @@ import type {
   DeleteDotStreamsDocumentAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
-  DeleteSignificantEventsAction,
+  DeleteQueriesAction,
   ElasticsearchAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
@@ -75,7 +75,7 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
-      delete_significant_events: [],
+      delete_queries: [],
     };
   }
 
@@ -160,7 +160,7 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
-        delete_significant_events,
+        delete_queries,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -202,7 +202,7 @@ export class ExecutionPlan {
         ...delete_dot_streams_document,
       ]);
 
-      await this.deleteSignificantEvents(delete_significant_events);
+      await this.deleteQueries(delete_queries);
     } catch (error) {
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${error.message}`
@@ -210,7 +210,7 @@ export class ExecutionPlan {
     }
   }
 
-  private async deleteSignificantEvents(actions: DeleteSignificantEventsAction[]) {
+  private async deleteQueries(actions: DeleteQueriesAction[]) {
     if (actions.length === 0) {
       return;
     }

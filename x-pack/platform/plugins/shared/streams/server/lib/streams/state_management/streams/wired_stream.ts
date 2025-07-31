@@ -678,7 +678,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
-        type: 'delete_significant_events',
+        type: 'delete_queries',
         request: {
           name: this._definition.name,
         },
