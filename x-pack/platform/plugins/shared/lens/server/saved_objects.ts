@@ -12,6 +12,10 @@ import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';
+import {
+  LENS_ITEM_VERSION as LENS_ITEM_VERSION_V1,
+  lensItemAttributesSchema as lensItemAttributesSchemaV1,
+} from '../common/content_management/v1';
 
 export function setupSavedObjects(
   core: CoreSetup,
@@ -40,6 +44,24 @@ export function setupSavedObjects(
         DataViewPersistableStateService.getAllMigrations(),
         customVisualizationMigrations
       ),
+    modelVersions: {
+      [LENS_ITEM_VERSION_V1]: {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              version: {
+                type: 'integer',
+              },
+            },
+          },
+        ],
+        schemas: {
+          forwardCompatibility: lensItemAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+          create: lensItemAttributesSchemaV1,
+        },
+      },
+    },
     mappings: {
       properties: {
         title: {
@@ -50,6 +72,9 @@ export function setupSavedObjects(
         },
         visualizationType: {
           type: 'keyword',
+        },
+        version: {
+          type: 'integer',
         },
         state: {
           dynamic: false,

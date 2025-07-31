@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export const LATEST_VERSION = 1;
+import { LENS_ITEM_VERSION } from './latest';
 
-export const CONTENT_ID = 'lens';
+export const LENS_ITEM_LATEST_VERSION = LENS_ITEM_VERSION;
+export type LENS_ITEM_LATEST_VERSION = typeof LENS_ITEM_LATEST_VERSION;
+
+export const LENS_CONTENT_TYPE = 'lens';
+export type LENS_CONTENT_TYPE = typeof LENS_CONTENT_TYPE;

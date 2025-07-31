@@ -5,28 +5,10 @@
  * 2.0.
  */
 
-export { LATEST_VERSION, CONTENT_ID } from './constants';
+export { LENS_ITEM_LATEST_VERSION, LENS_CONTENT_TYPE } from './constants';
+export { servicesDefinitions } from './services';
+export * from './v1/schema/utils';
 
-export type { LensContentType } from './types';
-
-export type {
-  LensSavedObject,
-  PartialLensSavedObject,
-  LensSavedObjectAttributes,
-  LensGetIn,
-  LensGetOut,
-  LensCreateIn,
-  LensCreateOut,
-  CreateOptions,
-  LensUpdateIn,
-  LensUpdateOut,
-  UpdateOptions,
-  LensDeleteIn,
-  LensDeleteOut,
-  LensSearchIn,
-  LensSearchOut,
-  LensSearchQuery,
-  LensCrudTypes,
-} from './latest';
+export * from './latest';
 
 export * as LensV1 from './v1';

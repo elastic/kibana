@@ -23,6 +23,7 @@ export const getLensAttributesFromSuggestion = ({
   suggestion: Suggestion | undefined;
   dataView?: DataView;
 }): {
+  // TODO: make these types reference the actual attributes
   references: Array<{ name: string; id: string; type: string }>;
   visualizationType: string;
   state: {
@@ -32,6 +33,7 @@ export const getLensAttributesFromSuggestion = ({
     filters: Filter[];
   };
   title: string;
+  version: 1;
 } => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -65,6 +67,7 @@ export const getLensAttributesFromSuggestion = ({
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
+    version: 1 as const,
   };
   return attributes;
 };

@@ -13,7 +13,12 @@ import {
 } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { isESQLModeEnabled } from './initializers/utils';
-import type { LensEmbeddableStartServices } from './types';
+import type { LensEmbeddableStartServices, LensSerializedState } from './types';
+
+export type ESQLStartServices = Pick<
+  LensEmbeddableStartServices,
+  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings'
+>;
 
 export async function loadESQLAttributes({
   dataViews,
@@ -21,10 +26,7 @@ export async function loadESQLAttributes({
   visualizationMap,
   datasourceMap,
   uiSettings,
-}: Pick<
-  LensEmbeddableStartServices,
-  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings'
->) {
+}: ESQLStartServices): Promise<LensSerializedState['attributes'] | undefined> {
   // Early exit if ESQL is not supported
   if (!isESQLModeEnabled({ uiSettings })) {
     return;

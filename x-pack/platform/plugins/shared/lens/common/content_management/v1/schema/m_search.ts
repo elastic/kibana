@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './cm_services';
+import { lensCommonSavedObjectSchema } from './common';
+
+export const lensCMMSearchResultSchema = lensCommonSavedObjectSchema;

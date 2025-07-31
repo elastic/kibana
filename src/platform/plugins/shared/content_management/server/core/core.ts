@@ -146,6 +146,7 @@ export class Core {
     const msearchClientFactory = getMSearchClientFactory({
       contentRegistry: this.contentRegistry,
       mSearchService,
+      logger: this.ctx.logger,
     });
 
     const msearchClient = msearchClientFactory({ requestHandlerContext, request });

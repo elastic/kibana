@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+// When we introduce a new version we need to export a union of all the version schemas
 export * from './v1';

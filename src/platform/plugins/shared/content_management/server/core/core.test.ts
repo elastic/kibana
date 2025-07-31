@@ -37,6 +37,8 @@ import type {
   SearchItemError,
 } from './event_types';
 import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { RequestHandlerContext } from '@kbn/core/server';
 
 const spyMsearch = jest.fn();
 const getmSearchSpy = () => spyMsearch;
@@ -64,7 +66,8 @@ const setup = ({
   latestVersion = 2,
 }: { registerFooType?: boolean; storage?: ContentStorage; latestVersion?: number } = {}) => {
   const ctx: StorageContext = {
-    requestHandlerContext: {} as any,
+    request: mockRouter.createFakeKibanaRequest({}),
+    requestHandlerContext: jest.mocked<RequestHandlerContext>({} as any),
     version: {
       latest: latestVersion,
       request: 1,
