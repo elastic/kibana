@@ -149,15 +149,17 @@ describe('Cloud Security Posture Plugin', () => {
     });
 
     it('should handle getInstallation complete failure after retries', async () => {
+      const testError = new Error('ES connection failed persistently');
       fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
         async (): Promise<Installation | undefined> => {
-          throw new Error('ES connection failed persistently');
+          throw testError;
         }
       );
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
       const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -166,6 +168,11 @@ describe('Cloud Security Posture Plugin', () => {
       // Assert - should retry 4 times total (initial + 3 retries)
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(4);
       expect(spy).toHaveBeenCalledTimes(0);
+      // Verify that the final error is logged properly after all retries are exhausted
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'CSP plugin getInstallation operation failed after all retries',
+        testError
+      );
     });
 
     it('should not initialize when other package is created', async () => {

@@ -220,7 +220,9 @@ export class CspPlugin
           }
         );
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch((err) => {
+        this.logger.error('CSP plugin getInstallation operation failed after all retries', err);
+      });
 
     return {};
   }
