@@ -9,6 +9,7 @@
 
 import { loadConfiguration } from './config_loader';
 import { piiFilter } from './filters/pii_filter';
+import { patchMocha } from './patch_mocha';
 
 export const initApm = (
   argv: string[],
@@ -17,7 +18,16 @@ export const initApm = (
   serviceName: string
 ) => {
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
-  const apmConfig = apmConfigLoader.getConfig(serviceName);
+
+  process.env.ELASTIC_APM_ACTIVE = 'true';
+  process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY = '';
+  process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE = '1.0';
+
+  const baseOptions = apmConfigLoader.getConfig(serviceName);
+
+  const apmConfig = {
+    ...baseOptions,
+  };
 
   const shouldRedactUsers = apmConfigLoader.isUsersRedactionEnabled();
 
@@ -29,6 +39,8 @@ export const initApm = (
   if (shouldRedactUsers) {
     apm.addFilter(piiFilter);
   }
+
+  patchMocha(apm);
 
   apm.start(apmConfig);
 };
