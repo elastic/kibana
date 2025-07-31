@@ -1296,6 +1296,32 @@
       }
     }
   },
+  "epm-packages-knowledge-base": {
+    "dynamic": false,
+    "properties": {
+      "installed_at": {
+        "type": "date"
+      },
+      "knowledge_base_content": {
+        "properties": {
+          "content": {
+            "index": false,
+            "type": "text"
+          },
+          "filename": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "package_name": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
+      }
+    }
+  },
   "event-annotation-group": {
     "dynamic": false,
     "properties": {

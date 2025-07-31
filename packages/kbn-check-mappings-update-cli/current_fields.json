@@ -384,6 +384,14 @@
     "package_name",
     "package_version"
   ],
+  "epm-packages-knowledge-base": [
+    "installed_at",
+    "knowledge_base_content",
+    "knowledge_base_content.content",
+    "knowledge_base_content.filename",
+    "package_name",
+    "version"
+  ],
   "event-annotation-group": [
     "description",
     "title"
