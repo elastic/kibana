@@ -9,15 +9,23 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningDataVisualizerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningDataVisualizerProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async assertDataVisualizerImportDataCardExists() {
       await testSubjects.existOrFail('mlDataVisualizerCardImportData');
+    },
+
+    async assertDataVisualizerImportDataCardDoesNotExist() {
+      await testSubjects.missingOrFail('mlDataVisualizerCardImportData');
     },
 
     async assertDataVisualizerIndexDataCardExists() {
@@ -26,6 +34,12 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
 
     async assertDataVisualizerStartTrialCardExists() {
       await testSubjects.existOrFail('mlDataVisualizerCardStartTrial');
+    },
+
+    async navigateToFileUploadByPath() {
+      PageObjects.common.navigateToApp('ml', {
+        path: 'filedatavisualizer',
+      });
     },
 
     async assertSelectIndexButtonEnabled(expectedValue: boolean) {

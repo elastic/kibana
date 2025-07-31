@@ -38,5 +38,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./full_ml_access'));
     loadTestFile(require.resolve('./read_ml_access'));
     loadTestFile(require.resolve('./no_ml_access'));
+    loadTestFile(require.resolve('./no_file_upload_access'));
   });
 }
