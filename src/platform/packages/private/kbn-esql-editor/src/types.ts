@@ -99,6 +99,8 @@ export interface ESQLEditorProps {
   expandToFitQueryOnMount?: boolean;
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
+  /** Optional form field label to show above the query editor */
+  formLabel?: string;
 }
 
 interface ESQLVariableService {
@@ -133,4 +135,9 @@ export interface ESQLEditorDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
+}
+
+export enum HistoryTabId {
+  recentQueries = 'history-queries-tab',
+  standardQueries = 'starred-queries-tab',
 }

@@ -8,7 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import {
+  ESQLControlVariable,
+  ESQLLicenseType,
+  ESQLVariableType,
+  RecommendedField,
+} from '@kbn/esql-types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -80,34 +85,56 @@ export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
 
+export const filterFunctionSignatures = (
+  signatures: FunctionDefinition['signatures'],
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+): FunctionDefinition['signatures'] => {
+  if (!hasMinimumLicenseRequired) {
+    return signatures;
+  }
+
+  return signatures.filter((signature) => {
+    if (!signature.license) return true;
+    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType);
+  });
+};
+
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
-  predicates: FunctionFilterPredicates | undefined
+  predicates: FunctionFilterPredicates | undefined,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
   }
   const { location, returnTypes, ignored = [] } = predicates;
 
-  return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
-    if (ignoreAsSuggestion) {
-      return false;
-    }
+  return functions.filter(
+    ({ name, locationsAvailable, ignoreAsSuggestion, signatures, license }) => {
+      if (ignoreAsSuggestion) {
+        return false;
+      }
 
-    if (ignored.includes(name)) {
-      return false;
-    }
+      if (!!hasMinimumLicenseRequired && license) {
+        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+          return false;
+        }
+      }
 
-    if (location && !locationsAvailable.includes(location)) {
-      return false;
-    }
+      if (ignored.includes(name)) {
+        return false;
+      }
 
-    if (returnTypes && !returnTypes.includes('any')) {
-      return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
-    }
+      if (location && !locationsAvailable.includes(location)) {
+        return false;
+      }
+      if (returnTypes && !returnTypes.includes('any')) {
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+      }
 
-    return true;
-  });
+      return true;
+    }
+  );
 };
 
 export function getAllFunctions(options?: {
@@ -233,9 +260,12 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates
+  predicates?: FunctionFilterPredicates,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): ISuggestionItem[] => {
-  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+  return filterFunctionDefinitions(allFunctions(), predicates, hasMinimumLicenseRequired).map(
+    getFunctionSuggestion
+  );
 };
 
 export function checkFunctionInvocationComplete(

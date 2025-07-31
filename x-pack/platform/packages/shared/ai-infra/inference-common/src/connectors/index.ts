@@ -14,4 +14,10 @@ export {
   getConnectorPlatform,
 } from './connector_config';
 export { getConnectorModel } from './get_connector_model';
-export { InferenceConnectorType, type InferenceConnector } from './connectors';
+export {
+  InferenceConnectorType,
+  type InferenceConnector,
+  type InferenceConnectorCapabilities,
+} from './connectors';
+export { getModelDefinition } from './known_models';
+export { getContextWindowSize, contextWindowFromModelName } from './connector_capabilities';

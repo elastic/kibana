@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('anomaly detection alert', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       const { job, datafeed } = createTestJobAndDatafeed();

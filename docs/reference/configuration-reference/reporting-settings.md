@@ -185,32 +185,32 @@ If the headless Chromium browser is asked to send a request that violates the ne
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
 
 ```yaml
-# Only allow requests to placeholder.com
+# Only allow requests to elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com" } ]
+  rules: [ { allow: true, host: "elastic.co" } ]
 ```
 
 ```yaml
-# Only allow requests to https://placeholder.com
+# Only allow HTTPS requests to https://elastic.co
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
+  rules: [ { allow: true, host: "elastic.co", protocol: "https:" } ]
 ```
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
-# Denies requests from http://placeholder.com, but anything else is allowed.
+# Denies requests from http://elastic.co, but anything else is allowed.
 xpack.screenshotting.networkPolicy:
-  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+  rules: [{ allow: false, host: "elastic.co", protocol: "http:" }, { allow: true }];
 ```
 
 A network policy can be composed of multiple rules:
 
 ```yaml
-# Allow any request to http://placeholder.com but for any other host, https is required
+# Allow any request to http://elastic.co but for any other host, https is required
 xpack.screenshotting.networkPolicy
   rules: [
-    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, host: "elastic.co", protocol: "http:" },
     { allow: true, protocol: "https:" },
   ]
 ```
