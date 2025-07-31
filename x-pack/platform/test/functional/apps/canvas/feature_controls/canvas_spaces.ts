@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('space with Canvas disabled', () => {
       const spaceWithCanvasDisabledArchive =
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/disabled_features';
+        'x-pack/platform/test/functional/fixtures/kbn_archives/spaces/disabled_features';
 
       before(async () => {
         // we need to load the following in every situation as deleting

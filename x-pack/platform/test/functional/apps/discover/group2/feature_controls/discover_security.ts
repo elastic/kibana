@@ -58,7 +58,7 @@ export default function (ctx: FtrProviderContext) {
   describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
@@ -74,7 +74,7 @@ export default function (ctx: FtrProviderContext) {
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/feature_controls/security'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

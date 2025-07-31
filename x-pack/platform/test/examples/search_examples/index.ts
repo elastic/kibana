@@ -19,14 +19,14 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       ); // need at least one index pattern
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 
