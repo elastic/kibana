@@ -3,7 +3,7 @@
   "id": "@kbn/storage-adapter",
   "owner": [
     "@elastic/observability-ui",
-    "@elastic/core"
+    "@elastic/kibana-core"
   ],
   "group": "platform",
   "visibility": "shared"
