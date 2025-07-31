@@ -404,9 +404,9 @@ export class TaskManagerRunner implements TaskRunner {
       });
 
       const originalTaskCancel = this.task.cancel;
-      this.task.cancel = async () => {
+      this.task.cancel = async function () {
         abortController.abort();
-        if (originalTaskCancel) return originalTaskCancel();
+        if (originalTaskCancel) return originalTaskCancel.call(this);
       };
 
       const ctx = {
