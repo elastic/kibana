@@ -25,6 +25,7 @@ import {
   FunctionDefinition,
   FunctionParameterType,
   ReasonTypes,
+  SupportedDataType,
 } from '../../types';
 import {
   ICommandCallbacks,
@@ -340,13 +341,46 @@ export function validateFunction({
     return [];
   }
 
+  const argTypes = fn.args.map((node) =>
+    getExpressionType(node, context.fields, context.userDefinedColumns)
+  );
+
+  // Begin validation
   const A = getSignaturesWithMatchingArity(definition, fn);
 
   if (!A.length) {
-    return [errors.noMatchingCallSignatures(fn, definition)];
+    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
   }
 
-  return [];
+  const S = getSignatureWithMatchingTypes(definition, argTypes);
+
+  if (S) {
+    return [];
+  }
+
+  return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
+}
+
+/**
+ * Returns a signature matching the given types if it exists
+ * @param definition
+ * @param types
+ *
+ * @TODO handle variadic, implicit casting, etc.
+ */
+function getSignatureWithMatchingTypes(
+  definition: FunctionDefinition,
+  types: Array<SupportedDataType | 'unknown'>
+): FunctionDefinition['signatures'][number] | undefined {
+  return definition.signatures.find((sig) => {
+    if (types.length < sig.params.length) {
+      return false;
+    }
+
+    return sig.params.every((param, index) => {
+      return types[index] === param.type;
+    });
+  });
 }
 
 /**

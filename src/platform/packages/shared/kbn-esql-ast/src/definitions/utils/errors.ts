@@ -12,10 +12,10 @@ import type {
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-  ESQLIdentifier,
 } from '../../types';
 import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
 
@@ -66,18 +66,18 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'noMatchingCallSignature':
       const signatureList = (out.validSignatures as unknown as string[])
-        .map((sig) => `- ${sig}`)
+        .map((sig) => `- [${sig}]`)
         .join('\n  ');
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
           defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
 
-Received {argTypes}.
+Received [{argTypes}].
 
 Expected one of:
   {validSignatures}`,
           values: {
-            functionName: out.functionName,
+            functionName: out.functionName.toUpperCase(),
             argTypes: out.argTypes,
             validSignatures: signatureList,
           },
@@ -473,17 +473,21 @@ export const errors = {
       identifier: identifier.name,
     }),
 
-  noMatchingCallSignatures: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
+  noMatchingCallSignatures: (
+    fn: ESQLFunction,
+    definition: FunctionDefinition,
+    argTypes: string[]
+  ): ESQLMessage => {
+    const validSignatures = definition.signatures.map((sig) => {
+      const definitionArgTypes = sig.params.map((param) => param.type).join(', ');
+      return `${definitionArgTypes}`;
+      // return `${definitionArgTypes} => ${sig.returnType}`;
+    });
+
     return errors.byId('noMatchingCallSignature', fn.location, {
       functionName: fn.name,
-      argTypes: 'boolean, keyword',
-      validSignatures: [
-        'boolean, boolean',
-        'keyword, keyword',
-        'text, text',
-        'double, double',
-        'integer, integer',
-      ],
+      argTypes: argTypes.join(', '),
+      validSignatures,
     });
   },
 };
