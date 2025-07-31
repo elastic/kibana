@@ -158,6 +158,12 @@ export const POLICIES = i18n.translate(
     defaultMessage: 'Policies',
   }
 );
+export const ENDPOINT_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.search.administration.endpointExceptions',
+  {
+    defaultMessage: 'Endpoint exceptions',
+  }
+);
 export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.search.administration.trustedApps',
   {

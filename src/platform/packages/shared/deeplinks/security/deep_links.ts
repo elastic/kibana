@@ -34,6 +34,7 @@ export enum SecurityPageName {
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
+  endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
   exploreLanding = 'explore',
