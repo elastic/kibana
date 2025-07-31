@@ -21,6 +21,7 @@ import {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { trace } from '@opentelemetry/api';
 import { partition, last, takeRightWhile } from 'lodash';
 import { createReasonToolCall } from './create_reason_tool_call';
 import {
@@ -142,7 +143,11 @@ export function executeAsReasoningAgent(
             toolCallId: toolCall.toolCallId,
           },
           () => callback(toolCall)
-        );
+        ).catch((error) => {
+          trace.getActiveSpan()?.recordException(error);
+          return { error };
+        });
+
         return {
           response,
           name: toolCall.function.name,

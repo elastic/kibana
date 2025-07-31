@@ -18,8 +18,10 @@ import {
 import { PromptCompositeResponse, PromptOptions } from '@kbn/inference-common/src/prompt/api';
 import { EsqlDocumentBase, runAndValidateEsqlQuery } from '@kbn/inference-plugin/server';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { omit, once } from 'lodash';
+import { castArray, once } from 'lodash';
 import moment from 'moment';
+import { indexPatternToCss } from '@kbn/std';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { describeDataset, sortAndTruncateAnalyzedFields } from '../../..';
 import { EsqlPrompt } from './prompt';
 
@@ -49,6 +51,7 @@ export async function executeAsEsqlAgent({
   prompt,
   tools,
   toolCallbacks,
+  logger,
 }: {
   inferenceClient: BoundInferenceClient;
   esClient: ElasticsearchClient;
@@ -58,6 +61,7 @@ export async function executeAsEsqlAgent({
   prompt: string;
   tools?: Record<string, ToolDefinition>;
   toolCallbacks?: ToolCallbacksOf<ToolOptions>;
+  logger: Logger;
 }): Promise<PromptResponse> {
   const docBase = await loadEsqlDocBase();
 
@@ -70,8 +74,13 @@ export async function executeAsEsqlAgent({
         return {
           error:
             response.error && response.error instanceof errors.ResponseError
-              ? omit(response.error, 'meta')
-              : response.error,
+              ? {
+                  message: response.error.message,
+                  status: response.error.statusCode,
+                }
+              : {
+                  message: response.error?.message,
+                },
           errorMessages: response.errorMessages,
         };
       }
@@ -91,20 +100,75 @@ export async function executeAsEsqlAgent({
     toolCallbacks: {
       ...toolCallbacks,
       list_datasets: async (toolCall) => {
+        const name = toolCall.function.arguments.name.flatMap((index) => index.split(','));
+
+        if (toolCall.function.arguments.include_kibana_indices) {
+          name.push(...indexPatternToCss('-.*'));
+        }
+
         return esClient.indices
           .resolveIndex({
             name: toolCall.function.arguments.name.flatMap((index) => index.split(',')),
             allow_no_indices: true,
           })
+          .catch((error) => {
+            if (error instanceof errors.ResponseError && error.statusCode === 404) {
+              return {
+                data_streams: [],
+                indices: [],
+                aliases: [],
+              };
+            }
+            throw error;
+          })
           .then((response) => {
+            const dataStreams = response.data_streams.map((dataStream) => {
+              return {
+                name: dataStream.name,
+                timestamp_field: dataStream.timestamp_field,
+              };
+            });
+
+            const aliases = response.aliases.map((alias) => {
+              return {
+                name: alias.name,
+                ...(alias.indices ? { indices: truncateList(castArray(alias.indices), 5) } : {}),
+              };
+            });
+
+            const allAliases = aliases.map((alias) => alias.name);
+
+            const allDataStreamNames = dataStreams.map((dataStream) => dataStream.name);
+
+            const indices = response.indices
+              .filter((index) => {
+                if (index.data_stream) {
+                  const isRepresentedAsDataStream = allDataStreamNames.includes(index.data_stream);
+
+                  return !isRepresentedAsDataStream;
+                }
+
+                if (index.aliases?.length) {
+                  const isRepresentedAsAlias = index.aliases.some((alias) =>
+                    allAliases.includes(alias)
+                  );
+                  return !isRepresentedAsAlias;
+                }
+
+                return true;
+              })
+              .map((index) => {
+                return index.name;
+              });
+
             return {
-              ...response,
-              data_streams: response.data_streams.map((dataStream) => {
-                return {
-                  name: dataStream.name,
-                  timestamp_field: dataStream.timestamp_field,
-                };
-              }),
+              indices: truncateList(indices, 250),
+              data_streams: truncateList(
+                response.data_streams.map((dataStream) => {
+                  return `${dataStream.name} (${dataStream.timestamp_field})`;
+                }),
+                250
+              ),
             };
           });
       },
@@ -114,7 +178,7 @@ export async function executeAsEsqlAgent({
           index: toolCall.function.arguments.index,
           kql: toolCall.function.arguments.kql,
           start: start ?? moment().subtract(24, 'hours').valueOf(),
-          end: Date.now(),
+          end: end ?? Date.now(),
         });
 
         return {
@@ -123,65 +187,100 @@ export async function executeAsEsqlAgent({
       },
       get_documentation: async (toolCall) => {
         return docBase.getDocumentation(
-          toolCall.function.arguments.commands.concat(toolCall.function.arguments.functions),
+          (toolCall.function.arguments.commands ?? []).concat(
+            toolCall.function.arguments.functions ?? []
+          ),
           { generateMissingKeywordDoc: true }
         );
       },
       run_queries: async (toolCall) => {
+        const mode = toolCall.function.arguments.mode ?? 'execute';
+
         const results = await Promise.all(
-          toolCall.function.arguments.queries.map(async (query) => {
-            const response = await runEsqlQuery(query);
+          toolCall.function.arguments.queries.map(async (originalQuery) => {
+            const correction = correctCommonEsqlMistakes(
+              mode === 'execute' ? originalQuery : `${originalQuery} | LIMIT 0`
+            );
 
-            const cols = response.columns ?? [];
-            const docs =
-              response.rows?.map((row) => {
-                const doc: Record<string, any> = {};
-                row.forEach((value, idx) => {
-                  const col = cols[idx];
-                  if (value !== null) {
-                    doc[col.name] = value;
-                  }
-                });
-              }) ?? [];
+            const queryOutput = correction.isCorrection ? correction : originalQuery;
 
-            return {
-              query,
-              response: {
-                docs: truncateList(docs, 50),
-              },
-            };
+            const response = await runEsqlQuery(correction.output);
+
+            switch (mode) {
+              case 'validate': {
+                if ('error' in response) {
+                  return {
+                    query: queryOutput,
+                    validation: {
+                      valid: false,
+                      ...response,
+                    },
+                  };
+                }
+
+                const cols = truncateList(response.columns?.map((c) => c.name) ?? [], 10);
+                return {
+                  query: queryOutput,
+                  validation: {
+                    valid: true,
+                    ...(cols.length ? { columns: cols } : {}),
+                  },
+                };
+              }
+
+              case 'validateSyntax': {
+                if ('error' in response && response.errorMessages?.length) {
+                  return {
+                    query: queryOutput,
+                    validation: {
+                      valid: false,
+                      errorMessages: response.errorMessages,
+                    },
+                  };
+                }
+                return {
+                  query: queryOutput,
+                  validation: {
+                    valid: true,
+                  },
+                };
+              }
+
+              case 'execute':
+              default: {
+                if ('error' in response) {
+                  return {
+                    query: queryOutput,
+                    ...response,
+                  };
+                }
+
+                const cols = response.columns ?? [];
+                const docs =
+                  response.rows?.map((row) => {
+                    const doc: Record<string, any> = {};
+                    row.forEach((value, idx) => {
+                      const col = cols[idx];
+                      if (value !== null) {
+                        doc[col.name] = value;
+                      }
+                    });
+                    return doc;
+                  }) ?? [];
+
+                return {
+                  query: queryOutput,
+                  response: {
+                    docs: truncateList(docs, 50),
+                  },
+                };
+              }
+            }
           })
         );
 
         return {
           queries: results,
-        };
-      },
-      validate_queries: async (toolCall) => {
-        const results = await Promise.all(
-          toolCall.function.arguments.queries.map(async (query) => {
-            return {
-              query,
-              validation: await runEsqlQuery(query + ' | LIMIT 0').then((response) => {
-                if ('error' in response) {
-                  return {
-                    valid: false,
-                    ...response,
-                  };
-                }
-
-                const cols = truncateList(response.columns?.map((col) => col.name) ?? [], 10);
-                return {
-                  valid: true,
-                  ...(cols.length ? { columns: cols } : {}),
-                };
-              }),
-            };
-          })
-        );
-
-        return {
-          results,
         };
       },
     },

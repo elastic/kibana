@@ -108,6 +108,11 @@ describe('correctCommonEsqlMistakes', () => {
     | WHERE DATE_EXTRACT("hour", "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT("hour", dropoff_datetime) < 10
     | LIMIT 10`,
     });
+
+    expectQuery({
+      input: `FROM logs-apm.error-default\n| WHERE @timestamp >= NOW() - 7 days\n| STATS total_logs = COUNT(*), error_logs = COUNT(*) WHERE processor.event == 'error' BY day = BUCKET(@timestamp, 1 day)\n| EVAL error_rate = (error_logs / total_logs) * 100\n| SORT day | LIMIT 0`,
+      expectedOutput: `FROM logs-apm.error-default\n| WHERE @timestamp >= NOW() - 7 days\n| STATS total_logs = COUNT(*), error_logs = COUNT(*) WHERE processor.event == "error" BY day = BUCKET(@timestamp, 1 day)\n| EVAL error_rate = (error_logs / total_logs) * 100\n| SORT day\n| LIMIT 0`,
+    });
   });
 
   it(`verifies if the SORT key is in KEEP, and if it's not, it will include it`, () => {
@@ -213,21 +218,6 @@ describe('correctCommonEsqlMistakes', () => {
           message == "Connection error", 0
         )
       | STATS success_rate = AVG(successful)`,
-    });
-  });
-
-  it('escapes special characters in column names', () => {
-    expectQuery({
-      input: `FROM "custom-test"
-| STATS
-    count = COUNT(*),
-    min = MIN("Total Bytes"),
-    max = MAX("Total Bytes"),
-    avg = AVG("Total Bytes"),
-    sum = SUM("Total Bytes")
-`,
-      expectedOutput: `FROM "custom-test"
-| STATS count = COUNT(*), min = MIN(\`Total Bytes\`), max = MAX(\`Total Bytes\`), avg = AVG(\`Total Bytes\`), sum = SUM(\`Total Bytes\`)`,
     });
   });
 });

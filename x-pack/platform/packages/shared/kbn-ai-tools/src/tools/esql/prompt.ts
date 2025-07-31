@@ -49,22 +49,6 @@ export const EsqlPrompt = createPrompt({
               },
             },
           },
-          required: ['commands', 'functions'],
-        },
-      },
-      validate_queries: {
-        description: 'Validate one or more ES|QL queries for syntax errors and/or mapping issues',
-        schema: {
-          type: 'object',
-          properties: {
-            queries: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-            },
-          },
-          required: ['queries'],
         },
       },
       run_queries: {
@@ -78,6 +62,10 @@ export const EsqlPrompt = createPrompt({
                 type: 'string',
               },
             },
+            mode: {
+              type: 'string',
+              enum: ['execute', 'validate', 'validateSyntax'],
+            },
           },
           required: ['queries'],
         },
@@ -88,6 +76,10 @@ export const EsqlPrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
+            include_kibana_indices: {
+              description: 'Whether to include Kibana system indices (saved objects, alerts, etc)',
+              type: 'boolean',
+            },
             name: {
               type: 'array',
               items: {

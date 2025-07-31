@@ -15,9 +15,22 @@ import {
   type ChatCompleteCompositeResponse,
   MessageRole,
   AnonymizationRule,
+  isToolValidationError,
+  ChatCompletionEvent,
+  isToolNotFoundError,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { defer, forkJoin, from, identity, share, switchMap, throwError } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  defer,
+  forkJoin,
+  from,
+  identity,
+  share,
+  switchMap,
+  throwError,
+} from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -84,7 +97,7 @@ export function createChatCompleteCallbackApi({
       abortSignal,
       stream,
       maxRetries = 3,
-      retryConfiguration = {},
+      retryConfiguration = { retryOn: 'auto' },
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
@@ -145,41 +158,75 @@ export function createChatCompleteCallbackApi({
                 ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
                 : system;
 
-              return withChatCompleteSpan(
-                {
-                  system: systemWithAnonymizationInstructions,
-                  messages: anonymization.messages,
-                  tools,
-                  toolChoice,
-                  model: {
-                    family: getConnectorFamily(connector),
-                    provider: getConnectorProvider(connector),
+              const executeChat = (
+                currentMessages: typeof anonymization.messages,
+                retriesLeft: number
+              ): Observable<ChatCompletionEvent> => {
+                return withChatCompleteSpan(
+                  {
+                    system: systemWithAnonymizationInstructions,
+                    messages: currentMessages,
+                    tools,
+                    toolChoice,
+                    model: {
+                      family: getConnectorFamily(connector),
+                      provider: getConnectorProvider(connector),
+                    },
+                    ...metadata?.attributes,
                   },
-                  ...metadata?.attributes,
-                },
-                () => {
-                  return inferenceAdapter
-                    .chatComplete({
-                      system: systemWithAnonymizationInstructions,
-                      executor,
-                      messages: anonymization.messages,
-                      toolChoice,
-                      tools,
-                      temperature,
-                      logger,
-                      functionCalling,
-                      modelName,
-                      abortSignal,
-                      metadata,
-                    })
-                    .pipe(
-                      chunksIntoMessage({
-                        toolOptions: { toolChoice, tools },
+                  () =>
+                    inferenceAdapter
+                      .chatComplete({
+                        system: systemWithAnonymizationInstructions,
+                        executor,
+                        messages: currentMessages,
+                        toolChoice,
+                        tools,
+                        temperature,
                         logger,
+                        functionCalling,
+                        modelName,
+                        abortSignal,
+                        metadata,
                       })
-                    );
-                }
-              ).pipe(deanonymizeMessage(anonymization));
+                      .pipe(
+                        chunksIntoMessage({
+                          toolOptions: { toolChoice, tools },
+                          logger,
+                        })
+                      )
+                ).pipe(
+                  catchError((error) => {
+                    if (
+                      (isToolValidationError(error) || isToolNotFoundError(error)) &&
+                      retriesLeft > 0
+                    ) {
+                      // Build the assistant message reflecting the invalid tool calls
+                      const assistantMessage = {
+                        role: MessageRole.Assistant as const,
+                        content: error.meta.content || null,
+                        toolCalls: error.meta?.toolCalls ?? [],
+                      };
+
+                      // Build a user message describing the validation error so the LLM
+                      // can correct it on the next attempt
+                      const userMessage = {
+                        role: MessageRole.User as const,
+                        content: `${error.message}. Please fix and try again. Do not mention these errors, just repeat your previous reply but WITH the fixes applied.`,
+                      };
+
+                      return executeChat(
+                        [...currentMessages, assistantMessage, userMessage],
+                        retriesLeft - 1
+                      );
+                    }
+
+                    return throwError(() => error);
+                  })
+                );
+              };
+
+              return executeChat(messages, maxRetries).pipe(deanonymizeMessage(anonymization));
             })
           );
         })

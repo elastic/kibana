@@ -6,7 +6,7 @@
  */
 
 import { InferenceTaskError } from '../errors';
-import type { UnvalidatedToolCall } from './tools';
+import type { ToolCall, UnvalidatedToolCall } from './tools';
 
 /**
  * List of code of error that are specific to the {@link ChatCompleteAPI}
@@ -38,6 +38,8 @@ export type ChatCompletionToolNotFoundError = InferenceTaskError<
   {
     /** The name of the tool that got called */
     name: string;
+    toolCalls: ToolCall[];
+    content?: string;
   }
 >;
 
@@ -54,6 +56,7 @@ export type ChatCompletionToolValidationError = InferenceTaskError<
     arguments?: string;
     errorsText?: string;
     toolCalls?: UnvalidatedToolCall[];
+    content?: string;
   }
 >;
 

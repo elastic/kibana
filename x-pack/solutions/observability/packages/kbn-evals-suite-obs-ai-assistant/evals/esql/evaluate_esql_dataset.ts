@@ -8,6 +8,9 @@
 import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
 import { EvaluationDataset } from '@kbn/evals/src/types';
+import { executeAsEsqlAgent } from '@kbn/ai-tools';
+import { BoundInferenceClient } from '@kbn/inference-common';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
 
 interface EsqlExample extends Example {
@@ -35,10 +38,18 @@ export function createEvaluateEsqlDataset({
   evaluators,
   phoenixClient,
   chatClient,
+  inferenceClient,
+  logger,
+  signal,
+  esClient,
 }: {
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: ObservabilityAIAssistantEvaluationChatClient;
+  signal: AbortSignal;
+  inferenceClient: BoundInferenceClient;
+  logger: Logger;
+  esClient: ElasticsearchClient;
 }): EvaluateEsqlDataset {
   return async function evaluateEsqlDataset({
     dataset: { name, description, examples },
@@ -59,13 +70,18 @@ export function createEvaluateEsqlDataset({
       {
         dataset,
         task: async ({ input }) => {
-          const response = await chatClient.complete({
-            messages: input.question,
+          const response = await executeAsEsqlAgent({
+            inferenceClient,
+            esClient,
+            logger,
+            prompt: `${input.question}. If you end up generating and/or executing a query, provide the full query in your final response.`,
+            signal,
+            toolCallbacks: {},
+            tools: {},
           });
 
           return {
-            errors: response.errors,
-            messages: response.messages,
+            content: response.content,
           };
         },
       },

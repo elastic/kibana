@@ -7,6 +7,7 @@
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
+import { toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { evaluate as base } from '../../src/evaluate';
 import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 import {
@@ -26,14 +27,22 @@ const evaluate = base.extend<{
   evaluateEsqlDataset: EvaluateEsqlDataset;
 }>({
   evaluateEsqlDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
+    async ({ chatClient, evaluators, phoenixClient, inferenceClient, esClient, log }, use) => {
+      const controller = new AbortController();
+
+      await use(
         createEvaluateEsqlDataset({
           chatClient,
           evaluators,
           phoenixClient,
+          inferenceClient,
+          signal: controller.signal,
+          esClient,
+          logger: toolingLogToLogger({ log }),
         })
       );
+
+      controller.abort();
     },
     { scope: 'test' },
   ],
