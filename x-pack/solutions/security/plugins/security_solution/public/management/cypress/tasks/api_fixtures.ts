@@ -22,7 +22,7 @@ export const cleanupRule = (id: string) => {
   });
 };
 
-export const loadRule = (body = {}, includeResponseActions = true) =>
+export const loadRule = (body: Record<string, unknown> = {}, includeResponseActions = true) =>
   request<RuleResponse>({
     method: 'POST',
     url: `/api/detection_engine/rules`,
