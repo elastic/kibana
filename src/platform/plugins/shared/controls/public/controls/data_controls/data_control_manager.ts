@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { ControlOutputOption, ControlValuesSource } from '../../../common';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';

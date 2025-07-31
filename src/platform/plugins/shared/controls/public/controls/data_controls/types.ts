@@ -17,30 +17,33 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { PublishesESQLVariable } from '@kbn/esql-types';
-import { ControlValuesSource, ControlOutputOption, DefaultDataControlState } from '../../../common';
+import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
+import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
-export interface PublishesField {
+interface PublishesField {
   field$: PublishingSubject<DataViewField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export interface PublishesControlInputOutput {
+interface PublishesControlInputOutput {
   valuesSource$: PublishingSubject<ControlValuesSource>;
   output$: PublishingSubject<ControlOutputOption>;
 }
 
-export interface PublishesESQLQuery {
+interface PublishesESQLQuery {
   esqlQuery$: PublishingSubject<string | undefined>;
 }
 
-export interface PublishesStaticValues {
+interface PublishesStaticValues {
   staticValues$: PublishingSubject<Array<{ value: string; text: string }> | undefined>;
 }
+
+interface MaybePublishesESQLVariable 
 
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden

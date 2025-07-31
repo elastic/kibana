@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFormRow, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ESQLEditorProps, ESQLEditorDeps } from '@kbn/esql-editor';
+import { ESQLEditorProps } from '@kbn/esql-editor';
 import { css } from '@emotion/react';
 import { EDITOR_INITIAL_HEIGHT_INLINE_EDITING } from '@kbn/esql-editor/src/esql_editor.styles';
 import {
