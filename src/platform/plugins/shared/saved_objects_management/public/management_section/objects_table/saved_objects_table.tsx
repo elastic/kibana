@@ -715,7 +715,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 'savedObjectsManagement.objectsTable.selected.selectedSavedObjectsLabel',
                 {
                   defaultMessage:
-                    '{count, plural, one {# item selected.} other {# items selected.}}',
+                    '{count, plural, one {# item} other {# items}} selected.',
                   values: {
                     count: selectedSavedObjects.length,
                   },
