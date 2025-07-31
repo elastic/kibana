@@ -81,8 +81,16 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Metric Threshold Alerts Executor', () => {
     describe('with 10K plus docs', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/ten_thousand_plus'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/ten_thousand_plus'
+        )
+      );
       describe('without group by', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -743,8 +751,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     describe('with gauge data', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
 
       describe('without groupBy', () => {
         it('should alert on document count', async () => {
@@ -1176,8 +1192,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     describe('with rate data', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts_test_data'
+        )
+      );
       it('should alert on rate with long threshold', async () => {
         const params = {
           ...baseParams,
