@@ -53,7 +53,6 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
           {
             type: ToolResultType.other,
             data: {
-              type: 'index_explorer_response',
               indices: result,
               original_query: query,
               index_pattern: indexPattern,

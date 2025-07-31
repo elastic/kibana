@@ -100,7 +100,12 @@ export const toolToLangchain = ({
 
         const errorToolReturn: RunToolReturn = {
           runId: tool.id,
-          results: [{ type: ToolResultType.other, data: { reason: e.message } }],
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: e.message, stack: e.stack },
+            },
+          ],
         };
 
         return [`${e}`, errorToolReturn];

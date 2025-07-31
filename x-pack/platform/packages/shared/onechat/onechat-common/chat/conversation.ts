@@ -56,7 +56,7 @@ export interface ToolCallWithResult<T = ToolResult[]> {
    */
   params: Record<string, any>;
   /**
-   * Result of the tool, serialized as string.
+   * Result of the tool
    */
   results: T;
 }

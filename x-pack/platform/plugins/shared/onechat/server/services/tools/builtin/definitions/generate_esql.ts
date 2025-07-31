@@ -51,7 +51,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         toolResults.push({
           type: ToolResultType.other,
           data: {
-            type: 'esql_generation_response',
             answer: esqlResponse.answer,
             original_query: query,
             context,

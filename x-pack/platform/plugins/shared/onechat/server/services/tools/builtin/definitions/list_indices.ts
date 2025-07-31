@@ -33,7 +33,6 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
           {
             type: ToolResultType.other,
             data: {
-              type: 'list_indices_response',
               indices: result,
               pattern,
             },

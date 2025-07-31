@@ -28,7 +28,6 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           {
             type: ToolResultType.other,
             data: {
-              type: 'index_mappings_response',
               mappings: result,
               indices,
             },

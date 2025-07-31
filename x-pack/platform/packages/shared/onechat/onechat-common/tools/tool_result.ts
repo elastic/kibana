@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchRequest,
+  EsqlEsqlColumnInfo,
+  FieldValue,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
   query = 'query',
   other = 'other',
+  error = 'error',
 }
 
 export interface ResourceResult {
@@ -47,4 +51,17 @@ export interface OtherResult {
   data: unknown;
 }
 
-export type ToolResult = ResourceResult | TabularDataResult | QueryResult | OtherResult;
+export interface ErrorResult {
+  type: ToolResultType.error;
+  data: {
+    message: string;
+    stack?: unknown;
+  };
+}
+
+export type ToolResult =
+  | ResourceResult
+  | TabularDataResult
+  | QueryResult
+  | OtherResult
+  | ErrorResult;
