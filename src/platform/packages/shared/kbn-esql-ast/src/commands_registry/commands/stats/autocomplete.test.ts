@@ -516,7 +516,12 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on partial column name', async () => {
-        const expected = [...allEvalFunctionsForStats, ...allGroupingFunctions];
+        const expected = [
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+          getDateHistogramCompletionItem().text,
+          ' = ',
+        ];
 
         await statsExpectSuggestions('from a | stats a=max(b) BY keywor', [
           ...expected,

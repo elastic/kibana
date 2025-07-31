@@ -10,7 +10,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 // import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isAssignment } from '../../../ast/is';
+import { isAssignment, isColumn } from '../../../ast/is';
 import { ICommandCallbacks, Location } from '../../types';
 import type {
   ESQLCommand,
@@ -296,7 +296,11 @@ async function getExpressionSuggestions({
     );
   }
 
-  if (!expressionRoot && !/not\s+$/i.test(innerText)) {
+  if (
+    (!expressionRoot ||
+      (isColumn(expressionRoot) && !_columnExists(expressionRoot.parts.join('.'), context))) &&
+    !/not\s+$/i.test(innerText)
+  ) {
     suggestions.push(...emptySuggestions);
   }
 
