@@ -133,7 +133,7 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { LensDocument } from './persistence';
+import type { LensDocument } from './persistence';
 import {
   CONTENT_ID,
   LATEST_VERSION,

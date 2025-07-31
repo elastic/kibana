@@ -31,7 +31,7 @@ import {
   reportingCsvExportShareIntegration,
   reportingPDFExportShareIntegration,
   reportingPNGExportShareIntegration,
-} from '@kbn/reporting-public/share/integrations';
+} from '@kbn/reporting-public/share';
 import { getSharedComponents } from '@kbn/reporting-public/share/shared';
 import { InjectedIntl } from '@kbn/i18n-react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
