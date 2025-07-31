@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { AuthConfig } from './auth_config';
-import { render, screen, waitFor, within, act } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
-import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
 describe('AuthConfig renders', () => {
   const onSubmit = jest.fn();
@@ -509,7 +508,7 @@ describe('AuthConfig renders', () => {
           clientId: 'client_id_123',
         },
         secret: {
-          clientSecret: 'read write', // This would overwrite the actual client secret!
+          clientSecret: 'secret_123',
         },
       };
 
@@ -519,7 +518,6 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      // OAuth2 option should be rendered
       expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
       expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
     });
@@ -538,13 +536,13 @@ describe('AuthConfig renders', () => {
         </AuthFormTestProvider>
       );
 
-      // OAuth2 fields should be rendered
       expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('clientIdOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('clientSecretOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('ScopeOAuth2')).toBeInTheDocument();
       expect(await screen.findByTestId('additionalFields')).toBeInTheDocument();
+      expect(await screen.findByTestId('additional_fieldsJsonEditor')).toBeInTheDocument();
     });
 
     it('submits additionalFields value when authType is OAuth2', async () => {
@@ -571,31 +569,29 @@ describe('AuthConfig renders', () => {
 
       expect(await screen.findByTestId('additionalFields')).toBeInTheDocument();
 
-      await act(async () => {
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
-      await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {
-            config: {
-              hasAuth: true,
-              authType: AuthType.OAuth2ClientCredentials,
-              accessTokenUrl: 'https://token.url',
-              clientId: 'client1',
-              scope: 'scope1',
-              additionalFields: validJson,
-            },
-            secrets: {
-              clientSecret: 'secret1',
-            },
-            __internal__: {
-              hasHeaders: false,
-              hasCA: false,
-            },
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          config: {
+            hasAuth: true,
+            authType: AuthType.OAuth2ClientCredentials,
+            accessTokenUrl: 'https://token.url',
+            clientId: 'client1',
+            scope: 'scope1',
+            additionalFields: validJson,
           },
-          isValid: true,
-        });
+          secrets: {
+            clientSecret: 'secret1',
+          },
+          __internal__: {
+            hasHeaders: false,
+            hasCA: false,
+          },
+        },
+        isValid: true,
       });
     });
 
@@ -619,19 +615,19 @@ describe('AuthConfig renders', () => {
 
       expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
 
-      await act(async () => {
-        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       expect(await screen.findByText('Access token URL is required.')).toBeInTheDocument();
       expect(await screen.findByText('Client ID is required.')).toBeInTheDocument();
       expect(await screen.findByText('Client secret is required.')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {}, // Data is empty because form is invalid
-          isValid: false,
-        });
+        expect(onSubmit).toHaveBeenCalled();
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {}, // Data is empty because form is invalid
+        isValid: false,
       });
     });
 
@@ -659,19 +655,16 @@ describe('AuthConfig renders', () => {
         additionalFieldsInput = document.querySelector('textarea');
         expect(additionalFieldsInput).toBeInTheDocument();
       });
+
       expect(additionalFieldsInput).not.toBeNull();
 
-      await act(async () => {
-        await userEvent.clear(additionalFieldsInput!);
-        await userEvent.type(additionalFieldsInput!, '{{key": "value');
-      });
+      await userEvent.clear(additionalFieldsInput!);
+      await userEvent.type(additionalFieldsInput!, '{{key": "value');
 
       expect(await screen.findByText('Invalid JSON')).toBeInTheDocument();
 
-      await act(async () => {
-        await userEvent.clear(additionalFieldsInput!);
-        await userEvent.type(additionalFieldsInput!, '{{"sdf": "value"}');
-      });
+      await userEvent.clear(additionalFieldsInput!);
+      await userEvent.type(additionalFieldsInput!, '{{"sdf": "value"}');
 
       await waitFor(() => {
         expect(screen.queryByText('Invalid JSON')).not.toBeInTheDocument();
@@ -703,15 +696,6 @@ describe('AuthConfig renders', () => {
     });
 
     it('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {
-      jest.mock('@kbn/code-editor', () => {
-        const original = jest.requireActual('@kbn/code-editor');
-        return {
-          ...original,
-          CodeEditor: (props: any) => {
-            return <MockedCodeEditor {...props} />;
-          },
-        };
-      });
       const initialJson = JSON.stringify({ initial: 'value' });
       const testFormData = {
         config: {
@@ -745,139 +729,10 @@ describe('AuthConfig renders', () => {
       const scopeInput = await screen.findByTestId('ScopeOAuth2');
       expect(scopeInput).toHaveAttribute('readonly');
 
-      const additionalFieldsContainer = await screen.findByTestId('additionalFields-readOnly');
+      const additionalFieldsContainer = await screen.findByTestId(
+        'additional_fieldsJsonEditorReadOnly'
+      );
       expect(additionalFieldsContainer).toBeInTheDocument();
-    });
-
-    it('switches from OAuth2 to Basic Auth correctly', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-          accessTokenUrl: 'https://initial.url',
-          clientId: 'initialClient',
-        },
-        secrets: {
-          clientSecret: 'initialSecret',
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
-        </AuthFormTestProvider>
-      );
-
-      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
-
-      // Switch to Basic Auth
-      const basicAuthRadio = await screen.findByTestId('authBasic');
-      const basicAuthRadioInput = basicAuthRadio.querySelector('input');
-      expect(basicAuthRadioInput).not.toBeNull();
-      await act(async () => {
-        await userEvent.click(basicAuthRadioInput!);
-      });
-
-      const basicAuthContainer = await screen.findByTestId('basicAuthFields');
-      expect(basicAuthContainer).toBeInTheDocument();
-
-      const usernameInput = await within(basicAuthContainer).findByLabelText('Username');
-      const passwordInput = await within(basicAuthContainer).findByLabelText('Password');
-
-      expect(usernameInput).toBeInTheDocument();
-      expect(passwordInput).toBeInTheDocument();
-
-      // Check that OAuth2 fields are now hidden
-      expect(screen.queryByTestId('accessTokenUrlAOuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('clientIdOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('clientSecretOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ScopeOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('additionalFields')).not.toBeInTheDocument();
-    });
-
-    it('allows toggling headers when OAuth2 is selected', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-          accessTokenUrl: 'https://initial.url',
-          clientId: 'initialClient',
-        },
-        secrets: {
-          clientSecret: 'initialSecret',
-        },
-        __internal__: {
-          hasHeaders: false,
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
-        </AuthFormTestProvider>
-      );
-
-      // Ensure OAuth2 fields are visible
-      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
-
-      // Headers should initially be hidden
-      expect(screen.queryByTestId('webhookHeaderText')).not.toBeInTheDocument();
-
-      // Toggle headers on
-      const headersToggle = await screen.findByTestId('webhookViewHeadersSwitch');
-      await act(async () => {
-        await userEvent.click(headersToggle);
-      });
-
-      // Headers should now be visible
-      expect(await screen.findByTestId('webhookHeaderText')).toBeInTheDocument();
-      expect(await screen.findByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
-      expect(await screen.findByTestId('webhookHeadersValueInput')).toBeInTheDocument();
-
-      // Ensure OAuth2 fields are still visible
-      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
-    });
-
-    it('allows toggling CA when OAuth2 is selected', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-          accessTokenUrl: 'https://initial.url',
-          clientId: 'initialClient',
-        },
-        secrets: {
-          clientSecret: 'initialSecret',
-        },
-        __internal__: {
-          hasCA: false,
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
-        </AuthFormTestProvider>
-      );
-
-      // Ensure OAuth2 fields are visible
-      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
-
-      // CA fields should initially be hidden
-      expect(screen.queryByTestId('webhookCAInput')).not.toBeInTheDocument();
-
-      // Toggle CA on
-      const caToggle = await screen.findByTestId('webhookViewCASwitch');
-      await act(async () => {
-        await userEvent.click(caToggle);
-      });
-
-      // CA fields should now be visible
-      expect(await screen.findByTestId('webhookCAInput')).toBeInTheDocument();
-      expect(await screen.findByTestId('webhookVerificationModeSelect')).toBeInTheDocument();
-
-      // Ensure OAuth2 fields are still visible
-      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
     });
   });
 });

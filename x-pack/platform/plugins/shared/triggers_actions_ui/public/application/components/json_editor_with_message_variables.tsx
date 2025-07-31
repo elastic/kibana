@@ -88,7 +88,9 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
-    if (readOnly) return;
+    if (readOnly) {
+      return;
+    }
 
     const editor = editorRef.current;
     if (!editor) {
@@ -168,16 +170,14 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        !readOnly ? (
-          <AddMessageVariablesOptional
-            isOptionalField={isOptionalField}
-            buttonTitle={buttonTitle}
-            messageVariables={messageVariables}
-            showButtonTitle={showButtonTitle}
-            onSelectEventHandler={onSelectMessageVariable}
-            paramsProperty={paramsProperty}
-          />
-        ) : null
+        <AddMessageVariablesOptional
+          isOptionalField={isOptionalField}
+          buttonTitle={buttonTitle}
+          messageVariables={messageVariables}
+          showButtonTitle={showButtonTitle}
+          onSelectEventHandler={onSelectMessageVariable}
+          paramsProperty={paramsProperty}
+        />
       }
       helpText={helpText}
     >
@@ -202,7 +202,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           value={xJson}
           width="100%"
           height="200px"
-          data-test-subj={`${paramsProperty}JsonEditor`}
+          data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
           aria-label={ariaLabel}
           {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
