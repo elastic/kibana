@@ -28,7 +28,7 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
       cy.getBySel('timeline-bottom-bar-title-button').click();
     });
     cy.getBySel('timelineQueryInput').type(
-      'NOT host.name: "dev-fleet-server*" and component.type: "osquery" AND _index: "logs-*" AND _index: "filebeat-*"{enter}'
+      'NOT host.name: "dev-fleet-server*" and component.type: "osquery" AND (_index: "logs-*" OR _index: "filebeat-*"){enter}'
     );
 
     // Force true due to pointer-events: none on parent prevents user mouse interaction.
