@@ -330,6 +330,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         })}
       </strong>
     );
+
     return (
       <EuiToolTip
         data-test-subj="codeEditorAccessibilityOverlay"
