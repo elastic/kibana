@@ -17,8 +17,6 @@ import { NoDataConfigPageProvider } from './services';
 
 describe('NoDataConfigPage', () => {
   const noDataConfig = {
-    solution: 'Solution',
-    logo: 'logoKibana',
     docsLink: 'test-link',
     action: {
       kibana: {
@@ -34,7 +32,6 @@ describe('NoDataConfigPage', () => {
         <NoDataConfigPage noDataConfig={noDataConfig} />
       </NoDataConfigPageProvider>
     );
-    expect(component.find('h1').html()).toContain('Welcome to Elastic Solution!');
     expect(component.find('a[data-test-subj="noDataDefaultFooterAction"]').html()).toContain(
       'Click me'
     );

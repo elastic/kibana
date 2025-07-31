@@ -67,7 +67,7 @@ export const NoDataCard = ({
             color="primary"
             fill
             href={href}
-            data-test-subj="kbnOverviewAddIntegrations"
+            data-test-subj="noDataDefaultFooterAction"
             onClick={onClick}
           >
             {button || defaultButton}

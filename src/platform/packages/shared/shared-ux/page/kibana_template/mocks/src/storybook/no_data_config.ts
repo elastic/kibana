@@ -19,10 +19,7 @@ import type {
   KibanaPageTemplateServices,
 } from '@kbn/shared-ux-page-kibana-template-types';
 
-export type NoDataConfigArguments = Pick<
-  NoDataConfig,
-  'solution' | 'logo' | 'docsLink' | 'pageTitle'
->;
+export type NoDataConfigArguments = Pick<NoDataConfig, 'docsLink' | 'pageTitle'>;
 
 type PropArguments = NoDataConfigArguments;
 
@@ -31,15 +28,6 @@ export type Params = ArgumentParams<PropArguments, {}> & NoDataConfigPageStorybo
 const noDataConfigMock = new NoDataConfigPageStorybookMock();
 
 export const noDataConfigArguments: ArgumentParams<NoDataConfigArguments> = {
-  solution: {
-    control: { control: 'text' },
-    defaultValue: 'Observability',
-  },
-  logo: {
-    control: { control: 'radio' },
-    options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
-    defaultValue: undefined,
-  },
   docsLink: {
     control: { control: 'text' },
     defaultValue: 'docs/link',
@@ -71,8 +59,6 @@ export class StorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        solution: this.getArgumentValue('solution', params),
-        logo: this.getArgumentValue('logo', params),
         docsLink: this.getArgumentValue('docsLink', params),
         pageTitle: this.getArgumentValue('pageTitle', params),
       },

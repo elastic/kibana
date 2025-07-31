@@ -21,7 +21,6 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
 <KibanaPageTemplate
   isEmptyState={true}
   pageHeader={{
-    iconType: 'dashboardApp',
     pageTitle: 'Dashboards',
     description: "You don't have any dashboards yet.",
     rightSideItems: [
@@ -39,7 +38,6 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
   Because all properties of the page header are optional, the empty state has the potential to
   render blank. Make sure your empty state doesn't leave the user confused.
 </DocCallOut>
-
 
 ### Custom empty state
 
@@ -126,11 +124,9 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts):
 
-1. `solution: string`: Single name for the current solution, used to auto-generate the title, logo, and description *(required)*
-2. `docsLink: string`: Required to set the docs link for the whole solution *(required)*
-3. `logo?: string`: Optionally replace the auto-generated logo
-4. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
-5. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key *(required)*
+1. `docsLink: string`: Required to set the docs link for the whole solution _(required)_
+2. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
+3. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
 
 ### `NoDataPageActions`
 
@@ -138,15 +134,12 @@ There is a main action for adding data that we promote throughout Kibana - Elast
 
 Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
 
-
 ```tsx
 // Perform your own check
 const hasData = checkForData();
 
 // No data configuration
 const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-  solution: 'Analytics',
-  logo: 'logoKibana',
   docsLink: '#',
   action: {
     elasticAgent: {
@@ -162,7 +155,7 @@ const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
   noDataConfig={hasData ? undefined : noDataConfig}
 >
   {/* Children will be ignored */}
-</KibanaPageTemplate>
+</KibanaPageTemplate>;
 ```
 
 ![Screenshot of and example in Observability using the no data configuration and using the corresponding list numbers to point out the UI elements that they adjust.](https://raw.githubusercontent.com/elastic/kibana/main/dev_docs/assets/kibana_template_no_data_config.png)

@@ -38,7 +38,7 @@ export interface NoDataPageProps extends CommonProps, ActionCardProps {
   /**
    * Optionally replace the auto-generated logo
    */
-  // logo?: string;
+  logo?: string;
   /**
    * Optionally replace the auto-generated page title (h1)
    */
