@@ -340,7 +340,8 @@ export function LensEditConfigurationFlyout({
             }
             .euiAccordion-isOpen {
               .euiAccordion__childWrapper {
-                block-size: auto !important; // Override euiAccordion__childWrapper blockSize
+                // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
+                block-size: auto ${textBasedMode ? '!important' : ''};
                 flex: 1;
               }
             }
@@ -391,9 +392,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
