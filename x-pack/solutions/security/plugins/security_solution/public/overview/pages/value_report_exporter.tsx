@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import jsPDF from 'jspdf';
+// @ts-ignore
 import domtoimage from 'dom-to-image-more';
 import { useToasts } from '../../common/lib/kibana';
 

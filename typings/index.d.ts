@@ -10,5 +10,4 @@
 declare module 'axios/lib/adapters/xhr';
 
 declare module 'find-cypress-specs';
-declare module 'dom-to-image-more';
 declare module '@cypress/grep/src/plugin';
