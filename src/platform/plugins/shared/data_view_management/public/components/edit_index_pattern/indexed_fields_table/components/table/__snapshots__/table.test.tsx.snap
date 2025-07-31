@@ -203,6 +203,7 @@ exports[`Table should render normally 1`] = `
           },
           Object {
             "available": [Function],
+            "color": "danger",
             "data-test-subj": "deleteField",
             "description": "Delete",
             "icon": "trash",
