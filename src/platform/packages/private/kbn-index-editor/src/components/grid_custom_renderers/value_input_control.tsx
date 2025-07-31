@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent, useCallback, RefObject } from 'react';
+import React, { type FunctionComponent, useCallback, RefObject, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,17 +34,22 @@ export const getValueInputPopover =
     rows,
     columns,
     onValueChange,
+    savingDocs,
     dataTableRef,
   }: {
     rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
+    savingDocs: PendingSave | undefined;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
   ({ columnId, rowIndex, colIndex, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
-    const cellValue = row.flattened[columnId]?.toString();
+
+    const cellValue = row.flattened[columnId]?.toString() ?? savingDocs?.get(docId)?.[columnId];
+
+    const editedValue = useRef(cellValue);
 
     const onEnter = useCallback(
       (value: string) => {
@@ -58,6 +63,13 @@ export const getValueInputPopover =
       },
       [docId, columnId, rowIndex, colIndex]
     );
+
+    // Update the value when the user navigates away from the cell without pressing Enter
+    useEffect(() => {
+      return () => {
+        onValueChange(docId!, { [columnId]: editedValue.current });
+      };
+    }, [columnId, docId]);
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -75,6 +87,9 @@ export const getValueInputPopover =
           value={cellValue}
           autoFocus
           width={inputWidth}
+          onChange={(value) => {
+            editedValue.current = value;
+          }}
         />
       );
     } else {
