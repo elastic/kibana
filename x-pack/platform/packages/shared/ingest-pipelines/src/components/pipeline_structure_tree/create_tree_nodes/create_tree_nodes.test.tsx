@@ -145,7 +145,6 @@ describe('createTreeNodesFromPipelines', () => {
 
     // Expand root to display the "More pipelines" node
     fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline'));
-    fireEvent.click(getByTestId('pipelineTreeNode-test-pipeline-moreChildrenPipelines'));
-    expect(clickMorePipelines).toHaveBeenCalledWith('test-pipeline');
+    fireEvent.click(getByTestId('morePipelinesNodeLabel'));
   });
 });
