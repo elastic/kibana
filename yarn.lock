@@ -6354,6 +6354,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/langgraph-checkpoint-saver@link:x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver":
+  version "0.0.0"
+  uid ""
+
 "@kbn/language-documentation@link:src/platform/packages/private/kbn-language-documentation":
   version "0.0.0"
   uid ""
