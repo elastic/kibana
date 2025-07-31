@@ -21,6 +21,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     simulatedFunctionCalling,
     temperature = 0,
     modelName,
+    stopSequences,
   } = applyProviderTransforms(options);
 
   let request: OpenAIRequest;
@@ -35,6 +36,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+      stop: stopSequences,
     };
   } else {
     request = {
@@ -43,6 +45,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system, messages }),
       tool_choice: toolChoiceToOpenAI(toolChoice),
       tools: toolsToOpenAI(tools),
+      stop: stopSequences,
     };
   }
 

@@ -138,6 +138,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * Sequences of characters that cause the model to stop generating the response.
+   */
+  stopSequences?: string[];
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {

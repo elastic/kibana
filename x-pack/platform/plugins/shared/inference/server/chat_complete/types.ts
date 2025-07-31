@@ -49,6 +49,7 @@ export type InferenceAdapterChatCompleteOptions = {
   modelName?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
+  stopSequences?: string[];
 } & ToolOptions;
 
 /**

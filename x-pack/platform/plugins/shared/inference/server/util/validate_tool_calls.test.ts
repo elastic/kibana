@@ -77,7 +77,9 @@ describe('validateToolCalls', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Failed parsing arguments for my_function"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Failed parsing arguments for tool id = 1, name = my_function"`
+    );
   });
 
   it('throws an error if the function call has invalid arguments', () => {
