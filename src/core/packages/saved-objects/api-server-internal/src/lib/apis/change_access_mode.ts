@@ -23,14 +23,9 @@ export interface PerformChangeAccessModeParams {
 }
 
 export const isSavedObjectsChangeAccessModeOptions = (
-  options: unknown
+  options: SavedObjectsChangeAccessControlOptions
 ): options is SavedObjectsChangeAccessModeOptions => {
-  return (
-    typeof options === 'object' &&
-    options !== null &&
-    'accessMode' in options &&
-    (options.accessMode === 'read_only' || options.accessMode === 'default')
-  );
+  return 'accessMode' in options;
 };
 
 export const performChangeAccessMode = async (

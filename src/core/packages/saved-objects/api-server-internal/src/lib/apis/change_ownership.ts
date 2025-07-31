@@ -10,6 +10,7 @@
 import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 
@@ -22,14 +23,9 @@ export interface PerformChangeOwnershipParams {
 }
 
 export const isSavedObjectsChangeOwnershipOptions = (
-  options: unknown
+  options: SavedObjectsChangeAccessControlOptions
 ): options is SavedObjectsChangeOwnershipOptions => {
-  return (
-    typeof options === 'object' &&
-    options !== null &&
-    'newOwnerProfileUid' in options &&
-    typeof options.newOwnerProfileUid === 'string'
-  );
+  return 'newOwnerProfileUid' in options;
 };
 export const performChangeOwnership = async (
   { objects, options }: PerformChangeOwnershipParams,
