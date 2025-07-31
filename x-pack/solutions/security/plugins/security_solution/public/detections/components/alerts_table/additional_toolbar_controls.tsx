@@ -30,6 +30,7 @@ import { useDataTableFilters } from '../../../common/hooks/use_data_table_filter
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const { changeViewMode } = dataTableActions;
 
@@ -48,6 +49,7 @@ const AdditionalToolbarControlsComponent = ({
     SourcererScopeName.detections
   );
 
+  const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const groupId = useMemo(() => groupIdSelector(), []);
@@ -79,10 +81,10 @@ const AdditionalToolbarControlsComponent = ({
 
   const fields = useMemo(
     () =>
-      experimentalDataView
+      isNewDataViewPickerEnabled
         ? experimentalDataView.fields.map((field) => field.spec)
         : Object.values(oldSourcererDataView.fields || {}),
-    [experimentalDataView, oldSourcererDataView.fields]
+    [experimentalDataView.fields, isNewDataViewPickerEnabled, oldSourcererDataView.fields]
   );
 
   const groupSelector = useGetGroupSelectorStateless({
