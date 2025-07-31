@@ -67,7 +67,6 @@ RUN set -e ; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
   curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
   echo "${TINI_CHECKSUM} ${TINI_BIN}" | sha256sum -c - ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
