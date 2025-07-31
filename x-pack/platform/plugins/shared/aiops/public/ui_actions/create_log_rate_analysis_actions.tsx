@@ -16,6 +16,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
+import { v4 } from 'uuid';
 import type {
   LogRateAnalysisEmbeddableApi,
   LogRateAnalysisEmbeddableInitialState,
@@ -52,12 +53,14 @@ export function createAddLogRateAnalysisEmbeddableAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
+      const uuid = v4();
+
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
         flyoutProps: {
           hideCloseButton: true,
-          focusedPanelId: context.embeddable.uuid,
+          focusedPanelId: uuid,
           'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
           'aria-labelledby': 'logRateAnalysisConfig',
         },
@@ -72,26 +75,26 @@ export function createAddLogRateAnalysisEmbeddableAction(
           >({
             panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
             serializedState: { rawState: initialState },
+            maybePanelId: uuid,
           });
 
           if (!embeddable) {
             return;
           }
 
-          const deletePanel = () => {
-            presentationContainerParent.removePanel(embeddable.uuid);
-          };
           return (
             <EmbeddableLogRateAnalysisUserInput
               isNewPanel={true}
               pluginStart={pluginStart}
               logRateAnalysisControlsApi={embeddable}
-              deletePanel={deletePanel}
               onConfirm={(updatedState) => {
                 embeddable.updateUserInput(updatedState);
                 closeFlyout();
               }}
-              onCancel={closeFlyout}
+              onCancel={() => {
+                presentationContainerParent.removePanel(embeddable.uuid);
+                closeFlyout();
+              }}
             />
           );
         },
