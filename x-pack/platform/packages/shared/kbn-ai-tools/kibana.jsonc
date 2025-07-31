@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/ai-tools",
   "owner": "@elastic/appex-ai-infra",
   "group": "platform",

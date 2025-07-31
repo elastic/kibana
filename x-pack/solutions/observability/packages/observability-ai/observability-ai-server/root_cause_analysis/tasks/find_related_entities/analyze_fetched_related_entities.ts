@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { DocumentAnalysis, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type {
+  DocumentAnalysis,
+  FieldPatternResultWithChanges,
+  TruncatedDocumentAnalysis,
+} from '@kbn/ai-tools';
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
-import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
+import { dateRangeQuery, kqlQuery } from '@kbn/es-query';
 import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';

@@ -7,7 +7,7 @@
 
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { getLogPatterns } from '@kbn/genai-utils-server';
+import { getLogPatterns } from '@kbn/ai-tools';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
