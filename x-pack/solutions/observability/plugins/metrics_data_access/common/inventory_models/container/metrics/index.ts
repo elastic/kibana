@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import type { InventoryMetricsWithCharts } from '../../types';
-import { cpu } from './snapshot/cpu';
-import { memory } from './snapshot/memory';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
-import type { ContainerFormulas } from './formulas';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 import type { ContainerCharts } from './charts';
+import type { ContainerFormulas } from './formulas';
+import type { ContainerAggregations } from './snapshot';
 
-const containerSnapshotMetrics = { cpu, memory, rx, tx };
-
-export const containerSnapshotMetricTypes = Object.keys(containerSnapshotMetrics) as Array<
-  keyof typeof containerSnapshotMetrics
->;
-
-export const metrics: InventoryMetricsWithCharts<ContainerFormulas, ContainerCharts> = {
-  snapshot: containerSnapshotMetrics,
-  getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
-  getCharts: async () => await import('./charts').then(({ charts }) => charts),
+export const metrics: InventoryMetricsConfig<
+  ContainerAggregations,
+  ContainerFormulas,
+  ContainerCharts
+> = {
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
+  getFormulas: async (args) => {
+    const { formulas } = await import('./formulas');
+    const catalog = new MetricsCatalog(formulas, args?.schema);
+    return catalog;
+  },
+  getCharts: async () => import('./charts').then(({ charts }) => charts),
+  getWaffleMapTooltipMetrics: () => ['cpu', 'memory', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

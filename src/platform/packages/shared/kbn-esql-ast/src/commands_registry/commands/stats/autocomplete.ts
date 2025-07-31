@@ -118,12 +118,21 @@ export async function autocomplete(
     case 'expression_without_assignment':
       return [
         ...controlSuggestions,
-        ...getFunctionSuggestions({ location: Location.STATS }),
+        ...getFunctionSuggestions(
+          { location: Location.STATS },
+          callbacks?.hasMinimumLicenseRequired
+        ),
         getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
 
     case 'expression_after_assignment':
-      return [...controlSuggestions, ...getFunctionSuggestions({ location: Location.STATS })];
+      return [
+        ...controlSuggestions,
+        ...getFunctionSuggestions(
+          { location: Location.STATS },
+          callbacks?.hasMinimumLicenseRequired
+        ),
+      ];
 
     case 'expression_complete':
       return [
@@ -148,6 +157,7 @@ export async function autocomplete(
         location: Location.STATS_WHERE,
         preferredExpressionType: 'boolean',
         context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
       });
 
       // Is this a complete boolean expression?
@@ -175,7 +185,10 @@ export async function autocomplete(
       return suggestColumns(
         columnSuggestions,
         [
-          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          ...getFunctionSuggestions(
+            { location: Location.STATS_BY },
+            callbacks?.hasMinimumLicenseRequired
+          ),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
         innerText,
@@ -196,7 +209,10 @@ export async function autocomplete(
       const suggestions = await suggestColumns(
         columnSuggestions,
         [
-          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          ...getFunctionSuggestions(
+            { location: Location.STATS_BY },
+            callbacks?.hasMinimumLicenseRequired
+          ),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
         innerText,

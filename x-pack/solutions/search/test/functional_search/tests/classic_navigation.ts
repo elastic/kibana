@@ -77,7 +77,7 @@ export default function searchSolutionNavigation({
         {
           navItem: 'Playground',
           breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'svlPlaygroundPage',
+          pageTestSubject: 'playgroundsListPage',
         },
         {
           navItem: 'SearchApplications',

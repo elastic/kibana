@@ -92,6 +92,18 @@ const MAX_RESULTS = 1000;
 
 export type ConnectorEventLogListOptions = 'stackManagement' | 'default';
 
+const removeLastItemWidthToExpandToFullContainerWidth = (
+  columns: EuiDataGridColumn[],
+  visibleColumns: string[]
+): EuiDataGridColumn[] => {
+  const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
+  return columns.map((col) => {
+    if (col.id !== lastVisibleColumnId) return col;
+    const { initialWidth, ...rest } = col;
+    return rest;
+  });
+};
+
 export type ConnectorEventLogListCommonProps = {
   localStorageKey?: string;
   refreshToken?: number;
@@ -291,6 +303,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('connector_id'),
+        initialWidth: 315,
       },
       {
         id: 'id',
@@ -301,6 +314,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('id'),
+        initialWidth: 320,
       },
       {
         id: 'timestamp',
@@ -315,7 +329,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         actions: {
           showHide: false,
         },
-        initialWidth: 250,
+        initialWidth: 230,
       },
       {
         id: 'status',
@@ -374,6 +388,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
                 showSortDesc: false,
                 showHide: false,
               },
+              initialWidth: 220,
             },
           ]
         : []),
@@ -391,6 +406,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('source'),
         cellActions: [],
+        initialWidth: 150,
       },
       {
         id: 'message',
@@ -406,6 +422,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('message'),
         cellActions: [],
+        initialWidth: 600,
       },
       {
         id: 'execution_duration',
@@ -431,6 +448,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('schedule_delay'),
+        initialWidth: 100,
       },
       {
         id: 'timed_out',
@@ -441,6 +459,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('timed_out'),
+        initialWidth: 100,
       },
       ...(showFromAllSpaces
         ? [
@@ -458,6 +477,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
                 showSortDesc: false,
                 showHide: false,
               },
+              initialWidth: 100,
             },
           ]
         : []),
@@ -475,7 +495,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
         <EventLogDataGrid
-          columns={columns}
+          columns={removeLastItemWidthToExpandToFullContainerWidth(columns, visibleColumns)}
           logs={logs}
           pagination={pagination}
           sortingColumns={sortingColumns}

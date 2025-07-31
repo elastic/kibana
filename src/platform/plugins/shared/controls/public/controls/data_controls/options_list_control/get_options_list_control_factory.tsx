@@ -25,7 +25,11 @@ import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentat
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ControlValuesSource, ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
+import {
+  ControlValuesSource,
+  ControlOutputOption,
+  OPTIONS_LIST_CONTROL,
+} from '@kbn/controls-constants';
 import type {
   OptionsListControlState,
   OptionsListSelection,

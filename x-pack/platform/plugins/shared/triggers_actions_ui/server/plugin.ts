@@ -10,7 +10,8 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
-import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../common';
+
+const BASE_TRIGGERS_ACTIONS_UI_API_PATH = '/internal/triggers_actions_ui';
 
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;

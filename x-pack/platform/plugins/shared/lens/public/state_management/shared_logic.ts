@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Reference } from '@kbn/content-management-utils';
 import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -54,14 +54,13 @@ export function mergeToNewDoc(
   );
 
   const persistibleDatasourceStates: Record<string, unknown> = {};
-  const references: SavedObjectReference[] = [];
-  const internalReferences: SavedObjectReference[] = [];
+  const references: Reference[] = [];
+  const internalReferences: Reference[] = [];
   Object.entries(activeDatasources).forEach(([id, datasource]) => {
-    const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
-      datasourceStates[id].state
-    );
+    const { state: persistableState, references: persistableReferences } =
+      datasource.getPersistableState(datasourceStates[id].state);
     persistibleDatasourceStates[id] = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {
@@ -72,14 +71,14 @@ export function mergeToNewDoc(
 
   let persistibleVisualizationState = visualization.state;
   if (activeVisualization.getPersistableState) {
-    const { state: persistableState, savedObjectReferences } =
+    const { state: persistableState, references: persistableReferences } =
       activeVisualization.getPersistableState(
         visualization.state,
         activeDatasource,
         datasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
-    savedObjectReferences.forEach((r) => {
+    persistableReferences.forEach((r) => {
       if (r.type === INDEX_PATTERN_TYPE && adHocDataViews[r.id]) {
         internalReferences.push(r);
       } else {

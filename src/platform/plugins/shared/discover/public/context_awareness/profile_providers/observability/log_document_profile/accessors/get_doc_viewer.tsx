@@ -46,11 +46,11 @@ export const createGetDocViewer =
             );
 
             useEffect(() => {
-              context.logOverviewContext$.next(undefined);
-
               if (!logsOverviewApi) {
                 return;
               }
+
+              context.logOverviewContext$.next(undefined);
 
               if (initialAccordionSection.current) {
                 logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
@@ -84,7 +84,8 @@ export const createGetDocViewer =
                 {...props}
                 ref={setLogsOverviewApi}
                 renderAIAssistant={logsAIAssistantFeature?.render}
-                renderStreamsField={streamsFeature?.renderStreamsField}
+                renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
+                renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
               />
             );
           },

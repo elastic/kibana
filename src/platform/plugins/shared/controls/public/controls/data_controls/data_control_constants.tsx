@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import { RANGE_SLIDER_CONTROL } from '../../../common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export const DataControlEditorStrings = {
   manageControl: {

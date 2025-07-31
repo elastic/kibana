@@ -5,6 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common/src/constants';
+import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
+import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export const PrivMonUtils = (
@@ -13,6 +19,7 @@ export const PrivMonUtils = (
 ) => {
   const api = getService('securitySolutionApi');
   const log = getService('log');
+  const supertest = getService('supertest');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -28,6 +35,20 @@ export const PrivMonUtils = (
     expect(res.status).to.eql(200);
   };
 
+  const bulkUploadUsersCsv = async (
+    fileContent: string | Buffer,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
+    return supertest
+      .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', namespace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .attach('file', file, { filename: 'users.csv', contentType: 'text/csv' })
+      .expect(expectStatusCode);
+  };
+
   const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
@@ -41,5 +62,5 @@ export const PrivMonUtils = (
     }
   };
 
-  return { initPrivMonEngine, retry };
+  return { initPrivMonEngine, bulkUploadUsersCsv, retry };
 };

@@ -7,26 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import {
-  CONTROL_LABEL_POSITION_OPTIONS,
-  CONTROL_WIDTH_OPTIONS,
-  ControlValuesSource,
-  ControlOutputOption,
-} from './constants';
-
-export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
-export type ControlLabelPosition =
-  (typeof CONTROL_LABEL_POSITION_OPTIONS)[keyof typeof CONTROL_LABEL_POSITION_OPTIONS];
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
+import type { ControlWidth } from '@kbn/controls-schemas';
 
 export type TimeSlice = [number, number];
-
-export interface ParentIgnoreSettings extends SerializableRecord {
-  ignoreFilters?: boolean;
-  ignoreQuery?: boolean;
-  ignoreTimerange?: boolean;
-  ignoreValidations?: boolean;
-}
 
 export interface DefaultControlState {
   grow?: boolean;

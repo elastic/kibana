@@ -19,3 +19,14 @@ export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export const ESQL_CONTROL = 'esqlControl';
+export enum ControlOutputOption {
+  DSL = 'dsl',
+  ESQL = 'esql',
+}
+export enum ControlValuesSource {
+  DSL = 'dsl',
+  ESQL = 'esql',
+  STATIC = 'static',
+}
+export const DEFAULT_CONTROL_OUTPUT = ControlOutputOption.DSL;
+export const DEFAULT_CONTROL_VALUES_SOURCE = ControlValuesSource.DSL;

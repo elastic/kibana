@@ -72,7 +72,7 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
                     <span data-test-subj="privileged-user-monitoring-validLinesMessage">
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.validationStep.validLinesMessage"
-                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} user will be assigned} other {{validLinesCountBold} users will be assigned}}"
+                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} user will be added} other {{validLinesCountBold} users will be added}}"
                         values={{
                           validLinesCount: validLines.count,
                           validLinesCountBold: <b>{validLines.count}</b>,
