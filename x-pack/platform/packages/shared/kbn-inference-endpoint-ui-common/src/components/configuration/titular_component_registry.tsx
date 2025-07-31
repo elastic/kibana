@@ -19,5 +19,5 @@ export const ConfigFieldTitularComponent = ({ configKey }: { configKey: string }
   if (!Component) {
     return null;
   }
-  return <Component /> ?? null;
+  return <Component />;
 };

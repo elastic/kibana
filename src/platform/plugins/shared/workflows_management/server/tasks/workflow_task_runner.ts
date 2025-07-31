@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import type { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { convertToSerializableGraph, convertToWorkflowGraph } from '../../common';
+import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
   workflowId: string;
@@ -66,7 +66,7 @@ export function createWorkflowTaskRunner({
           };
 
           // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(executionGraph, actionsClient);
+          const connectorCredentials = await extractConnectorIds(actionsClient);
 
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(

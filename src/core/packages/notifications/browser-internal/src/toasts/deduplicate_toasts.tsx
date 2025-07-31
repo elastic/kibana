@@ -120,6 +120,7 @@ const floatTopRight = css`
   position: absolute;
   top: -8px;
   right: -8px;
+  z-index: 1;
 `;
 
 /**

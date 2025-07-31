@@ -14,52 +14,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.CoreStatus",
-        "type": "Interface",
-        "tags": [],
-        "label": "CoreStatus",
-        "description": [
-          "\nStatus of core services.\n"
-        ],
-        "path": "src/core/packages/status/common/src/core_status.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.elasticsearch",
-            "type": "Object",
-            "tags": [],
-            "label": "elasticsearch",
-            "description": [],
-            "signature": [
-              "ServiceStatus",
-              "<unknown>"
-            ],
-            "path": "src/core/packages/status/common/src/core_status.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.savedObjects",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjects",
-            "description": [],
-            "signature": [
-              "ServiceStatus",
-              "<unknown>"
-            ],
-            "path": "src/core/packages/status/common/src/core_status.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-status-server",
         "id": "def-server.ServiceStatus",
         "type": "Interface",
         "tags": [],
@@ -309,6 +263,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-status-server",
+        "id": "def-server.CoreStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreStatus",
+        "description": [
+          "\nStatus of core services.\n"
+        ],
+        "signature": [
+          "CoreStatusBase | CoreStatusWithHttp"
+        ],
+        "path": "src/core/packages/status/common/src/core_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-status-server",
         "id": "def-server.ServiceStatusLevel",

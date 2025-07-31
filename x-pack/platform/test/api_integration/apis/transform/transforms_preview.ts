@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('/internal/transform/transforms/_preview', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.api.waitForIndicesToExist('ft_farequote');
     });

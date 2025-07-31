@@ -20601,13 +20601,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInspectEsQueries.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableInspectEsQueries.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20696,13 +20696,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.maxSuggestions.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.maxSuggestions.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20794,13 +20794,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableComparisonByDefault.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableComparisonByDefault.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -20903,13 +20903,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.defaultApmServiceEnvironment.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.defaultApmServiceEnvironment.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21121,13 +21121,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmProgressiveLoading.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmProgressiveLoading.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21216,13 +21216,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21342,13 +21342,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableTableSearchBar.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableTableSearchBar.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21482,13 +21482,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21622,13 +21622,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21761,13 +21761,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmAWSLambdaPriceFactor.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21845,13 +21845,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmAWSLambdaRequestCostPerMillion.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21957,13 +21957,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22083,13 +22083,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableLegacyUptimeApp.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.enableLegacyUptimeApp.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22184,13 +22184,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingShowErrorFrames.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingShowErrorFrames.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22293,13 +22293,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPervCPUWattX86.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingPervCPUWattX86.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22402,13 +22402,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingPervCPUWattArm64.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingPervCPUWattArm64.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22511,13 +22511,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingDatacenterPUE.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingDatacenterPUE.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22620,13 +22620,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingCo2PerKWH.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingCo2PerKWH.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22729,13 +22729,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingAWSCostDiscountRate.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22838,13 +22838,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingAzureCostDiscountRate.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingAzureCostDiscountRate.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22947,13 +22947,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.profilingCostPervCPUPerHour.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23048,13 +23048,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableTransactionProfiling.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.apmEnableTransactionProfiling.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23160,13 +23160,13 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.searchExcludedDataTiers.solution",
-                "type": "string",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.solutionViews",
+                "type": "Array",
                 "tags": [],
-                "label": "solution",
+                "label": "solutionViews",
                 "description": [],
                 "signature": [
-                  "\"oblt\""
+                  "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,

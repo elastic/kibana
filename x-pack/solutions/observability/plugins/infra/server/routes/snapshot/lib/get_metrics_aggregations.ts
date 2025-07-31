@@ -26,7 +26,9 @@ export const getMetricsAggregations = async (
   const { metrics, nodeType } = options;
 
   const inventoryModel = findInventoryModel(nodeType);
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations({
+    schema: options.schema,
+  });
 
   return metrics.reduce<MetricsUIAggregation>((aggs, metric, index) => {
     if (SnapshotCustomMetricInputRT.is(metric)) {

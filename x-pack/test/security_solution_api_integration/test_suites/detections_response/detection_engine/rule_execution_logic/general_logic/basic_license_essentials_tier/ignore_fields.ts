@@ -53,11 +53,15 @@ export default ({ getService }: FtrProviderContext): void => {
     const es = getService('es');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ignore_fields'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ignore_fields');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ignore_fields'
+      );
     });
 
     beforeEach(async () => {

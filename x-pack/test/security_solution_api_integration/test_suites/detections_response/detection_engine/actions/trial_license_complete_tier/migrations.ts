@@ -34,13 +34,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('legacy actions', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_actions'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_actions'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_actions'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_actions'
         );
       });
 
@@ -365,11 +365,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('7.16.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/migrations');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/migrations');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations'
+        );
       });
 
       it('migrates legacy siem-detection-engine-rule-actions to use saved object references', async () => {

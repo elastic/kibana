@@ -22,6 +22,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
+  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
 import type {
@@ -44,7 +45,7 @@ import {
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { isEmpty } from 'lodash';
+import { isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
@@ -67,6 +68,9 @@ import {
 } from './constants';
 import { getRuleTypeIdsFilter } from '../lib/get_rule_type_ids_filter';
 import { getConsumersFilter } from '../lib/get_consumers_filter';
+import { mergeUniqueFieldsByName } from '../utils/unique_fields';
+import { getAlertFieldsFromIndexFetcher } from '../utils/get_alert_fields_from_index_fetcher';
+import type { GetAlertFieldsResponseV1 } from '../routes/get_alert_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -93,6 +97,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
+  esClientScoped: ElasticsearchClient;
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
@@ -169,19 +174,23 @@ export class AlertsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
+  private readonly esClientScoped: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
+  private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
     this.logger = options.logger;
     this.authorization = options.authorization;
     this.esClient = options.esClient;
+    this.esClientScoped = options.esClientScoped;
     this.auditLogger = options.auditLogger;
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
+    this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
@@ -1227,5 +1236,52 @@ export class AlertsClient {
       browserFields: fieldDescriptorToBrowserFieldMapper(fields),
       fields,
     };
+  }
+
+  private getRuleTypeIds(ruleTypeIds: string[]): string[] {
+    // fetch all rule types if no specific rule type Ids are provided
+    if (ruleTypeIds.length === 0) {
+      const registeredRuleTypes = this.getRuleList();
+
+      if (!registeredRuleTypes) {
+        return [];
+      }
+
+      return Array.from(registeredRuleTypes.keys());
+    }
+
+    return ruleTypeIds;
+  }
+
+  public async getAlertFields(ruleTypeIds: string[]): Promise<GetAlertFieldsResponseV1> {
+    const allRuleTypesIds = this.getRuleTypeIds(ruleTypeIds);
+
+    const authorizedRuleTypes = await this.authorization.getAllAuthorizedRuleTypesFindOperation({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      ruleTypeIds: allRuleTypesIds,
+    });
+    const authorizedRuleTypesIds = Array.from(authorizedRuleTypes.keys());
+
+    const [siemRuleTypeIds, otherRuleTypeIds] = partition(authorizedRuleTypesIds, (ruleTypeId) =>
+      isSiemRuleType(ruleTypeId)
+    );
+
+    const siemIndices = siemRuleTypeIds ? this.getAlertIndicesAlias(siemRuleTypeIds) : [];
+    const otherIndices = otherRuleTypeIds ? this.getAlertIndicesAlias(otherRuleTypeIds) : [];
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const indexPatternsFetcherAsScoped = new IndexPatternsFetcher(this.esClientScoped);
+
+    const [specFields, descriptorFields] = await Promise.all([
+      getAlertFieldsFromIndexFetcher(indexPatternsFetcherAsScoped, siemIndices),
+      getAlertFieldsFromIndexFetcher(indexPatternsFetcherAsInternalUser, otherIndices),
+    ]);
+
+    const uniqueFields = mergeUniqueFieldsByName(descriptorFields, specFields);
+
+    const mappedFields = {
+      fields: uniqueFields,
+    };
+
+    return mappedFields;
   }
 }

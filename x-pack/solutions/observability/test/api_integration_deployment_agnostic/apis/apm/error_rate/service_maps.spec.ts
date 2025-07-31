@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
-  describe('Service Maps APIs', () => {
+  describe('Service maps APIs', () => {
     describe('when data is loaded ', () => {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       before(async () => {

@@ -441,7 +441,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                             label: i18n.translate(
                               'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
                               {
-                                defaultMessage: 'Explore Service Inventory',
+                                defaultMessage: 'Explore Service inventory',
                               }
                             ),
                             href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',

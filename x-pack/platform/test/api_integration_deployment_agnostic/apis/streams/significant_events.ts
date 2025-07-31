@@ -69,14 +69,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Unwired streams update', () => {
-      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
+    describe('Classic streams update', () => {
+      const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
-            unwired: {},
+            classic: {},
           },
         },
         dashboards: [],
@@ -115,15 +115,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       it('updates the queries', async () => {
-        const indexName = 'unwired-stream-queries';
+        const indexName = 'classic-stream-queries';
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
-        await putStream(apiClient, indexName, unwiredPutBody);
+        await putStream(apiClient, indexName, classicPutBody);
 
         let streamDefinition = await getStream(apiClient, indexName);
         expect(streamDefinition.queries.length).to.eql(0);
 
         await putStream(apiClient, indexName, {
-          ...unwiredPutBody,
+          ...classicPutBody,
           queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
         });
 

@@ -23,7 +23,7 @@ import {
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE, ControlGroupSerializedState } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -38,6 +38,7 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import { savedStateManager, unsavedStateManager, WEB_LOGS_DATA_VIEW_ID } from './session_storage';
 
@@ -142,9 +143,7 @@ export const ReactControlExample = ({
               references: [],
             };
       },
-      setLastSavedControlGroupState: (
-        savedState: SerializedPanelState<ControlGroupSerializedState>
-      ) => {
+      setLastSavedControlGroupState: (savedState: SerializedPanelState<ControlsGroupState>) => {
         lastSavedControlGroupState$.next(savedState);
       },
     };
@@ -403,7 +402,7 @@ export const ReactControlExample = ({
       />
       {hasControls && <EuiSpacer size="m" />}
       <EmbeddableRenderer
-        type={CONTROL_GROUP_TYPE}
+        type={CONTROLS_GROUP_TYPE}
         maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
         onApiAvailable={(api) => {
           setControlGroupApi(api as ControlGroupApi);

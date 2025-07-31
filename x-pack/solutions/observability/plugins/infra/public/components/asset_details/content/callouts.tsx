@@ -28,7 +28,11 @@ export const Callouts = () => {
   const entityConfig = findInventoryModel(entity.type);
   const alertMetric = isSnapshotMetricType(state?.alertMetric) ? state?.alertMetric : undefined;
 
-  if (entity.type === 'host' && alertMetric && entityConfig.legacyMetrics?.includes(alertMetric)) {
+  if (
+    entity.type === 'host' &&
+    alertMetric &&
+    entityConfig.metrics.legacyMetrics?.includes(alertMetric)
+  ) {
     return (
       <LegacyAlertMetricCallout
         visibleFor={INCOMING_ALERT_CALLOUT_VISIBLE_FOR}

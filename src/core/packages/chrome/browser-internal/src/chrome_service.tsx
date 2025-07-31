@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil, filter } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  map,
+  merge,
+  mergeMap,
+  type Observable,
+  of,
+  ReplaySubject,
+  takeUntil,
+} from 'rxjs';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,32 +31,29 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { type DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
-  ChromeNavLink,
+  AppDeepLinkId,
   ChromeBadge,
   ChromeBreadcrumb,
-  ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
-  ChromeUserBanner,
-  ChromeStyle,
+  ChromeHelpMenuLink,
+  ChromeNavLink,
+  ChromeSetBreadcrumbsParams,
   ChromeSetProjectBreadcrumbsParams,
+  ChromeStyle,
+  ChromeUserBanner,
   NavigationTreeDefinition,
-  AppDeepLinkId,
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type {
-  SideNavComponent as ISideNavComponent,
-  ChromeHelpMenuLink,
-} from '@kbn/core-chrome-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
@@ -61,7 +68,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
-import { ProjectSideNavV1 } from './ui/project/sidenav_v1/navigation';
+import { ProjectSideNavV1 } from './ui/project/sidenav_v1/sidenav';
 import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_sidenav';
 import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
 import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
@@ -90,6 +97,7 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
+  analytics: AnalyticsServiceStart;
 }
 
 /** @internal */
@@ -256,6 +264,7 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
+    analytics,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
@@ -355,21 +364,17 @@ export class ChromeService {
       }
     };
 
-    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
-      validateChromeStyle();
-      projectNavigation.setSideNavComponent(component);
-    };
-
     function initProjectNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      config?: { dataTestSubj?: string }
     ) {
       validateChromeStyle();
-      projectNavigation.initNavigation(id, navigationTree$);
+      projectNavigation.initNavigation(id, navigationTree$, config);
     }
 
     const setProjectBreadcrumbs = (
@@ -469,6 +474,15 @@ export class ChromeService {
       />
     );
 
+    // create observables once here to avoid re-renders, TODO: do it for everything else
+    const navLinks$ = navLinks.getNavLinks$();
+    const activeNodes$ = projectNavigation.getActiveNodes$();
+    const navigationTreeUi$ = projectNavigation.getNavigationTreeUi$();
+    const panelSelectedNode$ = projectNavigation.getPanelSelectedNode$();
+    const loadingCount$ = http.getLoadingCount$();
+    const recentlyAccessed$ = recentlyAccessed.get$();
+    const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
+
     const getProjectHeader = ({
       includeSideNav,
       isFixed,
@@ -522,9 +536,19 @@ export class ChromeService {
               <ProjectSideNavV1
                 isCollapsed$={this.isSideNavCollapsed$}
                 toggle={setIsSideNavCollapsed}
-              >
-                {getProjectSideNavV1BodyComponent()}
-              </ProjectSideNavV1>
+                navigationTree$={navigationTreeUi$}
+                navigateToUrl={application.navigateToUrl}
+                navLinks$={navLinks$}
+                activeNodes$={activeNodes$}
+                recentlyAccessed$={recentlyAccessed$}
+                basePath={http.basePath}
+                isFeedbackBtnVisible$={this.isFeedbackBtnVisible$}
+                panelSelectedNode$={panelSelectedNode$}
+                setPanelSelectedNode={projectNavigation.setPanelSelectedNode}
+                loadingCount$={loadingCount$}
+                reportEvent={analytics.reportEvent}
+                dataTestSubj$={activeDataTestSubj$}
+              />
             )}
 
             {includeSideNav === 'v2' && (
@@ -545,33 +569,6 @@ export class ChromeService {
         )}
       </ProjectHeader>
     );
-
-    /**
-     * Actual sidenav implementation component is provided by navigation plugin.
-     */
-    const getProjectSideNavV1BodyComponent = () => {
-      const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-      const activeNodes$ = projectNavigation.getActiveNodes$();
-
-      const SideNavComponent = () => {
-        // TODO: remove useObservable usage https://github.com/elastic/kibana/issues/225265
-        const CustomSideNavComponent = useObservable(projectNavigationComponent$, {
-          current: null,
-        });
-        const activeNodes = useObservable(activeNodes$, []);
-
-        const SideNavComponentImpl = useMemo<ISideNavComponent>(() => {
-          if (CustomSideNavComponent.current) {
-            return CustomSideNavComponent.current;
-          }
-          return () => null;
-        }, [CustomSideNavComponent]);
-
-        return <SideNavComponentImpl activeNodes={activeNodes} />;
-      };
-
-      return <SideNavComponent />;
-    };
 
     const getLegacyHeaderComponentForFixedLayout = (
       {
@@ -767,7 +764,6 @@ export class ChromeService {
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
-        setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$.bind(projectNavigation),
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),

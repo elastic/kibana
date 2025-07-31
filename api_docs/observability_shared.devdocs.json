@@ -6032,7 +6032,7 @@
             "label": "preferredSchema",
             "description": [],
             "signature": [
-              "SchemaTypes",
+              "DataSchemaFormat",
               " | null | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/hosts_locator.ts",

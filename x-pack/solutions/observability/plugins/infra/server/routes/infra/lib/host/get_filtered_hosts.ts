@@ -18,7 +18,8 @@ export const getFilteredHostNames = async ({
   to,
   limit,
   query,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit'> & {
+  schema,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'schema'> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
   const response = await infraMetricsClient.search({
@@ -27,7 +28,11 @@ export const getFilteredHostNames = async ({
     track_total_hits: false,
     query: {
       bool: {
-        filter: [...castArray(query), ...rangeQuery(from, to), getFilterForEntityType('host')],
+        filter: [
+          ...castArray(query),
+          ...rangeQuery(from, to),
+          getFilterForEntityType('host', schema),
+        ],
       },
     },
     aggs: {
@@ -52,7 +57,8 @@ export const getHasDataFromSystemIntegration = async ({
   from,
   to,
   query,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to'> & {
+  schema,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'schema'> & {
   query?: estypes.QueryDslQueryContainer;
 }) => {
   const hitCount = await infraMetricsClient.search({
@@ -63,7 +69,11 @@ export const getHasDataFromSystemIntegration = async ({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...castArray(query), ...rangeQuery(from, to), getFilterForEntityType('host')],
+        filter: [
+          ...castArray(query),
+          ...rangeQuery(from, to),
+          getFilterForEntityType('host', schema),
+        ],
       },
     },
   });

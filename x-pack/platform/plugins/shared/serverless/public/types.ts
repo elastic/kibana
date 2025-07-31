@@ -8,7 +8,6 @@
 import type {
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
-  SideNavComponent,
   NavigationTreeDefinition,
   SolutionId,
 } from '@kbn/core-chrome-browser';
@@ -30,10 +29,6 @@ export interface ServerlessPluginStart {
     navigationTree$: Observable<NavigationTreeDefinition>,
     config?: { dataTestSubj?: string }
   ): void;
-  /**
-   * @deprecated Use {@link ServerlessPluginStart.initNavigation} instead.
-   */
-  setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
   getNavigationCards(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>

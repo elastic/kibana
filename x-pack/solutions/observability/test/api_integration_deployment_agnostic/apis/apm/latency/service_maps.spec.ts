@@ -74,7 +74,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   let latencyMetricValues: Awaited<ReturnType<typeof getLatencyValues>>;
   let latencyTransactionValues: Awaited<ReturnType<typeof getLatencyValues>>;
 
-  describe('Service Maps APIs', () => {
+  describe('Service maps APIs', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     before(async () => {

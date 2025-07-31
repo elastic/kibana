@@ -11,9 +11,9 @@ import {
   findInventoryFields,
   findInventoryModel,
 } from '@kbn/metrics-data-access-plugin/common';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotRequest } from '../../../../common/http_api';
-import type { ESSearchClient } from '../../../lib/metrics/types';
 import type { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';

@@ -13,10 +13,13 @@ import { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID, BACKGROUND_SEARCH_ENABLED } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
+
+// We want to expose the table from the start contract so we can use it in some other places
+export { SearchSessionsMgmtTable } from './components/table';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -44,9 +47,13 @@ export interface AppDependencies {
 export const APP = {
   id: SEARCH_SESSIONS_MANAGEMENT_ID,
   getI18nName: (): string =>
-    i18n.translate('data.mgmt.searchSessions.appTitle', {
-      defaultMessage: 'Search Sessions',
-    }),
+    BACKGROUND_SEARCH_ENABLED
+      ? i18n.translate('data.mgmt.backgroundSearch.appTitle', {
+          defaultMessage: 'Background Search',
+        })
+      : i18n.translate('data.mgmt.searchSessions.appTitle', {
+          defaultMessage: 'Search Sessions',
+        }),
 };
 
 export function registerSearchSessionsMgmt(

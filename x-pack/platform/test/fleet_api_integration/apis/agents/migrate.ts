@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agents_migrate', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
 
       // Create agent policies using the Fleet API
       // Policy 1 - regular policy without tamper protection
@@ -172,7 +172,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       // Cleanup will be handled automatically by Fleet API
     });
 

@@ -24,7 +24,9 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+      );
       await fleetAndAgents.setup();
 
       // Set up default Fleet Server host, needed during agentless agent creation
@@ -43,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/fleet_server_hosts/fleet-default-fleet-server-host`)
         .set('kbn-xsrf', 'xxxx');
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       mockApiServer.close();
     });
 

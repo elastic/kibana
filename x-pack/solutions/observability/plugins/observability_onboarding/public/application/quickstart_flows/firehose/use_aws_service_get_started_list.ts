@@ -79,7 +79,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
     (dataset: string, name: string) => ({
       id: `logs-explorer-${dataset}`,
       title: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataTitle', {
-        defaultMessage: 'See {name} data in Logs Explorer',
+        defaultMessage: 'See {name} data in Logs explorer',
         values: { name },
       }),
       label: i18n.translate('xpack.observability_onboarding.firehosePanel.exploreDataLabel', {

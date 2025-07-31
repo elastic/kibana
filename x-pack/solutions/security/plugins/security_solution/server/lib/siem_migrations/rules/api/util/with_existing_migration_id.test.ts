@@ -17,9 +17,20 @@ const mockRuleMigrationsClient = {
   },
 };
 
+const mockDashboardMigrationsClient = {
+  data: {
+    migrations: {
+      get: jest.fn(),
+    },
+  },
+};
+
 const mockSecuritySolutionContext = {
   securitySolution: {
-    getSiemRuleMigrationsClient: jest.fn().mockReturnValue(mockRuleMigrationsClient),
+    siemMigrations: {
+      getRulesClient: jest.fn().mockReturnValue(mockRuleMigrationsClient),
+      getDashboardsClient: jest.fn().mockReturnValue(mockDashboardMigrationsClient),
+    },
   },
 };
 

@@ -9,7 +9,7 @@
 import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { ENRICH_MODES } from './util';
-import type { ESQLPolicy, ICommandContext } from '../../types';
+import type { ESQLPolicy, ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 function hasWildcard(name: string) {
@@ -19,7 +19,8 @@ function hasWildcard(name: string) {
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const source = command.args[0] as ESQLSource;
@@ -66,7 +67,7 @@ export const validate = (
     }
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

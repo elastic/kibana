@@ -132,12 +132,13 @@ enabled:
   - src/platform/test/server_integration/http/ssl_with_p12/config.js
   - src/platform/test/server_integration/http/ssl/config.js
   - src/platform/test/ui_capabilities/newsfeed_err/config.ts
-  - x-pack/test/accessibility/apps/group1/config.ts
-  - x-pack/test/accessibility/apps/group2/config.ts
-  - x-pack/test/accessibility/apps/group3/config.ts
+  - x-pack/platform/test/accessibility/apps/group1/config.ts
+  - x-pack/platform/test/accessibility/apps/group2/config.ts
+  - x-pack/platform/test/accessibility/apps/group3/config.ts
   - x-pack/platform/test/localization/config.ja_jp.ts
   - x-pack/platform/test/localization/config.fr_fr.ts
   - x-pack/platform/test/localization/config.zh_cn.ts
+  - x-pack/platform/test/localization/config.de_de.ts
   - x-pack/platform/test/alerting_api_integration/basic/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config.ts

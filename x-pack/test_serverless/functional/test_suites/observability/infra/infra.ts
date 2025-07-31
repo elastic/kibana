@@ -42,14 +42,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('with metrics present', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+          );
           await pageObjects.common.navigateToApp(INVENTORY_PATH);
           await pageObjects.infraHome.waitForLoading();
         });
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+          );
         });
 
         it('renders the correct page title', async () => {
@@ -57,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain(
-            'Infrastructure Inventory - Infrastructure - Observability - Elastic'
+            'Infrastructure inventory - Infrastructure - Observability - Elastic'
           );
         });
 
@@ -87,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'demo-stack-redis-01 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'demo-stack-redis-01 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -103,7 +111,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -114,13 +122,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('Metrics explorer page', function () {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        );
         await pageObjects.common.navigateToApp(METRICS_EXPLORER_PATH);
         await pageObjects.infraHome.waitForLoading();
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        );
       });
 
       it('should be disabled', async () => {

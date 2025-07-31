@@ -13,7 +13,7 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import {
   DeprecationSettings,
   TechnicalPreviewSettings,
-  UiSettingsSolution,
+  UiSettingsSolutions,
 } from '@kbn/core-ui-settings-common';
 
 import { KnownTypeToValue, SettingType } from './setting_type';
@@ -92,11 +92,11 @@ export interface FieldDefinition<
   type: T;
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
-  /** The solution where this setting is applicable.
-   * If undefined, the setting must be displayed in all solutions.
-   * @see {@link UiSettingsSolution}
+  /** The solutions where this setting is applicable.
+   * If undefined or an empty array, the setting must be displayed in all solutions.
+   * @see {@link UiSettingsSolutions}
    */
-  solution?: UiSettingsSolution;
+  solutionViews?: UiSettingsSolutions;
   /**
    * Technical preview information for the field
    * @see {@link TechnicalPreviewSettings}

@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should create a new index with the same documents', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       const { dummydata: originalIndex } = await es.indices.get({
         index: 'dummydata',
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should match the same original index settings after reindex', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       const originalSettings = {
         'index.number_of_replicas': 1,
@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('can resume after reindexing was stopped right after creating the new index', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // This new index is the new soon to be created reindexed index. We create it
       // upfront to simulate a situation in which the user restarted kibana half
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should update any aliases', async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/upgrade_assistant/reindex');
 
       // Add aliases and ensure each returns the right number of docs
       await es.indices.updateAliases({

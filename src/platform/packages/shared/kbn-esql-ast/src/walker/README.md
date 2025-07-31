@@ -125,6 +125,8 @@ low-level API, for your convenience:
 - `Walker.match` &mdash; Matches a single node against a template object.
 - `Walker.matchAll` &mdash; Matches all nodes against a template object.
 - `Walker.findFunction` &mdash; Finds the first function that matches the predicate or name.
+- `Walker.replace` &mdash; Replaces the first node that matches the search criteria with a new node.
+- `Walker.replaceAll` &mdash; Replaces all nodes that match the search criteria with a new node.
 - `Walker.hasFunction` &mdash; Searches for at least one occurrence of a function or expression in the AST.
 - `Walker.parent` &mdash; Returns the parent node of the given node.
 - `Walker.parents` &mdash; Returns all parent nodes of the given node as a list.
@@ -146,6 +148,13 @@ predicate function.
 The `Walker.match()` and `Walker.matchAll()` methods are also used to search for
 nodes in the AST, but unlike `find` and `findAll`, they use a template object
 to match the nodes.
+
+The `Walker.replace()` and `Walker.replaceAll()` methods are used to
+replace nodes in the AST that match a specific criteria. The criteria is
+specified either a predicate function or a template object. The first
+method replaces the first occurrence of a node that matches the criteria, while
+the second method replaces all occurrences of nodes that match the criteria. The
+nodes are replaced in-place, meaning that the original AST is modified.
 
 The `Walker.findFunction()` is a simple utility to find the first function that
 matches a predicate. The `Walker.hasFunction()` returns `true` if at least one

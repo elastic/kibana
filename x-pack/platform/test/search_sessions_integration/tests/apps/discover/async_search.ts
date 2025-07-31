@@ -32,7 +32,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover async search', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );

@@ -22,6 +22,7 @@ export type {
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
   WorkflowExecutionListItemDto,
+  WorkflowListItemAction,
 
   // commands
   CreateWorkflowCommand,

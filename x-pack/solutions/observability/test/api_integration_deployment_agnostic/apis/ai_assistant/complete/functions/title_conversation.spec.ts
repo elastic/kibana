@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
   TITLE_CONVERSATION_FUNCTION_NAME,
-  TITLE_SYSTEM_MESSAGE,
+  getTitleSystemMessage,
 } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
@@ -76,9 +76,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('sends the correct system message to the LLM for the title', () => {
+        const systemMessage = getTitleSystemMessage(['observability' as const]);
         expect(
           titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
-        ).to.be(TITLE_SYSTEM_MESSAGE);
+        ).to.be(systemMessage);
       });
 
       it('sends the correct user message to the LLM for the title', () => {
