@@ -12,7 +12,7 @@ interface BeforeSaveContext {
   taskInstance: TaskInstance;
 }
 
-type BeforeRunContext = Omit<RunContext, 'abortController'>;
+export type BeforeRunContext = Omit<RunContext, 'abortController'>;
 
 export type BeforeSaveContextFunction = Mapper<BeforeSaveContext>;
 export type BeforeRunContextFunction = Mapper<BeforeRunContext>;
