@@ -111,7 +111,7 @@ describe('#delete', () => {
 
       it(`should use ES get action then delete action when using a multi-namespace type`, async () => {
         await deleteSuccess(client, repository, registry, MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).not.toHaveBeenCalled();
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
@@ -228,7 +228,7 @@ describe('#delete', () => {
       });
 
       it(`logs a message when deleteLegacyUrlAliases returns an error`, async () => {
-        client.get.mockResolvedValueOnce(
+        client.get.mockResolvedValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
             getMockGetResponse(registry, { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, namespace })
           )
@@ -240,11 +240,12 @@ describe('#delete', () => {
         );
         mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
         await repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
         expect(logger.error).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledWith(
           'Unable to delete aliases when deleting an object: Oh no!'
         );
+        client.get.mockClear();
       });
     });
 
@@ -282,7 +283,7 @@ describe('#delete', () => {
           } as estypes.GetResponse)
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
       });
 
       it(`throws when ES is unable to find the index during get`, async () => {
@@ -292,7 +293,7 @@ describe('#delete', () => {
           })
         );
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id);
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
       });
 
       it(`throws when the type is multi-namespace and the document exists, but not in this namespace`, async () => {
@@ -307,7 +308,7 @@ describe('#delete', () => {
         await expectNotFoundError(MULTI_NAMESPACE_ISOLATED_TYPE, id, {
           namespace: 'bar-namespace',
         });
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
       });
 
       it(`throws when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
@@ -317,15 +318,15 @@ describe('#delete', () => {
           namespace,
         });
         response._source!.namespaces = [namespace, 'bar-namespace'];
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.get.mockResponse(response);
+
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
         ).rejects.toThrowError(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
+        client.get.mockClear();
       });
 
       it(`throws when the type is multi-namespace and the document has all namespaces and the force option is not enabled`, async () => {
@@ -334,16 +335,17 @@ describe('#delete', () => {
           id,
           namespace,
         });
+
         response._source!.namespaces = ['*'];
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.get.mockResponse(response);
+
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
         ).rejects.toThrowError(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
-        expect(client.get).toHaveBeenCalledTimes(1);
+        expect(client.get).toHaveBeenCalledTimes(2);
+        client.get.mockClear();
       });
 
       it(`throws when ES is unable to find the document during delete`, async () => {
@@ -422,7 +424,7 @@ describe('#delete', () => {
 
         await repository.delete(type, id, { namespace });
 
-        expect(client.get).toHaveBeenCalledTimes(0);
+        expect(client.get).toHaveBeenCalledTimes(1);
 
         expect(securityExtension.authorizeDelete).toHaveBeenLastCalledWith({
           namespace,
