@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   Direction,
   Criteria,
   useEuiTheme,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -42,25 +43,30 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const enrichedStreams = React.useMemo(() => {
-    const streamList = shouldComposeTree(sortField) ? asTrees(streams) : streams;
+    const streamList = shouldComposeTree(sortField, searchQuery) ? asTrees(streams) : streams;
     return streamList.map(enrichStream);
-  }, [sortField, streams]);
+  }, [sortField, searchQuery, streams]);
 
   const items = React.useMemo(
     () => buildStreamRows(enrichedStreams, sortField, sortDirection),
     [enrichedStreams, sortField, sortDirection]
   );
 
-  const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
+  const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
+    if (query) setSearchQuery(query.text);
+  };
+
+  const handleTableChange = ({ sort }: Criteria<TableRow>) => {
     if (sort) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
     }
-  }, []);
+  };
 
   const sorting = {
     sort: {
@@ -148,14 +154,16 @@ export function StreamsTreeTable({
       items={items}
       sorting={sorting}
       noItemsMessage={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
-        defaultMessage: 'Loading streams...',
+        defaultMessage: 'No streams found.',
       })}
-      onTableChange={onTableChange}
+      onTableChange={handleTableChange}
       pagination={{
         initialPageSize: 25,
         pageSizeOptions: [25, 50, 100],
       }}
       search={{
+        query: searchQuery,
+        onChange: handleQueryChange,
         box: {
           incremental: true,
         },

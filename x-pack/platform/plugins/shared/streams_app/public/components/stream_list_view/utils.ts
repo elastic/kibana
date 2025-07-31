@@ -37,8 +37,8 @@ export function isParentName(parent: string, descendant: string) {
   return parent !== descendant && descendant.startsWith(parent + '.');
 }
 
-export function shouldComposeTree(sortField: SortableField) {
-  return !sortField || sortField === 'nameSortKey';
+export function shouldComposeTree(sortField: SortableField, query: string) {
+  return (!sortField || sortField === 'nameSortKey') && !query;
 }
 
 export function buildStreamRows(
@@ -118,7 +118,10 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
   } else if (isIlmLifecycle(lc)) {
     retentionMs = Number.POSITIVE_INFINITY;
   }
-  const nameSortKey = `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`;
+  const nameSortKey =
+    'children' in node
+      ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
+      : node.stream.name;
   const children = 'children' in node ? node.children.map(enrichStream) : undefined;
 
   return {
