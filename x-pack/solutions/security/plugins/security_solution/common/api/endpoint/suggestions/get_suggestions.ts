@@ -16,7 +16,11 @@ export const EndpointSuggestionsSchema = {
     fieldMeta: schema.maybe(schema.any()),
   }),
   params: schema.object({
-    suggestion_type: schema.oneOf([schema.literal('eventFilters'), schema.literal('endpoints')]),
+    suggestion_type: schema.oneOf([
+      schema.literal('eventFilters'),
+      schema.literal('endpoints'),
+      schema.literal('trustedApps'),
+    ]),
   }),
 };
 
