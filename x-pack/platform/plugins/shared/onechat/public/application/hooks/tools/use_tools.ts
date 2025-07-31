@@ -6,7 +6,7 @@
  */
 
 import { ToolType } from '@kbn/onechat-common';
-import { EsqlToolDefinitionWithSchema, isEsqlTool } from '@kbn/onechat-common/tools/esql';
+import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
@@ -35,24 +35,6 @@ export const useOnechatTools = ({ includeSystemTools = true }: UseOnechatToolsOp
   }, [data, includeSystemTools]);
 
   return { tools, isLoading, error };
-};
-
-export const useBaseTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const baseTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.builtin), [tools]);
-  return { tools: baseTools, ...rest };
-};
-
-export const useEsqlTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const esqlTools = useMemo(
-    // inferred type predicates are implemented in Typescript 5.5
-    () => tools.filter(isEsqlTool) as EsqlToolDefinitionWithSchema[],
-    [tools]
-  );
-  return { tools: esqlTools, ...rest };
 };
 
 export const useOnechatTool = (toolId?: string) => {

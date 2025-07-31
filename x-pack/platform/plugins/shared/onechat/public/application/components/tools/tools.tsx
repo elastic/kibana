@@ -38,7 +38,7 @@ import { isEsqlTool } from '@kbn/onechat-common/tools';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useToggle from 'react-use/lib/useToggle';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   CreateToolErrorCallback,
   CreateToolSuccessCallback,
@@ -68,6 +68,8 @@ import { truncateAtNewline } from '../../utils/truncate_at_newline';
 import { OnechatEsqlToolFlyout, OnechatEsqlToolFlyoutMode } from './esql/esql_tool_flyout';
 import { OnechatEsqlToolFormData } from './esql/form/types/esql_tool_form_types';
 import { OnechatToolTags } from './tags/tool_tags';
+
+const INCLUDE_SYSTEM_TOOLS = 'onechat:tools:includeSystemTools';
 
 const ToolId = ({
   tool,
@@ -261,7 +263,7 @@ const ToolsTableHeader = ({
   setSelectedTools,
   deleteSelectedTools,
   includeSystemTools,
-  toggleIncludeSystemTools,
+  setIncludeSystemTools,
 }: {
   isLoading: boolean;
   pageIndex: number;
@@ -271,7 +273,7 @@ const ToolsTableHeader = ({
   setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
   deleteSelectedTools: (toolIds: string[]) => void;
   includeSystemTools: boolean;
-  toggleIncludeSystemTools: (state?: boolean) => void;
+  setIncludeSystemTools: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -398,7 +400,7 @@ const ToolsTableHeader = ({
               `}
               compressed
               checked={includeSystemTools}
-              onChange={() => toggleIncludeSystemTools()}
+              onChange={() => setIncludeSystemTools(!includeSystemTools)}
             />
           </EuiFlexGroup>
         }
@@ -474,7 +476,10 @@ const getColumns = ({
 
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
-  const [includeSystemTools, toggleIncludeSystemTools] = useToggle(true);
+  const [includeSystemTools = true, setIncludeSystemTools] = useLocalStorage(
+    INCLUDE_SYSTEM_TOOLS,
+    true
+  );
   const {
     tools,
     isLoading: isLoadingTools,
@@ -825,7 +830,7 @@ export const OnechatTools = () => {
               setSelectedTools={setSelectedTools}
               deleteSelectedTools={bulkDeleteTools}
               includeSystemTools={includeSystemTools}
-              toggleIncludeSystemTools={toggleIncludeSystemTools}
+              setIncludeSystemTools={setIncludeSystemTools}
             />
           }
           loading={isLoadingTools}
