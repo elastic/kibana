@@ -20,6 +20,8 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 
 import {
@@ -56,6 +58,18 @@ const isValidUserProfileId = (userProfileId: string): boolean => {
   return USER_PROFILE_REGEX.test(userProfileId);
 };
 
+export const isSavedObjectsChangeAccessModeOptions = (
+  options: SavedObjectsChangeAccessControlOptions
+): options is SavedObjectsChangeAccessModeOptions => {
+  return 'accessMode' in options;
+};
+
+export const isSavedObjectsChangeOwnershipOptions = (
+  options: SavedObjectsChangeAccessControlOptions
+): options is SavedObjectsChangeOwnershipOptions => {
+  return 'newOwnerProfileUid' in options;
+};
+
 const validateChangeAccessControlParams = ({
   actionType,
   newOwnerProfileUid,
@@ -67,10 +81,18 @@ const validateChangeAccessControlParams = ({
   accessMode?: 'default' | 'read_only';
   objects: SavedObjectsChangeAccessControlObject[];
 }) => {
-  if (actionType === 'changeOwnership' && !newOwnerProfileUid) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      'The "newOwnerProfileUid" field is required to change ownership of a saved object.'
-    );
+  if (actionType === 'changeOwnership') {
+    if (!newOwnerProfileUid) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'The "newOwnerProfileUid" field is required to change ownership of a saved object.'
+      );
+    }
+
+    if (!isValidUserProfileId(newOwnerProfileUid)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `User profile ID is invalid: ${newOwnerProfileUid}`
+      );
+    }
   }
 
   if (
@@ -91,14 +113,6 @@ const validateChangeAccessControlParams = ({
       }`
     );
   }
-
-  if (actionType === 'changeOwnership' && newOwnerProfileUid) {
-    if (!isValidUserProfileId(newOwnerProfileUid)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `User profile ID is invalid: ${newOwnerProfileUid}`
-      );
-    }
-  }
 };
 
 export const changeObjectAccessControl = async (
@@ -109,8 +123,13 @@ export const changeObjectAccessControl = async (
 
   // Extract owner for changeOwnership or accessMode for changeAccessMode
   const newOwnerProfileUid =
-    actionType === 'changeOwnership' ? params.options.newOwnerProfileUid : undefined;
-  const accessMode = actionType === 'changeAccessMode' ? params.options.accessMode : undefined;
+    actionType === 'changeOwnership' && isSavedObjectsChangeOwnershipOptions(params.options)
+      ? params.options.newOwnerProfileUid
+      : undefined;
+  const accessMode =
+    actionType === 'changeAccessMode' && isSavedObjectsChangeAccessModeOptions(params.options)
+      ? params.options.accessMode
+      : undefined;
   const {
     registry,
     allowedTypes,

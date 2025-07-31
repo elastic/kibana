@@ -11,22 +11,18 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeAccessModeOptions,
 } from '@kbn/core-saved-objects-api-server';
 
-import { changeObjectAccessControl } from './internals/change_object_access_control';
+import {
+  changeObjectAccessControl,
+  isSavedObjectsChangeAccessModeOptions,
+} from './internals/change_object_access_control';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformChangeAccessModeParams {
   objects: SavedObjectsChangeAccessControlObject[];
   options: SavedObjectsChangeAccessControlOptions;
 }
-
-export const isSavedObjectsChangeAccessModeOptions = (
-  options: SavedObjectsChangeAccessControlOptions
-): options is SavedObjectsChangeAccessModeOptions => {
-  return 'accessMode' in options;
-};
 
 export const performChangeAccessMode = async (
   { objects, options }: PerformChangeAccessModeParams,
