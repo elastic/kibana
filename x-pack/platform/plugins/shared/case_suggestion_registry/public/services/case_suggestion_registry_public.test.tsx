@@ -6,20 +6,23 @@
  */
 
 import React from 'react';
-import { ContextRegistryPublic, ContextDefinitionPublic } from './context_registry_public';
+import {
+  CaseSuggestionRegistryPublic,
+  CaseSuggestionDefinitionPublic,
+} from './case_suggestion_registry_public';
 import { OWNERS } from '../../common/constants';
 
 const mockOwner = OWNERS[0];
 
-describe('ContextRegistryPublic', () => {
-  let registry: ContextRegistryPublic;
+describe('CaseSuggestionRegistryPublic', () => {
+  let registry: CaseSuggestionRegistryPublic;
 
   beforeEach(() => {
-    registry = new ContextRegistryPublic();
+    registry = new CaseSuggestionRegistryPublic();
   });
 
   it('should register a public context definition successfully for an owner', () => {
-    const context: ContextDefinitionPublic = {
+    const context: CaseSuggestionDefinitionPublic = {
       key: 'test-id',
       owner: mockOwner,
       children: React.lazy(() =>
@@ -30,11 +33,11 @@ describe('ContextRegistryPublic', () => {
     };
 
     registry.registerHandler(context);
-    expect(registry.getContextByKey({ owner: mockOwner, key: 'test-id' })).toEqual(context);
+    expect(registry.getCaseSuggestionByKey({ owner: mockOwner, key: 'test-id' })).toEqual(context);
   });
 
   it('should throw an error when registering a duplicate key for the same owner', () => {
-    const context: ContextDefinitionPublic = {
+    const context: CaseSuggestionDefinitionPublic = {
       key: 'duplicate-id',
       owner: mockOwner,
       children: React.lazy(() =>
@@ -46,27 +49,27 @@ describe('ContextRegistryPublic', () => {
 
     registry.registerHandler(context);
     expect(() => registry.registerHandler(context)).toThrowError(
-      `Context with key 'duplicate-id' is already registered for owner '${mockOwner}'.`
+      `CaseSuggestion with key 'duplicate-id' is already registered for owner '${mockOwner}'.`
     );
   });
 
   it('should retrieve all registered contexts for an owner', () => {
-    const context1: ContextDefinitionPublic = {
+    const context1: CaseSuggestionDefinitionPublic = {
       key: 'id-1',
       owner: mockOwner,
       children: React.lazy(() =>
         Promise.resolve({
-          default: () => <div>Context 1</div>,
+          default: () => <div>CaseSuggestion 1</div>,
         })
       ),
     };
 
-    const context2: ContextDefinitionPublic = {
+    const context2: CaseSuggestionDefinitionPublic = {
       key: 'id-2',
       owner: mockOwner,
       children: React.lazy(() =>
         Promise.resolve({
-          default: () => <div>Context 2</div>,
+          default: () => <div>CaseSuggestion 2</div>,
         })
       ),
     };
@@ -74,20 +77,20 @@ describe('ContextRegistryPublic', () => {
     registry.registerHandler(context1);
     registry.registerHandler(context2);
 
-    expect(registry.getContextByOwner(mockOwner)).toEqual([context1, context2]);
+    expect(registry.getCaseSuggestionByOwner(mockOwner)).toEqual([context1, context2]);
   });
 
   it('should throw an error for a non-existent key for an owner', () => {
     expect(() =>
-      registry.getContextByKey({ owner: mockOwner, key: 'non-existent-id' })
+      registry.getCaseSuggestionByKey({ owner: mockOwner, key: 'non-existent-id' })
     ).toThrowError(
-      `Context with key 'non-existent-id' is not registered for owner '${mockOwner}'.`
+      `CaseSuggestion with key 'non-existent-id' is not registered for owner '${mockOwner}'.`
     );
   });
 
   it('should throw an error when the owner is not recognized', () => {
     const invalidOwner = 'invalid-owner';
-    const context: ContextDefinitionPublic = {
+    const context: CaseSuggestionDefinitionPublic = {
       key: 'test-id',
       owner: invalidOwner as any, // Intentionally using an invalid owner type
       children: React.lazy(() =>
@@ -103,22 +106,22 @@ describe('ContextRegistryPublic', () => {
   });
 
   it('should retrieve all contexts for a specific owner', () => {
-    const context1: ContextDefinitionPublic = {
+    const context1: CaseSuggestionDefinitionPublic = {
       key: 'context-1',
       owner: mockOwner,
       children: React.lazy(() =>
         Promise.resolve({
-          default: () => <div>Context 1</div>,
+          default: () => <div>CaseSuggestion 1</div>,
         })
       ),
     };
 
-    const context2: ContextDefinitionPublic = {
+    const context2: CaseSuggestionDefinitionPublic = {
       key: 'context-2',
       owner: mockOwner,
       children: React.lazy(() =>
         Promise.resolve({
-          default: () => <div>Context 2</div>,
+          default: () => <div>CaseSuggestion 2</div>,
         })
       ),
     };
@@ -126,7 +129,7 @@ describe('ContextRegistryPublic', () => {
     registry.registerHandler(context1);
     registry.registerHandler(context2);
 
-    const contexts = registry.getContextByOwner(mockOwner);
+    const contexts = registry.getCaseSuggestionByOwner(mockOwner);
     expect(contexts).toEqual([context1, context2]);
   });
 });
