@@ -35,11 +35,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.beforeAll(async () => {
       // Access to ml.api has to happen inside a test or test hook
       mlJobHelper = createMlJobHelper(ml.api);
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
     });
 
     this.afterAll(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+      );
     });
 
     describe('hashed format', () => {
