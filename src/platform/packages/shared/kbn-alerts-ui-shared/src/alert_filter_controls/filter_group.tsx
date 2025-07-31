@@ -9,7 +9,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type {
   ControlGroupRendererApi,
