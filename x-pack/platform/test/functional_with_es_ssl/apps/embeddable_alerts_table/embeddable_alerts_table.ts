@@ -90,9 +90,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
-        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
-        await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
-        await find.clickByCssSelector(`button#security`);
+        await retry.try(async () => {
+          await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+          await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
+          await find.clickByCssSelector(`button#security`);
+        });
 
         expect(await find.byButtonText('Switch solution')).to.be.ok();
       });
