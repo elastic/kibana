@@ -127,15 +127,14 @@ const AnomalyActionMenu = ({
       isAutoReloading: false,
     });
 
-    setWaffleFiltersState({
-      expression: influencers.reduce((query, i) => {
+    setWaffleFiltersState(
+      influencers.reduce((query, i) => {
         if (query) {
           query = `${query} or `;
         }
         return `${query} ${influencerField}: "${i}"`;
-      }, ''),
-      kind: 'kuery',
-    });
+      }, '')
+    );
 
     if (closeFlyout) closeFlyout();
   }, [
