@@ -20,6 +20,7 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiCallOut,
+  useGeneratedHtmlId,
   EuiText,
   EuiCode,
 } from '@elastic/eui';
@@ -70,6 +71,7 @@ export const CreateIndexModal = ({
   onClose: () => void;
   onCreate: (indexName: string) => void;
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [indexName, setIndexName] = useState('');
   const [indexMode, setIndexMode] = useState<IndexMode>(IndexMode.STANDARD);
   const [error, setError] = useState<string | null>(null);
@@ -99,9 +101,9 @@ export const CreateIndexModal = ({
   }, [indexName, createPrivMonImportIndex, indexMode, onCreate]);
 
   return (
-    <EuiModal onClose={onClose} maxWidth="624px">
+    <EuiModal onClose={onClose} maxWidth="624px" aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.title"
             defaultMessage="Create index"
