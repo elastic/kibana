@@ -122,6 +122,7 @@ export function fetchAll(
           expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          searchSessionId: params.searchSessionId,
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

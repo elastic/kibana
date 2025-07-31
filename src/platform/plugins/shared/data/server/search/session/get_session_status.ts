@@ -16,7 +16,7 @@ import type { SearchSessionsConfigSchema } from '../../config';
 import { getSearchStatus } from './get_search_status';
 
 export async function getSessionStatus(
-  deps: { internalClient: ElasticsearchClient },
+  deps: { internalClient: ElasticsearchClient; asUserClient: ElasticsearchClient },
   session: SearchSessionSavedObjectAttributes,
   config: SearchSessionsConfigSchema
 ): Promise<{ status: SearchSessionStatus; errors?: string[] }> {
@@ -33,7 +33,12 @@ export async function getSessionStatus(
   const searches = Object.values(session.idMapping);
   const searchStatuses = await Promise.all(
     searches.map(async (s) => {
-      const status = await getSearchStatus(deps.internalClient, s.id);
+      const status = await getSearchStatus({
+        internalClient: deps.internalClient,
+        asyncId: s.id,
+        session: s,
+        asUserClient: deps.asUserClient,
+      });
       return {
         ...s,
         ...status,
