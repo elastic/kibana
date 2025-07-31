@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { KibanaContextExtra } from '../types';
+import { KibanaContextExtra } from '../../types';
+import { isPlaceholderColumn } from '../../utils';
 
 export interface UnsavedChangesModal {
   onClose: () => void;
@@ -30,8 +31,13 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
 
   const pendingColumnsToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
+  const columnsWithoutPlaceholders = useMemo(
+    () => pendingColumnsToBeSaved.filter((column) => !isPlaceholderColumn(column.name)),
+    [pendingColumnsToBeSaved]
+  );
+
   const closeWithoutSaving = () => {
-    indexUpdateService.deleteUnsavedColumns();
+    indexUpdateService.discardUnsavedColumns();
     onClose();
   };
 
@@ -66,7 +72,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
       />
       <EuiSpacer size="s" />
       <ul>
-        {pendingColumnsToBeSaved.map((column) => (
+        {columnsWithoutPlaceholders.map((column) => (
           <li key={column.name}>{column.name}</li>
         ))}
       </ul>

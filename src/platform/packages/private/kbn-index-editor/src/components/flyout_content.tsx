@@ -17,7 +17,8 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { UnsavedChangesModal } from './unsaved_changes_modal';
+import { isPlaceholderColumn } from '../utils';
+import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
@@ -65,7 +66,11 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const noResults = !isLoading && dataViewColumns?.length === 0;
+  const columnsWithoutPlaceholders = dataViewColumns?.filter(
+    (column) => !isPlaceholderColumn(column.name)
+  );
+
+  const noResults = !isLoading && columnsWithoutPlaceholders?.length === 0;
 
   return (
     <KibanaContextProvider

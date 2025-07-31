@@ -11,7 +11,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
 import {
   CustomCellRenderer,
@@ -19,14 +18,18 @@ import {
   UnifiedDataTable,
   type SortOrder,
   CustomGridColumnsConfiguration,
+  type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { difference, intersection, times } from 'lodash';
-import { getCellValueRenderer } from './grid_custom_renderers/value_input_control';
+import { difference, intersection } from 'lodash';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
-import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import { KibanaContextExtra } from '../types';
+import {
+  getCellValueRenderer,
+  getValueInputPopover,
+} from './grid_custom_renderers/value_input_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -42,7 +45,6 @@ interface ESQLDataGridProps {
 const DEFAULT_INITIAL_ROW_HEIGHT = 2;
 const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
-const MAX_COLUMN_PLACEHOLDERS = 4;
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
@@ -58,6 +60,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       dataViewFieldEditor,
       indexUpdateService,
+      storage,
     },
   } = useKibana<KibanaContextExtra>();
 
@@ -79,12 +82,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  // Track which cell is being edited
-  const [editingCell, setEditingCell] = useState<{ row: number | null; col: string | null }>({
-    row: null,
-    col: null,
-  });
-
   const onSetColumns = useCallback(
     (columns: string[]) => {
       setActiveColumns(columns);
@@ -100,29 +97,32 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   // Visible columns are calculated based on 3 sources:
-  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user.
-  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly, it preserves the order of the columns.
-  // - The hiddenColumns ref, which tracks the columns that are currently hidden.
+  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user plus the placeholders.
+  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly,
+  // it preserves the order of the columns given by the user.
   // The visible columns are determined by:
   // - Filter out hidden columns from the props.columns
-  // - Ensure the order is preserved based on activeColumns
-  // - Add any new columns that are not in the preserved order to the beginning
+  // - Ensure the order is preserved based on activeColumns and the new columns that might have been added.
   const renderedColumns = useMemo(() => {
     const currentColumnNames = props.columns
       .map((c) => c.name)
       .filter((name) => !hiddenColumns.current.includes(name));
 
+    // It's important to only keep the columns that are still present in the props.columns
     const preservedOrder = intersection(activeColumns, currentColumnNames);
     const newColumns = difference(currentColumnNames, preservedOrder);
 
-    const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - props.columns.length;
-    const addColumnPlaceholders =
-      missingPlaceholders > 0
-        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}${idx}`)
-        : [];
+    // We need to place the new columns, (the ones not present in activeColumns) at their original index.
+    if (newColumns.length > 0) {
+      newColumns.forEach((newColumn) => {
+        const newColumnIndex = currentColumnNames.findIndex((col) => col === newColumn);
+        // if there is a new column, we added at it original index
+        preservedOrder.splice(newColumnIndex, 0, newColumn);
+      });
+    }
 
-    return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];
-  }, [props.columns, hiddenColumns, activeColumns]);
+    return preservedOrder;
+  }, [props.columns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -135,8 +135,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.columns]);
 
   const services = useMemo(() => {
-    const storage = new Storage(localStorage);
-
     return {
       data,
       theme,
@@ -146,30 +144,31 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       fieldFormats,
       storage,
     };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
+  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const onValueChange = useCallback(
     (docId: string, update: any) => {
-      // reset editing cell
-      setEditingCell({ row: null, col: null });
       // make a call to update the doc with the new value
       indexUpdateService.updateDoc(docId, update);
       // update rows to reflect the change
     },
-    [setEditingCell, indexUpdateService]
+    [indexUpdateService]
   );
 
+  const dataTableRef = useRef<EuiDataGridRefProps & RestorableStateProviderApi>(null);
+  const renderCellPopover = useMemo(
+    () =>
+      getValueInputPopover({
+        rows,
+        columns: props.columns,
+        onValueChange,
+        dataTableRef,
+      }),
+    [rows, props.columns, onValueChange, dataTableRef]
+  );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(
-      rows,
-      props.columns,
-      editingCell,
-      savingDocs,
-      setEditingCell,
-      onValueChange,
-      isIndexCreated
-    );
-  }, [rows, props.columns, editingCell, setEditingCell, onValueChange, savingDocs, isIndexCreated]);
+    return getCellValueRenderer(rows, savingDocs, dataTableRef, isIndexCreated);
+  }, [rows, savingDocs, isIndexCreated]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
@@ -191,6 +190,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   return (
     <>
       <UnifiedDataTable
+        ref={dataTableRef}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         columns={renderedColumns}
         rows={rows}
@@ -198,6 +198,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         services={services}
         enableInTableSearch
         externalCustomRenderers={externalCustomRenderers}
+        renderCellPopover={renderCellPopover}
         isPlainRecord
         isSortEnabled
         showMultiFields={false}
@@ -224,8 +225,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rowHeightState={rowHeight}
         onUpdateRowHeight={setRowHeight}
         controlColumnIds={props.controlColumnIds}
-        disableCellActions
-        disableCellPopover
         css={css`
           .euiDataGridRowCell__content > div,
           .unifiedDataTable__cellValue {

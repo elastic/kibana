@@ -7,29 +7,101 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import React, { type FunctionComponent, useCallback, RefObject } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiDataGridCellPopoverElementProps,
+  EuiCallOut,
+  EuiFocusTrap,
+} from '@elastic/eui';
+import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { isPlaceholderColumn } from '../../utils';
 import type { PendingSave } from '../../index_update_service';
 import { ValueInput } from '../value_input';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
 
+export const getValueInputPopover =
+  ({
+    rows,
+    columns,
+    onValueChange,
+    dataTableRef,
+  }: {
+    rows: DataTableRecord[];
+    columns: DatatableColumn[];
+    onValueChange: OnCellValueChange;
+    dataTableRef: RefObject<EuiDataGridRefProps>;
+  }) =>
+  ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
+    const row = rows[rowIndex];
+    const docId = row.raw._id;
+    const cellValue = row.flattened[columnId]?.toString();
+
+    const onEnter = useCallback(
+      (value: string) => {
+        onValueChange(docId!, { [columnId]: value });
+
+        if (dataTableRef.current) {
+          dataTableRef.current.closeCellPopover();
+
+          // Cell needs to be focused again after popover close,
+          // Also focus must be put in another cell first for it to work.
+          dataTableRef.current.setFocusedCell({ rowIndex: 0, colIndex: 0 });
+          dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
+        }
+      },
+      [docId, columnId, rowIndex, colIndex]
+    );
+
+    const isPlaceholder = isPlaceholderColumn(columnId);
+
+    let inputWidth: number | undefined;
+    if (cellContentsElement) {
+      inputWidth = cellContentsElement.offsetWidth;
+    }
+
+    if (!isPlaceholder) {
+      return (
+        <EuiFocusTrap autoFocus={true} initialFocus="input">
+          <ValueInput
+            onEnter={onEnter}
+            columnName={columnId}
+            columns={columns}
+            value={cellValue}
+            width={inputWidth}
+          />
+        </EuiFocusTrap>
+      );
+    } else {
+      return (
+        <EuiCallOut
+          size="s"
+          title={i18n.translate('indexEditor.flyout.grid.cell.noColumnDefined', {
+            defaultMessage: 'Name the field before adding cell values',
+          })}
+        />
+      );
+    }
+  };
+
 export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
-    columns: DatatableColumn[],
-    editingCell: { row: number | null; col: string | null },
     savingDocs: PendingSave | undefined,
-    onEditStart: (update: { row: number | null; col: string | null }) => void,
-    onValueChange: OnCellValueChange,
+    dataTableRef: RefObject<EuiDataGridRefProps>,
     isIndexCreated: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
-  ({ rowIndex, columnId }) => {
+  ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
 
@@ -47,39 +119,17 @@ export const getCellValueRenderer =
       cellValue = row.flattened[columnId]?.toString();
     }
 
-    const isEditing = editingCell.row === rowIndex && editingCell.col === columnId;
-
-    if (isEditing) {
-      return (
-        <div css={{ display: 'flex', height: '100%' }}>
-          <ValueInput
-            onBlur={() => {
-              onEditStart({ row: null, col: null });
-            }}
-            onEnter={(value) => {
-              onValueChange(docId!, { [columnId]: value });
-            }}
-            columnName={columnId}
-            columns={columns}
-            value={cellValue}
-            autoFocus
-          />
-        </div>
-      );
-    }
-
     const onEditStartHandler = () => {
-      const columnExists = columns.some((col) => col.id === columnId);
-      if (columnExists) {
-        onEditStart({ row: rowIndex, col: columnId });
-      }
+      dataTableRef.current?.openCellPopover({
+        rowIndex,
+        colIndex,
+      });
     };
 
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
         <EuiFlexItem>
           <div
-            tabIndex={0}
             css={{
               cursor: 'pointer',
               height: '100%',
