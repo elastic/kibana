@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { camelCase } from 'lodash';
 import {
   TRIGGER_SUGGESTION_COMMAND,
@@ -27,6 +26,7 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -137,7 +137,9 @@ export function getFunctionSignaturesByReturnType(
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
-  option?: string
+  option?: string,
+  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+    license === 'platinum'
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -167,6 +169,20 @@ export function getFunctionSignaturesByReturnType(
 
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
+      const hasRestrictedSignature = signatures.some((signature) => signature.license);
+      if (hasRestrictedSignature) {
+        const availableSignatures = signatures.filter((signature) => {
+          if (!signature.license) return true;
+          return hasMinimumLicenseRequired(
+            signature.license.toLocaleLowerCase() as ESQLLicenseType
+          );
+        });
+
+        if (availableSignatures.length === 0) {
+          return false;
+        }
+      }
+
       if (ignoreAsSuggestion) {
         return false;
       }
@@ -257,16 +273,18 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
-) {
+  }>,
+  customLicenseType = 'platinum'
+): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
     fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
+
   return {
-    getColumnsFor: jest.fn(async ({ query }) => {
-      if (query === 'FROM join_index') {
+    getColumnsFor: jest.fn(async (params) => {
+      if (params?.query === 'FROM join_index') {
         return lookupIndexFields;
       }
 
@@ -286,6 +304,9 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
+    getLicense: jest.fn(async () => ({
+      hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
+    })),
   };
 }
 

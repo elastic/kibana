@@ -125,6 +125,7 @@ const SavedPlaygroundFieldErrors: string[] = [
   SavedPlaygroundFormFields.citations,
   SavedPlaygroundFormFields.sourceFields,
   SavedPlaygroundFormFields.docSize,
+  SavedPlaygroundFormFields.summarizationModel,
 ];
 
 type SavedPlaygroundFormErrors = FormState<SavedPlaygroundForm>['errors'];
@@ -184,4 +185,42 @@ export function validatePlaygroundName(name: string): string | null {
     });
   }
   return null;
+}
+
+export function validateSavedPlaygroundIndices(
+  savedIndices: string[],
+  queriedIndices: string[]
+): { validIndices: string[]; missingIndices: string[] } {
+  const validIndices: string[] = [];
+  const missingIndices: string[] = [];
+  for (const index of savedIndices) {
+    if (queriedIndices.includes(index)) {
+      validIndices.push(index);
+    } else {
+      missingIndices.push(index);
+    }
+  }
+  return { validIndices, missingIndices };
+}
+
+export function validateSavedPlaygroundModel(
+  summarizationModel: PlaygroundSavedObject['summarizationModel'],
+  models: LLMModel[]
+): string | undefined {
+  if (summarizationModel && summarizationModel.modelId) {
+    const model = models.find(
+      (llm) =>
+        llm.connectorId === summarizationModel.connectorId &&
+        llm.value === summarizationModel.modelId
+    );
+    if (model === undefined) {
+      return summarizationModel.modelId;
+    }
+  } else if (summarizationModel) {
+    const model = models.find((llm) => llm.connectorId === summarizationModel.connectorId);
+    if (model === undefined) {
+      return summarizationModel.connectorId;
+    }
+  }
+  return undefined;
 }
