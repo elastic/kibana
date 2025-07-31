@@ -12,7 +12,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('../common/saved_objects_management')],
+  testFiles: [require.resolve('../../test_suites/saved_objects_management')],
   junit: {
     reportName: 'Serverless Search Saved Objects Management Functional Tests',
   },

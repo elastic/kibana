@@ -5,23 +5,22 @@
  * 2.0.
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findTestPluginPaths } from '@kbn/test';
+import { resolve } from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('../common/discover/context_awareness')],
+  testFiles: [require.resolve('../../test_suites/examples')],
   junit: {
-    reportName: 'Serverless Observability Discover Context Awareness Functional Tests',
+    reportName: 'Serverless Observability Examples Functional Tests',
   },
-  suiteTags: { exclude: ['skipSvlOblt'] },
-  kbnServerArgs: [
-    `--discover.experimental.enabledProfiles=${JSON.stringify([
-      'example-root-profile',
-      'example-solution-view-root-profile',
-      'example-data-source-profile',
-      'example-document-profile',
-    ])}`,
-  ],
+  kbnServerArgs: findTestPluginPaths([
+    resolve(REPO_ROOT, 'examples'),
+    resolve(REPO_ROOT, 'x-pack/examples'),
+  ]),
+
   // include settings from project controller
   esServerArgs: [],
 });
