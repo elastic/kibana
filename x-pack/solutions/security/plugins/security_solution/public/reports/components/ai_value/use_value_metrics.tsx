@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { getExcludeAlertsFilters } from './utils';
 import { useAlertCountQuery } from '../../hooks/use_alert_count_query';
 import { getValueMetrics, type ValueMetrics } from './metrics';
 import { useKibana } from '../../../common/lib/kibana';
@@ -60,44 +61,12 @@ export const useValueMetrics = ({
     });
 
   const filters = useMemo(
-    () => [
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            // only query alerts that are not part of an attack discovery
-            must_not: (data?.unique_alert_ids ?? []).map((uuid: string) => ({
-              match_phrase: { 'kibana.alert.uuid': uuid },
-            })),
-          },
-        },
-      },
-    ],
+    () => getExcludeAlertsFilters(data?.unique_alert_ids ?? []),
     [data?.unique_alert_ids]
   );
 
   const filtersCompare = useMemo(
-    () => [
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-        },
-        query: {
-          bool: {
-            // only query alerts that are not part of an attack discovery
-            must_not: (compareAdData?.unique_alert_ids ?? []).map((uuid: string) => ({
-              match_phrase: { 'kibana.alert.uuid': uuid },
-            })),
-          },
-        },
-      },
-    ],
+    () => getExcludeAlertsFilters(compareAdData?.unique_alert_ids ?? []),
     [compareAdData?.unique_alert_ids]
   );
 

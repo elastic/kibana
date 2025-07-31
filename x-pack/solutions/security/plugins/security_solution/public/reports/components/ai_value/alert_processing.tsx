@@ -27,7 +27,7 @@ export const AlertProcessing: React.FC<Props> = ({ valueMetrics, valueMetricsCom
       <EuiText size="s">
         <p>{i18n.ALERT_PROCESSING_DESC}</p>
       </EuiText>
-      <EuiSpacer size="l" />{' '}
+      <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <AlertProcessingDonut valueMetrics={valueMetrics} />

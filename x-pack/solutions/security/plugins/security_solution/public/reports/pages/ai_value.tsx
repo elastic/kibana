@@ -18,8 +18,6 @@ import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
@@ -76,55 +74,49 @@ const AIValueComponent = () => {
   }
 
   return (
-    <>
-      <>
-        <ValueReportExporter>
-          {(exportPDF) => (
-            <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
-              <HeaderPage
-                title={i18n.AI_VALUE_DASHBOARD}
-                subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
-                rightSideItems={[
-                  <SuperDatePicker
-                    id={InputsModelId.valueReport}
-                    showUpdateButton="iconOnly"
-                    width="auto"
-                    compressed
-                  />,
-                  ...(hasAttackDiscoveries
-                    ? [
-                        <EuiButtonEmpty
-                          className="exportPdfButton"
-                          iconType="download"
-                          onClick={exportPDF}
-                          size="s"
-                        >
-                          {EXPORT_REPORT}
-                        </EuiButtonEmpty>,
-                      ]
-                    : []),
-                ]}
-              />
-              {isSourcererLoading ? (
-                <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-              ) : (
-                <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-                  <EuiFlexItem>
-                    <AIValueMetrics
-                      from={from}
-                      to={to}
-                      setHasAttackDiscoveries={setHasAttackDiscoveries}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              )}
-            </SecuritySolutionPageWrapper>
+    <ValueReportExporter>
+      {(exportPDF) => (
+        <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+          <HeaderPage
+            title={i18n.AI_VALUE_DASHBOARD}
+            subtitle={METRICS_OVER_TIME(getTimeRangeAsDays({ from, to }))}
+            rightSideItems={[
+              <SuperDatePicker
+                id={InputsModelId.valueReport}
+                showUpdateButton="iconOnly"
+                width="auto"
+                compressed
+              />,
+              ...(hasAttackDiscoveries
+                ? [
+                    <EuiButtonEmpty
+                      className="exportPdfButton"
+                      iconType="download"
+                      onClick={exportPDF}
+                      size="s"
+                    >
+                      {EXPORT_REPORT}
+                    </EuiButtonEmpty>,
+                  ]
+                : []),
+            ]}
+          />
+          {isSourcererLoading ? (
+            <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
+          ) : (
+            <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+              <EuiFlexItem>
+                <AIValueMetrics
+                  from={from}
+                  to={to}
+                  setHasAttackDiscoveries={setHasAttackDiscoveries}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
-        </ValueReportExporter>
-      </>
-
-      <SpyRoute pageName={SecurityPageName.aiValue} />
-    </>
+        </SecuritySolutionPageWrapper>
+      )}
+    </ValueReportExporter>
   );
 };
 

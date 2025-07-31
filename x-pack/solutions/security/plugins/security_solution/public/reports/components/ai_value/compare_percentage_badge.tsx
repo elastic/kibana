@@ -8,8 +8,8 @@
 import { EuiBadge, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
+import { getPercentInfo } from './utils';
 import * as i18n from './translations';
-import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 
 interface Props {
   colorFamily?: 'default' | 'bright';
@@ -35,31 +35,16 @@ export const ComparePercentageBadge = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
-
-  const isNegative = percentageChange.charAt(0) === '-';
-  const isZero = percentageChange === '0.0%';
-
-  const percentInfo = {
-    percent: isNegative || isZero ? percentageChange : `+${percentageChange}`,
-    color: isZero
-      ? 'hollow'
-      : isNegative
-      ? colorFamily === 'bright'
-        ? 'danger'
-        : colors.backgroundBaseDanger
-      : colorFamily === 'bright'
-      ? 'success'
-      : colors.backgroundBaseSuccess,
-    note: isZero
-      ? i18n.NO_CHANGE('cost savings')
-      : i18n.STAT_DIFFERENCE({
-          upOrDown: isNegative ? i18n.DOWN : i18n.UP,
-          percentageChange: isNegative ? percentageChange.substring(1) : percentageChange,
-          stat,
-          statType,
-        }),
-  };
+  const percentInfo = useMemo(() => {
+    return getPercentInfo({
+      colors,
+      colorFamily,
+      currentCount,
+      previousCount,
+      stat,
+      statType,
+    });
+  }, [colorFamily, colors, currentCount, previousCount, stat, statType]);
   const statUI = useMemo(() => {
     if (previousCount === 0 || currentCount === 0) {
       // do not display percentage change if either count is zero

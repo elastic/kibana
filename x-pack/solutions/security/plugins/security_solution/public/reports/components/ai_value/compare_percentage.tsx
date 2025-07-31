@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { getPercentInfo } from './utils';
 import * as i18n from './translations';
-import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 
 interface Props {
   currentCount: number;
@@ -23,27 +23,19 @@ export const ComparePercentage = ({
   statType,
   timeRange,
 }: Props) => {
+  const percentInfo = useMemo(() => {
+    return getPercentInfo({
+      currentCount,
+      previousCount,
+      stat,
+      statType,
+    });
+  }, [currentCount, previousCount, stat, statType]);
+
   if (previousCount === 0 || currentCount === 0) {
     // do not display percentage change if either count is zero
     return null;
   }
-  const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
-
-  const isNegative = percentageChange.charAt(0) === '-';
-  const isZero = percentageChange === '0.0%';
-
-  const percentInfo = {
-    percent: isNegative || isZero ? percentageChange : `+${percentageChange}`,
-    color: isZero ? 'hollow' : isNegative ? 'danger' : 'success',
-    note: isZero
-      ? i18n.NO_CHANGE(statType)
-      : i18n.STAT_DIFFERENCE({
-          upOrDown: isNegative ? i18n.DOWN : i18n.UP,
-          percentageChange: isNegative ? percentageChange.substring(1) : percentageChange,
-          stat,
-          statType,
-        }),
-  };
   return (
     <span data-test-subj="comparePercentage">
       {percentInfo.note}

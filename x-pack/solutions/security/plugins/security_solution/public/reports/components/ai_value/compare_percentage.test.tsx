@@ -9,14 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ComparePercentage } from './compare_percentage';
 
-jest.mock('../detection_response/soc_trends/helpers', () => ({
-  getPercChange: (current: number, previous: number) => {
-    if (previous === 0) return undefined;
-    const change = ((current - previous) / previous) * 100;
-    return `${change > 0 ? change.toFixed(1) : change.toFixed(1)}%`;
-  },
-}));
-
 describe('ComparePercentage', () => {
   const defaultProps = {
     currentCount: 10,

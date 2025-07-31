@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { getExcludeAlertsFilters } from './utils';
 import * as i18n from './translations';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -38,23 +39,7 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
 }) => {
   const extraVisualizationOptions = useMemo(
     () => ({
-      filters: [
-        {
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-          },
-          query: {
-            bool: {
-              // only query alerts that are not part of an attack discovery
-              must_not: attackAlertIds.map((uuid: string) => ({
-                match_phrase: { 'kibana.alert.uuid': uuid },
-              })),
-            },
-          },
-        },
-      ],
+      filters: getExcludeAlertsFilters(attackAlertIds),
     }),
     [attackAlertIds]
   );
