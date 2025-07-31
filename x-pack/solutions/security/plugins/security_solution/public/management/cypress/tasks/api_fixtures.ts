@@ -41,7 +41,7 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
       ],
       filters: [],
       language: 'kuery',
-      query: body.agentId ? `agent.id: ${body.agentId}` : `_id: *`,
+      query: body.query ?? `_id: *`,
       author: [],
       false_positives: [],
       references: [],
