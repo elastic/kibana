@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
@@ -242,6 +242,17 @@ export function SettingsPage({
                     <EuiButton
                       data-test-subj="apmSettingsAddAdvancedConfigurationButton"
                       iconType="plusInCircle"
+                      onClick={() =>
+                        setNewConfig((prev) => {
+                          return {
+                            ...prev,
+                            settings: {
+                              ...prev.settings,
+                              ['']: '',
+                            },
+                          };
+                        })
+                      }
                     >
                       {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
                         defaultMessage: 'Add configuration',
@@ -251,70 +262,71 @@ export function SettingsPage({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              {unknownAgentSettings.map(([key, value]) => (
-                <EuiFlexGroup key={key}>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
-                        defaultMessage: 'Key',
-                      })}
-                      isDisabled
-                      fullWidth
-                    >
-                      <EuiFieldText
-                        data-test-subj="apmSettingsPageFieldText"
-                        aria-label={i18n.translate(
-                          'xpack.apm.agentConfig.settingsPage.keyAriaLabel',
-                          { defaultMessage: 'Advanced configuration key' }
-                        )}
+              {unknownAgentSettings.map(([key, value], index) => (
+                <Fragment key={index}>
+                  {index > 0 && <EuiSpacer size="s" />}
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
+                          defaultMessage: 'Key',
+                        })}
                         fullWidth
-                        value={key}
-                        onChange={(e) => {
-                          setNewConfig((prev) => {
-                            delete prev.settings[key];
-                            return {
-                              ...prev,
-                              settings: {
-                                ...prev.settings,
-                                [e.target.value]: value,
-                              },
-                            };
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
-                        defaultMessage: 'Value',
-                      })}
-                      fullWidth
-                    >
-                      <EuiFieldText
-                        data-test-subj="apmSettingsPageFieldText"
-                        aria-label={i18n.translate(
-                          'xpack.apm.agentConfig.settingsPage.valueAriaLabel',
-                          { defaultMessage: 'Advanced configuration value' }
-                        )}
+                      >
+                        <EuiFieldText
+                          data-test-subj="apmSettingsPageFieldText"
+                          aria-label={i18n.translate(
+                            'xpack.apm.agentConfig.settingsPage.keyAriaLabel',
+                            { defaultMessage: 'Advanced configuration key' }
+                          )}
+                          fullWidth
+                          value={key}
+                          onChange={(e) => {
+                            setNewConfig((prev) => {
+                              delete prev.settings[key];
+                              return {
+                                ...prev,
+                                settings: {
+                                  ...prev.settings,
+                                  [e.target.value]: value,
+                                },
+                              };
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
+                          defaultMessage: 'Value',
+                        })}
                         fullWidth
-                        value={value}
-                        onChange={(e) => {
-                          setNewConfig((prev) => {
-                            console.log(e.target.value);
-                            return {
-                              ...prev,
-                              settings: {
-                                ...prev.settings,
-                                [key]: e.target.value,
-                              },
-                            };
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                      >
+                        <EuiFieldText
+                          data-test-subj="apmSettingsPageFieldText"
+                          aria-label={i18n.translate(
+                            'xpack.apm.agentConfig.settingsPage.valueAriaLabel',
+                            { defaultMessage: 'Advanced configuration value' }
+                          )}
+                          fullWidth
+                          value={value}
+                          onChange={(e) => {
+                            setNewConfig((prev) => {
+                              return {
+                                ...prev,
+                                settings: {
+                                  ...prev.settings,
+                                  [key]: e.target.value,
+                                },
+                              };
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Fragment>
               ))}
             </>
           )}
