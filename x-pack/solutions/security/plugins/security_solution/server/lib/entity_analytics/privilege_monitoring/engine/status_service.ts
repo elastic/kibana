@@ -10,7 +10,7 @@ import { EngineComponentResourceEnum } from '../../../../../common/api/entity_an
 import { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
-import { removePrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
+import { removePrivilegeMonitoringTask, scheduleNow } from '../tasks/privilege_monitoring_task';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
 export type EngineStatusService = ReturnType<typeof createEngineStatusService>;
@@ -93,5 +93,31 @@ export const createEngineStatusService = (
     }
   };
 
-  return { get, disable };
+  const _scheduleNow = async () => {
+    if (!deps.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    const engineStatus = await get();
+
+    if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      throw new Error(
+        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+      );
+    }
+
+    dataClient.audit(
+      PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
+      EngineComponentResourceEnum.privmon_engine,
+      'Privilege Monitoring Engine scheduled for immediate run'
+    );
+
+    return scheduleNow({
+      taskManager: deps.taskManager,
+      namespace: deps.namespace,
+      logger: deps.logger,
+    });
+  };
+
+  return { get, disable, scheduleNow: _scheduleNow };
 };

@@ -21,9 +21,11 @@ import { createEngineStatusService } from './status_service';
 import type { PrivilegeMonitoringEngineDescriptorClient } from '../saved_objects';
 
 const mockRemovePrivilegeMonitoringTask = jest.fn();
+const mockScheduleNow = jest.fn();
 jest.mock('../tasks/privilege_monitoring_task', () => {
   return {
     removePrivilegeMonitoringTask: () => mockRemovePrivilegeMonitoringTask(),
+    scheduleNow: () => mockScheduleNow(),
   };
 });
 
@@ -95,6 +97,32 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
         expect.stringContaining('Privileged Monitoring Engine disabled successfully')
       );
       expect(result.status).toBe('disabled');
+    });
+  });
+
+  describe('schedule now', () => {
+    it('should schedule the privilege monitoring task to run immediately', async () => {
+      mockGetEngineDescriptor.mockResolvedValue({ status: 'started' });
+
+      await statusService.scheduleNow();
+
+      expect(mockScheduleNow).toHaveBeenCalled();
+      expect(auditMock.log).toHaveBeenCalled();
+    });
+    it('should not schedule if status is not started', async () => {
+      mockGetEngineDescriptor.mockResolvedValue({ status: 'stopped' });
+
+      await expect(statusService.scheduleNow()).rejects.toThrow(
+        'The Privileged Monitoring Engine must be enable to schedule a run. Current status: stopped'
+      );
+    });
+
+    it('should not schedule if taskManager is not available', async () => {
+      const { taskManager, ...optsWithoutTaskManager } = deps;
+      dataClient = new PrivilegeMonitoringDataClient(optsWithoutTaskManager);
+      statusService = createEngineStatusService(dataClient, mockSavedObjectClient);
+
+      await expect(statusService.scheduleNow()).rejects.toThrow('Task Manager is not available');
     });
   });
 });
