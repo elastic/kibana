@@ -195,7 +195,7 @@ export function getSystemPrompt({
             : ''
         } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. ${
           isFunctionAvailable(ALERTS_FUNCTION_NAME)
-            ? `Use the Elasticseach datemath format for the time range when calling the \`${ALERTS_FUNCTION_NAME}\` tool (e.g.: 'now', 'now-15m', 'now-24h', 'now-2d')`
+            ? `Use the Elasticsearch datemath format for the time range when calling the \`${ALERTS_FUNCTION_NAME}\` tool (e.g.: 'now', 'now-15m', 'now-24h', 'now-2d')`
             : ''
         }`
       );
