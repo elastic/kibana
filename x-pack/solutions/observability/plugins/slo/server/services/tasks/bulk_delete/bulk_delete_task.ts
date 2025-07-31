@@ -123,10 +123,7 @@ export class BulkDeleteTask {
                 };
               }
             },
-
-            cancel: async () => {
-              abortController.abort('Timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

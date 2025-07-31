@@ -58,10 +58,7 @@ export class FleetUsageSender {
                 this.runTask(taskInstance, core, () => fetchUsage(abortController))
               );
             },
-
-            cancel: async () => {
-              abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

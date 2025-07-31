@@ -74,21 +74,12 @@ export class AutoInstallContentPackagesTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({
-          taskInstance,
-          abortController,
-        }: {
-          taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
-        }) => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              abortController = new AbortController();
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              abortController?.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

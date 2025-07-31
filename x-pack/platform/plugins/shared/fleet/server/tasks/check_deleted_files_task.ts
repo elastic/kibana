@@ -61,9 +61,7 @@ export class CheckDeletedFilesTask {
             run: async () => {
               return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

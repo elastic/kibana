@@ -70,10 +70,7 @@ export class SloOrphanSummaryCleanupTask {
             run: async () => {
               return this.runTask(abortController);
             },
-
-            cancel: async () => {
-              abortController.abort('orphan-slo-summary-cleanup task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

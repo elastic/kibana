@@ -63,20 +63,12 @@ export class UnenrollInactiveAgentsTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({
-          taskInstance,
-          abortController,
-        }: {
-          taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
-        }) => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

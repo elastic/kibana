@@ -65,9 +65,7 @@ export class DeleteUnenrolledAgentsTask {
             run: async () => {
               return this.runTask({ taskInstance, core, abortController });
             },
-            cancel: async () => {
-              abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

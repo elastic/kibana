@@ -53,10 +53,7 @@ export class FleetMetricsTask {
                 this.runTask(taskInstance, () => fetchAgentMetrics(abortController))
               );
             },
-
-            cancel: async () => {
-              abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },

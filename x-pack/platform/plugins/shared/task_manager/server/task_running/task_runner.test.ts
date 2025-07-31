@@ -1369,7 +1369,7 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            createTaskRunner: ({ abortController }) => ({
+            createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 1000));
                 jest.advanceTimersByTime(1000);
@@ -1377,7 +1377,6 @@ describe('TaskManagerRunner', () => {
               },
               async cancel() {
                 wasCancelled = true;
-                abortController.abort();
               },
             }),
           },

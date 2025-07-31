@@ -50,10 +50,7 @@ export class TempSummaryCleanupTask {
             run: async () => {
               return this.runTask(taskInstance, core, abortController);
             },
-
-            cancel: async () => {
-              abortController.abort('Timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
