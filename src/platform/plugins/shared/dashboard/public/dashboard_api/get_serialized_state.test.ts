@@ -50,7 +50,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes).toMatchInlineSnapshot(`
@@ -59,7 +58,7 @@ describe('getSerializedState', () => {
         "description": "",
         "kibanaSavedObjectMeta": Object {
           "searchSource": Object {
-            "filter": Array [],
+            "filters": Array [],
             "query": Object {
               "language": "kuery",
               "query": "hi",
@@ -101,7 +100,6 @@ describe('getSerializedState', () => {
           id: 'bizzbuzz',
         },
       ],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes.panels).toMatchInlineSnapshot(`
@@ -136,7 +134,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -152,7 +149,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences,
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(panelReferences);

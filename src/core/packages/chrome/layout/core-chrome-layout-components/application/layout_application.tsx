@@ -32,10 +32,15 @@ export const LayoutApplication = ({
   const overflow = useEuiOverflowScroll('y');
 
   return (
-    <main css={[styles.root, overflow]} id={APP_MAIN_SCROLL_CONTAINER_ID}>
+    <div
+      css={[styles.root, overflow]}
+      id={APP_MAIN_SCROLL_CONTAINER_ID}
+      className="kbnChromeLayoutApplication"
+      data-test-subj="kbnChromeLayoutApplication"
+    >
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>
       {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
-    </main>
+    </div>
   );
 };

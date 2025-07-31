@@ -27,7 +27,6 @@ export const saveDashboardState = async ({
   saveOptions,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
@@ -36,7 +35,6 @@ export const saveDashboardState = async ({
     generateNewIds: saveOptions.saveAsCopy, // When saving a dashboard as a copy, we should generate new IDs for all panels
     dashboardState,
     panelReferences,
-    searchSourceReferences,
   });
 
   /**
