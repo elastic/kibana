@@ -18,20 +18,20 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import assert from 'assert';
-import type { IndexNameProvider, SiemRuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsIndexNameProvider, SiemMigrationsClientDependencies } from '../types';
 import type { Stored } from '../../types';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
 
-export class RuleMigrationsDataBaseClient {
+export class SiemMigrationsDataBaseClient {
   protected esClient: ElasticsearchClient;
 
   constructor(
-    protected getIndexName: IndexNameProvider,
+    protected getIndexName: SiemMigrationsIndexNameProvider,
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
     protected logger: Logger,
-    protected dependencies: SiemRuleMigrationsClientDependencies
+    protected dependencies: SiemMigrationsClientDependencies
   ) {
     this.esClient = esScopedClient.asInternalUser;
   }
