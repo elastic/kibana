@@ -28,6 +28,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
   private readonly telemetry = new PromptTelemetry();
   private interceptSubscription?: Subscription;
   private upgradeInterceptSubscription?: Subscription;
+  private trialInterceptSubscription?: Subscription;
   private readonly buildVersion: string;
 
   constructor(ctx: PluginInitializerContext) {
@@ -54,10 +55,14 @@ export class ProductInterceptPublicPlugin implements Plugin {
       surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));
       surveyUrl.searchParams.set('solution', String(cloud.serverless.projectType || null));
 
-      [this.upgradeInterceptSubscription, this.interceptSubscription] = [
+      [
+        this.interceptSubscription,
+        this.trialInterceptSubscription,
+        this.upgradeInterceptSubscription,
+      ] = [
         TRIGGER_DEF_ID,
-        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
         TRIAL_TRIGGER_DEF_ID,
+        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
       ].map((triggerId) =>
         intercepts
           .registerIntercept?.({
@@ -80,7 +85,10 @@ export class ProductInterceptPublicPlugin implements Plugin {
   }
 
   stop() {
-    this.interceptSubscription?.unsubscribe();
-    this.upgradeInterceptSubscription?.unsubscribe();
+    [
+      this.interceptSubscription,
+      this.trialInterceptSubscription,
+      this.upgradeInterceptSubscription,
+    ]?.forEach((subscription) => subscription?.unsubscribe());
   }
 }
