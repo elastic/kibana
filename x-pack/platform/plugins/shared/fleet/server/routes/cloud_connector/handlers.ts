@@ -7,19 +7,23 @@
 
 import { cloudConnectorService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
-import type { PackagePolicy } from '../../../common/types/models/package_policy';
+
+export interface CreateCloudConnectorRequest {
+  name: string;
+  vars: Record<string, any>;
+  cloudProvider: string;
+}
 
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
   undefined,
-  PackagePolicy
+  CreateCloudConnectorRequest
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const packagePolicy = request.body;
 
   try {
-    const cloudConnector = await cloudConnectorService.create(internalSoClient, packagePolicy);
+    const cloudConnector = await cloudConnectorService.create(internalSoClient, request.body);
     return response.ok({ body: cloudConnector });
   } catch (error) {
     return response.customError({

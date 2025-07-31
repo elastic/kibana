@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { PackagePolicyConfigRecordEntry } from './package_policy';
+
 export type CloudProvider = 'AWS' | 'Azure' | 'GCP';
 
 export interface CloudConnectorSecretVar {
@@ -14,30 +16,20 @@ export interface CloudConnectorSecretVar {
 
 export interface CloudConnectorVars {
   // AWS variables
-  role_arn?: {
-    type?: string;
-    value: string;
-    frozen?: boolean;
-  };
+  'aws.role_arn'?: PackagePolicyConfigRecordEntry | string;
+  'aws.credentials.external_id'?: PackagePolicyConfigRecordEntry;
+  role_arn?: PackagePolicyConfigRecordEntry | string;
   external_id?: {
     type?: string;
     value: {
       isSecretRef: true;
       id: string;
-    } | string;
+    };
     frozen?: boolean;
   };
   // Azure variables
-  client_id?: {
-    type?: string;
-    value: string;
-    frozen?: boolean;
-  };
-  tenant_id?: {
-    type?: string;
-    value: string;
-    frozen?: boolean;
-  };
+  client_id?: PackagePolicyConfigRecordEntry;
+  tenant_id?: PackagePolicyConfigRecordEntry;
 }
 
 export interface CloudConnectorSO {
@@ -53,4 +45,10 @@ export interface CloudConnectorSO {
 export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
-} 
+}
+
+export interface CreateCloudConnectorRequest {
+  name: string;
+  vars: Record<string, any>;
+  cloudProvider: string;
+}

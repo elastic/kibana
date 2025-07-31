@@ -44,9 +44,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: {
           request: {
             body: schema.object({
-              id: schema.string(),
               name: schema.string(),
-              policy_id: schema.string(),
+              cloudProvider: schema.string(),
               vars: schema.recordOf(schema.string(), schema.any()),
             }),
           },
@@ -126,4 +125,4 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       getCloudConnectorsHandler
     );
-}; 
+};

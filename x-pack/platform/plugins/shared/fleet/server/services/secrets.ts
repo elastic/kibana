@@ -266,7 +266,9 @@ export async function extractAndWriteSecrets(opts: {
     return { packagePolicy, secretReferences: [] };
   }
 
-  const secretsToCreate = secretPaths.filter((secretPath) => !!secretPath.value.value);
+  const secretsToCreate = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
+  );
 
   const secrets = await createSecrets({
     esClient,
@@ -279,14 +281,24 @@ export async function extractAndWriteSecrets(opts: {
     packagePolicy
   );
 
+  // cloud connectors secret refs are not created as secrets, but are added to the secretReferences
+  const cloudConnectorsSecret = secretPaths
+    .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+    .map((secretPath) => ({
+      id: secretPath.value.value?.id,
+    }));
+
   return {
     packagePolicy: policyWithSecretRefs,
-    secretReferences: secrets.reduce((acc: PolicySecretReference[], secret) => {
-      if (Array.isArray(secret)) {
-        return [...acc, ...secret.map(({ id }) => ({ id }))];
-      }
-      return [...acc, { id: secret.id }];
-    }, []),
+    secretReferences: [
+      ...secrets.reduce((acc: PolicySecretReference[], secret) => {
+        if (Array.isArray(secret)) {
+          return [...acc, ...secret.map(({ id }) => ({ id }))];
+        }
+        return [...acc, { id: secret.id }];
+      }, []),
+      ...cloudConnectorsSecret,
+    ],
   };
 }
 
