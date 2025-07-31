@@ -6,16 +6,7 @@
  */
 
 export function isDescendantOf(parent: string, child: string) {
-  if (!child.startsWith(parent)) {
-    return false;
-  }
-  if (!child.startsWith(parent + '.')) {
-    return false;
-  }
-  if (parent === child) {
-    return false;
-  }
-  return true;
+  return child.startsWith(parent + '.');
 }
 
 export function isChildOf(parent: string, child: string) {
