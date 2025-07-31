@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { core, node, resources, tracing } from '@elastic/opentelemetry-node/sdk';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/exporter-trace-otlp-http';
 import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
 import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
 import { fromExternalVariant } from '@kbn/std';
@@ -14,6 +16,7 @@ import { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { Metadata } from '@grpc/grpc-js';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import { castArray } from 'lodash';
 import { LateBindingSpanProcessor } from '..';
@@ -68,6 +71,27 @@ export function initTracing({
 
       case 'phoenix':
         LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
+        break;
+
+      case 'grpc': {
+        const metadata = new Metadata();
+        Object.entries(variant.value.headers ?? {}).forEach(([key, value]) => {
+          metadata.add(key, value);
+        });
+        LateBindingSpanProcessor.get().register(
+          new tracing.BatchSpanProcessor(
+            new OTLPTraceExporterGrpc({ url: variant.value.url, metadata })
+          )
+        );
+        break;
+      }
+
+      case 'http':
+        LateBindingSpanProcessor.get().register(
+          new tracing.BatchSpanProcessor(
+            new OTLPTraceExporterHttp({ url: variant.value.url, headers: variant.value.headers })
+          )
+        );
         break;
     }
   });

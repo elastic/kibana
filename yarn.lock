@@ -9526,6 +9526,19 @@
     "@opentelemetry/resources" "2.0.1"
     "@opentelemetry/sdk-trace-base" "2.0.1"
 
+"@opentelemetry/exporter-trace-otlp-grpc@^0.203.0":
+  version "0.203.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-trace-otlp-grpc/-/exporter-trace-otlp-grpc-0.203.0.tgz#e2a44a972aa1c7bd2897211f86a32fec3a8bb591"
+  integrity sha512-322coOTf81bm6cAA8+ML6A+m4r2xTCdmAZzGNTboPXRzhwPt4JEmovsFAs+grpdarObd68msOJ9FfH3jxM6wqA==
+  dependencies:
+    "@grpc/grpc-js" "^1.7.1"
+    "@opentelemetry/core" "2.0.1"
+    "@opentelemetry/otlp-exporter-base" "0.203.0"
+    "@opentelemetry/otlp-grpc-exporter-base" "0.203.0"
+    "@opentelemetry/otlp-transformer" "0.203.0"
+    "@opentelemetry/resources" "2.0.1"
+    "@opentelemetry/sdk-trace-base" "2.0.1"
+
 "@opentelemetry/exporter-trace-otlp-http@0.202.0":
   version "0.202.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-trace-otlp-http/-/exporter-trace-otlp-http-0.202.0.tgz#5587696379696bf14f6bfb3ad63e489ac56d9e13"

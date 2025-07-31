@@ -8,6 +8,10 @@
  */
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
+
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { getInstrumentations } from '@elastic/opentelemetry-node/sdk';
+
 /**
  *
  * Initializes OpenTelemetry (currently only tracing)
@@ -41,6 +45,12 @@ export const initTelemetry = (
   if (!tracingEnabled) {
     return async () => {};
   }
+
+  // register EDOT auto-instrumentations (node-runtime, http, hapi, and more)
+  // https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/nodejs/supported-technologies#instrumentations
+  registerInstrumentations({
+    instrumentations: getInstrumentations(),
+  });
 
   return initTracing({
     tracingConfig: telemetryConfig.tracing,
