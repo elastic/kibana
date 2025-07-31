@@ -12,10 +12,15 @@ import { Chart } from './chart';
 import { Popover } from '../../common/popover';
 import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
 export const MetricsGrid = () => {
   const { metricsView } = useMetricsDataViewContext();
-  const charts = useMetricsCharts({ dataViewId: metricsView?.dataViewReference.id });
+  const { searchCriteria } = useUnifiedSearchContext();
+  const charts = useMetricsCharts({
+    dataViewId: metricsView?.dataViewReference.id,
+    schema: searchCriteria.preferredSchema,
+  });
 
   return (
     <>

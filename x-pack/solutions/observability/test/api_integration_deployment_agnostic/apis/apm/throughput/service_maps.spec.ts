@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  describe('Service Maps APIs', () => {
+  describe('Service maps APIs', () => {
     describe('when data is loaded ', () => {
       const GO_PROD_RATE = 80;
       const GO_DEV_RATE = 20;
