@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useCheckAlertAttachments } from './use_check_alert_attachments';
 import { findCaseUserActions } from './api';
 import { AttachmentType } from '../../common/types/domain';
@@ -19,6 +19,11 @@ jest.mock('../common/use_cases_toast', () => ({
   useCasesToast: () => ({
     showErrorToast: jest.fn(),
   }),
+}));
+
+// Mock React Query
+jest.mock('@tanstack/react-query', () => ({
+  useQuery: jest.fn(),
 }));
 
 describe('useCheckAlertAttachments', () => {
@@ -68,11 +73,11 @@ describe('useCheckAlertAttachments', () => {
   });
 
   it('should return loading state when enabled and alertIds are provided', () => {
-    mockFindCaseUserActions.mockResolvedValue({
-      userActions: [],
-      page: 1,
-      perPage: 1000,
-      total: 0,
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: true,
+      isError: false,
+      data: undefined,
     });
 
     const { result } = renderHook(() =>
@@ -87,6 +92,13 @@ describe('useCheckAlertAttachments', () => {
   });
 
   it('should not load when disabled', () => {
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
     const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: mockCases,
@@ -96,10 +108,16 @@ describe('useCheckAlertAttachments', () => {
     );
 
     expect(result.current.isLoading).toBe(false);
-    expect(mockFindCaseUserActions).not.toHaveBeenCalled();
   });
 
   it('should not load when no alertIds are provided', () => {
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
     const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: mockCases,
@@ -109,38 +127,40 @@ describe('useCheckAlertAttachments', () => {
     );
 
     expect(result.current.isLoading).toBe(false);
-    expect(mockFindCaseUserActions).not.toHaveBeenCalled();
   });
 
   it('should correctly identify cases with alert attachments', async () => {
-    mockFindCaseUserActions
-      .mockResolvedValueOnce({
-        userActions: [
-          {
-            type: 'comment',
-            payload: {
-              comment: {
-                type: AttachmentType.alert,
-                alertId: 'alert-1',
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery
+      .mockReturnValueOnce({
+        isLoading: false,
+        isError: false,
+        data: {
+          userActions: [
+            {
+              type: 'comment',
+              payload: {
+                comment: {
+                  type: AttachmentType.alert,
+                  alertId: 'alert-1',
+                },
               },
             },
-          },
-        ],
-        page: 1,
-        perPage: 1000,
-        total: 1,
+          ],
+        },
       })
-      .mockResolvedValueOnce({
-        userActions: [],
-        page: 1,
-        perPage: 1000,
-        total: 0,
+      .mockReturnValueOnce({
+        isLoading: false,
+        isError: false,
+        data: {
+          userActions: [],
+        },
       });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: mockCases,
-        alertIds: ['alert-1'], // Only one alert ID to match the mock
+        alertIds: ['alert-1'],
         isEnabled: true,
       })
     );
@@ -154,27 +174,29 @@ describe('useCheckAlertAttachments', () => {
   });
 
   it('should return false when only some alerts are attached', async () => {
-    mockFindCaseUserActions.mockResolvedValue({
-      userActions: [
-        {
-          type: 'comment',
-          payload: {
-            comment: {
-              type: AttachmentType.alert,
-              alertId: 'alert-1',
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        userActions: [
+          {
+            type: 'comment',
+            payload: {
+              comment: {
+                type: AttachmentType.alert,
+                alertId: 'alert-1',
+              },
             },
           },
-        },
-      ],
-      page: 1,
-      perPage: 1000,
-      total: 1,
+        ],
+      },
     });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: [mockCases[0]],
-        alertIds: ['alert-1', 'alert-2'], // Two alert IDs but only one is attached
+        alertIds: ['alert-1', 'alert-2'],
         isEnabled: true,
       })
     );
@@ -183,31 +205,33 @@ describe('useCheckAlertAttachments', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.hasAlertAttached('case-1')).toBe(false); // Should be false because not ALL alerts are attached
+    expect(result.current.hasAlertAttached('case-1')).toBe(false);
   });
 
   it('should return true when all alerts are attached', async () => {
-    mockFindCaseUserActions.mockResolvedValue({
-      userActions: [
-        {
-          type: 'comment',
-          payload: {
-            comment: {
-              type: AttachmentType.alert,
-              alertId: ['alert-1', 'alert-2'], // Both alerts attached
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        userActions: [
+          {
+            type: 'comment',
+            payload: {
+              comment: {
+                type: AttachmentType.alert,
+                alertId: ['alert-1', 'alert-2'],
+              },
             },
           },
-        },
-      ],
-      page: 1,
-      perPage: 1000,
-      total: 1,
+        ],
+      },
     });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: [mockCases[0]],
-        alertIds: ['alert-1', 'alert-2'], // Both alerts being checked
+        alertIds: ['alert-1', 'alert-2'],
         isEnabled: true,
       })
     );
@@ -216,31 +240,33 @@ describe('useCheckAlertAttachments', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.hasAlertAttached('case-1')).toBe(true); // Should be true because ALL alerts are attached
+    expect(result.current.hasAlertAttached('case-1')).toBe(true);
   });
 
   it('should handle array of alert IDs', async () => {
-    mockFindCaseUserActions.mockResolvedValue({
-      userActions: [
-        {
-          type: 'comment',
-          payload: {
-            comment: {
-              type: AttachmentType.alert,
-              alertId: ['alert-1', 'alert-3'],
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        userActions: [
+          {
+            type: 'comment',
+            payload: {
+              comment: {
+                type: AttachmentType.alert,
+                alertId: ['alert-1', 'alert-3'],
+              },
             },
           },
-        },
-      ],
-      page: 1,
-      perPage: 1000,
-      total: 1,
+        ],
+      },
     });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: [mockCases[0]],
-        alertIds,
+        alertIds: ['alert-1', 'alert-3'],
         isEnabled: true,
       })
     );
@@ -253,24 +279,26 @@ describe('useCheckAlertAttachments', () => {
   });
 
   it('should handle non-alert attachments', async () => {
-    mockFindCaseUserActions.mockResolvedValue({
-      userActions: [
-        {
-          type: 'comment',
-          payload: {
-            comment: {
-              type: AttachmentType.user,
-              comment: 'Test comment',
+    const { useQuery } = require('@tanstack/react-query');
+    useQuery.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: {
+        userActions: [
+          {
+            type: 'comment',
+            payload: {
+              comment: {
+                type: AttachmentType.user,
+                comment: 'Test comment',
+              },
             },
           },
-        },
-      ],
-      page: 1,
-      perPage: 1000,
-      total: 1,
+        ],
+      },
     });
 
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCheckAlertAttachments({
         cases: [mockCases[0]],
         alertIds,

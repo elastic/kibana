@@ -17,7 +17,7 @@ export const useCasesLocalStorage = <T,>(
   const { appId } = useApplication();
   const { owner } = useCasesContext();
 
-  const lsKeyPrefix = owner.length > 0 ? owner.join('.') : appId;
+  const lsKeyPrefix = (owner?.length ?? 0) > 0 ? owner.join('.') : appId;
   const lsKey = getLocalStorageKey(key, lsKeyPrefix);
 
   const [value, setValue] = useState<T>(() => getStorageItem(lsKey, initialValue));

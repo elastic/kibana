@@ -37,11 +37,11 @@ export const useGetCases = (
   const { owner } = useCasesContext();
   const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
 
-  const hasOwner = !!owner.length;
+  const hasOwner = !!(owner?.length);
   const initialOwner = hasOwner ? owner : availableSolutions;
 
   const ownerFilter =
-    params.filterOptions?.owner != null && params.filterOptions.owner.length > 0
+    params.filterOptions?.owner != null && (params.filterOptions.owner?.length ?? 0) > 0
       ? { owner: params.filterOptions.owner }
       : { owner: initialOwner };
 

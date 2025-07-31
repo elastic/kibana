@@ -17,7 +17,7 @@ import { useCallback } from 'react';
 
 export interface UseCheckAlertAttachmentsProps {
   cases: CaseUI[];
-  alertIds: string[];
+  alertIds?: string[];
   isEnabled: boolean;
 }
 
@@ -27,6 +27,9 @@ export const useCheckAlertAttachments = ({
   isEnabled,
 }: UseCheckAlertAttachmentsProps) => {
   const { showErrorToast } = useCasesToast();
+
+  // Ensure alertIds is always an array to prevent undefined errors
+  const safeAlertIds = alertIds || [];
 
   const queries = cases.map((theCase) =>
     useQuery(
@@ -43,7 +46,7 @@ export const useCheckAlertAttachments = ({
         perPage: 1000,
       }, signal),
       {
-        enabled: isEnabled && alertIds.length > 0,
+        enabled: isEnabled && safeAlertIds.length > 0,
         onError: (error: ServerError) => {
           showErrorToast(error, { title: ERROR_TITLE });
         },
@@ -80,8 +83,8 @@ export const useCheckAlertAttachments = ({
   // Check which cases have the current alert attached
   const hasAlertAttached = useCallback((caseId: string) => {
     const attachedAlerts = caseToAttachedAlerts.get(caseId) || [];
-    return alertIds.every((alertId) => attachedAlerts.includes(alertId));
-  }, [caseToAttachedAlerts, alertIds]);
+    return safeAlertIds.every((alertId) => attachedAlerts.includes(alertId));
+  }, [caseToAttachedAlerts, safeAlertIds]);
 
   return {
     isLoading,
