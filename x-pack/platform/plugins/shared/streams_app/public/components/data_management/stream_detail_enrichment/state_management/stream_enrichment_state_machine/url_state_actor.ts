@@ -35,7 +35,7 @@ export function createUrlInitializerActor({
     if (urlState.success) {
       // Always add default random samples data source
       if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
-        urlState.data.dataSources.unshift(defaultRandomSamplesDataSource);
+        urlState.data.dataSources.push(defaultRandomSamplesDataSource);
       }
 
       sendBack({
