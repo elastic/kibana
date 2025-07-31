@@ -61,7 +61,6 @@ export function DocumentsColumn({
           white-space: nowrap;
           padding-right: ${euiTheme.size.xl};
         `}
-        role="status"
         aria-live="polite"
         aria-label={i18n.translate('xpack.streams.documentsColumn.loadingAriaLabel', {
           defaultMessage: 'Loading document count and chart data for {indexPattern}',
@@ -194,6 +193,7 @@ export function DocumentsColumn({
         height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
+      role="group"
       aria-label={cellAriaLabel}
     >
       {histogramQueryFetch.loading ? (

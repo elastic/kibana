@@ -55,11 +55,6 @@ export const DOCUMENTS_NO_DATA_ICON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'No chart data available' }
 );
 
-export const RETENTION_ILM_POLICY_DESCRIPTION = i18n.translate(
-  'xpack.streams.streamsRetentionColumn.ilmPolicyDescription',
-  { defaultMessage: 'Index Lifecycle Management policy that controls data retention' }
-);
-
 export const INFINITE_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.infiniteRetentionAriaLabel',
   { defaultMessage: 'Infinite retention - data is kept indefinitely' }

@@ -126,9 +126,7 @@ export function StreamsTreeTable({
         {
           field: 'retentionMs',
           name: (
-            <span role="columnheader" aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>
-              {RETENTION_COLUMN_HEADER}
-            </span>
+            <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
           ),
           width: '160px',
           align: 'left',

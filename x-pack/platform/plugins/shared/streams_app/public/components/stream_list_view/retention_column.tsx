@@ -16,12 +16,7 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
-import {
-  RETENTION_ILM_POLICY_DESCRIPTION,
-  INFINITE_RETENTION_LABEL,
-  NO_RETENTION_LABEL,
-  NO_DATA_SHORT_LABEL,
-} from './translations';
+import { INFINITE_RETENTION_LABEL, NO_RETENTION_LABEL, NO_DATA_SHORT_LABEL } from './translations';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -49,15 +44,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
 
   if (isIlmLifecycle(lifecycle)) {
     return (
-      <EuiBadge
-        color="hollow"
-        tabIndex={0}
-        role="region"
-        aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeAriaLabel', {
-          defaultMessage: 'ILM retention policy: {name}',
-          values: { name: lifecycle.ilm.policy },
-        })}
-      >
+      <EuiBadge color="hollow">
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
@@ -79,9 +66,6 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             },
           })}
         </EuiLink>
-        <span id="ilm-policy-description" className="euiScreenReaderOnly">
-          {RETENTION_ILM_POLICY_DESCRIPTION}
-        </span>
       </EuiBadge>
     );
   }
@@ -107,6 +91,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
       <span
         tabIndex={0}
         aria-label={INFINITE_RETENTION_LABEL}
+        role="status"
         style={{ display: 'inline-flex', alignItems: 'center' }}
       >
         <EuiIcon type="infinity" size="m" aria-hidden="true" />
