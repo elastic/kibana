@@ -90,6 +90,7 @@ export const RadioGroup = ({
               `}
             >
               <EuiRadio
+                name="cspRadioGroup"
                 data-test-subj={option.testId}
                 label={option.label}
                 id={option.id}

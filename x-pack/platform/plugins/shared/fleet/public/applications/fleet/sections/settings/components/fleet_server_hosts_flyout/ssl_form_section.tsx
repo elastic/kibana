@@ -292,6 +292,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               data-test-subj={'fleetServerHosts.clientAuthenticationRadioInput'}
               options={clientAuthenticationsOptions}
               compressed
+              name="clientAuth"
               {...inputs.sslClientAuthInput.props}
             />
           </EuiFormRow>

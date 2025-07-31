@@ -117,6 +117,7 @@ export const ImportModeControl = ({ initialValues, updateSelection }: ImportMode
         onChange={() => onChange({ createNewCopies: false })}
       >
         <EuiRadioGroup
+          name="importModeOverwrite"
           options={[overwriteEnabled, overwriteDisabled]}
           idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
           onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}

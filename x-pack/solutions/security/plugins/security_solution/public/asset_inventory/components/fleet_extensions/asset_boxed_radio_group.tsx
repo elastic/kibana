@@ -91,6 +91,7 @@ export const RadioGroup = ({
             >
               <EuiRadio
                 data-test-subj={option.testId}
+                name="assetRadioGroup"
                 label={option.label}
                 id={option.id}
                 checked={isChecked}

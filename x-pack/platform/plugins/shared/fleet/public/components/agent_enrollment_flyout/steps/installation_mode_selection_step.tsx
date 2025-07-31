@@ -111,7 +111,7 @@ export const InstallationModeSelectionStep = ({
         ]}
         idSelected={`${mode}_${radioSuffix}`}
         onChange={onChangeCallback}
-        name={`radio group ${radioSuffix}`}
+        name="installationMode"
       />
     ) : (
       <React.Fragment />

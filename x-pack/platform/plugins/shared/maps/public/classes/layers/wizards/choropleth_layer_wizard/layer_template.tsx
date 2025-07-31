@@ -343,6 +343,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             })}
           >
             <EuiComboBox
+              name="leftEmsJoinField"
               singleSelection={true}
               isClearable={false}
               options={this.state.leftEmsFields}
@@ -377,6 +378,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
         <EuiFormRow>
           <EuiRadioGroup
+            name="boundariesSource"
             options={BOUNDARIES_OPTIONS}
             idSelected={this.state.leftSource}
             onChange={this._onLeftSourceChange}
@@ -403,6 +405,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
           })}
         >
           <SingleFieldSelect
+            name="rightJoinField"
             placeholder={inputStrings.fieldSelectPlaceholder}
             value={this.state.rightJoinField}
             onChange={this._onRightJoinFieldSelect}

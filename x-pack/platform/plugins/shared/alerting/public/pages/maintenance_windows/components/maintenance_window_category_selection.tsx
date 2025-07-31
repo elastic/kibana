@@ -79,6 +79,7 @@ export const MaintenanceWindowSolutionSelection = (
         options={options}
         idSelected={selectedSolution}
         onChange={onRadioChange}
+        name="maintenanceWindowSolution"
       />
     );
   }, [options, selectedSolution, onRadioChange]);
