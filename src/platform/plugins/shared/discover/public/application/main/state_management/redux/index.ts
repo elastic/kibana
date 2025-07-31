@@ -8,7 +8,7 @@
  */
 
 import { omit } from 'lodash';
-import { internalStateSlice } from './internal_state';
+import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
 import {
   loadDataViewList,
   appendAdHocDataViews,
@@ -20,7 +20,6 @@ import {
   setTabs,
   updateTabs,
   disconnectTab,
-  updateTabAppStateAndGlobalState,
   restoreTab,
   clearAllTabs,
   initializeTabs,
@@ -53,7 +52,7 @@ export const internalStateActions = {
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSingleTab,
-  updateTabAppStateAndGlobalState,
+  syncLocallyPersistedTabState,
   restoreTab,
   clearAllTabs,
   initializeTabs,
