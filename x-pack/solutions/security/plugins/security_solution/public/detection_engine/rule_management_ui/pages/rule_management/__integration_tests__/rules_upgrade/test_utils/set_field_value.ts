@@ -394,6 +394,9 @@ async function inputRelatedIntegrations(
         target: { value: version },
       });
     });
+
+    // Make sure the validation has passed
+    await waitFor(() => expect(packageVersionInput).toHaveValue(version), { timeout: 500 });
   }
 }
 
@@ -616,11 +619,17 @@ async function inputDataSource(
     return;
   }
 
-  const indexPatternsEditWrapper = within(fieldFinalSide).getByTestId('indexPatternEdit');
-  const dataViewEditWrapper = within(fieldFinalSide).getByTestId('pick-rule-data-source');
-
   switch (dataSource.type) {
     case DataSourceType.index_patterns:
+      await act(async () => {
+        const indexPatternsButton = within(fieldFinalSide).getByTestId(
+          'rule-index-toggle-index_patterns'
+        );
+        fireEvent.click(indexPatternsButton);
+      });
+
+      const indexPatternsEditWrapper = within(fieldFinalSide).getByTestId('indexPatternEdit');
+
       await clearEuiComboBoxSelection({
         clearButton: within(indexPatternsEditWrapper).getByTestId('comboBoxClearButton'),
       });
@@ -635,6 +644,13 @@ async function inputDataSource(
       break;
 
     case DataSourceType.data_view:
+      await act(async () => {
+        const dataViewButton = within(fieldFinalSide).getByTestId('rule-index-toggle-data_view');
+        fireEvent.click(dataViewButton);
+      });
+
+      const dataViewEditWrapper = within(fieldFinalSide).getByTestId('pick-rule-data-source');
+
       await waitFor(
         () =>
           expect(
@@ -644,6 +660,14 @@ async function inputDataSource(
           timeout: 500,
         }
       );
+
+      await clearEuiComboBoxSelection({
+        clearButton: within(dataViewEditWrapper).getByTestId('comboBoxClearButton'),
+      });
+
+      if (!dataSource.data_view_id) {
+        return;
+      }
 
       await selectEuiComboBoxOption({
         comboBoxToggleButton: within(dataViewEditWrapper).getByTestId('comboBoxToggleListButton'),
