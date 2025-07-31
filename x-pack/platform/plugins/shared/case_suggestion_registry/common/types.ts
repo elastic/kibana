@@ -6,9 +6,9 @@
  */
 import { z } from '@kbn/zod';
 
-const contextOwnerSchema = z.enum(['observability', 'security', 'stack']);
+const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
 
-export const contextRequestSchema = z.object({
+export const caseSuggestionRequestSchema = z.object({
   'service.name': z.string().optional(),
   timeRange: z
     .object({
@@ -18,16 +18,16 @@ export const contextRequestSchema = z.object({
     .optional(),
 });
 
-export type ContextRequest = z.infer<typeof contextRequestSchema>;
+export type CaseSuggestionRequest = z.infer<typeof caseSuggestionRequestSchema>;
 
-export type ContextOwner = z.infer<typeof contextOwnerSchema>;
-export type ContextOwners = ContextOwner[];
-export interface ContextItem<TPayload = Record<string, unknown>> {
+export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
+export type SuggestionOwners = SuggestionOwner[];
+export interface CaseSuggestionItem<TPayload = Record<string, unknown>> {
   payload: TPayload; // The payload associated with the context
   description: string; // A plaintext description of the context
 }
 
-export interface ContextResponse<
+export interface CaseSuggestionResponse<
   TPayload = Record<string, unknown> // Generic type for the payload, defaults to a record of unknown key-value pairs
 > {
   key: string; // Unique identifier for context
@@ -35,5 +35,5 @@ export interface ContextResponse<
    * This is used by the LLM to understand the context, but may also be used by the UI
    * to display a summary of all context items. */
   description?: string;
-  data: Array<ContextItem<TPayload>>; // The main data of the context, containing 1 or more context items
+  data: Array<CaseSuggestionItem<TPayload>>; // The main data of the context, containing 1 or more context items
 }

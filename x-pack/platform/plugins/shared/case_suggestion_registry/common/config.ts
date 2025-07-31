@@ -7,16 +7,16 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const ContextRegistryConfigSchema = schema.object({
+export const CaseSuggestionRegistryConfigSchema = schema.object({
   unsafe: schema.maybe(
     schema.object({
-      contextRegistryEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      caseSuggestionRegistryEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
     })
   ),
 });
 
-export type ContextRegistryConfig = TypeOf<typeof ContextRegistryConfigSchema>;
-export type ContextRegistryBrowserConfig = Pick<
-  TypeOf<typeof ContextRegistryConfigSchema>,
+export type CaseSuggestionRegistryConfig = TypeOf<typeof CaseSuggestionRegistryConfigSchema>;
+export type CaseSuggestionRegistryBrowserConfig = Pick<
+  TypeOf<typeof CaseSuggestionRegistryConfigSchema>,
   'unsafe'
 >;
