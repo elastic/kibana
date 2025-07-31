@@ -62,8 +62,6 @@ export const initTelemetry = (
       desiredInstrumentations.add('@opentelemetry/instrumentation-http');
       // Undici client's request duration
       desiredInstrumentations.add('@opentelemetry/instrumentation-undici');
-      // OpenAI operation duration and number of tokens used
-      desiredInstrumentations.add('@elastic/opentelemetry-instrumentation-openai');
     }
 
     if (desiredInstrumentations.size > 0) {
