@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -17,7 +16,7 @@ import { useHttp } from '../../../common/lib/kibana';
 /**
  * Error type for custom scripts API errors
  */
-interface CustomScriptsErrorType {
+export interface CustomScriptsErrorType {
   statusCode: number;
   message: string;
   meta: ActionTypeExecutorResult<unknown>;
@@ -29,6 +28,7 @@ interface CustomScriptsErrorType {
  * @param options - Additional options for the query
  * @returns Query result containing custom scripts data
  */
+
 export const useGetCustomScripts = (
   agentType: ResponseActionAgentType,
   options: Omit<
