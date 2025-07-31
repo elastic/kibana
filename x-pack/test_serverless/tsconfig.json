@@ -81,5 +81,6 @@
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/test-suites-xpack-observability",
+    "@kbn/security-plugin-types-common",
   ]
 }
