@@ -32,7 +32,7 @@ export function assertFieldValidation({
   fieldName: rawFieldName,
   fieldVersions: { initial, upgrade, invalidValue: rawInvalidValue },
 }: AssertFieldValidationParams) {
-  // TS isn't able to infer the type of the fie1    ld name for inputFieldValue()
+  // TS isn't able to infer the type of the field name for inputFieldValue()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const invalidValue = rawInvalidValue as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

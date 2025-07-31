@@ -46,7 +46,6 @@ describe('Upgrade diffable rule "name" (query rule type) after preview in flyout
     fieldVersions: {
       initial,
       upgrade,
-      // zero max signals is invalid
       invalidValue: '',
     },
   });
