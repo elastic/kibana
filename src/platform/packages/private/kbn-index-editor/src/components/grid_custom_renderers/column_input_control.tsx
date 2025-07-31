@@ -10,7 +10,7 @@
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useState, KeyboardEvent, HTMLAttributes } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPlaceholderColumn } from '../../utils';
 import { IndexUpdateService } from '../../index_update_service';
@@ -25,9 +25,6 @@ export const getColumnInputRenderer = (
   return ({ column }) => ({
     ...column,
     display: <AddColumnHeader initialColumnName={columnName} containerId={column.id} />,
-    displayHeaderCellProps: {
-      'data-column-id': column.id,
-    } as HTMLAttributes<HTMLElement>,
     actions: {
       showHide: false,
       additional: !isPlaceholder
@@ -56,20 +53,12 @@ interface AddColumnHeaderProps {
   containerId: string;
 }
 
-export const AddColumnHeader = ({ initialColumnName, containerId }: AddColumnHeaderProps) => {
+export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
 
   const [isEditing, setIsEditing] = useState(false);
-
-  const focusContainer = (focusContainerId: string) =>
-    requestAnimationFrame(() => {
-      const containerElement = document.querySelector<HTMLElement>(
-        `[data-column-id="${focusContainerId}"]`
-      );
-      containerElement?.focus();
-    });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,8 +67,6 @@ export const AddColumnHeader = ({ initialColumnName, containerId }: AddColumnHea
     if (columnName && !validationError) {
       await saveColumn();
       setIsEditing(false);
-
-      focusContainer(columnName);
     }
   };
 
@@ -118,7 +105,6 @@ export const AddColumnHeader = ({ initialColumnName, containerId }: AddColumnHea
                 e.preventDefault();
                 resetColumnName();
                 setIsEditing(false);
-                focusContainer(containerId);
               }
             }}
             css={{
@@ -151,9 +137,6 @@ export const AddColumnHeader = ({ initialColumnName, containerId }: AddColumnHea
         e.stopPropagation();
         if (e.key === 'Enter') {
           setIsEditing(true);
-        }
-        if (e.key === 'Escape') {
-          focusContainer(containerId);
         }
       }}
     >
