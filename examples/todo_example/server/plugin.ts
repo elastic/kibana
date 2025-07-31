@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from '@kbn/core/server';
+import type {
+  Plugin,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  SavedObject,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import crypto from 'crypto';
 
 interface Todo {
   id: string;
@@ -17,12 +22,13 @@ interface Todo {
   completed: boolean;
 }
 
-export class ToDoPlugin implements Plugin {
-  private todos: Todo[];
+const savedObjectToTodo = (so: SavedObject<Omit<Todo, 'id'>>) => ({
+  id: so.id,
+  ...so.attributes,
+});
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.todos = [];
-  }
+export class ToDoPlugin implements Plugin {
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
@@ -54,9 +60,17 @@ export class ToDoPlugin implements Plugin {
         },
         options: { access: 'public' },
       },
-      async (_context, _request, response) => {
+      async (context, _request, response) => {
         try {
-          return response.ok({ body: { todos: this.todos } });
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
+
+          const todosData = await savedObjectsClient.find<Omit<Todo, 'id'>>({
+            type: SAVED_OBJECTS_TYPE,
+          });
+
+          const todos = todosData.saved_objects.map(savedObjectToTodo);
+
+          return response.ok({ body: { todos } });
         } catch (error) {
           return response.badRequest({ body: error.message });
         }
@@ -80,14 +94,21 @@ export class ToDoPlugin implements Plugin {
         },
         options: { access: 'public' },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
-          const todo = this.todos.find((t) => t.id === request.params.id);
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
 
-          if (!todo) return response.notFound();
+          const todo = await savedObjectsClient.get<Omit<Todo, 'id'>>(
+            SAVED_OBJECTS_TYPE,
+            request.params.id
+          );
 
-          return response.ok({ body: { todo } });
+          return response.ok({ body: { todo: savedObjectToTodo(todo) } });
         } catch (error) {
+          if (error.output?.statusCode === 404) {
+            return response.notFound();
+          }
+
           return response.badRequest({ body: error.message });
         }
       }
@@ -110,17 +131,16 @@ export class ToDoPlugin implements Plugin {
         },
         options: { access: 'public' },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
-          const newTodo: Todo = {
-            id: crypto.randomUUID(),
-            completed: false,
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
+
+          const newTodo = await savedObjectsClient.create(SAVED_OBJECTS_TYPE, {
             title: request.body.title,
-          };
+            completed: false,
+          });
 
-          this.todos.push(newTodo);
-
-          return response.ok({ body: { todo: newTodo } });
+          return response.ok({ body: { todo: savedObjectToTodo(newTodo) } });
         } catch (error) {
           return response.badRequest({ body: error.message });
         }
@@ -148,21 +168,33 @@ export class ToDoPlugin implements Plugin {
         },
         options: { access: 'public' },
       },
-      async (_context, request, response) => {
+      async (context, request, response) => {
         try {
-          const todoIndex = this.todos.findIndex((t) => t.id === request.params.id);
+          const savedObjectsClient = (await context.core).savedObjects.getClient();
+          const { id } = request.params;
+          const { title, completed } = request.body;
 
-          if (todoIndex === -1) return response.notFound();
+          const attributesToUpdate: Partial<Omit<Todo, 'id'>> = {};
+          if (title !== undefined) {
+            attributesToUpdate.title = title;
+          }
+          if (completed !== undefined) {
+            attributesToUpdate.completed = completed;
+          }
 
-          const updatedTodo: Todo = {
-            ...this.todos[todoIndex],
-            ...request.body,
-          };
+          await savedObjectsClient.update(SAVED_OBJECTS_TYPE, id, attributesToUpdate);
 
-          this.todos[todoIndex] = updatedTodo;
+          const updatedTodo = await savedObjectsClient.get<Omit<Todo, 'id'>>(
+            SAVED_OBJECTS_TYPE,
+            id
+          );
 
-          return response.ok({ body: { todo: updatedTodo } });
+          return response.ok({ body: { todo: savedObjectToTodo(updatedTodo) } });
         } catch (error) {
+          if (error.output?.statusCode === 404) {
+            return response.notFound();
+          }
+
           return response.badRequest({ body: error.message });
         }
       }
