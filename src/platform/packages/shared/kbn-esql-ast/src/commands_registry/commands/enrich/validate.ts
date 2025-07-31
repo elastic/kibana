@@ -12,10 +12,6 @@ import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
-function hasWildcard(name: string) {
-  return /\*/.test(name);
-}
-
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
