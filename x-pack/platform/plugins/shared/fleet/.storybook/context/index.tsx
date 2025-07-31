@@ -142,7 +142,6 @@ export const StorybookContext: React.FC<{
           writeIntegrationPolicies: true,
         },
       },
-      guidedOnboarding: {},
     }),
     [isCloudEnabled]
   );

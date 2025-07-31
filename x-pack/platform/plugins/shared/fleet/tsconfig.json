@@ -30,7 +30,6 @@
     "@kbn/licensing-plugin",
     "@kbn/data-plugin",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/files-plugin",
 
     // optionalPlugins from ./kibana.json
@@ -125,6 +124,6 @@
     "@kbn/saved-search-component",
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
-    "@kbn/core-chrome-layout-constants",
+    "@kbn/core-chrome-layout-constants"
   ]
 }
