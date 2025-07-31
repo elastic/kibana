@@ -58,6 +58,7 @@ export interface EsWorkflowStepExecution {
   startedAt: string;
   completedAt?: string;
   executionTimeMs?: number;
+  topologicalIndex: number;
   error?: string;
   output?: Record<string, any>;
 }
@@ -174,8 +175,18 @@ export interface WorkflowListDto {
   };
   results: WorkflowListItemDto[];
 }
+export interface WorkflowExecutionEngineModel
+  extends Pick<EsWorkflow, 'id' | 'name' | 'status' | 'definition'> {
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+}
 
-export type WorkflowExecutionEngineModel = Pick<
-  EsWorkflow,
-  'id' | 'name' | 'status' | 'definition'
->;
+export interface WorkflowListItemAction {
+  isPrimary?: boolean;
+  type: string;
+  color: string;
+  name: string;
+  icon: string;
+  description: string;
+  onClick: (item: WorkflowListItemDto) => void;
+}
