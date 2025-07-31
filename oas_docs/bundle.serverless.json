@@ -58599,6 +58599,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "currentDate",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
