@@ -270,22 +270,13 @@ async function updateExistingUserManagedPipeline({
     }
   }
 
-  // some keys on the pipeline can't be modified, so we need to clean them up
-  // to avoid errors when updating the pipeline
-  const cleanedPipeline = omit(targetPipeline || {}, [
-    'created_date_millis',
-    'created_date',
-    'modified_date_millis',
-    'modified_date',
-  ]);
-
   actionsByType.upsert_ingest_pipeline.push({
     type: 'upsert_ingest_pipeline',
     // All of these are ClassicStreams so take any stream name to use for the ordering of operations
     stream: actions[0].dataStream,
     request: {
       id: targetPipelineName,
-      ...cleanedPipeline,
+      ...(targetPipeline ?? {}),
       processors,
     },
   });
@@ -339,15 +330,29 @@ async function findPipelineToModify(
 }
 
 async function getPipeline(id: string, scopedClusterClient: IScopedClusterClient) {
-  return scopedClusterClient.asCurrentUser.ingest
-    .getPipeline({ id })
-    .then((response) => response[id])
-    .catch((error) => {
-      if (isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
-    });
+  return (
+    scopedClusterClient.asCurrentUser.ingest
+      .getPipeline({ id })
+      // some keys on the pipeline can't be modified, so we need to clean them up
+      // to avoid errors when updating the pipeline
+      .then((response) => {
+        if (!response[id]) {
+          return undefined;
+        }
+        return omit(response[id], [
+          'created_date_millis',
+          'created_date',
+          'modified_date_millis',
+          'modified_date',
+        ]);
+      })
+      .catch((error) => {
+        if (isNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      })
+  );
 }
 
 async function getIndexTemplate(name: string, scopedClusterClient: IScopedClusterClient) {
