@@ -20,7 +20,6 @@ import type {
   NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
-import { set } from '@kbn/safer-lodash-set/fp';
 import type { GraphEdge } from './types';
 import { transformEntityTypeToIcon } from './utils';
 
@@ -38,6 +37,13 @@ interface ParseContext {
   readonly labelEdges: Record<string, LabelEdges>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
+}
+
+interface NodeVisualProps {
+  shape: EntityNodeDataModel['shape'];
+  label?: EntityNodeDataModel['label'];
+  tag?: EntityNodeDataModel['tag'];
+  icon?: EntityNodeDataModel['icon'];
 }
 
 export const parseRecords = (
@@ -185,32 +191,29 @@ const determineEntityNodeVisualProps = (
   hosts: string[],
   users: string[],
   entitiesData: NodeDocumentDataModel[] = []
-): {
-  shape: EntityNodeDataModel['shape'];
-  icon?: string;
-} => {
+): NodeVisualProps => {
   // try to find an exact match by entity id
   const matchingEntity = entitiesData.find((entity) => entity.id === actorId);
 
   // Extract entity data from the matching entity's documentsData if available
   const entityDetailsData = matchingEntity?.entity ?? {};
 
-  let mappedProps = {};
+  const mappedProps: Partial<NodeVisualProps> = {};
 
   if (entityDetailsData.name) {
-    mappedProps = set('label', entityDetailsData.name)(mappedProps);
+    mappedProps.label = entityDetailsData.name;
   }
 
   if (entityDetailsData.type) {
-    mappedProps = set('tag', entityDetailsData.type)(mappedProps);
+    mappedProps.tag = entityDetailsData.type;
 
     const iconValue: string | undefined = transformEntityTypeToIcon(entityDetailsData.type);
     if (iconValue) {
-      mappedProps = set('icon', iconValue)(mappedProps);
+      mappedProps.icon = iconValue;
     }
   }
 
-  let nodeProps: Partial<EntityNodeDataModel> = {
+  let nodeProps: NodeVisualProps = {
     shape: 'hexagon',
     ...mappedProps,
   };
@@ -231,7 +234,7 @@ const determineEntityNodeVisualProps = (
   }
 
   // Ensure shape property is present
-  return nodeProps as { shape: EntityNodeDataModel['shape']; icon?: string };
+  return nodeProps;
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
