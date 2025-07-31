@@ -492,6 +492,7 @@ class TableClass extends PureComponent<
             name: deleteLabel,
             description: deleteDescription,
             icon: 'trash',
+            color: 'danger',
             onClick: (field) => {
               const toDelete = [field.name];
               if (field.spec?.runtimeField?.fields) {
