@@ -48,11 +48,7 @@ const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({
-  readOnly,
-  isOAuth2Enabled = false,
-  isPfxEnabled = true,
-}) => {
+export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = true }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
@@ -108,7 +104,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       ),
       'data-test-subj': 'authSSL',
     },
-    isOAuth2Enabled && {
+    {
       value: AuthType.OAuth2ClientCredentials,
       label: i18n.AUTHENTICATION_OAUTH2,
       children: authType === AuthType.OAuth2ClientCredentials && (

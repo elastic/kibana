@@ -44,6 +44,8 @@ describe('AuthConfig renders', () => {
     expect(screen.queryByTestId('basicAuthFields')).not.toBeInTheDocument();
     expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
     expect(screen.queryByTestId('sslCertFields')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
+    expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
   });
 
   it('toggles headers as expected', async () => {
@@ -482,47 +484,7 @@ describe('AuthConfig renders', () => {
   });
 
   describe('AuthConfig with showOAuth2Option', () => {
-    it('does not render OAuth2 option by default (showOAuth2Option=false)', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: false,
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
-        </AuthFormTestProvider>
-      );
-
-      // OAuth2 option should not be rendered
-      expect(screen.queryByTestId('authOAuth2')).not.toBeInTheDocument();
-    });
-
-    it('renders OAuth2 option when showOAuth2Option is explicitly set to true', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: 'oauth2',
-          accessTokenUrl: 'https://api.example.com/oauth/token',
-          clientId: 'client_id_123',
-        },
-        secret: {
-          clientSecret: 'secret_123',
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
-        </AuthFormTestProvider>
-      );
-
-      expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
-      expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
-    });
-
-    it('renders OAuth2 fields when authType is OAuth2 and showOAuth2Option=true', async () => {
+    it('renders OAuth2 fields when authType is OAuth2', async () => {
       const testFormData = {
         config: {
           hasAuth: true,
@@ -532,7 +494,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
+          <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -563,7 +525,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
+          <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -609,7 +571,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
+          <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -646,7 +608,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
+          <AuthConfig readOnly={false} />
         </AuthFormTestProvider>
       );
 
@@ -671,30 +633,6 @@ describe('AuthConfig renders', () => {
       });
     });
 
-    it('does not render OAuth2 fields when authType is OAuth2 but showOAuth2Option=false', async () => {
-      const testFormData = {
-        config: {
-          hasAuth: true,
-          authType: AuthType.OAuth2ClientCredentials,
-        },
-      };
-
-      render(
-        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} isOAuth2Enabled={false} />
-        </AuthFormTestProvider>
-      );
-
-      // OAuth2 radio itself should not be present
-      expect(screen.queryByTestId('authOAuth2')).not.toBeInTheDocument();
-      // Consequently, none of the OAuth2 specific fields should be present
-      expect(screen.queryByTestId('accessTokenUrlAOuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('clientIdOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('clientSecretOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ScopeOAuth2')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('additionalFields')).not.toBeInTheDocument();
-    });
-
     it('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {
       const initialJson = JSON.stringify({ initial: 'value' });
       const testFormData = {
@@ -713,7 +651,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={true} isOAuth2Enabled={true} />
+          <AuthConfig readOnly={true} />
         </AuthFormTestProvider>
       );
 
