@@ -12,52 +12,68 @@ import { ESQLLiteral } from '../../types';
 import { ComposerQuery } from '../composer_query';
 import { esql, e } from '../esql';
 
-test('can construct a static query', () => {
-  const query = esql`FROM index | WHERE foo > 42 | LIMIT 10`;
+describe('"esql" tag query construction', () => {
+  test('can construct a static query', () => {
+    const query = esql`FROM index | WHERE foo > 42 | LIMIT 10`;
 
-  expect(query).toBeInstanceOf(ComposerQuery);
-  expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
-  expect(query.ast).toMatchObject({
-    type: 'query',
-    commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    });
+  });
+
+  test('can construct a query with a simple dynamic input', () => {
+    const input = 42;
+    const query = esql`FROM index | WHERE foo > ${input} | LIMIT 10`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    });
+  });
+
+  test('can construct a query from string', () => {
+    const input = 42;
+    const query = esql(`FROM index | WHERE foo > ${input} | LIMIT 10`);
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    });
   });
 });
 
-test('can construct a query with a simple dynamic input', () => {
-  const input = 42;
-  const query = esql`FROM index | WHERE foo > ${input} | LIMIT 10`;
+describe('processing holes', () => {
+  test('various hole input construction methods result into equivalent query', () => {
+    const input = 42;
+    // prettier-ignore
+    const query1 = esql`FROM index | WHERE foo > ${{type: 'literal', literalType: 'integer', value: input} as ESQLLiteral} | LIMIT 10`;
+    // prettier-ignore
+    const query2 = esql`FROM index | WHERE foo > ${Builder.expression.literal.integer(input)} | LIMIT 10`;
+    const query3 = esql`FROM index | WHERE foo > ${esql.int(input)} | LIMIT 10`;
+    const query4 = esql`FROM index | WHERE foo > ${input} | LIMIT 10`;
 
-  expect(query).toBeInstanceOf(ComposerQuery);
-  expect(query.print()).toBe('FROM index | WHERE foo > 42 | LIMIT 10');
-  expect(query.ast).toMatchObject({
-    type: 'query',
-    commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    expect(query1 + '').toBe(query2 + '');
+    expect(query1 + '').toBe(query3 + '');
+    expect(query1 + '').toBe(query4 + '');
   });
-});
 
-test('various hole input construction methods result into equivalent query', () => {
-  const input = 42;
-  // prettier-ignore
-  const query1 = esql`FROM index | WHERE foo > ${{type: 'literal', literalType: 'integer', value: input} as ESQLLiteral} | LIMIT 10`;
-  // prettier-ignore
-  const query2 = esql`FROM index | WHERE foo > ${Builder.expression.literal.integer(input)} | LIMIT 10`;
-  const query3 = esql`FROM index | WHERE foo > ${esql.int(input)} | LIMIT 10`;
-  const query4 = esql`FROM index | WHERE foo > ${input} | LIMIT 10`;
+  test('can construct a query with dynamic input enforced to be a string', () => {
+    const input = 'test';
+    const query = esql`FROM index | WHERE foo > ${e.str(input)} | LIMIT 10`;
 
-  expect(query1 + '').toBe(query2 + '');
-  expect(query1 + '').toBe(query3 + '');
-  expect(query1 + '').toBe(query4 + '');
-});
-
-test('can construct a query with dynamic input enforced to be a string', () => {
-  const input = 'test';
-  const query = esql`FROM index | WHERE foo > ${e.str(input)} | LIMIT 10`;
-
-  expect(query).toBeInstanceOf(ComposerQuery);
-  expect(query.print()).toBe('FROM index | WHERE foo > "test" | LIMIT 10');
-  expect(query.ast).toMatchObject({
-    type: 'query',
-    commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | WHERE foo > "test" | LIMIT 10');
+    expect(query.ast).toMatchObject({
+      type: 'query',
+      commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
+    });
   });
 });
 

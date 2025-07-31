@@ -47,32 +47,33 @@ const esqlTag = ((templateOrQuery, ...holes: ComposerQueryTagHole[]) => {
  * @param holes The dynamic values to be interpolated into the query.
  * @returns A ComposerQuery instance representing the constructed ESQL query.
  */
-export const esql: ComposerQueryTag & ComposerQueryTagMethods = Object.assign(
-  /**
-   * The `esql` tag function:
-   *
-   * ```typescript
-   * const query = esql`FROM index | WHERE foo > 42 | LIMIT 10`;
-   * ```
-   */
-  esqlTag,
+export const esql: ComposerQueryTag & ComposerQueryGenerator & ComposerQueryTagMethods =
+  Object.assign(
+    /**
+     * The `esql` tag function:
+     *
+     * ```typescript
+     * const query = esql`FROM index | WHERE foo > 42 | LIMIT 10`;
+     * ```
+     */
+    esqlTag,
 
-  /**
-   * Re-sharing the Synth module for convenience.
-   *
-   * ```typescript
-   * const expression = esql.exp `abc > 42`;
-   * ```
-   */
-  synth,
+    /**
+     * Re-sharing the Synth module for convenience.
+     *
+     * ```typescript
+     * const expression = esql.exp `abc > 42`;
+     * ```
+     */
+    synth,
 
-  /**
-   * Overwriting Synth API for custom handling of ESQL parameters.
-   */
-  {
-    par: (value: unknown, name?: string) => new ParameterHole(value, name),
-  }
-);
+    /**
+     * Overwriting Synth API for custom handling of ESQL parameters.
+     */
+    {
+      par: (value: unknown, name?: string) => new ParameterHole(value, name),
+    }
+  );
 
 /**
  * Alias for {@link esql} for convenience.

@@ -11,8 +11,8 @@ import { printTree } from 'tree-dump';
 import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { ESQLAstQueryExpression } from '../types';
-import type { ComposerQueryTag, EsqlRequest } from './types';
 import { processTemplateHoles } from './util';
+import type { ComposerQueryTagHole, EsqlRequest } from './types';
 
 export class ComposerQuery {
   constructor(
@@ -20,8 +20,11 @@ export class ComposerQuery {
     protected readonly params: Map<string, unknown> = new Map()
   ) {}
 
-  public readonly pipe: ComposerQueryTag = ((templateOrQuery, ...holes): this => {
-    processTemplateHoles(holes, this.params);
+  public readonly pipe: {
+    (template: TemplateStringsArray, ...holes: ComposerQueryTagHole[]): ComposerQuery;
+    (query: string): ComposerQuery;
+  } = (templateOrQuery, ...holes: ComposerQueryTagHole[]): this => {
+    if (Array.isArray(holes)) processTemplateHoles(holes, this.params);
 
     const command = synth.cmd(
       templateOrQuery as TemplateStringsArray,
@@ -30,7 +33,7 @@ export class ComposerQuery {
     this.ast.commands.push(command);
 
     return this;
-  }) as ComposerQueryTag;
+  };
 
   /**
    * Prints the query to a string in a specified format.

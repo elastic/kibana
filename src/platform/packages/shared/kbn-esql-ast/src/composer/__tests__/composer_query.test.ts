@@ -24,7 +24,7 @@ ComposerQuery
    └─ {}`);
 });
 
-describe('.pipe()', () => {
+describe('.pipe``', () => {
   test('can add additional commands to the query', () => {
     const query = esql`FROM kibana_ecommerce_index`;
 
@@ -40,6 +40,37 @@ describe('.pipe()', () => {
 
     expect(query.print('basic')).toBe(
       'FROM kibana_ecommerce_index | WHERE foo > 42 | EVAL a = 123 | LIMIT 10'
+    );
+  });
+
+  test('can supply integers floats into holes', () => {
+    const query = esql`FROM kibana_ecommerce_index`;
+
+    expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+
+    query.pipe`WHERE foo > ${5.5}`.pipe`EVAL a = ${123}`;
+
+    expect(query.print('basic')).toBe(
+      'FROM kibana_ecommerce_index | WHERE foo > 5.5 | EVAL a = 123'
+    );
+  });
+
+  test('can insert parameters', () => {
+    const query = esql`FROM kibana_ecommerce_index`;
+
+    query.pipe`WHERE foo > ${esql.par(5.5)}`.pipe`EVAL a = ${esql.par(123)}`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > ?p0 | EVAL a = ?p1',
+      params: [{ p0: 5.5 }, { p1: 123 }],
+    });
+  });
+
+  test('throws when providing multiple commands in one template', () => {
+    const query = esql`FROM kibana_ecommerce_index`;
+
+    expect(() => query.pipe`WHERE foo > 123 | LIMIT 10`).toThrowErrorMatchingInlineSnapshot(
+      `"Could not parse a single command completely: \\"WHERE foo > 123 | LIMIT 10\\". "`
     );
   });
 });
