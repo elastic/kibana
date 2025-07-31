@@ -27,6 +27,7 @@ export async function ensureInstalledPackage(
     logger.info(
       `ensureInstalledPackage: "${PREBUILT_RULES_PACKAGE_NAME}" version ${pkgVersion} is ${packageInstallationResult.status}`
     );
+    logger.error('I AM A TEST ERROR LOG MESSAGE');
 
     return packageInstallationResult;
   } catch (error) {
