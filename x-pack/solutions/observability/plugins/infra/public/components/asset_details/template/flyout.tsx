@@ -24,7 +24,7 @@ export const Flyout = ({
   links = [],
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
-  const [, setUrlState] = useAssetDetailsUrlState();
+  const [state, setUrlState] = useAssetDetailsUrlState();
   const { entity, loading } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { activeTabId } = useTabSwitcherContext();
@@ -63,6 +63,7 @@ export const Flyout = ({
             rightSideItems={rightSideItems}
             entityType={entity.type}
             loading={loading}
+            schema={state?.schema}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
