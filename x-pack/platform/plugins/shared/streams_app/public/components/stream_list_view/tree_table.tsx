@@ -18,7 +18,15 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { buildStreamRows, TableRow, SortableField } from './utils';
+import { isEmpty } from 'lodash';
+import {
+  buildStreamRows,
+  TableRow,
+  SortableField,
+  asTrees,
+  enrichStream,
+  shouldComposeTree,
+} from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -26,9 +34,9 @@ import { RetentionColumn } from './retention_column';
 
 export function StreamsTreeTable({
   loading,
-  streams,
+  streams = [],
 }: {
-  streams: ListStreamDetail[] | undefined;
+  streams?: ListStreamDetail[];
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
@@ -37,13 +45,18 @@ export function StreamsTreeTable({
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
+  const enrichedStreams = React.useMemo(() => {
+    const streamList = shouldComposeTree(sortField) ? asTrees(streams) : streams;
+    return streamList.map(enrichStream);
+  }, [sortField, streams]);
+
   const items = React.useMemo(
-    () => buildStreamRows(streams ?? [], sortField, sortDirection),
-    [streams, sortField, sortDirection]
+    () => buildStreamRows(enrichedStreams, sortField, sortDirection),
+    [enrichedStreams, sortField, sortDirection]
   );
 
   const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
-    if (sort && (sort.field === 'nameSortKey' || sort.field === 'retentionMs')) {
+    if (sort) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
     }
@@ -76,19 +89,21 @@ export function StreamsTreeTable({
                 margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
               `}
             >
-              <EuiFlexItem grow={false}>
-                {item.children.length > 0 ? (
-                  <EuiIcon type="arrowDown" color="text" size="m" />
-                ) : (
-                  <EuiIcon type="empty" color="text" size="m" />
-                )}
-              </EuiFlexItem>
+              {item.children && (
+                <EuiFlexItem grow={false}>
+                  {isEmpty(item.children) ? (
+                    <EuiIcon type="empty" color="text" size="m" />
+                  ) : (
+                    <EuiIcon type="arrowDown" color="text" size="m" />
+                  )}
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="streamsAppStreamNodeLink"
-                  href={router.link('/{key}', { path: { key: item.name } })}
+                  href={router.link('/{key}', { path: { key: item.stream.name } })}
                 >
-                  {item.name}
+                  {item.stream.name}
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -112,7 +127,7 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DocumentsColumn indexPattern={item.name} numDataPoints={25} />
+              <DocumentsColumn indexPattern={item.stream.name} numDataPoints={25} />
             ) : null,
         },
         {
@@ -132,7 +147,7 @@ export function StreamsTreeTable({
       itemId="name"
       items={items}
       sorting={sorting}
-      message={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
+      noItemsMessage={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
         defaultMessage: 'Loading streams...',
       })}
       onTableChange={onTableChange}

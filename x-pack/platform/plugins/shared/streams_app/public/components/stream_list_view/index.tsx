@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBetaBadge, EuiLink, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiBetaBadge,
+  EuiLink,
+  useEuiTheme,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
@@ -96,7 +103,18 @@ export function StreamListView() {
         }
       />
       <StreamsAppPageTemplate.Body grow>
-        {streamsListFetch.loading || isEmpty(streamsListFetch.value) ? (
+        {streamsListFetch.loading && streamsListFetch.value === undefined ? (
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
+                  defaultMessage: 'Loading Streams',
+                })}
+              </h2>
+            }
+          />
+        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value) ? (
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
