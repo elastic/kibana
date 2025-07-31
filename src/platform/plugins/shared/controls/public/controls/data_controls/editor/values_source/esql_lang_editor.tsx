@@ -55,7 +55,7 @@ export const ESQLLangEditor = (props: ESQLEditorProps) => {
     );
 
   // TODO Add indexManagement as optional service if and when circular dependency issue with this plugin is fixed
-  const services: ESQLEditorDeps = {
+  const services = {
     core: coreServices,
     dataViews: dataViewsService,
     data: dataService,
