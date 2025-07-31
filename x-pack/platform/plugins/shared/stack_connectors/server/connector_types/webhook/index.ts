@@ -155,15 +155,15 @@ function validateConnectorTypeConfig(
     configObject.authType === AuthType.OAuth2ClientCredentials &&
     (!configObject.accessTokenUrl || !configObject.clientId)
   ) {
-    const missingItems = [];
-    if (!configObject.accessTokenUrl) missingItems.push('Access Token URL');
-    if (!configObject.clientId) missingItems.push('Client ID');
+    const missingFields = [];
+    if (!configObject.accessTokenUrl) missingFields.push('Access Token URL (accessTokenUrl)');
+    if (!configObject.clientId) missingFields.push('Client ID (clientId)');
 
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.oauth2ConfigurationError', {
         defaultMessage: `error validation webhook action config: missing {missingItems} fields`,
         values: {
-          missingItems: missingItems.join(', '),
+          missingItems: missingFields.join(', '),
         },
       })
     );

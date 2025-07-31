@@ -39,7 +39,7 @@ export const AuthConfiguration = {
   accessTokenUrl: schema.maybe(schema.string()),
   clientId: schema.maybe(schema.string()),
   scope: schema.maybe(schema.string()),
-  additionalFields: schema.nullable(schema.string()),
+  additionalFields: schema.maybe(schema.nullable(schema.string())),
 };
 
 export const SecretConfiguration = {
