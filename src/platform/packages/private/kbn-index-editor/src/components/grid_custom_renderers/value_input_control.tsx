@@ -51,11 +51,14 @@ export const getValueInputPopover =
       (value: string) => {
         onValueChange(docId!, { [columnId]: value });
 
-        dataTableRef.current?.closeCellPopover();
-        // Cell needs to be focused again after popover close,
-        // also focus must be put in another cell first for it to work.
-        dataTableRef.current?.setFocusedCell({ rowIndex: 0, colIndex: 0 });
-        dataTableRef.current?.setFocusedCell({ rowIndex, colIndex });
+        if (dataTableRef.current) {
+          dataTableRef.current.closeCellPopover();
+
+          // Cell needs to be focused again after popover close,
+          // Also focus must be put in another cell first for it to work.
+          dataTableRef.current.setFocusedCell({ rowIndex: 0, colIndex: 0 });
+          dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
+        }
       },
       [docId, columnId, rowIndex, colIndex]
     );
@@ -64,7 +67,7 @@ export const getValueInputPopover =
 
     let inputWidth: number | undefined;
     if (cellContentsElement) {
-      inputWidth = cellContentsElement.getBoundingClientRect().width;
+      inputWidth = cellContentsElement.offsetWidth;
     }
 
     if (!isPlaceholder) {
