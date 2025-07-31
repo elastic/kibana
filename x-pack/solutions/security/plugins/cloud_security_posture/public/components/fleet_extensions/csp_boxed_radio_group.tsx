@@ -16,6 +16,7 @@ export interface CspRadioGroupProps {
   onChange(id: string): void;
   idSelected: string;
   size?: 's' | 'm';
+  name?: string;
 }
 
 export interface CspRadioOption {
@@ -26,7 +27,6 @@ export interface CspRadioOption {
   tooltip?: string;
   isBeta?: boolean;
   testId?: string;
-  name?: string;
 }
 
 export const RadioGroup = ({
