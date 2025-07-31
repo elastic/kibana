@@ -66,7 +66,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       queryParams,
     });
 
-    // Check if alerts are already attached to cases
+    // Check if alerts are already attached to cases - ALWAYS call the hook to maintain order
     const { hasAlertAttached, isLoading: isLoadingAlertAttachments } = useCheckAlertAttachments({
       cases: data.cases,
       alertIds,
