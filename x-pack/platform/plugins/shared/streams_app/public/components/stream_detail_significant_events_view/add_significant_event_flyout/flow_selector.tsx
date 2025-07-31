@@ -49,7 +49,7 @@ export function FlowSelector({ selected, onSelect: onSelect }: Props) {
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.aiOptionDescription',
                 {
                   defaultMessage:
-                    'Let the system suggests important moments based on patterns in your data. You can review and edit the results.',
+                    'Let the system suggests important queries based on patterns in your data. You can review the suggestions.',
                 }
               )}
             </EuiText>
