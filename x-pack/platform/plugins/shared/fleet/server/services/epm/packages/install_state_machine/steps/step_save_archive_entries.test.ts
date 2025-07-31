@@ -22,12 +22,9 @@ import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveArchiveEntriesFromAssetsMap, removeArchiveEntries } from '../../../archive/storage';
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 
-import {
-  stepSaveArchiveEntries,
-  cleanupArchiveEntriesStep,
-  saveKnowledgeBaseContent,
-} from './step_save_archive_entries';
+import { stepSaveArchiveEntries, cleanupArchiveEntriesStep } from './step_save_archive_entries';
 
 jest.mock('../../../archive/storage', () => {
   return {
@@ -439,11 +436,11 @@ describe('cleanupArchiveEntriesStep', () => {
 
 describe('saveKnowledgeBaseContent', () => {
   beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
+    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     jest.clearAllMocks();
   });
 
-  it('should save knowledge base content as a saved object', async () => {
+  it('should save knowledge base content to the system index', async () => {
     const knowledgeBaseContent = [
       {
         filename: 'test-guide.md',
@@ -455,59 +452,52 @@ describe('saveKnowledgeBaseContent', () => {
       },
     ];
 
-    soClient.create.mockResolvedValueOnce({
-      id: 'test-package',
-      type: 'epm-packages-knowledge-base',
-      attributes: {
-        package_name: 'test-package',
-        version: '1.0.0',
-        installed_at: expect.any(String),
-        knowledge_base_content: knowledgeBaseContent,
-      },
-      references: [],
+    esClient.index.mockResolvedValueOnce({
+      _index: '.integration_knowledge',
+      _id: 'test-package',
+      _version: 1,
+      result: 'created',
     } as any);
 
-    await saveKnowledgeBaseContent({
-      savedObjectsClient: soClient,
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
       pkgName: 'test-package',
       pkgVersion: '1.0.0',
       knowledgeBaseContent,
     });
 
-    expect(soClient.create).toHaveBeenCalledWith(
-      'epm-packages-knowledge-base',
-      {
+    expect(esClient.index).toHaveBeenCalledWith({
+      index: '.integration_knowledge',
+      id: 'test-package',
+      body: {
         package_name: 'test-package',
         version: '1.0.0',
         installed_at: expect.any(String),
         knowledge_base_content: knowledgeBaseContent,
       },
-      {
-        id: 'test-package',
-        overwrite: true,
-      }
-    );
+      refresh: 'wait_for',
+    });
   });
 
   it('should not save anything if knowledge base content is empty', async () => {
-    await saveKnowledgeBaseContent({
-      savedObjectsClient: soClient,
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
       pkgName: 'test-package',
       pkgVersion: '1.0.0',
       knowledgeBaseContent: [],
     });
 
-    expect(soClient.create).not.toHaveBeenCalled();
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 
   it('should not save anything if knowledge base content is null', async () => {
-    await saveKnowledgeBaseContent({
-      savedObjectsClient: soClient,
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
       pkgName: 'test-package',
       pkgVersion: '1.0.0',
       knowledgeBaseContent: null as any,
     });
 
-    expect(soClient.create).not.toHaveBeenCalled();
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 });

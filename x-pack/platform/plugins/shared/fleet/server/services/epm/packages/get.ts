@@ -9,7 +9,6 @@ import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
 import {
-  SavedObjectsErrorHelpers,
   type ElasticsearchClient,
   type SavedObjectsClientContract,
   type SavedObjectsFindOptions,
@@ -27,7 +26,6 @@ import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_typ
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
-  KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
   installationStatuses,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
@@ -43,10 +41,12 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
 } from '../../../../common/types';
+
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../../../constants';
+
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -75,6 +75,7 @@ import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
 import { createInstallableFrom } from '.';
+import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
 import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
@@ -882,26 +883,34 @@ export async function getAgentTemplateAssetsMap({
 
 /**
  * Get knowledge base content for a package
- * @param options Object with savedObjectsClient and package name
+ * @param options Object with esClient and package name
  * @returns The knowledge base content or undefined if not found
  */
 export async function getPackageKnowledgeBase(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
   pkgName: string;
+  pkgVersion?: string;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { savedObjectsClient, pkgName } = options;
-  // Using imported constant KNOWLEDGE_BASE_SAVED_OBJECT_TYPE
+  const { esClient, pkgName, pkgVersion } = options;
 
   try {
-    const knowledgeBaseSO = await savedObjectsClient.get<PackageKnowledgeBase>(
-      KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-      pkgName
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      pkgVersion
     );
-    return knowledgeBaseSO.attributes;
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+
+    if (knowledgeBaseItems.length === 0) {
       return undefined;
     }
-    throw error;
+
+    return {
+      package_name: pkgName,
+      version: pkgVersion || 'latest',
+      installed_at: new Date().toISOString(),
+      knowledge_base_content: knowledgeBaseItems,
+    };
+  } catch (error) {
+    return undefined;
   }
 }

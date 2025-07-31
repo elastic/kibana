@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../../../../app_context';
 
-import {
-  ASSETS_SAVED_OBJECT_TYPE,
-  KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-} from '../../../../../constants';
+import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
 
 import {
   assetPathToObjectId,
   removeArchiveEntries,
   saveArchiveEntriesFromAssetsMap,
 } from '../../../archive/storage';
+import {
+  saveKnowledgeBaseContentToIndex,
+  deletePackageKnowledgeBase,
+} from '../../knowledge_base_index';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 
-import type { KnowledgeBaseItem, PackageKnowledgeBase } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
 
 export async function stepSaveArchiveEntries(
   context: InstallContext
 ): Promise<{ packageAssetRefs: Array<{ id: string; path: string; type: string }> }> {
-  const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
+  const { packageInstallContext, savedObjectsClient, installSource, useStreaming, esClient } =
+    context;
 
   await appContextService.getLogger().info(`Installing package from: ${installSource}`);
   await appContextService.getLogger().debug(`Streaming package: ${useStreaming}`);
@@ -120,8 +120,8 @@ export async function stepSaveArchiveEntries(
   // Save knowledge base content if present
   if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
     try {
-      await saveKnowledgeBaseContent({
-        savedObjectsClient,
+      await saveKnowledgeBaseContentToIndex({
+        esClient,
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: packageInfo.knowledge_base,
@@ -139,8 +139,15 @@ export async function stepSaveArchiveEntries(
 }
 
 export async function cleanupArchiveEntriesStep(context: InstallContext) {
-  const { logger, savedObjectsClient, installedPkg, retryFromLastState, force, initialState } =
-    context;
+  const {
+    logger,
+    savedObjectsClient,
+    installedPkg,
+    retryFromLastState,
+    force,
+    initialState,
+    esClient,
+  } = context;
 
   // In case of retry clean up previous installed assets
   if (
@@ -156,44 +163,14 @@ export async function cleanupArchiveEntriesStep(context: InstallContext) {
     await withPackageSpan('Retry transition - clean up package archive assets', async () => {
       await removeArchiveEntries({ savedObjectsClient, refs: packageAssets });
     });
+
+    // Also clean up knowledge base content
+    if (esClient && installedPkg.attributes.name && installedPkg.attributes.version) {
+      await deletePackageKnowledgeBase(
+        esClient,
+        installedPkg.attributes.name,
+        installedPkg.attributes.version
+      );
+    }
   }
-}
-
-/**
- * Saves knowledge base content as a separate document in Elasticsearch
- * @param savedObjectsClient - The saved objects client
- * @param pkgName - Package name
- * @param pkgVersion - Package version
- * @param knowledgeBaseContent - Array of knowledge base items
- */
-export async function saveKnowledgeBaseContent({
-  savedObjectsClient,
-  pkgName,
-  pkgVersion,
-  knowledgeBaseContent,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
-  knowledgeBaseContent: KnowledgeBaseItem[];
-}) {
-  if (!knowledgeBaseContent || knowledgeBaseContent.length === 0) {
-    return;
-  }
-
-  // Using the imported KNOWLEDGE_BASE_SAVED_OBJECT_TYPE constant
-
-  // Create knowledge base document
-  const knowledgeBaseDoc: PackageKnowledgeBase = {
-    package_name: pkgName,
-    version: pkgVersion,
-    installed_at: new Date().toISOString(),
-    knowledge_base_content: knowledgeBaseContent,
-  };
-
-  // Save it as a saved object with the package name as the ID
-  await savedObjectsClient.create(KNOWLEDGE_BASE_SAVED_OBJECT_TYPE, knowledgeBaseDoc, {
-    id: pkgName,
-    overwrite: true,
-  });
 }

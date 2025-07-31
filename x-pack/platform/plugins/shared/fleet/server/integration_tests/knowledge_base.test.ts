@@ -5,18 +5,51 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
-import { saveKnowledgeBaseContent } from '../services/epm/packages/install_state_machine/steps/step_save_archive_entries';
+import {
+  saveKnowledgeBaseContentToIndex,
+  INTEGRATION_KNOWLEDGE_INDEX,
+} from '../services/epm/packages/knowledge_base_index';
 import { getPackageKnowledgeBase } from '../services/epm/packages/get';
-import { KNOWLEDGE_BASE_SAVED_OBJECT_TYPE } from '../../common/constants/epm';
-import type { KnowledgeBaseItem, PackageKnowledgeBase } from '../../common/types/models/epm';
+import type { KnowledgeBaseItem } from '../../common/types/models/epm';
 
 describe('Knowledge Base End-to-End Integration Test', () => {
-  let soClient: jest.Mocked<any>;
+  let esClient: jest.Mocked<any>;
 
   beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
+    esClient = {
+      indices: {
+        existsIndexTemplate: jest.fn().mockResolvedValue(true),
+        exists: jest.fn().mockResolvedValue(true),
+        putIndexTemplate: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockResolvedValue({}),
+      },
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      bulk: jest.fn().mockResolvedValue({}),
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                package_name: 'test-integration',
+                filename: 'setup-guide.md',
+                content:
+                  '# Setup Guide\n\nThis guide helps you set up the integration.\n\n## Prerequisites\n\n- Node.js 16+\n- Elasticsearch cluster',
+                version: '1.2.0',
+              },
+            },
+            {
+              _source: {
+                package_name: 'test-integration',
+                filename: 'troubleshooting.md',
+                content:
+                  '# Troubleshooting\n\n## Common Issues\n\n### Connection Problems\n\nIf you experience connection issues, check your network settings.',
+                version: '1.2.0',
+              },
+            },
+          ],
+        },
+      }),
+    };
     jest.clearAllMocks();
   });
 
@@ -35,90 +68,129 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       },
     ];
 
-    const expectedKnowledgeBaseDoc: PackageKnowledgeBase = {
-      package_name: 'test-integration',
-      version: '1.2.0',
-      installed_at: expect.any(String),
-      knowledge_base_content: knowledgeBaseContent,
-    };
-
-    // Mock the saved object create operation
-    soClient.create.mockResolvedValueOnce({
-      id: 'test-integration',
-      type: KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-      attributes: expectedKnowledgeBaseDoc,
-      references: [],
-    });
-
-    // Mock the saved object get operation for retrieval
-    soClient.get.mockResolvedValueOnce({
-      id: 'test-integration',
-      type: KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-      attributes: expectedKnowledgeBaseDoc,
-      references: [],
-    });
-
     // Step 1: Save knowledge base content during package installation
-    await saveKnowledgeBaseContent({
-      savedObjectsClient: soClient,
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
       pkgName: 'test-integration',
       pkgVersion: '1.2.0',
       knowledgeBaseContent,
     });
 
-    // Verify that the knowledge base content was saved correctly
-    expect(soClient.create).toHaveBeenCalledWith(
-      KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
-      expectedKnowledgeBaseDoc,
-      {
-        id: 'test-integration',
-        overwrite: true,
-      }
-    );
+    // Verify that the knowledge base content was indexed correctly
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
+      index: INTEGRATION_KNOWLEDGE_INDEX,
+      query: {
+        bool: {
+          must: [
+            { term: { 'package_name.keyword': 'test-integration' } },
+            { term: { version: '1.2.0' } },
+          ],
+        },
+      },
+      refresh: true,
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      operations: expect.arrayContaining([
+        {
+          index: {
+            _index: INTEGRATION_KNOWLEDGE_INDEX,
+            _id: 'test-integration-1.2.0-setup-guide.md',
+          },
+        },
+        {
+          package_name: 'test-integration',
+          filename: 'setup-guide.md',
+          content: expect.stringContaining('Setup Guide'),
+          version: '1.2.0',
+        },
+        {
+          index: {
+            _index: INTEGRATION_KNOWLEDGE_INDEX,
+            _id: 'test-integration-1.2.0-troubleshooting.md',
+          },
+        },
+        {
+          package_name: 'test-integration',
+          filename: 'troubleshooting.md',
+          content: expect.stringContaining('Troubleshooting'),
+          version: '1.2.0',
+        },
+      ]),
+      refresh: 'wait_for',
+    });
 
     // Step 2: Retrieve knowledge base content through the API
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
-      savedObjectsClient: soClient,
+      esClient,
       pkgName: 'test-integration',
+      pkgVersion: '1.2.0',
+    });
+
+    // Verify that the search was called correctly
+    expect(esClient.search).toHaveBeenCalledWith({
+      index: INTEGRATION_KNOWLEDGE_INDEX,
+      query: {
+        bool: {
+          must: [
+            { term: { 'package_name.keyword': 'test-integration' } },
+            { term: { version: '1.2.0' } },
+          ],
+        },
+      },
+      sort: [{ filename: 'asc' }],
+      size: 1000,
     });
 
     // Verify that the retrieved content matches what was saved
-    expect(soClient.get).toHaveBeenCalledWith(KNOWLEDGE_BASE_SAVED_OBJECT_TYPE, 'test-integration');
-
-    expect(retrievedKnowledgeBase).toEqual(expectedKnowledgeBaseDoc);
-    expect(retrievedKnowledgeBase?.knowledge_base_content).toHaveLength(2);
-    expect(retrievedKnowledgeBase?.knowledge_base_content[0].filename).toBe('setup-guide.md');
-    expect(retrievedKnowledgeBase?.knowledge_base_content[0].content).toContain('Setup Guide');
-    expect(retrievedKnowledgeBase?.knowledge_base_content[1].filename).toBe('troubleshooting.md');
-    expect(retrievedKnowledgeBase?.knowledge_base_content[1].content).toContain('Common Issues');
+    expect(retrievedKnowledgeBase).toEqual({
+      package_name: 'test-integration',
+      version: '1.2.0',
+      installed_at: expect.any(String),
+      knowledge_base_content: [
+        {
+          filename: 'setup-guide.md',
+          content: expect.stringContaining('Setup Guide'),
+          path: 'docs/knowledge_base/setup-guide.md',
+        },
+        {
+          filename: 'troubleshooting.md',
+          content: expect.stringContaining('Troubleshooting'),
+          path: 'docs/knowledge_base/troubleshooting.md',
+        },
+      ],
+    });
   });
 
   it('should handle packages without knowledge base content', async () => {
-    // Test that packages without knowledge base content don't create saved objects
-    await saveKnowledgeBaseContent({
-      savedObjectsClient: soClient,
+    // Test that packages without knowledge base content don't call bulk index
+    await saveKnowledgeBaseContentToIndex({
+      esClient,
       pkgName: 'simple-package',
       pkgVersion: '1.0.0',
       knowledgeBaseContent: [],
     });
 
-    expect(soClient.create).not.toHaveBeenCalled();
+    expect(esClient.bulk).not.toHaveBeenCalled();
 
-    // Mock not found error for retrieval
-    const notFoundError = new Error('Not found');
-    (notFoundError as any).output = { statusCode: 404 };
-    soClient.get.mockRejectedValueOnce(notFoundError);
+    // Mock empty search results for retrieval
+    esClient.search.mockResolvedValueOnce({
+      hits: {
+        hits: [],
+      },
+    });
 
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
-      savedObjectsClient: soClient,
+      esClient,
       pkgName: 'simple-package',
+      pkgVersion: '1.0.0',
     });
 
     expect(retrievedKnowledgeBase).toBeUndefined();
   });
 
-  it('should verify the saved object type is properly registered', () => {
-    // Verify that the knowledge base saved object type constant is correct
-    expect(KNOWLEDGE_BASE_SAVED_OBJECT_TYPE).toBe('epm-packages-knowledge-base');
+  it('should verify the system index name is correct', () => {
+    // Verify that the knowledge base system index name is correct
+    expect(INTEGRATION_KNOWLEDGE_INDEX).toBe('.integration_knowledge');
   });
 });
