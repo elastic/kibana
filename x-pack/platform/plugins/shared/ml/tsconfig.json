@@ -146,5 +146,16 @@
     "@kbn/licensing-types",
     "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
+    "@kbn/ml-kibana-context",
+    "@kbn/ml-services",
+    "@kbn/ml-locator",
+    "@kbn/ml-license",
+    "@kbn/ml-common-utils",
+    "@kbn/ml-hooks",
+    "@kbn/ml-embeddables",
+    "@kbn/ml-plugin-contracts",
+    "@kbn/ml-client",
+    "@kbn/ml-server-api-schemas",
+    "@kbn/ml-saved-objects",
   ]
 }
