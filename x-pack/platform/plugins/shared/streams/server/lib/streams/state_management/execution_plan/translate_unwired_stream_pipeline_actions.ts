@@ -8,7 +8,7 @@
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { castArray, groupBy, uniq } from 'lodash';
+import { castArray, groupBy, omit, uniq } from 'lodash';
 import { ASSET_VERSION } from '../../../../../common/constants';
 import type {
   ActionsByType,
@@ -330,15 +330,29 @@ async function findPipelineToModify(
 }
 
 async function getPipeline(id: string, scopedClusterClient: IScopedClusterClient) {
-  return scopedClusterClient.asCurrentUser.ingest
-    .getPipeline({ id })
-    .then((response) => response[id])
-    .catch((error) => {
-      if (isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
-    });
+  return (
+    scopedClusterClient.asCurrentUser.ingest
+      .getPipeline({ id })
+      // some keys on the pipeline can't be modified, so we need to clean them up
+      // to avoid errors when updating the pipeline
+      .then((response) => {
+        if (!response[id]) {
+          return undefined;
+        }
+        return omit(response[id], [
+          'created_date_millis',
+          'created_date',
+          'modified_date_millis',
+          'modified_date',
+        ]);
+      })
+      .catch((error) => {
+        if (isNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      })
+  );
 }
 
 async function getIndexTemplate(name: string, scopedClusterClient: IScopedClusterClient) {
