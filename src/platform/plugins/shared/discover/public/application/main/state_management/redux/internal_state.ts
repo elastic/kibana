@@ -144,7 +144,7 @@ export const internalStateSlice = createSlice({
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
-    setTabGlobalState: (
+    setGlobalState: (
       state,
       action: TabAction<{
         globalState: TabState['globalState'];

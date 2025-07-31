@@ -343,7 +343,7 @@ export const getDiscoverAppStateContainer = ({
         const { time: timeRange, refreshInterval, filters } = state;
 
         internalState.dispatch(
-          injectCurrentTab(internalStateActions.setTabGlobalState)({
+          injectCurrentTab(internalStateActions.setGlobalState)({
             globalState: {
               timeRange,
               refreshInterval,

@@ -1070,7 +1070,7 @@ describe('Discover state', () => {
       savedSearchWithQuery.searchSource.setField('filter', filters);
       const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
       state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.setTabGlobalState)({
+        state.injectCurrentTab(internalStateActions.setGlobalState)({
           globalState: { filters },
         })
       );
