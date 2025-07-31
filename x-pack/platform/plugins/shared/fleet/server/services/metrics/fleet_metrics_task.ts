@@ -40,7 +40,13 @@ export class FleetMetricsTask {
         title: TITLE,
         timeout: TIMEOUT,
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, abortController }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
               return withSpan({ name: TYPE, type: 'metrics' }, () =>

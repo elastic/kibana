@@ -45,7 +45,13 @@ export class FleetUsageSender {
         title: 'Fleet Usage Sender',
         timeout: this.timeout,
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, abortController }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
               return withSpan({ name: this.taskType, type: 'telemetry' }, () =>

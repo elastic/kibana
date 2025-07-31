@@ -78,7 +78,13 @@ export class AlertDeletionClient {
       [ALERT_DELETION_TASK_TYPE]: {
         title: 'Alert deletion task',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, abortController }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance, abortController);
