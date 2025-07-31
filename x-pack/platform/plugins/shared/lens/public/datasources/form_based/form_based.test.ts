@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
-import { isFragment } from 'react-is';
+import React, { ReactElement } from 'react';
 
 import type { Reference } from '@kbn/content-management-utils';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -193,6 +192,10 @@ const dateRange = {
   fromDate: '2022-03-17T08:25:00.000Z',
   toDate: '2022-04-17T08:25:00.000Z',
 };
+
+function isFragment(element: unknown): element is ReactElement {
+  return React.isValidElement(element) && element.type === React.Fragment;
+}
 
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
@@ -3057,7 +3060,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => {},
+            setState: () => { },
           })
         ).toMatchInlineSnapshot(`
           Array [
@@ -3113,7 +3116,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => {},
+            setState: () => { },
           })
         ).toMatchInlineSnapshot(`
           Array [
@@ -3202,7 +3205,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => {},
+            setState: () => { },
           });
 
           expect(messages.length).toBe(1);
@@ -3243,7 +3246,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => {},
+            setState: () => { },
           });
 
           expect(messages.length).toBe(1);
@@ -3409,7 +3412,7 @@ describe('IndexPattern Data Source', () => {
       it('should return mismatched time shifts', () => {
         const warnings = FormBasedDatasource.getUserMessages!(state, {
           frame: framePublicAPI,
-          setState: () => {},
+          setState: () => { },
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
@@ -3425,7 +3428,7 @@ describe('IndexPattern Data Source', () => {
 
         const warnings = FormBasedDatasource.getUserMessages!(state, {
           frame: framePublicAPI,
-          setState: () => {},
+          setState: () => { },
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
@@ -3527,7 +3530,7 @@ describe('IndexPattern Data Source', () => {
                   indexPatterns: expectedIndexPatterns,
                 }),
               }),
-              setState: () => {},
+              setState: () => { },
               visualizationInfo: { layers: [] },
             }
           );
@@ -3553,7 +3556,7 @@ describe('IndexPattern Data Source', () => {
               indexPatterns: expectedIndexPatterns,
             }),
           }),
-          setState: () => {},
+          setState: () => { },
           visualizationInfo: { layers: [] },
         });
         const infoMessages = messages.filter(({ severity }) => severity === 'info');
