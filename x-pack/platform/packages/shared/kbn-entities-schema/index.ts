@@ -7,7 +7,6 @@
 
 export * from './src/schema/v1/entity_definition';
 export * from './src/schema/v1/entity';
-export * from './src/schema/v2';
 export * from './src/schema/v1/common';
 export * from './src/schema/v1/patterns';
 export * from './src/rest_spec/create';

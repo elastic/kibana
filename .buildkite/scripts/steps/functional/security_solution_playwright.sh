@@ -9,6 +9,6 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- ESS - Security Solution Playwright Tests"
 
-cd x-pack/test/security_solution_playwright
+cd x-pack/solutions/security/test/security_solution_playwright
 
 yarn run:ess; exit_code=$?; exit $exit_code

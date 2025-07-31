@@ -1,6 +1,6 @@
 # MV_COUNT
 
-The MV_COUNT function calculates the total number of values in a multivalued expression.
+Converts a multivalued expression into a single-valued column containing the count of the number of values.
 
 ## Syntax
 
@@ -8,7 +8,7 @@ The MV_COUNT function calculates the total number of values in a multivalued exp
 
 ### Parameters
 
-#### field
+#### `field`
 
 A multivalued expression.
 
@@ -19,8 +19,10 @@ ROW a=["foo", "zoo", "bar"]
 | EVAL count_a = MV_COUNT(a)
 ```
 
-**Counting the number of element in a multivalued field**
+Count the number of values in the multivalued column `a`.
+
 ```esql
 FROM bag_of_numbers
 | EVAL count = MV_COUNT(numbers)
 ```
+Count the number of element in a multivalued field `numbers`

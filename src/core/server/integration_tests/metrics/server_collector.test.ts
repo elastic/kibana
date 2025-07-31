@@ -11,13 +11,13 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { take, filter } from 'rxjs';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
+import { createInternalHttpService } from '../utilities';
 
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
@@ -29,7 +29,7 @@ describe('ServerMetricsCollector', () => {
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
-    server = createHttpService();
+    server = createInternalHttpService();
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({

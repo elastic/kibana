@@ -67,6 +67,12 @@ export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
 export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
 
+// Security AI Prompts (prompt integration)
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
+  `${ELASTIC_AI_ASSISTANT_URL}/security_ai_prompts` as const;
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
@@ -120,3 +126,15 @@ export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
  */
 export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
+
+/**
+ * This feature flag disables the InferenceChatModel feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.inferenceChatModelDisabled: true
+ * ```
+ */
+export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
+  'securitySolution.inferenceChatModelDisabled' as const;

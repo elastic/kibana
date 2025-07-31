@@ -8,9 +8,10 @@
 import moment from 'moment';
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
+import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ALERT_URL } from '@kbn/rule-data-utils';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -21,7 +22,7 @@ import { getResourceName } from '../../../../ai_assistant_service';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import { AttackDiscoveryExecutorOptions } from '../types';
+import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
   generateAttackDiscoveryAlertHash,
@@ -126,7 +127,11 @@ export const attackDiscoveryScheduleExecutor = async ({
       connectorId: params.apiConfig.connectorId,
       indexPattern,
       logger,
-      ownerId: rule.id,
+      ownerInfo: {
+        id: rule.id,
+        isSchedule: true,
+      },
+      replacements,
       spaceId,
     });
 
@@ -136,6 +141,7 @@ export const attackDiscoveryScheduleExecutor = async ({
           attackDiscovery,
           connectorId: params.apiConfig.connectorId,
           ownerId: rule.id,
+          replacements,
           spaceId,
         });
         const { uuid: alertDocId } = alertsClient.report({
@@ -152,11 +158,29 @@ export const attackDiscoveryScheduleExecutor = async ({
           spaceId,
         });
 
-        const { id, ...restAttack } = attackDiscovery;
+        const { alertIds, timestamp, mitreAttackTactics } = attackDiscovery;
+        const { detailsMarkdown, entitySummaryMarkdown, title, summaryMarkdown } =
+          getAttackDiscoveryMarkdownFields({
+            attackDiscovery,
+            replacements,
+          });
+        const context: AttackDiscoveryScheduleContext = {
+          attack: {
+            alertIds,
+            detailsMarkdown,
+            detailsUrl: baseAlertDocument[ALERT_URL],
+            entitySummaryMarkdown,
+            mitreAttackTactics,
+            summaryMarkdown,
+            timestamp,
+            title,
+          },
+        };
+
         alertsClient.setAlertData({
           id: alertInstanceId,
           payload: baseAlertDocument,
-          context: { attack: { ...restAttack, detailsUrl: baseAlertDocument[ALERT_URL] } },
+          context,
         });
       })
     );

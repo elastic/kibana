@@ -10,22 +10,15 @@
 import { ESQLCallbacks } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import { getCallbackMocks } from '../../__tests__/helpers';
-import { EditorContext } from '../types';
 
 const setup = async (caret = '?') => {
   if (caret.length !== 1) throw new Error('Caret must be a single character');
   const callbacks = getCallbackMocks();
-  const suggest = async (
-    query: string,
-    ctx: EditorContext = {
-      triggerKind: 0,
-    },
-    cb: ESQLCallbacks = callbacks
-  ) => {
+  const suggest = async (query: string, cb: ESQLCallbacks = callbacks) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    return await autocomplete.suggest(querySansCaret, pos, ctx, cb);
+    return await autocomplete.suggest(querySansCaret, pos, cb);
   };
 
   return {

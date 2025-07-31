@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { scheduleRruleSchemaV1 } from '@kbn/task-manager-plugin/server';
 
 const rawLayoutIdSchema = schema.oneOf([
   schema.literal('preserve_layout'),
@@ -52,6 +52,6 @@ export const rawScheduledReportSchema = schema.object({
   migrationVersion: schema.maybe(schema.string()),
   notification: schema.maybe(rawNotificationSchema),
   payload: schema.string(),
-  schedule: scheduleRruleSchema,
+  schedule: scheduleRruleSchemaV1,
   title: schema.string(),
 });

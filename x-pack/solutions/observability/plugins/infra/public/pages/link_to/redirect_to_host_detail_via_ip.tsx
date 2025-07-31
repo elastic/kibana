@@ -46,8 +46,8 @@ export const RedirectToHostDetailViaIP = ({
 
       baseLocator?.navigate({
         ...search,
-        assetType: 'host',
-        assetId: name,
+        entityType: 'host',
+        entityId: name,
         state: location.state as SerializableRecord,
       });
     }

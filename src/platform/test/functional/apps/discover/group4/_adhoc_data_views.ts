@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -186,7 +186,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield');
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield-updated');
 
-      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElements(0, 3);
+      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElementsByColumnName(
+        0,
+        '_bytes-runtimefield'
+      );
       const first = await firstSearchCell.getVisibleText();
       const second = await secondSearchCell.getVisibleText();
 

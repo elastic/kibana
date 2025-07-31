@@ -10,7 +10,12 @@
 import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { OptionTab } from './use_option_tabs';
+
+const defaultEditorNavBarStyles = {
+  base: css({ flexGrow: 0 }),
+};
 
 interface DefaultEditorNavBarProps {
   optionTabs: OptionTab[];
@@ -19,7 +24,7 @@ interface DefaultEditorNavBarProps {
 
 function DefaultEditorNavBar({ setSelectedTab, optionTabs }: DefaultEditorNavBarProps) {
   return (
-    <EuiTabs className="visEditorSidebar__nav" size="s">
+    <EuiTabs className="visEditorSidebar__nav" size="s" css={defaultEditorNavBarStyles.base}>
       {optionTabs.map(({ name, title, isSelected = false }) => (
         <EuiTab
           key={name}

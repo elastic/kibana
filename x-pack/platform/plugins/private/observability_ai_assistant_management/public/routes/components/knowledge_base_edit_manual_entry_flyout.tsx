@@ -140,7 +140,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
             fullWidth
             value={newEntryTitle}
             onChange={(e) => setNewEntryTitle(e.target.value)}
-            isInvalid={isEntryTitleInvalid}
           />
         </EuiFormRow>
 
@@ -178,7 +177,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             <EuiIconTip
               content="Global entries will be available to all users. User entries will only be available to the author."
               position="top"
-              type="iInCircle"
+              type="info"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

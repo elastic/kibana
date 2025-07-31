@@ -95,4 +95,6 @@ Tools like the EQLPlaygound, RTAs, and detection-rules CLI are great resources f
 
 In a following article of TRaDE craft, we’ll describe how we validate our rules across languages like EQL or KQL, and how we automate our end-to-end process. Additionally, if you’re interested in hearing how our partners at Tines have integrated Elastic detection logic, check out their blog on [Automating Detection-as-Code](https://www.tines.com/blog/automating-detection-as-code), which walks through the Elastic SIEM, detection content development CI/CD, alert management, and response handling.
 
+Update: RTAs have relocated to the [Cortado](https://github.com/elastic/cortado) centralized repository which now has the option to use the packages RTAs whl available under [releases](https://github.com/elastic/cortado/releases).  See the [README](https://github.com/elastic/cortado/blob/main/README.md) for more details.
+
 We’re always interested in hearing use cases and workflows like these, so as always, reach out to us via [GitHub issues](https://github.com/elastic/protections-artifacts/issues), chat with us in our [community Slack](http://ela.st/slack), and ask questions in our [Discuss forums](https://discuss.elastic.co/c/security/endpoint-security/80)!

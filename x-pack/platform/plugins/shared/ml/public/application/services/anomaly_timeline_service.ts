@@ -13,6 +13,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type {
   ExplorerJob,
   OverallSwimlaneData,
@@ -21,6 +22,7 @@ import type {
 } from '../explorer/explorer_utils';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import type { MlResultsService } from './results_service';
+import { shouldIncludePointByScore } from '../util/anomaly_score_utils';
 
 /**
  * Service for retrieving anomaly swim lanes data.
@@ -113,7 +115,7 @@ export class AnomalyTimelineService {
     selectedJobs: Array<{ id: string; bucketSpanSeconds: number }>,
     chartWidth?: number,
     bucketInterval?: TimeBucketsInterval,
-    overallScore?: number
+    overallScore?: SeverityThreshold[]
   ): Promise<OverallSwimlaneData> {
     const interval = bucketInterval ?? this.getSwimlaneBucketInterval(selectedJobs, chartWidth!);
 
@@ -122,6 +124,10 @@ export class AnomalyTimelineService {
     }
 
     const bounds = this.getTimeBounds();
+
+    const minOverallScore = overallScore?.length
+      ? Math.min(...overallScore.map((threshold) => threshold.min))
+      : undefined;
 
     // Ensure the search bounds align to the bucketing interval used in the swim lane so
     // that the first and last buckets are complete.
@@ -143,12 +149,14 @@ export class AnomalyTimelineService {
       overallBucketsBounds.min.valueOf(),
       overallBucketsBounds.max.valueOf(),
       interval.asSeconds() + 's',
-      overallScore
+      minOverallScore
     );
+
     const overallSwimlaneData = this.processOverallResults(
       resp.results,
       searchBounds,
-      interval.asSeconds()
+      interval.asSeconds(),
+      overallScore || []
     );
 
     return overallSwimlaneData;
@@ -178,10 +186,9 @@ export class AnomalyTimelineService {
     swimlaneContainerWidth?: number,
     influencersFilterQuery?: any,
     bucketInterval?: TimeBucketsInterval,
-    swimLaneSeverity?: number
+    swimLaneSeverity?: SeverityThreshold[]
   ): Promise<ViewBySwimLaneData | undefined> {
     const timefilterBounds = this.getTimeBounds();
-
     if (timefilterBounds === undefined) {
       throw new Error('timeRangeSelectorEnabled has to be enabled');
     }
@@ -258,7 +265,7 @@ export class AnomalyTimelineService {
     bucketInterval: TimeBucketsInterval,
     selectionInfluencers: MlEntityField[],
     influencersFilterQuery: InfluencersFilterQuery,
-    swimlaneSeverity: number
+    swimLaneSeverity: SeverityThreshold[]
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -297,7 +304,7 @@ export class AnomalyTimelineService {
         bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
-        swimlaneSeverity
+        swimLaneSeverity
       );
       return Object.keys(resp.results);
     }
@@ -312,7 +319,8 @@ export class AnomalyTimelineService {
   private processOverallResults(
     scoresByTime: { [timeMs: number]: number },
     searchBounds: Required<TimeRangeBounds>,
-    interval: number
+    interval: number,
+    selectedSeverity: SeverityThreshold[]
   ): OverallSwimlaneData {
     const overallLabel = OVERALL_LABEL;
     const dataset: OverallSwimlaneData = {
@@ -327,14 +335,19 @@ export class AnomalyTimelineService {
     // These will be used for calculating the earliest and latest times for the swim lane charts.
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
       const time = +timeMs / 1000;
-      dataset.points.push({
-        laneLabel: overallLabel,
-        time,
-        value: score,
-      });
 
-      dataset.earliest = Math.min(time, dataset.earliest);
-      dataset.latest = Math.max(time + dataset.interval, dataset.latest);
+      const shouldIncludePoint = shouldIncludePointByScore(score, selectedSeverity);
+
+      if (shouldIncludePoint) {
+        dataset.points.push({
+          laneLabel: overallLabel,
+          time,
+          value: score,
+        });
+
+        dataset.earliest = Math.min(time, dataset.earliest);
+        dataset.latest = Math.max(time + dataset.interval, dataset.latest);
+      }
     });
 
     return dataset;

@@ -15,12 +15,16 @@ import {
   type EuiThemeFontSize,
 } from '@elastic/eui';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import type { GeometryValue, SeriesIdentifier } from '@elastic/charts';
 import { Axis, BarSeries, Chart, Position, Settings, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { FilterStateStore } from '@kbn/es-query';
 import type { AssetInventoryChartData } from '../hooks/use_fetch_chart_data/types';
 import { ASSET_FIELDS } from '../constants';
+import type { AssetsURLQuery } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
+import { useDataViewContext } from '../hooks/data_view_context';
 
 const chartTitle = i18n.translate(
   'xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle',
@@ -61,19 +65,70 @@ export interface AssetInventoryBarChartProps {
   isLoading: boolean;
   isFetching: boolean;
   assetInventoryChartData: AssetInventoryChartData[];
+  setQuery(v: Partial<AssetsURLQuery>): void;
 }
+
+const createAssetFilter = (key: string, value: string, index: string) => {
+  return {
+    $state: { store: FilterStateStore.APP_STATE },
+    meta: {
+      alias: null,
+      disabled: false,
+      index,
+      key,
+      negate: false,
+      params: { query: value },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        [key]: value,
+      },
+    },
+  };
+};
+
+export const handleElementClick = (
+  elements: Array<[GeometryValue, SeriesIdentifier]>,
+  setQuery: (v: Partial<AssetsURLQuery>) => void,
+  index: string
+): void => {
+  if (!elements.length) return;
+
+  const [[geometryValue]] = elements;
+  const datum = geometryValue.datum as AssetInventoryChartData;
+
+  const subtype = datum[ASSET_FIELDS.ENTITY_SUB_TYPE];
+  const type = datum[ASSET_FIELDS.ENTITY_TYPE];
+
+  const filters = [
+    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index),
+    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index),
+  ];
+
+  setQuery({ filters });
+};
 
 export const AssetInventoryBarChart = ({
   isLoading,
   isFetching,
   assetInventoryChartData,
+  setQuery,
 }: AssetInventoryBarChartProps) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs');
   const baseTheme = useElasticChartsTheme();
+  const { dataView } = useDataViewContext();
+
+  if (!dataView.id) {
+    return null;
+  }
+
+  const dataViewId = dataView.id;
+
   return (
     <div css={getChartStyles(euiTheme, xsFontSize)}>
-      <EuiProgress size="xs" color="accent" style={getProgressStyle(isFetching)} />
+      <EuiProgress size="xs" color="accent" css={getProgressStyle(isFetching)} />
       {isLoading ? (
         <EuiFlexGroup
           justifyContent="center"
@@ -116,6 +171,13 @@ export const AssetInventoryBarChart = ({
               const count = !seriesData ? 0 : getAbbreviatedNumber(seriesData.count);
               return <span>{count}</span>;
             }}
+            onElementClick={(elements) =>
+              handleElementClick(
+                elements as Array<[GeometryValue, SeriesIdentifier]>,
+                setQuery,
+                dataViewId
+              )
+            }
           />
           <Axis
             id="X-axis"

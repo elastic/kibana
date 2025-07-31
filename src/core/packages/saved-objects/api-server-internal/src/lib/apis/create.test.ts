@@ -31,6 +31,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   CUSTOM_INDEX_TYPE,
@@ -57,6 +59,7 @@ describe('#create', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -80,6 +83,7 @@ describe('#create', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -97,6 +101,9 @@ describe('#create', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -382,7 +389,8 @@ describe('#create', () => {
       });
 
       it(`prepends namespace to the id and adds namespace to the body when providing namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id, namespace });
+        const res = await createSuccess(type, attributes, { id, namespace });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
@@ -393,7 +401,8 @@ describe('#create', () => {
       });
 
       it(`doesn't prepend namespace to the id or add namespace to the body when providing no namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id });
+        const res = await createSuccess(type, attributes, { id });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -404,7 +413,8 @@ describe('#create', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await createSuccess(type, attributes, { id, namespace: 'default' });
+        const res = await createSuccess(type, attributes, { id, namespace: 'default' });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -824,6 +834,21 @@ describe('#create', () => {
           typeMigrationVersion: '1.1.1',
           managed: true,
         });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeCreate', async () => {
+        await createSuccess(type, attributes, { overwrite: true });
+
+        expect(securityExtension.authorizeCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: expect.objectContaining({
+              name: 'Logstash',
+              type: 'index-pattern',
+            }),
+          })
+        );
       });
     });
   });

@@ -56,6 +56,10 @@ const loadingPrompt = (
   />
 );
 
+const ruleTypeModalTitle = i18n.translate('responseOpsRuleForm.components.ruleTypeModal.title', {
+  defaultMessage: 'Select rule type',
+});
+
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
   onSelectRuleType,
@@ -88,6 +92,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
         overflow: isFullscreenPortrait ? 'auto' : 'hidden',
       }}
       data-test-subj="ruleTypeModal"
+      aria-label={ruleTypeModalTitle}
     >
       <EuiPanel paddingSize="m" style={!isFullscreenPortrait ? { maxHeight: '100%' } : {}}>
         <EuiFlexGroup direction="column" style={{ height: '100%' }}>
@@ -95,11 +100,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
             <EuiPageHeader bottomBorder="extended" paddingSize="m">
               <EuiPageHeaderSection style={{ width: '100%' }}>
                 <EuiTitle size="s">
-                  <h1>
-                    {i18n.translate('responseOpsRuleForm.components.ruleTypeModal.title', {
-                      defaultMessage: 'Select rule type',
-                    })}
-                  </h1>
+                  <h1>{ruleTypeModalTitle}</h1>
                 </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiPageHeaderSection style={{ width: isFullscreenPortrait ? '100%' : '50%' }}>

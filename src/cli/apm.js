@@ -10,19 +10,12 @@
 const { join } = require('path');
 const { name, build } = require('../../package.json');
 const { initApm } = require('@kbn/apm-config-loader');
-const { once } = require('lodash');
 const { initTelemetry } = require('@kbn/telemetry');
 
 const rootDir = join(__dirname, '../..');
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
-module.exports = function (serviceName = name) {
-  initApm(process.argv, rootDir, isKibanaDistributable, serviceName);
-  const shutdown = once(initTelemetry(process.argv, rootDir, isKibanaDistributable, serviceName));
-
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
-
-  return shutdown;
+module.exports = function (serviceName = name, argv = process.argv) {
+  initApm(argv, rootDir, isKibanaDistributable, serviceName);
+  initTelemetry(argv, rootDir, isKibanaDistributable, serviceName);
 };

@@ -52,7 +52,7 @@ export const OverviewStatusMetaDataCodec = t.intersection([
     projectId: t.string,
     updated_at: t.string,
     timestamp: t.string,
-    spaceId: t.string,
+    spaces: t.array(t.string),
     urls: t.string,
     maintenanceWindows: t.array(t.string),
   }),

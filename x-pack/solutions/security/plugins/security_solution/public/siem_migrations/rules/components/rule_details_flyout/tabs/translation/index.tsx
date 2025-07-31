@@ -107,7 +107,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
               <EuiCallOut
                 color={'primary'}
                 title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
-                iconType={'iInCircle'}
+                iconType={'info'}
                 size={'s'}
               >
                 {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}

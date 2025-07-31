@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CustomScriptSelector } from '../../console_argument_selectors/custom_script_selector';
+import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -581,7 +581,7 @@ export const getEndpointConsoleCommands = ({
   }
 };
 
-/** @private */
+/** @internal */
 const disableCommand = (command: CommandDefinition, agentType: ResponseActionAgentType) => {
   command.helpDisabled = true;
   command.helpHidden = true;
@@ -589,7 +589,7 @@ const disableCommand = (command: CommandDefinition, agentType: ResponseActionAge
     UPGRADE_AGENT_FOR_RESPONDER(agentType, command.name as ConsoleResponseActionCommands);
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForSentinelOne = ({
   commandList,
   platform,
@@ -659,7 +659,7 @@ const adjustCommandsForSentinelOne = ({
   });
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForCrowdstrike = ({
   commandList,
   crowdstrikeRunScriptEnabled,

@@ -7,8 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import { EditableResult } from '@kbn/search-index-documents';
-import React from 'react';
 import { resultToFieldFromMappingResponse } from '@kbn/search-index-documents/components/result/result_metadata';
+import React from 'react';
+import { FieldError } from 'react-hook-form';
 import { useFetchDocument } from '../../../../hooks/use_fetch_document';
 
 interface DocumentSelectorProps {
@@ -21,6 +22,7 @@ interface DocumentSelectorProps {
   onIndexSelectorChange?: (index: string) => void;
   indices?: string[];
   hasIndexSelector?: boolean;
+  error?: FieldError;
 }
 
 export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
@@ -33,11 +35,22 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
   onIndexSelectorChange = () => {},
   indices = [],
   hasIndexSelector = true,
+  error: formError,
 }) => {
-  const { data, error, isError, isLoading } = useFetchDocument(index, initialDocId);
+  const {
+    data,
+    error: fetchDocumentError,
+    isError,
+    isLoading,
+  } = useFetchDocument(index, initialDocId);
   const { document, mappings } = data || {};
   // Otherwise it will show loading until first document is fetched
   const showLoading = Boolean(isLoading && index && initialDocId);
+  const error = isError
+    ? fetchDocumentError?.body?.message
+    : formError
+    ? formError?.message
+    : undefined;
 
   return (
     <EditableResult
@@ -67,7 +80,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
       onIndexSelectorChange={onIndexSelectorChange}
       onDeleteDocument={onDeleteDocument}
       isLoading={showLoading}
-      error={isError ? error?.body?.message : undefined}
+      error={error}
     />
   );
 };

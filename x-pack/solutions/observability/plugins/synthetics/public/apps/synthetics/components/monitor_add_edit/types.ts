@@ -168,4 +168,5 @@ export interface FieldMap {
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
   [ConfigKey.LABELS]: FieldMeta<ConfigKey.LABELS>;
   [ConfigKey.MAINTENANCE_WINDOWS]: FieldMeta<ConfigKey.MAINTENANCE_WINDOWS>;
+  [ConfigKey.KIBANA_SPACES]: FieldMeta<ConfigKey.KIBANA_SPACES>;
 }

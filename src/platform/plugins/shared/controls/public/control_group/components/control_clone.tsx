@@ -20,10 +20,10 @@ import {
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW } from '../../../common';
+import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
 import { DefaultControlApi } from '../../controls/types';
 import { controlWidthStyles } from './control_panel.styles';
 
@@ -46,7 +46,7 @@ export const ControlClone = ({
   );
   const isTwoLine = labelPosition === 'twoLine';
 
-  const styles = useMemoizedStyles(controlCloneStyles);
+  const styles = useMemoCss(controlCloneStyles);
 
   return (
     <EuiFlexItem

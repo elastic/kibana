@@ -12,6 +12,9 @@ import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
+import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
@@ -24,10 +27,12 @@ import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
   SUGGESTIONS_INTERNAL_ROUTE,
+  METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
+import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
@@ -53,7 +58,7 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       withEndpointAuthz(
-        { any: ['canWriteEventFilters'] },
+        { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
         endpointContext.logFactory.get('endpointSuggestions'),
         getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
@@ -71,19 +76,32 @@ export const getEndpointSuggestionsRequestHandler = (
 > => {
   return async (context, request, response) => {
     const logger = endpointContext.logFactory.get('suggestions');
+    const isTrustedAppsAdvancedModeFFEnabled =
+      endpointContext.experimentalFeatures.trustedAppsAdvancedMode;
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
-
     try {
       const config = await firstValueFrom(config$);
+      const { savedObjects, elasticsearch } = await context.core;
+      const securitySolutionContext = await context.securitySolution;
+      const spaceId = securitySolutionContext.getSpaceId();
+      const isSpaceAwarenessEnabled =
+        endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
+      let fullFilters: QueryDslQueryContainer[] = filters
+        ? [...(filters as QueryDslQueryContainer[])]
+        : [];
+      let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
+        termsEnumSuggestions;
 
-      if (request.params.suggestion_type === 'eventFilters') {
-        if (!endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      if (
+        request.params.suggestion_type === 'eventFilters' ||
+        (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')
+      ) {
+        if (!isSpaceAwarenessEnabled) {
           index = eventsIndexPattern;
         } else {
           logger.debug('Using space-aware index pattern');
 
-          const spaceId = (await context.securitySolution).getSpaceId();
           const integrationNamespaces = await endpointContext.service
             .getInternalFleetServices(spaceId)
             .getIntegrationNamespaces(['endpoint']);
@@ -112,6 +130,26 @@ export const getEndpointSuggestionsRequestHandler = (
             });
           }
         }
+      } else if (request.params.suggestion_type === 'endpoints') {
+        suggestionMethod = termsAggSuggestions;
+        index = METADATA_UNITED_INDEX;
+
+        const agentPolicyIds: string[] = [];
+        const fleetService = securitySolutionContext.getInternalFleetServices();
+        const endpointPackagePolicies = await fleetService.packagePolicy.fetchAllItems(
+          savedObjects.client,
+          {
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
+            spaceIds: isSpaceAwarenessEnabled ? [spaceId] : ['*'],
+          }
+        );
+        for await (const batch of endpointPackagePolicies) {
+          const batchAgentPolicyIds = batch.flatMap((policy) => policy.policy_ids);
+          agentPolicyIds.push(...batchAgentPolicyIds);
+        }
+
+        const baseFilters = buildBaseEndpointMetadataFilter(agentPolicyIds);
+        fullFilters = [...fullFilters, baseFilters];
       } else {
         return response.badRequest({
           body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
@@ -119,16 +157,15 @@ export const getEndpointSuggestionsRequestHandler = (
       }
 
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-      const { savedObjects, elasticsearch } = await context.core;
 
-      const body = await termsEnumSuggestions(
+      const body = await suggestionMethod(
         config,
         savedObjects.client,
         elasticsearch.client.asInternalUser,
         index,
         fieldName,
         query,
-        filters,
+        fullFilters,
         fieldMeta,
         abortSignal
       );

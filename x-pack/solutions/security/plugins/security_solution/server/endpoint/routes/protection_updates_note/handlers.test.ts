@@ -20,9 +20,11 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointAppContext } from '../../types';
+import type { EndpointInternalFleetServicesInterfaceMocked } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 
 const mockedSOSuccessfulFindResponse = {
   total: 1,
@@ -91,6 +93,12 @@ describe('test protection updates note handler', () => {
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+
+      const internalFleetServicesMock =
+        mockEndpointContext.service.getInternalFleetServices() as EndpointInternalFleetServicesInterfaceMocked;
+
+      internalFleetServicesMock.ensureInCurrentSpace.mockResolvedValue(undefined);
+      internalFleetServicesMock.getSoClient.mockReturnValue(mockSavedObjectClient);
     });
 
     afterEach(() => endpointAppContextService.stop());
@@ -121,7 +129,9 @@ describe('test protection updates note handler', () => {
         'policy-settings-protection-updates-note',
         { note: 'note' },
         {
-          references: [{ id: undefined, name: 'package_policy', type: 'ingest-package-policies' }],
+          references: [
+            { id: undefined, name: 'package_policy', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
           refresh: 'wait_for',
         }
       );

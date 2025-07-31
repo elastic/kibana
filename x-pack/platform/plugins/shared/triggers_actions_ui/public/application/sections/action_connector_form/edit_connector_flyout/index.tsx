@@ -13,6 +13,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -43,6 +44,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -60,6 +62,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     docLinks,
     application: { capabilities },
@@ -177,7 +181,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
       const { name, config, secrets } = data;
       const validConnector = {
         id: connector.id,
@@ -364,6 +367,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       </EuiFlyout>
       {showConfirmModal && (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={{ id: confirmModalTitleId }}
           buttonColor="danger"
           data-test-subj="closeConnectorEditConfirm"
           title={i18n.translate(

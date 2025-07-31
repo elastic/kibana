@@ -33,6 +33,9 @@ import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 export const AlertsTabContent = () => {
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
+  const { services } = useKibanaContextForPlugin();
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    services;
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -81,6 +84,16 @@ export const AlertsTabContent = () => {
               consumers={INFRA_ALERT_CONSUMERS}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           </EuiFlexItem>
         )}

@@ -27,6 +27,7 @@ export {
 
 export {
   type RecommendedQuery,
+  type RecommendedField,
   type ResolveIndexResponse,
 } from './src/extensions_autocomplete_types';
 
@@ -34,5 +35,7 @@ export {
   type InferenceEndpointsAutocompleteResult,
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
+
+export type { ESQLLicenseType, ESQLSignatureLicenseType, ESQLLicenseResult } from './src/license';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';

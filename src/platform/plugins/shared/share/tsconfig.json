@@ -27,10 +27,9 @@
     "@kbn/licensing-plugin",
     "@kbn/core-rendering-browser",
     "@kbn/std",
-    "@kbn/core-http-server-internal",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-router-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

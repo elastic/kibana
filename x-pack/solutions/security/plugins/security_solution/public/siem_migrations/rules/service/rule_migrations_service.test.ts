@@ -147,18 +147,19 @@ describe('SiemRulesMigrationsService', () => {
 
   describe('createRuleMigration', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.createRuleMigration([])).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
+      await expect(service.createRuleMigration([], 'test')).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
 
     it('should create migration with a single batch', async () => {
       const body = [{ id: 'rule1' }] as CreateRuleMigrationRulesRequestBody;
+      const name = 'test';
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body);
+      const migrationId = await service.createRuleMigration(body, name);
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
-      expect(createRuleMigration).toHaveBeenCalledWith({});
+      expect(createRuleMigration).toHaveBeenCalledWith({ name });
       expect(addRulesToMigration).toHaveBeenCalledWith({ migrationId: 'mig-1', body });
       expect(migrationId).toBe('mig-1');
     });
@@ -166,15 +167,16 @@ describe('SiemRulesMigrationsService', () => {
     it('should create migration in batches if body length exceeds the batch size', async () => {
       // Create an array of 51 items (the service batches in chunks of 50)
       const body = new Array(51).fill({ rule: 'rule' });
+      const name = 'test';
       (createRuleMigration as jest.Mock).mockResolvedValueOnce({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body);
+      const migrationId = await service.createRuleMigration(body, name);
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(addRulesToMigration).toHaveBeenCalledTimes(2);
       // First call: first 50 items, migrationId undefined
-      expect(createRuleMigration).toHaveBeenNthCalledWith(1, {});
+      expect(createRuleMigration).toHaveBeenNthCalledWith(1, { name });
 
       expect(addRulesToMigration).toHaveBeenNthCalledWith(1, {
         migrationId: 'mig-1',
@@ -316,16 +318,16 @@ describe('SiemRulesMigrationsService', () => {
   describe('getRuleMigrationsStats', () => {
     it('should fetch and update latest stats', async () => {
       const statsArray = [
-        { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING },
-        { id: 'mig-2', status: SiemMigrationTaskStatus.FINISHED },
+        { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING, name: 'test 1' },
+        { id: 'mig-2', status: SiemMigrationTaskStatus.FINISHED, name: 'test 2' },
       ];
       mockGetRuleMigrationsStatsAll.mockResolvedValue(statsArray);
 
       const result = await service.getRuleMigrationsStats();
       expect(getRuleMigrationsStatsAll).toHaveBeenCalled();
       expect(result).toHaveLength(2);
-      expect(result[0].number).toBe(1);
-      expect(result[1].number).toBe(2);
+      expect(result[0].name).toBe('test 1');
+      expect(result[1].name).toBe('test 2');
 
       const latestStats = await firstValueFrom(service.getLatestStats$());
       expect(latestStats).toEqual(result);

@@ -17,7 +17,7 @@ import { Subscription, switchMap } from 'rxjs';
 import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { uiActionsService } from '../../services/kibana_services';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
 
@@ -119,7 +119,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
   }, [api, viewMode, disabledActions]);
 
-  const styles = useMemoizedStyles(floatingActionsStyles);
+  const styles = useMemoCss(floatingActionsStyles);
 
   return (
     <div css={styles.wrapper}>

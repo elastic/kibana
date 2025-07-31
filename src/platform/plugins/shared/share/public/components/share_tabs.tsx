@@ -34,7 +34,7 @@ export const ShareMenuTabs = () => {
     tabs.push(linkTab);
   }
 
-  // Embed is disabled in the serverless offering, hence the need to check that we received it
+  // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
   if (
     shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
     !objectTypeMeta?.config?.embed?.disabled

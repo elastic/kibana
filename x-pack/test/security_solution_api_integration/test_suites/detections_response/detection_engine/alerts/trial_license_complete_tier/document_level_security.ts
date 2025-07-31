@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  SECURITY_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 
@@ -25,7 +28,7 @@ const roleToAccessSecuritySolution = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
@@ -48,7 +51,7 @@ const roleToAccessSecuritySolutionWithDls = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
@@ -105,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await deleteAllAlerts(supertest, log, es);
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0_multiple_docs',
         {
           useCreate: true,
           docsOnly: true,
@@ -119,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       await security.role.delete(roleToAccessSecuritySolution.name);
       await security.role.delete(roleToAccessSecuritySolutionWithDls.name);
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0_multiple_docs'
       );
     });
 

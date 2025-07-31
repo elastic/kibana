@@ -34,7 +34,7 @@ export const createRule = (
       method: 'POST',
       url: spaceId ? getSpaceUrl(spaceId, DETECTION_ENGINE_RULES_URL) : DETECTION_ENGINE_RULES_URL,
       body: rule,
-      failOnStatusCode: false,
+      failOnStatusCode: true,
     })
   );
 };
@@ -168,4 +168,11 @@ export const enableRules = ({ names, ids }: EnableRulesParameters): Cypress.Chai
     },
     failOnStatusCode: false,
   });
+};
+
+export const interceptGetManualRuns = (ruleId: string) => {
+  cy.intercept('POST', `/internal/alerting/rules/backfill/_find?rule_ids=${ruleId}*`, {
+    statusCode: 200,
+    body: { page: 1, per_page: 10, total: 0, data: [] },
+  }).as('getRuleManualRuns');
 };

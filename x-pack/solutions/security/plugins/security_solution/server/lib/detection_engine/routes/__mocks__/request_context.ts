@@ -47,6 +47,7 @@ import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inv
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -80,11 +81,13 @@ export const createMockClients = () => {
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
     privilegeMonitorDataClient: privilegeMonitorDataClientMock.create(),
+    padPackageInstallationClient: padPackageInstallationClientMock.create(),
 
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
+    siemDashboardMigrationsClient: siemMigrationsServiceMock.createDashboardsClient(),
     getInferenceClient: jest.fn(),
     assetInventoryDataClient: AssetInventoryDataClientMock.create(),
     productFeaturesService: createProductFeaturesServiceMock(),
@@ -189,13 +192,21 @@ const createSecuritySolutionRequestContextMock = (
     getAuditLogger: jest.fn(() => mockAuditLogger),
     getDataViewsService: jest.fn(),
     getEntityStoreApiKeyManager: jest.fn(),
+    getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
+    getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),
     getMonitoringEntitySourceDataClient: jest.fn(),
-    getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
+    siemMigrations: {
+      getRulesClient: jest.fn(() => clients.siemRuleMigrationsClient),
+      getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
+    },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
   };
 };
 

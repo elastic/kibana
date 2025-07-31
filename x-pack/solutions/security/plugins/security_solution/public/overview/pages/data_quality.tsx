@@ -36,6 +36,7 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../common/components/page_loader';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -155,6 +156,10 @@ const DataQualityComponent: React.FC = () => {
 
   if (isSourcererLoading || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+  }
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
   }
 
   return (

@@ -1,103 +1,96 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CalendarListsHeader renders header 1`] = `
-<Fragment>
-  <MlPageHeader>
-    <MemoizedFormattedMessage
-      defaultMessage="Calendars"
-      id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-    />
-  </MlPageHeader>
-  <EuiFlexGroup
-    alignItems="baseline"
-    justifyContent="spaceBetween"
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-baseline-row"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiFlexGroup
-        alignItems="baseline"
-        gutterSize="m"
-        responsive={false}
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
-          <EuiTextColor
-            color="subdued"
+          <span
+            class="emotion-euiTextColor-subdued"
           >
             <p>
-              <MemoizedFormattedMessage
-                defaultMessage="{totalCount} in total"
-                id="xpack.ml.settings.calendars.listHeader.calendarsListTotalCount"
-                values={
-                  Object {
-                    "totalCount": 3,
-                  }
-                }
-              />
+              3 in total
             </p>
-          </EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <EuiFlexGroup
-        alignItems="baseline"
-        gutterSize="m"
-        responsive={false}
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
-          <EuiButtonEmpty
+          <button
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
             data-test-subj="mlCalendarListRefreshButton"
-            iconType="refresh"
-            onClick={[MockFunction]}
-            size="s"
+            type="button"
           >
-            <MemoizedFormattedMessage
-              defaultMessage="Refresh"
-              id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiText>
-    <p>
-      <EuiTextColor
-        color="subdued"
-      >
-        <MemoizedFormattedMessage
-          defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"
-          id="xpack.ml.settings.calendars.listHeader.calendarsDescription"
-          values={
-            Object {
-              "br": <br />,
-              "learnMoreLink": <EuiLink
-                href={[MockFunction]}
-                target="_blank"
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                color="inherit"
+                data-euiicon-type="refresh"
+              />
+              <span
+                class="eui-textTruncate euiButtonEmpty__text"
               >
-                <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Learn more"
-                  id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      </EuiTextColor>
-    </p>
-  </EuiText>
-  <EuiSpacer
-    size="m"
+                Refresh
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
-</Fragment>
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      <span
+        class="emotion-euiTextColor-subdued"
+      >
+        Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.
+        <br />
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="calendars link"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Learn more
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+</div>
 `;

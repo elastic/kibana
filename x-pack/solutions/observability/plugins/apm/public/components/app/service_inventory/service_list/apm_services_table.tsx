@@ -401,7 +401,7 @@ export function ApmServicesTable({
           <EuiFlexItem grow={false}>
             <EuiIconTip
               position="top"
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={i18n.translate('xpack.apm.servicesTable.tooltip.metricsExplanation', {
                 defaultMessage:

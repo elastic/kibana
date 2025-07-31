@@ -148,6 +148,7 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
+  last_known_status?: AgentStatus;
 }
 
 export interface CurrentUpgrade {
@@ -371,6 +372,11 @@ export interface FleetServerAgent {
    * Namespaces
    */
   namespaces?: string[];
+
+  /**
+   * The last known agent status
+   */
+  last_known_status?: AgentStatus;
 }
 
 /**

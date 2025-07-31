@@ -220,7 +220,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                   defaultMessage: 'Be sure you have the necessary privileges',
                 }
               )}
-              iconType="help"
+              iconType="question"
             >
               <p>
                 <FormattedMessage

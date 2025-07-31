@@ -8,7 +8,7 @@
 import rison from '@kbn/rison';
 import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
-import { HostsLocatorDefinition } from './hosts_locator';
+import { HostsLocatorDefinition, HostsLocatorParams } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
 import querystring from 'querystring';
 
@@ -41,8 +41,8 @@ const setupInventoryLocator = async () => {
 describe('Infra Locators', () => {
   describe('Asset Details Locator', () => {
     const params = {
-      assetType: 'host',
-      assetId: '1234',
+      entityType: 'host',
+      entityId: '1234',
       assetDetails: {
         tabId: 'testTab',
         dashboardId: 'testDashboard',
@@ -60,7 +60,7 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
+        `/detail/${params.entityType}/${params.entityId}?assetDetails=${assetDetails}`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
@@ -72,18 +72,18 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/detail/${params.assetType}/${params.assetId}?assetDetails=${assetDetails}`
+        `/detail/${params.entityType}/${params.entityId}?assetDetails=${assetDetails}`
       );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
 
-    it('should return correct fallback params for non-supported assetType using assetDetails', async () => {
+    it('should return correct fallback params for non-supported entityType using assetDetails', async () => {
       const { assetDetailsLocator } = await setupAssetDetailsLocator();
 
       const { app, path, state } = await assetDetailsLocator.getLocation({
         ...params,
-        assetType: 'pod',
+        entityType: 'pod',
       });
 
       const expectedDetails = rison.encodeUnknown({
@@ -91,7 +91,7 @@ describe('Infra Locators', () => {
       });
 
       expect(app).toBe('metrics');
-      expect(path).toBe(`/detail/pod/${params.assetId}?_a=${expectedDetails}`);
+      expect(path).toBe(`/detail/pod/${params.entityId}?_a=${expectedDetails}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });
@@ -143,7 +143,7 @@ describe('Infra Locators', () => {
   });
 
   describe('Hosts Locator', () => {
-    const params = {
+    const params: HostsLocatorParams = {
       query: {
         language: 'kuery',
         query: 'host.name: "foo"',
@@ -165,9 +165,18 @@ describe('Infra Locators', () => {
           field: 'alertsCount',
         },
       },
+      preferredSchema: 'ecs',
     };
-    const { query, dateRange, filters, panelFilters, limit, tableProperties } = params;
-    const searchString = rison.encodeUnknown({ query, dateRange, filters, panelFilters, limit });
+    const { query, dateRange, filters, panelFilters, limit, tableProperties, preferredSchema } =
+      params;
+    const searchString = rison.encodeUnknown({
+      query,
+      dateRange,
+      filters,
+      panelFilters,
+      limit,
+      preferredSchema,
+    });
     const tablePropertiesString = rison.encodeUnknown(tableProperties);
 
     it('should create a link to Hosts with no state', async () => {

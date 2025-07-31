@@ -13,50 +13,56 @@ import { DetectedField, Simulation } from './types';
 import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors
-    .map((processor) => {
-      const config = getProcessorConfig(processor);
-      if ('field' in config) {
-        return config.field.trim();
-      }
-      return '';
-    })
-    .filter(Boolean);
+export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
+  const config = getProcessorConfig(processor);
+  if ('field' in config) {
+    const trimmedField = config.field.trim();
+    return trimmedField.length > 0 ? trimmedField : undefined;
+  }
+  return undefined;
 }
 
-export function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
+export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
+  return uniq(detectedFields.map((field) => field.name));
+}
 
-  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
-    return uniqueProcessorsFields;
+export function getTableColumns({
+  currentProcessorSourceField,
+  detectedFields = [],
+  previewDocsFilter,
+}: {
+  currentProcessorSourceField?: string;
+  detectedFields?: DetectedField[];
+  previewDocsFilter: PreviewDocsFilterOption;
+}) {
+  if (!currentProcessorSourceField) {
+    return [];
   }
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
+  if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
+    return [currentProcessorSourceField];
+  }
 
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+
+  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
 
-export function filterSimulationDocuments(
-  documents: Simulation['documents'],
-  filter: PreviewDocsFilterOption
-) {
+type SimulationDocReport = Simulation['documents'][number];
+
+export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) {
   switch (filter) {
     case 'outcome_filter_parsed':
-      return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'parsed';
     case 'outcome_filter_partially_parsed':
-      return documents.filter((doc) => doc.status === 'partially_parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'partially_parsed';
     case 'outcome_filter_skipped':
-      return documents.filter((doc) => doc.status === 'skipped').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
-      return documents.filter((doc) => doc.status === 'failed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_all':
     default:
-      return documents.map((doc) => doc.value);
+      return (doc: SimulationDocReport) => true;
   }
 }
 

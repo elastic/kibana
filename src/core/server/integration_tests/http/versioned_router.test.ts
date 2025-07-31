@@ -15,11 +15,12 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpService, createConfigService } from '@kbn/core-http-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
 import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
+import { createInternalHttpService } from '../utilities';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -43,7 +44,7 @@ describe('Routing versioned requests', () => {
           options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
-    server = createHttpService({
+    server = createInternalHttpService({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({

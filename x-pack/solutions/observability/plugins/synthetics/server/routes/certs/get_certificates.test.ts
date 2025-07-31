@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as getAllMonitors from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import * as getAllMonitors from '../../saved_objects/synthetics_monitor/process_monitors';
 import * as getCerts from '../../queries/get_certs';
 import { getSyntheticsCertsRoute } from './get_certificates';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';

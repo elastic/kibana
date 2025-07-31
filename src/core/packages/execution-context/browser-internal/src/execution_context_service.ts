@@ -116,7 +116,7 @@ export class ExecutionContextService
   /**
    * Sets the analytics context provider based on the execution context details.
    * @param analytics The analytics service
-   * @private
+   * @internal
    */
   private enrichAnalyticsContext(analytics: AnalyticsServiceSetup) {
     analytics.registerContextProvider({

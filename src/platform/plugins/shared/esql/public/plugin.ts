@@ -102,7 +102,11 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       const { CreateESQLControlAction } = await import(
         './triggers/esql_controls/esql_control_action'
       );
-      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      const createESQLControlAction = new CreateESQLControlAction(
+        core,
+        data.search.search,
+        data.query.timefilter.timefilter
+      );
       return createESQLControlAction;
     });
 

@@ -9,6 +9,11 @@ import type { Either } from 'fp-ts/Either';
 
 export interface BulkPrivMonUser {
   username: string;
+  label?: {
+    field: string;
+    value: string;
+    source: string;
+  };
   index: number;
 }
 
@@ -28,9 +33,16 @@ export interface BulkProcessingError {
   index: number | null;
 }
 
-export interface BulkProcessingResults {
+export interface BulkBatchProcessingResults {
   failed: number;
   successful: number;
   errors: BulkProcessingError[];
   batch: Batch;
+}
+
+export interface BulkProcessingResults {
+  users: BulkPrivMonUser[];
+  errors: BulkProcessingError[];
+  failed: number;
+  successful: number;
 }

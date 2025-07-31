@@ -20,7 +20,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-cloud.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-project.yml
-    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing-9-dot-0.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing-9-dot-1.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-serverless-snapshots.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml
@@ -38,6 +38,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-pr.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployments.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-renovate-helper.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-emergency-release.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates-emergency.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-quality-gates.yml

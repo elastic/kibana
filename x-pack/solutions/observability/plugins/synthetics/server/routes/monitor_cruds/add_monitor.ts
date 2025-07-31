@@ -7,6 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../../common/types/saved_objects';
 import { validatePermissions } from './edit_monitor';
 import {
   InvalidLocationError,
@@ -34,14 +38,26 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
             defaultValue: false,
           })
         ),
+        // primarily used for testing purposes, to specify the type of saved object
+        savedObjectType: schema.maybe(
+          schema.oneOf(
+            [
+              schema.literal(syntheticsMonitorSavedObjectType),
+              schema.literal(legacySyntheticsMonitorTypeSingle),
+            ],
+            {
+              defaultValue: syntheticsMonitorSavedObjectType,
+            }
+          )
+        ),
       }),
     },
   },
   handler: async (routeContext): Promise<any> => {
     console.log('YOU HIT THE MONITOR ADD ROUTE')
-    const { request, response, server } = routeContext;
+    const { request, response, server, spaceId } = routeContext;
     // usually id is auto generated, but this is useful for testing
-    const { id, internal } = request.query;
+    const { id, internal, savedObjectType } = request.query;
 
     const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 
@@ -81,7 +97,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         request.body as CreateMonitorPayLoad
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults);
+      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;
@@ -92,7 +108,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const normalizedMonitor = validationResult.decodedMonitor;
 
-      const err = await validatePermissions(routeContext, normalizedMonitor.locations);
+      // Parallelize permission and unique name validation
+      const [err, nameError] = await Promise.all([
+        validatePermissions(routeContext, normalizedMonitor.locations),
+        addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name),
+      ]);
+
       if (err) {
         return response.forbidden({
           body: {
@@ -100,7 +121,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           },
         });
       }
-      const nameError = await addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name);
       if (nameError) {
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },
@@ -110,6 +130,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       const { errors, newMonitor } = await addMonitorAPI.syncNewMonitor({
         id,
         normalizedMonitor,
+        savedObjectType,
       });
       console.log('monitor created scucessfully ')
 

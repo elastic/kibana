@@ -142,6 +142,18 @@ describe('useLLMsModels Query Hook', () => {
           promptTokenLimit: 200000,
         },
         {
+          connectorId: 'connectorId2',
+          connectorName: 'Bedrock Connector',
+          connectorType: LLMs.bedrock,
+          disabled: false,
+          icon: expect.any(String),
+          id: 'connectorId2Anthropic Claude 3.7 Sonnet',
+          name: 'Anthropic Claude 3.7 Sonnet',
+          showConnectorName: false,
+          value: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
+          promptTokenLimit: 200000,
+        },
+        {
           connectorId: 'connectorId3',
           connectorName: 'OpenAI OSS Model Connector',
           connectorType: LLMs.openai_other,

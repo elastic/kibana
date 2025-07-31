@@ -19,8 +19,6 @@
   "kbn_references": [
     "@kbn/field-formats-plugin",
     "@kbn/discover-utils",
-    "@kbn/router-utils",
-    "@kbn/management-settings-ids",
     "@kbn/share-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
@@ -33,6 +31,7 @@
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
     "@kbn/data-views-plugin",
-    "@kbn/data-view-utils", 
+    "@kbn/data-view-utils",
+    "@kbn/react-kibana-context-theme",
   ]
 }

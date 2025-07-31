@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -24,8 +24,9 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     console.log('PUT ALERTING')
     const currentSpacePromise = server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } =
-      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
+    const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(
+      savedObjectsClient
+    );
 
     const activeSpace = await currentSpacePromise;
 

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
@@ -40,7 +42,20 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
+ * ```
+ */
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -92,10 +107,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   commandType?: string;
 
   args: ESQLAstItem[];
-}
-
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
@@ -225,16 +236,18 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
   | BinaryExpressionMatchOperator
-  | BinaryExpressionIn;
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
-export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRegexOperator = 'like' | 'not like' | 'rlike' | 'not rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
-export type BinaryExpressionIn = 'in' | 'not_in';
+export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =

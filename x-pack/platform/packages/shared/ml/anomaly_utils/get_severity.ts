@@ -21,8 +21,10 @@ export function getSeverity(normalizedScore: number): MlSeverityType {
     return ML_ANOMALY_SEVERITY_TYPES.major;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return ML_ANOMALY_SEVERITY_TYPES.minor;
-  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
     return ML_ANOMALY_SEVERITY_TYPES.warning;
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
+    return ML_ANOMALY_SEVERITY_TYPES.low;
   } else {
     return ML_ANOMALY_SEVERITY_TYPES.unknown;
   }

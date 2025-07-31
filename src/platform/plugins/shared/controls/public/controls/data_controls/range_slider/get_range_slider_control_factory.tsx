@@ -14,9 +14,9 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
-import { RANGE_SLIDER_CONTROL } from '../../../../common';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -236,16 +236,25 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
-            useBatchedPublishingSubjects(
-              dataLoading$,
-              dataControlManager.api.fieldFormatter,
-              max$,
-              min$,
-              selectionHasNoResults$,
-              step$,
-              selections.value$
-            );
+          const [
+            dataLoading,
+            fieldFormatter,
+            max,
+            min,
+            selectionHasNoResults,
+            step,
+            value,
+            fieldName,
+          ] = useBatchedPublishingSubjects(
+            dataLoading$,
+            dataControlManager.api.fieldFormatter,
+            max$,
+            min$,
+            selectionHasNoResults$,
+            step$,
+            selections.value$,
+            dataControlManager.api.fieldName$
+          );
 
           useEffect(() => {
             return () => {
@@ -260,6 +269,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           return (
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
+              fieldName={fieldName}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

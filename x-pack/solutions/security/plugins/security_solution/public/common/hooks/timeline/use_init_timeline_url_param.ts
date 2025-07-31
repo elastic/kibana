@@ -32,6 +32,7 @@ export const useInitTimelineFromUrlParam = () => {
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
+          query: initialState.query,
         });
       }
     },
@@ -48,7 +49,7 @@ export const useInitTimelineFromUrlParam = () => {
 
       const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 
-      // Make sure we only re-initialize the timeline if there are siginificant changes to the active timeline.
+      // Make sure we only re-initialize the timeline if there are significant changes to the active timeline.
       // Without this check, we could potentially overwrite the timeline.
       if (!hasTimelineStateChanged(activeTimeline, parsedState)) {
         onInitialize(parsedState);

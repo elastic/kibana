@@ -14,13 +14,14 @@ import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
 
 import { DEFAULT_ROUTE_UI_SETTING_ID, DEFAULT_ROUTES } from '../common/constants';
-import { NavigationServerStartDependencies } from './types';
+import { NavigationServerSetupDependencies, NavigationServerStartDependencies } from './types';
 
 /**
  * uiSettings definitions for Navigation
  */
 export const getUiSettings = (
   core: CoreSetup<NavigationServerStartDependencies>,
+  setupPlugins: NavigationServerSetupDependencies,
   logger: Logger
 ): Record<string, UiSettingsParams> => {
   return {
@@ -39,8 +40,9 @@ export const getUiSettings = (
           if (!request.auth.isAuthenticated) return DEFAULT_ROUTES.classic;
 
           const activeSpace = await spaces.spacesService.getActiveSpace(request);
+          const serverlessProjectType = setupPlugins.cloud?.serverless?.projectType;
 
-          const solution = activeSpace?.solution ?? 'classic';
+          const solution = serverlessProjectType ?? activeSpace?.solution ?? 'classic';
           return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
         } catch (e) {
           logger.error(`Failed to retrieve active space: ${e.message}`);

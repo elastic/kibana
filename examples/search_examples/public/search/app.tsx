@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -24,8 +25,10 @@ import {
   EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -37,6 +40,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CreateAggConfigParams } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
@@ -109,6 +113,7 @@ export const SearchExamplesApp = ({
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
+  const styles = useMemoCss(componentStyles);
 
   function setResponse(response: IKibanaSearchResponse) {
     setWarningContents([]);
@@ -277,7 +282,7 @@ export const SearchExamplesApp = ({
         .setField('size', selectedFields.length ? 100 : 0)
         .setField('trackTotalHits', 100);
 
-      const aggDef = [];
+      const aggDef: CreateAggConfigParams[] = [];
       if (selectedBucketField) {
         aggDef.push({
           type: bucketAggType,
@@ -624,7 +629,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from low-level client (data.search.search)."
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Metrics aggregation with raw documents in response."
@@ -641,7 +646,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
@@ -658,7 +663,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
@@ -815,7 +820,7 @@ export const SearchExamplesApp = ({
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ width: '60%' }}>
+          <EuiFlexItem css={styles.tabbedContentContainer}>
             <EuiTabbedContent
               tabs={reqTabs}
               selectedTab={reqTabs[selectedTab]}
@@ -835,4 +840,15 @@ export const SearchExamplesApp = ({
       </EuiPageTemplate.Section>
     </>
   );
+};
+
+const componentStyles = {
+  stepDsc: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingLeft: euiTheme.size.xl,
+      fontStyle: 'italic',
+    }),
+  tabbedContentContainer: css({
+    width: '60%',
+  }),
 };

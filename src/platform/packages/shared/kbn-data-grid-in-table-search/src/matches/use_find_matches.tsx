@@ -19,6 +19,7 @@ import {
 } from '../types';
 
 const INITIAL_STATE: UseFindMatchesState = {
+  term: '',
   matchesList: [],
   matchesCount: null,
   activeMatchPosition: null,
@@ -27,8 +28,23 @@ const INITIAL_STATE: UseFindMatchesState = {
   renderCellsShadowPortal: null,
 };
 
+const FIRST_ACTIVE_MATCH_POSITION = 1;
+
 export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn => {
-  const { inTableSearchTerm, visibleColumns, rows, renderCellValue, onScrollToActiveMatch } = props;
+  const {
+    initialState,
+    onInitialStateChange,
+    inTableSearchTerm,
+    visibleColumns,
+    rows,
+    renderCellValue,
+    onScrollToActiveMatch,
+  } = props;
+  const initialActiveMatchPositionRef = useRef<number | undefined>(
+    initialState?.activeMatch?.matchPosition && initialState?.searchTerm === inTableSearchTerm
+      ? initialState.activeMatch.matchPosition
+      : undefined
+  );
   const [state, setState] = useState<UseFindMatchesState>(INITIAL_STATE);
   const { matchesCount, activeMatchPosition, isProcessing, renderCellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
@@ -46,6 +62,7 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
     const numberOfRuns = numberOfRunsRef.current;
 
     const onFinish: AllCellsProps['onFinish'] = ({
+      term,
       matchesList: nextMatchesList,
       totalMatchesCount,
     }) => {
@@ -53,8 +70,14 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
         return;
       }
 
-      const nextActiveMatchPosition = totalMatchesCount > 0 ? 1 : null;
+      const initialActiveMatchPosition = initialActiveMatchPositionRef.current;
+      initialActiveMatchPositionRef.current = undefined;
+
+      const nextActiveMatchPosition =
+        totalMatchesCount > 0 ? initialActiveMatchPosition ?? FIRST_ACTIVE_MATCH_POSITION : null;
+
       setState({
+        term,
         matchesList: nextMatchesList,
         matchesCount: totalMatchesCount,
         activeMatchPosition: nextActiveMatchPosition,
@@ -65,10 +88,18 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
       if (totalMatchesCount > 0) {
         updateActiveMatchPosition({
+          term,
+          animate: !initialActiveMatchPosition,
           matchPosition: nextActiveMatchPosition,
           matchesList: nextMatchesList,
           columns: visibleColumns,
           onScrollToActiveMatch,
+          onInitialStateChange,
+        });
+      } else {
+        onInitialStateChange?.({
+          searchTerm: term,
+          activeMatch: undefined,
         });
       }
 
@@ -89,22 +120,39 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
     setState((prevState) => ({
       ...prevState,
+      term: inTableSearchTerm,
       isProcessing: true,
       renderCellsShadowPortal: RenderCellsShadowPortal,
     }));
-  }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm, onScrollToActiveMatch]);
+  }, [
+    setState,
+    renderCellValue,
+    visibleColumns,
+    rows,
+    inTableSearchTerm,
+    onScrollToActiveMatch,
+    onInitialStateChange,
+  ]);
 
   const goToPrevMatch = useCallback(() => {
-    setState((prevState) => changeActiveMatchInState(prevState, 'prev', onScrollToActiveMatch));
-  }, [setState, onScrollToActiveMatch]);
+    setState((prevState) =>
+      changeActiveMatchInState(prevState, 'prev', onScrollToActiveMatch, onInitialStateChange)
+    );
+  }, [setState, onScrollToActiveMatch, onInitialStateChange]);
 
   const goToNextMatch = useCallback(() => {
-    setState((prevState) => changeActiveMatchInState(prevState, 'next', onScrollToActiveMatch));
-  }, [setState, onScrollToActiveMatch]);
+    setState((prevState) =>
+      changeActiveMatchInState(prevState, 'next', onScrollToActiveMatch, onInitialStateChange)
+    );
+  }, [setState, onScrollToActiveMatch, onInitialStateChange]);
 
   const resetState = useCallback(() => {
     setState(INITIAL_STATE);
-  }, [setState]);
+    onInitialStateChange?.({
+      searchTerm: undefined,
+      activeMatch: undefined,
+    });
+  }, [setState, onInitialStateChange]);
 
   return useMemo(
     () => ({
@@ -163,6 +211,7 @@ function getActiveMatchForPosition({
           rowIndex: Number(rowIndex),
           columnId,
           matchIndexWithinCell: matchPosition - traversedMatchesCount - 1,
+          matchPosition,
         };
       }
 
@@ -177,15 +226,21 @@ function getActiveMatchForPosition({
 let prevJumpTimer: NodeJS.Timeout | null = null;
 
 function updateActiveMatchPosition({
+  animate = true,
+  term,
   matchPosition,
   matchesList,
   columns,
   onScrollToActiveMatch,
+  onInitialStateChange,
 }: {
+  animate?: boolean;
+  term: string;
   matchPosition: number | null;
   matchesList: RowMatches[];
   columns: string[];
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
+  onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'];
+  onInitialStateChange: UseFindMatchesProps['onInitialStateChange'];
 }) {
   if (typeof matchPosition !== 'number') {
     return;
@@ -203,7 +258,14 @@ function updateActiveMatchPosition({
     });
 
     if (activeMatch) {
-      onScrollToActiveMatch(activeMatch);
+      onScrollToActiveMatch(activeMatch, animate);
+    }
+
+    if (animate) {
+      onInitialStateChange?.({
+        searchTerm: term,
+        activeMatch: activeMatch || undefined,
+      });
     }
   }, 0);
 }
@@ -211,7 +273,8 @@ function updateActiveMatchPosition({
 function changeActiveMatchInState(
   prevState: UseFindMatchesState,
   direction: 'prev' | 'next',
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void
+  onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'],
+  onInitialStateChange: UseFindMatchesProps['onInitialStateChange']
 ): UseFindMatchesState {
   if (
     typeof prevState.matchesCount !== 'number' ||
@@ -231,10 +294,12 @@ function changeActiveMatchInState(
   }
 
   updateActiveMatchPosition({
+    term: prevState.term,
     matchPosition: nextMatchPosition,
     matchesList: prevState.matchesList,
     columns: prevState.columns,
     onScrollToActiveMatch,
+    onInitialStateChange,
   });
 
   return {

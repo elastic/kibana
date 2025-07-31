@@ -74,6 +74,7 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
       search_query: '',
     },
     resolver: playgroundFormResolver,
+    mode: 'onChange',
     reValidateMode: 'onChange',
   });
   const { isValidated: isValidatedIndices, validIndices } = useIndicesValidation(
@@ -94,11 +95,14 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
   }, [form, storage, setLocalSessionDebounce]);
 
   useEffect(() => {
+    if (models.length === 0) return; // don't continue if there are no models
     const defaultModel = models.find((model) => !model.disabled);
     const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
     if (defaultModel && (!currentModel || !models.find((model) => currentModel.id === model.id))) {
-      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel);
+      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel, {
+        shouldValidate: true,
+      });
     }
   }, [form, models]);
 

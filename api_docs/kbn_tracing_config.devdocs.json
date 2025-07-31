@@ -1,0 +1,159 @@
+{
+  "id": "@kbn/tracing-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/tracing-config",
+        "id": "def-common.TracingConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TracingConfig",
+        "description": [
+          "\nConfiguration for OpenTelemetry tracing"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.TracingConfig.enabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nWhether OpenTelemetry tracing is enabled."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.TracingConfig.sample_rate",
+            "type": "number",
+            "tags": [],
+            "label": "sample_rate",
+            "description": [
+              "\nAt which rate spans get sampled if a sampling decision\nneeds to be made. Should be between 0-1."
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/tracing-config",
+            "id": "def-common.TracingConfig.exporters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exporters",
+            "description": [
+              "\nOTLP exporters for tracing data"
+            ],
+            "signature": [
+              "InferenceTracingExportConfig",
+              " | ",
+              "InferenceTracingExportConfig",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/tracing-config",
+        "id": "def-common.TracingExporterConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "TracingExporterConfig",
+        "description": [
+          "\nAllowed configurations for OTLP tracing exporters"
+        ],
+        "signature": [
+          "{ langfuse: ",
+          {
+            "pluginId": "@kbn/inference-tracing-config",
+            "scope": "common",
+            "docId": "kibKbnInferenceTracingConfigPluginApi",
+            "section": "def-common.InferenceTracingLangfuseExportConfig",
+            "text": "InferenceTracingLangfuseExportConfig"
+          },
+          "; } | { phoenix: ",
+          {
+            "pluginId": "@kbn/inference-tracing-config",
+            "scope": "common",
+            "docId": "kibKbnInferenceTracingConfigPluginApi",
+            "section": "def-common.InferenceTracingPhoenixExportConfig",
+            "text": "InferenceTracingPhoenixExportConfig"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/tracing-config",
+        "id": "def-common.tracingConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "tracingConfigSchema",
+        "description": [
+          "\nThe tracing config schema that is exposed by the Telemetry plugin."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/tracing-config",
+            "scope": "common",
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.TracingConfig",
+            "text": "TracingConfig"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-config/src/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

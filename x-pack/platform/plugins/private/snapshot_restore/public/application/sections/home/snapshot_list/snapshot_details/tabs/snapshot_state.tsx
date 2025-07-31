@@ -57,7 +57,7 @@ export const SnapshotState: React.FC<Props> = ({ state, displayTooltipIcon }) =>
 
   const { color, label, tip } = stateMap[state];
 
-  const iconTip = displayTooltipIcon && tip && <EuiIcon type="questionInCircle" />;
+  const iconTip = displayTooltipIcon && tip && <EuiIcon type="question" />;
 
   return (
     <EuiToolTip position="top" content={tip}>

@@ -25,6 +25,7 @@ import {
   transformResponse,
   scheduledQueryFactory,
   CreatedAtSearchResponse,
+  transformSingleResponse,
 } from './scheduled_query';
 import { ReportingCore } from '../../..';
 import { ScheduledReportType } from '../../../types';
@@ -1135,6 +1136,160 @@ describe('transformResponse', () => {
         },
       ],
     });
+  });
+
+  it('should correctly transform the responses with rrule.dtstart field', () => {
+    expect(
+      transformResponse(
+        mockLogger,
+        {
+          ...soResponse,
+          saved_objects: savedObjects.map((so) => ({
+            ...so,
+            attributes: {
+              ...so.attributes,
+              schedule: {
+                ...so.attributes.schedule,
+                rrule: {
+                  ...so.attributes.schedule.rrule,
+                  dtstart: new Date().toISOString(),
+                },
+              },
+            },
+            score: 0,
+          })),
+        },
+        lastRunResponse
+      )
+    ).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: '2025-05-06T12:00:00.500Z',
+          next_run: expect.any(String),
+          payload: jsonPayload,
+          schedule: {
+            rrule: {
+              dtstart: expect.any(String),
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+          title: '[Logs] Web Traffic',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          created_at: '2025-05-06T21:12:06.584Z',
+          created_by: 'not-elastic',
+          enabled: true,
+          jobtype: 'PNGV2',
+          last_run: '2025-05-06T21:12:07.198Z',
+          next_run: expect.any(String),
+          notification: {
+            email: {
+              to: ['user@elastic.co'],
+            },
+          },
+          payload: jsonPayload,
+          title: 'Another cool dashboard',
+          schedule: {
+            rrule: {
+              dtstart: expect.any(String),
+              freq: 1,
+              interval: 3,
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+        },
+      ],
+    });
+  });
+
+  it('should correctly transform a response with rrule.dtstart is in the future', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-05-06T21:10:17.137Z'));
+
+    // current time is 2025-05-06T21:10:17.137Z which is a Tuesday
+    // schedule is set to run every Friday at 17:00 UTC
+    // start time is set to 2025-05-11T12:00:00.000Z (which is a Sunday)
+    // next run should be the next Friday after 2025-05-11T12:00:00.000Z which is 2025-05-16T17:00:00.000Z
+    // not the actual next friday which would be 2025-05-09T17:00:00.000Z
+    const dtstart = '2025-05-11T12:00:00.000Z';
+    expect(
+      transformSingleResponse(mockLogger, {
+        type: 'scheduled_report',
+        id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+        namespaces: ['a-space'],
+        attributes: {
+          createdAt: '2025-05-06T21:10:17.137Z',
+          createdBy: 'elastic',
+          enabled: true,
+          jobType: 'printable_pdf_v2',
+          meta: {
+            isDeprecated: false,
+            layout: 'preserve_layout',
+            objectType: 'dashboard',
+          },
+          migrationVersion: '9.1.0',
+          title: '[Logs] Web Traffic',
+          payload,
+          schedule: {
+            rrule: {
+              dtstart,
+              freq: 3,
+              interval: 1,
+              byhour: [17],
+              byminute: [0],
+              byweekday: ['FR'],
+              tzid: 'UTC',
+            },
+          },
+        },
+        references: [],
+        managed: false,
+        updated_at: '2025-05-06T21:10:17.137Z',
+        created_at: '2025-05-06T21:10:17.137Z',
+        version: 'WzEsMV0=',
+        coreMigrationVersion: '8.8.0',
+        typeMigrationVersion: '10.1.0',
+        score: 0,
+      })
+    ).toEqual({
+      id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+      created_at: '2025-05-06T21:10:17.137Z',
+      created_by: 'elastic',
+      enabled: true,
+      jobtype: 'printable_pdf_v2',
+      next_run: '2025-05-16T17:00:00.000Z',
+      payload: jsonPayload,
+      schedule: {
+        rrule: {
+          dtstart,
+          freq: 3,
+          interval: 1,
+          byhour: [17],
+          byminute: [0],
+          byweekday: ['FR'],
+          tzid: 'UTC',
+        },
+      },
+      space_id: 'a-space',
+      title: '[Logs] Web Traffic',
+    });
+
+    jest.useRealTimers();
   });
 
   it('handles malformed payload', () => {

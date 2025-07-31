@@ -16,6 +16,13 @@ export interface RecommendedQuery {
   description?: string;
 }
 
+export interface RecommendedField {
+  // The name of the recommended field, will be used to prioritize the field in the autocomplete suggestions
+  name: string;
+  // The associated index pattern for the field, used to match the field with the current query's index pattern
+  pattern: string;
+}
+
 interface ResolveIndexResponseItem {
   name: string;
 }

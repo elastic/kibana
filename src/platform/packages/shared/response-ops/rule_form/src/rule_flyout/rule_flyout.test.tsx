@@ -16,6 +16,7 @@ import {
   RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT,
 } from '../translations';
 import { RuleFormData } from '../types';
+import { RuleFormStepId } from '../constants';
 
 jest.mock('../rule_definition', () => ({
   RuleDefinition: () => <div />,
@@ -116,6 +117,44 @@ describe('ruleFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterPreviousStepButton'));
     expect(await screen.findByTestId('ruleFlyoutFooterNextStepButton')).toBeInTheDocument();
+  });
+
+  test('omitting `initialStep` causes default behavior with step 1 selected', () => {
+    const { getByText } = render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    expect(getByText('Current step is 1'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.DEFINITION` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DEFINITION} />
+    );
+
+    expect(getByText('Current step is 1'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.ACTION` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.ACTIONS} />
+    );
+
+    expect(getByText('Step 1 is complete'));
+    expect(getByText('Current step is 2'));
+    expect(getByText('Step 3 is incomplete'));
+  });
+
+  test('setting `initialStep` to `RuleFormStepId.DETAILS` will make step 1 the current step', () => {
+    const { getByText } = render(
+      <RuleFlyout onCancel={onCancel} onSave={onSave} initialEditStep={RuleFormStepId.DETAILS} />
+    );
+
+    expect(getByText('Step 1 is complete'));
+    expect(getByText('Step 2 is incomplete'));
+    expect(getByText('Current step is 3'));
   });
 
   test('should call onSave when save button is pressed', async () => {

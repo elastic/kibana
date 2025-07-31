@@ -9,7 +9,8 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getCases, waitForCases } from '../../../../../../cases_api_integration/common/lib/api';
+import { getCases } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
+import { waitForCases } from '../../../utils/cases';
 import {
   deleteAllRules,
   waitForRuleSuccess,
@@ -48,15 +49,18 @@ export default ({ getService }: FtrProviderContext) => {
     describe('adding actions', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
-          useCreate: true,
-          docsOnly: true,
-        });
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',
+          {
+            useCreate: true,
+            docsOnly: true,
+          }
+        );
       });
       after(async () => {
         await esArchiver.unload(auditbeatPath);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
         );
       });
       beforeEach(async () => {

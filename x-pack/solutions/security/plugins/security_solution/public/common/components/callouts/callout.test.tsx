@@ -90,14 +90,14 @@ describe('callout', () => {
     );
   });
 
-  test('a default icon type of "iInCircle" will be chosen if no iconType is set and the message type is "primary"', () => {
+  test('a default icon type of "info" will be chosen if no iconType is set and the message type is "primary"', () => {
     const wrapper = mount(
       <TestProviders>
         <CallOut message={message} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="callout-some-id"]').first().prop('iconType')).toEqual(
-      'iInCircle'
+      'info'
     );
   });
 

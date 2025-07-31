@@ -234,10 +234,10 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                 id: VulnerabilityFindingsPreviewPanelKey,
                 params: {
                   vulnerabilityId: vulnerability?.id,
-                  resourceId: finding?.resource?.id || '',
+                  resourceId: finding?.resource?.id,
                   packageName: vulnerability?.package?.name,
                   packageVersion: vulnerability?.package?.version,
-                  eventId: finding?.event?.id || '',
+                  eventId: finding?.event?.id,
                   scopeId,
                   isPreviewMode: true,
                   banner: {
