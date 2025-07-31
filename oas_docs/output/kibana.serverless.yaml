@@ -49668,13 +49668,9 @@ components:
             - delete
           type: string
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49692,13 +49688,9 @@ components:
             - disable
           type: string
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49728,13 +49720,9 @@ components:
             - include_exceptions
             - include_expired_exceptions
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49825,13 +49813,9 @@ components:
           minItems: 1
           type: array
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49854,13 +49838,9 @@ components:
             - enable
           type: string
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49880,13 +49860,9 @@ components:
             - export
           type: string
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
@@ -49896,53 +49872,6 @@ components:
           type: string
       required:
         - action
-<<<<<<< HEAD
-=======
-    Security_Detections_API_BulkGapsFillingSkipReason:
-      enum:
-        - NO_GAPS_TO_FILL
-      type: string
-    Security_Detections_API_BulkManualRuleFillGaps:
-      type: object
-      properties:
-        action:
-          enum:
-            - fill_gaps
-          type: string
-        fill_gaps:
-          description: Object that describes applying a manual gap fill action for the specified time range.
-          type: object
-          properties:
-            end_date:
-              description: End date of the manual gap fill
-              type: string
-            start_date:
-              description: Start date of the manual gap fill
-              type: string
-          required:
-            - start_date
-            - end_date
-        gaps_range_end:
-          description: Gaps range end, valid only when query is provided
-          type: string
-        gaps_range_start:
-          description: Gaps range start, valid only when query is provided
-          type: string
-        ids:
-          description: |
-            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
-            Only valid when query property is undefined.
-          items:
-            type: string
-          minItems: 1
-          type: array
-        query:
-          description: Query to filter rules.
-          type: string
-      required:
-        - action
-        - fill_gaps
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
     Security_Detections_API_BulkManualRuleRun:
       type: object
       properties:
@@ -49951,13 +49880,9 @@ components:
             - run
           type: string
         ids:
-<<<<<<< HEAD
-          description: Array of rule IDs
-=======
           description: |
             Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
             Only valid when query property is undefined.
->>>>>>> 642f6b328be ([Security Solution] Improve bulk actions API reference docs (#228712))
           items:
             type: string
           minItems: 1
