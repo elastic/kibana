@@ -307,6 +307,16 @@ describe('ML snapshots APIs', () => {
         ],
       });
 
+      (
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.migration
+          .deprecations as jest.Mock
+      ).mockResolvedValue({
+        cluster_settings: [],
+        ml_settings: [],
+        node_settings: [],
+        index_settings: {},
+      });
+
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/ml_snapshots/{jobId}/{snapshotId}',
