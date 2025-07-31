@@ -143,8 +143,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const templateName = packagePolicy?.inputs?.[0]?.policy_template || 'unknown';
     const roleArn = vars.role_arn?.value || vars['aws.role_arn']?.value;
 
+    if (!roleArn) {
+      logger.error(
+        `AWS package policy must contain role_arn variable. Package Policy ID: ${packagePolicy?.id}, Name: ${packagePolicy?.name}, Template: ${templateName}`
+      );
+      throw new Error('AWS package policy must contain role_arn variable');
+    }
     // Check for AWS variables
-    if (vars.role_arn?.value || vars['aws.role_arn']?.value) {
+    if (roleArn) {
       let externalId: any;
 
       if (vars.external_id?.value) {

@@ -15,16 +15,14 @@ export interface CloudConnectorSecretVar {
 }
 
 export interface CloudConnectorVars {
-  // AWS variables
+  // AWS Role ARN variables
   'aws.role_arn'?: PackagePolicyConfigRecordEntry | string;
-  'aws.credentials.external_id'?: PackagePolicyConfigRecordEntry;
   role_arn?: PackagePolicyConfigRecordEntry | string;
+  // AWS credentials variables
+  'aws.credentials.external_id'?: PackagePolicyConfigRecordEntry;
   external_id?: {
     type?: string;
-    value: {
-      isSecretRef: true;
-      id: string;
-    };
+    value: CloudConnectorSecretVar;
     frozen?: boolean;
   };
   // Azure variables
