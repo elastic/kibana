@@ -5,42 +5,267 @@
  * 2.0.
  */
 
-import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import { shouldExecute } from './health_diagnostic_utils';
+import { of, throwError, from } from 'rxjs';
+import type { ElasticsearchClient, AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import { HealthDiagnosticServiceImpl } from './health_diagnostic_service';
+import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
+import { ValidationError } from './health_diagnostic_circuit_breakers.types';
+import { artifactService } from '../artifact';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  createMockLogger,
+  createMockTaskManager,
+  createMockAnalytics,
+  createMockQueryExecutor,
+  createMockDocument,
+  createMockArtifactData,
+} from './__mocks__';
 
-describe('Security Solution - health diagnostic', () => {
-  beforeEach(() => {});
+jest.mock('./health_diagnostic_receiver');
+jest.mock('../artifact');
 
-  describe('Interval', () => {
-    test.each([
-      ['5m', '2025-05-14T17:00:00.000Z', '2025-05-14T17:05:00.000Z'],
-      ['1h', '2025-05-14T17:00:00.000Z', '2025-05-14T18:00:00.000Z'],
-      ['24h', '2025-05-14T17:00:00.000Z', '2025-05-15T17:00:00.000Z'],
-      ['30d', '2025-05-31T17:00:00.000Z', '2025-06-30T17:00:00.000Z'],
-      ['365d', '2025-05-31T17:00:00.000Z', '2026-05-31T17:00:00.000Z'],
-    ])('adds %s to %s to equal %s', (interval, dateFrom, expected) => {
-      const next = intervalFromDate(new Date(dateFrom), interval);
-      expect(next).toEqual(new Date(expected));
+const MockedCircuitBreakingQueryExecutorImpl = CircuitBreakingQueryExecutorImpl as jest.MockedClass<
+  typeof CircuitBreakingQueryExecutorImpl
+>;
+
+describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticService', () => {
+  let service: HealthDiagnosticServiceImpl;
+  let mockLogger: jest.Mocked<Logger>;
+  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
+  let mockQueryExecutor: jest.Mocked<CircuitBreakingQueryExecutorImpl>;
+
+  const mockDocument = createMockDocument();
+
+  const setupMocks = () => {
+    mockLogger = createMockLogger();
+    mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockTaskManager = createMockTaskManager();
+    mockAnalytics = createMockAnalytics();
+    mockQueryExecutor = createMockQueryExecutor();
+
+    MockedCircuitBreakingQueryExecutorImpl.mockImplementation(() => mockQueryExecutor);
+    service = new HealthDiagnosticServiceImpl(mockLogger);
+  };
+
+  const setupDefaultArtifact = (overrides = {}) => {
+    (artifactService.getArtifact as jest.Mock).mockResolvedValue({
+      data: createMockArtifactData(overrides),
     });
+  };
+
+  const startService = async () => {
+    await service.start({
+      taskManager: mockTaskManager,
+      esClient: mockEsClient,
+      analytics: mockAnalytics,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupMocks();
+    setupDefaultArtifact();
   });
 
-  describe('nextExecution', () => {
-    test.each([
-      ['5m', '2025-05-14T17:00:00.000Z', '2025-05-14T17:03:00.000Z', false],
-      ['5m', '2025-05-14T17:00:00.000Z', '2025-05-14T17:06:00.000Z', true],
-      ['5m', '2025-05-14T17:00:00.000Z', '2025-05-14T18:03:00.000Z', true],
-      ['1h', '2025-05-14T17:00:00.000Z', '2025-05-14T18:00:00.000Z', false],
-      ['1h', '2025-05-14T17:00:00.000Z', '2025-05-14T18:01:00.000Z', true],
-      ['1h', '2025-05-14T17:00:00.000Z', '2025-05-15T01:00:00.000Z', true],
-      ['1h', '2025-05-14T17:00:00.000Z', '2025-05-12T01:00:00.000Z', false],
-      ['1s', '2025-05-02T17:00:00.000Z', '2025-06-30T17:00:00.000Z', true],
-      ['30d', '2025-05-31T17:00:00.000Z', '2025-06-29T17:00:00.000Z', false],
-      ['365d', '2025-01-31T17:00:00.000Z', '2025-12-31T17:00:00.000Z', false],
-    ])(
-      'adds %s to %s when endDate is %s should return %s',
-      (interval, startDate, endDate, expected) => {
-        expect(shouldExecute(new Date(startDate), new Date(endDate), interval)).toBe(expected);
-      }
-    );
+  describe('runHealthDiagnosticQueries', () => {
+    describe('successful execution', () => {
+      beforeEach(async () => {
+        await startService();
+      });
+
+      test('should execute enabled queries that are due for execution', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: true,
+          numDocs: 1,
+          fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
+        });
+        expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledTimes(2); // result + stats events
+      });
+
+      test('should process multiple documents in batches', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const documents = Array.from({ length: 5 }, (_, i) =>
+          createMockDocument({ _id: `doc${i}` })
+        );
+
+        mockQueryExecutor.search.mockReturnValue(from(documents));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result[0].numDocs).toBe(5);
+        expect(result[0].passed).toBe(true);
+      });
+
+      test('should skip queries that are not due for execution', async () => {
+        const recentTimestamp = Date.now() - 1000;
+        const lastExecutionByQuery = { 'test-query': recentTimestamp };
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip disabled queries', async () => {
+        setupDefaultArtifact({ enabled: false });
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should include circuit breaker stats in successful execution', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result[0].circuitBreakers).toBeDefined();
+        expect(typeof result[0].circuitBreakers).toBe('object');
+      });
+    });
+
+    describe('error handling', () => {
+      test('should return empty array when query executor is not available', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toEqual([]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'CircuitBreakingQueryExecutor service is not started',
+          expect.anything()
+        );
+      });
+
+      test('should handle query execution errors', async () => {
+        await startService();
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const error = new Error('Query execution failed');
+        mockQueryExecutor.search.mockReturnValue(throwError(() => error));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: false,
+          failure: {
+            message: 'Query execution failed',
+            reason: undefined,
+          },
+        });
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Error running query',
+          expect.objectContaining({ error })
+        );
+      });
+
+      test('should handle validation errors with circuit breaker results', async () => {
+        await startService();
+
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        const validationError = new ValidationError({
+          circuitBreaker: 'TimeoutCircuitBreaker',
+          valid: false,
+          message: 'Circuit breaker triggered',
+        });
+        mockQueryExecutor.search.mockReturnValue(throwError(() => validationError));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result[0]).toMatchObject({
+          passed: false,
+          failure: {
+            message: 'Circuit breaker triggered',
+            reason: {
+              circuitBreaker: 'TimeoutCircuitBreaker',
+              valid: false,
+              message: 'Circuit breaker triggered',
+            },
+          },
+        });
+      });
+
+      test('should handle artifact service errors gracefully', async () => {
+        await startService();
+
+        (artifactService.getArtifact as jest.Mock).mockRejectedValue(
+          new Error('Artifact not found')
+        );
+        const lastExecutionByQuery = {};
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toEqual([]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          'Error getting health diagnostic queries',
+          expect.any(Object)
+        );
+      });
+    });
+
+    describe('EBT event reporting', () => {
+      beforeEach(async () => {
+        await startService();
+      });
+
+      test('should report query result and stats events', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+
+        await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledTimes(2);
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          'telemetry_health_diagnostic_query_stats_event',
+          expect.objectContaining({
+            name: 'test-query',
+            passed: true,
+            numDocs: 1,
+            traceId: expect.any(String),
+          })
+        );
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          'telemetry_health_diagnostic_query_result_event',
+          expect.objectContaining({
+            name: 'test-query',
+            queryId: 'test-query-1',
+            page: 0,
+            data: expect.any(Array),
+            traceId: expect.any(String),
+          })
+        );
+      });
+
+      test('should handle EBT reporting errors gracefully', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(of(mockDocument));
+        mockAnalytics.reportEvent.mockImplementation(() => {
+          throw new Error('EBT reporting failed');
+        });
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result[0].passed).toBe(true);
+        expect(mockLogger.warn).toHaveBeenCalledWith('Error sending EBT', expect.any(Object));
+      });
+    });
   });
 });
