@@ -14,6 +14,7 @@ import type {
   EsqlRuleCreateProps,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
+  ThreatMatchRuleUpdateProps,
   ThresholdRuleCreateProps,
   NewTermsRuleCreateProps,
   NewTermsRuleUpdateProps,
@@ -213,6 +214,36 @@ export const getUpdateNewTermsSchemaMock = (
   from: 'now-6m',
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
+});
+
+export const getUpdateThreatMatchRuleSchemaMock = (
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+): ThreatMatchRuleUpdateProps => ({
+  description: 'Detecting root and admin users',
+  id,
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'threat_match',
+  risk_score: 55,
+  language: 'kuery',
+  threat_query: '*:*',
+  threat_index: ['auditbeat-*'],
+  threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
+  interval: '5m',
+  from: 'now-6m',
+  threat_mapping: [
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
 });
 
 export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
