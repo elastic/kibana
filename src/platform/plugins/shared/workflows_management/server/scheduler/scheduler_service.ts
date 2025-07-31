@@ -59,7 +59,7 @@ export class SchedulerService {
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
-    const connectorCredentials = await extractConnectorIds(this.actionsClient);
+    const connectorCredentials = await extractConnectorIds(this.actionsClient, workflow.spaceId);
 
     const workflowRunId = generateUuid();
     const context = {
@@ -68,6 +68,7 @@ export class SchedulerService {
       event: 'event' in inputs ? inputs.event : undefined,
       connectorCredentials,
       triggeredBy: 'manual', // <-- mark as manual
+      spaceId: workflow.spaceId,
     };
 
     const taskInstance = {
@@ -93,9 +94,9 @@ export class SchedulerService {
 
   public async pushEvent(eventType: string, eventData: Record<string, any>) {
     try {
-      const worklfowsToRun = findWorkflowsByTrigger(eventType);
+      const workflowsToRun = findWorkflowsByTrigger(eventType);
 
-      for (const workflow of worklfowsToRun) {
+      for (const workflow of workflowsToRun) {
         await this.runWorkflow(workflow, {
           event: eventData,
         });

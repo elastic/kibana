@@ -17,12 +17,17 @@ import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-en
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginSetup {}
 
 export interface WorkflowsPluginStart {
-  runWorkflow(workflow: WorkflowExecutionEngineModel, params: Record<string, any>): Promise<string>;
+  runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    params: Record<string, any>,
+    spaceId: string
+  ): Promise<string>;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
@@ -30,9 +35,11 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {
   features?: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
+  spaces?: SpacesPluginStart;
 }

@@ -4294,6 +4294,15 @@
         },
         "type": "text"
       },
+      "spaceId": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "keyword"
+      },
       "status": {
         "type": "keyword"
       },
