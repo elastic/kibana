@@ -322,18 +322,18 @@ export function registerGapFillAutoSchedulerTask({
             );
             // TODO: think about status etc.'
 
-            let overalStatus = '';
-            let overalError = '';
+            let overallStatus = '';
+            let overallError = '';
             const allSuccess = results.every((r) => r.status === 'success');
             const allError = results.every((r) => r.status === 'error');
             if (allSuccess) {
-              overalStatus = 'success';
+              overallStatus = 'success';
             } else if (allError) {
-              overalStatus = 'error';
-              overalError = 'All rules failed to schedule backfills';
+              overallStatus = 'error';
+              overallError = 'All rules failed to schedule backfills';
             } else if (allInProgress) {
-              overalStatus = 'warning';
-              overalError = 'Some rules failed to schedule backfills';
+              overallStatus = 'warning';
+              overallError = 'Some rules failed to schedule backfills';
             }
             const summary = {
               totalRules: results.length,
