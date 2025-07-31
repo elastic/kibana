@@ -1200,8 +1200,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/test_suites/security/config.examples.ts   @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts @elastic/kibana-data-discovery
+/x-pack/platform/test/serverless/functional/configs/security/config.examples.ts   @elastic/kibana-data-discovery
+/x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts @elastic/kibana-data-discovery
 /src/platform/test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
 /src/platform/test/api_integration/apis/data_views @elastic/kibana-data-discovery
 /src/platform/test/api_integration/apis/data_view_field_editor @elastic/kibana-data-discovery
@@ -2056,7 +2056,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/core/ @elastic/kibana-core
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
-/x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
+/x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.*.yml @elastic/kibana-core @elastic/kibana-security

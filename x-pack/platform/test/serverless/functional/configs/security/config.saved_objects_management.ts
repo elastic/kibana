@@ -12,16 +12,15 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('../common/examples')],
+  testFiles: [require.resolve('../../test_suites/saved_objects_management')],
   junit: {
-    reportName: 'Serverless Security Examples Functional Tests',
+    reportName: 'Serverless Search Saved Objects Management Functional Tests',
   },
   kbnServerArgs: findTestPluginPaths([
-    resolve(REPO_ROOT, 'examples'),
-    resolve(REPO_ROOT, 'x-pack/examples'),
+    resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
   ]),
 
   // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/security/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.nlp.enabled=true'],
+  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
+  esServerArgs: [],
 });

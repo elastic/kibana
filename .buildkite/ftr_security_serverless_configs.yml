@@ -28,14 +28,14 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.config_compat_mode.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group1.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group2.ts

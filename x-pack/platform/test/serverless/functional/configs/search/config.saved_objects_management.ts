@@ -12,13 +12,12 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../common/examples')],
+  testFiles: [require.resolve('../../test_suites/saved_objects_management')],
   junit: {
-    reportName: 'Serverless Search Examples Functional Tests',
+    reportName: 'Serverless Search Saved Objects Management Functional Tests',
   },
   kbnServerArgs: findTestPluginPaths([
-    resolve(REPO_ROOT, 'examples'),
-    resolve(REPO_ROOT, 'x-pack/examples'),
+    resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
   ]),
 
   // include settings from project controller

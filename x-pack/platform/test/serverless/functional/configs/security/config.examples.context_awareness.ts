@@ -8,12 +8,13 @@
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
-  serverlessProject: 'es',
-  testFiles: [require.resolve('../common/discover/context_awareness')],
+  serverlessProject: 'security',
+  testFiles: [require.resolve('../../test_suites/discover/context_awareness')],
   junit: {
-    reportName: 'Serverless Search Discover Context Awareness Functional Tests',
+    reportName:
+      'Serverless Security Discover Context Awareness Functional Tests - Example Profiles',
   },
-  suiteTags: { exclude: ['skipSvlSearch'] },
+  suiteTags: { exclude: ['skipSvlSec'] },
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
       'example-root-profile',
