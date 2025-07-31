@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataCascade, DataCascadeRow, DataCascadeRowCell } from './components';
-export type {
-  GroupNode,
-  LeafNode,
-  DataCascadeRowProps,
-  DataCascadeRowCellProps,
-} from './components';
-export * from './lib';
+export { CascadeRowCellPrimitive } from './cascade_row_cell';
+export type { CascadeRowCellPrimitiveProps } from './cascade_row_cell';
