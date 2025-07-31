@@ -174,7 +174,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceInventoryTableSearchBar', {
-      defaultMessage: 'Service Inventory instant table search',
+      defaultMessage: 'Service inventory instant table search',
     }),
     description: i18n.translate(
       'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',
@@ -193,10 +193,10 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmEnableServiceMapApiV2]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
-      defaultMessage: 'Service Map API v2',
+      defaultMessage: 'Service map API v2',
     }),
     description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
-      defaultMessage: 'Enables the usage of the new Service Map API v2.',
+      defaultMessage: 'Enables the usage of the new Service map API v2.',
     }),
     schema: schema.boolean(),
     value: false,

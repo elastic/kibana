@@ -42,7 +42,7 @@ export const buildOSSFeatures = ({
       deprecated: {
         notice: i18n.translate('xpack.features.visualizeFeatureDeprecationNotice', {
           defaultMessage:
-            'The Visualize Library V1 privilege has been deprecated and replaced with a Visualize Library V2 privilege in order to improve saved query management. See {link} for more details.',
+            'The Visualize library V1 privilege has been deprecated and replaced with a Visualize library V2 privilege in order to improve saved query management. See {link} for more details.',
           values: { link: 'https://github.com/elastic/kibana/pull/202863' },
         }),
         replacedBy: ['visualize_v2'],
@@ -517,7 +517,7 @@ const getBaseVisualizeFeature = ({
 
   return {
     name: i18n.translate('xpack.features.visualizeFeatureName', {
-      defaultMessage: 'Visualize Library',
+      defaultMessage: 'Visualize library',
     }),
     management: {
       ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),

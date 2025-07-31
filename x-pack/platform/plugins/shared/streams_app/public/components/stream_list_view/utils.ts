@@ -118,7 +118,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
         ...streamDetail,
         name: streamDetail.stream.name,
         children: [],
-        type: Streams.UnwiredStream.Definition.is(streamDetail.stream)
+        type: Streams.ClassicStream.Definition.is(streamDetail.stream)
           ? 'classic'
           : isRootStreamDefinition(streamDetail.stream)
           ? 'root'

@@ -392,6 +392,16 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateDashboardMigrationRequestBodyInput,
+  CreateDashboardMigrationResponse,
+  CreateDashboardMigrationDashboardsRequestParamsInput,
+  CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetDashboardMigrationRequestParamsInput,
+  GetDashboardMigrationResponse,
+  GetDashboardMigrationStatsRequestParamsInput,
+  GetDashboardMigrationStatsResponse,
+} from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
@@ -639,6 +649,41 @@ If a record already exists for the specified entity, that record is overwritten 
         path: '/api/asset_criticality',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates a new dashboard migration and returns the corresponding migration_id
+   */
+  async createDashboardMigration(props: CreateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigration`);
+    return this.kbnClient
+      .request<CreateDashboardMigrationResponse>({
+        path: '/internal/siem_migrations/dashboards',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds dashboards to an alreayd existing dashboard migration
+   */
+  async createDashboardMigrationDashboards(props: CreateDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1409,6 +1454,39 @@ finalize it.
     return this.kbnClient
       .request<GetAssetCriticalityStatusResponse>({
         path: '/internal/asset_criticality/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migration document stored in the system given the dashboard migration id
+   */
+  async getDashboardMigration(props: GetDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigration`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for given migrations stored in the system
+   */
+  async getDashboardMigrationStats(props: GetDashboardMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationStats`);
+    return this.kbnClient
+      .request<GetDashboardMigrationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stats',
+          props.params
+        ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2755,6 +2833,13 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreateDashboardMigrationProps {
+  body: CreateDashboardMigrationRequestBodyInput;
+}
+export interface CreateDashboardMigrationDashboardsProps {
+  params: CreateDashboardMigrationDashboardsRequestParamsInput;
+  body: CreateDashboardMigrationDashboardsRequestBodyInput;
+}
 export interface CreateEntitySourceProps {
   body: CreateEntitySourceRequestBodyInput;
 }
@@ -2873,6 +2958,12 @@ export interface FindRulesProps {
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetDashboardMigrationProps {
+  params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationStatsProps {
+  params: GetDashboardMigrationStatsRequestParamsInput;
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;

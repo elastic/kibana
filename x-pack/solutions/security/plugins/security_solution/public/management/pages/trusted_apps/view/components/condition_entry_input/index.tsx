@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
@@ -70,7 +70,7 @@ const InputGroup = styled.div`
 const InputItem = styled.div<{ gridArea: string }>`
   grid-area: ${({ gridArea }) => gridArea};
   align-self: center;
-  margin: 4px;
+  margin-right: ${(props) => props.theme.euiTheme.size.s};
   vertical-align: baseline;
 `;
 

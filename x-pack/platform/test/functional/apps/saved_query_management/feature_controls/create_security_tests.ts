@@ -117,7 +117,9 @@ export function createSecurityTests(
               'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
             );
 
-            await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+            await esArchiver.loadIfNeeded(
+              'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+            );
 
             // ensure we're logged out, so we can log in as the appropriate users
             await security.forceLogout();

@@ -24,7 +24,12 @@ export interface ICommandMethods<TContext = any> {
    * @param context Additional context needed for validation (e.g., available fields).
    * @returns Return an array of validation errors/warnings.
    */
-  validate?: (command: ESQLCommand, ast: ESQLAst, context?: TContext) => ESQLMessage[];
+  validate?: (
+    command: ESQLCommand,
+    ast: ESQLAst,
+    context?: TContext,
+    callbacks?: ICommandCallbacks
+  ) => ESQLMessage[];
 
   /**
    * Provides suggestions for autocompletion based on the current query context

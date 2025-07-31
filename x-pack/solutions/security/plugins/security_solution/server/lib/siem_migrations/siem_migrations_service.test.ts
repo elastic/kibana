@@ -18,7 +18,7 @@ import {
   mockStop,
 } from './rules/__mocks__/mocks';
 import type { ConfigType } from '../../config';
-import type { SiemRuleMigrationsClientDependencies } from './rules/types';
+import type { SiemMigrationsClientDependencies } from './common/types';
 
 jest.mock('./rules/siem_rule_migrations_service');
 
@@ -28,7 +28,7 @@ jest.mock('rxjs', () => ({
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
 }));
 
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 
 describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;

@@ -14,9 +14,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('search sessions management', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/dashboard/async_search');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/dashboard/async_search'
+      );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard_async/async_search'
       );

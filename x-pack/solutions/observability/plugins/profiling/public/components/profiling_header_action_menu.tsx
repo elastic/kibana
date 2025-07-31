@@ -40,7 +40,7 @@ export function ProfilingHeaderActionMenu() {
           }}
         >
           {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
-            defaultMessage: 'Storage Explorer',
+            defaultMessage: 'Storage explorer',
           })}
         </EuiHeaderLink>
       </EuiToolTip>
@@ -56,7 +56,7 @@ export function ProfilingHeaderActionMenu() {
         color="primary"
       >
         {i18n.translate('xpack.profiling.headerActionMenu.addData', {
-          defaultMessage: 'Add Data',
+          defaultMessage: 'Add data',
         })}
       </EuiHeaderLink>
     </EuiHeaderLinks>

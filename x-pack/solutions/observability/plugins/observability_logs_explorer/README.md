@@ -1,4 +1,4 @@
-# Observability Logs Explorer
+# Observability Logs explorer
 
 This plugin provides an app based on the `LogsExplorer` component from the `logs_explorer` plugin, but adds observability-specific affordances.
 
@@ -55,11 +55,11 @@ unset FLEET_PACKAGE_REGISTRY_PORT
 
 ## Checktypes
 
-#### Logs Explorer
+#### Logs explorer
 ```
 node scripts/type_check.js --project x-pack/solutions/observability/plugins/logs_explorer/tsconfig.json
 ```
-#### Observability Logs Explorer
+#### Observability Logs explorer
 ```
 node scripts/type_check.js --project x-pack/solutions/observability/plugins/observability_logs_explorer/tsconfig.json
 ```
