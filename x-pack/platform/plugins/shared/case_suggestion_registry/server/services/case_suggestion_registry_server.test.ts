@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { ToolDefinition } from '@kbn/inference-common';
-import { ContextRegistryServer, ContextDefinitionServer } from './context_registry_server';
+import {
+  CaseSuggestionRegistryServer,
+  CaseSuggestionDefinitionServer,
+} from './case_suggestion_registry_server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockTool: ToolDefinition = {
@@ -14,13 +17,13 @@ const mockTool: ToolDefinition = {
 
 const mockOwner = 'observability' as const;
 
-describe('ContextRegistry', () => {
-  let registry: ContextRegistryServer;
+describe('CaseSuggestionRegistry', () => {
+  let registry: CaseSuggestionRegistryServer;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();
-    registry = new ContextRegistryServer(mockLogger);
+    registry = new CaseSuggestionRegistryServer(mockLogger);
   });
 
   const mockHandler = async () => ({
@@ -34,70 +37,70 @@ describe('ContextRegistry', () => {
     ],
   });
 
-  const mockContext: ContextDefinitionServer = {
-    key: 'mockContext',
+  const mockCaseSuggestion: CaseSuggestionDefinitionServer = {
+    key: 'mockCaseSuggestion',
     owner: mockOwner,
     tools: { mockTool },
     handlers: { mockHandler },
   };
 
   it('registers a context definition successfully', () => {
-    registry.register(mockContext);
-    expect(registry.get('mockContext', mockOwner)).toEqual(mockContext);
+    registry.register(mockCaseSuggestion);
+    expect(registry.get('mockCaseSuggestion', mockOwner)).toEqual(mockCaseSuggestion);
   });
 
   it('throws an error when registering a duplicate context definition for the same owner', () => {
-    registry.register(mockContext);
-    expect(() => registry.register(mockContext)).toThrow(
-      `Context type 'mockContext' is already registered for owner '${mockOwner}'.`
+    registry.register(mockCaseSuggestion);
+    expect(() => registry.register(mockCaseSuggestion)).toThrow(
+      `CaseSuggestion type 'mockCaseSuggestion' is already registered for owner '${mockOwner}'.`
     );
   });
 
   it('retrieves a tool successfully for a specific owner', () => {
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
     expect(registry.getTool('mockTool', mockOwner)).toEqual(mockTool);
   });
 
   it('throws an error when registering a duplicate tool for the same owner', () => {
-    registry.register(mockContext);
-    const duplicateContext = {
-      ...mockContext,
-      key: 'duplicateContext',
+    registry.register(mockCaseSuggestion);
+    const duplicateCaseSuggestion = {
+      ...mockCaseSuggestion,
+      key: 'duplicateCaseSuggestion',
     };
-    expect(() => registry.register(duplicateContext)).toThrow(
-      `Tool 'mockTool' is already registered for context type 'duplicateContext' under owner '${mockOwner}'.`
+    expect(() => registry.register(duplicateCaseSuggestion)).toThrow(
+      `Tool 'mockTool' is already registered for context type 'duplicateCaseSuggestion' under owner '${mockOwner}'.`
     );
   });
 
   it('retrieves a tool handler successfully for a specific owner', () => {
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
     expect(registry.getToolHandler('mockHandler', mockOwner)).toBe(mockHandler);
   });
 
   it('throws an error when registering a duplicate tool handler for the same owner', () => {
-    registry.register(mockContext);
-    const duplicateContext = {
-      ...mockContext,
+    registry.register(mockCaseSuggestion);
+    const duplicateCaseSuggestion = {
+      ...mockCaseSuggestion,
       tools: { mockTool2: mockTool },
-      key: 'duplicateContextWithoutDuplicateTool',
+      key: 'duplicateCaseSuggestionWithoutDuplicateTool',
     };
-    expect(() => registry.register(duplicateContext)).toThrow(
-      `Handler 'mockHandler' is already registered for context type 'duplicateContextWithoutDuplicateTool' under owner '${mockOwner}'.`
+    expect(() => registry.register(duplicateCaseSuggestion)).toThrow(
+      `Handler 'mockHandler' is already registered for context type 'duplicateCaseSuggestionWithoutDuplicateTool' under owner '${mockOwner}'.`
     );
   });
 });
 
-describe('getContext', () => {
-  let registry: ContextRegistryServer;
+describe('getCaseSuggestion', () => {
+  let registry: CaseSuggestionRegistryServer;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();
-    registry = new ContextRegistryServer(mockLogger);
+    registry = new CaseSuggestionRegistryServer(mockLogger);
   });
 
   it('returns an empty array when no handlers are registered for the owner', async () => {
-    const result = await registry.getContextForOwner({}, mockOwner);
+    const result = await registry.getCaseSuggestionForOwner({}, mockOwner);
     expect(result).toEqual([]);
   });
 
@@ -113,53 +116,53 @@ describe('getContext', () => {
       data: [{ payload: { example: 'data2' }, description: 'Payload 2' }],
     }));
 
-    const mockContext = {
-      key: 'mockContext',
+    const mockCaseSuggestion = {
+      key: 'mockCaseSuggestion',
       owner: mockOwner, // Updated to a single owner
       tools: { mockTool1: mockTool, mockTool2: mockTool },
       handlers: { mockHandler1, mockHandler2 },
     };
 
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
 
-    const result = await registry.getContextForOwner({}, mockOwner);
+    const result = await registry.getCaseSuggestionForOwner({}, mockOwner);
     expect(result).toHaveLength(2);
     expect(mockHandler1).toHaveBeenCalled();
     expect(mockHandler2).toHaveBeenCalled();
   });
 });
 
-describe('getContextByKey', () => {
-  let registry: ContextRegistryServer;
+describe('getCaseSuggestionByKey', () => {
+  let registry: CaseSuggestionRegistryServer;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     mockLogger = loggingSystemMock.createLogger();
-    registry = new ContextRegistryServer(mockLogger);
+    registry = new CaseSuggestionRegistryServer(mockLogger);
   });
 
   it('throws an error when the context key is not found for the owner', async () => {
     await expect(
-      registry.getContextByKey({ key: 'nonExistentKey', context: {}, owner: mockOwner })
+      registry.getCaseSuggestionByKey({ key: 'nonExistentKey', context: {}, owner: mockOwner })
     ).rejects.toThrow(
-      `Context with key 'nonExistentKey' is not registered for owner '${mockOwner}'.`
+      `CaseSuggestion with key 'nonExistentKey' is not registered for owner '${mockOwner}'.`
     );
   });
 
   it('throws an error when no handlers are registered for the context under the owner', async () => {
-    const mockContext = {
-      key: 'mockContext',
+    const mockCaseSuggestion = {
+      key: 'mockCaseSuggestion',
       owner: mockOwner, // Updated to a single owner
       tools: {},
       handlers: {},
     };
 
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
 
     await expect(
-      registry.getContextByKey({ key: 'mockContext', context: {}, owner: mockOwner })
+      registry.getCaseSuggestionByKey({ key: 'mockCaseSuggestion', context: {}, owner: mockOwner })
     ).rejects.toThrow(
-      `No handlers registered for context with key 'mockContext' under owner '${mockOwner}'.`
+      `No handlers registered for context with key 'mockCaseSuggestion' under owner '${mockOwner}'.`
     );
   });
 
@@ -170,17 +173,17 @@ describe('getContextByKey', () => {
       data: [{ payload: { example: 'specificData' }, description: 'Specific payload' }],
     }));
 
-    const mockContext = {
-      key: 'mockContext',
+    const mockCaseSuggestion = {
+      key: 'mockCaseSuggestion',
       owner: mockOwner, // Updated to a single owner
       tools: { mockTool },
       handlers: { mockHandler },
     };
 
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
 
-    const result = await registry.getContextByKey({
-      key: 'mockContext',
+    const result = await registry.getCaseSuggestionByKey({
+      key: 'mockCaseSuggestion',
       handlerName: 'mockHandler',
       context: {},
       owner: mockOwner,
@@ -202,17 +205,17 @@ describe('getContextByKey', () => {
       data: [{ payload: { example: 'data2' }, description: 'Payload 2' }],
     }));
 
-    const mockContext = {
-      key: 'mockContext',
+    const mockCaseSuggestion = {
+      key: 'mockCaseSuggestion',
       owner: mockOwner, // Updated to a single owner
       tools: { mockTool1: mockTool, mockTool2: mockTool },
       handlers: { mockHandler1, mockHandler2 },
     };
 
-    registry.register(mockContext);
+    registry.register(mockCaseSuggestion);
 
-    const result = await registry.getContextByKey({
-      key: 'mockContext',
+    const result = await registry.getCaseSuggestionByKey({
+      key: 'mockCaseSuggestion',
       context: {},
       owner: mockOwner,
     });
