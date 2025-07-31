@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiBadge, useEuiTheme, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
@@ -130,6 +130,30 @@ const EmptyBar: React.FC<EmptyBarProps> = ({ 'data-test-subj': dataTestSubj }) =
   return <div css={emptyBarStyle} data-test-subj={`${dataTestSubj}`} />;
 };
 
+// Only show tooltip for segments thats hovered OR Set as Filter OR Last
+const shouldShowTooltip = ({
+  isHovered,
+  isCurrentFilter,
+  isLast,
+  hasFilterActive,
+  hideLastTooltip,
+  isHoveringAnyStatsBar,
+}: {
+  isHovered: boolean;
+  isCurrentFilter: boolean;
+  isLast: boolean;
+  hasFilterActive: boolean;
+  hideLastTooltip?: boolean;
+  isHoveringAnyStatsBar: boolean;
+}) => {
+  if (isHovered) return true;
+
+  const shouldShowBecauseOfFilter = isCurrentFilter;
+  const shouldShowBecauseItIsLast = isLast && !hideLastTooltip && !hasFilterActive;
+
+  return !isHoveringAnyStatsBar && (shouldShowBecauseOfFilter || shouldShowBecauseItIsLast);
+};
+
 // TODO: fix tooltip direction if not enough space;
 /**
  * Security Solution DistributionBar component.
@@ -142,17 +166,22 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
 
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const hasCurrentFilter = stats.some((item) => item.isCurrentFilter === true);
+  const hasCurrentFilter = useMemo(() => stats.some((item) => item.isCurrentFilter), [stats]);
 
   const parts = stats.map((stat, index) => {
     const isLast = index === stats.length - 1;
     const isHovered = hoveredKey === stat.key;
 
     // Only show tooltip for segments thats hovered OR Set as Filter OR Last
-    const showTooltip =
-      isHovered ||
-      (!hoveredKey &&
-        ((stat.isCurrentFilter ?? false) || (!hideLastTooltip && !hasCurrentFilter && isLast)));
+    const isCurrentFilter = stat.isCurrentFilter ?? false;
+    const showTooltip = shouldShowTooltip({
+      isHovered,
+      isCurrentFilter,
+      isLast,
+      hasFilterActive: hasCurrentFilter,
+      hideLastTooltip,
+      isHoveringAnyStatsBar: Boolean(hoveredKey),
+    });
 
     const partStyle = [
       styles.part.base,
