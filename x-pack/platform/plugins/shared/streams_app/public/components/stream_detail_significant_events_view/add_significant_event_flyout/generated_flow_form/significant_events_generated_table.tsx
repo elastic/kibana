@@ -16,20 +16,24 @@ import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { buildDiscoverParams } from '../../utils/discover_helpers';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
+
+interface Props {
+  definition: Streams.all.Definition;
+  generatedQueries: StreamQueryKql[];
+  selectedQueries: StreamQueryKql[];
+  isSubmitting: boolean;
+  onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
+}
 
 export function SignificantEventsGeneratedTable({
   generatedQueries,
   selectedQueries,
   onSelectionChange,
   definition,
-}: {
-  generatedQueries: StreamQueryKql[];
-  selectedQueries: StreamQueryKql[];
-  onSelectionChange: (selectedItems: StreamQueryKql[]) => void;
-  definition: Streams.all.Definition;
-}) {
+  isSubmitting,
+}: Props) {
   const {
     dependencies: {
       start: { discover },
@@ -70,6 +74,7 @@ export function SignificantEventsGeneratedTable({
   const selection: EuiTableSelectionType<StreamQueryKql> = {
     onSelectionChange,
     selected: selectedQueries,
+    selectable: () => !isSubmitting,
   };
 
   return (

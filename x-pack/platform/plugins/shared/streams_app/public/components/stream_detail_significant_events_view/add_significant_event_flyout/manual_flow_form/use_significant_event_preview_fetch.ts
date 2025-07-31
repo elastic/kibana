@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
-import type { TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { calculateAuto } from '@kbn/calculate-auto';
-import moment from 'moment';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import type { SignificantEventsPreviewResponse, StreamQueryKql } from '@kbn/streams-schema';
+import moment from 'moment';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 
 export function useSignificantEventPreviewFetch({
   name,
-  queryValues,
+  query,
   timeRange,
 }: {
   name: string;
-  queryValues: Partial<StreamQueryKql>;
+  query: Partial<StreamQueryKql>;
   timeRange: TimeRange;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
   const {
@@ -31,7 +31,7 @@ export function useSignificantEventPreviewFetch({
 
   const previewFetch = useStreamsAppFetch(
     ({ signal }) => {
-      const { kql } = queryValues;
+      const { kql } = query;
 
       const { from, to } = getAbsoluteTimeRange(timeRange);
 
@@ -61,7 +61,7 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [timeRange, name, queryValues, streams.streamsRepositoryClient]
+    [timeRange, name, query, streams.streamsRepositoryClient]
   );
 
   return previewFetch;

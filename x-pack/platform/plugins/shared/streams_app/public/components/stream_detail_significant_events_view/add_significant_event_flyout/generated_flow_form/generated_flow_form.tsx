@@ -17,11 +17,12 @@ import { useAIFeatures } from './use_ai_features';
 
 interface Props {
   definition: Streams.all.Definition;
+  isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
 }
 
-export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props) {
+export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
   const {
     core: { notifications, http },
   } = useKibana();
@@ -90,7 +91,11 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
         <EuiButton
           isLoading={isGenerating}
           disabled={
-            isGenerating || !aiFeatures || !aiFeatures.enabled || !aiFeatures.selectedConnector
+            isSubmitting ||
+            isGenerating ||
+            !aiFeatures ||
+            !aiFeatures.enabled ||
+            !aiFeatures.selectedConnector
           }
           iconType="sparkles"
           onClick={() => {
@@ -140,6 +145,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave }: Props)
       </EuiFlexGroup>
 
       <SignificantEventsGeneratedTable
+        isSubmitting={isSubmitting}
         generatedQueries={generatedQueries}
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}

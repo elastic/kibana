@@ -10,13 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { StreamQueryKql } from '@kbn/streams-schema';
 
-export function useSignificantEventValidation({
-  queryValues,
-}: {
-  queryValues: Partial<StreamQueryKql>;
-}) {
+export function useSignificantEventValidation(query: Partial<StreamQueryKql>) {
   const validation = useMemo(() => {
-    const { title = '', kql: { query: kqlQuery } = { query: '' } } = queryValues;
+    const { title = '', kql: { query: kqlQuery } = { query: '' } } = query;
     const titleEmptyError = title.length === 0;
     const kqlEmptyError = kqlQuery.length === 0;
 
@@ -50,7 +46,7 @@ export function useSignificantEventValidation({
       title: titleErrorMessage,
       kql: kqlErrorMessage,
     };
-  }, [queryValues]);
+  }, [query]);
 
   return validation;
 }

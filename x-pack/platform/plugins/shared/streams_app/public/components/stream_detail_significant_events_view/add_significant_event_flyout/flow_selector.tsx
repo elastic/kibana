@@ -19,9 +19,10 @@ import type { Flow } from './types';
 interface Props {
   selected?: Flow;
   updateSelected: (flow: Flow) => void;
+  isSubmitting: boolean;
 }
 
-export function FlowSelector({ selected, updateSelected }: Props) {
+export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) {
   const flowRadioGroupId = useGeneratedHtmlId({ prefix: 'flowRadioGroup' });
   const manualCheckableCardId = useGeneratedHtmlId({
     prefix: 'manualCheckableCard',
@@ -59,6 +60,7 @@ export function FlowSelector({ selected, updateSelected }: Props) {
         value="ai"
         checked={selected === 'ai'}
         onChange={() => updateSelected('ai')}
+        disabled={isSubmitting}
       />
       <EuiCheckableCard
         id={manualCheckableCardId}
@@ -87,6 +89,7 @@ export function FlowSelector({ selected, updateSelected }: Props) {
         value="manual"
         checked={selected === 'manual'}
         onChange={() => updateSelected('manual')}
+        disabled={isSubmitting}
       />
     </EuiFlexGroup>
   );

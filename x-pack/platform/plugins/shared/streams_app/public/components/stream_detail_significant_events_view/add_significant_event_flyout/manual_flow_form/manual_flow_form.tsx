@@ -30,13 +30,21 @@ import { useSparkplotDataFromSigEvents } from './use_spark_plot_data_from_sig_ev
 
 interface Props {
   definition: Streams.all.Definition;
-  setQuery: (query: StreamQueryKql) => void;
   query: StreamQueryKql;
   isEditMode: boolean;
+  isSubmitting: boolean;
+  setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
 }
 
-export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCanSave }: Props) {
+export function ManualFlowForm({
+  definition,
+  query,
+  setQuery,
+  isEditMode,
+  setCanSave,
+  isSubmitting,
+}: Props) {
   const {
     dependencies: {
       start: { data },
@@ -55,7 +63,7 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCan
     });
   }, [data.dataViews, definition.name]);
 
-  const validation = useSignificantEventValidation({ queryValues: query });
+  const validation = useSignificantEventValidation(query);
 
   const validationMessages = useMemo(() => {
     return {
@@ -84,7 +92,7 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCan
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    queryValues: query,
+    query,
     timeRange,
   });
 
@@ -124,6 +132,7 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCan
         >
           <EuiFieldText
             value={query?.title}
+            disabled={isSubmitting}
             onBlur={() => {
               setTouched((prev) => ({ ...prev, title: true }));
             }}
@@ -154,6 +163,7 @@ export function ManualFlowForm({ definition, query, setQuery, isEditMode, setCan
               query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
             }
             showQueryInput
+            isDisabled={isSubmitting}
             onQueryChange={() => {
               setTouched((prev) => ({ ...prev, kql: true }));
             }}

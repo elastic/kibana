@@ -79,6 +79,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
         <EuiFlexGroup direction="column" gutterSize="m">
           {!isEditMode && (
             <FlowSelector
+              isSubmitting={isSubmitting}
               selected={selectedFlow}
               updateSelected={(flow) => setSelectedFlow(flow)}
             />
@@ -86,6 +87,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
 
           {selectedFlow === 'manual' && (
             <ManualFlowForm
+              isSubmitting={isSubmitting}
               isEditMode={isEditMode}
               setQuery={(next: StreamQueryKql) => setQueries([next])}
               query={queries[0]}
@@ -98,6 +100,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
 
           {selectedFlow === 'ai' && (
             <GeneratedFlowForm
+              isSubmitting={isSubmitting}
               definition={definition}
               setQueries={(next: StreamQueryKql[]) => {
                 setQueries(next);
