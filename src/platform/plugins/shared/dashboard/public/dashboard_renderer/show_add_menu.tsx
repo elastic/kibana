@@ -76,7 +76,16 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
             const overlayRef = coreServices.overlays.openFlyout(
               toMountPoint(
                 React.createElement(function () {
-                  return <AddPanelFlyout dashboardApi={dashboardApi} />;
+                  return (
+                    <AddPanelFlyout
+                      dashboardApi={dashboardApi}
+                      closeFlyout={() => {
+                        dashboardApi.clearOverlays();
+                        overlayRef.close();
+                      }}
+                      ariaLabelledBy="addPanelsFlyout"
+                    />
+                  );
                 }),
                 coreServices
               ),
@@ -84,16 +93,19 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
                 size: 'm',
                 maxWidth: 500,
                 paddingSize: 'm',
-                'aria-labelledby': 'addPanelsFlyout',
                 'data-test-subj': 'dashboardPanelSelectionFlyout',
-                onClose() {
-                  dashboardApi.clearOverlays();
-                  overlayRef.close();
-                },
               }
             );
 
             dashboardApi.openOverlay(overlayRef);
+            closePopover();
+          },
+        },
+        {
+          name: 'Add a collapsible section',
+          icon: 'section',
+          onClick: () => {
+            dashboardApi.addNewSection();
             closePopover();
           },
         },
