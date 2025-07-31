@@ -129,6 +129,7 @@ src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
+src/core/packages/chrome/navigation @elastic/eui-team
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -2401,6 +2402,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/functional/ @elastic/security-solution
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
+/x-pack/test/common/utils/security_solution/spaces.ts @elastic/security-detection-rule-management
 /x-pack/solutions/security/test/plugin_functional/ @elastic/security-solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
