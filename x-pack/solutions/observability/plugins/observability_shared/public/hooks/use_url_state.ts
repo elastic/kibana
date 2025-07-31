@@ -47,7 +47,7 @@ export const useUrlState = <State>({
   }, [defaultState, decodedState]);
 
   const setState = useCallback(
-    (patch: State | undefined | ((prevState?: State) => State)) => {
+    (patch: State | undefined | ((prevState: State) => State)) => {
       if (!history || !history.location) {
         return;
       }
@@ -60,7 +60,7 @@ export const useUrlState = <State>({
         )
       );
 
-      const newState = patch instanceof Function ? patch(decodedUrlState) : patch;
+      const newState = patch instanceof Function ? patch(decodedUrlState ?? ({} as State)) : patch;
 
       const newLocation = replaceQueryStringInLocation(
         currentLocation,
