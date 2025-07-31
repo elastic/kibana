@@ -18,6 +18,7 @@ import {
   useInternalStateDispatch,
 } from '../state_management/redux';
 import { CONTROLS_STORAGE_KEY } from '../../../../common/constants';
+import { TABS_ENABLED } from '../../../constants';
 
 /**
  * @param panels - The control panels state, which may be null.
@@ -85,7 +86,9 @@ export const useESQLVariables = ({
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const currentTabIdWhenTabsEnabled = useCurrentTabSelector((tab) => tab.id);
+  // When tabs are not enabled, the above hook returns a random string after refresh
+  const currentTabId = TABS_ENABLED ? currentTabIdWhenTabsEnabled : 'default';
 
   const [controlsStateMap, setControlsStateMap] = useSessionStorage<
     ESQLControlSessionStorage | undefined
