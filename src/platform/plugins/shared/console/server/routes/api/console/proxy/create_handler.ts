@@ -104,7 +104,7 @@ export const createHandler =
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { method, path, withProductOrigin } = query;
+    const { method, path, withProductOrigin, host: requestHost } = query;
 
     if (kibanaVersion.major < 8) {
       // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
@@ -123,59 +123,60 @@ export const createHandler =
     const { hosts } = legacyConfig;
     let esIncomingMessage: IncomingMessage;
 
-    for (let idx = 0; idx < hosts.length; ++idx) {
-      const host = hosts[idx];
-      try {
-        const uri = toURL(host, path);
+    // Use the requested host if provided, otherwise use the first configured host
+    const host = requestHost || hosts[0];
+    try {
+      const uri = toURL(host, path);
 
-        // Because this can technically be provided by a settings-defined proxy config, we need to
-        // preserve these property names to maintain BWC.
-        const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
-          request.headers,
-          legacyConfig,
-          uri.toString(),
-          kibanaVersion,
-          proxyConfigCollection
-        );
+      // Because this can technically be provided by a settings-defined proxy config, we need to
+      // preserve these property names to maintain BWC.
+      const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
+        request.headers,
+        legacyConfig,
+        uri.toString(),
+        kibanaVersion,
+        proxyConfigCollection
+      );
 
-        const requestHeaders = {
-          ...headers,
-          ...getProxyHeaders(request),
-          // There are a few internal calls that console UI makes to ES in order to get mappings, aliases and templates
-          // in the autocomplete mechanism from the editor. At this particular time, those requests generate deprecation
-          // logs since they access system indices. With this header we can provide a way to the UI to determine which
-          // requests need to deprecation logs and which ones dont.
-          ...(withProductOrigin && { 'x-elastic-product-origin': 'kibana' }),
-        };
+      const requestHeaders = {
+        ...headers,
+        ...getProxyHeaders(request),
+        // There are a few internal calls that console UI makes to ES in order to get mappings, aliases and templates
+        // in the autocomplete mechanism from the editor. At this particular time, those requests generate deprecation
+        // logs since they access system indices. With this header we can provide a way to the UI to determine which
+        // requests need to deprecation logs and which ones dont.
+        ...(withProductOrigin && { 'x-elastic-product-origin': 'kibana' }),
+      };
 
-        esIncomingMessage = await proxyRequest({
-          method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
-          headers: requestHeaders,
-          uri,
-          timeout,
-          payload: body,
-          rejectUnauthorized,
-          agent,
-        });
+      esIncomingMessage = await proxyRequest({
+        method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
+        headers: requestHeaders,
+        uri,
+        timeout,
+        payload: body,
+        rejectUnauthorized,
+        agent,
+      });
+    } catch (e) {
+      log.error(e);
+      log.warn(`Could not connect to ES node [${host}]`);
 
-        break;
-      } catch (e) {
-        // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
-        // We try contacting another node in that case.
-        log.error(e);
-        if (idx === hosts.length - 1) {
-          log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
-          return response.customError({
-            statusCode: 502,
-            body: e,
-            headers: {
-              'x-console-proxy-status-code': '502',
-              'x-console-proxy-status-text': 'Bad Gateway',
-            },
-          });
-        }
-        // Otherwise, try the next host...
-      }
+      const hasMultipleHosts = hosts.length > 1;
+      const errorMessage =
+        'Could not connect to Elasticsearch node. Try selecting a different host from Console > Config > General settings > Elasticsearch host.';
+
+      return response.custom({
+        statusCode: 502,
+        body: {
+          message: 'An internal server error occurred. Check Kibana server logs for details.',
+        },
+        headers: {
+          'x-console-proxy-status-code': '502',
+          'x-console-proxy-status-text': 'Bad Gateway',
+          'content-type': 'application/json',
+          ...(hasMultipleHosts && { warning: errorMessage }),
+        },
+      });
     }
 
     const {
