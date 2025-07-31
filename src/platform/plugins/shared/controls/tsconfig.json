@@ -43,7 +43,12 @@
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/kibana-react-plugin",
+    "@kbn/esql-editor",
+    "@kbn/expressions-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }
