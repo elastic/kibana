@@ -117,7 +117,7 @@ describe('ElasticSearchSaver', () => {
     saver = new ElasticSearchSaver({
       client,
       refreshPolicy: 'wait_for',
-      logger: mockLogger
+      logger: mockLogger,
     });
   });
 
