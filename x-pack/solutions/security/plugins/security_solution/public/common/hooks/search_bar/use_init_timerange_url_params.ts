@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
+import { useKibana } from '../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
 import type {
@@ -27,10 +28,18 @@ import { InputsModelId } from '../../store/inputs/constants';
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+  const { serverless } = useKibana().services;
+  // only on serverless
+  const isValueReportEnabled = !!serverless;
   const onInitialize = useCallback(
     (initialState: UrlInputsModel | null) =>
-      initializeTimerangeFromUrlParam(initialState, dispatch, isSocTrendsEnabled),
-    [dispatch, isSocTrendsEnabled]
+      initializeTimerangeFromUrlParam(
+        initialState,
+        dispatch,
+        isSocTrendsEnabled,
+        isValueReportEnabled
+      ),
+    [dispatch, isSocTrendsEnabled, isValueReportEnabled]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.timerange, onInitialize);
@@ -39,7 +48,8 @@ export const useInitTimerangeFromUrlParam = () => {
 const initializeTimerangeFromUrlParam = (
   initialState: UrlInputsModel | null,
   dispatch: Dispatch,
-  isSocTrendsEnabled: boolean
+  isSocTrendsEnabled: boolean,
+  isValueReportEnabled: boolean
 ) => {
   if (initialState != null) {
     const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', initialState) };
@@ -178,8 +188,7 @@ const initializeTimerangeFromUrlParam = (
         );
       }
     }
-
-    if (valueReportType) {
+    if (valueReportType && isValueReportEnabled) {
       if (valueReportType === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('valueReport.timerange', initialState)

@@ -11,11 +11,13 @@ import * as redux from 'react-redux';
 import * as experimentalFeatures from '../use_experimental_features';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
+import { useKibana } from '../../lib/kibana';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: jest.fn(),
 }));
+jest.mock('../../lib/kibana');
 jest.mock('../use_experimental_features', () => ({ useIsExperimentalFeatureEnabled: jest.fn() }));
 jest.mock('../../utils/global_query_string', () => ({ useInitializeUrlParam: jest.fn() }));
 
@@ -25,6 +27,12 @@ describe('useInitTimerangeFromUrlParam', () => {
     jest.clearAllMocks();
     (redux.useDispatch as jest.Mock).mockReturnValue(dispatch);
     (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        serverless: {},
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
   });
 
   it('should call useInitializeUrlParam with correct params', () => {
@@ -37,7 +45,29 @@ describe('useInitTimerangeFromUrlParam', () => {
     );
   });
 
-  it('should pass isSocTrendsEnabled to initializeTimerangeFromUrlParam', () => {
+  it('should call dispatch 2 times on init url params when not serverless', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    renderHook(() => useInitTimerangeFromUrlParam(), {
+      wrapper: TestProviders,
+    });
+    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
+    callback({ valueReport: { timerange: { kind: 'absolute' } } });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call dispatch 3 times on init url params when serverless and valueReport exists', () => {
+    renderHook(() => useInitTimerangeFromUrlParam(), {
+      wrapper: TestProviders,
+    });
+    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
+    callback({ valueReport: { timerange: { kind: 'absolute' } } });
+    expect(dispatch).toHaveBeenCalledTimes(3);
+  });
+
+  it('should call dispatch 6 times on init url params when serverless, valueReport exists, and isSocTrendsEnabled=true', () => {
     (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     renderHook(() => useInitTimerangeFromUrlParam(), {
       wrapper: TestProviders,
@@ -45,11 +75,15 @@ describe('useInitTimerangeFromUrlParam', () => {
     // Extract the callback passed to useInitializeUrlParam
     const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
     // Call the callback with a mock state
-    callback({});
+    callback({
+      valueReport: { timerange: { kind: 'absolute' } },
+      socTrends: { timerange: { kind: 'absolute' } },
+    });
     // No assertion here, but you could spy on internal helpers if exported
     expect(experimentalFeatures.useIsExperimentalFeatureEnabled).toHaveBeenCalledWith(
       'socTrendsEnabled'
     );
+    expect(dispatch).toHaveBeenCalledTimes(6);
   });
 
   it('should not throw if initialState is null', () => {
