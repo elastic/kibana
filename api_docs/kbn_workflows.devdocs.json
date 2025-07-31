@@ -329,20 +329,6 @@
             "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/workflows",
-            "id": "def-common.ConnectorContract.availableConnectorIds",
-            "type": "Array",
-            "tags": [],
-            "label": "availableConnectorIds",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

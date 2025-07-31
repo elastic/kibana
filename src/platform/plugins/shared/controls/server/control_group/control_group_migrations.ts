@@ -8,11 +8,8 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import {
-  OPTIONS_LIST_CONTROL,
-  type ControlPanelsState,
-  type SerializedControlState,
-} from '../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { ControlPanelsState, SerializedControlState } from '../../common';
 import { OptionsListControlState } from '../../common/options_list';
 import { SerializableControlGroupState } from './types';
 
