@@ -47,16 +47,6 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
 ];
 
-interface AzureCredentialsFormProps {
-  newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
-  updatePolicy: UpdatePolicy;
-  packageInfo: PackageInfo;
-  disabled: boolean;
-  hasInvalidRequiredVars: boolean;
-  isValid: boolean;
-}
-
 const ArmTemplateSetup = ({
   hasArmTemplateUrl,
   input,
@@ -208,6 +198,16 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
+
+interface AzureCredentialsFormProps {
+  newPolicy: NewPackagePolicy;
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  updatePolicy: UpdatePolicy;
+  packageInfo: PackageInfo;
+  disabled: boolean;
+  hasInvalidRequiredVars: boolean;
+  isValid: boolean;
+}
 
 export const AzureCredentialsForm = ({
   input,

@@ -10,6 +10,7 @@ import type {
   CspFinding,
   MisconfigurationEvaluationStatus,
 } from '@kbn/cloud-security-posture-common';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
@@ -21,6 +22,12 @@ export type AwsCredentialsType =
   | 'temporary_keys'
   | 'shared_credentials'
   | 'cloud_formation';
+
+export type UpdatePolicy = (params: {
+  updatedPolicy: NewPackagePolicy;
+  isValid?: boolean;
+  isExtensionLoaded?: boolean;
+}) => void;
 
 export type AwsCredentialsTypeFieldMap = {
   [key in AwsCredentialsType]: string[];

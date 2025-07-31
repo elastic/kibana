@@ -12,9 +12,10 @@ import {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
+import { PackagePolicyFormState } from '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/types';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
+import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
@@ -51,6 +52,7 @@ const getSelectedOption = (
 
 const usePolicyTemplateInitialName = ({
   isEditPage,
+  isLoading,
   integration,
   newPolicy,
   packagePolicyList,
@@ -58,15 +60,15 @@ const usePolicyTemplateInitialName = ({
   setCanFetchIntegration,
 }: {
   isEditPage: boolean;
+  isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  updatePolicy: UpdatePolicy;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
-    if (!integration) return;
-    if (isEditPage) return;
+    if (!integration || isEditPage || isLoading) return;
 
     const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
@@ -79,61 +81,70 @@ const usePolicyTemplateInitialName = ({
      * if policie were fetched its an array - the check will return true
      */
     const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
-    updatePolicy(
-      {
+
+    updatePolicy({
+      updatedPolicy: {
         ...newPolicy,
         name: currentIntegrationName,
       },
-      isPoliciesLoaded
-    );
+      isExtensionLoaded: isPoliciesLoaded,
+    });
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [integration, isEditPage, packagePolicyList]);
+  }, [integration, isEditPage, packagePolicyList, isLoading]);
 };
 
 const useCloudFormationTemplate = ({
   packageInfo,
   newPolicy,
   updatePolicy,
+  isLoading,
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  updatePolicy: UpdatePolicy;
+  isLoading: boolean;
 }) => {
-  if (
-    newPolicy.inputs.some(
-      (input) =>
-        input.type === CLOUDBEAT_VULN_MGMT_AWS && input.config?.cloud_formation_template_url
-    )
-  ) {
-    return;
-  }
+  useEffect(() => {
+    if (
+      isLoading ||
+      newPolicy.inputs.some(
+        (input) =>
+          input.type === CLOUDBEAT_VULN_MGMT_AWS && input.config?.cloud_formation_template_url
+      )
+    ) {
+      return;
+    }
 
-  const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
+    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
 
-  // If the template is not available, do not update the policy
-  if (templateUrl === '') return;
+    // If the template is not available, do not update the policy
+    if (templateUrl === '') return;
 
-  const checkCurrentTemplate = newPolicy?.inputs?.find(
-    (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
-  )?.config?.cloud_formation_template_url?.value;
+    const checkCurrentTemplate = newPolicy?.inputs?.find(
+      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
+    )?.config?.cloud_formation_template_url?.value;
 
-  // If the template is already set, do not update the policy
-  if (checkCurrentTemplate === templateUrl) return;
+    // If the template is already set, do not update the policy
+    if (checkCurrentTemplate === templateUrl) return;
 
-  updatePolicy?.({
-    ...newPolicy,
-    inputs: newPolicy.inputs.map((input) => {
-      if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
-        return {
-          ...input,
-          config: { cloud_formation_template_url: { value: templateUrl } },
-        };
-      }
-      return input;
-    }),
-  });
+    updatePolicy?.({
+      updatedPolicy: {
+        ...newPolicy,
+        inputs: newPolicy.inputs.map((input) => {
+          if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
+            return {
+              ...input,
+              config: { cloud_formation_template_url: { value: templateUrl } },
+            };
+          }
+          return input;
+        }),
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };
 
 interface UseLoadFleetExtensionProps {
@@ -146,6 +157,7 @@ interface UseLoadFleetExtensionProps {
   isEditPage: boolean;
   packageInfo: PackageInfo;
   integrationToEnable?: CloudSecurityPolicyTemplate;
+  formState?: PackagePolicyFormState;
 }
 
 const DEFAULT_INPUT_TYPE = {
@@ -160,9 +172,9 @@ export const useLoadFleetExtension = ({
   isEditPage,
   packageInfo,
   integrationToEnable,
+  formState,
 }: UseLoadFleetExtensionProps) => {
   const { cloud, uiSettings } = useKibana().services;
-  const isServerless = !!cloud.serverless.projectType;
   const integration =
     integrationToEnable &&
     SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
@@ -171,89 +183,89 @@ export const useLoadFleetExtension = ({
   const input = getSelectedOption(newPolicy.inputs, integration);
   const enabledPolicyInputCount = newPolicy.inputs.filter((i) => i.enabled).length;
 
-  const isValidRef = useRef(true);
-  const setIsValid = useCallback((valid: boolean) => {
-    if (valid !== isValidRef.current) {
-      isValidRef.current = valid;
-    }
-  }, []);
-
   const [isLoading, setIsLoading] = useState(true);
   const [canFetchIntegration, setCanFetchIntegration] = useState(true);
+  const setInitialEnabledInputRef = useRef(false);
 
   const getIsSubscriptionValid = useIsSubscriptionStatusValid();
   const isSubscriptionValid = !!getIsSubscriptionValid.data;
   const isSubscriptionLoading = !!getIsSubscriptionValid.isLoading;
-
-  const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
-    enabled: canFetchIntegration,
-  });
+  const isValidFormState =
+    formState === 'VALID' ? true : formState === 'INVALID' ? false : undefined;
 
   const updatePolicy = useCallback(
-    (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean, isValid?: boolean) => {
-      if (isValid !== undefined && isValid !== isValidRef.current) {
-        setIsValid(isValid);
-      }
+    ({
+      updatedPolicy,
+      isExtensionLoaded,
+      isValid,
+    }: {
+      updatedPolicy: NewPackagePolicy;
+      isExtensionLoaded?: boolean;
+      isValid?: boolean;
+    }) => {
       onChange({
-        isValid: isValid !== undefined ? isValid : isValidRef.current,
+        isValid: isValid !== undefined && isValid !== isValidFormState ? isValid : true,
         updatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isLoading, onChange, setIsValid]
+    [isLoading, isValidFormState, onChange]
   );
-
-  useCloudFormationTemplate({
-    packageInfo,
-    updatePolicy,
-    newPolicy,
-  });
 
   const setEnabledPolicyInput = useCallback(
     (inputType: PostureInput) => {
       const inputVars = getPostureInputHiddenVars(inputType);
       const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-      updatePolicy(policy);
+      updatePolicy({ updatedPolicy: policy });
     },
     [newPolicy, updatePolicy]
   );
 
+  const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+    enabled: canFetchIntegration,
+  });
+
+  if (
+    !isEditPage &&
+    !isLoading &&
+    !isSubscriptionLoading &&
+    !setInitialEnabledInputRef.current &&
+    (enabledPolicyInputCount === 0 || enabledPolicyInputCount > 1)
+  ) {
+    setInitialEnabledInputRef.current = true;
+    setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+    refetch();
+  }
+
+  useCloudFormationTemplate({
+    packageInfo,
+    updatePolicy,
+    newPolicy,
+    isLoading,
+  });
+
   usePolicyTemplateInitialName({
     packagePolicyList: packagePolicyList?.items,
     isEditPage,
+    isLoading,
     integration: integration as CloudSecurityPolicyTemplate,
     newPolicy,
     updatePolicy,
     setCanFetchIntegration,
   });
 
-  if (!isSubscriptionLoading && isLoading) {
+  if (!isSubscriptionLoading && isLoading && isValidFormState !== undefined) {
     setIsLoading(false);
-  }
-
-  if ((!!isSubscriptionValid && !isValidRef.current) || (!isValidRef.current && isServerless)) {
-    isValidRef.current = true;
-  }
-
-  if (
-    !isEditPage &&
-    !isLoading &&
-    !isSubscriptionLoading &&
-    (enabledPolicyInputCount === 0 || enabledPolicyInputCount > 1)
-  ) {
-    setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-    refetch();
   }
 
   return {
     cloud,
     isLoading,
-    isValid: isValidRef.current,
+    isValid: !!isValidFormState,
     isSubscriptionValid,
     input,
     setEnabledPolicyInput,
     updatePolicy,
-    setIsValid,
     uiSettings,
   };
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
@@ -59,6 +59,14 @@ const getAzureAccountType = (
 
 const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
 
+interface AzureAccountTypeSelectProps {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: UpdatePolicy;
+  disabled: boolean;
+  packageInfo: PackageInfo;
+  setupTechnology: SetupTechnology;
+}
 export const AzureAccountTypeSelect = ({
   input,
   newPolicy,
@@ -66,14 +74,7 @@ export const AzureAccountTypeSelect = ({
   disabled,
   packageInfo,
   setupTechnology,
-}: {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: UpdatePolicy;
-  disabled: boolean;
-  packageInfo: PackageInfo;
-  setupTechnology: SetupTechnology;
-}) => {
+}: AzureAccountTypeSelectProps) => {
   const isAzureOrganizationDisabled = isBelowMinVersion(
     packageInfo.version,
     AZURE_ORG_MINIMUM_PACKAGE_VERSION
@@ -81,25 +82,22 @@ export const AzureAccountTypeSelect = ({
   const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
-  useEffect(() => {
-    if (!getAzureAccountType(input)) {
-      updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
-          'azure.account_type': {
-            value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
-            type: 'text',
-          },
-          'azure.credentials.type': {
-            value: isAgentless
-              ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-              : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-            type: 'text',
-          },
-        }),
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, updatePolicy]);
+  if (!getAzureAccountType(input)) {
+    updatePolicy({
+      updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        'azure.account_type': {
+          value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
+          type: 'text',
+        },
+        'azure.credentials.type': {
+          value: isAgentless
+            ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+            : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+          type: 'text',
+        },
+      }),
+    });
+  }
 
   return (
     <>

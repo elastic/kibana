@@ -18,7 +18,7 @@ import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/service
 import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
+import type { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from './types';
 import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
 import { PolicyTemplateInputSelector } from './policy_template_selectors';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
@@ -56,13 +56,8 @@ interface CloudSetupProps {
   isValid: boolean;
   namespaceSupportEnabled?: boolean;
   newPolicy: NewPackagePolicy;
-  onChange: (opts: {
-    isValid: boolean;
-    updatedPolicy: NewPackagePolicy;
-    isExtensionLoaded?: boolean;
-  }) => void;
+  updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
-  setIsValid: (isValid: boolean) => void;
   validationResults?: PackagePolicyValidationResults;
   uiSettings: IUiSettingsClient;
 }
@@ -78,16 +73,14 @@ export const CloudSetup = memo<CloudSetupProps>(
     isValid,
     namespaceSupportEnabled = false,
     newPolicy,
-    onChange,
+    updatePolicy,
     packageInfo,
-    setIsValid,
     validationResults,
     uiSettings,
   }: CloudSetupProps) => {
     const {
       input,
       setEnabledPolicyInput,
-      updatePolicy,
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
@@ -96,7 +89,7 @@ export const CloudSetup = memo<CloudSetupProps>(
       hasInvalidRequiredVars,
     } = useLoadCloudSetup({
       newPolicy,
-      onChange,
+      updatePolicy,
       validationResults,
       isEditPage,
       packageInfo,
@@ -106,8 +99,8 @@ export const CloudSetup = memo<CloudSetupProps>(
       integrationToEnable,
       cloud,
       uiSettings,
-      setIsValid,
-      isValid,
+      // setIsValid,
+      // isValid,
     });
 
     const { euiTheme } = useEuiTheme();

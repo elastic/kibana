@@ -67,6 +67,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     defaultSetupTechnology,
     integrationToEnable,
     setIntegrationToEnable,
+    formState,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
 
@@ -85,7 +86,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isSubscriptionValid,
       isValid,
       setEnabledPolicyInput,
-      setIsValid,
       uiSettings,
       updatePolicy,
     } = useLoadFleetExtension({
@@ -94,6 +94,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isEditPage,
       packageInfo,
       integrationToEnable: integrationToEnable as 'cspm' | 'kspm' | 'vuln_mgmt' | undefined,
+      formState,
     });
 
     if (isLoading) {
@@ -149,15 +150,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {input.policy_template === CSPM_POLICY_TEMPLATE && (
           <CloudSetup
             newPolicy={newPolicy}
-            onChange={onChange}
+            updatePolicy={updatePolicy}
             packageInfo={packageInfo}
             isEditPage={isEditPage}
             validationResults={validationResults}
             defaultSetupTechnology={defaultSetupTechnology}
             isAgentlessEnabled={isAgentlessEnabled}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            namespaceSupportEnabled={true}
-            setIsValid={setIsValid}
             isValid={isValid}
             cloud={cloud}
             uiSettings={uiSettings}
@@ -174,7 +173,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             validationResults={validationResults}
             isEditPage={isEditPage}
             input={input}
-            onChange={onChange}
           />
         )}
 

@@ -150,6 +150,7 @@ describe('<CspPolicyTemplateForm />', () => {
               isEditPage={true}
               isAgentlessEnabled={isAgentlessEnabled}
               integrationToEnable={integrationToEnable}
+              formState="VALID"
             />
           )}
           {!edit && (
@@ -162,6 +163,7 @@ describe('<CspPolicyTemplateForm />', () => {
               integrationToEnable={integrationToEnable || integrationToEnableState}
               defaultSetupTechnology={defaultSetupTechnology}
               setIntegrationToEnable={setIntegrationToEnable}
+              formState="VALID"
             />
           )}
         </TestProvider>
@@ -1477,7 +1479,7 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Azure Credentials input fields', () => {
-    it.skip(`renders ${CLOUDBEAT_AZURE} Not supported when version is not at least version 1.6.0`, () => {
+    it(`renders ${CLOUDBEAT_AZURE} Not supported when version is not at least version 1.6.0`, () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
         'azure.credentials.type': { value: 'arm_template' },
@@ -1535,7 +1537,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+        isValid: false,
         updatedPolicy: policy,
       });
     });

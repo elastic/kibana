@@ -20,7 +20,7 @@ import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import type { PostureInput } from '../../../../common/types_old';
+import type { PostureInput, UpdatePolicy } from '../../../../common/types_old';
 import { CnvmKspmTemplateInfo } from './cnvm_kspm_info';
 import { KspmEksInputSelector } from './kspm_eks_input_selector';
 import { EksCredentialsForm } from './eks_credentials_form';
@@ -84,13 +84,8 @@ interface CnvmKspmSetupProps {
   isEditPage: boolean;
   input: NewPackagePolicyInput;
   setEnabledPolicyInput: (input: Extract<PostureInput, 'kspm' | 'vuln_mgmt'>) => void;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: UpdatePolicy;
   newPolicy: NewPackagePolicy;
-  onChange: (opts: {
-    isValid: boolean;
-    updatedPolicy: NewPackagePolicy;
-    isExtensionLoaded?: boolean;
-  }) => void;
   validationResults?: PackagePolicyValidationResults;
   packageInfo: PackageInfo;
 }
@@ -156,7 +151,9 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
           )}
           <IntegrationSettings
             fields={integrationFields}
-            onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+            onChange={(field, value) =>
+              updatePolicy({ updatedPolicy: { ...newPolicy, [field]: value } })
+            }
           />
 
           {/* Namespace selector */}
@@ -189,7 +186,7 @@ export const CnvmKspmSetup = memo<CnvmKspmSetupProps>(
                   isEditPage={isEditPage}
                   validationError={validationResults?.namespace}
                   onNamespaceChange={(namespace: string) => {
-                    updatePolicy({ ...newPolicy, namespace });
+                    updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                   }}
                   data-test-subj="namespaceInput"
                   labelId="xpack.csp.fleetIntegration.namespaceLabel"

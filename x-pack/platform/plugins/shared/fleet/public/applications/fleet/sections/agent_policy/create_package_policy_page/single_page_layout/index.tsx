@@ -430,6 +430,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onChange={handleExtensionViewOnChange}
             validationResults={validationResults}
             isEditPage={false}
+            formState={formState}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
             defaultSetupTechnology={defaultSetupTechnology}

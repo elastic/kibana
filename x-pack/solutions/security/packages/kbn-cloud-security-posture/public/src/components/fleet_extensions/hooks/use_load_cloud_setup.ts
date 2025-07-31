@@ -12,7 +12,7 @@ import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constan
 import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CloudSecurityPolicyTemplate, PostureInput } from '../types';
+import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../types';
 import {
   SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
   SUPPORTED_POLICY_TEMPLATES,
@@ -55,11 +55,7 @@ const getSelectedOption = (
 
 interface UseLoadCloudSetupProps {
   newPolicy: NewPackagePolicy;
-  onChange: (args: {
-    isValid: boolean;
-    updatedPolicy: NewPackagePolicy;
-    isExtensionLoaded?: boolean;
-  }) => void;
+  updatePolicy: UpdatePolicy;
   validationResults?: PackagePolicyValidationResults;
   isEditPage: boolean;
   packageInfo: PackageInfo;
@@ -70,13 +66,13 @@ interface UseLoadCloudSetupProps {
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   uiSettings: IUiSettingsClient;
   cloud: CloudSetup;
-  setIsValid: (isValid: boolean) => void;
-  isValid: boolean;
+  // setIsValid: (isValid: boolean) => void;
+  // isValid: boolean;
 }
 
 export const useLoadCloudSetup = ({
   newPolicy,
-  onChange,
+  updatePolicy,
   validationResults,
   isEditPage,
   packageInfo,
@@ -86,9 +82,9 @@ export const useLoadCloudSetup = ({
   handleSetupTechnologyChange,
   uiSettings,
   cloud,
-  isValid,
-  setIsValid,
-}: UseLoadCloudSetupProps) => {
+}: // isValid,
+// setIsValid,
+UseLoadCloudSetupProps) => {
   const isServerless = !!cloud.serverless.projectType;
   const integration =
     integrationToEnable &&
@@ -101,24 +97,24 @@ export const useLoadCloudSetup = ({
     uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
   const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
-  const updatePolicy = useCallback(
-    ({
-      updatedPolicy,
-      isValid: resetIsValid,
-      isExtensionLoaded,
-    }: {
-      updatedPolicy: NewPackagePolicy;
-      isValid?: boolean;
-      isExtensionLoaded?: boolean;
-    }) => {
-      onChange({
-        isValid: resetIsValid ? resetIsValid : isValid,
-        updatedPolicy,
-        isExtensionLoaded: isExtensionLoaded || true,
-      });
-    },
-    [isValid, onChange]
-  );
+  // const updatePolicy = useCallback(
+  //   ({
+  //     updatedPolicy,
+  //     isValid: resetIsValid,
+  //     isExtensionLoaded,
+  //   }: {
+  //     updatedPolicy: NewPackagePolicy;
+  //     isValid?: boolean;
+  //     isExtensionLoaded?: boolean;
+  //   }) => {
+  //     onChange({
+  //       isValid: resetIsValid ? resetIsValid : isValid,
+  //       updatedPolicy,
+  //       isExtensionLoaded: isExtensionLoaded || true,
+  //     });
+  //   },
+  //   [isValid, onChange]
+  // );
 
   const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
     input,
