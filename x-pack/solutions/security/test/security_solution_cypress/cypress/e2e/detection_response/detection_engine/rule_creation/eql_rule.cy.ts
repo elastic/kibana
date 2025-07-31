@@ -34,7 +34,7 @@ import {
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL Rule - Rule Creation', { tags: ['@here', '@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
