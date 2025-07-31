@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import { type Logger, type AnalyticsServiceSetup, type AuditLogger } from '@kbn/core/server';
+import { type Logger, type AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -35,7 +35,6 @@ interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
-  auditLogger: AuditLogger;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
@@ -66,7 +65,6 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 export const registerPrivilegeMonitoringTask = async ({
   getStartServices,
   logger,
-  auditLogger,
   telemetry,
   taskManager,
   kibanaVersion,
