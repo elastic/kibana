@@ -229,13 +229,13 @@ export function registerMlSnapshotRoutes({
 
         // If snapshot is *not* found in SO can be because update operation was not started or was completed
         if (typeof foundSnapshots === 'undefined' || foundSnapshots.total === 0) {
-          const { hasDeprecation } = await verifySnapshotUpgrade(esClient, {
+          const { hasDeprecation, isSuccessful } = await verifySnapshotUpgrade(esClient, {
             snapshotId,
             jobId,
           });
 
-          if (!hasDeprecation) {
-            // No deprecation exists for this snapshot, so it was already completed
+          if (isSuccessful && !hasDeprecation) {
+            // No deprecation exists for this snapshot and has been successfully upgraded, so it was already completed
             return response.ok({
               body: {
                 snapshotId,
