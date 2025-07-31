@@ -52,10 +52,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import {
-  confirmDiscardOrSaveUnsavedChanges,
-  confirmDiscardUnsavedChanges,
-} from '../dashboard_listing/confirm_overlays';
+import { confirmDiscardOrSaveUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 import { ViewModeToggle } from './view_mode_toggle';
 
 export interface InternalDashboardTopNavProps {

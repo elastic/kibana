@@ -15,7 +15,7 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { addFromLibrary } from './add_panel_from_library';
 import { DashboardApi } from '../dashboard_api/types';
@@ -23,6 +23,7 @@ import { executeAddLensPanelAction } from '../dashboard_actions/execute_add_lens
 import { AddPanelFlyout } from '../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout';
 import {
   getAddControlButtonTitle,
+  getControlButtonTitle,
   getAddESQLControlButtonTitle,
   getAddTimeSliderControlButtonTitle,
 } from '../dashboard_app/_dashboard_app_strings';
@@ -113,6 +114,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
     },
     {
       id: 1,
+      title: getControlButtonTitle(),
       initialFocusedItemIndex: 1,
       items: [
         {

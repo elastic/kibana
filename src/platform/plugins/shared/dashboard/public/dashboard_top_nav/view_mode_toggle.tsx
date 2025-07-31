@@ -13,10 +13,7 @@ import { EuiButtonGroup, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { DashboardApi } from '../dashboard_api/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import {
-  confirmDiscardOrSaveUnsavedChanges,
-  confirmDiscardUnsavedChanges,
-} from '../dashboard_listing/confirm_overlays';
+import { confirmDiscardOrSaveUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 
 export const ViewModeToggle = ({
   viewMode,
