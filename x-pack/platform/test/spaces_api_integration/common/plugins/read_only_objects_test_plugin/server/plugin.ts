@@ -126,11 +126,22 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         },
       },
       async (context, request, response) => {
-        const soClient = (await context.core).savedObjects.client;
-        const result = await soClient.get(READ_ONLY_TYPE, request.params.objectId);
-        return response.ok({
-          body: result,
-        });
+        try {
+          const soClient = (await context.core).savedObjects.client;
+          const result = await soClient.get(READ_ONLY_TYPE, request.params.objectId);
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          if (error.output && error.output.statusCode === 404) {
+            return response.notFound({
+              body: error.message,
+            });
+          }
+          return response.forbidden({
+            body: error.message,
+          });
+        }
       }
     );
     router.put(
@@ -246,6 +257,35 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
           });
         } catch (error) {
           return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
+    router.delete(
+      {
+        path: '/read_only_objects/{objectId}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          params: schema.object({
+            objectId: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const soClient = (await context.core).savedObjects.client;
+          const result = await soClient.delete(READ_ONLY_TYPE, request.params.objectId);
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.badRequest({
             body: error.message,
           });
         }
