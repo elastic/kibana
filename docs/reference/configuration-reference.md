@@ -31,3 +31,4 @@ The settings are grouped by feature or purpose, for example:
 - [Telemetry](/reference/configuration-reference/telemetry-settings.md)
 - [URL drilldown](/reference/configuration-reference/url-drilldown-settings.md)
 - [Product intercept](/reference/configuration-reference/product-intercept-settings.md)
+- [Share] (/reference/configuration-reference/share-settings.md)
