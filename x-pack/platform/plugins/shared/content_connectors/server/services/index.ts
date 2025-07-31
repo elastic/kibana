@@ -244,6 +244,7 @@ export class AgentlessConnectorsInfraService {
       options: {
         withSysMonitoring: true,
         spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
+        force: true,
       },
     });
 
