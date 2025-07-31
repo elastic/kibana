@@ -7,11 +7,14 @@
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import TestAgent from 'supertest/lib/agent';
+import expect from '@kbn/expect';
+import { createSupertestErrorLogger } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('@ess @serverless @serverlessQA Response Actions support for sentinelOne agentType', function () {
     const utils = getService('securitySolutionUtils');
+    const log = getService('log');
 
     let adminSupertest: TestAgent;
     before(async () => {
@@ -20,17 +23,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
       it('should not return feature disabled error, but a connector not found error', async () => {
-        await adminSupertest
+        const { body } = await adminSupertest
           .post(ISOLATE_HOST_ROUTE_V2)
           .set('kbn-xsrf', 'true')
           .set('Elastic-Api-Version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
           .send({ endpoint_ids: ['test'], agent_type: 'sentinel_one' })
-          .expect(400, {
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'Unable to build list of indexes while retrieving policy information for SentinelOne agents [test]. Check to ensure at least one integration policy exists.',
-          });
+          .expect(404);
+
+        expect(body.message).to.match(/No stack connector instance configured for/);
       });
     });
   });
