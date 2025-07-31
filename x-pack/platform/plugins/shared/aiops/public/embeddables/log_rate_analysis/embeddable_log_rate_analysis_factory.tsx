@@ -139,6 +139,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
             flyoutProps: {
               hideCloseButton: true,
               focusedPanelId: uuid,
+              'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
+              'aria-labelledby': 'logRateAnalysisConfig',
             },
             loadContent: async ({ closeFlyout }) => {
               return (

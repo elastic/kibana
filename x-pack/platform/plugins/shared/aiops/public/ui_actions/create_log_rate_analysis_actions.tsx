@@ -78,6 +78,8 @@ export function createAddLogRateAnalysisEmbeddableAction(
         flyoutProps: {
           hideCloseButton: true,
           focusedPanelId: context.embeddable.uuid,
+          'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
+          'aria-labelledby': 'logRateAnalysisConfig',
         },
         loadContent: async ({ closeFlyout }) => {
           return (
