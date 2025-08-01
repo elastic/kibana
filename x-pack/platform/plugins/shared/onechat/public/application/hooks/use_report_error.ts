@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from './use_kibana';
 import { eventTypes } from '../../../common/events';
 
 const useReportEvent = () => {
@@ -22,7 +22,7 @@ const useReportEvent = () => {
       eventData: Record<string, unknown>;
     }) => {
       try {
-        analytics?.reportEvent(eventType, eventData);
+        analytics.reportEvent(eventType, eventData);
       } catch {
         // Discard analytics errors
       }
