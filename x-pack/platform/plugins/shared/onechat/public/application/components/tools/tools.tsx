@@ -15,8 +15,10 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiNotificationBadge,
   EuiPopover,
   EuiSearchBar,
   EuiSearchBarOnChangeArgs,
@@ -36,7 +38,7 @@ import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { noop } from 'lodash';
+import { countBy, noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -70,6 +72,44 @@ import { OnechatEsqlToolFormData } from './esql/form/types/esql_tool_form_types'
 import { OnechatToolTags } from './tags/tool_tags';
 
 const INCLUDE_SYSTEM_TOOLS = 'onechat:tools:includeSystemTools';
+
+interface ToolFilterOptionProps {
+  name: string;
+  matches: number;
+}
+
+const ToolFilterOption = ({ name, matches }: ToolFilterOptionProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        display: inline-flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-block: ${euiTheme.size.xs};
+        width: 100%;
+
+        &:hover .tool-filter-option-name {
+          text-decoration: underline;
+        }
+      `}
+    >
+      <EuiText className="tool-filter-option-name" size="s">
+        {name}
+      </EuiText>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          justify-content: center;
+        `}
+      >
+        <EuiNotificationBadge size="m" color="subdued">
+          {matches}
+        </EuiNotificationBadge>
+      </EuiFlexItem>
+    </div>
+  );
+};
 
 const ToolId = ({
   tool,
@@ -727,6 +767,14 @@ export const OnechatTools = () => {
     [tools, addErrorToast]
   );
 
+  const matchesByType = useMemo(() => {
+    return countBy(tools, 'type') as Record<ToolType, number>;
+  }, [tools]);
+
+  const matchesByTag = useMemo(() => {
+    return countBy(tools, 'tags');
+  }, [tools]);
+
   const search: Search = {
     onChange: onSearch,
     box: {
@@ -749,6 +797,14 @@ export const OnechatTools = () => {
             name: i18n.translate('xpack.onechat.tools.esqlLabel', {
               defaultMessage: 'ES|QL',
             }),
+            view: (
+              <ToolFilterOption
+                name={i18n.translate('xpack.onechat.tools.esqlLabel', {
+                  defaultMessage: 'ES|QL',
+                })}
+                matches={matchesByType[ToolType.esql] ?? 0}
+              />
+            ),
           },
           ...(includeSystemTools
             ? [
@@ -757,6 +813,14 @@ export const OnechatTools = () => {
                   name: i18n.translate('xpack.onechat.tools.builtinLabel', {
                     defaultMessage: 'System',
                   }),
+                  view: (
+                    <ToolFilterOption
+                      name={i18n.translate('xpack.onechat.tools.builtinLabel', {
+                        defaultMessage: 'System',
+                      })}
+                      matches={matchesByType[ToolType.builtin] ?? 0}
+                    />
+                  ),
                 },
               ]
             : []),
@@ -772,6 +836,7 @@ export const OnechatTools = () => {
         options: tags.map((tag) => ({
           value: tag,
           name: tag,
+          view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
         })),
         searchThreshold: 1,
       },
