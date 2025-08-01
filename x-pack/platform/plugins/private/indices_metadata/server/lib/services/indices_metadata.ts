@@ -197,26 +197,21 @@ export class IndicesMetadataService {
   ): Promise<TaskInstance | null> {
     this.logger.debug('About to schedule task', { task: TASK_ID } as LogMeta);
 
-    try {
-      const taskInstance = await taskManager.ensureScheduled({
-        id: TASK_ID,
-        taskType: TASK_TYPE,
-        schedule: { interval: INTERVAL },
-        params: {},
-        state: {},
-        scope: ['uptime'],
-      });
+    const taskInstance = await taskManager.ensureScheduled({
+      id: TASK_ID,
+      taskType: TASK_TYPE,
+      schedule: { interval: INTERVAL },
+      params: {},
+      state: {},
+      scope: ['uptime'],
+    });
 
-      this.logger.debug('Task scheduled', {
-        task: TASK_ID,
-        interval: taskInstance.schedule?.interval,
-      } as LogMeta);
+    this.logger.debug('Task scheduled', {
+      task: TASK_ID,
+      interval: taskInstance.schedule?.interval,
+    } as LogMeta);
 
-      return taskInstance;
-    } catch (error) {
-      this.logger.error('ng synthetics syncs task', { task: TASK_ID, error });
-      return null;
-    }
+    return taskInstance;
   }
 
   private async publishIndicesStats(indices: string[]): Promise<number> {
