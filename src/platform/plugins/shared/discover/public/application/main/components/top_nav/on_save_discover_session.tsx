@@ -125,9 +125,6 @@ export const onSaveDiscoverSession = async ({
         onSaveCb();
       } else if (response.id !== persistedDiscoverSession?.id) {
         services.locator.navigate({ savedSearchId: response.id });
-      } else {
-        // Update defaults so that "reload saved query" functions correctly
-        state.actions.undoSavedSearchChanges();
       }
     }
 
