@@ -1831,15 +1831,9 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
 ^/src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
 /x-pack/test/functional/apps/status_page @elastic/kibana-core
-<<<<<<< HEAD
-/x-pack/test/cloud_integration @elastic/kibana-core
-/x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-^/src/platform/test/server_integration @elastic/kibana-core
-=======
 /x-pack/platform/test/cloud_integration @elastic/kibana-core
 /x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
->>>>>>> 0f5ca5ff10e ([ska] relocate platform banner, cloud, so, custom branding tests (#227269))
 /x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
 ^/src/platform/test/plugin_functional/plugins/core* @elastic/kibana-core
