@@ -115,7 +115,7 @@ export interface InferenceServerStart {
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
 
-  listConnectors: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
 }
 
 /**

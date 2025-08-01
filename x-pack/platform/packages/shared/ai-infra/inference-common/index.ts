@@ -130,6 +130,7 @@ export {
   getConnectorFamily,
   getConnectorPlatform,
   getConnectorProvider,
+  getConnectorList,
   connectorToInference,
   getModelDefinition,
   getContextWindowSize,

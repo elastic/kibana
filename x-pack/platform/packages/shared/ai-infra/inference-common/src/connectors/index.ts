@@ -21,3 +21,4 @@ export {
 } from './connectors';
 export { getModelDefinition } from './known_models';
 export { getContextWindowSize, contextWindowFromModelName } from './connector_capabilities';
+export { getConnectorList } from './get_connector_list';

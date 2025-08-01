@@ -11,7 +11,8 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { getConnectorList, getDefaultConnector } from '../../runner/utils';
+import { getConnectorList } from '@kbn/inference-common';
+import { getDefaultConnector } from '../../runner/utils';
 
 export const getChatModel$ = ({
   connectorId,

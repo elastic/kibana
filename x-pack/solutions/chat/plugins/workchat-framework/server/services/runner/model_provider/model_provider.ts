@@ -6,7 +6,8 @@
  */
 
 import type { ModelProvider } from '@kbn/wc-framework-types-server';
-import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
+import { getDefaultConnector } from '@kbn/wc-genai-utils';
+import { getConnectorList } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';

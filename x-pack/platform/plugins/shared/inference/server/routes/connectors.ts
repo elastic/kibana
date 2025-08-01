@@ -5,27 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import {
-  InferenceConnector,
-  connectorToInference,
-  isSupportedConnector,
-} from '@kbn/inference-common';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import { getConnectorList } from '@kbn/inference-common';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
-
-export async function listConnectors(request: KibanaRequest, actions: ActionsPluginStart) {
-  const client = await actions.getActionsClientWithRequest(request);
-
-  const allConnectors = await client.getAll({
-    includeSystemActions: false,
-  });
-
-  const connectors: InferenceConnector[] = allConnectors
-    .filter((connector) => isSupportedConnector(connector))
-    .map(connectorToInference);
-  return connectors;
-}
 
 export function registerConnectorsRoute({
   coreSetup,
@@ -49,7 +31,7 @@ export function registerConnectorsRoute({
       const actions = await coreSetup
         .getStartServices()
         .then(([_coreStart, pluginsStart]) => pluginsStart.actions);
-      const connectors = await listConnectors(request, actions);
+      const connectors = await getConnectorList({ actions, request });
       return response.ok({ body: { connectors } });
     }
   );

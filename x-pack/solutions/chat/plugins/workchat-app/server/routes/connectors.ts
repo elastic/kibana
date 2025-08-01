@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getConnectorList } from '@kbn/wc-genai-utils';
+import { getConnectorList } from '@kbn/inference-common';
 import type { ListConnectorsResponse } from '../../common/http_api/connectors';
 import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
