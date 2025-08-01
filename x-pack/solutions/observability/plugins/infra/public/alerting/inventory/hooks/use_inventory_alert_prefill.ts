@@ -58,7 +58,7 @@ export const useInventoryAlertPrefill = () => {
       schema: state.schema,
       region: state.region,
       accountId: state.accountId,
-      setPartial: (value: Partial<InventoryPrefillState>) =>
+      setPrefillState: (value: Partial<InventoryPrefillState>) =>
         dispatch({ type: 'SET_PARTIAL', value }),
       reset: () => dispatch({ type: 'RESET' }),
     }),

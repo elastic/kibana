@@ -32,7 +32,7 @@ function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersStat
 export const useWaffleFilters = () => {
   const { currentView } = useInventoryViewsContext();
   const {
-    inventoryPrefill: { setPartial },
+    inventoryPrefill: { setPrefillState },
   } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
@@ -45,10 +45,12 @@ export const useWaffleFilters = () => {
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      const stateFromSavedView = mapInventoryViewToState(currentView);
+      setUrlState(stateFromSavedView);
+
       previousViewId.current = currentView.id;
     }
-  }, [currentView, setUrlState]);
+  }, [currentView, setPrefillState, setUrlState]);
 
   const isValidKuery = useCallback((expression: string) => {
     try {
@@ -69,8 +71,8 @@ export const useWaffleFilters = () => {
   );
 
   useEffect(() => {
-    setPartial({ kuery: urlState.expression });
-  }, [setPartial, urlState.expression]);
+    setPrefillState({ kuery: urlState.expression });
+  }, [setPrefillState, urlState.expression]);
 
   return {
     filterQuery: urlState,

@@ -91,7 +91,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 export const useWaffleOptions = () => {
   const { currentView } = useInventoryViewsContext();
   const {
-    inventoryPrefill: { setPartial },
+    inventoryPrefill: { setPrefillState },
   } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
@@ -179,7 +179,7 @@ export const useWaffleOptions = () => {
   );
 
   useEffect(() => {
-    setPartial({
+    setPrefillState({
       nodeType: urlState.nodeType,
       metric: urlState.metric,
       customMetrics: urlState.customMetrics,
@@ -188,7 +188,7 @@ export const useWaffleOptions = () => {
       schema: urlState.preferredSchema,
     });
   }, [
-    setPartial,
+    setPrefillState,
     urlState.accountId,
     urlState.customMetrics,
     urlState.metric,

@@ -114,7 +114,9 @@ export const useUnifiedSearch = () => {
   const onPreferredSchemaChange = useCallback(
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
-      inventoryPrefill.setPartial({ schema: preferredSchema ?? DataSchemaFormat.ECS });
+
+      inventoryPrefill.setPrefillState({ schema: preferredSchema ?? DataSchemaFormat.ECS });
+
       updateReloadRequestTime();
     },
     [inventoryPrefill, setSearch, updateReloadRequestTime]
@@ -183,7 +185,8 @@ export const useUnifiedSearch = () => {
     }
 
     // Sync Inventory Alert Prefill state
-    inventoryPrefill.setPartial({
+    inventoryPrefill.reset();
+    inventoryPrefill.setPrefillState({
       nodeType: 'host',
       schema: searchCriteria.preferredSchema ?? DataSchemaFormat.ECS,
     });

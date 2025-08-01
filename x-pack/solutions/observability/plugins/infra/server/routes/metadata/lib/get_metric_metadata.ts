@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_client';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
@@ -104,6 +104,7 @@ export const getMetricMetadata = async (
       query: {
         match: { [fields.id]: nodeId },
       },
+      schema: DataSchemaFormat.ECS,
     });
 
     return {

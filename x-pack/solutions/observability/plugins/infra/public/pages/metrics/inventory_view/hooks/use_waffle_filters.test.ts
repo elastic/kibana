@@ -12,10 +12,15 @@ import { useWaffleFilters } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import type { ResolvedDataView } from '../../../../utils/data_view';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('../../../../alerting/use_alert_prefill');
 
 const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
+const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
+  typeof useAlertPrefillContext
+>;
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
@@ -53,22 +58,17 @@ jest.mock('./use_inventory_views', () => ({
   }),
 }));
 
-let PREFILL: Record<string, any> = {};
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
-  useAlertPrefillContext: () => ({
-    inventoryPrefill: {
-      setKuery(kuery: string) {
-        PREFILL = { kuery };
-      },
-    },
-  }),
-}));
-
 const renderUseWaffleFiltersHook = () => renderHook(() => useWaffleFilters());
+const setPrefillState = jest.fn();
 
 describe('useWaffleFilters', () => {
   beforeEach(() => {
-    PREFILL = {};
+    mockUseAlertPrefillContext.mockReturnValue({
+      inventoryPrefill: {
+        setPrefillState,
+      },
+    } as unknown as ReturnType<typeof useAlertPrefillContext>);
+
     mockUseUrlState.mockReturnValue([
       { kind: 'kuery', expression: '' } as WaffleFiltersState,
       jest.fn(),
@@ -87,7 +87,9 @@ describe('useWaffleFilters', () => {
       mockUseUrlState.mockReturnValue([newQuery, jest.fn()]);
       result.current.applyFilterQuery(newQuery.expression);
     });
+
     rerender();
-    expect(PREFILL).toEqual({ kuery: newQuery.expression });
+
+    expect(setPrefillState).toHaveBeenCalledWith({ kuery: newQuery.expression });
   });
 });
