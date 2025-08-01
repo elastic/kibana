@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { alertSuppressionFieldsValidatorFactory } from '../../../../../../../rule_creation_ui/validators/alert_suppression_fields_validator_factory';
 import type {
   ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
-  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit';
-import { ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME } from '../../../../../../../rule_creation/components/alert_suppression_edit';
+import {
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../../../../rule_creation/components/alert_suppression_edit';
 import type {
   AlertSuppressionDurationUnit,
   AlertSuppressionMissingFieldsStrategy,
@@ -31,6 +34,13 @@ export interface AlertSuppressionFormData {
 }
 
 export const alertSuppressionFormSchema = {
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
+    validations: [
+      {
+        validator: alertSuppressionFieldsValidatorFactory(),
+      },
+    ],
+  },
   [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
     defaultValue: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
   },
