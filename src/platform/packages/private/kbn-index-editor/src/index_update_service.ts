@@ -197,19 +197,6 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
-    this.pendingColumnsToBeSaved$.pipe(
-      // Refetch the dataView to look for new field types when there are new columns saved
-      // (when pendingColumnsToBeSaved$ length decreases)
-      scan(
-        (acc, curr) => ({
-          prevLength: acc.currLength,
-          currLength: curr.length,
-        }),
-        { prevLength: 0, currLength: 0 }
-      ),
-      filter(({ prevLength, currLength }) => currLength < prevLength),
-      startWith({ prevLength: 0, currLength: 0 })
-    ),
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
@@ -224,7 +211,7 @@ export class IndexUpdateService {
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
-    map(([dataView, pendingColumnsToBeSaved]) => {
+    switchMap(async ([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
@@ -303,8 +290,13 @@ export class IndexUpdateService {
           switchMap((updates) => {
             return from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
-              map(([response, rows, dataView]) => {
-                return { updates, response, rows, dataView };
+              switchMap(([response, rows, dataView]) => {
+                // Refresh the data view fields after the update, to get any new field type added
+                return from(this.data.dataViews.refreshFields(dataView)).pipe(
+                  map(() => {
+                    return { updates, response, rows, dataView };
+                  })
+                );
               })
             );
           })

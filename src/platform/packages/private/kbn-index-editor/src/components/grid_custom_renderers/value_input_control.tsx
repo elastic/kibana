@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent, useCallback, RefObject } from 'react';
+import React, { type FunctionComponent, useCallback, RefObject, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,7 @@ import {
   EuiDataGridCellPopoverElementProps,
   EuiCallOut,
   EuiFocusTrap,
+  EuiForm,
 } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -35,21 +36,37 @@ export const getValueInputPopover =
     rows,
     columns,
     onValueChange,
+    savingDocs,
     dataTableRef,
   }: {
     rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
+    savingDocs: PendingSave | undefined;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
-    const cellValue = row.flattened[columnId]?.toString();
 
-    const onEnter = useCallback(
-      (value: string) => {
-        onValueChange(docId!, { [columnId]: value });
+    const cellValue = row.flattened[columnId]?.toString() ?? savingDocs?.get(docId)?.[columnId];
+
+    const editedValue = useRef(cellValue);
+
+    const saveValue = useCallback(
+      (newValue: string) => {
+        if (docId && newValue !== cellValue) {
+          onValueChange(docId, { [columnId]: editedValue.current });
+        }
+      },
+      [docId, columnId, cellValue]
+    );
+
+    const onSubmit = useCallback(
+      (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        saveValue(editedValue.current);
 
         if (dataTableRef.current) {
           dataTableRef.current.closeCellPopover();
@@ -60,8 +77,15 @@ export const getValueInputPopover =
           dataTableRef.current.setFocusedCell({ rowIndex, colIndex });
         }
       },
-      [docId, columnId, rowIndex, colIndex]
+      [saveValue, rowIndex, colIndex]
     );
+
+    // Update the value when the user navigates away from the cell
+    useEffect(() => {
+      return () => {
+        saveValue(editedValue.current);
+      };
+    }, [columnId, docId, saveValue]);
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -73,13 +97,17 @@ export const getValueInputPopover =
     if (!isPlaceholder) {
       return (
         <EuiFocusTrap autoFocus={true} initialFocus="input">
-          <ValueInput
-            onEnter={onEnter}
-            columnName={columnId}
-            columns={columns}
-            value={cellValue}
-            width={inputWidth}
-          />
+          <EuiForm component="form" onSubmit={onSubmit}>
+            <ValueInput
+              columnName={columnId}
+              columns={columns}
+              value={cellValue}
+              width={inputWidth}
+              onChange={(value) => {
+                editedValue.current = value;
+              }}
+            />
+          </EuiForm>
         </EuiFocusTrap>
       );
     } else {
