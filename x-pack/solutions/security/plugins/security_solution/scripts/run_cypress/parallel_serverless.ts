@@ -44,7 +44,6 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'security', product_tier: 'complete' },
   { product_line: 'cloud', product_tier: 'complete' },
   { product_line: 'endpoint', product_tier: 'complete' },
-  { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
 ] as const;
 
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';

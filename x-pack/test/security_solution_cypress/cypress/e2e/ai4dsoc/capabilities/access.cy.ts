@@ -26,7 +26,8 @@ describe(
     env: {
       ftrConfig: {
         productTypes: [
-          { product_line: 'ai_soc', product_tier: 'search_ai_lake' }
+          { product_line: 'security', product_tier: 'complete' },
+          { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
         ],
       },
     },
