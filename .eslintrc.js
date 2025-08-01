@@ -773,7 +773,6 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -792,6 +791,9 @@ module.exports = {
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
+        'x-pack/platform/test/serverless/shared/config*.ts',
+        'x-pack/platform/test/serverless/*/test_suites/**/*',
+        'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
         'x-pack/test/security_solution_api_integration/*/test_suites/**/*',
@@ -1609,7 +1611,7 @@ module.exports = {
       settings: {
         playwright: {
           globalAliases: {
-            test: ['test', 'spaceTest'],
+            test: ['test', 'spaceTest', 'apiTest'],
           },
         },
       },
@@ -2280,7 +2282,7 @@ module.exports = {
         // Ideally, we need to classify the solution specific ones to reduce CI times
         'x-pack/test_serverless/**',
         'x-pack/test/**',
-        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',
