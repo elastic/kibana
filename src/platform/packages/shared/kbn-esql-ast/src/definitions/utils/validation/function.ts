@@ -335,6 +335,28 @@ export function validateFunction({
   isNested?: boolean;
   parentAst?: ESQLCommand[];
 }): ESQLMessage[] {
+  const nestedErrors: ESQLMessage[] = [];
+  for (const arg of fn.args) {
+    if (isFunctionExpression(arg)) {
+      nestedErrors.push(
+        ...validateFunction({
+          fn: arg,
+          parentCommand,
+          context,
+          callbacks,
+          forceConstantOnly,
+          isNested: true,
+          parentAst,
+        })
+      );
+    }
+
+    // if a one or more child functions produced errors, stop validation and report
+    if (nestedErrors.length) {
+      return nestedErrors;
+    }
+  }
+
   const definition = getFunctionDefinition(fn.name);
 
   if (!definition) {
@@ -354,11 +376,11 @@ export function validateFunction({
 
   const S = getSignatureWithMatchingTypes(definition, argTypes);
 
-  if (S) {
-    return [];
+  if (!S) {
+    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
   }
 
-  return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
+  return [];
 }
 
 /**
