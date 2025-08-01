@@ -7,6 +7,7 @@
 
 import os from 'os';
 import type {
+  HealthDiagnosticConfiguration,
   IndicesMetadataConfiguration,
   IngestPipelinesStatsConfiguration,
   PaginationConfiguration,
@@ -42,6 +43,34 @@ class TelemetryConfigurationDTO {
   private readonly DEFAULT_INGEST_PIPELINES_STATS_CONFIG = {
     enabled: true,
   };
+  private readonly DEFAULT_HEALTH_DIAGNOSTIC_CONFIG = {
+    query: {
+      maxDocuments: 100_000_000,
+      bufferSize: 10_000,
+    },
+    rssGrowthCircuitBreaker: {
+      maxRssGrowthPercent: 40,
+      validationIntervalMs: 200,
+    },
+    timeoutCircuitBreaker: {
+      timeoutMillis: 1000,
+      validationIntervalMs: 50,
+    },
+    eventLoopUtilizationCircuitBreaker: {
+      thresholdMillis: 1000,
+      validationIntervalMs: 50,
+    },
+    eventLoopDelayCircuitBreaker: {
+      thresholdMillis: 100,
+      validationIntervalMs: 10,
+    },
+    elasticsearchCircuitBreaker: {
+      maxJvmHeapUsedPercent: 80,
+      maxCpuPercent: 80,
+      expectedClusterHealth: ['green', 'yellow'],
+      validationIntervalMs: 1000,
+    },
+  };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -57,6 +86,8 @@ class TelemetryConfigurationDTO {
     this.DEFAULT_INDICES_METADATA_CONFIG;
   private _ingest_pipelines_stats_config: IngestPipelinesStatsConfiguration =
     this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
+  private _health_diagnostic_config: HealthDiagnosticConfiguration =
+    this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -140,6 +171,16 @@ class TelemetryConfigurationDTO {
     return this._ingest_pipelines_stats_config;
   }
 
+  public set health_diagnostic_config(
+    healthDiagnosticConfiguration: HealthDiagnosticConfiguration
+  ) {
+    this._health_diagnostic_config = healthDiagnosticConfiguration;
+  }
+
+  public get health_diagnostic_config(): HealthDiagnosticConfiguration {
+    return this._health_diagnostic_config;
+  }
+
   public resetAllToDefault() {
     this._telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
     this._max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -150,6 +191,7 @@ class TelemetryConfigurationDTO {
     this._pagination_config = this.DEFAULT_PAGINATION_CONFIG;
     this._indices_metadata_config = this.DEFAULT_INDICES_METADATA_CONFIG;
     this._ingest_pipelines_stats_config = this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
+    this._health_diagnostic_config = this.DEFAULT_HEALTH_DIAGNOSTIC_CONFIG;
   }
 }
 

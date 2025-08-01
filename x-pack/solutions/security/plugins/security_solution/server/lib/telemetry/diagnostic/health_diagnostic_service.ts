@@ -42,6 +42,7 @@ import {
 } from '../event_based/events';
 import { artifactService } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
+import { telemetryConfiguration } from '../configuration';
 import { RssGrowthCircuitBreaker } from './circuit_breakers/rss_growth_circuit_breaker';
 import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breaker';
 import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breaker';
@@ -61,36 +62,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
-
-  // TODO: implement external configuration
-  private readonly healthDiagnosticConfig = {
-    query: {
-      maxDocuments: 100_000_000,
-      bufferSize: 10_000,
-    },
-    rssGrowth: {
-      maxRssGrowthPercent: 40,
-      validationIntervalMs: 200,
-    },
-    timeout: {
-      timeoutMillis: 1000,
-      validationIntervalMs: 50,
-    },
-    eventLoopUtilization: {
-      thresholdMillis: 1000,
-      validationIntervalMs: 50,
-    },
-    eventLoopDelay: {
-      thresholdMillis: 100,
-      validationIntervalMs: 10,
-    },
-    elasticsearch: {
-      maxJvmHeapUsedPercent: 80,
-      maxCpuPercent: 80,
-      expectedClusterHealth: ['green', 'yellow'],
-      validationIntervalMs: 1000,
-    },
-  };
 
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
@@ -144,7 +115,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         query$
           .pipe(
             // cap the result set to the max number of documents
-            take(this.healthDiagnosticConfig.query.maxDocuments),
+            take(telemetryConfiguration.health_diagnostic_config.query.maxDocuments),
 
             // get the fields names, only once (assume all docs have the same structure)
             tap((doc) => {
@@ -154,7 +125,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             }),
 
             // publish N documents in the same EBT
-            bufferCount(this.healthDiagnosticConfig.query.bufferSize),
+            bufferCount(telemetryConfiguration.health_diagnostic_config.query.bufferSize),
 
             // apply filterlist
             mergeMap((result) => from(applyFilterlist(result, query.filterlist, this.salt)))
@@ -288,12 +259,13 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private buildCircuitBreakers(): CircuitBreaker[] {
+    const config = telemetryConfiguration.health_diagnostic_config;
     return [
-      new RssGrowthCircuitBreaker(this.healthDiagnosticConfig.rssGrowth),
-      new TimeoutCircuitBreaker(this.healthDiagnosticConfig.timeout),
-      new EventLoopUtilizationCircuitBreaker(this.healthDiagnosticConfig.eventLoopUtilization),
-      new EventLoopDelayCircuitBreaker(this.healthDiagnosticConfig.eventLoopDelay),
-      new ElasticsearchCircuitBreaker(this.healthDiagnosticConfig.elasticsearch, this.esClient()),
+      new RssGrowthCircuitBreaker(config.rssGrowthCircuitBreaker),
+      new TimeoutCircuitBreaker(config.timeoutCircuitBreaker),
+      new EventLoopUtilizationCircuitBreaker(config.eventLoopUtilizationCircuitBreaker),
+      new EventLoopDelayCircuitBreaker(config.eventLoopDelayCircuitBreaker),
+      new ElasticsearchCircuitBreaker(config.elasticsearchCircuitBreaker, this.esClient()),
     ];
   }
 

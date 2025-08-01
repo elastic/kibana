@@ -504,6 +504,7 @@ export interface TelemetryConfiguration {
   pagination_config?: PaginationConfiguration;
   indices_metadata_config?: IndicesMetadataConfiguration;
   ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
+  health_diagnostic_config?: HealthDiagnosticConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {
@@ -522,6 +523,35 @@ export interface IndicesMetadataConfiguration {
 
 export interface IngestPipelinesStatsConfiguration {
   enabled: boolean;
+}
+
+export interface HealthDiagnosticConfiguration {
+  query: {
+    maxDocuments: number;
+    bufferSize: number;
+  };
+  rssGrowthCircuitBreaker: {
+    maxRssGrowthPercent: number;
+    validationIntervalMs: number;
+  };
+  timeoutCircuitBreaker: {
+    timeoutMillis: number;
+    validationIntervalMs: number;
+  };
+  eventLoopUtilizationCircuitBreaker: {
+    thresholdMillis: number;
+    validationIntervalMs: number;
+  };
+  eventLoopDelayCircuitBreaker: {
+    thresholdMillis: number;
+    validationIntervalMs: number;
+  };
+  elasticsearchCircuitBreaker: {
+    maxJvmHeapUsedPercent: number;
+    maxCpuPercent: number;
+    expectedClusterHealth: string[];
+    validationIntervalMs: number;
+  };
 }
 
 export interface PaginationConfiguration {
