@@ -1,0 +1,389 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo } from 'react';
+import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import type {
+  MenuItem,
+  NavigationStructure,
+  SecondaryMenuItem,
+  SecondaryMenuSection,
+} from '@kbn/core-chrome-navigation/types';
+import { combineLatest, Observable } from 'rxjs';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  ChromeRecentlyAccessedHistoryItem,
+  NavigationTreeDefinitionUI,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
+} from '@kbn/core-chrome-browser';
+import type { IBasePath as BasePath } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import useObservable from 'react-use/lib/useObservable';
+import classnames from 'classnames';
+import { RedirectNavigationAppLinks } from './redirect_app_links';
+import { AppDeepLinkIdToIcon } from './hack_icons_mappings';
+
+export interface ChromeNavigationProps {
+  // sidenav state
+  isCollapsed: boolean;
+  setWidth: (width: number) => void;
+
+  // kibana deps
+  basePath: BasePath;
+  application: Pick<ApplicationStart, 'navigateToUrl' | 'currentAppId$'>;
+  reportEvent: (eventType: string, eventData: object) => void;
+
+  // nav state
+  navigationTree$: Observable<NavigationTreeDefinitionUI>;
+  navLinks$: Observable<Readonly<ChromeNavLink[]>>;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
+
+  // other state that might be needed later
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  isFeedbackBtnVisible$: Observable<boolean>;
+  loadingCount$: Observable<number>;
+  dataTestSubj$?: Observable<string | undefined>;
+}
+
+export const Navigation = (props: ChromeNavigationProps) => {
+  const state = useNavigationState(props);
+
+  if (!state) {
+    return null;
+  }
+
+  const { navItems, logoItem } = state;
+
+  return (
+    <RedirectNavigationAppLinks application={props.application}>
+      <NavigationComponent
+        items={navItems}
+        logoLabel={logoItem.label}
+        logoType={logoItem.logoType}
+        isCollapsed={props.isCollapsed}
+        setWidth={props.setWidth}
+      />
+    </RedirectNavigationAppLinks>
+  );
+};
+
+// For the React.Lazy import to work correctly, we need to export the component as default
+// eslint-disable-next-line import/no-default-export
+export default Navigation;
+
+const useNavigationState = (
+  props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$'>
+) => {
+  const state$ = useMemo(
+    () => combineLatest([props.navigationTree$, props.navLinks$, props.activeNodes$]),
+    [props.navigationTree$, props.navLinks$, props.activeNodes$]
+  );
+  const state = useObservable(state$);
+
+  const memoizedState = useMemo(() => {
+    if (!state) return null;
+    const [navigationTree, navLinks, activeNodes] = state;
+    return toNavigationItems(navigationTree, navLinks, activeNodes);
+  }, [state]);
+
+  return memoizedState;
+};
+
+interface LogoItem {
+  logoType: string;
+  label: string;
+}
+
+// exported for testing purposes
+export const toNavigationItems = (
+  navigationTree: NavigationTreeDefinitionUI,
+  navLinks: Readonly<ChromeNavLink[]>,
+  activeNodes: ChromeProjectNavigationNode[][]
+): {
+  logoItem: LogoItem;
+  navItems: NavigationStructure;
+} => {
+  // HACK: extract the logo, primary and footer nodes from the navigation tree
+  let logoNode: ChromeProjectNavigationNode | null = null;
+  let primaryNodes: ChromeProjectNavigationNode[] = [];
+  let footerNodes: ChromeProjectNavigationNode[] = [];
+
+  if (navigationTree.body.length === 1) {
+    const firstNode = navigationTree.body[0];
+    if (!isRecentlyAccessedDefinition(firstNode)) {
+      logoNode = firstNode;
+      primaryNodes = firstNode.children ?? [];
+    }
+  } else {
+    warnOnce(
+      `Navigation tree has multiple root nodes. First level should have a single node for the logo and solution name.`
+    );
+  }
+  if (navigationTree.footer?.length === 1) {
+    const firstNode = navigationTree.footer[0];
+    if (!isRecentlyAccessedDefinition(firstNode)) {
+      footerNodes = firstNode.children ?? [];
+    }
+  } else {
+    warnOnce(
+      `Navigation tree footer has multiple root nodes. Footer should have a single node for the footer links.`
+    );
+  }
+
+  const logoItem: LogoItem = {
+    logoType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+    label: warnIfMissing(logoNode, 'title', 'Kibana'),
+  };
+
+  const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
+    if (!navNode) return null;
+
+    if (isRecentlyAccessedDefinition(navNode)) {
+      warnOnce(
+        `Recently accessed node "${navNode.id}" is not supported in the new navigation. Ignoring it.`
+      );
+      return null;
+    }
+
+    if (navNode.sideNavStatus === 'hidden') {
+      return null;
+    }
+
+    // Flatten accordion items into a single level with links.
+    // This is because the new navigation does not support accordion items.
+    if (navNode.renderAs === 'accordion') {
+      if (!navNode.children?.length) {
+        warnOnce(`Accordion node "${navNode.id}" has no children. Ignoring it.`);
+        return null;
+      }
+
+      const items = filterEmpty(navNode.children.flatMap(toMenuItem));
+
+      warnOnce(
+        `Accordion items are not supported in the new navigation. Flattening them "${items
+          .map((i) => i.id)
+          .join(', ')}" and dropping accordion node "${navNode.id}".`
+      );
+
+      return items;
+    }
+
+    // This was like a sub-section title without a link in the old navigation.
+    // In the new navigation, just flatten it into its children, since we must have links in the primary items.
+    if (navNode.renderAs !== 'panelOpener' && !navNode.href) {
+      warnOnce(
+        `Navigation node "${navNode.id}${
+          navNode.title ? ` (${navNode.title})` : ''
+        }" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: ${navNode.children
+          ?.map((c) => c.id)
+          .join(', ')}.`
+      );
+
+      if (!navNode.children?.length) return null;
+      return filterEmpty(navNode.children.flatMap(toMenuItem));
+    }
+
+    let secondarySections: SecondaryMenuSection[] | undefined;
+    if (navNode.renderAs === 'panelOpener') {
+      if (!navNode.children?.length) {
+        warnOnce(`Panel opener node "${navNode.id}" has no children. Ignoring it.`);
+        return null;
+      }
+
+      const noSubSections = navNode.children.every((l) => l.href);
+
+      if (noSubSections) {
+        warnOnce(
+          `Panel opener node "${
+            navNode.id
+          }" should contain panel sections, not direct links. Flattening links "${navNode.children
+            ?.map((c) => c.id)
+            .join(', ')}" into secondary items and creating a placeholder section for these links.`
+        );
+
+        // If all children have hrefs, we can treat them as secondary items
+        secondarySections = [
+          // create a single section for all children
+          {
+            id: `${navNode.id}-section`,
+            label: null,
+            items: navNode.children.map((child) => {
+              warnUnsupportedNavNodeOptions(child);
+              return {
+                id: child.id,
+                label: warnIfMissing(child, 'title', 'Missing Title 😭'),
+                href: warnIfMissing(child, 'href', 'Missing Href 😭'),
+                external: child.isExternalLink,
+                iconType: child.icon,
+                'data-test-subj': getTestSubj(child),
+              };
+            }),
+          },
+        ];
+      } else {
+        // Otherwise, we need to create sections for each child
+        secondarySections = filterEmpty(
+          navNode.children.map((child) => {
+            if (child.sideNavStatus === 'hidden') return null;
+            if (!navNode.children?.length) return null;
+
+            warnUnsupportedNavNodeOptions(child);
+
+            const secondaryItems: SecondaryMenuItem[] =
+              child
+                .children!.filter((subChild) => subChild.sideNavStatus !== 'hidden')
+                .map((subChild) => {
+                  warnUnsupportedNavNodeOptions(subChild);
+                  return {
+                    id: subChild.id,
+                    label: warnIfMissing(subChild, 'title', 'Missing Title 😭'),
+                    href: warnIfMissing(subChild, 'href', 'Missing Href 😭'),
+                    external: subChild.isExternalLink,
+                    'data-test-subj': getTestSubj(subChild),
+                  };
+                }) ?? [];
+
+            if (child.href) {
+              warnOnce(
+                `Secondary menu item node "${child.id}" has a href "${child.href}", but it should not. We're using it as a section title that doesn't have a link.`
+              );
+            }
+
+            return {
+              id: child.id,
+              label: child.title ?? null, // Use null for no label
+              items: secondaryItems,
+            };
+          })
+        );
+      }
+    }
+
+    // if primary item is missing href, try to find a fallback href from secondary sections
+    const fallbackHref = secondarySections?.flatMap(
+      (section) => section.items?.map((item) => item.href).filter(Boolean) ?? []
+    )[0];
+
+    warnUnsupportedNavNodeOptions(navNode);
+
+    return {
+      id: navNode.id,
+      label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
+      iconType: warnIfMissing(navNode, 'icon', AppDeepLinkIdToIcon[navNode.id] || 'faceSad'),
+      href: warnIfMissing(navNode, 'href', fallbackHref ?? 'missing-href-😭'),
+      sections: secondarySections,
+      'data-test-subj': getTestSubj(navNode),
+    };
+  };
+
+  const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+
+  const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
+
+  if (footerItems.length > 5) {
+    warnOnce(
+      `Footer items should not exceed 5. Found ${
+        footerItems.length
+      }. Only the first 5 will be displayed. Dropped items: ${footerItems
+        .slice(5)
+        .map((item) => item.id)
+        .join(', ')}`
+    );
+  }
+
+  return { logoItem, navItems: { primaryItems, footerItems } };
+};
+
+// =====================
+// Utilities & Helpers
+// =====================
+
+function warnIfMissing<T extends { id: string }, K extends keyof T>(
+  obj: T | null | undefined,
+  key: K,
+  fallback: T[K]
+): NonNullable<T[K]> {
+  const value = obj?.[key];
+  if (value === undefined || value === null) {
+    warnOnce(
+      `Navigation item "${String(obj?.id)}" is missing a "${String(
+        key
+      )}". Using fallback value: "${String(fallback)}".`
+    );
+    return fallback;
+  }
+  return value;
+}
+
+const warnedMessages = new Set<string>();
+let lastWarning = '';
+function warnOnce(message: string) {
+  if (!warnedMessages.has(message)) {
+    warnedMessages.add(message);
+  }
+  setTimeout(() => {
+    const header = '\n=== Navigation Warnings ===\n';
+    const warning =
+      header +
+      Array.from(warnedMessages.values())
+        .map((msg) => `• ${msg}`)
+        .join('\n');
+    if (warning !== lastWarning) {
+      // eslint-disable-next-line no-console
+      console.warn(warning);
+      lastWarning = warning;
+    }
+  }, 0);
+}
+
+function warnUnsupportedNavNodeOptions(navNode: ChromeProjectNavigationNode) {
+  if (navNode.spaceBefore) {
+    warnOnce(
+      `Space before is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
+    );
+  }
+
+  if (navNode.badgeOptions || navNode.withBadge) {
+    warnOnce(
+      `Badge options are not supported in the new navigation. Ignoring them for node "${navNode.id}".`
+    );
+  }
+
+  if (navNode.openInNewTab) {
+    warnOnce(
+      `Open in new tab is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
+    );
+  }
+
+  if (navNode.renderItem) {
+    warnOnce(
+      `Custom renderItem is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
+    );
+  }
+}
+
+const isRecentlyAccessedDefinition = (
+  item: ChromeProjectNavigationNode | RecentlyAccessedDefinition
+): item is RecentlyAccessedDefinition => {
+  return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
+};
+
+const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
+  arr.filter((item) => item !== null && item !== undefined) as T[];
+
+const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
+  const { id, path, deepLink } = navNode;
+  return classnames(`nav-item`, `nav-item-${path}`, {
+    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+    [`nav-item-id-${id}`]: id,
+    [`nav-item-isActive`]: isActive,
+  });
+};
