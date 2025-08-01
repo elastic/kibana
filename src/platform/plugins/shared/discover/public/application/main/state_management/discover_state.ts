@@ -570,8 +570,6 @@ export function getDiscoverStateContainer({
     addLog('undoSavedSearchChanges');
 
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    savedSearchContainer.set(nextSavedSearch);
-
     const globalState = selectTab(internalState.getState(), tabId).globalState;
     let globalStateUpdate: Partial<TabStateGlobalState> = {};
 
@@ -605,6 +603,7 @@ export function getDiscoverStateContainer({
     });
 
     internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
+    savedSearchContainer.set(nextSavedSearch);
     await appStateContainer.replaceUrlState(newAppState);
 
     return nextSavedSearch;
