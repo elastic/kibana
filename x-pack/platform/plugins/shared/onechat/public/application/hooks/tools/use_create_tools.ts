@@ -7,11 +7,14 @@
 
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { produce } from 'immer';
+import { useCallback, useMemo, useState } from 'react';
 import { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
+import { duplicateName } from '../../utils/duplicate_name';
 import { useFlyoutState } from '../use_flyout_state';
 import { useOnechatServices } from '../use_onechat_service';
+import { useOnechatTool } from './use_tools';
 
 type CreateToolMutationOptions = UseMutationOptions<CreateToolResponse, Error, CreateToolPayload>;
 type CreateToolMutationSuccessCallback = NonNullable<CreateToolMutationOptions['onSuccess']>;
@@ -48,11 +51,23 @@ export const useCreateToolFlyout = ({
   onError?: CreateToolErrorCallback;
 }) => {
   const { isOpen, openFlyout, closeFlyout } = useFlyoutState();
+  const [sourceToolId, setSourceToolId] = useState<string | undefined>();
+  const { tool: sourceTool, isLoading: isLoadingSourceTool } = useOnechatTool(sourceToolId);
+
+  const handleOpenFlyout = useCallback(
+    (toolId?: string) => {
+      if (toolId) {
+        setSourceToolId(toolId);
+      }
+      openFlyout();
+    },
+    [openFlyout]
+  );
 
   const handleSuccess = useCallback<CreateToolMutationSuccessCallback>(
-    (tool) => {
+    (createdTool) => {
       closeFlyout();
-      onSuccess?.(tool);
+      onSuccess?.(createdTool);
     },
     [closeFlyout, onSuccess]
   );
@@ -62,10 +77,21 @@ export const useCreateToolFlyout = ({
     onError,
   });
 
+  const tool = useMemo(() => {
+    if (!sourceTool) {
+      return;
+    }
+    return produce(sourceTool, (draft) => {
+      draft.id = duplicateName(sourceTool.id);
+    });
+  }, [sourceTool]);
+
   return {
     isOpen,
     isSubmitting,
-    openFlyout,
+    isLoading: !!sourceToolId && isLoadingSourceTool,
+    tool,
+    openFlyout: handleOpenFlyout,
     submit: createTool,
     closeFlyout,
   };
