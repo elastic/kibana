@@ -357,6 +357,72 @@ class AppContextService {
   public getLockManagerService() {
     return this.lockManagerService;
   }
+  public getO11yAndSecurityAssistantsStatus = async () => {
+    // make api requests to check if the assistants are enabled
+    const results = await this.getAssistantStatusViaServices(
+      (this.securityStart as any)?.elasticAssistant,
+      (this.data as any)?.observability?.assistant
+    );
+
+    return {
+      securityAssistantStatus: results.security,
+      observabilityAssistantStatus: results.observability,
+    };
+  };
+
+  // Option 2: Access underlying services (if available in your context)
+  private async getAssistantStatusViaServices(
+    elasticAssistantService: any, // Security assistant service
+    observabilityService: any // Observability assistant service
+  ) {
+    const results = {
+      security: {},
+      observability: {},
+    };
+
+    // Security assistant via service
+    try {
+      const kbDataClient = await elasticAssistantService.getAIAssistantKnowledgeBaseDataClient();
+      if (kbDataClient) {
+        const setupAvailable = await kbDataClient.isSetupAvailable();
+        const isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
+        const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
+        const userDataExists = await kbDataClient.isUserDataExists();
+        const productDocumentationStatus = await kbDataClient.getProductDocumentationStatus();
+
+        results.security = {
+          setupAvailable,
+          isInferenceEndpointExists,
+          securityLabsExists,
+          userDataExists,
+          productDocumentationStatus,
+        };
+      }
+    } catch (error) {
+      results.security = { error: error.message };
+    }
+
+    // Observability assistant via service
+    try {
+      const mockRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: { href: {} },
+        raw: { req: { url: '/' } },
+        isFakeRequest: true,
+      } as unknown as KibanaRequest;
+
+      const client = await observabilityService.getClient({ request: mockRequest });
+      const status = await client.getKnowledgeBaseStatus();
+      results.observability = status;
+    } catch (error) {
+      results.observability = { error: error.message };
+    }
+
+    return results;
+  }
 }
 
 export const appContextService = new AppContextService();

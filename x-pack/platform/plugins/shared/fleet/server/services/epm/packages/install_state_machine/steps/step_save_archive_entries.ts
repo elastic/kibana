@@ -127,27 +127,33 @@ export async function stepSaveArchiveEntries(
   // Save knowledge base content if present
   if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
     try {
-      // Check if this is an upgrade (existing package with different version)
-      const isUpgrade = installedPkg && installedPkg.attributes.version !== packageInfo.version;
-      const oldVersion = installedPkg?.attributes.version;
+      // First, check that one (or both) of the ai assistants are enabled via api calls
+      const { securityAssistantStatus, observabilityAssistantStatus } =
+        await appContextService.getO11yAndSecurityAssistantsStatus();
 
-      if (isUpgrade) {
-        // Handle package upgrade - this will delete all old versions and save new one
-        await updatePackageKnowledgeBaseVersion({
-          esClient,
-          pkgName: packageInfo.name,
-          oldVersion,
-          newVersion: packageInfo.version,
-          knowledgeBaseContent: packageInfo.knowledge_base,
-        });
-      } else {
-        // Handle fresh install - use existing logic
-        await saveKnowledgeBaseContentToIndex({
-          esClient,
-          pkgName: packageInfo.name,
-          pkgVersion: packageInfo.version,
-          knowledgeBaseContent: packageInfo.knowledge_base,
-        });
+      if (securityAssistantStatus || observabilityAssistantStatus) {
+        // Check if this is an upgrade (existing package with different version)
+        const isUpgrade = installedPkg && installedPkg.attributes.version !== packageInfo.version;
+        const oldVersion = installedPkg?.attributes.version;
+
+        if (isUpgrade) {
+          // Handle package upgrade - this will delete all old versions and save new one
+          await updatePackageKnowledgeBaseVersion({
+            esClient,
+            pkgName: packageInfo.name,
+            oldVersion,
+            newVersion: packageInfo.version,
+            knowledgeBaseContent: packageInfo.knowledge_base,
+          });
+        } else {
+          // Handle fresh install - use existing logic
+          await saveKnowledgeBaseContentToIndex({
+            esClient,
+            pkgName: packageInfo.name,
+            pkgVersion: packageInfo.version,
+            knowledgeBaseContent: packageInfo.knowledge_base,
+          });
+        }
       }
     } catch (error) {
       throw new Error(`Error saving knowledge base content: ${error}`);
