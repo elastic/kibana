@@ -29,13 +29,14 @@ export function getSignaturesWithMatchingArity(
   fnDef: FunctionDefinition,
   astFunction: ESQLFunction
 ) {
+  const arity = astFunction.args.length;
+
   return fnDef.signatures.filter((def) => {
     if (def.minParams) {
-      return astFunction.args.length >= def.minParams;
+      return arity >= def.minParams;
     }
     return (
-      astFunction.args.length >= def.params.filter(({ optional }) => !optional).length &&
-      astFunction.args.length <= def.params.length
+      arity >= def.params.filter(({ optional }) => !optional).length && arity <= def.params.length
     );
   });
 }

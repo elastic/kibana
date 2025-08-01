@@ -12,12 +12,12 @@ import type {
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLLocation,
   ESQLMessage,
   ESQLSource,
-  ESQLIdentifier,
 } from '../../types';
-import type { ErrorTypes, ErrorValues } from '../types';
+import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -62,6 +62,25 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function [{name}]',
           values: { name: out.name },
+        }),
+      };
+    case 'noMatchingCallSignature':
+      const signatureList = (out.validSignatures as unknown as string[])
+        .map((sig) => `- [${sig}]`)
+        .join('\n  ');
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.noMatchingCallSignatures', {
+          defaultMessage: `The arguments to [{functionName}] don't match a valid call signature.
+
+Received [{argTypes}].
+
+Expected one of:
+  {validSignatures}`,
+          values: {
+            functionName: out.functionName.toUpperCase(),
+            argTypes: out.argTypes,
+            validSignatures: signatureList,
+          },
         }),
       };
     case 'wrongArgumentNumber':
@@ -109,15 +128,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
             "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
-      };
-    case 'shadowFieldType':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.typeOverwrite', {
-          defaultMessage:
-            'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
-          values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
-        }),
-        type: 'warning',
       };
     case 'unsupportedColumnTypeForCommand':
       return {
@@ -214,25 +224,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: {
             type: out.type,
             value: out.value,
-          },
-        }),
-      };
-    case 'wildcardNotSupportedForCommand':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForCommand', {
-          defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
-          values: {
-            command: out.command,
-            value: out.value,
-          },
-        }),
-      };
-    case 'noWildcardSupportAsArg':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForFunction', {
-          defaultMessage: 'Using wildcards (*) in {name} is not allowed',
-          values: {
-            name: out.name,
           },
         }),
       };
@@ -457,12 +448,6 @@ export const errors = {
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
 
-  noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
-    errors.byId('noAggFunction', fn.location, {
-      commandName: cmd.name,
-      expression: fn.text,
-    }),
-
   expressionNotAggClosed: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('expressionNotAggClosed', fn.location, {
       commandName: cmd.name,
@@ -487,4 +472,22 @@ export const errors = {
     errors.byId('invalidJoinIndex', identifier.location, {
       identifier: identifier.name,
     }),
+
+  noMatchingCallSignatures: (
+    fn: ESQLFunction,
+    definition: FunctionDefinition,
+    argTypes: string[]
+  ): ESQLMessage => {
+    const validSignatures = definition.signatures.map((sig) => {
+      const definitionArgTypes = sig.params.map((param) => param.type).join(', ');
+      return `${definitionArgTypes}`;
+      // return `${definitionArgTypes} => ${sig.returnType}`;
+    });
+
+    return errors.byId('noMatchingCallSignature', fn.location, {
+      functionName: fn.name,
+      argTypes: argTypes.join(', '),
+      validSignatures,
+    });
+  },
 };

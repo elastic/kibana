@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
 import {
   isFunctionExpression,
   isOptionNode,
@@ -14,13 +13,15 @@ import {
   isIdentifier,
   isTimeInterval,
 } from '../../../ast/is';
-import { validateFunction } from './function';
+import { validateFunction, validateFunctionOld } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import { getMessageFromId } from '../errors';
 import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+
+const USE_NEW_VALIDATION = true;
 
 export const validateCommandArguments = (
   command: ESQLCommand,
@@ -31,20 +32,20 @@ export const validateCommandArguments = (
   },
   callbacks: ICommandCallbacks = {}
 ) => {
-  const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
   for (const arg of command.args) {
     if (!Array.isArray(arg)) {
       if (isFunctionExpression(arg)) {
+        const validate = USE_NEW_VALIDATION ? validateFunction : validateFunctionOld;
+
         messages.push(
-          ...validateFunction({
+          ...validate({
             fn: arg,
             parentCommand: command.name,
             parentOption: undefined,
             context,
             callbacks,
             parentAst: ast,
-            currentCommandIndex,
           })
         );
       } else if (isOptionNode(arg)) {

@@ -541,16 +541,7 @@ describe('validation logic', () => {
     });
 
     describe('shadowing', () => {
-      testErrorsAndWarnings(
-        'from a_index | eval textField = 5',
-        [],
-        ['Column [textField] of type text has been overwritten as new type: integer']
-      );
-      testErrorsAndWarnings(
-        'from a_index | eval doubleField = "5"',
-        [],
-        ['Column [doubleField] of type double has been overwritten as new type: keyword']
-      );
+      // fields shadowing validation removed
     });
 
     describe('quoting and escaping expressions', () => {
