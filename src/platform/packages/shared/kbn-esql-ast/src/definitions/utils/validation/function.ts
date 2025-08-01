@@ -319,21 +319,13 @@ function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType
 export function validateFunction({
   fn,
   parentCommand,
-  parentOption,
   context,
   callbacks,
-  forceConstantOnly = false,
-  isNested,
-  parentAst,
 }: {
   fn: ESQLFunction;
   parentCommand: string;
-  parentOption?: string;
   context: ICommandContext;
   callbacks: ICommandCallbacks;
-  forceConstantOnly?: boolean;
-  isNested?: boolean;
-  parentAst?: ESQLCommand[];
 }): ESQLMessage[] {
   const nestedErrors: ESQLMessage[] = [];
   for (const arg of fn.args) {
@@ -344,9 +336,6 @@ export function validateFunction({
           parentCommand,
           context,
           callbacks,
-          forceConstantOnly,
-          isNested: true,
-          parentAst,
         })
       );
     }
