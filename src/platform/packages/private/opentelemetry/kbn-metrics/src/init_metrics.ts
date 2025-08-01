@@ -77,4 +77,5 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
   process.on('beforeExit', shutdown);
+  process.on('uncaughtExceptionMonitor', shutdown);
 }

@@ -40,4 +40,5 @@ export function installShutdownHandlers(
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
   process.on('beforeExit', shutdown);
+  process.on('uncaughtExceptionMonitor', shutdown);
 }
