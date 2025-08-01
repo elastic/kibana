@@ -428,7 +428,7 @@ export class DashboardStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const { item } = await savedObjectToItem(so, false, {
+          const { item } = savedObjectToItem(so, false, {
             allowedAttributes: soQuery.fields,
             allowedReferences: optionsToLatest?.includeReferences,
             getTagNamesFromReferences: (references: SavedObjectReference[]) =>
