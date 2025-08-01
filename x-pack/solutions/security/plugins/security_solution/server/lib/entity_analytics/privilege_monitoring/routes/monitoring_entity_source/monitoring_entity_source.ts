@@ -62,7 +62,7 @@ export const monitoringEntitySourceRoute = (
 
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.init(request.body);              
+          const body = await client.init(request.body);
 
           return response.ok({ body });
         } catch (e) {
@@ -140,7 +140,7 @@ export const monitoringEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.update({ ...request.body, id: request.params.id });              
+          const body = await client.update({ ...request.body, id: request.params.id });
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

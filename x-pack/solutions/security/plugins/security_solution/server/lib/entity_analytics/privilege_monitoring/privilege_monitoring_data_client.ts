@@ -860,18 +860,18 @@ export class PrivilegeMonitoringDataClient {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
-     try {
-    const engineStatus = await this.getEngineStatus();
+    try {
+      const engineStatus = await this.getEngineStatus();
 
-    if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-      throw new Error(
-        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}`
-      );
+      if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+        throw new Error(
+          `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}`
+        );
+      }
+    } catch (error) {
+      console.error(`Failed to schedule task: ${error.message}`);
+      throw error;
     }
-  } catch (error) {
-    console.error(`Failed to schedule task: ${error.message}`);
-    throw error;
-  }
 
     this.audit(
       PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
