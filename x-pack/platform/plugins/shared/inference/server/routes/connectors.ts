@@ -8,8 +8,8 @@
 import type { CoreSetup, IRouter, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import {
   InferenceConnector,
-  isSupportedConnectorType,
   connectorToInference,
+  isSupportedConnector,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
@@ -22,7 +22,7 @@ export async function listConnectors(request: KibanaRequest, actions: ActionsPlu
   });
 
   const connectors: InferenceConnector[] = allConnectors
-    .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
+    .filter((connector) => isSupportedConnector(connector))
     .map(connectorToInference);
   return connectors;
 }

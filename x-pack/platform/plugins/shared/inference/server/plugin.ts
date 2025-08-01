@@ -111,7 +111,7 @@ export class InferencePlugin
         });
       },
 
-      getConnectors: async (request: KibanaRequest) => {
+      listConnectors: async (request: KibanaRequest) => {
         return listConnectors(request, pluginsStart.actions);
       },
     };
