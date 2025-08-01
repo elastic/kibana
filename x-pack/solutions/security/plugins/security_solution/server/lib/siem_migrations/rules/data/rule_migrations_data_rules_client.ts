@@ -25,6 +25,8 @@ import {
   type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
+  type RuleMigrationAllIntegrationsStats,
+  type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';

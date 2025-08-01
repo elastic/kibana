@@ -17,7 +17,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
-export * from './actions/types';
+export type * from './actions/types';
 
 export type CellActionsProviderProps = PropsWithChildren<{
   /**

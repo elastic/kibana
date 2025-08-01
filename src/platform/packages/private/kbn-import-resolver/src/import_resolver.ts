@@ -153,6 +153,10 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
     }
 
+    if (req.startsWith('@typescript-eslint/parser')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||

@@ -15,7 +15,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
-export * from './url';
+export type * from './url';
 
 export interface CsvMetrics {
   rows: number;
