@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { fireEvent } from '@testing-library/react';
 
 import { ErrorToast } from './error_toast';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
