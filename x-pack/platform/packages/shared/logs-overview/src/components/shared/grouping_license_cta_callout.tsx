@@ -49,9 +49,11 @@ export const GroupingLicenseCtaCallout = React.memo<GroupingLicenseCtaCalloutPro
       >
         <p>{groupingLicenseCtaMessageDescription}</p>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
-          </EuiFlexItem>
+          {GroupingLicenseCtaMessageTrialButton.canRender(dependencies) ? (
+            <EuiFlexItem grow={false}>
+              <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <GroupingLicenseCtaMessageDetailsButton showDetails={showDetails} />
           </EuiFlexItem>

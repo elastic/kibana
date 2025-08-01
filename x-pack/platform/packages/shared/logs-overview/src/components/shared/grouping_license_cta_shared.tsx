@@ -31,9 +31,9 @@ export interface GroupingLicenseCtaMessageTrialButtonDependencies {
   share: SharePluginStart;
 }
 
-export const GroupingLicenseCtaMessageTrialButton: React.FC<
-  GroupingLicenseCtaMessageTrialButtonProps
-> = ({ dependencies, ...buttonProps }) => {
+export const GroupingLicenseCtaMessageTrialButton: React.FC<GroupingLicenseCtaMessageTrialButtonProps> & {
+  canRender: (dependencies: GroupingLicenseCtaMessageTrialButtonDependencies) => boolean;
+} = ({ dependencies, ...buttonProps }) => {
   const licenseManagementUrl = dependencies.share.url.locators
     .get(MANAGEMENT_APP_LOCATOR)
     ?.useUrl({ sectionId: 'stack', appId: 'license_management' });
@@ -47,6 +47,12 @@ export const GroupingLicenseCtaMessageTrialButton: React.FC<
       {groupingLicenseCtaMessageTrialButtonTitle}
     </EuiButton>
   );
+};
+
+GroupingLicenseCtaMessageTrialButton.canRender = (
+  dependencies: GroupingLicenseCtaMessageTrialButtonDependencies
+): boolean => {
+  return dependencies.share.url.locators.get(MANAGEMENT_APP_LOCATOR) != null;
 };
 
 export const groupingLicenseCtaMessageTitle = i18n.translate(

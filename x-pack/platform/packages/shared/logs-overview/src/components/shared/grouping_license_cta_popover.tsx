@@ -67,9 +67,11 @@ export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverPro
         </div>
         <EuiPopoverFooter>
           <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
-            </EuiFlexItem>
+            {GroupingLicenseCtaMessageTrialButton.canRender(dependencies) ? (
+              <EuiFlexItem grow={false}>
+                <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <GroupingLicenseCtaMessageDetailsButton showDetails={showDetails} />
             </EuiFlexItem>

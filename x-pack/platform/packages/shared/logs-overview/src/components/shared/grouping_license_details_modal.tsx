@@ -78,9 +78,11 @@ export const GroupingLicenseDetailsModal = React.memo<GroupingLicenseDetailsModa
                 {groupingLicenseDetailsModalCancelButtonLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
-            </EuiFlexItem>
+            {GroupingLicenseCtaMessageTrialButton.canRender(dependencies) ? (
+              <EuiFlexItem grow={false}>
+                <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>
