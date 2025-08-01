@@ -1177,6 +1177,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           inputExample,
           inputRequired,
           osTypes,
+          shortFileName,
         }) => {
           return {
             id,
@@ -1191,6 +1192,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               inputInstructions,
               inputExample,
               inputRequired,
+              shortFileName,
             },
           };
         }

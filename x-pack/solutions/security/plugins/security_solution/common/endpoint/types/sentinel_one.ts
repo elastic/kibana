@@ -183,5 +183,11 @@ export interface SentinelOneRunScriptResponseMeta {
  */
 export type SentinelOneScript = Pick<
   SentinelOneGetRemoteScriptsResponse['data'][number],
-  'id' | 'scriptDescription' | 'osTypes' | 'inputInstructions' | 'inputExample' | 'inputRequired'
+  | 'id'
+  | 'scriptDescription'
+  | 'osTypes'
+  | 'inputInstructions'
+  | 'inputExample'
+  | 'inputRequired'
+  | 'shortFileName'
 >;
