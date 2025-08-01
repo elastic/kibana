@@ -48,7 +48,13 @@ export const NODE_HEIGHT = 100;
  * The width of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 140;
+export const NODE_LABEL_WIDTH = 200;
+
+/**
+ * The total height of a label node including the shape and details below, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_TOTAL_HEIGHT = 72;
 
 /**
  * The height of a node label in the graph, in pixels.
@@ -56,9 +62,17 @@ export const NODE_LABEL_WIDTH = 140;
  */
 export const NODE_LABEL_HEIGHT = 20;
 
+/**
+ * The height of the details below a label node shape, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_DETAILS = NODE_LABEL_TOTAL_HEIGHT - NODE_LABEL_HEIGHT;
+
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
-export const LABEL_PADDING_X = 15;
+export const LABEL_PADDING_X = 8;
+
+const LABEL_BORDER_RADIUS = 8;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
@@ -72,38 +86,47 @@ export const LabelNodeContainer = styled.div`
 `;
 
 interface LabelShapeProps extends EuiTextProps {
-  color: LabelNodeViewModel['color'];
+  backgroundColor?: string;
+  borderColor?: string;
+  shadow?: string;
 }
 
-export const LabelShape = styled(EuiText)<LabelShapeProps>`
-  background: ${(props) => useNodeFillColor(props.color)};
+export const LabelShape = styled(EuiText, {
+  shouldForwardProp(propName) {
+    return !['backgroundColor', 'borderColor', 'isConnectable', 'shadow'].includes(propName);
+  },
+})<LabelShapeProps>`
+  background-color: ${(props) => props.backgroundColor};
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
   max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `solid ${
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors]
-    } ${LABEL_BORDER_WIDTH}px`;
-  }};
-
-  font-weight: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.weight.semiBold}`;
-  }};
-  font-size: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.scale.xs * 10.5}px`;
-  }};
 
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   padding: 6px ${LABEL_PADDING_X}px;
-  border-radius: 16px;
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   min-height: 100%;
   min-width: 100%;
+
+  ${({ shadow }) => `
+    /* Apply shadow when node is selected */
+    .react-flow__node.selected & {
+      ${shadow};
+    }
+
+    /* Apply shadow when node is pressed but still not selected */
+    .react-flow__node:active:not(.selected) & {
+      ${shadow};
+    }
+
+    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
+  `};
 `;
 
-export const LabelShapeOnHover = styled.div`
+export const LabelShapeOnHover = styled.div<{ color: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -111,17 +134,11 @@ export const LabelShapeOnHover = styled.div`
 
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `dashed ${rgba(
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
-      0.5
-    )} 1px`;
-  }};
-  border-radius: 20px;
+  border: ${(props) => `dashed ${rgba(props.color, 0.5)} 1px`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   background: transparent;
-  width: 108%;
-  height: 134%;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
 
   ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
@@ -139,6 +156,28 @@ export const NodeContainer = styled.div`
   align-items: center;
   width: ${NODE_WIDTH}px;
 `;
+
+/**
+ * Gets the background, border and text colors for the label based on document analysis
+ */
+export const getLabelColors = (
+  color: LabelNodeViewModel['color'],
+  euiTheme: EuiThemeComputed
+): { backgroundColor: string; borderColor: string; textColor: string } => {
+  if (color === 'danger') {
+    return {
+      backgroundColor: euiTheme.colors.danger,
+      borderColor: euiTheme.colors.danger,
+      textColor: euiTheme.colors.textInverse,
+    };
+  }
+
+  return {
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
+    borderColor: euiTheme.colors.borderStrongPrimary,
+    textColor: euiTheme.colors.textPrimary,
+  };
+};
 
 export const NodeShapeContainer = styled.div`
   position: relative;
@@ -257,20 +296,25 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 
 export const ExpandButtonSize = 18;
 
-export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
+export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
+  shouldForwardProp: (propName) => propName !== 'backgroundColor',
+})<{ backgroundColor: string }>`
   border-radius: 50%;
-  background-color: ${(_props) => useEuiBackgroundColor('plain')};
+  background-color: ${(props) => props.backgroundColor};
   width: ${ExpandButtonSize}px;
   height: ${ExpandButtonSize}px;
 
   > svg {
-    transform: translate(0.75px, 0.75px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) translate(0.5px, 0.5px);
   }
 
   :hover,
   :focus,
   :active {
-    background-color: ${(_props) => useEuiBackgroundColor('plain')};
+    background-color: ${(props) => props.backgroundColor};
   }
 `;
 
@@ -284,7 +328,7 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size: {
+export const getStackNodeStyle = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({
