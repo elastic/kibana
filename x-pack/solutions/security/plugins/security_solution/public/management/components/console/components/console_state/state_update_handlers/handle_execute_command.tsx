@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { executionTranslations } from './translations';
@@ -339,7 +341,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 } else if (
                   argDefinition.mustHaveValue === 'non-empty-string' &&
-                  argValue.trim().length === 0
+                  (argValue ?? '').trim().length === 0
                 ) {
                   dataValidationError = executionTranslations.mustHaveValue(argName);
                 }
