@@ -65,6 +65,18 @@ export const ControlBar: React.FC<ControlBarProps> = React.memo(
       [documentFilters]
     );
 
+    const groupingControl =
+      groupingCapabilities.status === 'unavailable' ? (
+        groupingCapabilities.reason === 'insufficientLicense' ? (
+          <GroupingLicenseCtaPopover
+            dependencies={dependencies}
+            showDetails={showGroupingLicenseDetails}
+          />
+        ) : null
+      ) : (
+        <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
+      );
+
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
@@ -77,18 +89,9 @@ export const ControlBar: React.FC<ControlBarProps> = React.memo(
                 timeRange={timeRange}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {groupingCapabilities.status === 'unavailable' ? (
-                groupingCapabilities.reason === 'insufficientLicense' ? (
-                  <GroupingLicenseCtaPopover
-                    dependencies={dependencies}
-                    showDetails={showGroupingLicenseDetails}
-                  />
-                ) : null
-              ) : (
-                <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
-              )}
-            </EuiFlexItem>
+            {groupingControl != null ? (
+              <EuiFlexItem grow={false}>{groupingControl}</EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
         {groupingCapabilities.status === 'unavailable' &&
