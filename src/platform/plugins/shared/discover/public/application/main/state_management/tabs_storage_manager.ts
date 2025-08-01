@@ -16,17 +16,16 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
-import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
+import { fromSavedObjectTabToLocalStorageTab } from './redux';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
-type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
+export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
@@ -358,48 +357,9 @@ export const createTabsStorageManager = ({
     sessionInfo.spaceId = spaceId;
     sessionInfo.persistedDiscoverSessionId = persistedDiscoverSession?.id;
 
-    const persistedTabs = persistedDiscoverSession?.tabs.map((rawTab) => {
-      const mappedTab: TabStateInLocalStorage = {
-        id: rawTab.id,
-        label: rawTab.label,
-        internalState: {
-          serializedSearchSource: rawTab.serializedSearchSource,
-        },
-        appState: {
-          columns: rawTab.columns,
-          filters: rawTab.serializedSearchSource.filter,
-          grid: rawTab.grid,
-          hideChart: rawTab.hideChart,
-          dataSource: isOfAggregateQueryType(rawTab.serializedSearchSource.query)
-            ? createEsqlDataSource()
-            : typeof rawTab.serializedSearchSource.index === 'string'
-            ? createDataViewDataSource({
-                dataViewId: rawTab.serializedSearchSource.index,
-              })
-            : rawTab.serializedSearchSource.index?.id
-            ? createDataViewDataSource({
-                dataViewId: rawTab.serializedSearchSource.index.id,
-              })
-            : undefined,
-          query: rawTab.serializedSearchSource.query,
-          sort: rawTab.sort,
-          viewMode: rawTab.viewMode,
-          hideAggregatedPreview: rawTab.hideAggregatedPreview,
-          rowHeight: rawTab.rowHeight,
-          headerRowHeight: rawTab.headerRowHeight,
-          rowsPerPage: rawTab.rowsPerPage,
-          sampleSize: rawTab.sampleSize,
-          breakdownField: rawTab.breakdownField,
-          density: rawTab.density,
-        },
-        globalState: {
-          timeRange: rawTab.timeRestore ? rawTab.timeRange : undefined,
-          refreshInterval: rawTab.timeRange ? rawTab.refreshInterval : undefined,
-        },
-      };
-
-      return toTabState(mappedTab, defaultTabState);
-    });
+    const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
+      toTabState(fromSavedObjectTabToLocalStorageTab(tab), defaultTabState)
+    );
     const openTabs =
       persistedDiscoverSession?.id === storedTabsState.persistedDiscoverSessionId
         ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))

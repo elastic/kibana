@@ -92,3 +92,10 @@ export {
 } from './runtime_state';
 
 export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
+
+export {
+  fromSavedObjectTabToLocalStorageTab,
+  fromSavedObjectTabToSavedSearch,
+  fromSavedSearchToSavedObjectTab,
+  fromTabStateToSavedObjectTab,
+} from './tab_mapping_utils';
