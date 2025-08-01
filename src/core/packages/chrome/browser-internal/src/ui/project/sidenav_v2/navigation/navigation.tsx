@@ -112,8 +112,8 @@ interface LogoItem {
  * - Root node (1st level) is used for the "logo" item and application branding
  * - 2nd level nodes are transformed into primary navigation items:
  *   - Accordion nodes are flattened (not supported) - their children become primary items
- *   - Nodes without links that aren't panel openers are treated as section dividers - their children are flattened
- *   - panelOpener nodes create flyout secondary navigation panels
+ *   - Nodes without links that aren't panel openers are treated as section dividers and not supported in new nav - their children are flattened
+ *   - panelOpener nodes create flyout secondary navigation panels, they can't have links directly, but can have sections with links
  * - 3rd level is used for secondary navigation (children of panelOpener):
  *   - If all 3rd level items have links, they're treated as menu items and wrapped in a single section
  *   - If some don't have links, they're treated as section headers with their children becoming menu items
@@ -287,18 +287,14 @@ export const toNavigationItems = (
       }
     }
 
-    // if primary item is missing href, try to find a fallback href from secondary sections
-    const fallbackHref = secondarySections?.flatMap(
-      (section) => section.items?.map((item) => item.href).filter(Boolean) ?? []
-    )[0];
-
     warnUnsupportedNavNodeOptions(navNode);
 
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
       iconType: warnIfMissing(navNode, 'icon', AppDeepLinkIdToIcon[navNode.id] || 'faceSad'),
-      href: warnIfMissing(navNode, 'href', fallbackHref ?? 'missing-href-😭'),
+      // TODO: For now, href shouldn't be required when rendering to open a panel.
+      href: secondarySections?.length ? '' : warnIfMissing(navNode, 'href', 'missing-href-😭'),
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
     };
