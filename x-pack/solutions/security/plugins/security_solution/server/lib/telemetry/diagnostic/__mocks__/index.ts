@@ -59,6 +59,8 @@ export const createMockEsClient = () => {
       explainLifecycle: jest.fn(),
     },
     helpers: mockHelpers,
+    cluster: { health: jest.fn() },
+    nodes: { stats: jest.fn() },
   };
 };
 
@@ -170,4 +172,173 @@ export const executeObservableTest = <T>(
     complete: () => expectations(results, done),
     error: done,
   });
+};
+
+// Circuit Breaker Test Helpers
+export const createMockEventLoopMonitor = (
+  overrides: Partial<{
+    min: number;
+    max: number;
+    mean: number;
+    exceeds: number;
+    stddev: number;
+    percentiles: Record<number, number>;
+  }> = {}
+) => {
+  const defaults = {
+    min: 1000000,
+    max: 5000000,
+    mean: 2000000,
+    exceeds: 0,
+    stddev: 500000,
+    percentiles: {
+      50: 2000000,
+      75: 3000000,
+      95: 4000000,
+      99: 4500000,
+    },
+  };
+
+  const config = { ...defaults, ...overrides };
+
+  return {
+    enable: jest.fn(),
+    disable: jest.fn(),
+    min: config.min,
+    max: config.max,
+    mean: config.mean,
+    exceeds: config.exceeds,
+    stddev: config.stddev,
+    percentile: jest.fn((p: number) => (config.percentiles as Record<number, number>)[p] || 0),
+  };
+};
+
+export const createMockPerformance = () => ({
+  now: jest.fn(),
+  eventLoopUtilization: jest.fn(),
+});
+
+export const createMockMemoryUsage = (overrides: Partial<NodeJS.MemoryUsage> = {}) => ({
+  rss: 100000000,
+  heapTotal: 50000000,
+  heapUsed: 25000000,
+  external: 1000000,
+  arrayBuffers: 500000,
+  ...overrides,
+});
+
+export const createMockNodeResponse = (
+  overrides: Partial<{
+    timestamp: number;
+    heapUsedPercent: number;
+    cpuPercent: number;
+  }> = {}
+) => {
+  const defaults = {
+    timestamp: 1234567890,
+    heapUsedPercent: 70,
+    cpuPercent: 60,
+  };
+  const config = { ...defaults, ...overrides };
+
+  return {
+    timestamp: config.timestamp,
+    jvm: { mem: { heap_used_percent: config.heapUsedPercent } },
+    os: { cpu: { percent: config.cpuPercent } },
+  };
+};
+
+export const createElasticsearchCircuitBreakerConfig = (
+  overrides: Partial<{
+    maxJvmHeapUsedPercent: number;
+    maxCpuPercent: number;
+    expectedClusterHealth: string[];
+    validationIntervalMs: number;
+  }> = {}
+) => ({
+  maxJvmHeapUsedPercent: 85,
+  maxCpuPercent: 90,
+  expectedClusterHealth: ['green', 'yellow'],
+  validationIntervalMs: 5000,
+  ...overrides,
+});
+
+export const createEventLoopDelayCircuitBreakerConfig = (
+  overrides: Partial<{
+    thresholdMillis: number;
+    validationIntervalMs: number;
+  }> = {}
+) => ({
+  thresholdMillis: 10,
+  validationIntervalMs: 5000,
+  ...overrides,
+});
+
+export const createEventLoopUtilizationCircuitBreakerConfig = (
+  overrides: Partial<{
+    thresholdMillis: number;
+    validationIntervalMs: number;
+  }> = {}
+) => ({
+  thresholdMillis: 1000,
+  validationIntervalMs: 5000,
+  ...overrides,
+});
+
+export const createRssGrowthCircuitBreakerConfig = (
+  overrides: Partial<{
+    maxRssGrowthPercent: number;
+    validationIntervalMs: number;
+  }> = {}
+) => ({
+  maxRssGrowthPercent: 50,
+  validationIntervalMs: 5000,
+  ...overrides,
+});
+
+export const createTimeoutCircuitBreakerConfig = (
+  overrides: Partial<{
+    timeoutMillis: number;
+    validationIntervalMs: number;
+  }> = {}
+) => ({
+  timeoutMillis: 5000,
+  validationIntervalMs: 1000,
+  ...overrides,
+});
+
+// Test assertion helpers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const expectValidCircuitBreakerResult = (result: any, circuitBreakerName: string) => {
+  expect(result.valid).toBe(true);
+  expect(result.circuitBreaker).toBe(circuitBreakerName);
+  expect(result.message).toBeUndefined();
+};
+
+export const expectInvalidCircuitBreakerResult = (
+  result: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  circuitBreakerName: string,
+  expectedMessage?: string
+) => {
+  expect(result.valid).toBe(false);
+  expect(result.circuitBreaker).toBe(circuitBreakerName);
+  if (expectedMessage) {
+    expect(result.message).toContain(expectedMessage);
+  } else {
+    expect(result.message).toBeDefined();
+  }
+};
+
+// Common test setup functions
+export const setupMockPerformanceHooks = () => {
+  const mockPerformance = createMockPerformance();
+  const mockMonitorEventLoopDelay = jest.fn();
+
+  // Mock perf_hooks module
+  jest.doMock('perf_hooks', () => ({
+    performance: mockPerformance,
+    monitorEventLoopDelay: mockMonitorEventLoopDelay,
+  }));
+
+  return { mockPerformance, mockMonitorEventLoopDelay };
 };

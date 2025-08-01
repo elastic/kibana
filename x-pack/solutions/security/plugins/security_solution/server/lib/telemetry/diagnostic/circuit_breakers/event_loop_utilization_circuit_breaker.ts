@@ -23,9 +23,7 @@ export class EventLoopUtilizationCircuitBreaker extends BaseCircuitBreaker {
     const exceeded = eventLoop.active > this.config.thresholdMillis;
 
     if (exceeded) {
-      return this.failure(
-        `Event loop utilization exceeded: ${eventLoop.active.toString()}, stopping`
-      );
+      return this.failure(`Event loop utilization exceeded: ${eventLoop.active.toString()}`);
     }
     return this.success();
   }
