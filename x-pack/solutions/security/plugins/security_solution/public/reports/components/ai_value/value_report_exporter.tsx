@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import jsPDF from 'jspdf';
+import { PDFDocument } from 'pdf-lib';
 // @ts-ignore
 import domtoimage from 'dom-to-image-more';
 import { useToasts } from '../../../common/lib/kibana';
@@ -76,36 +76,64 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
     adjustUI();
 
     try {
+      const scale = 2; // 2x resolution
       const dataUrl = await domtoimage.toPng(exportRef.current, {
         quality: 1,
         bgcolor: '#ffffff',
         cacheBust: true,
+        width: exportRef.current.offsetWidth * scale,
+        height: exportRef.current.offsetHeight * scale,
+        style: {
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${exportRef.current.offsetWidth}px`,
+          height: `${exportRef.current.offsetHeight}px`,
+        },
       });
 
-      const img = new Image();
-      img.src = dataUrl;
+      const pdfDoc = await PDFDocument.create();
+      const pageWidth = 595.28; // A4 width
+      const pageHeight = 841.89; // A4 height
+      const padding = 20;
 
-      img.onload = () => {
-        const pdf = new jsPDF('portrait', 'pt', 'a4');
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const padding = 20;
-        const imgWidth = pageWidth - padding * 2;
-        const imgHeight = (img.height * imgWidth) / img.width;
+      const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-        let position = 0;
-        let heightLeft = imgHeight;
+      const pngImageBytes = await fetch(dataUrl).then((res) => res.arrayBuffer());
+      const pngImage = await pdfDoc.embedPng(pngImageBytes);
 
-        while (heightLeft > 0) {
-          pdf.addImage(dataUrl, 'PNG', padding, position + padding, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-          position -= pageHeight;
-          if (heightLeft > 0) pdf.addPage();
-        }
+      const originalWidth = pngImage.width;
+      const originalHeight = pngImage.height;
 
-        const date = new Date().toISOString();
-        pdf.save(`value-report-${date}.pdf`);
-      };
+      const maxWidth = pageWidth - padding * 2;
+      const maxHeight = pageHeight - padding * 2;
+
+      const widthScale = maxWidth / originalWidth;
+      const heightScale = maxHeight / originalHeight;
+      const pdfScale = Math.min(widthScale, heightScale);
+
+      const imageWidth = originalWidth * pdfScale;
+      const imageHeight = originalHeight * pdfScale;
+
+      const x = (pageWidth - imageWidth) / 2;
+      const y = pageHeight - padding - imageHeight;
+
+      page.drawImage(pngImage, {
+        x,
+        y,
+        width: imageWidth,
+        height: imageHeight,
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `value-report-${new Date().toISOString()}.pdf`;
+      a.click();
+
+      URL.revokeObjectURL(url);
     } catch (err) {
       toasts.addError(err, {
         title: 'Failed to export value report PDF',

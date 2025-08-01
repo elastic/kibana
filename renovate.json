@@ -3271,7 +3271,7 @@
         "css-box-model",
         "dom-to-image-more",
         "i18n-iso-countries",
-        "jspdf",
+        "pdf-lib",
         "node-diff3",
         "re-resizable",
         "react-diff-view",

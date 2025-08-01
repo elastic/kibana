@@ -16,6 +16,7 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ExecutiveSummaryListItem } from './executive_summary_list_item';
 import { CostSavings } from './cost_savings';
 import { getPercChange } from '../../../overview/components/detection_response/soc_trends/helpers';
 import { ComparePercentage } from './compare_percentage';
@@ -44,10 +45,6 @@ interface Props {
 
 const LI_PADDING = css`
   padding: 5px 0;
-`;
-
-const ICON_PADDING = css`
-  margin: 0px 8px 0 0;
 `;
 
 export const ExecutiveSummary: React.FC<Props> = ({
@@ -152,6 +149,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   {i18n.EXECUTIVE_MESSAGE_END(i18n.TIME_RANGE(timerangeAsDays))}{' '}
                   {i18n.EXECUTIVE_FILTERING}
                   <br />
+                  <br />
                   {i18n.EXECUTIVE_CALC} <strong>{i18n.ESCALATED.toLowerCase()}</strong>{' '}
                   {i18n.EXECUTIVE_SUSPICIOUS} <strong>{i18n.NON_SUSPICIOUS}</strong>
                   {'. '}
@@ -161,6 +159,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   {i18n.EXECUTIVE_CONVERT}{' '}
                   <strong>{i18n.ANALYST_RATE(`$${analystHourlyRate}`)}</strong>
                   {'.'}
+                  <br />
                   <br />
                   {i18n.EXECUTIVE_MESSAGE_SECOND}
                 </p>
@@ -185,64 +184,68 @@ export const ExecutiveSummary: React.FC<Props> = ({
                   data-test-subj="executiveSummaryStatsList"
                 >
                   <li css={LI_PADDING} data-test-subj="executiveSummaryCostSavingsStat">
-                    <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
-                    <strong>{costSavings}</strong> {i18n.EXECUTIVE_COST_SAVINGS_DESC}
-                    {'. '}
-                    <ComparePercentage
-                      currentCount={valueMetrics.filteredAlerts}
-                      previousCount={valueMetricsCompare.filteredAlerts}
-                      stat={costSavingsCompare}
-                      statType={i18n.COST_SAVINGS_TITLE.toLowerCase()}
-                      timeRange={timerangeAsDays}
-                    />
+                    <ExecutiveSummaryListItem>
+                      <strong>{costSavings}</strong> {i18n.EXECUTIVE_COST_SAVINGS_DESC}
+                      {'. '}
+                      <ComparePercentage
+                        currentCount={valueMetrics.filteredAlerts}
+                        previousCount={valueMetricsCompare.filteredAlerts}
+                        stat={costSavingsCompare}
+                        statType={i18n.COST_SAVINGS_TITLE.toLowerCase()}
+                        timeRange={timerangeAsDays}
+                      />
+                    </ExecutiveSummaryListItem>
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryAlertFilteringStat">
-                    <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
-                    <strong>{formatPercent(valueMetrics.filteredAlertsPerc)}</strong>{' '}
-                    {i18n.EXECUTIVE_ALERT_FILTERING_DESC}
-                    {'. '}
-                    <ComparePercentage
-                      currentCount={valueMetrics.filteredAlertsPerc}
-                      previousCount={valueMetricsCompare.filteredAlertsPerc}
-                      stat={formatPercent(valueMetricsCompare.filteredAlertsPerc)}
-                      statType={i18n.FILTERING_RATE.toLowerCase()}
-                      timeRange={timerangeAsDays}
-                    />
+                    <ExecutiveSummaryListItem>
+                      <strong>{formatPercent(valueMetrics.filteredAlertsPerc)}</strong>{' '}
+                      {i18n.EXECUTIVE_ALERT_FILTERING_DESC}
+                      {'. '}
+                      <ComparePercentage
+                        currentCount={valueMetrics.filteredAlertsPerc}
+                        previousCount={valueMetricsCompare.filteredAlertsPerc}
+                        stat={formatPercent(valueMetricsCompare.filteredAlertsPerc)}
+                        statType={i18n.FILTERING_RATE.toLowerCase()}
+                        timeRange={timerangeAsDays}
+                      />
+                    </ExecutiveSummaryListItem>
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryHoursSavedStat">
-                    <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
-                    <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
-                    {i18n.EXECUTIVE_HOURS_SAVED_DESC}
-                    {'. '}
-                    <ComparePercentage
-                      currentCount={valueMetrics.hoursSaved}
-                      previousCount={valueMetricsCompare.hoursSaved}
-                      stat={formatThousands(valueMetricsCompare.hoursSaved)}
-                      statType={i18n.TIME_SAVED_DESC.toLowerCase()}
-                      timeRange={timerangeAsDays}
-                    />
+                    <ExecutiveSummaryListItem>
+                      <strong>{formatThousands(valueMetrics.hoursSaved)}</strong>{' '}
+                      {i18n.EXECUTIVE_HOURS_SAVED_DESC}
+                      {'. '}
+                      <ComparePercentage
+                        currentCount={valueMetrics.hoursSaved}
+                        previousCount={valueMetricsCompare.hoursSaved}
+                        stat={formatThousands(valueMetricsCompare.hoursSaved)}
+                        statType={i18n.TIME_SAVED_DESC.toLowerCase()}
+                        timeRange={timerangeAsDays}
+                      />
+                    </ExecutiveSummaryListItem>
                   </li>
                   <li css={LI_PADDING} data-test-subj="executiveSummaryThreatsDetectedStat">
-                    <EuiIcon css={ICON_PADDING} type="check" color="success" />{' '}
-                    <strong>{attackDiscoveryStat}</strong>{' '}
-                    {hasAttackDiscoveryComparison
-                      ? i18n.EXECUTIVE_THREATS_DETECTED_DESC(
-                          (
-                            getPercChange(
-                              valueMetrics.attackDiscoveryCount,
-                              valueMetricsCompare.attackDiscoveryCount
-                            ) ?? '0.0%'
-                          ).charAt(0) !== '-'
-                        )
-                      : i18n.EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE}
-                    {'. '}
-                    <ComparePercentage
-                      currentCount={valueMetrics.attackDiscoveryCount}
-                      previousCount={valueMetricsCompare.attackDiscoveryCount}
-                      stat={`${valueMetricsCompare.attackDiscoveryCount}`}
-                      statType={i18n.ATTACK_DISCOVERY_COUNT.toLowerCase()}
-                      timeRange={timerangeAsDays}
-                    />
+                    <ExecutiveSummaryListItem>
+                      <strong>{attackDiscoveryStat}</strong>{' '}
+                      {hasAttackDiscoveryComparison
+                        ? i18n.EXECUTIVE_THREATS_DETECTED_DESC(
+                            (
+                              getPercChange(
+                                valueMetrics.attackDiscoveryCount,
+                                valueMetricsCompare.attackDiscoveryCount
+                              ) ?? '0.0%'
+                            ).charAt(0) !== '-'
+                          )
+                        : i18n.EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE}
+                      {'. '}
+                      <ComparePercentage
+                        currentCount={valueMetrics.attackDiscoveryCount}
+                        previousCount={valueMetricsCompare.attackDiscoveryCount}
+                        stat={`${valueMetricsCompare.attackDiscoveryCount}`}
+                        statType={i18n.ATTACK_DISCOVERY_COUNT.toLowerCase()}
+                        timeRange={timerangeAsDays}
+                      />
+                    </ExecutiveSummaryListItem>
                   </li>
                 </ul>
               </EuiText>
