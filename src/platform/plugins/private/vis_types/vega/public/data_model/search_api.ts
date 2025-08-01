@@ -108,7 +108,7 @@ export class SearchAPI {
                 ),
                 map((data) => ({
                   name: requestId,
-                  rawResponse: data.rawResponse,
+                  rawResponse: structuredClone(data.rawResponse),
                 }))
               )
           )

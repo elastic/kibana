@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-
 import { getVersionsFile } from '#pipeline-utils';
-import { expect } from 'chai';
 
 import {
   getArtifactBuildTriggers,
@@ -27,13 +24,13 @@ describe('pipeline trigger combinations', () => {
     // tests 7.17 against 8.x versions
     const targets = versionsFile.versions.filter((v) => v.currentMajor === true);
 
-    expect(esForwardTriggers.length).to.eql(targets.length);
+    expect(esForwardTriggers.length).toEqual(targets.length);
 
-    expect(esForwardTriggers.every((trigger) => trigger.build?.branch === '7.17')).to.be.true;
+    expect(esForwardTriggers.every((trigger) => trigger.build?.branch === '7.17')).toBe(true);
 
     const targetedManifests = esForwardTriggers.map((t) => t.build?.env?.ES_SNAPSHOT_MANIFEST);
     targets.forEach((t) =>
-      expect(targetedManifests).to.include(
+      expect(targetedManifests).toContain(
         `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${t.version}/manifest-latest-verified.json`
       )
     );
@@ -44,10 +41,10 @@ describe('pipeline trigger combinations', () => {
     // triggers for all open branches
     const branches = versionsFile.versions.map((v) => v.branch);
 
-    expect(snapshotTriggers.length).to.eql(branches.length);
+    expect(snapshotTriggers.length).toEqual(branches.length);
 
     branches.forEach((b) => {
-      expect(snapshotTriggers.some((trigger) => trigger.build?.branch === b)).to.be.true;
+      expect(snapshotTriggers.some((trigger) => trigger.build?.branch === b)).toBe(true);
     });
   });
 
@@ -55,12 +52,13 @@ describe('pipeline trigger combinations', () => {
     const triggerTriggers = getArtifactBuildTriggers();
     // all currentMajor+prevMinor branches
     const branches = versionsFile.versions
-      .filter((v) => v.currentMajor === true && v.previousMinor === true)
+      .filter((v) => v.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
+      .filter((v) => v.branch !== '7.17')
       .map((v) => v.branch);
 
-    expect(triggerTriggers.length).to.eql(branches.length);
+    expect(triggerTriggers.length).toEqual(branches.length);
     branches.forEach((b) => {
-      expect(triggerTriggers.some((trigger) => trigger.build?.branch === b)).to.be.true;
+      expect(triggerTriggers.some((trigger) => trigger.build?.branch === b)).toBe(true);
     });
   });
 
@@ -71,9 +69,9 @@ describe('pipeline trigger combinations', () => {
       .filter((v) => !v.currentMajor || !v.currentMinor)
       .map((v) => v.branch);
 
-    expect(stagingTriggers.length).to.eql(branches.length);
+    expect(stagingTriggers.length).toEqual(branches.length);
     branches.forEach((b) => {
-      expect(stagingTriggers.some((trigger) => trigger.build?.branch === b)).to.be.true;
+      expect(stagingTriggers.some((trigger) => trigger.build?.branch === b)).toBe(true);
     });
   });
 });

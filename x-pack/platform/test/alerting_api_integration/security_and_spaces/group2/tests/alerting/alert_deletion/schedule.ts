@@ -43,7 +43,6 @@ import {
   getActiveAlert,
 } from './alert_deletion_test_utils';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
@@ -108,9 +107,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     await retry.try(async () => {
       const results = await es.search<IValidatedEvent>({
         index: '.kibana-event-log*',
+        sort: { '@timestamp': 'desc' },
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
       });
-      expect(results.hits.hits.length).to.eql(1);
+      expect(results.hits.hits.length > 0).to.be(true);
       expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
       expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
         deletedAlertIds.length

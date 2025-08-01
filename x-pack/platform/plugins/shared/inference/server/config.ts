@@ -9,6 +9,17 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  workers: schema.object({
+    anonymization: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      minThreads: schema.number({ defaultValue: 0, min: 0 }),
+      maxThreads: schema.number({ defaultValue: 3, min: 1 }),
+      idleTimeout: schema.duration({ defaultValue: '30s' }),
+      taskTimeout: schema.duration({ defaultValue: '15s' }),
+    }),
+  }),
 });
 
 export type InferenceConfig = TypeOf<typeof configSchema>;
+
+export type AnonymizationWorkerConfig = InferenceConfig['workers']['anonymization'];

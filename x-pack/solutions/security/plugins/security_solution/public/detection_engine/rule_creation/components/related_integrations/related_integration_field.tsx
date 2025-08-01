@@ -85,11 +85,14 @@ export function RelatedIntegrationField({
   );
 
   const handleVersionChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const version = e.target.value;
+
       field.setValue((oldValue) => ({
         ...oldValue,
-        version: e.target.value,
-      })),
+        version,
+      }));
+    },
     [field]
   );
 

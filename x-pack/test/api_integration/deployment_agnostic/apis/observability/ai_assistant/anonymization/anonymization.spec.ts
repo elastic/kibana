@@ -6,10 +6,8 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';
@@ -24,13 +22,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   let connectorId: string;
 
   const conversationsIndex = '.kibana-observability-ai-assistant-conversations-000001';
+  let simulatorPromise: Promise<LlmResponseSimulator>;
+  let simulator: LlmResponseSimulator;
 
   describe('anonymization', function () {
     const userText1 = 'My name is Claudia and my email is claudia@example.com';
     const userText2 = 'my website is http://claudia.is';
     // LLM proxy is not working on MKI
-    this.tags(['failsOnMKI']);
-
+    this.tags(['skipCloud']);
     before(async () => {
       await clearConversations(es);
       proxy = await createLlmProxy(log);
@@ -40,39 +39,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': JSON.stringify(
-          [
-            {
-              entityClass: 'EMAIL',
-              type: 'regex',
-              pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-              enabled: true,
-            },
-            {
-              entityClass: 'URL',
-              type: 'regex',
-              pattern: 'https?://[^\\s]+',
-              enabled: true,
-            },
-          ],
+        [aiAnonymizationSettings]: JSON.stringify(
+          {
+            rules: [
+              {
+                entityClass: 'EMAIL',
+                type: 'RegExp',
+                pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+                enabled: true,
+              },
+              {
+                entityClass: 'URL',
+                type: 'RegExp',
+                pattern: '(https?:\\/\\/[^\\s"\']+)',
+                enabled: true,
+              },
+            ],
+          },
           null,
           2
         ),
       });
-    });
 
-    after(async () => {
-      proxy.close();
-      await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
-      await clearConversations(es);
-      await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [],
-      });
-    });
+      simulatorPromise = proxy.interceptWithResponse(
+        'your email is EMAIL_f3cad5d12e6341ea1f5c27832754720aff68020e'
+      );
 
-    it('does not send detected entities to the LLM via chat/complete', async () => {
       void proxy.interceptTitle('Title for a new conversation');
-      const simulatorPromise = proxy.interceptWithResponse('ok');
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -99,8 +92,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.status).to.be(200);
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
-      const simulator = await simulatorPromise;
+      simulator = await simulatorPromise;
+    });
 
+    after(async () => {
+      proxy.close();
+      await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
+      await clearConversations(es);
+      await setAdvancedSettings(supertest, {
+        [aiAnonymizationSettings]: JSON.stringify({ rules: [] }),
+      });
+    });
+
+    it('does not send detected entities to the LLM via chat/complete', async () => {
       const userMsgsReq = simulator.requestBody.messages.filter((m: any) => m.role === 'user');
       expect(userMsgsReq).to.have.length(2);
       // First message
@@ -117,7 +121,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       ).to.be(1);
     });
 
-    it('stores original content and detected entities in Elasticsearch', async () => {
+    it('stores deanonymized messages and deanonymizations in Elasticsearch', async () => {
       // Refresh the index to make sure our document is searchable
       await es.indices.refresh({
         index: conversationsIndex,
@@ -128,6 +132,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         sort: '@timestamp:desc',
       });
       const hit: any = searchRes.hits.hits[0]._source;
+
       // Find the stored user messages
       const storedUserMsgs = hit.messages
         .filter(
@@ -138,17 +143,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         .map((m: any) => m.message);
       expect(storedUserMsgs).to.have.length(2);
 
-      // First stored message
+      // First stored user message
       const firstSavedMsg = storedUserMsgs[0];
-      expect(firstSavedMsg.unredactions).to.have.length(1);
-      expect(firstSavedMsg.unredactions[0].entity).to.eql('claudia@example.com');
-      expect(firstSavedMsg.unredactions[0].class_name).to.eql('EMAIL');
+      expect(firstSavedMsg.deanonymizations).to.have.length(1);
+      expect(firstSavedMsg.deanonymizations[0].entity.value).to.eql('claudia@example.com');
+      expect(firstSavedMsg.deanonymizations[0].entity.class_name).to.eql('EMAIL');
 
-      // Second stored message
+      // Second stored user message
       const secSavedMsg = storedUserMsgs[1];
-      expect(secSavedMsg.unredactions).to.have.length(1);
-      expect(secSavedMsg.unredactions[0].entity).to.eql('http://claudia.is');
-      expect(secSavedMsg.unredactions[0].class_name).to.eql('URL');
+      expect(secSavedMsg.deanonymizations).to.have.length(1);
+      expect(secSavedMsg.deanonymizations[0].entity.value).to.eql('http://claudia.is');
+      expect(secSavedMsg.deanonymizations[0].entity.class_name).to.eql('URL');
+
+      // stores assistant message
+      const storedAssistantMsg = hit.messages.find(
+        (m: any) => m.message.role === 'assistant' && m.message.content?.includes('your email')
+      )?.message;
+
+      expect(storedAssistantMsg).to.be.ok();
+      // Should contain clear text, not the hashed mask
+      expect(storedAssistantMsg.content).to.contain('claudia@example.com');
+      expect(storedAssistantMsg.content).to.not.match(/[0-9a-f]{40}/);
+
+      // Should have deanonymizations array with the detected entity
+      expect(storedAssistantMsg.deanonymizations).to.be.an('array');
+      expect(storedAssistantMsg.deanonymizations).to.have.length(1);
+      expect(storedAssistantMsg.deanonymizations[0].entity.value).to.eql('claudia@example.com');
+      expect(storedAssistantMsg.deanonymizations[0].entity.class_name).to.eql('EMAIL');
     });
   });
 }

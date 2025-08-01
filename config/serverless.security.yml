@@ -166,3 +166,6 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 5m
   - id: attack-discovery
     timeout: 10m
+
+# AI Assistant config
+aiAssistantManagementSelection.preferredAIAssistantType: 'security'

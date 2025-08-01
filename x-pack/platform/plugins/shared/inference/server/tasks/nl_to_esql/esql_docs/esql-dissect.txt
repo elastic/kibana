@@ -1,6 +1,6 @@
-# DISSECT
+## DISSECT
 
-The DISSECT command is used to extract structured data from a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns.
+The `DISSECT` command is used to extract structured data from a string. It matches the string against a delimiter-based pattern and extracts the specified keys as columns.
 
 ### Use Cases
 - **Log Parsing**: Extracting timestamps, log levels, and messages from log entries.
@@ -13,21 +13,23 @@ The DISSECT command is used to extract structured data from a string. It matches
 
 ### Parameters
 
-#### input
+#### `input`
 
-The column containing the string you want to structure. If the column has multiple values, DISSECT will process each value.
+The column containing the string you want to structure. If the column has multiple values, `DISSECT` will process each value.
 
-#### pattern
+#### `pattern`
 
 A dissect pattern. If a field name conflicts with an existing column, the existing column is dropped. If a field name is used more than once, only the rightmost duplicate creates a column.
 
-#### <separator>
+#### `<separator>`
 
 A string used as the separator between appended values, when using the append modifier.
 
 ## Examples
 
-The following example parses a string that contains a timestamp, some text, and an IP address:
+Parsing a string with a timestamp, text, and IP address
+
+Extracts the `date`, `msg`, and `ip` fields from a structured string.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
@@ -35,7 +37,9 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-By default, DISSECT outputs keyword string columns. To convert to another type, use Type conversion functions:
+Converting output to another type
+
+Converts the `date` field from a string to a datetime type after extracting it.
 
 ```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
@@ -43,7 +47,6 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 | EVAL date = TO_DATETIME(date)
 ```
-
 In this example, we use the `APPEND_SEPARATOR` to concatenate values with a custom separator:
 
 ```esql

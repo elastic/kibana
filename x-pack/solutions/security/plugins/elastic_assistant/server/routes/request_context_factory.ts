@@ -107,7 +107,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getCurrentUser,
 
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
 

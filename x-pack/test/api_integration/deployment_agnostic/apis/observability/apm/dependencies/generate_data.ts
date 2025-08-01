@@ -22,6 +22,8 @@ export const dataConfig = {
   },
 };
 
+export const NUMBER_OF_DEPENDENCIES_PER_SERVICE = 50;
+
 export async function generateData({
   apmSynthtraceEsClient,
   start,
@@ -46,12 +48,17 @@ export async function generateData({
         .duration(transaction.duration)
         .success()
         .children(
-          instance
-            .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
-            .duration(transaction.duration)
-            .success()
-            .destination(span.destination)
-            .timestamp(timestamp)
+          ...Array.from({ length: NUMBER_OF_DEPENDENCIES_PER_SERVICE }, (_, i) =>
+            instance
+              .span({
+                spanName: `${span.name} ${i + 1}`,
+                spanType: span.type,
+                spanSubtype: span.subType,
+              })
+              .duration(transaction.duration)
+              .destination(`${span.destination}/${i + 1}`)
+              .timestamp(timestamp)
+          )
         )
     );
 

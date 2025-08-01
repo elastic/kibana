@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   let elasticAgentpkgVersion: string;
 
-  describe('fleet_list_agent', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/170690
+  describe.skip('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest

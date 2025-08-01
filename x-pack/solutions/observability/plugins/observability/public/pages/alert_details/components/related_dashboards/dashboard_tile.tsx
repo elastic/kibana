@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { useKibana } from '../../../../utils/kibana_react';
 export interface DashboardMetadata {
@@ -48,24 +49,15 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
         <EuiFlexItem key={dashboard.id}>
-          <EuiText size="s">
-            <a
-              href="#"
-              onClick={async (e) => {
-                e.preventDefault();
-                if (dashboardLocator) {
-                  const url = await dashboardLocator.getUrl({
-                    dashboardId: dashboard.id,
-                  });
-                  window.open(url, '_blank');
-                } else {
-                  console.error('Dashboard locator is not available');
-                }
-              }}
-            >
-              {dashboard.title}
-            </a>
-          </EuiText>
+          <EuiLink
+            data-test-subj="o11yDashboardTileLink"
+            href={dashboardLocator?.getRedirectUrl({
+              dashboardId: dashboard.id,
+            })}
+            target="_blank"
+          >
+            {dashboard.title}
+          </EuiLink>
           <EuiText color={'subdued'} size="s">
             {dashboard.description}
           </EuiText>

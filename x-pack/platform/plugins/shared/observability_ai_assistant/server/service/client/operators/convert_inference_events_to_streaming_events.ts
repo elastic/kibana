@@ -41,6 +41,8 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                       }
                     : undefined,
               },
+              ...(event.deanonymized_input && { deanonymized_input: event.deanonymized_input }),
+              ...(event.deanonymized_output && { deanonymized_output: event.deanonymized_output }),
             } as ChatCompletionChunkEvent;
           case InferenceChatCompletionEventType.ChatCompletionMessage:
             // Convert to ChatCompletionMessageEvent
@@ -57,6 +59,8 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                       }
                     : undefined,
               },
+              ...(event.deanonymized_input && { deanonymized_input: event.deanonymized_input }),
+              ...(event.deanonymized_output && { deanonymized_output: event.deanonymized_output }),
             } as ChatCompletionMessageEvent;
 
           default:

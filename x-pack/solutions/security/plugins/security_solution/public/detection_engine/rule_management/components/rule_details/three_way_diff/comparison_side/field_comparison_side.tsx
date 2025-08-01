@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, snakeCase } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { VersionsPicker, VersionsPickerOptionEnum } from './versions_picker/versions_picker';
@@ -58,7 +58,7 @@ export function FieldComparisonSide(): JSX.Element {
   }, [selectedOption, prevResolvedValue, resolvedValue]);
 
   return (
-    <>
+    <section data-test-subj={`${snakeCase(fieldName)}-comparisonSide`}>
       <FieldUpgradeSideHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -81,6 +81,6 @@ export function FieldComparisonSide(): JSX.Element {
       <KibanaSectionErrorBoundary sectionName={i18n.TITLE}>
         <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
       </KibanaSectionErrorBoundary>
-    </>
+    </section>
   );
 }

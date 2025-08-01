@@ -10,7 +10,7 @@ import expect from 'expect';
 import { serviceMap, timerange, apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'node:stream';
 import { compact } from 'lodash';
-import type { SupertestReturnType } from '@kbn/test-suites-xpack-observability/apm_api_integration/common/apm_api_supertest';
+import type { SupertestReturnType } from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   extractExitSpansConnections,

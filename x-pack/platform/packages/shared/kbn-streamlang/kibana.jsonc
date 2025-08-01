@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/streamlang",
+  "owner": "@elastic/streams-program-team",
+  "group": "platform",
+  "visibility": "shared"
+}

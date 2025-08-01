@@ -7,8 +7,9 @@
 
 import React, { useState } from 'react';
 
-import { EuiCheckbox, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface DeleteRulesetRuleModalProps {
   closeDeleteModal: () => void;
@@ -27,10 +28,6 @@ export const DeleteRulesetRuleModal = ({
       onSuccessAction();
     }
   };
-  const confirmCheckboxId = useGeneratedHtmlId({
-    prefix: 'confirmCheckboxId',
-  });
-  const [checked, setChecked] = useState(false);
 
   const deleteOperation = () => {
     setIsLoading(true);
@@ -50,23 +47,17 @@ export const DeleteRulesetRuleModal = ({
       confirmButtonText={i18n.translate('xpack.queryRules.deleteRulesetRuleModal.confirmButton', {
         defaultMessage: 'Delete rule',
       })}
-      confirmButtonDisabled={checked === false}
       buttonColor="danger"
       isLoading={isLoading}
     >
-      {i18n.translate('xpack.queryRules.deleteRulesetRuleModal.body', {
-        defaultMessage:
-          'Deleting a rule referenced in a query will result in a broken query.  Make sure you have fixed any references to this rule prior to deletion.',
-      })}
-      <EuiSpacer size="m" />
-      <EuiCheckbox
-        id={confirmCheckboxId}
-        label="This rule is safe to delete"
-        checked={checked}
-        onChange={(e) => {
-          setChecked(e.target.checked);
-        }}
-      />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.queryRules.deleteRulesetRuleModal.description"
+            defaultMessage="Are you sure you want to delete this rule?"
+          />
+        </p>
+      </EuiText>
     </EuiConfirmModal>
   );
 };

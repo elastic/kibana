@@ -16,6 +16,10 @@ type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_depende
 type TopDependenciesStatistics =
   APIReturnType<'POST /internal/apm/dependencies/top_dependencies/statistics'>;
 
+const DEPENDENCY_NAMES = [
+  dataConfig.span.destination,
+  ...Array.from({ length: 25 }, (_, i) => `${dataConfig.span.destination}/${i + 1}`),
+];
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
@@ -51,7 +55,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           numBuckets: 20,
         },
         body: {
-          dependencyNames: JSON.stringify([dataConfig.span.destination]),
+          dependencyNames: JSON.stringify(DEPENDENCY_NAMES),
         },
       },
     });
@@ -83,7 +87,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns an array of dependencies', () => {
         expect(topDependencies).to.have.property('dependencies');
-        expect(topDependencies.dependencies).to.have.length(1);
+        expect(topDependencies.dependencies).to.have.length(51); // 50 dependencies + 1 dependency from the failed transaction
       });
 
       it('returns correct dependency information', () => {
@@ -101,7 +105,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let dependencies: TopDependencies['dependencies'][number];
 
         before(() => {
-          dependencies = topDependencies.dependencies[0];
+          dependencies =
+            topDependencies.dependencies.find(
+              (dep) => dep.location.dependencyName === dataConfig.span.destination
+            ) ?? topDependencies.dependencies[0];
         });
 
         it("doesn't have previous stats", () => {
@@ -117,6 +124,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(dependencies.currentStats.totalTime).to.not.have.property('timeseries');
           expect(dependencies.currentStats.throughput).to.not.have.property('timeseries');
           expect(dependencies.currentStats.errorRate).to.not.have.property('timeseries');
+        });
+
+        it('returns the correct number of statistics', () => {
+          expect(Object.keys(topDependenciesStats.currentTimeseries).length).to.be(
+            DEPENDENCY_NAMES.length
+          );
         });
 
         it('returns the correct latency', () => {
@@ -139,9 +152,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const {
             currentStats: { throughput },
           } = dependencies;
-          const { rate, errorRate } = dataConfig;
-
-          const totalRate = rate + errorRate;
+          const { errorRate } = dataConfig;
+          const totalRate = errorRate;
           expect(roundNumber(throughput.value)).to.be(roundNumber(totalRate));
           expect(
             topDependenciesStats.currentTimeseries[dataConfig.span.destination].throughput.every(
@@ -154,9 +166,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const {
             currentStats: { totalTime },
           } = dependencies;
-          const { rate, transaction, errorRate } = dataConfig;
+          const { transaction, errorRate } = dataConfig;
 
-          const expectedValuePerBucket = (rate + errorRate) * transaction.duration * 1000;
+          const expectedValuePerBucket = errorRate * transaction.duration * 1000;
           expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         });
 
@@ -164,8 +176,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const {
             currentStats: { errorRate },
           } = dependencies;
-          const { rate, errorRate: dataConfigErroRate } = dataConfig;
-          const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
+          const { errorRate: dataConfigErroRate } = dataConfig;
+          const expectedValue = dataConfigErroRate / dataConfigErroRate;
           expect(errorRate.value).to.be(expectedValue);
           expect(
             topDependenciesStats.currentTimeseries[dataConfig.span.destination].errorRate.every(

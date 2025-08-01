@@ -115,41 +115,41 @@ With PATH_TO_CONFIG and other options as follows.
 
 1. Functional UI tests with `Trial` license:
 
-    Group | PATH_TO_CONFIG
-    ----- | --------------
-    anomaly detection jobs | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts`
-    anomaly detection result views | `src/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts`
-    anomaly detection integrations | `src/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts`
-    data frame analytics | `src/platform/test/functional/apps/ml/data_frame_analytics/config.ts`
-    data visualizer | `src/platform/test/functional/apps/ml/data_visualizer/config.ts`
-    permissions | `src/platform/test/functional/apps/ml/permissions/config.ts`
-    stack management jobs | `src/platform/test/functional/apps/ml/stack_management_jobs/config.ts`
-    short tests | `src/platform/test/functional/apps/ml/short_tests/config.ts`
+   | Group                          | PATH_TO_CONFIG                                                                  |
+   | ------------------------------ | ------------------------------------------------------------------------------- |
+   | anomaly detection jobs         | `src/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts`         |
+   | anomaly detection result views | `src/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts` |
+   | anomaly detection integrations | `src/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts` |
+   | data frame analytics           | `src/platform/test/functional/apps/ml/data_frame_analytics/config.ts`           |
+   | data visualizer                | `src/platform/test/functional/apps/ml/data_visualizer/config.ts`                |
+   | permissions                    | `src/platform/test/functional/apps/ml/permissions/config.ts`                    |
+   | stack management jobs          | `src/platform/test/functional/apps/ml/stack_management_jobs/config.ts`          |
+   | short tests                    | `src/platform/test/functional/apps/ml/short_tests/config.ts`                    |
 
-    The `short tests` group contains tests for page navigation, model management,
-    feature controls, settings and notifications. Test files for each group are located
-    in the directory of their configuration file.
+   The `short tests` group contains tests for page navigation, model management,
+   feature controls, settings and notifications. Test files for each group are located
+   in the directory of their configuration file.
 
-1.  Functional UI tests with `Basic` license:
+1. Functional UI tests with `Basic` license:
 
-    Group | PATH_TO_CONFIG
-    ----- | --------------
-    permissions | `test/functional_basic/apps/ml/permissions/config.ts`
-    data visualizer group1 (file data viz) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts`
-    data visualizer group2 (index data viz) | `test/functional_basic/apps/ml/data_visualizer/group2/config.ts`
-    data visualizer group3 (actions panel, discover grid) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts`
+   | Group                                                 | PATH_TO_CONFIG                                                   |
+   | ----------------------------------------------------- | ---------------------------------------------------------------- |
+   | permissions                                           | `test/functional_basic/apps/ml/permissions/config.ts`            |
+   | data visualizer group1 (file data viz)                | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
+   | data visualizer group2 (index data viz)               | `test/functional_basic/apps/ml/data_visualizer/group2/config.ts` |
+   | data visualizer group3 (actions panel, discover grid) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
 
-1.  API integration tests with `Trial` license:
+1. API integration tests with `Trial` license:
 
-    - PATH_TO_CONFIG: `src/platform/test/api_integration/apis/ml/config.ts`
+   - PATH_TO_CONFIG: `x-pack/platform/test/api_integration/apis/ml/config.ts`
 
-1.  Accessibility tests:
+1. Accessibility tests:
 
-    We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of ML (for example, users relying on screen readers).
+   We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of ML (for example, users relying on screen readers).
 
-    - PATH_TO_CONFIG: `src/platform/test/accessibility/config.ts`
-    - Add `--grep=ml` to the test runner command
-    - Tests are located in `x-pack/test/accessibility/apps/group2`
+   - PATH_TO_CONFIG: `src/platform/test/accessibility/config.ts`
+   - Add `--grep=ml` to the test runner command
+   - Tests are located in `x-pack/test/accessibility/apps/group2`
 
 ## Generating docs screenshots
 
@@ -164,7 +164,7 @@ and Kibana instance that the tests will be run against.
     node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag ml
 
 The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
-ML screenshot generation tests are located in `x-pack/test/screenshot_creation/apps/ml_docs`.
+ML screenshot generation tests are located in `x-pack/platform/test/screenshot_creation/apps/ml_docs`.
 
 ## Shared functions
 

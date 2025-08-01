@@ -173,6 +173,9 @@ const createSecuritySolutionRequestContextMock = (
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
   };
 };
 

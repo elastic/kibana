@@ -1,146 +1,818 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CalendarForm CalendarId shown as title when editing 1`] = `null`;
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `
+<div
+  class="euiForm"
+  data-test-subj="mlCalendarFormEdit"
+>
+  <div
+    class="euiText emotion-euiText-m"
+    data-test-subj="mlCalendarDescriptionText"
+  >
+    <p>
+      test description
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Jobs
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiComboBox emotion-euiComboBox"
+        data-test-subj="mlCalendarJobSelection"
+      >
+        <div
+          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        >
+          <div
+            class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
+            >
+              <div
+                class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-invalid="false"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Groups
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiComboBox emotion-euiComboBox"
+        data-test-subj="mlCalendarJobGroupSelection"
+      >
+        <div
+          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        >
+          <div
+            class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
+            >
+              <div
+                class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-invalid="false"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+  />
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Events
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiBasicTable"
+        data-test-subj="mlCalendarEventsTable"
+      >
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_description_0"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Description"
+                      >
+                        Description
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="ascending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_start_time_1"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Start"
+                      >
+                        <span>
+                          Start
+                        </span>
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortUp"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_end_time_2"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="End"
+                      >
+                        <span>
+                          End
+                        </span>
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <td
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell__3"
+                role="columnheader"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  />
+                </div>
+              </td>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                colspan="4"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    No items found
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Cancel
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+        data-test-subj="mlSaveCalendarButton"
+        disabled=""
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Save
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
 
 exports[`CalendarForm Renders calendar form 1`] = `
-<EuiForm
+<div
+  class="euiForm"
   data-test-subj="mlCalendarFormNew"
 >
-  <MlPageHeader>
-    <MemoizedFormattedMessage
-      defaultMessage="Create new calendar"
-      id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-    />
-  </MlPageHeader>
-  <EuiFormRow
-    error={
-      Array [
-        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
-      ]
-    }
-    isInvalid={true}
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Calendar ID"
-        id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
-      />
-    }
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
   >
-    <EuiFieldText
-      data-test-subj="mlCalendarIdInput"
-      disabled={false}
-      name="calendarId"
-      onChange={[MockFunction]}
-      value=""
-    />
-  </EuiFormRow>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFormRow
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Jobs"
-        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
-      />
-    }
-  >
-    <EuiComboBox
-      async={false}
-      compressed={false}
-      data-test-subj="mlCalendarJobSelection"
-      fullWidth={false}
-      isClearable={true}
-      isDisabled={false}
-      onChange={[MockFunction]}
-      optionMatcher={[Function]}
-      options={Array []}
-      selectedOptions={Array []}
-      singleSelection={false}
-      sortMatchesBy="none"
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Groups"
-        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
-      />
-    }
-  >
-    <EuiComboBox
-      async={false}
-      compressed={false}
-      data-test-subj="mlCalendarJobGroupSelection"
-      fullWidth={false}
-      isClearable={true}
-      isDisabled={false}
-      onChange={[MockFunction]}
-      onCreateOption={[MockFunction]}
-      optionMatcher={[Function]}
-      options={Array []}
-      selectedOptions={Array []}
-      singleSelection={false}
-      sortMatchesBy="none"
-    />
-  </EuiFormRow>
-  <EuiSpacer
-    size="xl"
-  />
-  <EuiFormRow
-    fullWidth={true}
-    label={
-      <Memo(MemoizedFormattedMessage)
-        defaultMessage="Events"
-        id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
-      />
-    }
-  >
-    <EventsTable
-      eventsList={Array []}
-      onDeleteClick={[MockFunction]}
-      saving={false}
-      showImportModal={[MockFunction]}
-      showNewEventModal={[MockFunction]}
-      showSearchBar={false}
-    />
-  </EuiFormRow>
-  <EuiSpacer
-    size="l"
-  />
-  <EuiFlexGroup
-    justifyContent="flexEnd"
-  >
-    <EuiFlexItem
-      grow={false}
+    <div
+      class="euiFormRow__labelWrapper"
     >
-      <EuiButton
-        isDisabled={false}
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid emotion-euiFormLabel-invalid"
+        for="generated-id"
+        id="generated-id-label"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Cancel"
-          id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
-        />
-      </EuiButton>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+        Calendar ID
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
     >
-      <EuiButton
+      <div
+        class="euiFormControlLayout emotion-euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="generated-id-error-0"
+            class="euiFieldText emotion-euiFieldText"
+            data-test-subj="mlCalendarIdInput"
+            id="generated-id"
+            name="calendarId"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        aria-live="polite"
+        class="euiFormErrorText euiFormRow__text emotion-euiFormErrorText"
+        id="generated-id-error-0"
+      >
+        Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Jobs
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiComboBox emotion-euiComboBox"
+        data-test-subj="mlCalendarJobSelection"
+      >
+        <div
+          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        >
+          <div
+            class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
+            >
+              <div
+                class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-invalid="false"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Groups
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiComboBox emotion-euiComboBox"
+        data-test-subj="mlCalendarJobGroupSelection"
+      >
+        <div
+          class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+        >
+          <div
+            class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
+            >
+              <div
+                class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect"
+                data-test-subj="comboBoxInput"
+                tabindex="-1"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-invalid="false"
+                  autocomplete="off"
+                  class="euiComboBox__input emotion-euiComboBoxInput"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id"
+                  role="combobox"
+                  style="inline-size: 2px;"
+                  value=""
+                />
+              </div>
+              <div
+                class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+              >
+                <button
+                  aria-label="Open list of options"
+                  class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                  data-test-subj="comboBoxToggleListButton"
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+  />
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow-fullWidth"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Events
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiBasicTable"
+        data-test-subj="mlCalendarEventsTable"
+      >
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_description_0"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Description"
+                      >
+                        Description
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="ascending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_start_time_1"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Start"
+                      >
+                        <span>
+                          Start
+                        </span>
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortUp"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_end_time_2"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="End"
+                      >
+                        <span>
+                          End
+                        </span>
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <td
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell__3"
+                role="columnheader"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  />
+                </div>
+              </td>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                colspan="4"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    No items found
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Cancel
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
         data-test-subj="mlSaveCalendarButton"
-        fill={true}
-        isDisabled={true}
-        onClick={[MockFunction]}
+        disabled=""
+        type="button"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Save"
-          id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
-        />
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</EuiForm>
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Save
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 `;

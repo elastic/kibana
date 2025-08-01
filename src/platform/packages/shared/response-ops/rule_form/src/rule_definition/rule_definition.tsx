@@ -359,14 +359,12 @@ export const RuleDefinition = () => {
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={
                     <EuiText size="s">
-                      <p>
-                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
-                        <RuleSettingsFlappingTitleTooltip
-                          isOpen={isFlappingPopoverOpen}
-                          setIsPopoverOpen={setIsFlappingPopoverOpen}
-                          anchorPosition="downCenter"
-                        />
-                      </p>
+                      <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
+                      <RuleSettingsFlappingTitleTooltip
+                        isOpen={isFlappingPopoverOpen}
+                        setIsPopoverOpen={setIsFlappingPopoverOpen}
+                        anchorPosition="downCenter"
+                      />
                     </EuiText>
                   }
                 >
