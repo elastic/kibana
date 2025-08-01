@@ -10,6 +10,7 @@ import type { Indicator } from '../../../../../../common/threat_intelligence/typ
 import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { IndicatorFieldsTable } from './fields_table';
+import { EuiPanel } from '@elastic/eui';
 
 /**
  * Pick indicator fields starting with the indicator type
@@ -45,10 +46,12 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   );
 
   return (
-    <IndicatorFieldsTable
-      indicator={indicator}
-      fields={highlightedFields}
-      data-test-subj={dataTestSubj}
-    />
+    <EuiPanel hasBorder hasShadow={false}>
+      <IndicatorFieldsTable
+        indicator={indicator}
+        fields={highlightedFields}
+        data-test-subj={dataTestSubj}
+      />
+    </EuiPanel>
   );
 };

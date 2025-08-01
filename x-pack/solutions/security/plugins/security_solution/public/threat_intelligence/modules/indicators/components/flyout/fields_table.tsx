@@ -73,6 +73,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
       columns={columns}
       sorting={true}
       data-test-subj={dataTestSubj}
+      compressed
     />
   );
 };
