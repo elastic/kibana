@@ -742,6 +742,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
   handleBlurOnScroll = onRaf(() => {
     // for small screens, unified search bar is no longer sticky,
     // so we need to blur the input when it scrolls out of view
+    // TODO: replace screen width value with euiTheme breakpoint once this component is converted to a functional component
     const isSmallScreen = window.innerWidth < 768;
 
     if (isSmallScreen && !this.hasScrollListener) {
