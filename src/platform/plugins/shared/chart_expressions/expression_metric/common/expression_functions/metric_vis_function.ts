@@ -84,10 +84,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The alignment of the Title and Subtitle.',
       }),
     },
-    valuesTextAlign: {
+    primaryAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.valuesTextAlign.help', {
-        defaultMessage: 'The alignment of the Primary and Secondary Metric.',
+      help: i18n.translate('expressionMetricVis.function.valueTextAlign.help', {
+        defaultMessage: 'The alignment of the Primary Metric.',
+      }),
+    },
+    secondaryAlign: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.extraTextAlign.help', {
+        defaultMessage: 'The alignment of the Secondary Metric.',
       }),
     },
     iconAlign: {
@@ -100,6 +106,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string', 'number'],
       help: i18n.translate('expressionMetricVis.function.valueFontSize.help', {
         defaultMessage: 'The value font size.',
+      }),
+    },
+    primaryPosition: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
+        defaultMessage: 'The primary position.',
+      }),
+    },
+    titleWeight: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.titleWeight.help', {
+        defaultMessage: 'The title weight.',
       }),
     },
     color: {
@@ -244,9 +262,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             palette: args.palette,
             progressDirection: args.progressDirection,
             titlesTextAlign: args.titlesTextAlign,
-            valuesTextAlign: args.valuesTextAlign,
+            primaryAlign: args.primaryAlign,
+            secondaryAlign: args.secondaryAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
+            primaryPosition: args.primaryPosition,
+            titleWeight: args.titleWeight,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,

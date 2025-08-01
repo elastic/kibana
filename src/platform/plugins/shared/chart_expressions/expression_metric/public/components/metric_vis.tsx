@@ -328,9 +328,12 @@ export const MetricVis = ({
                   emptyBackground: colors.emptyShade,
                   blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
-                  valuesTextAlign: config.metric.valuesTextAlign,
+                  valueTextAlign: config.metric.primaryAlign,
+                  extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  valuePosition: config.metric.primaryPosition,
+                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

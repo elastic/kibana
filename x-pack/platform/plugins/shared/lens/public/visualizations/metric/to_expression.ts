@@ -200,9 +200,12 @@ export const toExpression = (
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
     titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
+    primaryAlign: state.primaryAlign ?? metricStateDefaults.primaryAlign,
+    secondaryAlign: state.secondaryAlign ?? metricStateDefaults.secondaryAlign,
     iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
+    primaryPosition: state.primaryPosition ?? metricStateDefaults.primaryPosition,
+    titleWeight: state.titleWeight ?? metricStateDefaults.titleWeight,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasIcon(state.icon) ? state.icon : undefined,
     palette:
