@@ -20,6 +20,7 @@ import type {
   MetricWNumber,
   MetricWText,
   SettingsProps,
+  SecondaryMetricProps,
 } from '@elastic/charts';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
@@ -36,7 +37,7 @@ import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric } from './secondary_metric';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
@@ -180,27 +181,33 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
+    // Build secondary metric information
+
     const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
+
+    const secondaryMetricInfo = getSecondaryMetricInfo({
+      columns: data.columns,
+      row,
+      config,
+      getMetricFormatter,
+      trendConfig,
+      staticColor: config.metric.secondaryColor,
+    });
+
+    const secondaryMetricProps: SecondaryMetricProps = {
+      value: secondaryMetricInfo.value,
+      label: secondaryMetricInfo.label,
+      badgeColor: secondaryMetricInfo.badgeColor,
+      ariaDescription: secondaryMetricInfo.description,
+      icon: secondaryMetricInfo.icon,
+    };
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ color }) => (
-          <SecondaryMetric
-            row={row}
-            config={config}
-            columns={data.columns}
-            getMetricFormatter={getMetricFormatter}
-            staticColor={config.metric.secondaryColor}
-            trendConfig={
-              hasDynamicColoring && trendConfig
-                ? { ...trendConfig, borderColor: color }
-                : trendConfig
-            }
-          />
-        ),
+        extra: secondaryMetricProps,
         color: config.metric.color ?? defaultColor,
       };
       return Array.isArray(value)
@@ -214,18 +221,7 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ color }) => (
-        <SecondaryMetric
-          row={row}
-          config={config}
-          columns={data.columns}
-          getMetricFormatter={getMetricFormatter}
-          staticColor={config.metric.secondaryColor}
-          trendConfig={
-            hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
-          }
-        />
-      ),
+      extra: secondaryMetricProps,
       color: tileColor,
     };
 
