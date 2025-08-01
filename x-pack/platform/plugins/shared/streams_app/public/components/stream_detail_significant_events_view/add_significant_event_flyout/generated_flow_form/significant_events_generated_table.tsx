@@ -7,17 +7,20 @@
 
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCodeBlock,
   EuiLink,
+  EuiScreenReaderOnly,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
+import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -40,6 +43,27 @@ export function SignificantEventsGeneratedTable({
     },
   } = useKibana();
   const { timeState } = useTimefilter();
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+
+  const toggleDetails = (query: StreamQueryKql) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+    if (itemIdToExpandedRowMapValues[query.id]) {
+      delete itemIdToExpandedRowMapValues[query.id];
+    } else {
+      itemIdToExpandedRowMapValues[query.id] = (
+        <PreviewDataSparkPlot
+          definition={definition}
+          query={query}
+          timeRange={timeState.timeRange}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   const columns: Array<EuiBasicTableColumn<StreamQueryKql>> = [
     {
@@ -69,6 +93,32 @@ export function SignificantEventsGeneratedTable({
         </EuiCodeBlock>
       ),
     },
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.dataColumn', {
+              defaultMessage: 'Preview',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      mobileOptions: { header: false },
+      render: (query: StreamQueryKql) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(query)}
+            aria-label={itemIdToExpandedRowMapValues[query.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMapValues[query.id] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
+    },
   ];
 
   const selection: EuiTableSelectionType<StreamQueryKql> = {
@@ -81,6 +131,7 @@ export function SignificantEventsGeneratedTable({
     <EuiBasicTable
       responsiveBreakpoint={false}
       items={generatedQueries}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       itemId="id"
       rowHeader="title"
       columns={columns}

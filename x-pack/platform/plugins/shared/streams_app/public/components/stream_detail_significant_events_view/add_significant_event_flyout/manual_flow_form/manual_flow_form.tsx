@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { niceTimeFormatter } from '@elastic/charts';
 import {
   EuiFieldText,
   EuiFlexGroup,
   EuiForm,
   EuiFormLabel,
   EuiFormRow,
-  EuiPanel,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,11 +19,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { SparkPlot } from '../../../spark_plot';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
-import { useSignificantEventPreviewFetch } from './use_significant_event_preview_fetch';
+import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { useSignificantEventValidation } from './use_significant_event_validation';
-import { useSparkplotDataFromSigEvents } from './use_spark_plot_data_from_sig_events';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -51,7 +46,7 @@ export function ManualFlowForm({
     },
   } = useKibana();
   const {
-    timeState: { timeRange: initialTimeRange, start, end },
+    timeState: { timeRange: initialTimeRange },
   } = useTimefilter();
 
   const [touched, setTouched] = useState({ title: false, kql: false });
@@ -89,22 +84,6 @@ export function ManualFlowForm({
     const isTouched = touched.title || touched.kql;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched.title, touched.kql]);
-
-  const previewFetch = useSignificantEventPreviewFetch({
-    name: definition.name,
-    kqlQuery: query.kql?.query ?? '',
-    timeRange,
-  });
-
-  const xFormatter = useMemo(() => {
-    return niceTimeFormatter([start, end]);
-  }, [start, end]);
-
-  const sparkPlotData = useSparkplotDataFromSigEvents({
-    previewFetch,
-    queryValues: query,
-    xFormatter,
-  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -191,29 +170,7 @@ export function ManualFlowForm({
           />
         </EuiFormRow>
       </EuiForm>
-      <EuiPanel hasBorder={true}>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiText size="xs">
-            <h4>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartTitle',
-                { defaultMessage: 'Occurrences' }
-              )}
-            </h4>
-          </EuiText>
-          <SparkPlot
-            id="query_preview"
-            name={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartSeriesName',
-              { defaultMessage: 'Count' }
-            )}
-            type="bar"
-            timeseries={sparkPlotData.timeseries}
-            annotations={sparkPlotData.annotations}
-            xFormatter={xFormatter}
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
+      <PreviewDataSparkPlot definition={definition} query={query} timeRange={timeRange} />
     </EuiFlexGroup>
   );
 }
