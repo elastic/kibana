@@ -6,14 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -154,19 +147,6 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
 
-  const buttonContent: React.ReactNode = (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <AssistantIcon size="m" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
-          defaultMessage: 'AI Assistant',
-        })}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <>
       <EuiToolTip
@@ -188,8 +168,12 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           }}
           color="primary"
           size="s"
+          iconType={AssistantIcon}
+          isLoading={chatService.loading}
         >
-          {chatService.loading ? <EuiLoadingSpinner size="s" /> : buttonContent}
+          {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
+            defaultMessage: 'AI Assistant',
+          })}
         </EuiButtonBasicOrEmpty>
       </EuiToolTip>
       {chatService.value ? (
