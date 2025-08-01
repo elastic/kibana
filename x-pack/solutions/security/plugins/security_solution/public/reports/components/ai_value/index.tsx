@@ -66,7 +66,6 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
           />
         </EuiFlexGrid>
       )}
-      <EuiSpacer size="l" />
     </>
   );
 };

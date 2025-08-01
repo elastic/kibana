@@ -63,7 +63,6 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
         timerange={timerange}
         id={`${ID}-area-embeddable`}
         height={300}
-        width={'95%'}
         inspectTitle={i18n.COST_SAVINGS_TREND}
         scopeId={SourcererScopeName.detections}
         withActions={[
