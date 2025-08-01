@@ -62,7 +62,7 @@ export function QueryHistoryAction({
           <EuiLink
             onClick={toggleHistory}
             external={false}
-            data-test-subj="ESQLEditor-feedback-link"
+            data-test-subj="ESQLEditor-hide-queries-link"
           >
             <EuiIconTip
               type="clockCounter"
