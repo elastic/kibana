@@ -20,19 +20,9 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
 
   const toasts = useToasts();
   const uiAdjuster = useCallback((eRef: HTMLDivElement) => {
-    const badgeEls = eRef.querySelectorAll('.euiBadge');
-    const badgeTextEls = eRef.querySelectorAll('.euiBadge__text');
     const exportButton = eRef.querySelector('.exportPdfButton');
 
     const adjustUI = () => {
-      badgeEls.forEach((el) => {
-        el.setAttribute('data-original-style', el.getAttribute('style') || '');
-        (el as HTMLElement).style.backgroundColor = 'transparent';
-      });
-      badgeTextEls.forEach((el) => {
-        el.setAttribute('data-original-style', el.getAttribute('style') || '');
-        (el as HTMLElement).style.color = 'black';
-      });
       if (exportButton) {
         exportButton.setAttribute('data-original-style', exportButton.getAttribute('style') || '');
         (exportButton as HTMLElement).style.display = 'none';
@@ -40,22 +30,6 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
     };
 
     const restoreUI = () => {
-      badgeEls.forEach((el) => {
-        const original = el.getAttribute('data-original-style');
-        if (original) {
-          el.setAttribute('style', original);
-        } else {
-          el.removeAttribute('style');
-        }
-      });
-      badgeTextEls.forEach((el) => {
-        const original = el.getAttribute('data-original-style');
-        if (original) {
-          el.setAttribute('style', original);
-        } else {
-          el.removeAttribute('style');
-        }
-      });
       if (exportButton) {
         const original = exportButton.getAttribute('data-original-style');
         if (original) {
