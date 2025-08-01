@@ -86,5 +86,9 @@ mv target/kibana-coverage/jest-combined/coverage-final.json \
 echo "--- Jest [$TEST_TYPE] configs complete"
 printf "%s\n" "${results[@]}"
 
+# Scout reporter
+echo "--- Upload Scout reporter events to AppEx QA's team cluster"
+node scripts/scout upload-events --dontFailOnError
+
 # Force exit 0 to ensure the next build step starts.
 exit 0

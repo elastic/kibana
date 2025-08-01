@@ -3042,35 +3042,6 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.SideNavCompProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "SideNavCompProps",
-        "description": [],
-        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SideNavCompProps.activeNodes",
-            "type": "Array",
-            "tags": [],
-            "label": "activeNodes",
-            "description": [],
-            "signature": [
-              "ChromeProjectNavigationNode",
-              "[][]"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-public.SolutionNavigationDefinition",
         "type": "Interface",
         "tags": [],
@@ -3151,23 +3122,6 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinition.sideNavComponent",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "sideNavComponent",
-            "description": [
-              "React component to render in the side nav for the navigation"
-            ],
-            "signature": [
-              "SideNavComponent",
-              " | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.SolutionNavigationDefinition.homePage",
             "type": "Uncategorized",
             "tags": [],
@@ -3177,6 +3131,22 @@
             ],
             "signature": [
               "LinkId | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SolutionNavigationDefinition.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [
+              "data-test-subj attribute for the solution navigation."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
@@ -3475,25 +3445,6 @@
           "<LinkId, Id, ChildrenId> | ",
           "ItemDefinition",
           "<LinkId, Id, ChildrenId>"
-        ],
-        "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.SideNavComponent",
-        "type": "Type",
-        "tags": [],
-        "label": "SideNavComponent",
-        "description": [],
-        "signature": [
-          "React.ComponentClass<",
-          "SideNavCompProps",
-          ", any> | React.FunctionComponent<",
-          "SideNavCompProps",
-          ">"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,

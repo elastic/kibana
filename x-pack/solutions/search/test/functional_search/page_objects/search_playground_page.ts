@@ -440,6 +440,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
       },
 
+      async runQueryInQueryMode(queryText: string) {
+        await testSubjects.existOrFail('searchPlaygroundChatQuestionFieldText');
+        await testSubjects.setValue('searchPlaygroundChatQuestionFieldText', queryText);
+        await testSubjects.click('RunElasticsearchQueryButton');
+      },
+
       async expectEditContextOpens(
         indexName: string = 'basic_index',
         expectedSelectedFields: string[] = ['baz']
@@ -599,7 +605,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async runQueryInQueryMode(queryText: string) {
         await testSubjects.existOrFail('searchPlaygroundSearchModeFieldText');
-        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', `${queryText}`);
+        await testSubjects.setValue('searchPlaygroundSearchModeFieldText', queryText);
         await testSubjects.click('RunElasticsearchQueryButton');
       },
       async expectFieldToBeSelected(fieldName: string) {
