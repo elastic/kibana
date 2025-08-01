@@ -30,7 +30,7 @@ export interface SaveDiscoverSessionOptions {
   copyOnSave?: boolean;
 }
 
-export const saveDiscoverSessionSavedObject = async (
+const saveDiscoverSessionSavedObject = async (
   id: string | undefined,
   attributes: DiscoverSessionAttributes,
   references: Reference[] | undefined,
@@ -67,7 +67,7 @@ export const saveDiscoverSession = async (
   options: SaveDiscoverSessionOptions,
   contentManagement: ContentManagementPublicStart['client'],
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
-): Promise<string | undefined> => {
+): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
 
   if (isNew) {
@@ -132,10 +132,12 @@ export const saveDiscoverSession = async (
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])
     : tabReferences;
 
-  return saveDiscoverSessionSavedObject(
+  const id = await saveDiscoverSessionSavedObject(
     isNew ? undefined : discoverSession.id,
     attributes,
     references,
     contentManagement
   );
+
+  return { ...discoverSession, id, references, managed: false };
 };
