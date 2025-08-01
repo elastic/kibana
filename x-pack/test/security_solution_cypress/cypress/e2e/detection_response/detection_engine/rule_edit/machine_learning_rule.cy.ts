@@ -39,8 +39,7 @@ import { visit } from '../../../../tasks/navigation';
 import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-// Failing: See https://github.com/elastic/kibana/issues/229859
-describe.skip(
+describe(
   'Machine Learning Detection Rules - Editing',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -56,12 +55,16 @@ describe.skip(
       );
       // ensure no ML jobs are started before the test
       machineLearningJobIds.forEach((j) => forceStopAndCloseJob({ jobId: j }));
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat/hosts', type: 'platform' });
     });
 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
       setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
       forceStartDatafeeds({ jobIds: [jobId] });
       cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });

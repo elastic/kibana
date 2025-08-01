@@ -25,6 +25,7 @@ export const fetchUnattachedIndices = async (
   let connectors: Connector[] = [];
   try {
     connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     connectors = [];
   }

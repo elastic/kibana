@@ -62,7 +62,6 @@ export const AddIndicesLogic = kea<MakeLogicType<AddIndicesLogicValues, AddIndic
       [],
       {
         closeAddIndicesFlyout: () => [],
-        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedIndices: (_, { indices }) => indices,
       },
     ],

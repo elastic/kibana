@@ -354,7 +354,8 @@ export class MonacoEditorActionsProvider {
       // track the requests
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
-      const results = await sendRequest({ http, requests });
+      const selectedHost = settings.getSelectedHost();
+      const results = await sendRequest({ http, requests, host: selectedHost || undefined });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();

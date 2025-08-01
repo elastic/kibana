@@ -20,6 +20,7 @@ const isUrl = (value: string) => {
 
   try {
     url = new URL(value);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_) {
     return false;
   }

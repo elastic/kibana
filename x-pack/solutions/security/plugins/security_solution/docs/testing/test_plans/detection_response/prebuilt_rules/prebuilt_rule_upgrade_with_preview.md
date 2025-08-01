@@ -30,7 +30,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Scenarios](#scenarios)
   - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
     - [**Scenario: User can preview prebuilt rules having upgrades**](#scenario-user-can-preview-prebuilt-rules-having-upgrades)
-    - [**Scenario: User can upgrade a prebuilt rule using the rule preview**](#scenario-user-can-upgrade-a-prebuilt-rule-using-the-rule-preview)
     - [**Scenario: User can see correct rule information in the preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-the-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in the preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-the-preview-before-upgrading)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
@@ -51,7 +50,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Rule upgrade button](#rule-upgrade-button)
     - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1)
     - [**Scenario: Rule upgrade button is disabled when num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-fields-in-edit-mode--1)
-    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1 or num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1-or-num-fields-in-edit-mode--1)
+    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1 and num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1-and-num-fields-in-edit-mode--1)
   - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
     - [**Scenario: Non-customized rule upgrade after preview (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-aab-diff-case)
     - [**Scenario: Non-customized rule upgrade after preview and customizing field values (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-and-customizing-field-values-aab-diff-case)
@@ -61,12 +60,14 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-and-accepting-edited-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
     - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-suggested-field-value-abc-diff-case-non-solvable-by-diff-algo)
     - [**Scenario: Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)**](#scenario-customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-edited-field-value-abc-diff-case-non-solvable-by-diff-algo)
+    - [**Scenario: Customized rule upgrade after preview solvable conflicts and accepting suggested field value (-AB diff case)**](#scenario-customized-rule-upgrade-after-preview-solvable-conflicts-and-accepting-suggested-field-value--ab-diff-case)
+    - [**Scenario: Customized rule upgrade after preview solvable conflicts and accepting edited field value (-AB diff case)**](#scenario-customized-rule-upgrade-after-preview-solvable-conflicts-and-accepting-edited-field-value--ab-diff-case)
   - [Rule type upgrade](#rule-type-upgrade)
     - [**Scenario: Non-customized rule upgrade to a different rule type after preview**](#scenario-non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
     - [**Scenario: Customized rule upgrade to a different rule type after preview**](#scenario-customized-rule-upgrade-to-a-different-rule-type-after-preview)
   - [Concurrency control](#concurrency-control)
-    - [**Scenario: User gets notified after someone edited a rule being previewed**](#scenario-user-gets-notified-after-someone-edited-a-rule-being-previewed)
-    - [**Scenario: User gets notified after a new rule versions is released**](#scenario-user-gets-notified-after-a-new-rule-versions-is-released)
+    - [**Scenario: User gets notified after someone edited the prebuilt rule being previewed**](#scenario-user-gets-notified-after-someone-edited-the-prebuilt-rule-being-previewed)
+    - [**Scenario: User gets notified after a prebuilt new rule version is released**](#scenario-user-gets-notified-after-a-prebuilt-new-rule-version-is-released)
   - [Licensing](#licensing)
     - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
     - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
@@ -144,26 +145,14 @@ What should be inside the Rule Upgrade flyout:
 
 #### **Scenario: User can preview prebuilt rules having upgrades**
 
+**Automation**: 1 e2e test.
+
 ```Gherkin
 Given a prebuilt rule with an upgrade
 When user opens the rule preview for the prebuilt rule
 Then the preview should open
 When user closes the preview
 Then it should disappear
-```
-
-#### **Scenario: User can upgrade a prebuilt rule using the rule preview**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given a prebuilt rule with an upgrade
-When user opens the rule preview for the prebuilt rule
-And upgrades the rule using a CTA in the rule preview
-Then the rule should be upgraded to the latest version
-And a success message should be displayed after upgrade
-And the rule should be removed from the Prebuilt Rules Upgrades page
-And user should see the number of rules available to upgrade as initial number minus 1
 ```
 
 #### **Scenario: User can see correct rule information in the preview before upgrading**
@@ -515,11 +504,11 @@ When user switch one or more fields to edit mode
 Then user should see INACTIVE CTA
 When user hover on the INACTIVE CTA
 Then explanation tooltip appears
-When user every field in readonly mode
+When user switches every field to readonly mode
 Then the INACTIVE CTA becomes ACTIVE
 ```
 
-#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1 or num fields in edit mode >= 1**
+#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1 and num fields in edit mode >= 1**
 
 **Automation**: 1 Cypress test.
 
@@ -744,6 +733,54 @@ When user opens rule details page for that prebuilt rule
 Then user should see <field> has an upgraded value user entered and saved in the form
 ```
 
+#### **Scenario: Customized rule upgrade after preview solvable conflicts and accepting suggested field value (-AB diff case)**
+
+**Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
+
+```Gherkin
+Given a prebuilt rule is installed
+And this rule's <field> is customized
+And the <field> has an upgrade resulting to a non-solvable conflict
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+And <field> has a conflict
+And <field> edit form is shown
+And <field> edit form inputs have current customized value
+When user saves the form without changes
+Then user should see an ACTIVE CTA to upgrade the prebuilt rule
+When user clicks on CTA
+Then success message should be displayed after upgrade
+And upgraded prebuilt rule should be removed from the table
+When user opens rule details page for that prebuilt rule
+Then user should see <field> has an upgraded value accepted by user
+```
+
+**Examples:**
+
+`<field>` = all customizable fields
+
+#### **Scenario: Customized rule upgrade after preview solvable conflicts and accepting edited field value (-AB diff case)**
+
+**Automation**: Jest integration test per `<field>` and 1 bulk Cypress test.
+
+```Gherkin
+Given a prebuilt rule is installed
+And this prebuilt rule's <field> is customized
+And it has an upgrade resulting to a non-solvable conflict
+When user opens the Rule Update Flyout
+Then user should see INACTIVE CTA to upgrade the prebuilt rule
+And <field> has a conflict
+And <field> edit form is shown
+And <field> edit form inputs have current customized value
+When user edits <field> form and saves it
+Then user should see an ACTIVE CTA to upgrade the prebuilt rule
+When user clicks on CTA
+Then success message should be displayed after upgrade
+And upgraded prebuilt rule should be removed from the table
+When user opens rule details page for that prebuilt rule
+Then user should see <field> has an upgraded value user entered and saved in the form
+```
+
 **Examples:**
 
 `<field>` = all customizable fields besides always mergeable fields (`tags`, `references`, `threat_index`, `new_terms_fields`)
@@ -787,7 +824,11 @@ And has upgraded field values
 
 ### Concurrency control
 
-#### **Scenario: User gets notified after someone edited a rule being previewed**
+> It wasn't possible to test the Concurrency control with Cypress clock mocking. Testing without mocks would require
+> waiting for 5 minutes significantly increasing tests duration. We should revisit this after we obtain better e2e
+> testing tooling.
+
+#### **Scenario: User gets notified after someone edited the prebuilt rule being previewed**
 
 **Automation**: 1 Cypress test.
 
@@ -800,7 +841,7 @@ Then <userA> should see a notification that rule has been edited
 And saved custom field values got discarded
 ```
 
-#### **Scenario: User gets notified after a new rule versions is released**
+#### **Scenario: User gets notified after a prebuilt new rule version is released**
 
 **Automation**: 1 Cypress test.
 

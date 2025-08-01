@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './common';
-export * from './params';
-export * from './operations';
-export * from './columns';
-export * from './context';
+export type * from './common';
+export type * from './params';
+export type * from './operations';
+export type * from './columns';
+export type * from './context';
 export * from './configurations';

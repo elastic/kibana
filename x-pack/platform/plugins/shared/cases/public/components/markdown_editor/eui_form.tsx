@@ -24,7 +24,6 @@ import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 import { type MarkdownEditorRef } from './types';
 import { CommentEditor } from './comment_editor';
 
-/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook<string>;
