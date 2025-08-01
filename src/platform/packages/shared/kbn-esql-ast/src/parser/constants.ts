@@ -14,6 +14,7 @@ export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
 
 export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
 
+// @TODO dedupe with src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts
 // FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
 export const TIME_DURATION_UNITS = [
   'MILLISECOND',

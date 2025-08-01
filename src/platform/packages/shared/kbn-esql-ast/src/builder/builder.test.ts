@@ -215,7 +215,7 @@ describe('literal', () => {
       const node = Builder.expression.literal.timeDuration(42, 'second');
       const text = BasicPrettyPrinter.expression(node);
 
-      expect(text).toBe('42 seconds');
+      expect(text).toBe('42 second');
     });
 
     test('a basic date period node', () => {
