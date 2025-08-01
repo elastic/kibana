@@ -651,7 +651,7 @@ const adjustCommandsForSentinelOne = ({
         };
       } else if (command.name === 'runscript') {
         command.helpDisabled = false;
-        command.exampleUsage = `runscript --script='copy.sh' --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+        command.exampleUsage = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
         command.args = {
           script: {
             required: true,
