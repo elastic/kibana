@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import slack from '@slack/web-api';
+import { RestEndpointMethodTypes } from '@octokit/rest';
 import {
   buildkite,
   COMMIT_INFO_CTX,
@@ -25,6 +27,9 @@ const WIZARD_CTX_DEFAULT = 'wizard-main';
 
 const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);
 const IS_AUTOMATED_RUN = process.env.AUTO_SELECT_COMMIT?.match(/(1|true)/i);
+
+const ELASTIC_ENGINEER_NOTIFICATIONS_ENABLED =
+  process.env.ELASTIC_ENGINEER_NOTIFICATIONS_ENABLED?.match(/(1|true)/i);
 
 type StateNames =
   | 'start'
@@ -164,6 +169,7 @@ const states: Record<StateNames, StateShape> = {
         targetCommitData,
         currentCommitSha,
         deployTag,
+        announceToCommitters: Boolean(ELASTIC_ENGINEER_NOTIFICATIONS_ENABLED),
       });
     },
     display: false,
@@ -313,18 +319,20 @@ async function sendReleaseSlackAnnouncement({
   targetCommitData,
   currentCommitSha,
   deployTag,
+  announceToCommitters,
 }: {
   targetCommitData: GithubCommitType;
   currentCommitSha: string | undefined | null;
   deployTag: string;
+  announceToCommitters: boolean;
 }) {
-  const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
 
   const mergedAtDate = targetCommitData.commit?.committer?.date;
   const mergedAtUtcString = mergedAtDate ? new Date(mergedAtDate).toUTCString() : 'unknown';
   const targetCommitSha = targetCommitData.sha;
   const targetCommitShort = targetCommitSha.slice(0, 12);
+
   const compareResponse = (
     await octokit.repos.compareCommits({
       owner: 'elastic',
@@ -333,8 +341,63 @@ async function sendReleaseSlackAnnouncement({
       head: targetCommitSha,
     })
   ).data;
+
+  const previousCommitHash = currentCommitSha || 'main';
+  const selectedCommitHash = targetCommitSha;
+
+  const releaseAnnouncementMessage = getAnnouncementMessage({
+    buildShortname,
+    commitsLink: compareResponse.html_url,
+    currentCommitSha,
+    deployTag,
+    mergedAtUtcString,
+    numberOfCommits: compareResponse.total_commits.toString(),
+    previousCommitHash,
+    selectedCommitHash,
+    targetCommitShort,
+  });
+
+  if (announceToCommitters) {
+    await sendSlackMessageToCommitters({ releaseAnnouncementMessage, compareResponse });
+  }
+
+  // Sends to Kibana Mission Control channel
+  return sendSlackMessage(releaseAnnouncementMessage);
+}
+
+interface AnnouncementMessage {
+  blocks: Array<{
+    type: string;
+    text?: { type: string; text: string };
+    fields?: Array<{ type: string; text: string }>;
+  }>;
+}
+
+function getAnnouncementMessage({
+  buildShortname,
+  commitsLink,
+  currentCommitSha,
+  deployTag,
+  mergedAtUtcString,
+  numberOfCommits,
+  previousCommitHash,
+  selectedCommitHash,
+  targetCommitShort,
+}: {
+  buildShortname: string;
+  commitsLink: string;
+  currentCommitSha: string | undefined | null;
+  deployTag: string;
+  mergedAtUtcString: string;
+  numberOfCommits: string;
+  previousCommitHash: string;
+  selectedCommitHash: string;
+  targetCommitShort: string;
+}): AnnouncementMessage {
+  const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
+
   const compareLink = currentCommitSha
-    ? `<${compareResponse.html_url}|${compareResponse.total_commits} new commits>`
+    ? `<${commitsLink}|${numberOfCommits} new commits>`
     : 'a new commit';
 
   const mainMessage = [
@@ -351,12 +414,9 @@ async function sendReleaseSlackAnnouncement({
     'Merged at': mergedAtUtcString,
   };
 
-  const usefulLinksSection = getUsefulLinks({
-    previousCommitHash: currentCommitSha || 'main',
-    selectedCommitHash: targetCommitSha,
-  });
+  const usefulLinksSection = getUsefulLinks({ previousCommitHash, selectedCommitHash });
 
-  return sendSlackMessage({
+  return {
     blocks: [
       {
         type: 'section',
@@ -391,7 +451,87 @@ async function sendReleaseSlackAnnouncement({
         },
       },
     ],
-  });
+  };
+}
+
+async function sendSlackMessageToCommitters({
+  compareResponse,
+  releaseAnnouncementMessage,
+}: {
+  compareResponse: RestEndpointMethodTypes['repos']['compareCommits']['response']['data'];
+  releaseAnnouncementMessage: AnnouncementMessage;
+}) {
+  try {
+    const slackClient = new slack.WebClient(process.env.SLACK_BOT_TOKEN);
+
+    // A maximum is not enforced by the Slack API, but we expect that the Slack API will not allow fetching this amount of users.
+    // This is a temporary value not intended to be merged.
+    const allSlackUsers = await slackClient.users.list({ limit: 4000 });
+
+    const commitMap = new Map<string, Array<{ message: string }>>();
+
+    for (const commit of compareResponse.commits) {
+      const authorName =
+        commit.commit?.author?.name ||
+        commit.author?.login ||
+        commit.commit?.author?.email ||
+        'unknown';
+
+      const commitMessage = commit.commit?.message || 'No message';
+
+      const sha = commit.sha.slice(0, 12);
+      const commitUrl = commit.url;
+
+      if (!commitMap.has(authorName)) {
+        commitMap.set(authorName, []);
+      }
+
+      commitMap.get(authorName)?.push({ message: `<${commitUrl}|${sha}>: ${commitMessage}` });
+    }
+
+    for (const [author, commits] of commitMap.entries()) {
+      // Find the Slack user by real name, profile field, or email
+      // Xf0EHAB1R7 is the custom field ID for the Github field in Slack profile fields
+      const slackUser = allSlackUsers.members?.find(
+        (user) =>
+          user.real_name === author ||
+          (user.profile &&
+            user.profile.fields &&
+            'Xf0EHAB1R7' in user.profile.fields &&
+            typeof (user.profile.fields.Xf0EHAB1R7 as { value?: string }) === 'object' &&
+            (user.profile.fields.Xf0EHAB1R7 as { value?: string })?.value === author) ||
+          user.profile?.email === author
+      );
+
+      if (!slackUser || !slackUser.id) {
+        console.warn(`Could not find Slack user for author: ${author}`);
+        continue;
+      }
+
+      const announcementMessage = [
+        ...releaseAnnouncementMessage.blocks.slice(0, 1),
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `:wave: Hi <@${author}>! The following commits of yours have been included in the latest deploy to Serverless.
+              
+${commits.map(({ message }) => `- ${message}`).join('\n')}`,
+          },
+        },
+        ...releaseAnnouncementMessage.blocks.slice(1),
+      ];
+
+      try {
+        await slackClient.chat.postMessage({ channel: slackUser.id, blocks: announcementMessage });
+        console.log(`Sent message to ${author} (${slackUser.id})`);
+      } catch (error) {
+        console.error(`Failed to send message to ${author} (${slackUser.id}):`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error sending Slack messages to committers:', error);
+  }
 }
 
 main(process.argv.slice(2)).then(

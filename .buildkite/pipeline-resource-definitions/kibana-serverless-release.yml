@@ -21,6 +21,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-mission-control'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_ENGINEER_NOTIFICATIONS_ENABLED: 'false'
       default_branch: main
       allow_rebuilds: false
       repository: elastic/kibana
