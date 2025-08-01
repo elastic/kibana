@@ -10,20 +10,19 @@
 import React, { ReactNode, useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EuiSelectOption } from '@elastic/eui';
 
-import { ListOptionsInput, INITIAL_OPTIONS } from './list_options_input';
+import { ListOptionsInput, INITIAL_OPTIONS, ListOptionsInputOption } from './list_options_input';
 
 const OPTIONS_FIELD_TEST_TIMEOUT = 15000;
 
 const TestWrapper: React.FC<{
   component: (props: {
-    value: EuiSelectOption[];
-    onChange: (v: EuiSelectOption[]) => void;
+    value: ListOptionsInputOption[];
+    onChange: (v: ListOptionsInputOption[]) => void;
   }) => ReactNode;
 }> = ({ component }) => {
-  const [value, setValue] = useState<EuiSelectOption[]>([]);
-  const onChange = (v: EuiSelectOption[]) => setValue(v);
+  const [value, setValue] = useState<ListOptionsInputOption[]>([]);
+  const onChange = (v: ListOptionsInputOption[]) => setValue(v);
   return component({ onChange, value });
 };
 
@@ -41,6 +40,7 @@ describe('Options field', () => {
         data-test-subj="list-options-input"
         value={[]}
         onChange={onChange}
+        suggestions={[]}
       />
     );
 
@@ -62,6 +62,7 @@ describe('Options field', () => {
               data-test-subj="list-options-input"
               value={value}
               onChange={onChange}
+              suggestions={[]}
             />
           )}
         />
@@ -98,6 +99,7 @@ describe('Options field', () => {
               value={value}
               onChange={onChange}
               maxOptions={3}
+              suggestions={[]}
             />
           )}
         />

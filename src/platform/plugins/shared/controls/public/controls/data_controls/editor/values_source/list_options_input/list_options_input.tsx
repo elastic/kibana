@@ -41,7 +41,7 @@ interface Props {
   suggestions: string[];
 }
 
-interface ListOptionsInputOption {
+export interface ListOptionsInputOption {
   value: string;
   text: string;
   isFresh?: boolean;

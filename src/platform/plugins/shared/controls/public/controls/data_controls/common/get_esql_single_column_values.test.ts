@@ -19,6 +19,9 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 
 const searchMock = {} as ISearchGeneric;
+jest.mock('../../../services/kibana_services', () => ({
+  search: { search: searchMock },
+}));
 
 describe('getESQLSingleColumnValues', () => {
   beforeEach(() => {
@@ -33,7 +36,6 @@ describe('getESQLSingleColumnValues', () => {
     });
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
-      search: searchMock,
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
     expect(result).toMatchInlineSnapshot(`
@@ -54,7 +56,6 @@ describe('getESQLSingleColumnValues', () => {
     });
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index',
-      search: searchMock,
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -70,7 +71,6 @@ describe('getESQLSingleColumnValues', () => {
     mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');
     const result = (await getESQLSingleColumnValues({
       query: 'FROM index | EVAL',
-      search: searchMock,
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
     expect('values' in result).toBe(false);
@@ -87,7 +87,6 @@ describe('getESQLSingleColumnValues', () => {
     const timeRange = { from: 'now-10m', to: 'now' };
     await getESQLSingleColumnValues({
       query: 'FROM index | STATS BY column',
-      search: searchMock,
       timeRange,
     });
     expect(mockGetESQLResults).toHaveBeenCalledWith(

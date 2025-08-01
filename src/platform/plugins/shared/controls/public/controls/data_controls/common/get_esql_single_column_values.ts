@@ -16,7 +16,7 @@ export interface GetESQLSingleColumnValuesSuccess {
   column: string;
 }
 
-interface GetESQLSingleColumnValuesFailure {
+export interface GetESQLSingleColumnValuesFailure {
   error: Error;
   columns?: string[];
 }
