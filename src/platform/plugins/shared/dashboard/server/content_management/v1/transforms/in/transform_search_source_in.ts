@@ -29,8 +29,8 @@ export function transformSearchSourceIn(
     return { searchSourceJSON: JSON.stringify(extractedState), references };
   } catch (error) {
     // If the references can not be extracted, we log a warning
-    // and return an empty object to avoid breaking the dashboard saving.
+    // and return the original searchSource stringified.
     logger.warn(`Unable to transform filter and query state on save. Error: ${error.message}`);
-    return { searchSourceJSON: '{}', references: [] };
+    return { searchSourceJSON: JSON.stringify(searchSource), references: [] };
   }
 }

@@ -22,19 +22,33 @@ export function transformSearchSourceOut(
   if (!searchSourceJSON) {
     return {};
   }
-
   try {
-    const parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
-    const searchSource = injectReferences(parsedSearchSource, references);
+    let parsedSearchSource;
+    try {
+      parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
+    } catch (parseError) {
+      logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
+      return { searchSource: {} };
+    }
+
+    let searchSource;
+    try {
+      searchSource = injectReferences(parsedSearchSource, references);
+    } catch (injectError) {
+      logger.warn(
+        `Unable to transform filter and query state on read. Error: ${injectError.message}`
+      );
+      // fallback to parsed if injection fails
+      searchSource = parsedSearchSource;
+    }
+
     const filters = cleanFiltersForSerialize(searchSource.filter);
     const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    return {
-      searchSource: { filters, query },
-    };
+    return { searchSource: { filters, query } };
   } catch (error) {
-    // If the searchSourceJSON is malformed or references are missing, we log a warning
-    // and return an empty object to avoid breaking the dashboard loading.
-    logger.warn(`Unable to transform filter and query state on read. Error: ${error.message}`);
-    return {};
+    logger.warn(
+      `Unexpected error transforming filter and query state on read. Error: ${error.message}`
+    );
+    return { searchSource: {} };
   }
 }
