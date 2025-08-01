@@ -483,6 +483,8 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'User login to OKTA',
     color: 'danger',
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(213.180.204.3)-b(user)',
@@ -491,6 +493,8 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'User login to OKTA',
     color: 'danger',
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(user)-b(oktauser)',
@@ -607,6 +611,8 @@ export const GraphStackedEdgeCases: Story = {
         label: 'User login to OKTA2',
         color: 'danger',
         shape: 'label',
+        ips: ['85.43.21.73'],
+        countryCodes: ['es', 'il', 'it'],
       },
     ]),
   },

@@ -48,26 +48,25 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
     return null;
   }
 
-  const toolTipContent =
-    validCodes.length > VISIBLE_FLAGS_LIMIT ? (
-      <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
-        {validCodes.slice(0, MAX_COUNTRY_FLAGS_IN_TOOLTIP).map((countryCode) => (
-          <li data-test-subj={TEST_SUBJ_TOOLTIP_COUNTRY} key={countryCode}>
-            <EuiText size="m">
-              {getCountryFlag(countryCode)} {getCountryName(countryCode)}
-            </EuiText>
+  const toolTipContent = (
+    <ul data-test-subj={TEST_SUBJ_TOOLTIP_CONTENT}>
+      {validCodes.slice(0, MAX_COUNTRY_FLAGS_IN_TOOLTIP).map((countryCode, index) => (
+        <li data-test-subj={TEST_SUBJ_TOOLTIP_COUNTRY} key={`${index}-${countryCode}`}>
+          <EuiText size="m">
+            {getCountryFlag(countryCode)} {getCountryName(countryCode)}
+          </EuiText>
+        </li>
+      ))}
+      {validCodes.length > MAX_COUNTRY_FLAGS_IN_TOOLTIP ? (
+        <>
+          <li>
+            <br />
           </li>
-        ))}
-        {validCodes.length > MAX_COUNTRY_FLAGS_IN_TOOLTIP ? (
-          <>
-            <li>
-              <br />
-            </li>
-            <li>{openFlyoutText}</li>
-          </>
-        ) : null}
-      </ul>
-    ) : null;
+          <li>{openFlyoutText}</li>
+        </>
+      ) : null}
+    </ul>
+  );
 
   const visibleFlags = validCodes.slice(0, VISIBLE_FLAGS_LIMIT).map((countryCode) => {
     const flag = getCountryFlag(countryCode);
@@ -96,8 +95,8 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
   return (
     <EuiToolTip
       data-test-subj={TEST_SUBJ_TOOLTIP}
-      title={toolTipTitle}
       position="right"
+      title={toolTipTitle}
       content={toolTipContent}
     >
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
