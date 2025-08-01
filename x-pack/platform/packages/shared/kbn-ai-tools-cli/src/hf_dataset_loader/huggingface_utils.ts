@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import streamWeb from 'stream/web';
 
-export interface HuggingFaceFileOptions {
+export interface FileDownloadInfoOptions {
   repo: string;
   path: string;
   revision?: string;
@@ -18,23 +18,17 @@ export interface HuggingFaceFileOptions {
   hubUrl?: string;
 }
 
-export interface HuggingFaceFileInfo {
+export interface FileDownloadInfo {
   url: string;
   size: number;
-}
-
-export interface HuggingFaceStreamResult {
-  stream: Readable;
-  size: number;
-  isGzip: boolean;
 }
 
 /**
  * Gets download information for a file from HuggingFace Hub using the official library
  */
-export async function getHuggingFaceFileInfo(
-  options: HuggingFaceFileOptions
-): Promise<HuggingFaceFileInfo> {
+export async function getFileDownloadInfo(
+  options: FileDownloadInfoOptions
+): Promise<FileDownloadInfo> {
   const hubOptions = {
     repo: options.repo,
     path: options.path,
@@ -60,11 +54,15 @@ export async function getHuggingFaceFileInfo(
 /**
  * Creates a readable stream for a dataset file from HuggingFace.
  */
-export async function createHuggingFaceFileStream(
-  options: HuggingFaceFileOptions,
-  logger?: Logger
-): Promise<HuggingFaceStreamResult> {
-  const fileInfo = await getHuggingFaceFileInfo(options);
+export async function createFileStream(
+  options: FileDownloadInfoOptions,
+  logger: Logger
+): Promise<{
+  stream: Readable;
+  size: number;
+  isGzip: boolean;
+}> {
+  const fileInfo = await getFileDownloadInfo(options);
   const { url, size } = fileInfo;
 
   const response = await fetch(url, {
@@ -77,12 +75,9 @@ export async function createHuggingFaceFileStream(
 
   const stream = Readable.fromWeb(response.body as unknown as streamWeb.ReadableStream<any>);
   const isGzip = new URL(url).searchParams.get('response-content-type') === 'application/gzip';
-
-  if (logger) {
-    logger.debug(
-      `Created stream for ${options.repo}/${options.path}, size: ${size} bytes, gzip: ${isGzip}`
-    );
-  }
+  logger.debug(
+    `Created stream for ${options.repo}/${options.path}, size: ${size} bytes, gzip: ${isGzip}`
+  );
 
   return {
     stream,
@@ -92,14 +87,14 @@ export async function createHuggingFaceFileStream(
 }
 
 /**
- * Fetches content from a HuggingFace file.
+ * Downloads a file from HuggingFace and retrieve a string.
  * This is useful for smaller files like configuration or mapping files that don't require streaming.
  */
-export async function fetchHuggingFaceFile(
-  options: HuggingFaceFileOptions,
-  logger?: Logger
+export async function getFileContent(
+  options: FileDownloadInfoOptions,
+  logger: Logger
 ): Promise<string> {
-  const fileInfo = await getHuggingFaceFileInfo(options);
+  const fileInfo = await getFileDownloadInfo(options);
   const { url } = fileInfo;
 
   const response = await fetch(url, {
@@ -112,11 +107,9 @@ export async function fetchHuggingFaceFile(
 
   const content = await response.text();
 
-  if (logger) {
-    logger.debug(
-      `Fetched text file ${options.repo}/${options.path}, length: ${content.length} characters`
-    );
-  }
+  logger.debug(
+    `Fetched text file ${options.repo}/${options.path}, length: ${content.length} characters`
+  );
 
   return content;
 }

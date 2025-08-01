@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import { randomUUID } from 'crypto';
 import { HuggingFaceDatasetSpec } from './types';
-import { fetchHuggingFaceFile } from './huggingface_utils';
+import { getFileContent } from './huggingface_utils';
 
 const ONECHAT_REPO = 'elastic/OneChatAgent';
 
@@ -34,7 +34,7 @@ export async function getOneChatIndexMappings(
 
   logger.debug(`Fetching OneChat index mappings for directory: ${directory}`);
 
-  const text = await fetchHuggingFaceFile(
+  const onechatMappingsFileContent = await getFileContent(
     {
       repo: ONECHAT_REPO,
       path: `${directory}/index-mappings.jsonl`,
@@ -46,7 +46,7 @@ export async function getOneChatIndexMappings(
 
   const mappings = new Map<string, OneChatIndexMapping>();
 
-  const lines = text.split('\n');
+  const lines = onechatMappingsFileContent.split('\n');
   for (const line of lines) {
     if (!line.trim()) continue;
     try {

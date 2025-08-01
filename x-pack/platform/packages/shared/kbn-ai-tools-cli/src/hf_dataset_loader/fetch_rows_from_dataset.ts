@@ -13,7 +13,7 @@ import { pickBy } from 'lodash';
 import { format } from 'util';
 import Papa from 'papaparse';
 import { HuggingFaceDatasetSpec } from './types';
-import { createHuggingFaceFileStream } from './huggingface_utils';
+import { createFileStream } from './huggingface_utils';
 
 function toMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + 'mb';
@@ -130,7 +130,7 @@ export async function fetchRowsFromDataset({
     stream: inputStream,
     size,
     isGzip,
-  } = await createHuggingFaceFileStream(
+  } = await createFileStream(
     {
       repo: dataset.repo,
       path: dataset.file,
