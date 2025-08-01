@@ -40,3 +40,5 @@ export { safeJsonStringify } from './src/safe_json_stringify';
 export { bytePartition } from './src/byte_partition/byte_partition';
 
 export { type FromExternalVariant, fromExternalVariant } from './src/from_external_variant';
+
+export { indexPatternToCss } from './src/index_pattern_to_css';

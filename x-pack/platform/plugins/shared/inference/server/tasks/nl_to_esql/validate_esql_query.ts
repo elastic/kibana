@@ -10,7 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { splitIntoCommands } from '../../../common';
+import { trace } from '@opentelemetry/api';
+import { uniq } from 'lodash';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 
 export async function runAndValidateEsqlQuery({
   query,
@@ -24,30 +26,67 @@ export async function runAndValidateEsqlQuery({
   error?: Error;
   errorMessages?: string[];
 }> {
-  const { errors } = await validateQuery(query, {
+  // Format the query for readability before validation and execution
+  let formattedQuery: string;
+  try {
+    const parser = Parser.create(query);
+    formattedQuery = BasicPrettyPrinter.print(parser.parse().root, { multiline: true });
+  } catch (e) {
+    // Fallback to original query if parsing fails
+    formattedQuery = query;
+  }
+
+  const { errors } = await validateQuery(formattedQuery, {
     // setting this to true, we don't want to validate the index / fields existence
     ignoreOnMissingCallbacks: true,
   });
 
-  const asCommands = splitIntoCommands(query);
+  // Build error messages – prioritise the first error that contains location information
+  let errorMessages: string[] = [];
+  if (errors && errors.length) {
+    const errorWithLocation = errors.find(
+      (e): e is typeof e & { location: { min: number; max: number } } => 'location' in e
+    );
 
-  const errorMessages = errors?.map((error) => {
-    if ('location' in error) {
-      const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
-      const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
-      if (lastCompleteCommand) {
-        return `Error in ${lastCompleteCommand.command}\n: ${error.text}`;
+    if (errorWithLocation && 'location' in errorWithLocation) {
+      const { min } = errorWithLocation.location;
+
+      // Prepare numbered lines
+      const lines = formattedQuery.split('\n');
+      let charCount = 0;
+      let errorLineIndex = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (charCount + lines[i].length >= min) {
+          errorLineIndex = i;
+          break;
+        }
+        charCount += lines[i].length + 1; // +1 for the \n that was removed by split
       }
+
+      const numbered = lines
+        .map((line, idx) => {
+          const lineNumber = idx + 1;
+          const prefix = idx === errorLineIndex ? '>> ' : '   ';
+          return `${prefix}${lineNumber} ${line}`;
+        })
+        .join('\n');
+
+      errorMessages = [
+        `${
+          'text' in errorWithLocation ? errorWithLocation.text : errorWithLocation.message
+        }\n\n${numbered}`,
+      ];
+    } else {
+      errorMessages = uniq(errors.map((e) => ('text' in e ? (e as any).text : (e as any).message)));
     }
-    return 'text' in error ? error.text : error.message;
-  });
+  }
 
   return client.transport
     .request({
       method: 'POST',
       path: '_query',
       body: {
-        query,
+        query: formattedQuery,
       },
     })
     .then((res) => {
@@ -63,6 +102,7 @@ export async function runAndValidateEsqlQuery({
       return { columns, rows: esqlResponse.values };
     })
     .catch((error) => {
+      trace.getActiveSpan()?.recordException(error);
       return {
         error,
         ...(errorMessages.length ? { errorMessages } : {}),
