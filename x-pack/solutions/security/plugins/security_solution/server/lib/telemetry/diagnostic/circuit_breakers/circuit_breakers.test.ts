@@ -307,15 +307,14 @@ describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () 
     });
 
     describe('nsToMs conversion', () => {
-      test('should convert nanoseconds to milliseconds correctly', () => {
+      test('should convert nanoseconds to milliseconds correctly', async () => {
         expect(ONE_MILLISECOND_AS_NANOSECONDS).toBe(1_000_000);
 
         const circuitBreaker = createCircuitBreaker();
         mockMonitor.mean = 5_500_000; // 5.5ms in nanoseconds
-        circuitBreaker.validate().then(() => {
-          const stats = circuitBreaker.stats() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-          expect(stats.mean).toBe(5.5);
-        });
+        await circuitBreaker.validate();
+        const stats = circuitBreaker.stats() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+        expect(stats.mean).toBe(5.5);
       });
     });
   });
@@ -631,14 +630,14 @@ describe('Security Solution - Health Diagnostic Queries - Circuit Breakers', () 
         });
       });
 
-      test('should calculate elapsed time correctly for multiple calls', () => {
+      test('should calculate elapsed time correctly for multiple calls', async () => {
         mockPerformance.now
           .mockReturnValueOnce(1000) // Constructor
           .mockReturnValueOnce(2000) // validate call
           .mockReturnValueOnce(4000); // stats call
 
         const circuitBreaker = createCircuitBreaker();
-        circuitBreaker.validate();
+        await circuitBreaker.validate();
         const stats = circuitBreaker.stats() as any; // eslint-disable-line @typescript-eslint/no-explicit-any
         expect(stats.elapsed).toBe(3000);
       });
