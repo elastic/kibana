@@ -72,6 +72,7 @@ const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
+  totalWithAlerts: long,
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {

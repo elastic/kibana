@@ -8,6 +8,7 @@
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type {
+  AlertsTelemetryAggregationsByOwnerResults,
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
@@ -31,6 +32,7 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
   getUniqueAlertCommentsCountQuery,
+  processWithAlertsByOwner,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -234,7 +236,24 @@ describe('utils', () => {
         ],
       },
     };
-
+    const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
+      by_owner: {
+        buckets: [
+          {
+            key: 'cases',
+            doc_count: 10,
+          },
+          {
+            key: 'observability',
+            doc_count: 5,
+          },
+          {
+            key: 'securitySolution',
+            doc_count: 20,
+          },
+        ],
+      },
+    };
     it('constructs the solution values correctly', () => {
       expect(
         getSolutionValues({
@@ -242,6 +261,7 @@ describe('utils', () => {
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
           owner: 'securitySolution',
+          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -299,6 +319,7 @@ describe('utils', () => {
           "daily": 3,
           "monthly": 1,
           "total": 5,
+          "totalWithAlerts": 20,
           "weekly": 2,
         }
       `);
@@ -307,6 +328,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
+          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
           owner: 'cases',
         })
       ).toMatchInlineSnapshot(`
@@ -365,6 +387,7 @@ describe('utils', () => {
           "daily": 3,
           "monthly": 1,
           "total": 1,
+          "totalWithAlerts": 10,
           "weekly": 2,
         }
       `);
@@ -373,6 +396,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
+          totalWithAlertsAggregationsByOwner: withAlertsByOwnerResults,
           owner: 'observability',
         })
       ).toMatchInlineSnapshot(`
@@ -431,6 +455,7 @@ describe('utils', () => {
           "daily": 3,
           "monthly": 1,
           "total": 1,
+          "totalWithAlerts": 5,
           "weekly": 2,
         }
       `);
@@ -1501,6 +1526,31 @@ describe('utils', () => {
         totalsByType: {},
         totals: 0,
         required: 0,
+      });
+    });
+    it('parses and returns the correct cases with alerts by owner', () => {
+      const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
+        by_owner: {
+          buckets: [
+            {
+              key: 'cases',
+              doc_count: 10,
+            },
+            {
+              key: 'observability',
+              doc_count: 5,
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 20,
+            },
+          ],
+        },
+      };
+      expect(processWithAlertsByOwner(withAlertsByOwnerResults)).toEqual({
+        securitySolution: 20,
+        observability: 5,
+        cases: 10,
       });
     });
   });

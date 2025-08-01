@@ -72,6 +72,11 @@ export interface FileAttachmentAggsResult {
   };
   topMimeTypes: Buckets<string>;
 }
+export interface AlertsTelemetryAggregationsByOwnerResults {
+  by_owner: {
+    buckets: Array<Bucket<Owner>>;
+  };
+}
 
 export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
   FileAttachmentAggsResult;
@@ -146,6 +151,7 @@ export interface AttachmentFramework {
 
 export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
+  totalWithAlerts: number;
 }
 
 export interface Status {
