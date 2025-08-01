@@ -31,10 +31,7 @@ import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
 
-export function registerRoutes(
-  fleetAuthzRouter: FleetAuthzRouter, 
-  config: FleetConfigType
-) {
+export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
   registerAppRoutes(fleetAuthzRouter, config);
 

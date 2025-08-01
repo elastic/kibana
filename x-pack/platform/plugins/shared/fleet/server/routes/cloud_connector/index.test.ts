@@ -19,4 +19,4 @@ describe('Cloud Connector Handlers', () => {
       expect(getCloudConnectorsHandler).toBeDefined();
     });
   });
-}); 
+});
