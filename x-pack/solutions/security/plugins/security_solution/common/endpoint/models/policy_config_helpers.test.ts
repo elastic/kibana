@@ -409,7 +409,7 @@ describe('Policy Config helpers', () => {
 
     it('works correctly with custom device_control values', () => {
       // Set custom device_control values
-      policy.windows.device_control = { enabled: true, usb_storage: 'block' };
+      policy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
       policy.mac.device_control = { enabled: true, usb_storage: 'audit' };
       policy.windows.popup.device_control = { enabled: true, message: 'Windows custom message' };
       policy.mac.popup.device_control = { enabled: false, message: 'Mac custom message' };
