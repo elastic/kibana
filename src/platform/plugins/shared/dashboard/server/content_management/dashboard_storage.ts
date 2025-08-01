@@ -207,6 +207,7 @@ export class DashboardStorage {
     const response: TypeOf<typeof dashboardGetResultSchema> = {
       data: item.data,
       meta: { ...item.meta, aliasPurpose, aliasTargetId, outcome },
+      id: item.id,
     };
 
     const validationError = transforms.get.out.result.validate(response);

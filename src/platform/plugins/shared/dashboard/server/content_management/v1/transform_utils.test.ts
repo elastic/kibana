@@ -29,8 +29,9 @@ describe('savedObjectToItem', () => {
     namespaces: ['default'],
   };
 
+  const id = '3d8459d9-0f1a-403d-aa82-6d93713a54b5';
+
   const meta = {
-    id: '3d8459d9-0f1a-403d-aa82-6d93713a54b5',
     type: 'dashboard',
     updatedAt: '2023-10-01T12:00:00Z',
     updatedBy: 'user1',
@@ -128,6 +129,7 @@ describe('savedObjectToItem', () => {
         version: 'WzEwLDFd',
       },
       meta,
+      id,
     });
   });
 
@@ -191,6 +193,7 @@ describe('savedObjectToItem', () => {
         version: 'WzEwLDFd',
       },
       meta,
+      id,
     });
   });
 
@@ -221,6 +224,7 @@ describe('savedObjectToItem', () => {
         version: 'WzEwLDFd',
       },
       meta,
+      id,
     });
   });
 
@@ -248,6 +252,7 @@ describe('savedObjectToItem', () => {
         version: 'WzEwLDFd',
       },
       meta,
+      id,
     });
   });
 

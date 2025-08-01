@@ -64,11 +64,8 @@ export const saveDashboardState = async ({
           },
         });
     console.log('result----------', result);
-    if ('error' in result) {
-      throw Error(result.error.message);
-    }
 
-    const newId = result.meta.id;
+    const newId = result.id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({

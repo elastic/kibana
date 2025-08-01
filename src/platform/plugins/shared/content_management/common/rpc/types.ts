@@ -16,10 +16,12 @@ export interface ProcedureSchemas {
 
 export type ItemResult<T = unknown, M = void> = M extends void
   ? {
+      id: string;
       data: T;
       meta?: never;
     }
   : {
+      id: string;
       data: T;
       meta: M;
     };
