@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
+import type { EndpointCommandDefinitionMeta } from '../types';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
@@ -160,7 +162,7 @@ export interface GetEndpointConsoleCommandsOptions {
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
   /** Host's platform: windows, linux, macos */
-  platform: string;
+  platform: SupportedHostOsType;
 }
 
 export const getEndpointConsoleCommands = ({
@@ -176,6 +178,13 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
   } = featureFlags;
+  const commandMeta: EndpointCommandDefinitionMeta = {
+    agentType,
+    platform,
+    endpointId: endpointAgentId,
+    capabilities: endpointCapabilities,
+    privileges: endpointPrivileges,
+  };
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities are only validated for Endpoint agent types
@@ -201,12 +210,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('isolate'),
       }),
       RenderComponent: IsolateActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -227,12 +231,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('release'),
       }),
       RenderComponent: ReleaseActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -252,12 +251,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('kill-process'),
       }),
       RenderComponent: KillProcessActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -292,12 +286,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('suspend-process'),
       }),
       RenderComponent: SuspendProcessActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -332,9 +321,7 @@ export const getEndpointConsoleCommands = ({
       name: 'status',
       about: CONSOLE_COMMANDS.status.about,
       RenderComponent: EndpointStatusActionResult,
-      meta: {
-        endpointId: endpointAgentId,
-      },
+      meta: commandMeta,
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 2,
@@ -346,12 +333,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('processes'),
       }),
       RenderComponent: GetProcessesActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -371,12 +353,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('get-file'),
       }),
       RenderComponent: GetFileActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -408,12 +385,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('execute'),
       }),
       RenderComponent: ExecuteActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'execute --command "ls -al" --timeout 2s --comment "Get list of all files"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -451,12 +423,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('scan'),
       }),
       RenderComponent: ScanActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'scan --path "/full/path/to/folder" --comment "Scan folder for malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -487,12 +454,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('runscript'),
       }),
       RenderComponent: RunScriptActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleInstruction: CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
@@ -517,12 +479,7 @@ export const getEndpointConsoleCommands = ({
         isSupported: doesEndpointSupportCommand('upload'),
       }),
       RenderComponent: UploadActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
-        privileges: endpointPrivileges,
-      },
+      meta: commandMeta,
       exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
       validate: capabilitiesAndPrivilegesValidator(agentType),
@@ -661,8 +618,7 @@ const adjustCommandsForSentinelOne = ({
               { defaultMessage: 'The script to run (selected from popup list)' }
             ),
             mustHaveValue: 'non-empty-string',
-            // FIXME:PT enable once PR #227463 is merged.
-            // SelectorComponent: CustomScriptSelector('sentinel_one'),
+            SelectorComponent: CustomScriptSelector,
           },
           inputParams: {
             required: false,
