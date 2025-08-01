@@ -17,13 +17,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('reloading archives before each test', () => {
       beforeEach(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
       });
 
