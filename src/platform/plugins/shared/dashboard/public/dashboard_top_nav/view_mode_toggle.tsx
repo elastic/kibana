@@ -80,6 +80,7 @@ export const ViewModeToggle = ({
       buttonSize="compressed"
       legend="This is the toggle for dashboard view mode"
       type="single"
+      isDisabled={isResetting}
       options={viewModeOptions}
       idSelected={viewMode}
       onChange={viewMode === 'view' ? switchToEditMode : switchToViewMode}
