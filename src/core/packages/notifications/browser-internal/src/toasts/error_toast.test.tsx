@@ -38,7 +38,7 @@ function getErrorToast(props: ErrorToastProps = {}) {
 }
 
 it('renders matching snapshot', () => {
-  expect(render(getErrorToast()).container).toMatchSnapshot();
+  expect(render(getErrorToast()).container.innerHTML).toMatchSnapshot();
 });
 
 it('should open a modal when clicking button', () => {

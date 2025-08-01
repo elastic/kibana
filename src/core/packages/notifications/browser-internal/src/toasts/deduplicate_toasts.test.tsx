@@ -104,7 +104,9 @@ describe('TitleWithBadge component', () => {
     const title = 'Welcome!';
 
     const titleComponent = <TitleWithBadge title={title} counter={5} />;
+    const renderedTitle = render(titleComponent);
 
+    expect(renderedTitle.container.textContent).toMatch('Welcome! 5');
     expect(render(titleComponent).container.innerHTML).toMatchInlineSnapshot(
       `"Welcome! <span class=\\"euiNotificationBadge css-1aoydhg-floatTopRight css-rme68u-euiNotificationBadge-m-subdued\\">5</span>"`
     );
