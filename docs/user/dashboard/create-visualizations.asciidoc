@@ -20,6 +20,9 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data
 
+| <<alert-panels,Alerts>> 
+| View Observability or Security alerts in your dashboard
+
 | <<field-statistics-dashboard,Field statistics>>
 | Add a field statistics view of your data to your dashboards
 
@@ -240,6 +243,29 @@ image::images/esql-visualization-customization-options.png[Appearance customizat
 
 . Return to the previous menu, then **Apply and close** the configuration to save your changes.
 
+[[create-alert-from-esql-viz]]
+[float]
+== Create an alert from your {esql} visualization
+
+Once you've created an {esql} panel, you can create an {es} threshold rule directly from the visualization panel based on the data it displays. When you do this, the rule query is automatically generated and either describes the data and sets a specific threshold, or describes the data without setting a specific threshold.
+
+[NOTE]
+====
+{elastic-sec} rule types are not supported.
+====
+
+To create a rule with the threshold pre-specified:
+
+* Right-click a data point in the visualization and click *Add alert rule*. This opens the *Create rule* flyout. The generated query will define a threshold that corresponds to the data point you selected.
+* {kib-ref}/rule-type-es-query.html[Configure] your {es} rule.
+
+To create a rule without the threshold pre-specified:
+
+* Open the *More actions* (three dots) menu in the upper right of the panel and select *Add alert rule*. This opens the *Create rule* flyout. The generated query will define a threshold that corresponds to the data point you selected.
+* {kib-ref}/rule-type-es-query.html[Configure] your {es} rule.
+
+include::alerts-panel.asciidoc[][leveloffset=-1]
+
 [[maps-visualizations]]
 == Maps
 
@@ -327,6 +353,7 @@ When importing a dashboard with an image panel, and the image file is unavailabl
 ============================================================================
 
 include::links-panel.asciidoc[leveloffset=-1]
+
 
 [[legacy-editors]]
 == Legacy editors
