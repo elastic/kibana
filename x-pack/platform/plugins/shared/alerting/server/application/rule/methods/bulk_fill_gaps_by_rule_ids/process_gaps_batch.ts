@@ -56,8 +56,6 @@ export const processGapsBatch = async (
     }))
   );
 
-  console.log('>> which yields', gapRanges);
-
   // Rules might have gaps within the range that don't yield any schedulingPayload
   // This can happen when they have gaps that are in an "in progress" state.
   // They are returned still returned by the function that is querying gaps

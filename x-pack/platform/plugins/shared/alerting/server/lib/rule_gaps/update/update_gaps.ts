@@ -82,8 +82,8 @@ export const updateGaps = async (params: UpdateGapsParams) => {
         }
       }
       // Return an object indicating how many gaps were processed per rule id
-      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce((acc, [ruleId, gaps]) => {
-        acc[ruleId] = gaps.length;
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce((acc, [currentRuleId, currentRuleGaps]) => {
+        acc[currentRuleId] = currentRuleGaps.length;
         return acc;
       }, {} as Record<string, number>);
     };
