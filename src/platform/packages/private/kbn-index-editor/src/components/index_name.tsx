@@ -91,6 +91,7 @@ export const IndexName: FC = () => {
   return (
     <EuiInlineEditTitle
       startWithEditOpen={startWithEditOpen}
+      autoFocus={startWithEditOpen}
       heading="h3"
       size={'m'}
       inputAriaLabel={i18n.translate('indexEditor.indexName.inputAriaLabel', {
@@ -101,7 +102,7 @@ export const IndexName: FC = () => {
       })}
       defaultValue={indexNameValue ?? fileUploadIndexName}
       isReadOnly={isIndexCreated}
-      isInvalid={error !== null}
+      isInvalid={error.length > 0}
       isLoading={isLoading}
       editModeProps={{
         formRowProps: { error },
