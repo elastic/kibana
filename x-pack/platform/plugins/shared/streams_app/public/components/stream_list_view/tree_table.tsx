@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import { Streams } from '@kbn/streams-schema';
 import { buildStreamRows, TableRow, SortableField } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -38,7 +39,16 @@ export function StreamsTreeTable({
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const items = React.useMemo(
-    () => buildStreamRows(streams ?? [], sortField, sortDirection),
+    () =>
+      buildStreamRows(
+        (streams ?? []).filter(
+          (stream) =>
+            Streams.WiredStream.Definition.is(stream.stream) ||
+            Streams.ClassicStream.Definition.is(stream.stream)
+        ),
+        sortField,
+        sortDirection
+      ),
     [streams, sortField, sortDirection]
   );
 
