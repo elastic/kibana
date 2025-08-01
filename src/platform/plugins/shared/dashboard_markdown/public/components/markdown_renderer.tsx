@@ -34,9 +34,9 @@ export const MarkdownRenderer = ({
   return (
     <EuiMarkdownFormat
       className="eui-yScroll"
+      data-test-subj="markdownRenderer"
       processingPluginList={processingPluginList}
       css={styles.container}
-      data-test-subj="markdownRenderer"
     >
       {content}
     </EuiMarkdownFormat>

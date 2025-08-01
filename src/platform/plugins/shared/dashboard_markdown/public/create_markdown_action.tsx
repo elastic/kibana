@@ -10,11 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { hasEditCapabilities, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState } from './types';
+import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
 export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_MARKDOWN_ACTION_ID,
@@ -24,7 +24,7 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    const newMarkdownEmbeddable = await embeddable.addNewPanel<MarkdownEditorSerializedState>(
+    const newMarkdownEmbeddable = await embeddable.addNewPanel<MarkdownEditorSerializedState, MarkdownEditorApi>(
       {
         panelType: MARKDOWN_ID,
         serializedState: {
@@ -35,9 +35,6 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
       },
       true
     );
-    if (!newMarkdownEmbeddable || !hasEditCapabilities(newMarkdownEmbeddable)) {
-      throw new IncompatibleActionError();
-    }
     return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },
   getDisplayName: () =>
