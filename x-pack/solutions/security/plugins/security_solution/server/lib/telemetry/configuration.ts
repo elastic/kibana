@@ -8,7 +8,6 @@
 import os from 'os';
 import type {
   HealthDiagnosticConfiguration,
-  HealthDiagnosticQueryConfig,
   IndicesMetadataConfiguration,
   IngestPipelinesStatsConfiguration,
   PaginationConfiguration,
@@ -19,6 +18,7 @@ import type { TimeoutCircuitBreakerConfig } from './diagnostic/circuit_breakers/
 import type { EventLoopUtilizationCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_utilization_circuit_breaker';
 import type { EventLoopDelayCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_delay_circuit_breaker';
 import type { ElasticsearchCircuitBreakerConfig } from './diagnostic/circuit_breakers/elastic_search_circuit_breaker';
+import type { HealthDiagnosticQueryConfig } from './diagnostic/health_diagnostic_service.types';
 
 class TelemetryConfigurationDTO {
   private readonly DEFAULT_TELEMETRY_MAX_BUFFER_SIZE = 100;
