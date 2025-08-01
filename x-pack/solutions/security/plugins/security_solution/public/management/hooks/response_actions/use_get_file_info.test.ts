@@ -95,5 +95,5 @@ describe('When using the `useGetFileInfo()` hook', () => {
         retry: false,
       })
     );
-  });
-}, 10000);
+  }, 10000);
+});
