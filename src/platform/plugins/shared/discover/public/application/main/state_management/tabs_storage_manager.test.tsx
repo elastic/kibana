@@ -42,6 +42,8 @@ const mockGetAppState = (tabId: string) => {
   }
 };
 
+const mockGetInternalState = () => ({});
+
 const mockTab1: TabState = {
   ...DEFAULT_TAB_STATE,
   id: 'tab1',
@@ -145,7 +147,7 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props, mockGetAppState);
+    await tabsStorageManager.persistLocally(props, mockGetAppState, mockGetInternalState);
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(TABS_STATE_URL_KEY, { tabId: 'tab1' });
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
@@ -367,6 +369,7 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'set');
 
     const updatedTabState = {
+      internalState: {},
       appState: {
         columns: ['a', 'b', 'c'],
       },
