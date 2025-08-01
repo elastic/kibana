@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { fileDownloadInfo } from '@huggingface/hub';
 import { Logger } from '@kbn/core/server';
-import streamWeb from 'stream/web';
 import { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import * as readline from 'node:readline';
@@ -15,6 +13,7 @@ import { pickBy } from 'lodash';
 import { format } from 'util';
 import Papa from 'papaparse';
 import { HuggingFaceDatasetSpec } from './types';
+import { createHuggingFaceFileStream } from './huggingface_utils';
 
 function toMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + 'mb';
@@ -48,38 +47,20 @@ export async function fetchRowsFromDataset({
   limit?: number;
   accessToken: string;
 }): Promise<Array<Record<string, unknown>>> {
-  const options = {
-    repo: dataset.repo,
-    path: dataset.file,
-    revision: dataset.revision ?? 'main',
-    hubUrl: `https://huggingface.co/datasets`,
-    accessToken,
-  };
-
-  const fileInfo = await fileDownloadInfo(options);
-
-  if (!fileInfo) {
-    throw new Error(
-      `Cannot fetch files for dataset (${dataset.repo}/${dataset.file}@${options.revision})`
-    );
-  }
-
-  const { url, size } = fileInfo;
-
-  // Add authentication headers for fetch request
-  const fetchHeaders: Record<string, string> = {};
-  if (accessToken) {
-    fetchHeaders.Authorization = `Bearer ${accessToken}`;
-  }
-
-  const res = await fetch(url, { headers: fetchHeaders });
-  if (!res.ok || !res.body) {
-    throw new Error(`HTTP ${res.status} while fetching ${url}`);
-  }
-
-  const inputStream = Readable.fromWeb(res.body as unknown as streamWeb.ReadableStream<any>);
-
-  const isGzip = new URL(url).searchParams.get('response-content-type') === 'application/gzip';
+  const {
+    stream: inputStream,
+    size,
+    isGzip,
+  } = await createHuggingFaceFileStream(
+    {
+      repo: dataset.repo,
+      path: dataset.file,
+      revision: dataset.revision ?? 'main',
+      accessToken,
+      hubUrl: 'https://huggingface.co/datasets',
+    },
+    logger
+  );
 
   const totalMb = toMb(size);
 

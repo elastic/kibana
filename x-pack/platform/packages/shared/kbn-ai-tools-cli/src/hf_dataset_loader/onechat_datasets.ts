@@ -8,6 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import { randomUUID } from 'crypto';
 import { HuggingFaceDatasetSpec } from './types';
+import { fetchHuggingFaceFile } from './huggingface_utils';
 
 const ONECHAT_REPO = 'elastic/OneChatAgent';
 
@@ -33,21 +34,16 @@ export async function getOneChatIndexMappings(
 
   logger.debug(`Fetching OneChat index mappings for directory: ${directory}`);
 
-  // Use direct URL instead of fileDownloadInfo for better auth handling
-  const url = `https://huggingface.co/datasets/${ONECHAT_REPO}/resolve/main/${directory}/index-mappings.jsonl`;
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'User-Agent': 'Kibana-OneChat-Loader/1.0',
+  const text = await fetchHuggingFaceFile(
+    {
+      repo: ONECHAT_REPO,
+      path: `${directory}/index-mappings.jsonl`,
+      revision: 'main',
+      accessToken,
     },
-  });
+    logger
+  );
 
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} while fetching OneChat index mappings from ${url}`);
-  }
-
-  const text = await response.text();
   const mappings = new Map<string, OneChatIndexMapping>();
 
   const lines = text.split('\n');
