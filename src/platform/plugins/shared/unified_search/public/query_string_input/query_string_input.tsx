@@ -653,6 +653,11 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     }
   };
 
+  private handleResize = () => {
+    this.handleAutoHeight();
+    this.handleBlurOnScroll();
+  };
+
   private onClickSuggestion = (suggestion: QuerySuggestion, index: number) => {
     if (!this.inputRef) {
       return;
@@ -685,10 +690,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     this.fetchIndexPatterns();
     this.handleAutoHeight();
 
-    window.addEventListener('resize', () => {
-      this.handleAutoHeight();
-      this.handleBlurOnScroll();
-    });
+    window.addEventListener('resize', this.handleResize);
 
     this.handleBlurOnScroll();
   }
@@ -728,7 +730,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
-    window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('resize', this.handleResize);
     if (this.hasScrollListener) window.removeEventListener('scroll', this.onOutsideClick);
   }
 
