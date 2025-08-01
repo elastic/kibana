@@ -301,24 +301,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearch);
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
-      let requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 's',
-        breakdownField: 'extension.keyword',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 's',
+          breakdownField: 'extension.keyword',
+        });
       });
       await discover.toggleChartVisibility();
       await discover.waitUntilSearchingHasFinished();
       await discover.revertUnsavedChanges();
       await discover.waitUntilSearchingHasFinished();
-      requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 'auto',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 'auto',
+        });
       });
     });
   });
