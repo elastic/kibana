@@ -9,8 +9,7 @@
 
 import { SearchSessionStatus } from '../../../../../../../common';
 import { getSearchSessionSavedObjectMock } from '../../../__mocks__';
-import { LocatorsStart } from '../../../types';
-import { Action } from '../actions';
+import { ACTION, LocatorsStart } from '../../../types';
 import { mapToUISession } from './map_to_ui_session';
 
 describe('mapToUISession', () => {
@@ -48,7 +47,7 @@ describe('mapToUISession', () => {
         created: mockSearchSession.attributes.created,
         expires: mockSearchSession.attributes.expires,
         status: SearchSessionStatus.COMPLETE,
-        actions: ['inspect', 'rename', 'extend', 'delete'] as Action[],
+        actions: [ACTION.INSPECT, ACTION.RENAME, ACTION.EXTEND, ACTION.DELETE],
         restoreUrl: 'restore-url',
         reloadUrl: 'reload-url',
         initialState: mockSearchSession.attributes.initialState,
@@ -85,7 +84,7 @@ describe('mapToUISession', () => {
         savedObject: mockSearchSession,
         locators: mockLocators,
         sessionStatuses,
-        actions: ['inspect', 'rename'], // Filtering actions to only include 'inspect' and 'rename'
+        actions: [ACTION.INSPECT, ACTION.RENAME], // Filtering actions to only include 'inspect' and 'rename'
       });
 
       // Then
@@ -96,7 +95,7 @@ describe('mapToUISession', () => {
         created: mockSearchSession.attributes.created,
         expires: mockSearchSession.attributes.expires,
         status: SearchSessionStatus.COMPLETE,
-        actions: ['inspect', 'rename'] as Action[],
+        actions: [ACTION.INSPECT, ACTION.RENAME],
         restoreUrl: 'restore-url',
         reloadUrl: 'reload-url',
         initialState: mockSearchSession.attributes.initialState,

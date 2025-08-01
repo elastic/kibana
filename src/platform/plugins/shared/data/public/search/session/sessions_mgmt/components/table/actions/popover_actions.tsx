@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { UISession } from '../../../types';
+import { ACTION, UISession } from '../../../types';
 import { getAction } from './get_action';
 import { OnActionComplete } from './types';
 
@@ -81,7 +81,7 @@ export const PopoverActionsMenu = ({
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
-      if (actions.length > 1 && actionType === 'delete') {
+      if (actions.length > 1 && actionType === ACTION.DELETE) {
         itemSet.push({ isSeparator: true, key: 'separadorable' });
       }
 

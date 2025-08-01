@@ -9,9 +9,8 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { SearchSessionsFindResponse } from '../../../../../../../common';
-import { LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
+import { ACTION, LocatorsStart, SearchSessionSavedObject, UISession } from '../../../types';
 import { getActions } from './get_actions';
-import { Action } from '../actions';
 
 function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
   try {
@@ -35,7 +34,7 @@ export const mapToUISession = ({
   savedObject: SearchSessionSavedObject;
   locators: LocatorsStart;
   sessionStatuses: SearchSessionsFindResponse['statuses'];
-  actions?: Action[];
+  actions?: ACTION[];
 }): UISession => {
   const {
     name,
