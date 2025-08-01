@@ -603,7 +603,9 @@ class AgentPolicyService {
       const agentPolicyWithPackagePolicies = await this.get(soClient, newAgentPolicy.id);
 
       if (!agentPolicyWithPackagePolicies) {
-        throw new Error(`Could not retrieve created agent policy ${newAgentPolicy.id}`);
+        throw new AgentPolicyNotFoundError(
+          `Could not retrieve created agent policy ${newAgentPolicy.id} after creating its package policies`
+        );
       }
 
       return agentPolicyWithPackagePolicies;
