@@ -71,7 +71,7 @@ export const getThemeStylesheetPaths = ({
     ...(darkMode
       ? [
           `${baseHref}/ui/legacy_dark_theme.min.css`,
-          `${baseHref}/ui/charts/theme_dark.css`, // EUI Charts' CSS (dark theme)
+          `${baseHref}/ui/charts/theme_dark.css`, // Elastic Charts' CSS (dark theme)
         ]
       : [
           `${baseHref}/ui/legacy_light_theme.min.css`,
