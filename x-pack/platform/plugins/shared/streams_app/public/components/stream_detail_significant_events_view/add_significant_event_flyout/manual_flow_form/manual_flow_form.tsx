@@ -92,7 +92,7 @@ export function ManualFlowForm({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    query,
+    kqlQuery: query.kql?.query ?? '',
     timeRange,
   });
 
