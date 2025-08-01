@@ -10,6 +10,7 @@
 import { captureErrorMock } from './versioned_router.test.mocks';
 
 import Supertest from 'supertest';
+import apm from 'elastic-apm-node';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -32,6 +33,15 @@ interface AdditionalOptions {
 describe('Routing versioned requests', () => {
   let router: IRouter;
   let supertest: Supertest.Agent;
+  const endMock = jest.fn();
+  jest.spyOn(apm, 'startSpan').mockReturnValue({ end: endMock });
+
+  const assertSpanCloseCalled = (numberofOfCalls: number = 2) => {
+    expect(apm.startSpan).toHaveBeenCalledTimes(numberofOfCalls);
+    expect(endMock).toHaveBeenCalledTimes(numberofOfCalls);
+    endMock.mockClear();
+    apm.startSpan.mockClear();
+  };
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
@@ -63,6 +73,8 @@ describe('Routing versioned requests', () => {
   };
 
   beforeEach(async () => {
+    endMock.mockClear();
+    apm.startSpan.mockClear();
     await setupServer();
   });
 
@@ -94,6 +106,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body: { v } }) => v)
     ).resolves.toBe('1');
+    assertSpanCloseCalled();
 
     await expect(
       supertest
@@ -102,6 +115,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body: { v } }) => v)
     ).resolves.toBe('2');
+    assertSpanCloseCalled();
   });
 
   it('handles missing version header (defaults to oldest)', async () => {
@@ -127,6 +141,7 @@ describe('Routing versioned requests', () => {
         'elastic-api-version': '2020-02-02',
       }),
     });
+    assertSpanCloseCalled();
   });
 
   it('returns the expected output for badly formatted versions', async () => {
@@ -151,6 +166,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatchObject({
       message: expect.stringMatching(/Invalid version/),
     });
+    assertSpanCloseCalled();
   });
 
   it('returns the expected responses for failed validation', async () => {
@@ -185,6 +201,7 @@ describe('Routing versioned requests', () => {
       headers: { 'elastic-api-version': '1' }, // includes version if validation failed
     });
     expect(captureErrorMock).not.toHaveBeenCalled();
+    assertSpanCloseCalled();
   });
 
   it('returns the version in response headers', async () => {
@@ -207,6 +224,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ header }) => header)
     ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    assertSpanCloseCalled();
   });
 
   it('returns the version in response headers, even for HTTP resources', async () => {
@@ -230,6 +248,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ header }) => header)
     ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    assertSpanCloseCalled();
   });
 
   it('runs response validation when in dev', async () => {
@@ -279,6 +298,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatchObject({
       message: expect.stringMatching(/Failed output validation/),
     });
+    assertSpanCloseCalled();
 
     await expect(
       supertest
@@ -289,6 +309,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatchObject({
       message: expect.stringMatching(/Failed output validation/),
     });
+    assertSpanCloseCalled();
 
     // This should pass response validation
     await expect(
@@ -302,6 +323,7 @@ describe('Routing versioned requests', () => {
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
+    assertSpanCloseCalled();
   });
 
   it('does not run response validation in prod', async () => {
@@ -329,6 +351,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('1');
+    assertSpanCloseCalled();
   });
 
   it('defaults to v1 for internal HTTP APIs to allow gracefully onboarding internal routes to versioned router', async () => {
@@ -357,6 +380,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ text }) => text)
     ).resolves.toMatch('v1');
+    assertSpanCloseCalled();
   });
 
   it('requires version headers to be set for internal and public endpoints when in dev', async () => {
@@ -386,8 +410,10 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toMatch(/Please specify.+version/);
+    assertSpanCloseCalled();
 
     await supertest.get('/my-path').set('Elastic-Api-Version', '2023-10-31').expect(200);
+    assertSpanCloseCalled();
 
     await expect(
       supertest
@@ -396,8 +422,10 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toMatch(/Please specify.+version/);
+    assertSpanCloseCalled();
 
     await supertest.get('/my-internal-path').set('Elastic-Api-Version', '1').expect(200);
+    assertSpanCloseCalled();
   });
 
   it('errors when no handler could be found', async () => {
@@ -417,6 +445,7 @@ describe('Routing versioned requests', () => {
         .then(({ body }) => body)
     ).resolves.toMatchObject({ message: expect.stringMatching(/No handlers registered/) });
     expect(captureErrorMock).not.toHaveBeenCalled();
+    assertSpanCloseCalled();
   });
 
   it('resolves the newest handler on serverless', async () => {
@@ -443,6 +472,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('newest');
+    assertSpanCloseCalled();
   });
 
   it('resolves the oldest handler on anything other than serverless', async () => {
@@ -469,6 +499,7 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('oldest');
+    assertSpanCloseCalled();
   });
 
   it('captures the error if handler throws', async () => {
@@ -487,6 +518,7 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await supertest.get('/my-path').set('Elastic-Api-Version', '1').expect(500);
+    assertSpanCloseCalled();
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(error);
@@ -525,6 +557,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual(
       'Use of query parameter "apiVersion" is not allowed. Please specify the API version using the "elastic-api-version" header.'
     );
+    assertSpanCloseCalled();
   });
 
   describe('query parameter version negotiation', () => {
@@ -574,6 +607,7 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2023-10-31')
         .query({ a: 1 })
         .expect(200);
+      assertSpanCloseCalled();
       expect(publicHandler).toHaveBeenCalledTimes(1);
       {
         const [[_, req]] = publicHandler.mock.calls;
@@ -584,6 +618,7 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '1')
         .query({ a: 2 })
         .expect(200);
+      assertSpanCloseCalled();
       expect(internalHandler).toHaveBeenCalledTimes(1);
       {
         const [[_, req]] = internalHandler.mock.calls;
@@ -593,11 +628,13 @@ describe('Routing versioned requests', () => {
     it('finds version based on query param', async () => {
       await server.start();
       await supertest.get('/my-public').query({ apiVersion: '2023-10-31', a: 1 }).expect(200);
+      assertSpanCloseCalled();
       {
         const [[_, req]] = publicHandler.mock.calls;
         expect(req.query).toEqual({ a: 1 }); // does not contain apiVersion key
       }
       await supertest.get('/my-internal').query({ apiVersion: '1', a: 2 }).expect(200);
+      assertSpanCloseCalled();
       {
         const [[_, req]] = internalHandler.mock.calls;
         expect(req.query).toEqual({ a: 2 }); // does not contain apiVersion key
@@ -633,7 +670,9 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await supertest.get('/my_path_to_bypass/123').expect(200);
+    assertSpanCloseCalled();
     const response = await supertest.get('/my_other_path').expect(400);
+    assertSpanCloseCalled();
 
     expect(response).toMatchObject({
       status: 400,

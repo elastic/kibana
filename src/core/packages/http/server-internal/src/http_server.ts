@@ -572,13 +572,7 @@ export class HttpServer {
 
     this.server!.ext('onPreHandler', (request, responseToolkit) => {
       (request.app as KibanaRequestState).span?.end();
-      (request.app as KibanaRequestState).span = apm.startSpan('route handler');
-
-      return responseToolkit.continue;
-    });
-
-    this.server!.ext('onPostHandler', (request, responseToolkit) => {
-      (request.app as KibanaRequestState).span?.end();
+      (request.app as KibanaRequestState).span = null;
 
       return responseToolkit.continue;
     });
