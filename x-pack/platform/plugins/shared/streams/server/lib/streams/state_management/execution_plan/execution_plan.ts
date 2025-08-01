@@ -195,14 +195,13 @@ export class ExecutionPlan {
       await Promise.all([
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
+        this.deleteQueries(delete_queries),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
         ...upsert_dot_streams_document,
         ...delete_dot_streams_document,
       ]);
-
-      await this.deleteQueries(delete_queries);
     } catch (error) {
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${error.message}`
