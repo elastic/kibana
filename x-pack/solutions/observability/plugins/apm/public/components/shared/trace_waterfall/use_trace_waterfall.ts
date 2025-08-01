@@ -27,13 +27,14 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
         : WaterfallLegendType.SpanType;
     const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
-    const rootItem = traceParentChildrenMap.root?.[0];
+    const { rootItem, traceState } = getRootItemOrFallback(traceParentChildrenMap, traceItems);
     const traceWaterfall = rootItem
       ? getTraceWaterfall(rootItem, traceParentChildrenMap, colorMap, colorBy)
       : [];
 
     return {
       rootItem,
+      traceState,
       traceWaterfall,
       duration: getTraceWaterfallDuration(traceWaterfall),
       maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
@@ -95,6 +96,51 @@ export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
   return traceMap;
 }
 
+export enum TraceDataState {
+  Full,
+  Partial,
+  Empty,
+}
+
+function matchParentId(this: TraceItem, parent: TraceItem) {
+  return parent.id === this.parentId;
+}
+
+function getFallbackRootItem(item: TraceItem, _index: number, traceItems: TraceItem[]): boolean {
+  // Avoid allocating a whole new function every iteration, making this operation less expensive
+  return !traceItems.find(matchParentId, item);
+}
+
+export function getRootItemOrFallback(
+  traceParentChildrenMap: Record<string, TraceItem[]>,
+  traceItems: TraceItem[]
+) {
+  const rootItem = traceParentChildrenMap.root?.[0];
+
+  if (rootItem) {
+    return {
+      traceState: TraceDataState.Full,
+      rootItem,
+    };
+  }
+
+  // O(n) in best case, O(n^2) in worst case. Hot loop here potentially.
+  // Avoid allocating new objects/functions here to ensure as fast iteration speed as
+  // possible for a potentially expensive op.
+  const fallbackItem = traceItems.find(getFallbackRootItem);
+
+  if (fallbackItem) {
+    return {
+      traceState: TraceDataState.Partial,
+      rootItem: fallbackItem,
+    };
+  }
+
+  return {
+    traceState: TraceDataState.Empty,
+  };
+}
+
 export function getTraceWaterfall(
   rootItem: TraceItem,
   parentChildMap: Record<string, TraceItem[]>,
@@ -103,7 +149,11 @@ export function getTraceWaterfall(
 ): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
-  function getTraceWaterfallItem(item: TraceItem, depth: number, parent?: TraceWaterfallItem) {
+  function getTraceWaterfallItem(
+    item: TraceItem,
+    depth: number,
+    parent?: TraceWaterfallItem
+  ): TraceWaterfallItem[] {
     const startMicroseconds = item.timestampUs;
     const color =
       colorBy === WaterfallLegendType.ServiceName
@@ -116,14 +166,15 @@ export function getTraceWaterfall(
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
       color,
     };
-    const result = [traceWaterfallItem];
+
     const sortedChildren =
       parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
 
-    sortedChildren.forEach((child) => {
-      result.push(...getTraceWaterfallItem(child, depth + 1, traceWaterfallItem));
-    });
-    return result;
+    const flattenedChildren = sortedChildren.flatMap((child) =>
+      getTraceWaterfallItem(child, depth + 1, traceWaterfallItem)
+    );
+
+    return [traceWaterfallItem, ...flattenedChildren];
   }
 
   return getTraceWaterfallItem(rootItem, 0);
