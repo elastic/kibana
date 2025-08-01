@@ -216,8 +216,9 @@ async function getValidConcreteIndices({
           indexPatterns.name
         } - ${JSON.stringify(concreteIndices)}`
     );
-    const validConcreteIndices = [];
+
     if (indexPatterns.validPrefixes) {
+      const validConcreteIndices = [];
       for (const cIdx of concreteIndices) {
         if (!indexPatterns.validPrefixes.some((prefix: string) => cIdx.index.startsWith(prefix))) {
           logger.warn(
@@ -231,8 +232,10 @@ async function getValidConcreteIndices({
           validConcreteIndices.push(cIdx);
         }
       }
+      return validConcreteIndices;
+    } else {
+      return concreteIndices;
     }
-    return validConcreteIndices;
   } catch (error) {
     // 404 is expected if no concrete write indices have been created
     if (error.statusCode !== 404) {
