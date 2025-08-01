@@ -9,7 +9,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { castArray } from 'lodash';
 import { loadHuggingFaceDatasets } from '../src/hf_dataset_loader/load_hugging_face_datasets';
-import { STATIC_HUGGING_FACE_DATASETS, getDatasetSpecs } from '../src/hf_dataset_loader/config';
+import { PREDEFINED_HUGGING_FACE_DATASETS, getDatasetSpecs } from '../src/hf_dataset_loader/config';
 import { listAllOneChatDatasets } from '../src/hf_dataset_loader/onechat_datasets';
 import { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
 
@@ -28,7 +28,9 @@ async function showAvailableDatasets(accessToken: string, logger: any) {
   let output = 'No datasets specified. Here are the available datasets:\n\n';
 
   output += 'Pre-defined HuggingFace datasets:\n';
-  output += STATIC_HUGGING_FACE_DATASETS.map((d, index) => `  ${index + 1}. ${d.name}`).join('\n');
+  output += PREDEFINED_HUGGING_FACE_DATASETS.map((d, index) => `  ${index + 1}. ${d.name}`).join(
+    '\n'
+  );
   output += '\n\n';
 
   const oneChatDatasets = await listAllOneChatDatasets(accessToken, logger);

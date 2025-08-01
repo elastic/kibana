@@ -30,6 +30,7 @@ export async function indexDocuments({
   });
 
   logger.debug(`Indexing ${documents.length} into ${indexName}`);
+
   await esClient.helpers.bulk<Record<string, unknown>>({
     datasource: Readable.from(documents),
     index: indexName,
@@ -38,7 +39,6 @@ export async function indexDocuments({
     flushBytes: 1024 * 128,
     onDocument: (document) => {
       const { _id, ...doc } = document;
-
       return [{ index: { _id: String(_id) } }, doc];
     },
     onDrop: (doc) => {

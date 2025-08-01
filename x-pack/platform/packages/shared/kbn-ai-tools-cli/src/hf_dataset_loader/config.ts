@@ -83,7 +83,7 @@ const EXTRA_DATASETS: HuggingFaceDatasetSpec[] = [
   },
 ];
 
-export const STATIC_HUGGING_FACE_DATASETS: HuggingFaceDatasetSpec[] = [
+export const PREDEFINED_HUGGING_FACE_DATASETS: HuggingFaceDatasetSpec[] = [
   ...BEIR_DATASETS,
   ...EXTRA_DATASETS,
 ];
@@ -103,7 +103,7 @@ export async function getDatasetSpecs(
       specs.push(spec);
     } else {
       // Look for static datasets
-      const staticSpec = STATIC_HUGGING_FACE_DATASETS.find((spec) => spec.name === name);
+      const staticSpec = PREDEFINED_HUGGING_FACE_DATASETS.find((spec) => spec.name === name);
       if (staticSpec) {
         specs.push(staticSpec);
       } else {

@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createLocalDirDiskCacheStore, fromCache } from '@kbn/cache-cli';
 import { createCache } from 'cache-manager';
 import { errors } from '@elastic/elasticsearch';
-import { STATIC_HUGGING_FACE_DATASETS } from './config';
+import { PREDEFINED_HUGGING_FACE_DATASETS } from './config';
 import { HuggingFaceDatasetSpec } from './types';
 import { ensureDatasetIndexExists } from './ensure_dataset_index_exists';
 import { fetchRowsFromDataset } from './fetch_rows_from_dataset';
@@ -36,7 +36,7 @@ export async function loadHuggingFaceDatasets({
   esClient,
   logger,
   accessToken,
-  datasets = STATIC_HUGGING_FACE_DATASETS,
+  datasets = PREDEFINED_HUGGING_FACE_DATASETS,
   limit = 1000,
   clear = false,
 }: {
