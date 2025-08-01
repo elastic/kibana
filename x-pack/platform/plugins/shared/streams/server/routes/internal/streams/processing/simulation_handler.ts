@@ -161,6 +161,8 @@ export const simulateProcessing = async ({
     streamIndexState,
     params
   );
+  console.log(JSON.stringify(ingestSimulationBody, null, 2));
+  console.log(JSON.stringify(pipelineSimulationBody, null, 2));
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
@@ -170,6 +172,8 @@ export const simulateProcessing = async ({
     executePipelineSimulation(scopedClusterClient, pipelineSimulationBody),
     executeIngestSimulation(scopedClusterClient, ingestSimulationBody),
   ]);
+  console.log(JSON.stringify(pipelineSimulationResult, null, 2));
+  console.log(JSON.stringify(ingestSimulationResult, null, 2));
 
   /* 3. Fail fast on pipeline simulations errors and return the generic error response gracefully */
   if (pipelineSimulationResult.status === 'failure') {
@@ -273,6 +277,7 @@ const prepareSimulationProcessors = (
 
   const formattedProcessors = formatToIngestProcessors(processors, {
     ignoreMalformedManualIngestPipeline: true,
+    addSimulateStuff: true,
   });
 
   return [...dotExpanderProcessors, ...formattedProcessors];
@@ -493,16 +498,25 @@ const computePipelineSimulationResult = (
 const initProcessorMetricsMap = (
   processing: ProcessorDefinitionWithId[]
 ): Record<string, ProcessorMetrics> => {
-  const processorMetricsEntries = processing.map((processor) => [
-    processor.id,
-    {
-      detected_fields: [],
-      errors: [],
-      failed_rate: 0,
-      skipped_rate: 0,
-      parsed_rate: 1,
-    },
-  ]);
+  const processorMetricsEntries = processing.flatMap((processor) => {
+    let submap: Record<string, ProcessorMetrics> = {};
+    if ('where' in processor) {
+      submap = initProcessorMetricsMap(processor.where.steps);
+    }
+    return [
+      ...Object.entries(submap),
+      [
+        processor.id,
+        {
+          detected_fields: [],
+          errors: [],
+          failed_rate: 0,
+          skipped_rate: 0,
+          parsed_rate: 1,
+        },
+      ],
+    ];
+  });
 
   return Object.fromEntries(processorMetricsEntries);
 };

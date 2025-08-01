@@ -25,6 +25,7 @@ export const processorMachine = setup({
         return {
           processor: {
             id: context.processor.id,
+            whereParentId: context.processor.whereParentId,
             type,
             ...params.processor,
           },
@@ -32,6 +33,12 @@ export const processorMachine = setup({
         };
       }
     ),
+    changeParent: assign(({ context }, params: { parentId?: string }) => ({
+      processor: {
+        ...context.processor,
+        whereParentId: params.parentId,
+      },
+    })),
     resetToPrevious: assign(({ context }) => ({
       processor: context.previousProcessor,
     })),
@@ -85,6 +92,9 @@ export const processorMachine = setup({
             { type: 'forwardChangeEventToParent' },
           ],
         },
+        'processor.changeParent': {
+          actions: [{ type: 'changeParent', params: ({ event }) => event }],
+        },
       },
     },
     configured: {
@@ -96,6 +106,9 @@ export const processorMachine = setup({
             'processor.edit': {
               target: 'editing',
               actions: [{ type: 'forwardEventToParent' }],
+            },
+            'processor.changeParent': {
+              actions: [{ type: 'changeParent', params: ({ event }) => event }],
             },
           },
         },
@@ -114,6 +127,9 @@ export const processorMachine = setup({
                 { type: 'changeProcessor', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
               ],
+            },
+            'processor.changeParent': {
+              actions: [{ type: 'changeParent', params: ({ event }) => event }],
             },
             'processor.delete': '#deleted',
           },

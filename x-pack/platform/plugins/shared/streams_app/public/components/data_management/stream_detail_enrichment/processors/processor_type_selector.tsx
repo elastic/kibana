@@ -138,6 +138,16 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   ...configDrivenProcessors,
+  where: {
+    type: 'where',
+    inputDisplay: 'Where',
+    getDocUrl: (docLinks: DocLinksStart) => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.whereHelpText"
+        defaultMessage="Filters documents based on a condition."
+      />
+    ),
+  },
   manual_ingest_pipeline: {
     type: 'manual_ingest_pipeline',
     inputDisplay: 'Manual pipeline configuration',

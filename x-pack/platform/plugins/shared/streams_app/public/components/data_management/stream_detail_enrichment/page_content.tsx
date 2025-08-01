@@ -193,7 +193,12 @@ const ProcessorsEditor = React.memo(() => {
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
-      reorderProcessors(source.index, destination.index);
+      reorderProcessors(
+        source.index,
+        destination.index,
+        source.droppableId,
+        destination.droppableId
+      );
     }
   };
   const hasProcessors = !isEmpty(processorsRefs);
@@ -259,15 +264,19 @@ const ProcessorsEditor = React.memo(() => {
         >
           <SortableList onDragItem={handlerItemDrag}>
             <EuiTimeline aria-label="Processors list" gutterSize="m">
-              {processorsRefs.map((processorRef, idx) => (
-                <DraggableProcessorListItem
-                  isDragDisabled={!canReorderProcessors}
-                  key={processorRef.id}
-                  idx={idx}
-                  processorRef={processorRef}
-                  processorMetrics={simulation?.processors_metrics[processorRef.id]}
-                />
-              ))}
+              {processorsRefs
+                .filter(
+                  (processorRef) => !processorRef.getSnapshot().context.processor.whereParentId
+                )
+                .map((processorRef, idx) => (
+                  <DraggableProcessorListItem
+                    isDragDisabled={!canReorderProcessors}
+                    key={processorRef.id}
+                    idx={idx}
+                    processorRef={processorRef}
+                    processorMetrics={simulation?.processors_metrics[processorRef.id]}
+                  />
+                ))}
             </EuiTimeline>
           </SortableList>
         </EuiPanel>

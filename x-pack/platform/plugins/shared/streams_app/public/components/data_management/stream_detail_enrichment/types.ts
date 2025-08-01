@@ -14,12 +14,14 @@ import {
 } from '@kbn/streams-schema';
 import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
 import { DraftGrokExpression } from '@kbn/grok-ui';
+import { WhereProcessorConfig } from '@kbn/streams-schema/src/models/ingest/processors';
 import { EnrichmentDataSource } from '../../../../common/url_schema';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;
   type: ProcessorTypeOf<T>;
+  whereParentId?: string;
 };
 
 /**
@@ -40,11 +42,14 @@ export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig 
   type: 'manual_ingest_pipeline';
 };
 
+export type WhereFormState = WhereProcessorConfig & { type: 'where' };
+
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
-  | ManualIngestPipelineFormState;
+  | ManualIngestPipelineFormState
+  | WhereFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 

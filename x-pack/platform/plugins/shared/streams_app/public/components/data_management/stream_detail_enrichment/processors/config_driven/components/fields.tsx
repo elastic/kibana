@@ -16,7 +16,6 @@ import { TextField } from './text_field';
 import { BooleanField } from './boolean_field';
 import { ArrayField } from './array_field';
 import { FieldConfiguration } from '../types';
-import { ProcessorConditionEditor } from '../../processor_condition_editor';
 
 export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProcessorType }) => {
   const processor = configDrivenProcessors[type];
@@ -41,12 +40,6 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
           .map((fieldConfiguration, id) => (
             <FieldComponentByConfig key={id} fieldConfiguration={fieldConfiguration} />
           ))}
-        {processor.fieldOptions.includeCondition && (
-          <>
-            <EuiSpacer size="m" />
-            <ProcessorConditionEditor />
-          </>
-        )}
       </FieldsAccordion>
       <EuiSpacer size="m" />
       {processor.fieldOptions.includeIgnoreFailures && <IgnoreFailureToggle />}
