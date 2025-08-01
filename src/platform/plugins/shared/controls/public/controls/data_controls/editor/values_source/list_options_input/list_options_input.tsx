@@ -314,7 +314,7 @@ export const ListOptionsInput = ({
                     onClick={onAddOption}
                     data-test-subj="list-options-input-add-option"
                   >
-                    {i18n.translate('optionsfield.addOption', {
+                    {i18n.translate('controls.listOptionsInput.addOption', {
                       defaultMessage: 'Add option',
                     })}
                   </EuiButtonEmpty>
@@ -327,14 +327,14 @@ export const ListOptionsInput = ({
                       iconType={nextSortDir === 'asc' ? 'sortAscending' : 'sortDescending'}
                       onClick={onSort}
                     >
-                      {i18n.translate('optionsfield.sort', {
+                      {i18n.translate('controls.listOptionsInput.sort', {
                         defaultMessage: 'Sort',
                       })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty color="danger" iconType="trash" onClick={onClearAll}>
-                      {i18n.translate('optionsfield.clearAll', {
+                      {i18n.translate('controls.listOptionsInput.clearAll', {
                         defaultMessage: 'Clear all',
                       })}
                     </EuiButtonEmpty>
@@ -391,7 +391,7 @@ const ListOption: React.FC<{
             renderingInVirtualizedMode ? String(option.text) : undefined
           }
           value={!renderingInVirtualizedMode ? String(option.text) : undefined}
-          placeholder={i18n.translate('optionsfield.placeholderText', {
+          placeholder={i18n.translate('controls.listOptionsInput.placeholderText', {
             defaultMessage: 'Option text',
           })}
           onChange={onChange}

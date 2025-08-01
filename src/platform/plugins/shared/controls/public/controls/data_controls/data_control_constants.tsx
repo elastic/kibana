@@ -305,37 +305,39 @@ export const DataControlEditorStrings = {
           defaultMessage: 'Variable name already in use',
         }),
       getEsqlVariableHelpText: (isStaticValuesSource: boolean) => {
-        const values = {
-          valuesPrefix: <EuiCode>?</EuiCode>,
-          fieldsPrefix: <EuiCode>??</EuiCode>,
-          valuesBold: (
-            <strong>
-              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.valuesText', {
-                defaultMessage: 'values',
-              })}
-            </strong>
-          ),
-          fieldsBold: (
-            <strong>
-              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.fieldsTexst', {
-                defaultMessage: 'fields',
-              })}
-            </strong>
-          ),
-          functionsBold: (
-            <strong>
-              {i18n.translate('controls.controlGroup.manageControl.esqlOutput.functionsText', {
-                defaultMessage: 'functions',
-              })}
-            </strong>
-          ),
-        };
         if (isStaticValuesSource)
           return (
             <FormattedMessage
               id="controls.controlGroup.manageControl.esqlOutput.variableHelpTextStaticInput"
               defaultMessage="Start your variable name with {valuesPrefix} to replace {valuesBold} or with {fieldsPrefix} to replace {fieldsBold} or {functionsBold}."
-              values={values}
+              values={{
+                valuesPrefix: <EuiCode>?</EuiCode>,
+                fieldsPrefix: <EuiCode>??</EuiCode>,
+                valuesBold: (
+                  <strong>
+                    {i18n.translate('controls.controlGroup.manageControl.esqlOutput.valuesText', {
+                      defaultMessage: 'values',
+                    })}
+                  </strong>
+                ),
+                fieldsBold: (
+                  <strong>
+                    {i18n.translate('controls.controlGroup.manageControl.esqlOutput.fieldsTexst', {
+                      defaultMessage: 'fields',
+                    })}
+                  </strong>
+                ),
+                functionsBold: (
+                  <strong>
+                    {i18n.translate(
+                      'controls.controlGroup.manageControl.esqlOutput.functionsText',
+                      {
+                        defaultMessage: 'functions',
+                      }
+                    )}
+                  </strong>
+                ),
+              }}
             />
           );
         else
@@ -344,7 +346,33 @@ export const DataControlEditorStrings = {
               id="controls.controlGroup.manageControl.esqlOutput.variableHelpTextDynamicInput"
               defaultMessage="Start your variable name with {valuesPrefix} to replace {valuesBold}. To use {fieldsPrefix} to replace {fieldsBold} or {functionsBold}, change your control input to {staticValuesBold}."
               values={{
-                ...values,
+                // i18n_check requires repeating all of this stuff
+                valuesPrefix: <EuiCode>?</EuiCode>,
+                fieldsPrefix: <EuiCode>??</EuiCode>,
+                valuesBold: (
+                  <strong>
+                    {i18n.translate('controls.controlGroup.manageControl.esqlOutput.valuesText', {
+                      defaultMessage: 'values',
+                    })}
+                  </strong>
+                ),
+                fieldsBold: (
+                  <strong>
+                    {i18n.translate('controls.controlGroup.manageControl.esqlOutput.fieldsTexst', {
+                      defaultMessage: 'fields',
+                    })}
+                  </strong>
+                ),
+                functionsBold: (
+                  <strong>
+                    {i18n.translate(
+                      'controls.controlGroup.manageControl.esqlOutput.functionsText',
+                      {
+                        defaultMessage: 'functions',
+                      }
+                    )}
+                  </strong>
+                ),
                 staticValuesBold: (
                   <strong>
                     {i18n.translate(
