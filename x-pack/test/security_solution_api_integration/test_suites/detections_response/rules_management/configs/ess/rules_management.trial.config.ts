@@ -6,17 +6,21 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { LOGGING_CONFIG } from '../constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../configs/ess/rules_management.basic.config')
+    require.resolve('../../../../../config/ess/config.base.trial')
   );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('..')],
-    junit: {
-      reportName: 'Rules Management - Rule Read Integration Tests - ESS Env - Basic License',
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`,
+      ],
     },
   };
 }
