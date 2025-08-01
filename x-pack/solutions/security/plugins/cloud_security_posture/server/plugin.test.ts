@@ -128,8 +128,6 @@ describe('Cloud Security Posture Plugin', () => {
     });
 
     it('should retry getInstallation on failures', async () => {
-      jest.useFakeTimers();
-
       let callCount = 0;
       fleetMock.packageService.asInternalUser.getInstallation.mockImplementation(
         async (): Promise<Installation | undefined> => {
@@ -146,22 +144,11 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
       const loggerWarnSpy = jest.spyOn(context.logger.get(), 'warn');
 
-      const startPromise = plugin.start(coreMock.createStart(), mockPlugins);
-      await startPromise;
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
 
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-
-      // Fast-forward through all pending timers multiple times to ensure
-      // all retry attempts have a chance to execute
-      for (let i = 0; i < 5; i++) {
-        jest.runAllTimers();
-        // Allow any pending promises to resolve
-        await Promise.resolve();
-      }
-
-      await fleetSetupPromise;
-
-      jest.useRealTimers();
+      // Wait for retry logic to complete
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(loggerWarnSpy).toHaveBeenCalled();
       expect(loggerWarnSpy.mock.calls[0][0]).toMatch(/failed and will be retried/);
@@ -173,8 +160,6 @@ describe('Cloud Security Posture Plugin', () => {
     });
 
     it('should handle getInstallation complete failure after retries', async () => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
-
       const testError = new Error('ES connection failed persistently');
       fleetMock.packageService.asInternalUser.getInstallation.mockRejectedValue(testError);
 
@@ -183,20 +168,11 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
       const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
 
-      const startPromise = plugin.start(coreMock.createStart(), mockPlugins);
-      await startPromise;
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
 
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-
-      // Fast-forward through all pending timers to trigger all retry attempts
-      for (let i = 0; i < 10; i++) {
-        jest.runOnlyPendingTimers();
-        await Promise.resolve();
-      }
-
-      await fleetSetupPromise;
-
-      jest.useRealTimers();
+      // Wait for retry logic to complete
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledTimes(0);
