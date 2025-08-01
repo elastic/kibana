@@ -358,19 +358,30 @@ class AppContextService {
     return this.lockManagerService;
   }
   public getO11yAndSecurityAssistantsStatus = async () => {
-    // make api requests to check if the assistants are enabled
+    // try to use the existing service-based approach
+    const logger = this.getLogger();
+
+    logger.debug(
+      'getO11yAndSecurityAssistantsStatus: Attempting to fetch assistants status via API calls'
+    );
+
+    // Continue with the original service-based approach
     const results = await this.getAssistantStatusViaServices(
       (this.securityStart as any)?.elasticAssistant,
       (this.data as any)?.observability?.assistant
     );
-
+    logger.debug(
+      `getO11yAndSecurityAssistantsStatus: Fetched assistants status via API calls, ${JSON.stringify(
+        results
+      )}`
+    );
     return {
       securityAssistantStatus: results.security,
       observabilityAssistantStatus: results.observability,
     };
   };
 
-  // Option 2: Access underlying services (if available in your context)
+  // Utilize the service-based approach to get assistants status
   private async getAssistantStatusViaServices(
     elasticAssistantService: any, // Security assistant service
     observabilityService: any // Observability assistant service

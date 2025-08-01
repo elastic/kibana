@@ -123,14 +123,12 @@ export async function stepSaveArchiveEntries(
       throw new Error(`Error saving archive entries: ${error}`);
     }
   }
-
+  // First, check that one (or both) of the ai assistants are enabled via api calls
+  const { securityAssistantStatus, observabilityAssistantStatus } =
+    await appContextService.getO11yAndSecurityAssistantsStatus();
   // Save knowledge base content if present
   if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
     try {
-      // First, check that one (or both) of the ai assistants are enabled via api calls
-      const { securityAssistantStatus, observabilityAssistantStatus } =
-        await appContextService.getO11yAndSecurityAssistantsStatus();
-
       if (securityAssistantStatus || observabilityAssistantStatus) {
         // Check if this is an upgrade (existing package with different version)
         const isUpgrade = installedPkg && installedPkg.attributes.version !== packageInfo.version;
