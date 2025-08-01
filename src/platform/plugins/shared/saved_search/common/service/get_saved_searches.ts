@@ -43,16 +43,12 @@ export const getSearchSavedObject = async (
     if (so.meta.outcome === 'conflict') {
       throw new Error(
         await getSavedSearchUrlConflictMessage(
-          JSON.stringify(
-            {
-              targetType: SAVED_SEARCH_TYPE,
-              sourceId: savedSearchId,
-              // front end only
-              targetSpace: (await spaces?.getActiveSpace())?.id,
-            },
-            null,
-            2
-          )
+          JSON.stringify({
+            targetType: SAVED_SEARCH_TYPE,
+            sourceId: savedSearchId,
+            // front end only
+            targetSpace: (await spaces?.getActiveSpace())?.id,
+          })
         )
       );
     }
