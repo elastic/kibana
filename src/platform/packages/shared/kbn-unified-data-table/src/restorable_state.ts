@@ -30,6 +30,8 @@ export interface UnifiedDataTableRestorableState {
 
   // settings
   density: DataGridDensity;
+  rowHeight: number;
+  headerRowHeight: number;
 }
 
 export const {
