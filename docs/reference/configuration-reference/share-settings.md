@@ -1,28 +1,27 @@
 ---
-navigation_title: "Share settings"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/share-settings-kb.html
+navigation_title: "Sharing settings"
 applies_to:
+  stack: ga 9.1
   deployment:
-    ess: ga 9.1, ga 8.19
-    self: ga 9.1, ga 8.19
+    ess: ga
+    self: ga
 ---
 
-# Share settings in {{kib}} [share-settings-kb]
+# Sharing settings in {{kib}} [share-settings-kb]
 
-Configure share settings in your `kibana.yml` configuration file.
-Share settings allow you to customize behavior related to URL sharing in Kibana.
+Configure sharing settings in your `kibana.yml` configuration file.
+These settings allow you to customize the behavior of URL sharing in {{kib}}.
 
-## URL Expiration settings [url-expiration-settings]
+## URL expiration settings [url-expiration-settings]
 
-URL expiration settings control the behavior of unused URLs cleanup background task, which runs using Task Manager plugin. This task allows you to periodically cleanup saved objects of type `url` that have not been accessed in the specified period of time, specified by `share.url_expiration.duration` config option. Each saved object is a representation of a URL generated through the share functionality. Those settings are disabled by default. You need to manually configure them in order to use this feature.
+URL expiration settings control the behavior of the unused URLs cleanup background task, which runs using the Task Manager plugin. This task allows you to periodically clean up saved objects of type `url` that have not been accessed in the specified period of time, controlled by the `share.url_expiration.duration` configuration option. Each saved object is a representation of a URL generated through the sharing functionality. Those settings are disabled by default. You must manually configure them in order to use this feature.
 
 ::::{warning}
-We do not recommend enabling this on lower tier Elasticsearch instances as it can lead to memory spikes and instability. The minimum recommend Elasticsearch instance to use the default setting should have 2 GB RAM. Lower tier instances shouldn’t set `share.url_expiration.url_limit` to more than `1000`.
+We do not recommend enabling this on lower tier Elasticsearch instances as it can lead to memory spikes and instability. The Elasticsearch instance should have at least 2 GB RAM to use the default setting. Lower tier instances shouldn’t set `share.url_expiration.url_limit` to more than `1000`.
 ::::
 
 `share.url_expiration.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   If true the URL expiration feature is enabled. Defaults to `false`
+:   If `true` the URL expiration feature is enabled. Defaults to `false`
 
 `share.url_expiration.duration` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls the expiration threshold. Saved object that have not been accessed in the specified period of time will get deleted. Defaults to `1y` (1 year)
