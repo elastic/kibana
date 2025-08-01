@@ -71,7 +71,7 @@ type Action =
   | { type: 'add'; payload: DocUpdate }
   | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
-  | { type: 'add-column'; payload: ColumnAddition }
+  | { type: 'add-column' }
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
@@ -419,6 +419,7 @@ export class IndexUpdateService {
       this.dataView$
         .pipe(
           switchMap((dataView) => {
+            let placeholderIndex = 0;
             const columnsCount = dataView.fields.filter(
               // @ts-ignore
               (field) => field.spec.metadata_field !== true && !field.spec.subType
@@ -427,28 +428,15 @@ export class IndexUpdateService {
             const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - columnsCount;
             const initialPlaceholders =
               missingPlaceholders > 0
-                ? times(missingPlaceholders, (idx) => ({
-                    name: `${COLUMN_PLACEHOLDER_PREFIX}${idx}`,
+                ? times(missingPlaceholders, () => ({
+                    name: `${COLUMN_PLACEHOLDER_PREFIX}${placeholderIndex++}`,
                   }))
                 : [];
 
             return this._actions$.pipe(
               scan((acc: ColumnAddition[], action) => {
                 if (action.type === 'add-column') {
-                  const lastPlaceholderIndex = acc.findIndex((column) =>
-                    isPlaceholderColumn(column.name)
-                  );
-
-                  // replace last placeholder with the new column
-                  if (lastPlaceholderIndex !== -1) {
-                    return [
-                      ...acc.slice(0, lastPlaceholderIndex),
-                      action.payload,
-                      ...acc.slice(lastPlaceholderIndex + 1),
-                    ];
-                  }
-
-                  return [...acc, action.payload];
+                  return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${placeholderIndex++}` }];
                 }
                 if (action.type === 'edit-column') {
                   return acc.map((column) =>
@@ -585,8 +573,8 @@ export class IndexUpdateService {
     this._actions$.next({ type: 'undo' });
   }
 
-  public addNewColumn(name: string) {
-    this._actions$.next({ type: 'add-column', payload: { name } });
+  public addNewColumn() {
+    this._actions$.next({ type: 'add-column' });
   }
 
   public editColumn(name: string, previousName: string) {
