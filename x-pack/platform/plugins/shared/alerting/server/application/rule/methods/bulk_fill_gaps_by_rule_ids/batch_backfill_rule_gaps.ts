@@ -42,13 +42,15 @@ export const batchBackfillRuleGaps = async (
       end,
       eventLogClient,
       logger,
-      processGapsBatch: async (gapsBatch: Gap[]) => {
-        const result = await processGapsBatch(context, { rule, range, gapsBatch });
-        if (result) {
+      processGapsBatch: async (gapsBatch: Gap[], processingLimitsByRuleId: Record<string, number>) => {
+        const { processedGapsCount } = await processGapsBatch(context, { rule, range, gapsBatch, maxGapsCountToProcess: processingLimitsByRuleId[rule.id] });
+        if (processedGapsCount > 0) {
           hasBeenBackfilled = true;
         }
+
+        return {[rule.id]: processedGapsCount}
       },
-      options: { maxFetchedGaps: maxGapCountPerRule },
+      options: { maxProcessedGapsPerRule: maxGapCountPerRule },
     });
   } catch (error) {
     logProcessedAsAuditEvent(context, rule, error);

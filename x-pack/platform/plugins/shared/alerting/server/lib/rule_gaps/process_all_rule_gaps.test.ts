@@ -170,7 +170,7 @@ describe('processAllRuleGaps', () => {
       expect(processGapsBatchMock).toHaveBeenCalledTimes(findGapsSearchReturnValues.length);
       findGapsSearchReturnValues.forEach(({ data }, idx) => {
         const callOrder = idx + 1;
-        expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, data);
+        expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, data, {});
       });
     });
   });
@@ -241,11 +241,18 @@ describe('processAllRuleGaps', () => {
       return acc;
     }, {} as Record<string, number>);
     beforeEach(async () => {
-      processGapsBatchMock.mockImplementation(async (gaps) => {
+      processGapsBatchMock.mockImplementation(async (gaps, limits: Record<string, number>) => {
         const groupedGaps = groupBy(gaps, 'ruleId');
-        Object.keys(groupedGaps).forEach((ruleId) => {
-          processedGapsCount[ruleId] += groupedGaps[ruleId].length;
+        const processedGapsCountCurrentIteration: Record<string, number> = {}
+
+        Object.keys(groupedGaps).forEach(ruleId => {
+          processedGapsCountCurrentIteration[ruleId] =
+            limits[ruleId] ? Math.min(limits[ruleId], groupedGaps[ruleId].length) : groupedGaps[ruleId].length;
+
+          processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId]
         });
+
+        return processedGapsCountCurrentIteration
       });
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
@@ -256,7 +263,7 @@ describe('processAllRuleGaps', () => {
         end,
         logger: mockLogger,
         options: {
-          maxFetchedGaps: 550,
+          maxProcessedGapsPerRule: 550,
         },
         eventLogClient: mockEventLogClient,
         processGapsBatch: processGapsBatchMock,

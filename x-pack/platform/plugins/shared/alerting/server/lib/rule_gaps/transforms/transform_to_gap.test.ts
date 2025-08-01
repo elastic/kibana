@@ -26,18 +26,13 @@ describe('transformToGap', () => {
     },
   };
 
-  const validSavedObjectsArray = [
-    {
-      type: 'alert',
-      id: 'some-rule-id',
-    },
-  ];
+  const ruleId = 'some-rule-id'
 
   type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>;
   const createMockEvent = (
     overrides: {
       alert?: ResultData['alert'];
-      saved_objects?: ResultData['saved_objects'];
+      ruleId?: string;
       '@timestamp'?: string;
     } = {}
   ): QueryEventsBySavedObjectResult => ({
@@ -55,10 +50,12 @@ describe('transformToGap', () => {
           alert: Object.prototype.hasOwnProperty.call(overrides, 'alert')
             ? overrides.alert
             : validAlertObject,
-          saved_objects: Object.prototype.hasOwnProperty.call(overrides, 'saved_objects')
-            ? overrides.saved_objects
-            : validSavedObjectsArray,
         },
+        rule: {
+          id: Object.prototype.hasOwnProperty.call(overrides, 'ruleId')
+            ? overrides.ruleId
+            : ruleId,
+        }
       },
     ],
     page: 1,
@@ -73,7 +70,7 @@ describe('transformToGap', () => {
     expect(result[0]).toBeInstanceOf(Gap);
     expect(result[0]).toEqual(
       new Gap({
-        ruleId: 'some-rule-id',
+        ruleId,
         timestamp,
         range: validInterval,
         filledIntervals: [validInterval],
@@ -116,7 +113,7 @@ describe('transformToGap', () => {
     expect(result).toHaveLength(0);
   });
 
-  it('filters out invalid gaps (missing ruleSO)', () => {
+  it('filters out invalid gaps (missing rule id)', () => {
     const events = createMockEvent({
       alert: {
         rule: {
@@ -127,29 +124,7 @@ describe('transformToGap', () => {
           },
         },
       },
-      saved_objects: undefined,
-    });
-    const result = transformToGap(events);
-    expect(result).toHaveLength(0);
-  });
-
-  it('filters out invalid gaps (invalid ruleSO)', () => {
-    const events = createMockEvent({
-      alert: {
-        rule: {
-          gap: {
-            range: validInterval,
-            filled_intervals: [validInterval],
-            in_progress_intervals: [validInterval],
-          },
-        },
-      },
-      saved_objects: [
-        {
-          type: 'some-other-type',
-          id: 'some-rule-id',
-        },
-      ],
+      ruleId: undefined
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);

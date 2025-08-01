@@ -51,9 +51,14 @@ describe('updateGaps', () => {
     },
   ];
 
+  let processGapsBatchResult = {}
+
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
+    processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
+      processGapsBatchResult = await processGapsBatch(gaps)
+      return processGapsBatchResult
+    });
   });
 
   describe('updateGaps', () => {
@@ -146,5 +151,13 @@ describe('updateGaps', () => {
         'Failed to update gaps for rule test-rule-id from: 2024-01-01T00:00:00.000Z to: 2024-01-01T01:00:00.000Z: Some gaps failed to update'
       );
     });
+
+    describe('processGapsBatch function', () => {
+      it('should return a record with the count of processed gaps per rule', () => {
+        expect(processGapsBatchResult).toEqual({
+          [ruleId]: 1
+        })
+      })
+    })
   });
 });

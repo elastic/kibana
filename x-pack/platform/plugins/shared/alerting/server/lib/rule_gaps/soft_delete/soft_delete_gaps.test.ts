@@ -37,9 +37,14 @@ describe('softDeleteGaps', () => {
     }),
   ];
 
+  let processGapsBatchResult = {}
+
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
+    processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
+      processGapsBatchResult = await processGapsBatch(gaps)
+      return processGapsBatchResult
+    });
   });
 
   describe('softDeleteGaps', () => {
@@ -89,5 +94,13 @@ describe('softDeleteGaps', () => {
         `Failed to soft delete gaps for rules test-rule-id: Some gaps failed to soft delete`
       );
     });
+
+    describe('processGapsBatch function', () => {
+      it('should return a record with the count of processed gaps per rule', () => {
+        expect(processGapsBatchResult).toEqual({
+          [ruleId]: 1
+        })
+      })
+    })
   });
 });

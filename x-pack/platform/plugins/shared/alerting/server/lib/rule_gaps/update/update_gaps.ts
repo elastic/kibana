@@ -8,7 +8,7 @@
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { chunk } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
@@ -81,6 +81,14 @@ export const updateGaps = async (params: UpdateGapsParams) => {
           hasErrors = true;
         }
       }
+      // Return an object indicating how many gaps were processed per rule id
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce(
+        (acc, [ruleId, gaps]) => {
+          acc[ruleId] = gaps.length
+          return acc
+        },
+        {} as Record<string, number>
+      )
     };
 
     if (gaps) {
@@ -105,8 +113,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     }
   } catch (e) {
     logger.error(
-      `Failed to update gaps for rule ${ruleId} from: ${start.toISOString()} to: ${end.toISOString()}: ${
-        e.message
+      `Failed to update gaps for rule ${ruleId} from: ${start.toISOString()} to: ${end.toISOString()}: ${e.message
       }`
     );
   }
