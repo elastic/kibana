@@ -9,16 +9,16 @@
   },
   "include": [
     "**/*.ts",
+    "globals.d.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/streams-schema",
     "@kbn/core",
-    "@kbn/cache-cli",
-    "@kbn/dev-cli-runner",
-    "@kbn/kibana-api-cli",
-    "@kbn/inference-cli",
-    "@kbn/ai-tools"
+    "@kbn/inference-common",
+    "@kbn/ai-tools",
+    "@kbn/zod",
   ]
 }

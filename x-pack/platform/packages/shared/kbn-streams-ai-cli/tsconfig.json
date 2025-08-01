@@ -14,11 +14,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/cache-cli",
-    "@kbn/dev-cli-runner",
-    "@kbn/kibana-api-cli",
     "@kbn/inference-cli",
-    "@kbn/ai-tools"
+    "@kbn/streams-schema",
+    "@kbn/streams-ai",
   ]
 }
