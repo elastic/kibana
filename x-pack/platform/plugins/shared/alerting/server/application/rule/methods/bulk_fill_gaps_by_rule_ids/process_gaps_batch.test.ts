@@ -50,12 +50,16 @@ describe('processGapsBatch', () => {
     jest.resetAllMocks();
   });
 
-  const callProcessGapsBatch = async (batch = testBatch, dateRange = backfillingDateRange, maxGapsCountToProcess: number | undefined = undefined) => {
+  const callProcessGapsBatch = async (
+    batch = testBatch,
+    dateRange = backfillingDateRange,
+    maxGapsCountToProcess: number | undefined = undefined
+  ) => {
     result = await processGapsBatch(context, {
       rule,
       range: dateRange,
       gapsBatch: batch,
-      maxGapsCountToProcess
+      maxGapsCountToProcess,
     });
   };
 
@@ -81,7 +85,7 @@ describe('processGapsBatch', () => {
 
     it('should return the right count of processed gaps', () => {
       expect(result).toEqual({
-        processedGapsCount: testBatch.length
+        processedGapsCount: testBatch.length,
       });
     });
   });
@@ -121,7 +125,7 @@ describe('processGapsBatch', () => {
 
     it('should return the right count of processed gaps', () => {
       expect(result).toEqual({
-        processedGapsCount: 0
+        processedGapsCount: 0,
       });
     });
   });
@@ -160,7 +164,7 @@ describe('processGapsBatch', () => {
 
     it('should return the right count of processed gaps', () => {
       expect(result).toEqual({
-        processedGapsCount: 2
+        processedGapsCount: 2,
       });
     });
   });
@@ -178,9 +182,9 @@ describe('processGapsBatch', () => {
 
     it('should return the right count of processed gaps', () => {
       expect(result).toEqual({
-        processedGapsCount: 0
-      })
-    })
+        processedGapsCount: 0,
+      });
+    });
   });
 
   describe('when the caller defines a limit of how many gaps should be processed', () => {
@@ -200,7 +204,7 @@ describe('processGapsBatch', () => {
     });
 
     it('should only schedule for gaps within the count limt', () => {
-      const processedGaps = gapsBatch.slice(0, 2)
+      const processedGaps = gapsBatch.slice(0, 2);
       expect(scheduleBackfillMock).toHaveBeenCalledTimes(1);
       expect(scheduleBackfillMock).toHaveBeenCalledWith(
         context,
@@ -216,8 +220,8 @@ describe('processGapsBatch', () => {
 
     it('should return the right count of processed gaps', () => {
       expect(result).toEqual({
-        processedGapsCount: 2
+        processedGapsCount: 2,
       });
     });
-  })
+  });
 });

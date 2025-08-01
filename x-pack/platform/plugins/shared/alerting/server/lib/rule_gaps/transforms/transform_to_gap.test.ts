@@ -26,7 +26,7 @@ describe('transformToGap', () => {
     },
   };
 
-  const ruleId = 'some-rule-id'
+  const ruleId = 'some-rule-id';
 
   type ResultData = NonNullable<QueryEventsBySavedObjectResult['data'][0]['kibana']>;
   const createMockEvent = (
@@ -52,10 +52,8 @@ describe('transformToGap', () => {
             : validAlertObject,
         },
         rule: {
-          id: Object.prototype.hasOwnProperty.call(overrides, 'ruleId')
-            ? overrides.ruleId
-            : ruleId,
-        }
+          id: Object.prototype.hasOwnProperty.call(overrides, 'ruleId') ? overrides.ruleId : ruleId,
+        },
       },
     ],
     page: 1,
@@ -124,7 +122,7 @@ describe('transformToGap', () => {
           },
         },
       },
-      ruleId: undefined
+      ruleId: undefined,
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);

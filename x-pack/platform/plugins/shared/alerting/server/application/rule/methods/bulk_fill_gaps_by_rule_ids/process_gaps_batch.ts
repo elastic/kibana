@@ -15,11 +15,11 @@ interface ProcessGapsBatchParams {
   rule: { id: string; name: string };
   range: BulkFillGapsByRuleIdsParams['range'];
   gapsBatch: Gap[];
-  maxGapsCountToProcess?: number
+  maxGapsCountToProcess?: number;
 }
 
 interface ProcessGapsBatchResult {
-  processedGapsCount: number
+  processedGapsCount: number;
 }
 
 export const processGapsBatch = async (
@@ -27,42 +27,43 @@ export const processGapsBatch = async (
   { rule, range, gapsBatch, maxGapsCountToProcess }: ProcessGapsBatchParams
 ): Promise<ProcessGapsBatchResult> => {
   const { start, end } = range;
-  let processedGapsCount = 0
+  let processedGapsCount = 0;
   let gapsClampedIntervals = gapsBatch
     .map((gap) => ({
       gap,
       clampedIntervals: clampIntervals(gap.unfilledIntervals, {
         gte: new Date(start),
         lte: new Date(end),
-      })
-    })
-    ).filter(
-      ({ clampedIntervals }) => clampedIntervals.length > 0
-    );
+      }),
+    }))
+    .filter(({ clampedIntervals }) => clampedIntervals.length > 0);
 
   if (maxGapsCountToProcess && maxGapsCountToProcess < gapsClampedIntervals.length) {
-    gapsClampedIntervals = gapsClampedIntervals.slice(0, Math.min(maxGapsCountToProcess, gapsClampedIntervals.length))
+    gapsClampedIntervals = gapsClampedIntervals.slice(
+      0,
+      Math.min(maxGapsCountToProcess, gapsClampedIntervals.length)
+    );
   }
 
-  processedGapsCount += gapsClampedIntervals.length
+  processedGapsCount += gapsClampedIntervals.length;
 
-  const gapsInBackfillScheduling = gapsClampedIntervals.map(({ gap }) => gap)
+  const gapsInBackfillScheduling = gapsClampedIntervals.map(({ gap }) => gap);
 
-  const gapRanges = gapsClampedIntervals.flatMap(
-    ({ clampedIntervals }) => clampedIntervals.map(({ gte, lte }) => ({
+  const gapRanges = gapsClampedIntervals.flatMap(({ clampedIntervals }) =>
+    clampedIntervals.map(({ gte, lte }) => ({
       start: gte.toISOString(),
       end: lte.toISOString(),
     }))
-  )
+  );
 
-  console.log(">> which yields", gapRanges)
+  console.log('>> which yields', gapRanges);
 
   // Rules might have gaps within the range that don't yield any schedulingPayload
   // This can happen when they have gaps that are in an "in progress" state.
   // They are returned still returned by the function that is querying gaps
   if (gapRanges.length === 0) {
     return {
-      processedGapsCount: 0
+      processedGapsCount: 0,
     };
   }
 
@@ -82,6 +83,6 @@ export const processGapsBatch = async (
   }
 
   return {
-    processedGapsCount
+    processedGapsCount,
   };
 };

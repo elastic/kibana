@@ -2642,7 +2642,7 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
       total: 0,
       skipped: 0,
     },
-  } as Awaited<ReturnType<typeof clusterClient.search>>
+  } as Awaited<ReturnType<typeof clusterClient.search>>;
 
   beforeEach(() => {
     clusterClient.openPointInTime.mockResponse({
@@ -2744,12 +2744,14 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     beforeEach(() => {
       clusterClient.search.mockResponseOnce({
         ...defaultSearchResponse,
-        pit_id: 'pit-id-returned-in-search-response'
+        pit_id: 'pit-id-returned-in-search-response',
       });
-    })
+    });
 
     test('should return properly formatted response', async () => {
-      const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+      const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(
+        defaultQuery
+      );
 
       expect(response).toEqual({
         data: [
@@ -2773,7 +2775,7 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
         pit_id: 'pit-id-returned-in-search-response',
       });
     });
-  })
+  });
 });
 
 describe('closePointInTime', () => {

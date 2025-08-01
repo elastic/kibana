@@ -747,15 +747,15 @@ export class ClusterClientAdapter<
     try {
       const {
         hits: { hits, total },
-        pit_id: returnedPit
+        pit_id: returnedPit,
       } = await esClient.search<IValidatedEventInternalDocInfo>({
         ...body,
         track_total_hits: true,
         seq_no_primary_term: true,
       });
 
-      if(returnedPit && returnedPit !== pitId) {
-        pitId = returnedPit
+      if (returnedPit && returnedPit !== pitId) {
+        pitId = returnedPit;
       }
 
       // Get the sort values from the last hit to use as search_after for next page

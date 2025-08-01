@@ -7,12 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import { groupBy } from 'lodash';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
 import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { gapStatus } from '../../../../common/constants';
-import { groupBy } from 'lodash';
 
 interface SoftDeleteGapsParams {
   ruleIds: string[];
@@ -48,13 +48,10 @@ export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
         hasErrors = true;
       }
 
-      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce(
-        (acc, [ruleId, gaps]) => {
-          acc[ruleId] = gaps.length
-          return acc
-        },
-        {} as Record<string, number>
-      )
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce((acc, [ruleId, gaps]) => {
+        acc[ruleId] = gaps.length;
+        return acc;
+      }, {} as Record<string, number>);
     };
 
     await processAllRuleGaps({

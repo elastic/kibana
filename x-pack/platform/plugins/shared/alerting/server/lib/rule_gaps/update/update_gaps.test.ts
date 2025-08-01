@@ -51,13 +51,13 @@ describe('updateGaps', () => {
     },
   ];
 
-  let processGapsBatchResult = {}
+  let processGapsBatchResult = {};
 
   beforeEach(() => {
     jest.resetAllMocks();
     processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch }) => {
-      processGapsBatchResult = await processGapsBatch(gaps)
-      return processGapsBatchResult
+      processGapsBatchResult = await processGapsBatch(gaps);
+      return processGapsBatchResult;
     });
   });
 
@@ -155,9 +155,9 @@ describe('updateGaps', () => {
     describe('processGapsBatch function', () => {
       it('should return a record with the count of processed gaps per rule', () => {
         expect(processGapsBatchResult).toEqual({
-          [ruleId]: 1
-        })
-      })
-    })
+          [ruleId]: 1,
+        });
+      });
+    });
   });
 });

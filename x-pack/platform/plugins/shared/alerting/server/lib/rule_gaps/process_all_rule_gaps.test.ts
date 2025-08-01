@@ -243,16 +243,17 @@ describe('processAllRuleGaps', () => {
     beforeEach(async () => {
       processGapsBatchMock.mockImplementation(async (gaps, limits: Record<string, number>) => {
         const groupedGaps = groupBy(gaps, 'ruleId');
-        const processedGapsCountCurrentIteration: Record<string, number> = {}
+        const processedGapsCountCurrentIteration: Record<string, number> = {};
 
-        Object.keys(groupedGaps).forEach(ruleId => {
-          processedGapsCountCurrentIteration[ruleId] =
-            limits[ruleId] ? Math.min(limits[ruleId], groupedGaps[ruleId].length) : groupedGaps[ruleId].length;
+        Object.keys(groupedGaps).forEach((ruleId) => {
+          processedGapsCountCurrentIteration[ruleId] = limits[ruleId]
+            ? Math.min(limits[ruleId], groupedGaps[ruleId].length)
+            : groupedGaps[ruleId].length;
 
-          processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId]
+          processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId];
         });
 
-        return processedGapsCountCurrentIteration
+        return processedGapsCountCurrentIteration;
       });
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)

@@ -74,7 +74,9 @@ describe('batchBackfillRuleGaps', () => {
   };
 
   beforeEach(() => {
-    processGapsBatchMock.mockImplementation((_, { gapsBatch }) => ({ processedGapsCount: gapsBatch.length }));
+    processGapsBatchMock.mockImplementation((_, { gapsBatch }) => ({
+      processedGapsCount: gapsBatch.length,
+    }));
     processAllRuleGapsMock.mockImplementation(async ({ processGapsBatch: processFn }) => {
       const results: Awaited<ReturnType<typeof processFn>> = [];
       for (const batch of gapsBatches) {
@@ -111,7 +113,7 @@ describe('batchBackfillRuleGaps', () => {
           rule,
           range: backfillingDateRange,
           gapsBatch: batch,
-          maxGapsCountToProcess: 1000
+          maxGapsCountToProcess: 1000,
         });
       });
     });

@@ -82,13 +82,10 @@ export const updateGaps = async (params: UpdateGapsParams) => {
         }
       }
       // Return an object indicating how many gaps were processed per rule id
-      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce(
-        (acc, [ruleId, gaps]) => {
-          acc[ruleId] = gaps.length
-          return acc
-        },
-        {} as Record<string, number>
-      )
+      return Object.entries(groupBy(fetchedGaps, 'ruleId')).reduce((acc, [ruleId, gaps]) => {
+        acc[ruleId] = gaps.length;
+        return acc;
+      }, {} as Record<string, number>);
     };
 
     if (gaps) {
@@ -113,7 +110,8 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     }
   } catch (e) {
     logger.error(
-      `Failed to update gaps for rule ${ruleId} from: ${start.toISOString()} to: ${end.toISOString()}: ${e.message
+      `Failed to update gaps for rule ${ruleId} from: ${start.toISOString()} to: ${end.toISOString()}: ${
+        e.message
       }`
     );
   }
