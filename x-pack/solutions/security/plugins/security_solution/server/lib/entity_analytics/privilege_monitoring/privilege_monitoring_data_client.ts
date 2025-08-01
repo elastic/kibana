@@ -869,7 +869,7 @@ export class PrivilegeMonitoringDataClient {
         );
       }
     } catch (error) {      
-       this.log('error',`Failed to schedule task: ${e.message}`);
+       this.log('error',`Failed to schedule task: ${error.message}`);
       throw error;
     }
 
