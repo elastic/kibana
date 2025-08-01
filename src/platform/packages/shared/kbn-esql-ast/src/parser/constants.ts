@@ -26,6 +26,7 @@ export const TIME_DURATION_UNITS = new Set([
   'minute',
   'minutes',
   'min',
+  'm',
   'hour',
   'hours',
   'h',
