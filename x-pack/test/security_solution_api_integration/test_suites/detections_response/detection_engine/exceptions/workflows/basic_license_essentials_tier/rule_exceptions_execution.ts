@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id: createdId });
         await waitForAlertsToBePresent(supertest, log, 10, [createdId]);
         const alertsOpen = await getAlertsByIds(supertest, log, [createdId]);
-        expect(alertsOpen.hits.hits.length).toEqual(10);
+        expect(alertsOpen.hits.hits).toHaveLength(10);
       });
 
       it('should be able to execute against an exception list that does include valid entries and get back 0 alerts', async () => {
@@ -149,7 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-        expect(alertsOpen.hits.hits.length).toEqual(0);
+        expect(alertsOpen.hits.hits).toHaveLength(0);
       });
 
       it('should be able to execute against an exception list that does include valid case sensitive entries and get back 0 alerts', async () => {
@@ -201,10 +201,10 @@ export default ({ getService }: FtrProviderContext) => {
         const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
         // Expect alerts here because all values are "Ubuntu"
         // and exception is one of ["ubuntu"]
-        expect(alertsOpen.hits.hits.length).toEqual(10);
+        expect(alertsOpen.hits.hits).toHaveLength(10);
         // Expect no alerts here because all values are "Ubuntu"
         // and exception is one of ["ubuntu", "Ubuntu"]
-        expect(alertsOpen2.hits.hits.length).toEqual(0);
+        expect(alertsOpen2.hits.hits).toHaveLength(0);
       });
 
       it('generates no alerts when an exception is added for an EQL rule', async () => {
@@ -223,7 +223,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-        expect(alertsOpen.hits.hits.length).toEqual(0);
+        expect(alertsOpen.hits.hits).toHaveLength(0);
       });
 
       it('generates no alerts when an exception is added for a threshold rule', async () => {
@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-        expect(alertsOpen.hits.hits.length).toEqual(0);
+        expect(alertsOpen.hits.hits).toHaveLength(0);
       });
 
       it('generates no alerts when an exception is added for a threat match rule', async () => {
@@ -288,8 +288,9 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         ]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-        expect(alertsOpen.hits.hits.length).toEqual(0);
+        expect(alertsOpen.hits.hits).toHaveLength(0);
       });
+
       describe('rules with value list exceptions', () => {
         beforeEach(async () => {
           await createListsIndex(supertest, log);
@@ -328,7 +329,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alertsOpen.hits.hits.length).toEqual(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
 
         it('generates no alerts when a value list exception is added for a threat match rule', async () => {
@@ -376,7 +377,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alertsOpen.hits.hits.length).toEqual(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
 
         it('generates no alerts when a value list exception is added for a threshold rule', async () => {
@@ -413,7 +414,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alertsOpen.hits.hits.length).toEqual(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
 
         it('generates no alerts when a value list exception is added for an EQL rule', async () => {
@@ -438,8 +439,9 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           ]);
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alertsOpen.hits.hits.length).toEqual(0);
+          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
+
         it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
           const valueListId = 'value-list-id.txt';
           await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
