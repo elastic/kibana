@@ -100,6 +100,10 @@ export default ({ getService }: FtrProviderContext): void => {
           id: CONNECTOR_ID,
           name: 'test-connector',
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('DOES NOT return an error when rule actions reference a preconfigured connector', async () => {
@@ -141,6 +145,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       /**
@@ -216,6 +224,10 @@ export default ({ getService }: FtrProviderContext): void => {
           id: CONNECTOR_ID,
           name: 'test-connector',
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('returns an error when connector is missing in ndjson', async () => {
@@ -265,6 +277,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
 
@@ -333,6 +349,10 @@ export default ({ getService }: FtrProviderContext): void => {
           id: CONNECTOR_ID,
           name: 'updated-connector',
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('returns an error when connector is missing in ndjson', async () => {
@@ -382,6 +402,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('DOES NOT return an error when rule actions reference a preconfigured connector', async () => {
@@ -423,6 +447,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
   });

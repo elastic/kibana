@@ -75,6 +75,9 @@ export default ({ getService }: FtrProviderContext): void => {
           status_code: 400,
           message: 'Invalid file extension .txt',
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       describe('threshold rule type', () => {
@@ -90,6 +93,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(importResponse.errors[0]).toEqual({
             error: { status_code: 400, message: 'threshold: Required' },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('results in partial success if more than 5 threshold fields', async () => {
@@ -114,6 +120,9 @@ export default ({ getService }: FtrProviderContext): void => {
               status_code: 400,
             },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('results in partial success if threshold value is less than 1', async () => {
@@ -138,6 +147,9 @@ export default ({ getService }: FtrProviderContext): void => {
               status_code: 400,
             },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('results in 400 error if cardinality is also an agg field', async () => {
@@ -167,6 +179,9 @@ export default ({ getService }: FtrProviderContext): void => {
               status_code: 400,
             },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
     });
@@ -195,6 +210,9 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule).toMatchObject(IMPORT_PAYLOAD[0]);
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports a rule with defined optional fields', async () => {
@@ -246,6 +264,9 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             ],
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports rules in bulk', async () => {
@@ -278,6 +299,9 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule2).toMatchObject(IMPORT_PAYLOAD[1]);
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
 
@@ -318,6 +342,9 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           expect(importedRule.actions[0]).toMatchObject(ACTION);
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports multiple rules with action connectors in bulk', async () => {
@@ -515,6 +542,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expected: EXCEPTION_LIST_ITEM,
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports a rule with space agnostic exception', async () => {
@@ -592,6 +622,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expected: SPACE_AGNOSTIC_EXCEPTION_LIST_ITEM,
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports a rule with exception having comments', async () => {
@@ -714,6 +747,9 @@ export default ({ getService }: FtrProviderContext): void => {
               ],
             },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('imports 100 rules with exceptions in bulk', async () => {
@@ -769,6 +805,9 @@ export default ({ getService }: FtrProviderContext): void => {
             exceptions_success: true,
             exceptions_success_count: 150,
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         it('removes non-existent exception list from the imported rule', async () => {
@@ -888,6 +927,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expected: EXCEPTION_LIST_ITEM,
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
 
         /*
@@ -934,6 +976,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expected: EXCEPTION_LIST_ITEM,
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
     };
@@ -1012,7 +1057,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
-
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
           expect(true).toBe(false);
         });
 
@@ -1074,6 +1119,9 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_warnings: [],
             action_connectors_errors: [],
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
     });
@@ -1105,6 +1153,9 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 1,
           rules_count: 2,
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('reports a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {
@@ -1134,6 +1185,9 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 0,
           rules_count: 1,
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('reports a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
@@ -1177,6 +1231,9 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 2,
           rules_count: 3,
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('reports a mix of conflicts and a mix of successes', async () => {
@@ -1234,6 +1291,9 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 1,
           rules_count: 3,
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('reads back a mixed import of different rules even if some cause conflicts', async () => {
@@ -1265,6 +1325,9 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(rule1).toMatchObject(existingRule1);
         expect(rule2).toMatchObject(existingRule2);
         expect(rule3).toMatchObject(ruleToImportSuccessfully);
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('reports a missing connector', async () => {
@@ -1306,6 +1369,9 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_warnings: [],
           action_connectors_errors: [],
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('warns about a missing connector secret', async () => {
@@ -1364,6 +1430,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           action_connectors_errors: [],
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('imports a mix of rules with actions and connectors while some connectors are missing', async () => {
@@ -1439,6 +1508,9 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
 
@@ -1502,6 +1574,9 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(Object.hasOwn(importedRule.threat[0], 'extraField')).toBeFalsy();
         expect(Object.hasOwn(importedRule.threat[0].tactic, 'extraField')).toBeFalsy();
         expect(Object.hasOwn(importedRule.investigation_fields!, 'extraField')).toBeFalsy();
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
 
@@ -1539,6 +1614,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(importedRule.actions[0]).toMatchObject({
             frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1d' },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
 
@@ -1579,6 +1657,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(importedRule.actions[0]).toMatchObject({
             frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1d' },
           });
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+          log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+          expect(true).toBe(false);
         });
       });
     });

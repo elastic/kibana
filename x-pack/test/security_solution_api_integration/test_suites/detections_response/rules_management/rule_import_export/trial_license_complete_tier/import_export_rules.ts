@@ -146,6 +146,10 @@ export default ({ getService }: FtrProviderContext): void => {
             id: `${exceptionItemFind2.comments[0].id}`,
           },
         ]);
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('should be able to reimport a rule referencing a new version of endpoint exception list with existing comments', async () => {
@@ -229,6 +233,10 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ]);
       });
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
 
     describe('Detection Exception', () => {
@@ -319,6 +327,10 @@ export default ({ getService }: FtrProviderContext): void => {
             id: `${exceptionItemFind2.comments[0].id}`,
           },
         ]);
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('should be able to reimport a rule referencing a new version of detection exception list with existing comments', async () => {
@@ -401,6 +413,10 @@ export default ({ getService }: FtrProviderContext): void => {
             id: `${exceptionItemFind2.comments[0].id}`,
           },
         ]);
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
   });

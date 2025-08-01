@@ -127,6 +127,11 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
+    try {
+      throw new Error('MY TEST ERROR');
+    } catch (error) {
+      this.logger.error('THIS IS A THROWN ERROR', error);
+    }
     this.logger.error('THIS IS A TEST ERROR');
     this.logger.warn('THIS IS A TEST WARN');
     this.logger.info('THIS IS A TEST INFO');

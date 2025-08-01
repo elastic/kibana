@@ -77,6 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const sidecarActionsPostResults = await getLegacyActionSO(es);
 
       expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
 
     describe('importing rules with different roles', () => {
@@ -110,6 +114,10 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('should NOT import rules with actions when user has "read" actions privileges', async () => {
@@ -180,6 +188,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('should NOT import rules with actions when a user has no actions privileges', async () => {
@@ -250,6 +262,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           action_connectors_warnings: [],
         });
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
 
@@ -291,6 +307,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule.id
         );
         expect(isInvestigationFieldMigratedInSo).toBeTruthy();
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('imports rule with investigation fields as empty array', async () => {
@@ -330,6 +350,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule.id
         );
         expect(isInvestigationFieldMigratedInSo).toBeTruthy();
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
 
       it('imports rule with investigation fields as intended object type', async () => {
@@ -366,6 +390,10 @@ export default ({ getService }: FtrProviderContext): void => {
           rule.id
         );
         expect(isInvestigationFieldIntendedTypeInSo).toBeTruthy();
+
+        log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+        log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+        expect(true).toBe(false);
       });
     });
   });
