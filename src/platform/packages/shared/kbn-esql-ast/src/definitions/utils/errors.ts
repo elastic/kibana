@@ -175,6 +175,17 @@ Expected one of:
           }
         ),
       };
+    case 'functionNotAllowedHere':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
+          defaultMessage: 'Function [{name}] not allowed in [{locationName}]',
+          values: {
+            locationName: out.locationName.toUpperCase(),
+            name: out.name.toUpperCase(),
+          },
+        }),
+      };
+
     case 'fnUnsupportedAfterCommand':
       return {
         type: 'error',
@@ -366,8 +377,8 @@ Expected one of:
         message: i18n.translate('kbn-esql-ast.esql.validation.licenseRequired', {
           defaultMessage: '{name} requires a {requiredLicense} license.',
           values: {
-            name: out.name,
-            requiredLicense: out.requiredLicense,
+            name: out.name.toUpperCase(),
+            requiredLicense: out.requiredLicense.toUpperCase(),
           },
         }),
       };
@@ -493,7 +504,13 @@ export const errors = {
 
   licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>
     errors.byId('licenseRequired', fn.location, {
-      name: fn.name.toUpperCase(),
+      name: fn.name,
       requiredLicense: license,
+    }),
+
+  functionNotAllowedHere: (fn: ESQLFunction, locationName: string): ESQLMessage =>
+    errors.byId('functionNotAllowedHere', fn.location, {
+      name: fn.name,
+      locationName,
     }),
 };

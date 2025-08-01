@@ -17,7 +17,7 @@ import {
   ESQLLiteral,
   ESQLParamLiteral,
 } from '../../../types';
-import { isAssignment, isInlineCast } from '../../../ast/is';
+import { isAssignment, isInlineCast, isOptionNode } from '../../../ast/is';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
 import {
   FunctionParameter,
@@ -55,6 +55,8 @@ import {
   isParametrized,
 } from '../../../ast/is';
 import { ICommandContext } from '../../../commands_registry/types';
+import { Walker } from '@kbn/esql-ast/src/walker';
+import { within } from '@kbn/esql-ast';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -323,7 +325,7 @@ export function validateFunction({
   callbacks,
 }: {
   fn: ESQLFunction;
-  parentCommand: string;
+  parentCommand: ESQLCommand;
   context: ICommandContext;
   callbacks: ICommandCallbacks;
 }): ESQLMessage[] {
@@ -357,7 +359,12 @@ export function validateFunction({
     callbacks.hasMinimumLicenseRequired &&
     !callbacks.hasMinimumLicenseRequired(definition.license.toLowerCase() as ESQLLicenseType)
   ) {
-    return [errors.licenseRequired(fn, definition.license)];
+    return [errors.licenseRequired(fn, definition.license)]; // TODO - maybe don't end validation here
+  }
+
+  const { displayName, location } = getFunctionLocation(fn, parentCommand);
+  if (!definition.locationsAvailable.includes(location)) {
+    return [errors.functionNotAllowedHere(fn, displayName)];
   }
 
   const argTypes = fn.args.map((node) =>
@@ -378,6 +385,19 @@ export function validateFunction({
   }
 
   return [];
+}
+
+/**
+ * Identifies the location ID of the function's position
+ */
+export function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
+  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
+
+  const displayName = (option ?? parentCommand).name;
+
+  const location = getLocationFromCommandOrOptionName(displayName);
+
+  return { location, displayName };
 }
 
 /**

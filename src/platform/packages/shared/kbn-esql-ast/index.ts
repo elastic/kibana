@@ -32,6 +32,7 @@ export type {
 } from './src/types';
 
 export * from './src/ast/is';
+export * from './src/ast/location';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 

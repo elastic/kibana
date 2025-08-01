@@ -41,7 +41,7 @@ export const validateCommandArguments = (
         messages.push(
           ...validate({
             fn: arg,
-            parentCommand: command.name,
+            parentCommand: command,
             parentOption: undefined,
             context,
             callbacks,

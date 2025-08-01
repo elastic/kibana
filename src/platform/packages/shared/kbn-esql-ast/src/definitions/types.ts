@@ -302,6 +302,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; command: string; option: string };
   };
+  functionNotAllowedHere: {
+    message: string;
+    type: { name: string; locationName: string };
+  };
   unsupportedLiteralOption: {
     message: string;
     type: { name: string; value: string; supportedOptions: string };
