@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('adds a test private location', async () => {
-      await testPrivateLocations.addPrivateLocation();
+      await testPrivateLocations.createPrivateLocation();
     });
 
     it('list all locations', async () => {
