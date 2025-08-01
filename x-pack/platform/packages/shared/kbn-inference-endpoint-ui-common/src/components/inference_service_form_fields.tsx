@@ -521,7 +521,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             isPreconfigured={isPreconfigured}
             isInternalProvider={isInternalProvider}
           />
-          <EuiSpacer size="m" />
+          {/* <EuiSpacer size="m" />
           <AdditionalOptionsFields
             config={config}
             optionalProviderFormFields={optionalProviderFormFields}
@@ -542,7 +542,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             providerSchema={providerSchema}
             setRequiredProviderFormFields={setRequiredProviderFormFields}
             isSubmitting={isSubmitting}
-          />
+          /> */}
         </>
       ) : null}
     </>

@@ -258,7 +258,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   data-test-subj="inference-endpoint-input-field"
                   fullWidth
                   disabled={isEdit}
-                  value={config.inferenceId}
+                  value={config?.inferenceId}
                   onChange={(e) => {
                     setFieldValue('config.inferenceId', e.target.value);
                   }}
