@@ -22,5 +22,13 @@ export interface LayoutBannerProps {
  * @returns The rendered LayoutBanner component.
  */
 export const LayoutBanner = ({ children }: LayoutBannerProps) => {
-  return <section css={styles.root}>{children}</section>;
+  return (
+    <section
+      css={styles.root}
+      className="kbnChromeLayoutBanner"
+      data-test-subj="kbnChromeLayoutBanner"
+    >
+      {children}
+    </section>
+  );
 };

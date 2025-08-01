@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       findings = pageObjects.findings;
       await findings.index.remove();
 
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     afterEach(async () => {
@@ -96,8 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220379
-    describe.skip('Rules Page - Bulk Action buttons', () => {
+    describe('Rules Page - Bulk Action buttons', () => {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
@@ -156,8 +155,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/220371
-    describe.skip('Rules Page - Flyout', () => {
+    describe('Rules Page - Flyout', () => {
       it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
         // Ensure that the first rule is enabled
         await rule.rulePage.togglEnableRulesRowSwitchButton(0, 'enable');

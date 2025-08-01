@@ -35,7 +35,6 @@ import type {
   CoreStart,
   Plugin,
   ApplicationStart,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -89,7 +88,6 @@ import {
   setCapabilities,
   setHttp,
   setSearch,
-  setSavedObjects,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -162,7 +160,6 @@ export interface VisualizationsStartDeps {
   application: ApplicationStart;
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -333,7 +330,7 @@ export class VisualizationsPlugin
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize Library',
+      title: 'Visualize library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -437,7 +434,7 @@ export class VisualizationsPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize Library',
+        title: 'Visualize library',
         description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -507,7 +504,7 @@ export class VisualizationsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Visualize Library',
+      name: 'Visualize library',
     });
 
     return {
@@ -543,7 +540,6 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);
     setExpressions(expressions);
