@@ -14,9 +14,8 @@ export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
 
 export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
 
-// @TODO dedupe with src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts
 // FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
-export const TIME_DURATION_UNITS = [
+export const TIME_DURATION_UNITS = new Set([
   'MILLISECOND',
   'MILLISECONDS',
   'MS',
@@ -30,4 +29,24 @@ export const TIME_DURATION_UNITS = [
   'HOUR',
   'HOURS',
   'H',
-];
+]);
+
+// FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
+export const DATE_PERIOD_UNITS = new Set([
+  'YEAR',
+  'YEARS',
+  'YR',
+  'Y',
+  'QUARTER',
+  'QUARTERS',
+  'Q',
+  'MONTH',
+  'MONTHS',
+  'MO',
+  'WEEK',
+  'WEEKS',
+  'W',
+  'DAY',
+  'DAYS',
+  'D',
+]);

@@ -2344,7 +2344,7 @@ export class CstToAstConverter {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
     const parserFields = this.createParserFields(ctx);
-    const builderMethod = TIME_DURATION_UNITS.some((u) => u === unit.toUpperCase())
+    const builderMethod = TIME_DURATION_UNITS.has(unit.toUpperCase())
       ? Builder.expression.literal.timeDuration
       : Builder.expression.literal.datePeriod;
 
