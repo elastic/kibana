@@ -51,8 +51,6 @@ import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
-import { registerTestHealthDiagnosticRoute } from '../lib/telemetry/routes';
-import type { HealthDiagnosticService } from '../lib/telemetry/diagnostic/health_diagnostic_service.types';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -70,8 +68,7 @@ export const initRoutes = (
   previewTelemetryReceiver: ITelemetryReceiver,
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
-  endpointContext: EndpointAppContext,
-  healthDiagnostic: HealthDiagnosticService
+  endpointContext: EndpointAppContext
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -139,7 +136,4 @@ export const initRoutes = (
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
   registerAssetInventoryRoutes({ router, logger });
-
-  // TODO: just to test the PR, remove
-  registerTestHealthDiagnosticRoute(router, logger, healthDiagnostic);
 };
