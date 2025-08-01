@@ -22,7 +22,7 @@ interface QueryParams {
   from?: number;
   to?: number;
   name?: string;
-  schema?: DataSchemaFormat;
+  schema?: DataSchemaFormat | null;
 }
 
 export const useAssetDetailsRedirect = () => {
