@@ -1675,25 +1675,30 @@ class AgentPolicyService {
     }
   }
 
-  public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
-    const res = await esClient.search<FleetServerPolicy>({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      rest_total_hits_as_int: true,
-      query: {
-        term: {
-          policy_id: agentPolicyId,
-        },
-      },
-      size: 1,
-      sort: [{ revision_idx: { order: 'desc' } }],
-    });
-
-    if ((res.hits.total as number) === 0) {
-      return null;
+  public async getLatestFleetPolicy(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ): Promise<FleetServerPolicy | null> {
+    try {
+      const esqlQuery = `FROM ${AGENT_POLICY_INDEX} METADATA _source
+  | WHERE policy_id == "${agentPolicyId}"
+  | SORT @timestamp DESC 
+  | KEEP _source
+  | LIMIT 1`;
+      const res = await esClient.esql.query({
+        query: esqlQuery,
+      });
+      if (res.values.length === 0) {
+        return null;
+      }
+      return res.values[0][0] as any;
+    } catch (err) {
+      if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+        return null;
+      } else {
+        throw err;
+      }
     }
-
-    return res.hits.hits[0]._source;
   }
 
   public async getFullAgentConfigMap(
