@@ -210,7 +210,6 @@ export class AgentlessConnectorsInfraService {
     };
 
     const packagePolicyToCreate = {
-      policy_ids: [],
       package: {
         title: pkgTitle,
         name: pkgName,
