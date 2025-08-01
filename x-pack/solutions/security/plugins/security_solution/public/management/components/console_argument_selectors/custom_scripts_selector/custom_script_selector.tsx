@@ -51,7 +51,7 @@ const TOOLTIP_TEXT = i18n.translate(
 /**
  * State for the custom script selector component
  */
-interface CustomScriptSelectorState {
+export interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
   selectedOption: ResponseActionScript | undefined;
 }

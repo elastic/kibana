@@ -632,7 +632,7 @@ const adjustCommandsForSentinelOne = ({
           ...commandCommentArgument(),
         };
         command.validate = (enteredCommand) => {
-          // FIXME:PT implement
+          // FIXME:PT implement validation once API returns specific data for S1
           // Ensure that `script` value is a valid script ID from the list retrieved?
           return true;
         };
