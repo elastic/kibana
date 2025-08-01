@@ -19,6 +19,7 @@ import { defer, from, throwError } from 'rxjs';
 import { combineSignal } from './combine_signal';
 import { InferenceCliClientOptions } from './types';
 
+// @ts-expect-error typescript upgrade v5.4.5
 export function createPrompt(options: InferenceCliClientOptions): BoundPromptAPI;
 
 export function createPrompt({ connector, kibanaClient, signal }: InferenceCliClientOptions) {
@@ -43,8 +44,8 @@ export function createPrompt({ connector, kibanaClient, signal }: InferenceCliCl
       retryConfiguration:
         retryConfiguration && typeof retryConfiguration.retryOn === 'string'
           ? {
-              retryOn: retryConfiguration.retryOn,
-            }
+            retryOn: retryConfiguration.retryOn,
+          }
           : undefined,
       prompt,
       input,
