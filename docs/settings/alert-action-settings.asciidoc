@@ -73,7 +73,7 @@ xpack.actions.customHostSettings:
           -----END CERTIFICATE-----
     smtp:
       requireTLS: true
-  - url: https://webhook.example.com
+  - url: <WEBHOOK_URL>
     ssl:
       verificationMode: 'none'
 --
@@ -286,7 +286,7 @@ A configuration URL that varies by connector:
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
-* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
+* For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL.
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
 * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>> specifies the ServiceNow instance URL.
 * For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
