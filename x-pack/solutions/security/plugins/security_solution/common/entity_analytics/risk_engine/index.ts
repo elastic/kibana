@@ -8,7 +8,7 @@
 export * from './risk_weights';
 export * from './range';
 export * from './risk_levels';
-export * from './types';
+export type * from './types';
 export * from './indices';
 export * from './constants';
 export * from './privileges';
