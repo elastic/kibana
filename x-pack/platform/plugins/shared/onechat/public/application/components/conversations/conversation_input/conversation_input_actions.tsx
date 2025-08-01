@@ -8,8 +8,8 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useConversation } from '../../../hooks/use_conversation';
+import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
+import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
 
@@ -22,12 +22,9 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
   handleSubmit,
   submitDisabled,
 }) => {
-  const {
-    conversation,
-    hasActiveConversation,
-    actions: { setAgentId },
-  } = useConversation();
-  const agentId = conversation?.agent_id ?? oneChatDefaultAgentId;
+  const { setAgentId } = useConversationActions();
+  const agentId = useAgentId();
+  const hasActiveConversation = useHasActiveConversation();
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
