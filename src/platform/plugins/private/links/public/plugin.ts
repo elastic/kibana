@@ -92,7 +92,7 @@ export class LinksPlugin
 
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
-        name: LINKS_SAVED_OBJECT_TYPE,
+        name: CONTENT_ID,
         title: APP_NAME,
         icon: APP_ICON,
         description: i18n.translate('links.description', {
@@ -101,7 +101,7 @@ export class LinksPlugin
         stage: 'production',
         appExtensions: {
           visualizations: {
-            docTypes: [LINKS_SAVED_OBJECT_TYPE],
+            docTypes: [CONTENT_ID],
             searchFields: ['title^3'],
             client: getLinksClient,
             toListItem(
