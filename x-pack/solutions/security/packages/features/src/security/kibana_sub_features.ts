@@ -191,7 +191,7 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
     'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.description',
     {
       defaultMessage:
-        "Extend Elastic Defend's protection against malicious processes and protect against potentially harmful applications.",
+        'Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
     }
   ),
   privilegeGroups: [
