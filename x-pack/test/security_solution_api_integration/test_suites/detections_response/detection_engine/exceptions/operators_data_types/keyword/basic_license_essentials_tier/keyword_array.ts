@@ -35,12 +35,14 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type keyword array', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/keyword_as_array'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_exceptions/keyword_as_array'
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/keyword_as_array'
       );
     });
 
