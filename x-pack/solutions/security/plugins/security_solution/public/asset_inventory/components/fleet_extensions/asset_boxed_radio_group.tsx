@@ -16,6 +16,7 @@ export interface AssetRadioGroupProps {
   onChange(id: string): void;
   idSelected: string;
   size?: 's' | 'm';
+  name?: string;
 }
 
 export interface AssetRadioOption {
@@ -26,7 +27,6 @@ export interface AssetRadioOption {
   tooltip?: string;
   isBeta?: boolean;
   testId?: string;
-  name?: string;
 }
 
 export const RadioGroup = ({
