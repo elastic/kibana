@@ -21,7 +21,7 @@ import {
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
@@ -97,7 +97,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   // These are the columns that are currently rendered in the grid.
-  // The columns data is taken from the props.columns.
+  // The columns data is taken from the props.columns. It has all the available columns, including placeholders.
   // The order of the columns is determined by the activeColumns state.
   const renderedColumns = useMemo(() => {
     // Filter the columns that are currently hidden
@@ -120,14 +120,16 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       });
     }
 
-    // Columns are not updated in the grid when the columns prop changes,
-    // so we need to update the activeColumns state by our own.
-    if (!isEqual(preservedOrder, activeColumns)) {
-      setActiveColumns(preservedOrder);
-    }
-
     return preservedOrder;
   }, [props.columns, activeColumns]);
+
+  useEffect(() => {
+    // Ensure that the activeColumns state is always in sync with the rendered columns
+    // This is necessary because DataTable onSetColumns method is not updated when new columns are added.
+    if (!isEqual(activeColumns, renderedColumns)) {
+      setActiveColumns(renderedColumns);
+    }
+  }, [renderedColumns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
