@@ -16,6 +16,7 @@ import type { Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
@@ -24,7 +25,6 @@ import type {
   AppPluginStartDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
-import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 
 export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
