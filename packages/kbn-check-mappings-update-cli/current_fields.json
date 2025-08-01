@@ -375,6 +375,15 @@
     "verification_status",
     "version"
   ],
+  "epm-packages-assets": [
+    "asset_path",
+    "data_base64",
+    "data_utf8",
+    "install_source",
+    "media_type",
+    "package_name",
+    "package_version"
+  ],
   "event-annotation-group": [
     "description",
     "title"
