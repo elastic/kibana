@@ -605,6 +605,8 @@ export const OnechatTools = () => {
     closeFlyout: closeCreateToolFlyout,
     submit: createTool,
     isSubmitting: isCreatingTool,
+    isLoading: isLoadingSourceTool,
+    tool: sourceTool,
   } = useCreateToolFlyout({
     onSuccess: handleCreateSuccess,
     onError: handleCreateError,
@@ -674,9 +676,9 @@ export const OnechatTools = () => {
         deleteTool,
         editTool: openEditToolFlyout,
         testTool: noop, // TODO: Integrate tool testing flyout
-        cloneTool: noop, // TODO: Integrate tool cloning
+        cloneTool: openCreateToolFlyout,
       }),
-    [deleteTool, openEditToolFlyout]
+    [deleteTool, openEditToolFlyout, openCreateToolFlyout]
   );
 
   const deleteEsqlToolTitleId = useGeneratedHtmlId({
@@ -795,7 +797,7 @@ export const OnechatTools = () => {
             key="new-esql-tool-button"
             fill
             iconType="plusInCircleFilled"
-            onClick={openCreateToolFlyout}
+            onClick={() => openCreateToolFlyout()}
           >
             <EuiText size="s">
               {i18n.translate('xpack.onechat.tools.newToolButton', {
@@ -876,10 +878,10 @@ export const OnechatTools = () => {
           isOpen={isEditToolFlyoutOpen || isCreateToolFlyoutOpen}
           onClose={isEditingTool ? closeEditToolFlyout : closeCreateToolFlyout}
           mode={isEditingTool ? OnechatEsqlToolFlyoutMode.Edit : OnechatEsqlToolFlyoutMode.Create}
-          tool={editingTool}
+          tool={isEditingTool ? editingTool : sourceTool}
           submit={isEditingTool ? handleUpdateTool : handleCreateTool}
           isSubmitting={isEditingTool ? isUpdatingTool : isCreatingTool}
-          isLoading={isEditingTool ? isLoadingEditTool : false}
+          isLoading={isEditingTool ? isLoadingEditTool : isLoadingSourceTool}
         />
         {isDeleteModalOpen && (
           <EuiConfirmModal
