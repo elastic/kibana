@@ -39,8 +39,6 @@ export class ProductInterceptServerPlugin
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly buildVersion: string;
-  private readonly upgradeInterceptInterval: string = '7d';
-  private readonly trialInterceptInterval: string = '7d';
   private trialEndDate?: Date;
 
   constructor(initContext: PluginInitializerContext<unknown>) {
@@ -66,7 +64,7 @@ export class ProductInterceptServerPlugin
         `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
         () => {
           this.logger.debug('Registering global product upgrade intercept trigger definition');
-          return { triggerAfter: this.upgradeInterceptInterval, isRecurrent: false };
+          return { triggerAfter: this.config.upgradeInterceptInterval, isRecurrent: false };
         }
       );
 
@@ -75,7 +73,7 @@ export class ProductInterceptServerPlugin
         void intercepts.registerTriggerDefinition?.(TRIAL_TRIGGER_DEF_ID, () => {
           this.logger.debug('Registering global product trial intercept trigger definition');
           return {
-            triggerAfter: this.trialInterceptInterval,
+            triggerAfter: this.config.trialInterceptInterval,
             isRecurrent: false,
           };
         });

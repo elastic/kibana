@@ -14,7 +14,7 @@ import type { PluginConfigDescriptor, ExposedToBrowserDescriptor } from '@kbn/co
  */
 export const configSchema = schema.object({
   /**
-   * Whether the product intercept orchestration is enabled.
+   * Denotes whether the product intercept orchestration is enabled.
    * It's worth noting that if the intercept plugin is disabled this setting will have no effect.
    */
   enabled: schema.boolean({
@@ -22,6 +22,22 @@ export const configSchema = schema.object({
   }),
   interval: schema.string({
     defaultValue: '90d',
+    validate(value) {
+      if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
+        return 'must be a supported duration string';
+      }
+    },
+  }),
+  trialInterceptInterval: schema.string({
+    defaultValue: '7d',
+    validate(value) {
+      if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
+        return 'must be a supported duration string';
+      }
+    },
+  }),
+  upgradeInterceptInterval: schema.string({
+    defaultValue: '7d',
     validate(value) {
       if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
         return 'must be a supported duration string';
