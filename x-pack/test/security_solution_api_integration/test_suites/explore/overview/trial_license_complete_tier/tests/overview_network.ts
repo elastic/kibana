@@ -25,10 +25,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/filebeat/default');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+        async () =>
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/filebeat/default')
       );
 
       const FROM = '2000-01-01T00:00:00.000Z';
@@ -69,11 +70,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/overview'
+        );
       });
       after(
         async () =>
-          await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview')
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/packetbeat/overview'
+          )
       );
 
       const FROM = '2000-01-01T00:00:00.000Z';
@@ -113,10 +118,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/overview');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview')
+        async () =>
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/overview')
       );
 
       const FROM = '2000-01-01T00:00:00.000Z';

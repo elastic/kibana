@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       function getChildNames(stream: Streams.all.Definition): string[] {
         if (
           Streams.GroupStream.Definition.is(stream) ||
-          Streams.UnwiredStream.Definition.is(stream)
+          Streams.ClassicStream.Definition.is(stream)
         )
           return [];
         return stream.ingest.wired.routing.map((r) => r.destination);
