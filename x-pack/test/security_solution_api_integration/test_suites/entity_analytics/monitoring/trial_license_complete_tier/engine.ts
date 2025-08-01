@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         await enablePrivmonSetting(kibanaServer);
         await enablePrivmonSetting(kibanaServer, customSpace);
         await api.initMonitoringEngine();
-        await api.initMonitoringEngine({ kibanaSpace: customSpace });
+        await api.initMonitoringEngine(customSpace);
       });
 
       after(async () => {
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         await enablePrivmonSetting(kibanaServer);
         await enablePrivmonSetting(kibanaServer, customSpace);
         await api.deleteMonitoringEngine({ query: { data: true } });
-        await api.deleteMonitoringEngine({ query: { data: true }, kibanaSpace: customSpace });
+        await api.deleteMonitoringEngine({ query: { data: true } }, customSpace);
       });
 
       it('should disable the privilege monitoring engine in default space', async () => {
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         log.info('Cleaning up after test in custom space');
         try {
-          await api.deleteMonitoringEngine({ query: { data: true }, kibanaSpace: customSpace });
+          await api.deleteMonitoringEngine({ query: { data: true } }, customSpace);
         } catch (err) {
           log.warning(`Failed to clean up in afterEach for custom space: ${err.message}`);
         }
