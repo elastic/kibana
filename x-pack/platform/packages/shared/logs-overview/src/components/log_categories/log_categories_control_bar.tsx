@@ -8,30 +8,10 @@
 import React from 'react';
 import { ControlBar, ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
 
+// For now it's conincidentally the same control bar, but the planned designs
+// indicate that it will diverge in the future
 export type LogCategoriesControlBarProps = ControlBarProps;
 
 export type LogCategoriesControlBarDependencies = ControlBarDependencies;
 
-export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = React.memo(
-  ({
-    dependencies,
-    documentFilters,
-    logsSource,
-    timeRange,
-    grouping,
-    groupingCapabilities,
-    onChangeGrouping,
-  }) => {
-    return (
-      <ControlBar
-        dependencies={dependencies}
-        documentFilters={documentFilters}
-        logsSource={logsSource}
-        timeRange={timeRange}
-        grouping={grouping}
-        groupingCapabilities={groupingCapabilities}
-        onChangeGrouping={onChangeGrouping}
-      />
-    );
-  }
-);
+export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = ControlBar;

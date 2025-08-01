@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ISearchGeneric } from '@kbn/search-types';
 import React, { CSSProperties } from 'react';
 import {
   LogEventsControlBar,
@@ -20,12 +19,13 @@ import {
 } from './log_events_result_content';
 
 export type LogEventsProps = LogEventsControlBarProps &
-  LogEventsContentProps & {
+  LogEventsResultContentProps & {
     dependencies: LogEventsDependencies;
     height?: CSSProperties['height'];
   };
 
-export type LogEventsDependencies = LogEventsControlBarDependencies & LogEventsContentDependencies;
+export type LogEventsDependencies = LogEventsControlBarDependencies &
+  LogEventsResultContentDependencies;
 
 export const LogEvents = React.memo<LogEventsProps>(
   ({
@@ -57,7 +57,7 @@ export const LogEvents = React.memo<LogEventsProps>(
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <LogEventsContent
+          <LogEventsResultContent
             dependencies={dependencies}
             documentFilters={documentFilters}
             logsSource={logsSource}
@@ -65,27 +65,6 @@ export const LogEvents = React.memo<LogEventsProps>(
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }
-);
-
-export type LogEventsContentProps = LogEventsResultContentProps & {
-  dependencies: LogEventsContentDependencies;
-};
-
-export type LogEventsContentDependencies = LogEventsResultContentDependencies & {
-  search: ISearchGeneric;
-};
-
-export const LogEventsContent = React.memo<LogEventsContentProps>(
-  ({ dependencies, documentFilters, logsSource, timeRange }) => {
-    return (
-      <LogEventsResultContent
-        dependencies={dependencies}
-        documentFilters={documentFilters}
-        logsSource={logsSource}
-        timeRange={timeRange}
-      />
     );
   }
 );
