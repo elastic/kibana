@@ -202,7 +202,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
                     />,
                   ]}
                   ariaLabel={i18n.translate('xpack.ml.overview.nodesPanel.ariaLabel', {
-                    defaultMessage: 'overview panel',
+                    defaultMessage: 'Nodes panel',
                   })}
                 >
                   <NodesList />
