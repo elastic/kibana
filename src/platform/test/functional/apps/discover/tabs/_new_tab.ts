@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
-      expect(await esql.getEsqlEditorQuery()).to.be('FROM logsta* | LIMIT 10'); // TODO: it should account for the query too
+      expect(await esql.getEsqlEditorQuery()).to.be('FROM logsta* | LIMIT 10');
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
