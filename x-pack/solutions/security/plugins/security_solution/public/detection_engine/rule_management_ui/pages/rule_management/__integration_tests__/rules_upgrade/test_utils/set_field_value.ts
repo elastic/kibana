@@ -268,7 +268,7 @@ async function inputSeverityMapping(
 async function inputRiskScore(fieldFinalSide: HTMLElement, value: number): Promise<void> {
   await act(async () => {
     // EuiRange is used for Risk Score
-    const [riskScoreInput] = within(fieldFinalSide).getAllByTestId(
+    const [, riskScoreInput] = within(fieldFinalSide).getAllByTestId(
       'defaultRiskScore-defaultRiskRange'
     );
 
@@ -707,9 +707,9 @@ async function inputAnomalyThreshold(
 ): Promise<void> {
   await act(async () => {
     // EuiRange is used for anomaly threshold
-    const [riskScoreInput] = within(fieldFinalSide).getAllByTestId('anomalyThresholdRange');
+    const [, input] = within(fieldFinalSide).getAllByTestId('anomalyThresholdRange');
 
-    fireEvent.change(riskScoreInput, {
+    fireEvent.change(input, {
       target: { value },
     });
   });
