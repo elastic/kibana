@@ -3234,11 +3234,13 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
-        "id": "def-common.EVENT_FILTERS_OPERATORS",
+        "id": "def-common.ENDPOINT_ARTIFACT_OPERATORS",
         "type": "Array",
         "tags": [],
-        "label": "EVENT_FILTERS_OPERATORS",
-        "description": [],
+        "label": "ENDPOINT_ARTIFACT_OPERATORS",
+        "description": [
+          "\nOperators valid for event filters, trusted apps and endpoint exceptions"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/securitysolution-list-utils",

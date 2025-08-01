@@ -59,7 +59,10 @@ import {
   MANUAL_RULE_RUN_ACTION_BTN,
   RULE_DETAILS_REVERT_RULE_BTN,
 } from '../screens/alerts_detection_rules';
-import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
+import type {
+  RULES_MONITORING_TABLE,
+  RULES_UPDATES_TABLE,
+} from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
   MODIFIED_PREBUILT_RULE_BADGE,
@@ -394,7 +397,10 @@ export const expectNoFilterByEnabledOrDisabledRules = () => {
 };
 
 export const expectNumberOfRules = (
-  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE,
   expectedNumber: number
 ) => {
   cy.log(`Expecting rules table to contain #${expectedNumber} rules`);
@@ -402,7 +408,10 @@ export const expectNumberOfRules = (
 };
 
 export const expectToContainRule = (
-  tableSelector: typeof RULES_MANAGEMENT_TABLE | typeof RULES_MONITORING_TABLE,
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE,
   ruleName: string
 ) => {
   cy.log(`Expecting rules table to contain '${ruleName}'`);
@@ -435,6 +444,20 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
 
   for (const ruleName of ruleNames) {
     expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
+  }
+};
+
+export const expectRulesInTable = (
+  tableSelector:
+    | typeof RULES_MANAGEMENT_TABLE
+    | typeof RULES_MONITORING_TABLE
+    | typeof RULES_UPDATES_TABLE,
+  ruleNames: string[]
+): void => {
+  expectNumberOfRules(tableSelector, ruleNames.length);
+
+  for (const ruleName of ruleNames) {
+    expectToContainRule(tableSelector, ruleName);
   }
 };
 

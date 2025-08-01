@@ -21,6 +21,7 @@ const examplesLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.examplesLab
 export const buildFunctionDocumentation = (
   signatures: Array<{
     declaration: string;
+    license?: string;
   }>,
   examples: string[] | undefined
 ) => `
@@ -29,9 +30,9 @@ export const buildFunctionDocumentation = (
 ***${declarationLabel}***
 ${signatures
   .map(
-    ({ declaration }) => `
+    ({ declaration, license }) => `
 \
-  - \`\`${declaration}\`\`
+  - \`\`${declaration}\`\`${license || ''}\
 \
 `
   )
@@ -49,7 +50,7 @@ ${signatures
 `
     )
     .join('')}
-  
+
 `
       : ''
   }`;

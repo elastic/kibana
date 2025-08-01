@@ -9,4 +9,4 @@
 
 export * from './cm_services';
 export * from './transform_utils';
-export * from './types';
+export type * from './types';

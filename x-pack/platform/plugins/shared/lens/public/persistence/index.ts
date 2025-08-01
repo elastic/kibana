@@ -6,4 +6,4 @@
  */
 
 export * from './lens_document_service';
-export * from './types';
+export type * from './types';

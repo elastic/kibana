@@ -39,9 +39,7 @@ import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/229861
-// Failing: See https://github.com/elastic/kibana/issues/229860
-describe.skip(
+describe(
   'Machine Learning Detection Rules - Alert suppression',
   {
     tags: ['@ess', '@serverless'],
@@ -84,7 +82,7 @@ describe.skip(
 
       describe('when ML jobs have run', () => {
         before(() => {
-          cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+          cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
@@ -92,7 +90,7 @@ describe.skip(
 
         after(() => {
           cy.task('esArchiverUnload', { archiveName: 'anomalies', type: 'ftr' });
-          cy.task('esArchiverUnload', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+          cy.task('esArchiverUnload', { archiveName: 'auditbeat/hosts', type: 'platform' });
         });
 
         describe('when not all jobs are running', () => {

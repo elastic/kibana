@@ -15,7 +15,7 @@ import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plug
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
-export * from './url';
+export type * from './url';
 
 export interface CsvMetrics {
   rows: number;
