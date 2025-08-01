@@ -8,6 +8,7 @@
 import { mockAvailableDataViews } from '../../test_utils/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
+import { assertDiffAfterSavingUnchangedValue } from '../../test_utils/assert_diff_after_saving_unchanged_value';
 
 describe('Upgrade diffable rule "new_terms_fields" (new_terms rule type) after preview in flyout', () => {
   beforeAll(() => {
@@ -41,6 +42,14 @@ describe('Upgrade diffable rule "new_terms_fields" (new_terms rule type) after p
     },
   });
 
+  assertDiffAfterSavingUnchangedValue({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      upgrade,
+    },
+  });
   assertRuleUpgradeAfterReview({
     ruleType,
     fieldName,
