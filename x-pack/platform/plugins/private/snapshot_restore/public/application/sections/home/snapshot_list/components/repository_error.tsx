@@ -37,7 +37,7 @@ export const RepositoryError = ({ errorMessage }: RepositoryErrorProps) => {
           <br />
           <FormattedMessage
             id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-            defaultMessage="Go to {repositoryLink} to fix the errors or select another repository from the filter above."
+            defaultMessage="Go to {repositoryLink} to fix the errors or select another repository."
             values={{
               repositoryLink: (
                 <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
