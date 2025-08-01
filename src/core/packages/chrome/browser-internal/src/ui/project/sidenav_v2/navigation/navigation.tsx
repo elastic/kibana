@@ -329,7 +329,7 @@ export const toNavigationItems = (
 function warnIfMissing<T extends { id: string }, K extends keyof T>(
   obj: T | null | undefined,
   key: K,
-  fallback: T[K]
+  fallback: NonNullable<T[K]>
 ): NonNullable<T[K]> {
   const value = obj?.[key];
   if (value === undefined || value === null) {
@@ -340,7 +340,7 @@ function warnIfMissing<T extends { id: string }, K extends keyof T>(
     );
     return fallback;
   }
-  return value;
+  return value as NonNullable<T[K]>;
 }
 
 const warnedMessages = new Set<string>();

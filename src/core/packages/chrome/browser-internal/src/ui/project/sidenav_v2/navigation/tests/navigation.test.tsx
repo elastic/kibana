@@ -9,8 +9,11 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from '../navigation';
-import mockSecurityTree from './mock_security_tree.json';
 import { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+
+// use require to bypass unnecessary TypeScript checks for JSON imports
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const navigationTree = require('./mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -19,8 +22,6 @@ describe('toNavigationItems', () => {
     consoleWarnSpy.mockClear();
   });
 
-  const navigationTree: NavigationTreeDefinitionUI =
-    mockSecurityTree as unknown as NavigationTreeDefinitionUI;
   const {
     logoItem,
     navItems: { footerItems, primaryItems },
