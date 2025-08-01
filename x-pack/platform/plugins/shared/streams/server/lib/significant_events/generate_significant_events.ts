@@ -86,11 +86,7 @@ export async function generateSignificantEventDefinitions({
     logger.debug(() => {
       return `Found ${logPatterns?.length} log patterns:
       
-      ${logPatterns
-        .map((pattern) => {
-          return `- ${pattern.sample} (${pattern.count})`;
-        })
-        .join('\n')}
+      ${logPatterns.map((pattern) => `- ${pattern.sample} (${pattern.count})`).join('\n')}
       `;
     });
   }
@@ -125,11 +121,6 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     `,
   ];
 
-  logger.debug(() => {
-    return `Input:
-    ${chunks.filter(Boolean).join('\n\n')}`;
-  });
-
   const { output } = await inferenceClient.output({
     id: 'generate_kql_queries',
     connectorId,
@@ -163,18 +154,6 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
 
   if (!queries.length) {
     return [];
-  }
-
-  if (queries.length) {
-    logger.debug(() => {
-      return `Generated queries:
-      
-      ${queries
-        .map((query) => {
-          return `- ${query.kql}`;
-        })
-        .join('\n')}`;
-    });
   }
 
   const limiter = pLimit(10);
@@ -213,11 +192,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     logger.debug(() => {
       return `Ran queries:
       
-      ${queriesWithCounts
-        .map((query) => {
-          return `- ${query.kql}: ${query.count}`;
-        })
-        .join('\n')}`;
+      ${queriesWithCounts.map((query) => `- ${query.kql}: ${query.count}`).join('\n')}`;
     });
   }
 
@@ -293,11 +268,7 @@ ${JSON.stringify(
   logger.debug(() => {
     return `Selected queries:
     
-    ${selected
-      .map((query) => {
-        return `- ${query.kql}`;
-      })
-      .join('\n')}
+    ${selected.map((query) => `- ${query.kql}`).join('\n')}
     `;
   });
 
