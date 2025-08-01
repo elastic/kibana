@@ -28,6 +28,10 @@ const commonVars = {
     type: 'integer',
     value: 2,
   },
+  maintenance_windows: {
+    type: 'yaml',
+    value: [],
+  },
 };
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
@@ -212,6 +216,7 @@ export const getHttpInput = ({
     'check.response.status': ['200', '201'],
     ipv4: true,
     ipv6: true,
+    maintenance_windows: null,
     mode: 'any',
     ...(isTLSEnabled
       ? {
