@@ -67,7 +67,7 @@ xpack.actions.customHostSettings:
           -----END CERTIFICATE-----
     smtp:
       requireTLS: true
-  - url: https://webhook.example.com
+  - url: <WEBHOOK_URL>
     ssl:
       verificationMode: 'none'
 --
