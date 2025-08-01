@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       describe('User has access to a single data stream', () => {
         before(async () => {
           await createDatasetQualityUserWithRole(security, 'fullAccess', [
-            { names: ['logs-*'], privileges: ['read', 'view_index_metadata'] },
+            { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
           ]);
 
           await PageObjects.security.login('fullAccess', 'fullAccess-password', {
@@ -123,6 +123,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           // Cleanup the user and role
           await PageObjects.security.forceLogout();
           await deleteDatasetQualityUserWithRole(security, 'fullAccess');
+        });
+
+        it('should still be able to navigate and use the dataset quality app', async () => {
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoPrivilegesEmptyState
+          );
         });
 
         it('types filter should not be rendered', async () => {
