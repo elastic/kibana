@@ -19,7 +19,7 @@ describe('ScopedClusterClient', () => {
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
-      asInternalUser: internalClient,
+      asInternalUserFactory: () => internalClient,
       asCurrentUserFactory: () => scopedClient,
       asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
@@ -33,7 +33,7 @@ describe('ScopedClusterClient', () => {
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
-      asInternalUser: internalClient,
+      asInternalUserFactory: () => internalClient,
       asCurrentUserFactory: () => scopedClient,
       asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
@@ -47,7 +47,7 @@ describe('ScopedClusterClient', () => {
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
-      asInternalUser: internalClient,
+      asInternalUserFactory: () => internalClient,
       asCurrentUserFactory: () => scopedClient,
       asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
@@ -61,7 +61,7 @@ describe('ScopedClusterClient', () => {
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
-      asInternalUser: internalClient,
+      asInternalUserFactory: () => internalClient,
       asCurrentUserFactory: () => scopedClient,
       asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
@@ -78,7 +78,7 @@ describe('ScopedClusterClient', () => {
     const secondaryAuthClient = createEsClient();
 
     const scopedClusterClient = new ScopedClusterClient({
-      asInternalUser: internalClient,
+      asInternalUserFactory: () => internalClient,
       asCurrentUserFactory: () => scopedClient,
       asSecondaryAuthUserFactory: () => secondaryAuthClient,
     });
