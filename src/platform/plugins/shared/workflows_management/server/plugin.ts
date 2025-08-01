@@ -10,6 +10,7 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { WorkflowsManagementConfig } from './config';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -32,6 +33,7 @@ import { registerFeatures } from './features';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
+  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
@@ -41,6 +43,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
@@ -136,7 +139,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
       WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
+      this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
 
