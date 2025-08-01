@@ -47,7 +47,11 @@ export const host = createInventoryModel('host', {
   },
   metrics,
   nodeFilter: (args?: { schema?: DataSchemaFormat }): estypes.QueryDslQueryContainer[] => {
-    const { schema = DataSchemaFormat.ECS } = args ?? {};
+    const { schema } = args ?? {};
+    if (!schema) {
+      return [];
+    }
+
     return [
       {
         bool:
