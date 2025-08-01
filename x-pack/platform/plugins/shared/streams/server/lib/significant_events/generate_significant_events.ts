@@ -16,30 +16,43 @@ import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
-const LOOKBACK_DAYS = 7;
+const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
+const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
 export interface GeneratedSignificantEventQuery {
   title: string;
   kql: string;
 }
 
-export async function generateSignificantEventDefinitions({
-  name,
-  connectorId,
-  currentDate = new Date(),
-  inferenceClient,
-  esClient,
-  logger,
-}: {
+interface Params {
   name: string;
   connectorId: string;
-  currentDate: Date;
+  currentDate?: Date;
+  shortLookback?: moment.Duration;
+  longLookback?: moment.Duration;
+}
+
+interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
-}): Promise<GeneratedSignificantEventQuery[]> {
+}
+
+export async function generateSignificantEventDefinitions(
+  params: Params,
+  dependencies: Dependencies
+): Promise<GeneratedSignificantEventQuery[]> {
+  const {
+    name,
+    connectorId,
+    currentDate = new Date(),
+    shortLookback = DEFAULT_SHORT_LOOKBACK,
+    longLookback = DEFAULT_LONG_LOOKBACK,
+  } = params;
+  const { inferenceClient, esClient, logger } = dependencies;
+
   const mend = moment(currentDate);
-  const mstart = mend.clone().subtract(24, 'hours');
+  const mstart = mend.clone().subtract(shortLookback);
 
   const start = mstart.valueOf();
   const end = mend.valueOf();
@@ -63,7 +76,7 @@ export async function generateSignificantEventDefinitions({
     ? 'body.text'
     : undefined;
 
-  const lookbackStart = mend.clone().subtract(LOOKBACK_DAYS, 'days').valueOf();
+  const lookbackStart = mend.clone().subtract(longLookback).valueOf();
 
   const logPatterns = categorizationField
     ? await getLogPatterns({
@@ -96,7 +109,7 @@ export async function generateSignificantEventDefinitions({
     KQL_GUIDE,
     logPatterns
       ? `## Log patterns
-The following log patterns were found over the last ${LOOKBACK_DAYS} days.
+The following log patterns were found over the last ${longLookback.asDays()} days.
 The field used is \`${categorizationField}\`:
     
 ${JSON.stringify(
@@ -218,7 +231,7 @@ Now I need you to analyze these results and prioritize the most operationally re
 
 ## Analysis Context
 - Total documents in time period: ${totalCount}
-- Lookback period: ${LOOKBACK_DAYS} days
+- Lookback period: ${longLookback.asDays()} days
 - Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
 
 ## Queries

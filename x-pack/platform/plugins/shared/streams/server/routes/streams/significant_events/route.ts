@@ -13,6 +13,7 @@ import {
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
+import moment from 'moment';
 import { Observable, from as fromRxjs, map } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
@@ -167,6 +168,26 @@ const readSignificantEventsRoute = createServerRoute({
   },
 });
 
+const durationSchema = z.string().transform((value) => {
+  const match = value.match(/^(\d+)([mhd])$/);
+  if (!match) {
+    throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');
+  }
+
+  const [, numberStr, unit] = match;
+  const number = parseInt(numberStr, 10);
+
+  // Map units to moment duration units
+  const unitMap: Record<string, moment.unitOfTime.DurationConstructor> = {
+    m: 'minute',
+    h: 'hour',
+    d: 'day',
+  };
+
+  const momentUnit = unitMap[unit];
+  return moment.duration(number, momentUnit);
+});
+
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
@@ -174,9 +195,10 @@ const generateSignificantEventsRoute = createServerRoute({
     query: z.object({
       connectorId: z.string(),
       currentDate: dateFromString.optional(),
+      shortLookback: durationSchema.optional(),
+      longLookback: durationSchema.optional(),
     }),
   }),
-
   options: {
     access: 'public',
     summary: 'Generate significant events',
@@ -216,18 +238,24 @@ const generateSignificantEventsRoute = createServerRoute({
       throw badRequest('Streams are not enabled');
     }
 
-    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions({
-      name: params.path.name,
-      connectorId: params.query.connectorId,
-      currentDate: params.query.currentDate ?? new Date(),
-      inferenceClient,
-      esClient: createTracedEsClient({
-        client: scopedClusterClient.asCurrentUser,
+    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions(
+      {
+        name: params.path.name,
+        connectorId: params.query.connectorId,
+        currentDate: params.query.currentDate,
+        shortLookback: params.query.shortLookback,
+        longLookback: params.query.longLookback,
+      },
+      {
+        inferenceClient,
+        esClient: createTracedEsClient({
+          client: scopedClusterClient.asCurrentUser,
+          logger,
+          plugin: 'streams',
+        }),
         logger,
-        plugin: 'streams',
-      }),
-      logger,
-    });
+      }
+    );
 
     return fromRxjs(generatedSignificantEventDefinitions).pipe(
       map((query) => ({
