@@ -6,9 +6,4 @@
  */
 
 export * from './processor_state_machine';
-<<<<<<< HEAD
 export * from './types';
-=======
-export type * from './types';
-export * from './utils';
->>>>>>> 2c326e4b40b (chore(NA): upgrade typescript into v5.4.5 (#227746))
