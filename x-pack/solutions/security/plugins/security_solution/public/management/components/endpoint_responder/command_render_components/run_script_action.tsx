@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { ArgSelectorState } from '../../console';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
@@ -17,6 +18,8 @@ import type {
   ResponseActionRunScriptParameters,
 } from '../../../../../common/endpoint/types';
 import type { ActionRequestComponentProps } from '../types';
+import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+
 export interface CrowdStrikeRunScriptActionParameters {
   Raw?: string[];
   HostPath?: string[];
@@ -78,12 +81,16 @@ export const RunScriptActionResult = memo<
       }
 
       if (agentType === 'sentinel_one') {
-        const { script, inputParams } = args as SentinelOneRunScriptActionParameters;
+        const { inputParams } = args as SentinelOneRunScriptActionParameters;
+        const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
+          command.argState?.script;
 
-        return {
-          scriptId: script?.[0],
-          scriptInput: inputParams?.[0],
-        };
+        if (scriptSelectionState && scriptSelectionState?.[0].store?.selectedOption?.id) {
+          return {
+            scriptId: scriptSelectionState[0].store.selectedOption.id,
+            scriptInput: inputParams?.[0],
+          };
+        }
       }
 
       return {} as unknown as RunScriptActionRequestBody;

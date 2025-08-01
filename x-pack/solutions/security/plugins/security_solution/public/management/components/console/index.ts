@@ -13,6 +13,7 @@ export type {
   ConsoleProps,
   CommandExecutionComponentProps,
 } from './types';
+export type { ArgSelectorState } from './components/console_state/types';
 export type {
   ConsoleRegistrationInterface,
   ManagedConsoleExtensionComponentProps,
