@@ -9,7 +9,7 @@ import { ModelValidation, joinValidation } from './validation/model_validation';
 import { BaseStream } from './base';
 import { GroupStream as nGroupStream } from './group';
 import { IngestStream } from './ingest';
-import { UnwiredStream as nUnwiredStream } from './ingest/unwired';
+import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -18,7 +18,7 @@ export namespace Streams {
   export import ingest = IngestStream;
 
   export import WiredStream = nWiredStream;
-  export import UnwiredStream = nUnwiredStream;
+  export import ClassicStream = nClassicStream;
   export import GroupStream = nGroupStream;
 
   export namespace all {
@@ -37,5 +37,5 @@ export namespace Streams {
 
 Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
-Streams.UnwiredStream = nUnwiredStream;
+Streams.ClassicStream = nClassicStream;
 Streams.GroupStream = nGroupStream;

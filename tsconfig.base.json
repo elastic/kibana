@@ -320,6 +320,8 @@
       "@kbn/core-chrome-layout-components/*": ["src/core/packages/chrome/layout/core-chrome-layout-components/*"],
       "@kbn/core-chrome-layout-constants": ["src/core/packages/chrome/layout/core-chrome-layout-constants"],
       "@kbn/core-chrome-layout-constants/*": ["src/core/packages/chrome/layout/core-chrome-layout-constants/*"],
+      "@kbn/core-chrome-navigation": ["src/core/packages/chrome/navigation"],
+      "@kbn/core-chrome-navigation/*": ["src/core/packages/chrome/navigation/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],
@@ -956,6 +958,8 @@
       "@kbn/evals/*": ["x-pack/platform/packages/shared/kbn-evals/*"],
       "@kbn/evals-suite-obs-ai-assistant": ["x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant"],
       "@kbn/evals-suite-obs-ai-assistant/*": ["x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/*"],
+      "@kbn/evals-suite-onechat": ["x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat"],
+      "@kbn/evals-suite-onechat/*": ["x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/*"],
       "@kbn/event-annotation-common": ["src/platform/packages/shared/kbn-event-annotation-common"],
       "@kbn/event-annotation-common/*": ["src/platform/packages/shared/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["src/platform/packages/shared/kbn-event-annotation-components"],
@@ -1210,6 +1214,8 @@
       "@kbn/kibana-utils-plugin/*": ["src/platform/plugins/shared/kibana_utils/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
+      "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],
+      "@kbn/langgraph-checkpoint-saver/*": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/*"],
       "@kbn/language-documentation": ["src/platform/packages/private/kbn-language-documentation"],
       "@kbn/language-documentation/*": ["src/platform/packages/private/kbn-language-documentation/*"],
       "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
@@ -2292,6 +2298,7 @@
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
