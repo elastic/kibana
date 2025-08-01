@@ -9,6 +9,7 @@ import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useMemo, useRef } from 'react';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
@@ -82,11 +83,11 @@ const createActions = ({
         round.steps.push(step);
       });
     },
-    setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
+    setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
       setCurrentRound((round) => {
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
-          step.result = result;
+          step.results = results;
         }
       });
     },

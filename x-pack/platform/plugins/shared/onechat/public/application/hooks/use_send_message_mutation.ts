@@ -74,14 +74,14 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
             actions.addToolCall({
               step: createToolCallStep({
                 params: event.data.params,
-                result: '',
+                results: [],
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
               }),
             });
           } else if (isToolResultEvent(event)) {
-            const { tool_call_id: toolCallId, result } = event.data;
-            actions.setToolCallResult({ result, toolCallId });
+            const { tool_call_id: toolCallId, results } = event.data;
+            actions.setToolCallResult({ results, toolCallId });
           } else if (isRoundCompleteEvent(event)) {
             // Now we have the full response and can stop the loading indicators
             setIsResponseLoading(false);
