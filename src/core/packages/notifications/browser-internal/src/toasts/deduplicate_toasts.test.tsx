@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { mount, render, shallow } from 'enzyme';
+import { render } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
 import { render as rtlRender } from '@testing-library/react';
 
