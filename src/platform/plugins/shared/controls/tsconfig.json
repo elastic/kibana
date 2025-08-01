@@ -48,7 +48,8 @@
     "@kbn/esql-editor",
     "@kbn/expressions-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types-jest"
   ],
   "exclude": ["target/**/*"]
 }
