@@ -47,6 +47,7 @@ export function readCliArgs(argv: string[]) {
       'silent',
       'debug',
       'help',
+      'upload-sourcemaps-to-apm',
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
@@ -154,6 +155,7 @@ export function readCliArgs(argv: string[]) {
     targetServerlessPlatforms: Boolean(flags.serverless),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
+    uploadServiceMapsToApm: Boolean(flags['upload-sourcemaps-to-apm']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
   };
