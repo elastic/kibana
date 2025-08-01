@@ -87,7 +87,29 @@ export const alertsWithNoGrouping = [
   { _id: 'alert-id-5', _index: 'alert-index-5' },
 ];
 
-export const groupedAlerts = null;
+export const groupedAlerts = [
+  {
+    alerts: [
+      { _id: 'alert-id-1', _index: 'alert-index-1' },
+      { _id: 'alert-id-2', _index: 'alert-index-1' },
+    ],
+    comments: ['comment-1'],
+    grouping: { field_name_1: 'field_value_1' },
+    title: 'custom-title',
+  },
+  {
+    alerts: [
+      { _id: 'alert-id-3', _index: 'alert-index-2' },
+      { _id: 'alert-id-4', _index: 'alert-index-2' },
+    ],
+    comments: ['comment-2', 'comment-3'],
+    grouping: { field_name_2: 'field_value_2' },
+  },
+  {
+    alerts: [{ _id: 'alert-id-5', _index: 'alert-index-3' }],
+    grouping: { field_name_1: 'field_value_3' },
+  },
+];
 export const internallyManagedAlerts = false;
 
 export const groupingBy = ['host.name', 'dest.ip'];

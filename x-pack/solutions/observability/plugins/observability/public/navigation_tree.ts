@@ -95,6 +95,20 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 children: [
                   {
+                    link: 'apm:service-map',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    link: 'apm:service-groups-list',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
                     link: 'apm:services',
                     getIsActive: ({ pathNameSerialized }) => {
                       const regex = /app\/apm\/.*service.*/;
@@ -144,6 +158,29 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                 ],
               },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
             ],
           },
           {
@@ -159,7 +196,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                      defaultMessage: 'Infrastructure inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -187,7 +224,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal profiling',
+                    defaultMessage: 'Universal Profiling',
                   }
                 ),
                 children: [

@@ -54,9 +54,7 @@ export function HeaderActions({
 }: HeaderActionsProps) {
   const { services } = useKibana();
   const {
-    cases: {
-      hooks: { useCasesAddToExistingCaseModal },
-    },
+    cases,
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
   } = services;
@@ -64,7 +62,7 @@ export function HeaderActions({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = useCasesAddToExistingCaseModal();
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 
@@ -100,7 +98,7 @@ export function HeaderActions({
 
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
-    selectCaseModal.open({ getAttachments: () => attachments });
+    selectCaseModal?.open({ getAttachments: () => attachments });
   };
 
   const handleOpenSnoozeModal = () => {
@@ -111,20 +109,22 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plus"
-            onClick={handleAddToCase}
-            data-test-subj="add-to-case-button"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                defaultMessage: 'Add to case',
-              })}
-            </EuiText>
-          </EuiButton>
-        </EuiFlexItem>
+        {cases && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="plus"
+              onClick={handleAddToCase}
+              data-test-subj="add-to-case-button"
+            >
+              <EuiText size="s">
+                {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                  defaultMessage: 'Add to case',
+                })}
+              </EuiText>
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"

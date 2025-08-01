@@ -9,15 +9,23 @@
 
 import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer, EuiSkipLink, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiSkipLink,
+  useGeneratedHtmlId,
+  euiOverflowScroll,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
-import './field_list_grouped.scss';
 import {
   useRestorableState,
   useRestorableRef,
@@ -61,6 +69,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
+  const styles = useMemoCss(componentStyles);
+
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
 
@@ -72,7 +82,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   );
   const isInitializedRef = useRef<boolean>(false);
   const [pageSize, setPageSize] = useRestorableState('pageSize', PAGINATION_SIZE);
-  const scrollPositionRef = useRestorableRef('scrollPosition', 0);
+  const scrollTopRef = useRestorableRef('scrollTop', 0);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
@@ -93,11 +103,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
           ];
         })
       ),
-    (restoredAccordionState) => {
-      return (
-        fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
-        fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
-      );
+    {
+      shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might get updated in the meantime
+      shouldIgnoredRestoredValue: (restoredAccordionState) => {
+        return (
+          fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
+          fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
+        );
+      },
     }
   );
 
@@ -110,14 +123,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         return;
       }
       scrollContainer.scrollTop = 0;
-      scrollPositionRef.current = 0;
+      scrollTopRef.current = 0;
       setPageSize(PAGINATION_SIZE);
     }
-  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollPositionRef]);
+  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollTopRef]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
-      if (scrollContainer.scrollTop === scrollPositionRef.current) {
+      if (scrollContainer.scrollTop === scrollTopRef.current) {
         // scroll top was restored to the last position
         return;
       }
@@ -126,7 +139,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
 
-      scrollPositionRef.current = scrollContainer.scrollTop;
+      scrollTopRef.current = scrollContainer.scrollTop;
 
       if (nearBottom) {
         setPageSize(
@@ -140,7 +153,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         );
       }
     }
-  }, [scrollContainer, scrollPositionRef, setPageSize, pageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollTopRef, setPageSize, pageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
@@ -160,14 +173,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
 
   return (
     <div
-      className="unifiedFieldList__fieldListGrouped"
+      css={styles.outerContainer}
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
-        if (el && !el.scrollTop && scrollPositionRef.current) {
+        if (el && !el.scrollTop && scrollTopRef.current) {
           // restore scroll position after restoring the initial ref value
           setTimeout(() => {
             el.scrollTo?.({
-              top: scrollPositionRef.current,
+              top: scrollTopRef.current,
               behavior: 'instant',
             });
           }, 0);
@@ -180,7 +193,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="unifiedFieldList__fieldListGrouped__container">
+      <div css={styles.innerContainer}>
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
@@ -382,3 +395,31 @@ function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
   // has some fields or an empty list should be still shown
   return group.fields?.length > 0 || !group.hideIfEmpty;
 }
+
+/**
+ * 1. Don't cut off the shadow of the field items
+ */
+
+const componentStyles = {
+  outerContainer: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+
+    return css([
+      {
+        marginLeft: `-${euiTheme.size.base}` /* 1 */,
+        position: 'relative',
+        flexGrow: 1,
+        overflow: 'auto',
+      },
+      euiOverflowScroll(themeContext, { direction: 'y', mask: true }),
+    ]);
+  },
+  innerContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: euiTheme.size.s,
+      position: 'absolute',
+      top: 0,
+      left: euiTheme.size.base /* 1 */,
+      right: euiTheme.size.xs /* 1 */,
+    }),
+};

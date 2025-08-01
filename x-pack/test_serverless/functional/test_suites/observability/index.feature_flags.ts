@@ -9,10 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI - feature flags', function () {
-    // add tests that require feature flags, defined in config.feature_flags.ts
-    loadTestFile(require.resolve('./role_management'));
-    loadTestFile(require.resolve('./rules/custom_threshold_consumer'));
-    loadTestFile(require.resolve('./rules/es_query_consumer'));
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./streams'));
   });

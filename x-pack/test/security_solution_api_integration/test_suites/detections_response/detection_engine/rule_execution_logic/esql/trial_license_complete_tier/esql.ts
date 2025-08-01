@@ -16,7 +16,10 @@ import {
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import { ALERT_ANCESTORS } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import {
+  ALERT_ANCESTORS,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
@@ -65,14 +68,17 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/224699
-  describe.skip('@ess @serverless ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -1537,6 +1543,7 @@ export default ({ getService }: FtrProviderContext) => {
         // should return 100 alerts
         expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
+        const dateRestart = new Date();
         // re-trigger rule execution with new interval
         await patchRule(supertest, log, {
           id: createdRule.id,
@@ -1556,21 +1563,242 @@ export default ({ getService }: FtrProviderContext) => {
           createdRule,
           RuleExecutionStatusEnum.succeeded,
           200,
-          new Date()
+          dateRestart
         );
 
         // should return 160 alerts
         expect(alertsResponse.hits.hits.length).toBe(160);
       });
+
+      describe('identical document ids across multiple indices', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant_synthetic_source'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant_synthetic_source'
+          );
+        });
+
+        it('should generate alerts from events with the same id', async () => {
+          const id = uuidv4();
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+            query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
+              id
+            )} | sort @timestamp asc`,
+            from: '2020-10-28T05:15:00.000Z',
+            to: '2020-10-28T06:00:00.000Z',
+            interval: '45m',
+            enabled: true,
+          };
+
+          await es.index({
+            index: 'ecs_compliant',
+            id, // id of event in index
+            refresh: true,
+            document: {
+              id,
+              '@timestamp': '2020-10-28T05:30:00.000Z',
+              agent: { name: 'from ecs_compliant' },
+            },
+          });
+          await es.index({
+            index: 'ecs_compliant_synthetic_source',
+            id, // id of event in index
+            refresh: true,
+            document: {
+              id,
+              '@timestamp': '2020-10-28T05:35:00.000Z',
+              agent: { name: 'from ecs_compliant_synthetic_source' },
+            },
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 200,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts[0]._source).toHaveProperty(['agent.name'], 'from ecs_compliant');
+          expect(previewAlerts[1]._source).toHaveProperty(
+            ['agent.name'],
+            'from ecs_compliant_synthetic_source'
+          );
+        });
+
+        // since we exclude _id from the query in the next page, we should be able to generate alerts from multiple documents with the same id in different indices
+        it('should generate alerts over multiple pages from different indices but same event id', async () => {
+          const id = uuidv4();
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+            query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
+              id
+            )} | sort @timestamp asc`,
+            from: '2020-10-28T05:15:00.000Z',
+            to: '2020-10-28T06:00:00.000Z',
+            interval: '45m',
+            max_signals: 2, // we would paginate with page size = 2
+            enabled: true,
+          };
+
+          const document = {
+            id,
+            '@timestamp': '2020-10-28T05:30:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          await Promise.all(
+            Array.from({ length: 2 }, (_, i) => i).map((i) =>
+              es.index({
+                index: 'ecs_compliant',
+                id: 'id-' + id + '_' + i, // id of event in index
+                refresh: true,
+                document,
+              })
+            )
+          );
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const alertsResponseFromFirstRuleExecution = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            10
+          );
+
+          expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(2);
+
+          await Promise.all(
+            Array.from({ length: 2 }, (_, i) => i).map((i) =>
+              es.index({
+                index: 'ecs_compliant_synthetic_source',
+                id: 'id-' + id + '_' + i, // id of event in index
+                refresh: true,
+                document: {
+                  ...document,
+                  '@timestamp': '2020-10-28T05:53:00.000Z',
+                },
+              })
+            )
+          );
+
+          const dateRestart = new Date();
+
+          await runSoonRule(supertest, createdRule.id);
+
+          const alertsResponse = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            200,
+            dateRestart
+          );
+
+          // no alert should be missed
+          expect(alertsResponse.hits.hits.length).toBe(4);
+        });
+
+        it('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
+          const id = uuidv4();
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+            query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | sort @timestamp asc`,
+            from: '2020-10-28T05:15:00.000Z',
+            to: '2020-10-28T06:00:00.000Z',
+            interval: '45m',
+            enabled: true,
+          };
+
+          const document = {
+            id,
+            '@timestamp': '2020-10-28T05:30:00.000Z',
+            agent: { name: Array.from({ length: 150 }, (_, i) => `test_1_${1000 + i}`) },
+          };
+
+          await Promise.all(
+            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index) =>
+              es.index({
+                index,
+                id,
+                refresh: true,
+                document,
+              })
+            )
+          );
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const alertsResponseFromFirstRuleExecution = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum['partial failure'], // rule has warning, alerts were truncated, thus "partial failure" status
+            200
+          );
+
+          expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+          const dateRestart = new Date();
+
+          await runSoonRule(supertest, createdRule.id);
+
+          const alertsResponse = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum['partial failure'], // rule has warning, alerts were truncated, thus "partial failure" status
+            300,
+            dateRestart
+          );
+
+          const indexCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
+            (acc, curr) => {
+              const indexName = curr._source?.[ALERT_ANCESTORS][0].index;
+              if (indexName) {
+                acc[indexName] = (acc[indexName] || 0) + 1;
+              }
+              return acc;
+            },
+            {}
+          );
+          expect(alertsResponse.hits.hits.length).toBe(200);
+
+          expect(indexCounts).toEqual({
+            ecs_compliant: 100,
+            ecs_compliant_synthetic_source: 100,
+          });
+        });
+      });
     });
 
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -1604,11 +1832,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -1728,13 +1960,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('non-ecs', () => {
         before(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
           );
         });
 
@@ -1834,13 +2066,15 @@ export default ({ getService }: FtrProviderContext) => {
     describe('manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
       });
 
       afterEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
       });
 
@@ -2190,7 +2424,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('shard failures', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/224699
+    describe.skip('shard failures', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -2210,6 +2445,7 @@ export default ({ getService }: FtrProviderContext) => {
         const doc1 = { agent: { name: 'test-1' } };
         await indexEnhancedDocuments({
           documents: [doc1],
+          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
           id: uuidv4(),
         });
 

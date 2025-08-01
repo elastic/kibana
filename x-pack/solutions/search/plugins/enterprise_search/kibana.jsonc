@@ -21,6 +21,7 @@
       "logsDataAccess",
       "esUiShared",
       "navigation",
+      "searchHomepage",
       "searchNavigation",
       "uiActions"
     ],
@@ -33,7 +34,6 @@
       "security",
       "spaces",
       "usageCollection",
-      "guidedOnboarding",
       "console",
       "contentConnectors",
       "searchPlayground",

@@ -16,15 +16,9 @@ import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import {
-  convertDashboardVersionToNumber,
-  convertNumberToDashboardVersion,
-} from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
-
-const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -41,13 +35,11 @@ export const getSerializedState = ({
   generateNewIds,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: {
   controlGroupReferences?: Reference[];
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
 }): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
@@ -83,7 +75,7 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filter: filters, query };
+  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -108,7 +100,7 @@ export const getSerializedState = ({
     : undefined;
 
   const attributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+    version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
@@ -125,14 +117,13 @@ export const getSerializedState = ({
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
-    : searchSourceReferences ?? [];
+    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+    : [];
 
   const allReferences = [
     ...references,
     ...(prefixedPanelReferences ?? []),
     ...(controlGroupReferences ?? []),
-    ...(searchSourceReferences ?? []),
   ];
   return { attributes, references: allReferences };
 };

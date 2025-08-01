@@ -28,7 +28,7 @@ export function RelatedAlertsTableFilter() {
             label={i18n.translate(
               'xpack.observability.alerts.relatedAlerts.proximityCheckboxLabel',
               {
-                defaultMessage: 'Created around the same time',
+                defaultMessage: 'Triggered around the same time',
               }
             )}
             checked={filterProximal}

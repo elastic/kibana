@@ -11,7 +11,3 @@ export const queryKeys = {
   getHealth: () => [root, 'health'] as const,
   getUserProfile: () => [root, 'userProfile'] as const,
 };
-
-export const mutationKeys = {
-  bulkDisableScheduledReports: () => [root, 'bulkDisableScheduledReports'] as const,
-};

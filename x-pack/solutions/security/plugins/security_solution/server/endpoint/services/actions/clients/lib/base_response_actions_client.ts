@@ -15,7 +15,9 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
 import { catchAndWrapError } from '../../../../utils';
 import {
@@ -452,12 +454,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Returns the action details for a given response action id
    * @param actionId
+   * @param bypassSpaceValidation
    * @protected
    */
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
-    actionId: string
+    actionId: string,
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean = false
   ): Promise<T> {
-    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId);
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId, {
+      bypassSpaceValidation,
+    });
   }
 
   /**
@@ -611,6 +621,22 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
+    // It's possible with Automated Response actions that we could reach this point with
+    // no endpoint IDs in the action request - case where they are no longer enrolled.
+    // In these cases, we don't attempt to build the agent policy info and instead add
+    // the `integration deleted` tag to the action request, which means these are only
+    // visible in the space configured (via ref. data) show orphaned actions
+    const agentPolicyInfo: LogsEndpointAction['agent']['policy'] =
+      isSpacesEnabled && actionRequest.endpoint_ids.length > 0
+        ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
+        : [];
+    const tags: LogsEndpointAction['tags'] = actionRequest.tags ?? [];
+    const actionId = actionRequest.actionId || uuidv4();
+
+    if (agentPolicyInfo.length === 0) {
+      tags.push(ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted);
+    }
+
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
 
@@ -618,7 +644,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
 
       // Add `tags` property to the document if spaces is enabled
-      ...(isSpacesEnabled ? { tags: actionRequest.tags ?? [] } : {}),
+      ...(isSpacesEnabled ? { tags } : {}),
 
       // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
       // It will be removed once we enable the feature and delete the feature flag checks.
@@ -626,14 +652,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agent: {
         id: actionRequest.endpoint_ids,
         // add the `policy` info if space awareness is enabled
-        ...(isSpacesEnabled
-          ? {
-              policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
-            }
-          : {}),
+        ...(isSpacesEnabled ? { policy: agentPolicyInfo } : {}),
       },
       EndpointActions: {
-        action_id: actionRequest.actionId || uuidv4(),
+        action_id: actionId,
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,
@@ -1016,7 +1038,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('runscript');
   }
 
-  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+  public async getCustomScripts(
+    options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
+  ): Promise<CustomScriptsResponse> {
     throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 

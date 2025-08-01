@@ -71,14 +71,6 @@ describe('SyncsContextMenu', () => {
         openFlyout: jest.fn(),
         openModal: jest.fn(),
       },
-      notifications: {
-        toasts: {
-          show: jest.fn(),
-          success: jest.fn(),
-          warning: jest.fn(),
-          danger: jest.fn(),
-        },
-      },
     });
     setMockValues(mockValues);
     setMockActions({

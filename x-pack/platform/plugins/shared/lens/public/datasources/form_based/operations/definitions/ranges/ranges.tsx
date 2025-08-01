@@ -82,6 +82,10 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  scale: (column) => {
+    const type = column.params?.type ?? MODES.Histogram;
+    return type === MODES.Histogram ? 'interval' : 'ordinal';
+  },
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer, columnId, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
@@ -110,7 +114,6 @@ export const rangeOperation: OperationDefinition<
       operationType: 'range',
       sourceField: field.name,
       isBucketed: true,
-      scale: type === MODES.Histogram ? 'interval' : 'ordinal', // ordinal for Range
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,

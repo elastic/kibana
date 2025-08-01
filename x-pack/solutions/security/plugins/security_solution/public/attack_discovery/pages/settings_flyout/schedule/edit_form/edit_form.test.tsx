@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
@@ -79,6 +79,8 @@ const renderComponent = async () => {
 const getBooleanValueMock = jest.fn();
 
 describe('EditForm', () => {
+  const mockTriggersActionsUi = triggersActionsUiMock.createStart();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -92,9 +94,7 @@ describe('EditForm', () => {
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
-        triggersActionsUi: {
-          ...triggersActionsUiMock.createStart(),
-        },
+        triggersActionsUi: mockTriggersActionsUi,
         uiSettings: {
           get: jest.fn(),
         },
@@ -177,5 +177,36 @@ describe('EditForm', () => {
     await renderComponent();
 
     expect(onChangeMock).toHaveBeenCalled();
+  });
+
+  it('should override default action frequency to `for each alert` instead of `summary of alerts`', async () => {
+    mockTriggersActionsUi.getActionForm = jest.fn();
+
+    await renderComponent();
+
+    expect(mockTriggersActionsUi.getActionForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultRuleFrequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+      })
+    );
+  });
+
+  it('calls onFormMutated when settings change', async () => {
+    const onFormMutatedMock = jest.fn();
+
+    render(
+      <TestProviders>
+        <EditForm {...defaultProps} onFormMutated={onFormMutatedMock} />
+      </TestProviders>
+    );
+
+    const input = screen.getByTestId('alertsRange');
+    fireEvent.change(input, { target: { value: 'changed' } });
+
+    expect(onFormMutatedMock).toHaveBeenCalled();
   });
 });

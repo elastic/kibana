@@ -126,13 +126,7 @@ export const createTestBed = registerTestBed(
         <InternalApiClientProvider apiClient={reportingAPIClient} http={http}>
           <IlmPolicyStatusContextProvider>
             <ReportingTabs
-              coreStart={coreMock.createStart()}
-              dataService={data}
-              shareService={share}
-              license$={l$}
               config={mockConfig}
-              redirect={jest.fn()}
-              navigateToUrl={jest.fn()}
               apiClient={reportingAPIClient}
               {...routeProps}
               {...rest}

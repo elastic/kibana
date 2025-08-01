@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { isStringLiteral } from '../ast/helpers';
+import { isStringLiteral } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,

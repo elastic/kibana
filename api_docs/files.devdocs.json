@@ -587,7 +587,7 @@
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/get_image_editor.tsx"
             },
             {
               "plugin": "imageEmbeddable",

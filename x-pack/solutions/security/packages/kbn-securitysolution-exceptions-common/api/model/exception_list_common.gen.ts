@@ -27,7 +27,7 @@ export type ExceptionListId = z.infer<typeof ExceptionListId>;
 export const ExceptionListId = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
- * Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+ * The exception list's human readable string identifier, `endpoint_list`.
  */
 export type ExceptionListHumanId = z.infer<typeof ExceptionListHumanId>;
 export const ExceptionListHumanId = z.string().min(1).superRefine(isNonEmptyString);

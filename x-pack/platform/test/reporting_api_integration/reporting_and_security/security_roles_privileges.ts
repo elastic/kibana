@@ -11,7 +11,6 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
@@ -212,13 +211,34 @@ export default function ({ getService }: FtrProviderContext) {
             locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
             objectType: 'dashboard',
             version: '7.14.0',
-          }
+          },
+          { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+          '2025-06-01T13:00:00.000Z'
         );
         expect(res.status).to.eql(200);
 
         const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        expect(soResult.body._source.scheduled_report.createdBy).to.eql('reporting_user');
+        expect(soResult.body._source.scheduled_report.enabled).to.eql(true);
+        expect(soResult.body._source.scheduled_report.jobType).to.eql('printable_pdf_v2');
+        expect(soResult.body._source.scheduled_report.meta).to.eql({
+          isDeprecated: false,
+          layout: 'preserve_layout',
+          objectType: 'dashboard',
+        });
+        expect(soResult.body._source.scheduled_report.payload).to.eql(
+          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"dashboard","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
+        );
+        expect(soResult.body._source.scheduled_report.schedule).to.eql({
+          rrule: {
+            dtstart: '2025-06-01T13:00:00.000Z',
+            freq: 1,
+            interval: 1,
+            tzid: 'UTC',
+          },
+        });
         scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
@@ -263,6 +283,24 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        expect(soResult.body._source.scheduled_report.createdBy).to.eql('reporting_user');
+        expect(soResult.body._source.scheduled_report.enabled).to.eql(true);
+        expect(soResult.body._source.scheduled_report.jobType).to.eql('printable_pdf_v2');
+        expect(soResult.body._source.scheduled_report.meta).to.eql({
+          isDeprecated: false,
+          layout: 'preserve_layout',
+          objectType: 'visualization',
+        });
+        expect(soResult.body._source.scheduled_report.payload).to.eql(
+          '{"browserTimezone":"UTC","layout":{"id":"preserve_layout"},"objectType":"visualization","title":"test PDF allowed","version":"7.14.0","locatorParams":[{"id":"canvas","params":{},"version":"7.14.0"}],"isDeprecated":false}'
+        );
+        expect(soResult.body._source.scheduled_report.schedule).to.eql({
+          rrule: {
+            freq: 1,
+            interval: 1,
+            tzid: 'UTC',
+          },
+        });
         scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);

@@ -6,18 +6,22 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { HttpSetup, IHttpFetchError, ResponseErrorBody, ToastsStart } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/reporting-public';
 import { bulkDisableScheduledReports } from '../apis/bulk_disable_scheduled_reports';
-import { mutationKeys, queryKeys } from '../query_keys';
+import { mutationKeys } from '../mutation_keys';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 const getKey = mutationKeys.bulkDisableScheduledReports;
 
-export const useBulkDisable = (props: { http: HttpSetup; toasts: ToastsStart }) => {
-  const { http, toasts } = props;
+export const useBulkDisable = () => {
   const queryClient = useQueryClient();
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
 
   return useMutation({
     mutationKey: getKey(),
@@ -40,7 +44,7 @@ export const useBulkDisable = (props: { http: HttpSetup; toasts: ToastsStart }) 
         })
       );
       queryClient.invalidateQueries({
-        queryKey: queryKeys.getScheduledList({}),
+        queryKey: ['reporting', 'scheduledList'],
         refetchType: 'active',
       });
     },

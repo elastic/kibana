@@ -219,4 +219,67 @@ describe('test_connector_form', () => {
     const result = wrapper?.find('[data-test-subj="executionFailureResult"]');
     expect(result?.exists()).toBeTruthy();
   });
+
+  it('renders code block if there is a execution result', async () => {
+    const connector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+    const wrapper = mountWithIntl(
+      <I18nProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutionAction={async () => {}}
+          executionResult={some({
+            actionId: '1234',
+            status: 'ok',
+          })}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      </I18nProvider>
+    );
+
+    const result = wrapper?.find('[data-test-subj="executionResultCodeBlock"]');
+    expect(result?.exists()).toBeTruthy();
+    expect(result?.first().text()).toEqual(
+      JSON.stringify(
+        {
+          actionId: '1234',
+          status: 'ok',
+        },
+        null,
+        2
+      )
+    );
+  });
+
+  it('does not render the code block if there is no execution result', async () => {
+    const connector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
+    const wrapper = mountWithIntl(
+      <I18nProvider>
+        <TestConnectorForm
+          connector={connector}
+          executeEnabled={true}
+          actionParams={{}}
+          setActionParams={() => {}}
+          isExecutingAction={false}
+          onExecutionAction={async () => {}}
+          executionResult={some(undefined)}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      </I18nProvider>
+    );
+
+    const result = wrapper?.find('[data-test-subj="executionResultCodeBlock"]');
+    expect(result?.exists()).toBeFalsy();
+  });
 });

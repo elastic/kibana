@@ -16,6 +16,7 @@ import {
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { APP_UI_ID } from '../../../../common';
 
 export type ProductDocumentationToolParams = Require<
@@ -53,6 +54,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           connectorId,
           request,
           functionCalling: 'auto',
+          inferenceId: defaultInferenceEndpoints.ELSER,
         });
 
         const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));

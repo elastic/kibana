@@ -222,6 +222,14 @@ export const internalStateSlice = createSlice({
         state.expandedDoc = undefined;
       }),
 
+    setESQLEditorUiState: (
+      state,
+      action: TabAction<{ esqlEditorUiState: Partial<TabState['uiState']['esqlEditor']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
+      }),
+
     setDataGridUiState: (
       state,
       action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
@@ -236,6 +244,22 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action, (tab) => {
         tab.uiState.fieldList = action.payload.fieldListUiState;
+      }),
+
+    setLayoutUiState: (
+      state,
+      action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.layout = action.payload.layoutUiState;
+      }),
+
+    setSearchDraftUiState: (
+      state,
+      action: TabAction<{ searchDraftUiState: Partial<TabState['uiState']['searchDraft']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
   },
   extraReducers: (builder) => {

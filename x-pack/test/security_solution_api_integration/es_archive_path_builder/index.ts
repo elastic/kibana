@@ -16,7 +16,22 @@ export class EsArchivePathBuilder {
    * @param resourceUri represents the data type, e.g., auditbeat, and its associated index for hosts.
    * @returns the complete path based on the environment from which we intend to load the data.
    */
+
+  /**
+   * List of archive prefixes that are stored in the x-pack/platform/test directory.
+   * If the resourceUri starts with any of these prefixes and is not serverless,
+   * the path will be resolved to the platform archive location.
+   */
+  private static readonly PLATFORM_ARCHIVES = ['auditbeat', 'filebeat'];
+
   getPath(resourceUri: string): string {
+    // Check if resourceUri matches any platform archive prefix
+    if (
+      !this.isServerless &&
+      EsArchivePathBuilder.PLATFORM_ARCHIVES.some((prefix) => resourceUri.startsWith(prefix))
+    ) {
+      return `x-pack/platform/test/fixtures/es_archives/${resourceUri}`;
+    }
     const archivePath = this.getEsArchivePathBasedOnEnv();
     return `${archivePath}/${resourceUri}`;
   }

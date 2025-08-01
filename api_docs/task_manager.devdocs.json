@@ -1966,7 +1966,61 @@
           },
           ".DAILY; bymonthday: never; }>>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/schemas/task.ts",
+        "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/schemas/rrule/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.scheduleRruleSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "scheduleRruleSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ rrule: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".MONTHLY; }> | Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".WEEKLY; bymonthday: never; }> | Readonly<{ dtstart?: string | undefined; byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".DAILY; bymonthday: never; }>>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/schemas/rrule/v2.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

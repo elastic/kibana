@@ -9,7 +9,6 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -21,6 +20,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 import { ALERTS_PANEL_LABEL } from '../translations';
@@ -30,7 +30,6 @@ import type {
   EmbeddableAlertsTablePublicStartDependencies,
   EmbeddableAlertsTableSerializedState,
 } from '../types';
-import { openConfigEditor } from '../components/open_config_editor';
 import { EMBEDDABLE_ALERTS_TABLE_ID, PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { queryClient } from '../query_client';
@@ -49,8 +48,8 @@ export const getAlertsTableEmbeddableFactory = (
       ...deps,
     };
 
-    const currentTableConfig = initialState.rawState.tableConfig;
-    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(currentTableConfig);
+    const initialTableConfig = initialState.rawState.tableConfig;
+    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
     const serializeState = () => ({
       rawState: {
@@ -82,9 +81,9 @@ export const getAlertsTableEmbeddableFactory = (
 
     const ruleTypes = await getInternalRuleTypesWithCache(coreServices.http);
     const ruleTypeIdsForSolution =
-      !ruleTypes || !currentTableConfig?.solution
+      !ruleTypes || !initialTableConfig?.solution
         ? []
-        : getRuleTypeIdsForSolution(ruleTypes, currentTableConfig.solution);
+        : getRuleTypeIdsForSolution(ruleTypes, initialTableConfig.solution);
 
     const api = finalizeApi({
       ...timeRangeManager.api,
@@ -96,17 +95,29 @@ export const getAlertsTableEmbeddableFactory = (
         // Users cannot edit panels based on a solution they cannot access.
         // The first condition ensures panels are editable even if the table configuration is
         // unexpectedly undefined or incomplete
-        return !currentTableConfig?.solution || ruleTypeIdsForSolution.length > 0;
+        return !initialTableConfig?.solution || ruleTypeIdsForSolution.length > 0;
       },
       getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
         try {
-          const newTableConfig = await openConfigEditor({
-            coreServices,
-            parentApi: api.parentApi as PresentationContainer,
-            initialConfig: tableConfig$.getValue(),
+          openLazyFlyout({
+            core: coreServices,
+            parentApi: api.parentApi,
+            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              const { ConfigEditor } = await import('../components/config_editor');
+              return (
+                <ConfigEditor
+                  initialConfig={tableConfig$.getValue()}
+                  ariaLabelledBy={ariaLabelledBy}
+                  coreServices={coreServices}
+                  closeFlyout={closeFlyout}
+                  onSave={(newConfig: EmbeddableAlertsTableConfig) => {
+                    tableConfig$.next(newConfig);
+                  }}
+                />
+              );
+            },
           });
-          tableConfig$.next(newTableConfig);
         } catch {
           // The user closed without saving, discard the edits
         }

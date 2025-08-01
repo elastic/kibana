@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface LogsDataAccessPluginSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface LogsDataAccessPluginStartDeps {}
+export interface LogsDataAccessPluginStartDeps {
+  data: DataPublicPluginStart;
+}

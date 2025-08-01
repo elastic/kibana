@@ -47,7 +47,8 @@ const rectIntersect = (rect1: Rect, rect2: Rect) => {
 };
 
 // Turn off the optimization that hides elements that are not visible in the viewport
-jest.mock('./graph/constants', () => ({
+jest.mock('./constants', () => ({
+  ...jest.requireActual('./constants'),
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
 

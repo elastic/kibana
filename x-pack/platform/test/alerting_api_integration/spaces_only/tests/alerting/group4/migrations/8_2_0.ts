@@ -10,7 +10,6 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -22,11 +21,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     let testStart: null | number = null;
     before(async () => {
       testStart = Date.now();
-      await esArchiver.load('x-pack/test/functional/es_archives/alerting/8_2_0');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/alerting/8_2_0');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/alerting/8_2_0');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/alerting/8_2_0');
     });
 
     describe('rule with null snoozeEndTime value', () => {

@@ -20,7 +20,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { ESQLLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
@@ -46,7 +46,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { IUnifiedSearchPluginServices } from '../types';
+import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
@@ -146,6 +146,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onCancel?: () => void;
+  onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
@@ -185,6 +186,9 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableExternalPadding?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
   bubbleSubmitEvent?: boolean;
+
+  esqlEditorInitialState?: ESQLEditorProps['initialState'];
+  onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -444,6 +448,36 @@ export const QueryBarTopRow = React.memo(
       },
       [onSubmit]
     );
+
+    const {
+      onDraftChange,
+      isDirty: draftIsDirty,
+      query: draftQuery,
+      dateRangeFrom: draftDateRangeFrom,
+      dateRangeTo: draftDateRangeTo,
+    } = props;
+    const draft = useMemo(
+      () =>
+        onDraftChange && draftIsDirty
+          ? {
+              query: draftQuery,
+              dateRangeFrom: showDatePicker ? draftDateRangeFrom : undefined,
+              dateRangeTo: showDatePicker ? draftDateRangeTo : undefined,
+            }
+          : undefined,
+      [
+        onDraftChange,
+        draftIsDirty,
+        draftQuery,
+        draftDateRangeFrom,
+        draftDateRangeTo,
+        showDatePicker,
+      ]
+    );
+
+    useEffect(() => {
+      onDraftChange?.(draft);
+    }, [onDraftChange, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
@@ -745,6 +779,7 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
+            expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,
@@ -755,6 +790,8 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
+            initialState={props.esqlEditorInitialState}
+            onInitialStateChange={props.onEsqlEditorInitialStateChange}
           />
         )
       );

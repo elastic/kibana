@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './drilldown_definition';
+export type * from './drilldown_definition';
 export * from './drilldown_manager';

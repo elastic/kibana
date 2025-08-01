@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ServerlessRoleName } from '../../../../shared/lib/security/types';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -19,9 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Error: Failed to delete all indices with pattern [.ml-*]
     this.tags(['failsOnMKI']);
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       // Load logstash* data and create dataview for logstash*, logstash-2015.09.22
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
       );
@@ -31,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanAnomalyDetection();
       await ml.testResources.cleanMLSavedObjects();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

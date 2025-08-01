@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
@@ -44,6 +43,7 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
+import { ObservabilitySharedBrowserConfig } from '../common/config';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   DependencyOverviewLocator,
@@ -55,8 +55,6 @@ export interface ObservabilitySharedSetup {
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -89,9 +87,11 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private config: ObservabilitySharedBrowserConfig;
 
-  constructor() {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
@@ -107,6 +107,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      config: this.config,
     };
   }
 
@@ -118,7 +119,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });
@@ -130,6 +130,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
+      config: this.config,
     };
   }
 

@@ -11,7 +11,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 
@@ -100,32 +100,58 @@ export const installPrebuiltRulesPackageByVersion = async (
   return fleetResponse as InstallPackageResponse;
 };
 
-export const MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH = path.join(
+const MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH = path.join(
   path.dirname(__filename),
-  './fixtures/packages/mock-security_detection_engine-99.0.0.zip'
+  '../../../rules_management/prebuilt_rules/common/fixtures/packages/security_detection_engine-99.0.0.zip'
 );
+
+const FLEET_RATE_LIMIT_TIMEOUT = 10000; // 10 seconds
+
+interface InstallMockPrebuiltRulesPackageParams {
+  getService: FtrProviderContext['getService'];
+}
 
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
  */
-export const installMockPrebuiltRulesPackage = async (
-  es: Client,
-  supertest: SuperTest.Agent
-): Promise<InstallPackageResponse> => {
+export const installMockPrebuiltRulesPackage = async ({
+  getService,
+}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse> => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const log = getService('log');
+  const retryService = getService('retry');
+
+  log.info('Installing mock prebuilt rules package...');
+
   const buffer = fs.readFileSync(MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH);
-  const response = await supertest
-    .post(`/api/fleet/epm/packages`)
-    .set('kbn-xsrf', 'xxxx')
-    .set('elastic-api-version', '2023-10-31')
-    .type('application/zip')
-    .send(buffer)
-    .expect(200);
 
-  expect((response.body as InstallPackageResponse).items).toBeDefined();
-  expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+  const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
+    installMockPrebuiltRulesPackage.name,
+    async () => {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31')
+        .type('application/zip')
+        .send(buffer)
+        .expect(200);
 
-  await refreshSavedObjectIndices(es);
+      expect((response.body as InstallPackageResponse).items).toBeDefined();
+      expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
 
-  return response.body;
+      await refreshSavedObjectIndices(es);
+
+      log.success('Mock prebuilt rules package has been installed');
+
+      return response.body;
+    },
+    {
+      retryCount: MAX_RETRIES,
+      timeout: FLEET_RATE_LIMIT_TIMEOUT * 3,
+    }
+  );
+
+  return fleetResponse;
 };

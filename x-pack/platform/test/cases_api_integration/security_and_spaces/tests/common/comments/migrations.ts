@@ -11,7 +11,6 @@ import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -47,11 +46,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       it('adds the owner field', async () => {

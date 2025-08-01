@@ -9,6 +9,7 @@ import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
@@ -42,7 +43,8 @@ export interface CloudConfigType {
   serverless?: {
     project_id: string;
     project_name?: string;
-    project_type?: string;
+    project_type?: KibanaSolution;
+    product_tier?: KibanaProductTier;
     orchestrator_target?: string;
   };
 }
@@ -117,6 +119,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
         orchestratorTarget: this.config.serverless?.orchestrator_target,
+        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
+        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
+        // Use `core.pricing` when checking if a feature is available for the current product tier.
+        productTier: this.config.serverless?.product_tier,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

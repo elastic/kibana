@@ -19,10 +19,15 @@ import React, {
   Dispatch,
   useMemo,
   useEffect,
+  type ComponentProps,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
+import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, Subject, map } from 'rxjs';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+const storage = new Storage(localStorage);
 
 export interface RestorableStateProviderProps<TState extends object> {
   initialState?: Partial<TState>;
@@ -94,20 +99,27 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return <context.Provider value={value}>{children}</context.Provider>;
   });
 
-  const withRestorableState = <TProps extends object>(Component: React.ComponentType<TProps>) =>
-    forwardRef<RestorableStateProviderApi, TProps & RestorableStateProviderProps<TState>>(
-      function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
-        return (
-          <RestorableStateProvider
-            ref={ref}
-            initialState={initialState}
-            onInitialStateChange={onInitialStateChange}
-          >
-            <Component {...(props as TProps)} />
-          </RestorableStateProvider>
-        );
-      }
-    );
+  const withRestorableState = <TComponent extends React.ComponentType<any>>(
+    Component: TComponent
+  ) => {
+    const ComponentMemoized = React.memo(Component);
+    type TProps = ComponentProps<typeof ComponentMemoized>;
+
+    return forwardRef<
+      RestorableStateProviderApi,
+      TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
+    >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
+      return (
+        <RestorableStateProvider
+          ref={ref}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        >
+          <ComponentMemoized {...(props as TProps)} />
+        </RestorableStateProvider>
+      );
+    });
+  };
 
   const getInitialValue = <TKey extends keyof TState>(
     initialState: Partial<TState> | undefined,
@@ -168,8 +180,12 @@ export const createRestorableStateProvider = <TState extends object>() => {
   const useRestorableState = <TKey extends keyof TState>(
     key: TKey,
     initialValue: InitialValue<TState, TKey>,
-    shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>
+    options?: {
+      shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>;
+      shouldStoreDefaultValueRightAway?: boolean;
+    }
   ) => {
+    const { shouldIgnoredRestoredValue, shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const [value, _setValue] = useState(() =>
       getInitialValue(initialState$.getValue(), key, initialValue, shouldIgnoredRestoredValue)
@@ -189,15 +205,37 @@ export const createRestorableStateProvider = <TState extends object>() => {
       });
     });
 
+    useMount(() => {
+      const restorableState = initialState$.getValue();
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
+        onInitialStateChange?.({ ...restorableState, [key]: value });
+      }
+    });
+
     useInitialStateRefresh(key, initialValue, _setValue, shouldIgnoredRestoredValue);
 
     return [value, setValue] as const;
   };
 
-  const useRestorableRef = <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey]) => {
+  const useRestorableRef = <TKey extends keyof TState>(
+    key: TKey,
+    initialValue: TState[TKey],
+    options?: {
+      shouldStoreDefaultValueRightAway?: boolean;
+    }
+  ) => {
+    const { shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const initialState = initialState$.getValue();
     const valueRef = useRef(getInitialValue(initialState, key, initialValue));
+
+    useMount(() => {
+      const value = valueRef.current;
+      const restorableState = initialState$.getValue();
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
+        onInitialStateChange?.({ ...restorableState, [key]: value });
+      }
+    });
 
     useUnmount(() => {
       onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current });
@@ -210,7 +248,36 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return valueRef;
   };
 
-  return { withRestorableState, useRestorableState, useRestorableRef };
+  const useRestorableLocalStorage = <TKey extends keyof TState>(
+    key: TKey,
+    localStorageKey: string,
+    initialValue: TState[TKey]
+  ) => {
+    const [value, _setValue] = useRestorableState(
+      key,
+      storage.get(localStorageKey) ?? initialValue,
+      {
+        shouldStoreDefaultValueRightAway: true,
+      }
+    );
+
+    const setValue = useStableFunction<typeof _setValue>((newValue) => {
+      _setValue((prevValue) => {
+        const nextValue =
+          typeof newValue === 'function'
+            ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
+            : newValue;
+
+        storage.set(localStorageKey, nextValue);
+
+        return nextValue;
+      });
+    });
+
+    return [value, setValue] as const;
+  };
+
+  return { withRestorableState, useRestorableState, useRestorableRef, useRestorableLocalStorage };
 };
 
 const useStableFunction = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {

@@ -8,10 +8,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
-export * from './types';
+export type * from './types';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type SearchHomepageConfig = TypeOf<typeof configSchema>;

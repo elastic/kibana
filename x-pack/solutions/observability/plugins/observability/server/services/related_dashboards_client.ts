@@ -19,9 +19,11 @@ import type {
   RelevantPanel,
   RelatedDashboard,
   SuggestedDashboard,
+  LinkedDashboard,
 } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
+import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -36,8 +38,8 @@ export class RelatedDashboardsClient {
   ) {}
 
   public async fetchRelatedDashboards(): Promise<{
-    suggestedDashboards: RelatedDashboard[];
-    linkedDashboards: RelatedDashboard[];
+    suggestedDashboards: SuggestedDashboard[];
+    linkedDashboards: LinkedDashboard[];
   }> {
     const [alertDocument] = await Promise.all([
       this.alertsClient.getAlertById(this.alertId),
@@ -71,6 +73,8 @@ export class RelatedDashboardsClient {
 
   private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
     const alert = this.checkAlert();
+    if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
+
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
     const index = this.getRuleQueryIndex();
@@ -116,10 +120,7 @@ export class RelatedDashboardsClient {
     perPage?: number;
     limit?: number;
   }) {
-    const dashboards = await this.dashboardClient.search(
-      { limit: perPage, cursor: `${page}` },
-      { spaces: ['*'] }
-    );
+    const dashboards = await this.dashboardClient.search({ limit: perPage, cursor: `${page}` });
     const {
       result: { hits },
     } = dashboards;
@@ -156,6 +157,7 @@ export class RelatedDashboardsClient {
           id: d.id,
           title: d.attributes.title,
           description: d.attributes.description,
+          tags: d.attributes.tags,
           matchedBy: { index: [index] },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -206,6 +208,7 @@ export class RelatedDashboardsClient {
           id: d.id,
           title: d.attributes.title,
           description: d.attributes.description,
+          tags: d.attributes.tags,
           matchedBy: { fields: Array.from(allMatchingFields) },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -324,7 +327,7 @@ export class RelatedDashboardsClient {
     return fields;
   }
 
-  private async getLinkedDashboards(): Promise<RelatedDashboard[]> {
+  private async getLinkedDashboards(): Promise<LinkedDashboard[]> {
     const alert = this.checkAlert();
     const ruleId = alert.getRuleId();
     if (!ruleId) {
@@ -345,16 +348,16 @@ export class RelatedDashboardsClient {
     return linkedDashboards;
   }
 
-  private async getLinkedDashboardsByIds(ids: string[]): Promise<RelatedDashboard[]> {
+  private async getLinkedDashboardsByIds(ids: string[]): Promise<LinkedDashboard[]> {
     const linkedDashboardsResponse = await Promise.all(
       ids.map((id) => this.getLinkedDashboardById(id))
     );
-    return linkedDashboardsResponse.filter((dashboard): dashboard is RelatedDashboard =>
+    return linkedDashboardsResponse.filter((dashboard): dashboard is LinkedDashboard =>
       Boolean(dashboard)
     );
   }
 
-  private async getLinkedDashboardById(id: string): Promise<RelatedDashboard | null> {
+  private async getLinkedDashboardById(id: string): Promise<LinkedDashboard | null> {
     try {
       const dashboardResponse = await this.dashboardClient.get(id);
       return {
@@ -362,6 +365,7 @@ export class RelatedDashboardsClient {
         title: dashboardResponse.result.item.attributes.title,
         matchedBy: { linked: true },
         description: dashboardResponse.result.item.attributes.description,
+        tags: dashboardResponse.result.item.attributes.tags,
       };
     } catch (error) {
       if (error.output.statusCode === 404) {

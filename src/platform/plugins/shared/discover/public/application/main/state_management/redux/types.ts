@@ -13,9 +13,12 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -76,8 +79,11 @@ export interface TabState extends TabItem {
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
   uiState: {
+    esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
+    layout?: Partial<DiscoverLayoutRestorableState>;
+    searchDraft?: Partial<UnifiedSearchDraft>;
   };
 }
 

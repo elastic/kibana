@@ -11,7 +11,6 @@ import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '..';
 import { MessageAddEvent } from '../../../common/conversation_complete';
-import { FunctionVisibility } from '../../../common/functions/types';
 import { Message } from '../../../common/types';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { recallAndScore } from './utils/recall_and_score';
@@ -31,7 +30,7 @@ export function registerContextFunction({
       name: CONTEXT_FUNCTION_NAME,
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
-      visibility: FunctionVisibility.Internal,
+      isInternal: true,
     },
     async ({ messages, screenContexts, chat }, signal) => {
       const { analytics } = await resources.plugins.core.start();

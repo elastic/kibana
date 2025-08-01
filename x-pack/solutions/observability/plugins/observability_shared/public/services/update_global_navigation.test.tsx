@@ -6,12 +6,24 @@
  */
 
 import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
+import {
+  App,
+  AppDeepLink,
+  ApplicationStart,
+  AppUpdater,
+  type PricingServiceStart,
+} from '@kbn/core/public';
 import { casesFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
 const app = {} as unknown as App;
+const pricing = {
+  isFeatureAvailable: (featureId: string) => {
+    // Mock implementation for testing purposes
+    return featureId === 'observability:complete_overview';
+  },
+} as unknown as PricingServiceStart;
 
 describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
@@ -26,7 +38,7 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
@@ -47,11 +59,11 @@ describe('updateGlobalNavigation', () => {
         next: (cb: AppUpdater) => callback(cb(app)),
       } as unknown as Subject<AppUpdater>;
 
-      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+      updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+        visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
       });
     });
 
@@ -78,7 +90,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -87,7 +99,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'], // visibility set
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -115,11 +127,11 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });
@@ -146,7 +158,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -158,7 +170,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
 
@@ -183,7 +195,7 @@ describe('updateGlobalNavigation', () => {
           next: (cb: AppUpdater) => callback(cb(app)),
         } as unknown as Subject<AppUpdater>;
 
-        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+        updateGlobalNavigation({ capabilities, deepLinks, updater$, pricing });
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [
@@ -195,7 +207,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+          visibleIn: ['sideNav', 'home', 'kibanaOverview', 'globalSearch'],
         });
       });
     });

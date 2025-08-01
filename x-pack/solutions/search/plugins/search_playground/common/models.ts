@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticModelIds } from '@kbn/inference-common';
 import { ModelProvider, LLMs } from './types';
 
 export const MODELS: ModelProvider[] = [
@@ -55,5 +56,11 @@ export const MODELS: ModelProvider[] = [
     model: 'gemini-1.5-flash-002',
     promptTokenLimit: 2097152,
     provider: LLMs.gemini,
+  },
+  {
+    name: 'Elastic Managed LLM',
+    model: elasticModelIds.RainbowSprinkles,
+    promptTokenLimit: 200000,
+    provider: LLMs.inference,
   },
 ];

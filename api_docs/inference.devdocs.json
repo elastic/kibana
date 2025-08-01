@@ -259,7 +259,7 @@
             "label": "getDocumentation",
             "description": [],
             "signature": [
-              "(keywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
+              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
               "GetDocsOptions",
               ") => Record<string, string>"
             ],
@@ -272,7 +272,7 @@
                 "id": "def-server.EsqlDocumentBase.getDocumentation.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "keywords",
+                "label": "rawKeywords",
                 "description": [],
                 "signature": [
                   "string[]"

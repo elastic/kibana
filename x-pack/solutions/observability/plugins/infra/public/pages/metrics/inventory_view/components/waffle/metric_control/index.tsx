@@ -116,7 +116,7 @@ export const WaffleMetricControls = ({
     setMode('pick');
   }, [editModeCustomMetrics, onChangeCustomMetrics]);
 
-  if (!options.length || !metric.type) {
+  if (!metric.type) {
     throw Error(
       i18n.translate('xpack.infra.waffle.unableToSelectMetricErrorTitle', {
         defaultMessage: 'Unable to select options or value for metric.',

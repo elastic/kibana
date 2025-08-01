@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../config/ess/config.base.frozen.trial')
   );
 
   return {
@@ -19,7 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Entity Analytics - Entity Store Integration Tests - ESS Env - Trial License',
+      reportName: 'Core Analysis - Entity Store Integration Tests - ESS Env - Trial License',
+    },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 360000 * 2,
     },
   };
 }

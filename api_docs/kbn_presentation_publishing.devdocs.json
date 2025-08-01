@@ -1622,6 +1622,77 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.findSavedObjectRef",
+        "type": "Function",
+        "tags": [],
+        "label": "findSavedObjectRef",
+        "description": [],
+        "signature": [
+          "(savedObjectType: string, references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.findSavedObjectRef.$1",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.findSavedObjectRef.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.getDescription",
         "type": "Function",
         "tags": [],
@@ -4387,7 +4458,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PublishesDataViews",
-        "description": [],
+        "description": [
+          "\nThis API publishes a list of data views that it uses. Note that this should not contain any\nad-hoc data views."
+        ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8589,6 +8662,21 @@
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/publishing_subject/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.SAVED_OBJECT_REF_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECT_REF_NAME",
+        "description": [],
+        "signature": [
+          "\"savedObjectRef\""
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

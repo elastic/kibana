@@ -146,4 +146,26 @@ describe('InTableSearchInput', () => {
 
     expect(goToPrevMatch).toHaveBeenCalled();
   });
+
+  it('applies the initial value', async () => {
+    const goToPrevMatch = jest.fn();
+    const goToNextMatch = jest.fn();
+    const onChangeSearchTerm = jest.fn();
+    const onHideInput = jest.fn();
+
+    render(
+      <InTableSearchInput
+        initialInTableSearchTerm="initial"
+        matchesCount={1}
+        activeMatchPosition={10}
+        isProcessing={false}
+        goToPrevMatch={goToPrevMatch}
+        goToNextMatch={goToNextMatch}
+        onChangeSearchTerm={onChangeSearchTerm}
+        onHideInput={onHideInput}
+      />
+    );
+
+    expect(screen.getByTestId(INPUT_TEST_SUBJ)).toHaveValue('initial');
+  });
 });
