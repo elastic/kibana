@@ -835,6 +835,29 @@
     "dynamic": false,
     "properties": {}
   },
+  "cloud-connector": {
+    "dynamic": false,
+    "properties": {
+      "cloudProvider": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "packagePolicyCount": {
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
