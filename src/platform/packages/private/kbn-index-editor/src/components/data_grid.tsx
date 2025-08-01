@@ -162,9 +162,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rows,
         columns: props.columns,
         onValueChange,
+        savingDocs,
         dataTableRef,
       }),
-    [rows, props.columns, onValueChange, dataTableRef]
+    [rows, props.columns, onValueChange, dataTableRef, savingDocs]
   );
   const CellValueRenderer = useMemo(() => {
     return getCellValueRenderer(rows, savingDocs, dataTableRef, isIndexCreated);
