@@ -10,12 +10,11 @@
 import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import {
-  ControlGroupEditorConfig,
   ControlValuesSource,
   ControlOutputOption,
   DEFAULT_CONTROL_OUTPUT,
-  DefaultDataControlState,
-} from '../../../../../common';
+} from '@kbn/controls-constants';
+import { ControlGroupEditorConfig, DefaultDataControlState } from '../../../../../common';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker } from '../data_view_and_field_picker';
 import { CONTROL_OUTPUT_OPTIONS, DEFAULT_ESQL_VARIABLE_NAME } from '../editor_constants';

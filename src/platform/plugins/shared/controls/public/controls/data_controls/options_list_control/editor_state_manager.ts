@@ -11,7 +11,7 @@ import {
   StateComparators,
   initializeStateManager,
 } from '@kbn/presentation-publishing/state_manager';
-import { ControlValuesSource, ControlOutputOption } from '../../../../common';
+import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
 import { OptionsListControlState } from '../../../../common/options_list';
 import { DEFAULT_SEARCH_TECHNIQUE } from './constants';
 

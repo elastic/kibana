@@ -25,12 +25,12 @@ import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
-interface PublishesField {
+export interface PublishesField {
   field$: PublishingSubject<DataViewField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-interface PublishesControlInputOutput {
+export interface PublishesControlInputOutput {
   valuesSource$: PublishingSubject<ControlValuesSource>;
   output$: PublishingSubject<ControlOutputOption>;
 }

@@ -11,8 +11,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
-import { ControlValuesSource, ControlOutputOption } from '../../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSearchTechnique,

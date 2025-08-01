@@ -157,11 +157,6 @@ export const DataControlEditorStrings = {
           i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.emptyText', {
             defaultMessage: 'Run the query to get a preview of possible values.',
           }),
-        getMoreText: (numMore: number) =>
-          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.more', {
-            defaultMessage: '{numMore} more…',
-            values: { numMore },
-          }),
         getErrorTitle: () =>
           i18n.translate(
             'controls.controlGroup.manageControl.dataSource.valuesPreview.errorTitle',

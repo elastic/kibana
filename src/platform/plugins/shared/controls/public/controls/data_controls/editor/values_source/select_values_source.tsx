@@ -17,10 +17,9 @@ import {
   DEFAULT_CONTROL_VALUES_SOURCE,
   ControlOutputOption,
   ControlValuesSource,
-  DefaultDataControlState,
-  ControlGroupEditorConfig,
   OPTIONS_LIST_CONTROL,
-} from '../../../../../common';
+} from '@kbn/controls-constants';
+import { DefaultDataControlState, ControlGroupEditorConfig } from '../../../../../common';
 import { ListOptionsInput } from './list_options_input/list_options_input';
 import { DataControlEditorStrings } from '../../data_control_constants';
 import { DataViewAndFieldPicker, useDataViewAndFieldContext } from '../data_view_and_field_picker';

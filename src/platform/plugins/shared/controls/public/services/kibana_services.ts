@@ -32,15 +32,20 @@ export let usageCollectionService: UsageCollectionStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
-export const setKibanaServices = (kibanaCore: CoreStart, deps: ControlsPluginStartDeps) => {
+export const setKibanaServices = (
+  kibanaCore: CoreStart,
+  deps: ControlsPluginStartDeps,
+  storage: Storage
+) => {
   coreServices = kibanaCore;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
   uiActionsService = deps.uiActions;
   expressionsService = deps.expressions;
-  storageService = deps.storage;
   fieldsMetadataService = deps.fieldsMetadata;
   usageCollectionService = deps.usageCollection;
+
+  storageService = storage;
 
   servicesReady$.next(true);
 };

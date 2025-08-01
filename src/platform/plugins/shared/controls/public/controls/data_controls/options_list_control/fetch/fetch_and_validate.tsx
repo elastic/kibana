@@ -19,7 +19,8 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { ControlValuesSource } from '../../../../../common';
+import { ControlValuesSource } from '@kbn/controls-constants';
+
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,

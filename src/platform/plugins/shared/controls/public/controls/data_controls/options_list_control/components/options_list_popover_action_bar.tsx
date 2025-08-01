@@ -28,7 +28,7 @@ import {
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { ControlValuesSource } from '../../../../../common';
+import { ControlValuesSource } from '@kbn/controls-constants';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
 import {
   OptionsListSearchTechnique,

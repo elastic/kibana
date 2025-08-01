@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
-import { ControlValuesSource, ControlOutputOption } from '../../../../common';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {

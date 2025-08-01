@@ -19,6 +19,7 @@ import { dataService, dataViewsService } from '../../../services/kibana_services
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { RangesliderControlState } from './types';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -90,6 +91,8 @@ describe('RangesliderControlApi', () => {
     test('should not set filters$ when value is not provided', async () => {
       const { api } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
         },
@@ -103,6 +106,8 @@ describe('RangesliderControlApi', () => {
     test('should set filters$ when value is provided', async () => {
       const { api } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           value: ['5', '10'],
@@ -138,6 +143,8 @@ describe('RangesliderControlApi', () => {
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'notGonnaFindMeDataView',
           fieldName: 'myFieldName',
           value: ['5', '10'],
@@ -160,6 +167,8 @@ describe('RangesliderControlApi', () => {
       max = null; // simulate no results by returning max aggregation value of null
       const { Component } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           value: ['5', '10'],
@@ -179,6 +188,8 @@ describe('RangesliderControlApi', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
       const { Component } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
@@ -200,6 +211,8 @@ describe('RangesliderControlApi', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
@@ -214,6 +227,8 @@ describe('RangesliderControlApi', () => {
     test('retains value from initial state', async () => {
       const { api } = await factory.buildControl({
         initialState: {
+          output: ControlOutputOption.DSL,
+          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           step: 1024,
@@ -237,6 +252,8 @@ describe('RangesliderControlApi', () => {
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
           controlGroupApi={controlGroupApi}
+          output={ControlOutputOption.DSL}
+          valuesSource={ControlValuesSource.DSL}
         />
       );
       expect(
@@ -254,6 +271,8 @@ describe('RangesliderControlApi', () => {
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}
           controlGroupApi={controlGroupApi}
+          output={ControlOutputOption.DSL}
+          valuesSource={ControlValuesSource.DSL}
         />
       );
 
