@@ -22,9 +22,11 @@ import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
 import { internalStateSlice } from '../internal_state';
 import {
+  fromSavedObjectTabToSavedSearch,
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
+import { appendAdHocDataViews } from './data_views';
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
   'internalState/saveDiscoverSession',
@@ -50,6 +52,13 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
   ) => {
     const state = getState();
     const allTabs = selectAllTabs(state);
+    const adHocDataViews = new Map<
+      string,
+      {
+        dataViewSpec: DataViewSpec;
+        tabs: DiscoverSessionTab[];
+      }
+    >();
 
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       allTabs.map(async (tab) => {
@@ -86,41 +95,64 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           updatedTab.visContext = overriddenVisContextAfterInvalidation;
         }
 
-        const dataView = updatedTab.serializedSearchSource.index;
-        const profileDataViewIds = state.defaultProfileAdHocDataViewIds;
+        const dataViewSpec = updatedTab.serializedSearchSource.index;
 
-        // If the Discover session is using a default profile ad hoc data view,
-        // we copy it with a new ID to avoid conflicts with the profile defaults
-        if (isObject(dataView) && dataView.id && profileDataViewIds.includes(dataView.id)) {
-          const replacementSpec: DataViewSpec & Required<Pick<DataViewSpec, 'id'>> = {
-            ...dataView,
-            id: uuidv4(),
-            name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
-              defaultMessage: '{dataViewName} ({discoverSessionTitle})',
-              values: {
-                dataViewName: dataView.name ?? dataView.title,
-                discoverSessionTitle: updatedTab.label,
-              },
-            }),
-          };
+        if (isObject(dataViewSpec) && dataViewSpec.id) {
+          const adHocEntry = adHocDataViews.get(dataViewSpec.id) ?? { dataViewSpec, tabs: [] };
 
-          updatedTab.serializedSearchSource.index = replacementSpec;
-
-          // If the data view was replaced, we need to update the filter references
-          if (Array.isArray(updatedTab.serializedSearchSource.filter)) {
-            updatedTab.serializedSearchSource.filter = updateFilterReferences(
-              updatedTab.serializedSearchSource.filter,
-              dataView.id,
-              replacementSpec.id
-            );
-          }
+          adHocEntry.tabs.push(updatedTab);
+          adHocDataViews.set(dataViewSpec.id, adHocEntry);
         }
 
         return updatedTab;
       })
     );
 
-    const updatedDiscoverSession: SaveDiscoverSessionParams = {
+    for (const adHocEntry of adHocDataViews.values()) {
+      const { dataViewSpec, tabs } = adHocEntry;
+
+      if (!dataViewSpec.id) {
+        continue;
+      }
+
+      if (state.defaultProfileAdHocDataViewIds.includes(dataViewSpec.id)) {
+        // If the Discover session is using a default profile ad hoc data view,
+        // we copy it with a new ID to avoid conflicts with the profile defaults
+        const replacementSpec: DataViewSpec & Required<Pick<DataViewSpec, 'id'>> = {
+          ...dataViewSpec,
+          id: uuidv4(),
+          name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
+            defaultMessage: '{dataViewName} ({discoverSessionTitle})',
+            values: {
+              dataViewName: dataViewSpec.name ?? dataViewSpec.title,
+              discoverSessionTitle: newTitle,
+            },
+          }),
+        };
+
+        // Update all applicable tabs to use the new data view spec
+        for (const tab of tabs) {
+          tab.serializedSearchSource.index = replacementSpec;
+
+          // If the data view was replaced, we need to update the filter references
+          if (Array.isArray(tab.serializedSearchSource.filter)) {
+            tab.serializedSearchSource.filter = updateFilterReferences(
+              tab.serializedSearchSource.filter,
+              dataViewSpec.id,
+              replacementSpec.id
+            );
+          }
+        }
+
+        // Skip field list fetching since the existing data view already has the fields
+        const dataView = await services.dataViews.create(replacementSpec, true);
+
+        // Make sure our state is aware of the copy so it appears in the UI
+        dispatch(appendAdHocDataViews(dataView));
+      }
+    }
+
+    const saveParams: SaveDiscoverSessionParams = {
       id: state.persistedDiscoverSession?.id,
       title: newTitle,
       description: newDescription,
@@ -134,19 +166,32 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       isTitleDuplicateConfirmed,
     };
 
-    const id = await services.savedSearch.saveDiscoverSession(updatedDiscoverSession, saveOptions);
+    const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
-    if (id) {
-      allTabs.forEach((tab) => {
-        dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
+    if (discoverSession) {
+      await Promise.all(
+        updatedTabs.map(async (tab) => {
+          dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
-        const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+          const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+          const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
 
-        tabStateContainer?.appState.resetInitialState();
-      });
+          if (!tabStateContainer) {
+            return;
+          }
+
+          const savedSearch = await fromSavedObjectTabToSavedSearch({
+            tab,
+            discoverSession,
+            services,
+          });
+
+          tabStateContainer?.savedSearchState.set(savedSearch);
+          tabStateContainer?.appState.resetInitialState();
+        })
+      );
     }
 
-    return { id };
+    return { id: discoverSession?.id };
   }
 );
