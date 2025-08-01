@@ -4,7 +4,8 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-common-types"
     ]
   },
   "include": [
@@ -14,11 +15,12 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/std",
     "@kbn/core",
-    "@kbn/cache-cli",
-    "@kbn/dev-cli-runner",
-    "@kbn/kibana-api-cli",
-    "@kbn/inference-cli",
-    "@kbn/ai-tools"
+    "@kbn/inference-common",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/inference-plugin",
+    "@kbn/inference-prompt-utils",
+    "@kbn/zod",
   ]
 }
