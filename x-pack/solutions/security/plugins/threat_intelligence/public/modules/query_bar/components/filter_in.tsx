@@ -16,7 +16,7 @@ import {
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
 import { type Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { FILTER_FOR_TITLE, FILTER_IN_ANNOUNCEMENT } from './translations';
+import { FILTER_IN_ANNOUNCEMENT } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
 
