@@ -17,6 +17,9 @@ export function sortAndTruncateAnalyzedFields(
   const { fields, ...meta } = analysis;
   const [nonEmptyFields, emptyFields] = partition(analysis.fields, (field) => !field.empty);
 
+  // randomize field selection to get a somewhat more illustrative set of fields when
+  // the # of fields exceeds the threshold, instead of alphabetically sorted
+  // additionally, prefer non-empty fields over empty fields
   const sortedFields = [...shuffle(nonEmptyFields), ...shuffle(emptyFields)];
 
   const filteredFields = dropEmpty ? sortedFields.filter((field) => !field.empty) : fields;

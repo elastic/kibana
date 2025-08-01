@@ -2,25 +2,22 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
   },
-  "include": [
-    "**/*.ts",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/calculate-auto",
+    "@kbn/core-elasticsearch-server",
     "@kbn/core",
     "@kbn/es-query",
-    "@kbn/std",
-    "@kbn/inference-common",
-    "@kbn/aiops-log-pattern-analysis",
     "@kbn/es-types",
-    "@kbn/calculate-auto",
+    "@kbn/inference-common",
+    "@kbn/inference-plugin",
+    "@kbn/inference-prompt-utils",
+    "@kbn/std",
     "@kbn/traced-es-client",
+    "@kbn/zod"
   ]
 }

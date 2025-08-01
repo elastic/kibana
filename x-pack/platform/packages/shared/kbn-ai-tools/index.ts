@@ -20,3 +20,4 @@ export {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
 } from './src/utils/p_value_to_label';
+export { executeAsEsqlAgent } from './src/tools/esql';
