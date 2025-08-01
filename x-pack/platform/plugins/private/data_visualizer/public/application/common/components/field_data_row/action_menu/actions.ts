@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type { MutableRefObject } from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   type VisualizeFieldContext,
@@ -28,10 +28,13 @@ export function getActions(
   combinedQuery: CombinedQuery,
   dataViewEditorRef: MutableRefObject<(() => void | undefined) | undefined> | undefined
 ): Array<Action<FieldVisConfig>> {
-  const { lens: lensPlugin, maps: mapsPlugin, data } = services;
+  const { lens: lensPlugin, maps: mapsPlugin, data, timefilter: timeFilter } = services;
 
   const actions: Array<Action<FieldVisConfig>> = [];
   const filters = data?.query.filterManager.getFilters() ?? [];
+
+  const isModifiedEvent = (event: MouseEvent) =>
+    !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
   const refreshPage = () => {
     const refresh: Refresh = {
@@ -53,13 +56,17 @@ export function getActions(
       icon: 'lensApp',
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
-      onClick: (item: FieldVisConfig) => {
+      onClick: (item: FieldVisConfig, event) => {
         const lensAttributes = getLensAttributes(dataView, combinedQuery, filters, item);
         if (lensAttributes) {
-          lensPlugin.navigateToPrefilledEditor({
-            id: `dataVisualizer-${item.fieldName}`,
-            attributes: lensAttributes,
-          });
+          lensPlugin.navigateToPrefilledEditor(
+            {
+              id: `dataVisualizer-${item.fieldName}`,
+              attributes: lensAttributes,
+              timeRange: timeFilter.getTime(),
+            },
+            { openInNewTab: isModifiedEvent(event) }
+          );
         }
       },
       'data-test-subj': 'dataVisualizerActionViewInLensButton',
