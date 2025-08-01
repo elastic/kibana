@@ -45,7 +45,7 @@ export const useWaffleFilters = () => {
     },
   } = services;
   const {
-    inventoryPrefill: { setPartial },
+    inventoryPrefill: { setPrefillState },
   } = useAlertPrefillContext();
 
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
@@ -58,10 +58,12 @@ export const useWaffleFilters = () => {
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      const stateFromSavedView = mapInventoryViewToState(currentView);
+      setUrlState(stateFromSavedView);
+
       previousViewId.current = currentView.id;
     }
-  }, [currentView, setUrlState]);
+  }, [currentView, setPrefillState, setUrlState]);
 
   useEffect(() => {
     if (!deepEqual(queryStringService.getQuery(), urlState)) {
@@ -89,8 +91,8 @@ export const useWaffleFilters = () => {
   );
 
   useEffect(() => {
-    setPartial({ kuery: urlState.query });
-  }, [setPartial, urlState.query]);
+    setPrefillState({ kuery: urlState.query });
+  }, [setPrefillState, urlState.query]);
 
   return {
     filterQuery: urlState,

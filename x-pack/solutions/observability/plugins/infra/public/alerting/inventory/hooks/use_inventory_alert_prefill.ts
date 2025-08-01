@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useReducer } from 'react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type {
   SnapshotMetricInput,
@@ -28,7 +28,7 @@ const initialState: InventoryPrefillState = {
   kuery: undefined,
   metric: { type: 'cpuV2' },
   customMetrics: [],
-  schema: DataSchemaFormat.ECS,
+  schema: 'ecs',
   region: '',
   accountId: '',
 };
@@ -58,7 +58,7 @@ export const useInventoryAlertPrefill = () => {
       schema: state.schema,
       region: state.region,
       accountId: state.accountId,
-      setPartial: (value: Partial<InventoryPrefillState>) =>
+      setPrefillState: (value: Partial<InventoryPrefillState>) =>
         dispatch({ type: 'SET_PARTIAL', value }),
       reset: () => dispatch({ type: 'RESET' }),
     }),
