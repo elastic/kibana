@@ -23,7 +23,7 @@ import {
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { difference, intersection } from 'lodash';
+import { difference, intersection, isEqual } from 'lodash';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
 import { KibanaContextExtra } from '../types';
 import {
@@ -119,6 +119,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         // if there is a new column, we added at it original index
         preservedOrder.splice(newColumnIndex, 0, newColumn);
       });
+    }
+
+    if (!isEqual(preservedOrder, activeColumns)) {
+      setActiveColumns(preservedOrder);
     }
 
     return preservedOrder;
