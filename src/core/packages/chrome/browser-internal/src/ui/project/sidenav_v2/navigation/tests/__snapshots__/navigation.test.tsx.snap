@@ -149,11 +149,6 @@ Array [
         "label": "Alerts and Insights",
       },
       Object {
-        "id": "node-3",
-        "items": Array [],
-        "label": "Machine Learning",
-      },
-      Object {
         "id": "node-4",
         "items": Array [
           Object {
@@ -605,21 +600,6 @@ Array [
           },
         ],
         "label": null,
-      },
-      Object {
-        "id": "node-1",
-        "items": Array [],
-        "label": "Anomaly detection",
-      },
-      Object {
-        "id": "node-2",
-        "items": Array [],
-        "label": "Data frame analytics",
-      },
-      Object {
-        "id": "node-3",
-        "items": Array [],
-        "label": "AIOps labs",
       },
     ],
   },

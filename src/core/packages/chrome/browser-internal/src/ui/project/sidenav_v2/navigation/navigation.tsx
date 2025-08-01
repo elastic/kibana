@@ -253,13 +253,13 @@ export const toNavigationItems = (
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
             if (child.sideNavStatus === 'hidden') return null;
-            if (!navNode.children?.length) return null;
+            if (!child.children?.length) return null;
 
             warnUnsupportedNavNodeOptions(child);
 
             const secondaryItems: SecondaryMenuItem[] =
-              child
-                .children!.filter((subChild) => subChild.sideNavStatus !== 'hidden')
+              child.children
+                .filter((subChild) => subChild.sideNavStatus !== 'hidden')
                 .map((subChild) => {
                   warnUnsupportedNavNodeOptions(subChild);
                   return {
