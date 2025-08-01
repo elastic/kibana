@@ -525,8 +525,6 @@ const componentStyles = {
 
       '.unifiedDataTable__cellValue': {
         fontFamily: euiTheme.font.familyCode,
-        display: 'inline-block',
-        textAlign: 'left',
       },
 
       // Custom styles for data grid header cell.
