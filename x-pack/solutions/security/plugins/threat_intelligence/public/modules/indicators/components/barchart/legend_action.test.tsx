@@ -48,7 +48,7 @@ describe('IndicatorBarchartLegendAction', () => {
       label: 'host.name',
       value: 'string',
     };
-   
+
     render(
       <IndicatorBarchartLegendAction
         announceIndicatorActionChange={announceFn}
