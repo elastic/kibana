@@ -38,10 +38,13 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
                   Tool result: [{ indexName: '.alerts', mappings: {...} }]
                   `,
     schema: indexExplorerSchema,
-    handler: async ({ query, indexPattern = '*', limit = 1 }, { esClient, modelProvider }) => {
+    handler: async (
+      { query: nlQuery, indexPattern = '*', limit = 1 },
+      { esClient, modelProvider }
+    ) => {
       const model = await modelProvider.getDefaultModel();
       const result = await indexExplorer({
-        query,
+        nlQuery,
         indexPattern,
         limit,
         esClient: esClient.asCurrentUser,
@@ -54,7 +57,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
             type: ToolResultType.other,
             data: {
               indices: result,
-              original_query: query,
+              nlQuery,
               index_pattern: indexPattern,
               limit,
             },

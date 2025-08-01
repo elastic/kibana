@@ -28,12 +28,13 @@ const searchDslSchema = z.object({
 export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof searchDslSchema> => {
   return {
     id: builtinToolIds.naturalLanguageSearch,
-    description: 'Run a DSL search query on one index and return matching documents.',
+    description:
+      'Given a natural language query, run a DSL search query on one index and return matching documents.',
     schema: searchDslSchema,
-    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
+    handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
       const result = await naturalLanguageSearch({
-        query,
+        nlQuery,
         context,
         index,
         model,

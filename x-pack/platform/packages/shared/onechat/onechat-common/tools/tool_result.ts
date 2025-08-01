@@ -56,6 +56,7 @@ export interface ErrorResult {
   data: {
     message: string;
     stack?: unknown;
+    metadata?: Record<string, unknown>;
   };
 }
 

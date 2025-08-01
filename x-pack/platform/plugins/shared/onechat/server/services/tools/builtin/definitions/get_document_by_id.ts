@@ -45,11 +45,13 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
       return {
         results: [
           {
-            type: ToolResultType.other,
+            type: ToolResultType.error,
             data: {
-              id: result.id,
-              index: result.index,
               message: `Document with ID '${result.id}' not found in index '${result.index}'`,
+              metadata: {
+                id: result.id,
+                index: result.index,
+              },
             },
           },
         ],

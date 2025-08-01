@@ -12,7 +12,7 @@ import { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResult, ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('The query to generate an ES|QL query from.'),
+  query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
     .string()
     .optional()
@@ -30,10 +30,10 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
     id: builtinToolIds.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
-    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
+    handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
       const esqlResponse = await generateEsql({
-        query,
+        nlQuery,
         context,
         index,
         model,
@@ -52,7 +52,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
           type: ToolResultType.other,
           data: {
             answer: esqlResponse.answer,
-            original_query: query,
+            nlQuery,
             context,
             index,
           },
