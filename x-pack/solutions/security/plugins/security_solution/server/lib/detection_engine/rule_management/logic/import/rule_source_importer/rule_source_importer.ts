@@ -127,6 +127,10 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
+    this.logger.error('THIS IS A TEST ERROR');
+    this.logger.warn('THIS IS A TEST WARN');
+    this.logger.info('THIS IS A TEST INFO');
+    this.logger.debug('THIS IS A TEST DEBUG');
     if (!this.latestPackagesInstalled) {
       await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logger);
       this.latestPackagesInstalled = true;

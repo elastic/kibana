@@ -1010,6 +1010,10 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_warnings: [],
             action_connectors_errors: [],
           });
+
+          log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+
+          expect(true).toBe(false);
         });
 
         it('imports a rule with connector when connector includes an originId', async () => {
