@@ -603,11 +603,10 @@ export function transformOutputToFullPolicyOutput(
     ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
-    ...(ssl ? { ssl } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
     ...(secrets ? { secrets } : {}),
   };
-  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+  if (ssl) {
     newOutput.ssl = {
       ...newOutput.ssl,
       ...ssl,

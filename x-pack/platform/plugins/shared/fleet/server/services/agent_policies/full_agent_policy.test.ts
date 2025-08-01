@@ -1501,6 +1501,7 @@ ssl.test: 123
         "ssl": Object {
           "certificate": "",
           "certificate_authorities": Array [],
+          "verification_mode": "none",
         },
         "type": "logstash",
       }
