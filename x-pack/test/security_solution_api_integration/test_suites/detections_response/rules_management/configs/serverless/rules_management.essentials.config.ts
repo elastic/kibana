@@ -7,21 +7,11 @@
 
 import type { CreateTestConfigOptions } from '../../../../../config/serverless/config.base.essentials';
 import { createTestConfig } from '../../../../../config/serverless/config.base.essentials';
+import { LOGGING_CONFIG } from '../constants';
 
 export function createEssentialsTierTestConfig(options: CreateTestConfigOptions) {
   return createTestConfig({
-    kbnTestServerArgs: [
-      `--logging.loggers=${JSON.stringify([
-        {
-          name: 'plugins.securitySolution',
-          level: 'debug',
-        },
-        {
-          name: 'plugins.fleet',
-          level: 'debug',
-        },
-      ])}`,
-    ],
+    kbnTestServerArgs: [`--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`],
     ...options,
   });
 }

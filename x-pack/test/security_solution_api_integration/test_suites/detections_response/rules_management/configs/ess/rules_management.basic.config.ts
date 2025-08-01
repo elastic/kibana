@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { LOGGING_CONFIG } from '../constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -18,16 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--logging.loggers=${JSON.stringify([
-          {
-            name: 'plugins.securitySolution',
-            level: 'debug',
-          },
-          {
-            name: 'plugins.fleet',
-            level: 'debug',
-          },
-        ])}`,
+        `--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`,
       ],
     },
   };
