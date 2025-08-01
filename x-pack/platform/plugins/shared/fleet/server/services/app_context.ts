@@ -358,82 +358,12 @@ class AppContextService {
     return this.lockManagerService;
   }
   public getO11yAndSecurityAssistantsStatus = async () => {
-    // try to use the existing service-based approach
-    const logger = this.getLogger();
-
-    logger.debug(
-      'getO11yAndSecurityAssistantsStatus: Attempting to fetch assistants status via API calls'
-    );
-
-    // Continue with the original service-based approach
-    const results = await this.getAssistantStatusViaServices(
-      (this.securityStart as any)?.elasticAssistant,
-      (this.data as any)?.observability?.assistant
-    );
-    logger.debug(
-      `getO11yAndSecurityAssistantsStatus: Fetched assistants status via API calls, ${JSON.stringify(
-        results
-      )}`
-    );
+    // TODO: Implement a service-based approach to get assistants status, we will need to extract/export functionality from the security and o11y assistant endpoints
     return {
-      securityAssistantStatus: results.security,
-      observabilityAssistantStatus: results.observability,
+      securityAssistantStatus: true,
+      observabilityAssistantStatus: true,
     };
   };
-
-  // Utilize the service-based approach to get assistants status
-  private async getAssistantStatusViaServices(
-    elasticAssistantService: any, // Security assistant service
-    observabilityService: any // Observability assistant service
-  ) {
-    const results = {
-      security: {},
-      observability: {},
-    };
-
-    // Security assistant via service
-    try {
-      const kbDataClient = await elasticAssistantService.getAIAssistantKnowledgeBaseDataClient();
-      if (kbDataClient) {
-        const setupAvailable = await kbDataClient.isSetupAvailable();
-        const isInferenceEndpointExists = await kbDataClient.isInferenceEndpointExists();
-        const securityLabsExists = await kbDataClient.isSecurityLabsDocsLoaded();
-        const userDataExists = await kbDataClient.isUserDataExists();
-        const productDocumentationStatus = await kbDataClient.getProductDocumentationStatus();
-
-        results.security = {
-          setupAvailable,
-          isInferenceEndpointExists,
-          securityLabsExists,
-          userDataExists,
-          productDocumentationStatus,
-        };
-      }
-    } catch (error) {
-      results.security = { error: error.message };
-    }
-
-    // Observability assistant via service
-    try {
-      const mockRequest = {
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: { href: {} },
-        raw: { req: { url: '/' } },
-        isFakeRequest: true,
-      } as unknown as KibanaRequest;
-
-      const client = await observabilityService.getClient({ request: mockRequest });
-      const status = await client.getKnowledgeBaseStatus();
-      results.observability = status;
-    } catch (error) {
-      results.observability = { error: error.message };
-    }
-
-    return results;
-  }
 }
 
 export const appContextService = new AppContextService();
