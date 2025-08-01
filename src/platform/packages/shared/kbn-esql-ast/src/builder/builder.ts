@@ -36,13 +36,14 @@ import {
   ESQLStringLiteral,
   ESQLBinaryExpression,
   ESQLUnaryExpression,
-  ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
   ESQLMap,
   ESQLMapEntry,
+  ESQLTimeDurationLiteral,
+  ESQLDatePeriodLiteral,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -443,20 +444,43 @@ export namespace Builder {
       };
 
       /**
-       * Constructs "time interval" literal node.
+       * Constructs time interval literal node.
        *
        * @example 1337 milliseconds
        */
-      export const qualifiedInteger = (
-        quantity: ESQLTimeInterval['quantity'],
-        unit: ESQLTimeInterval['unit'],
+      export const timeDuration = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeInterval => {
+      ): ESQLTimeDurationLiteral => {
         return {
           ...Builder.parserFields(fromParser),
-          type: 'timeInterval',
+          type: 'literal',
+          literalType: 'time_duration',
           unit,
           quantity,
+          value: `${quantity} ${unit}`,
+          name: `${quantity} ${unit}`,
+        };
+      };
+
+      /**
+       * Constructs date period literal node.
+       *
+       * @example 1337 milliseconds
+       */
+      export const datePeriod = (
+        quantity: ESQLTimeDurationLiteral['quantity'],
+        unit: ESQLTimeDurationLiteral['unit'],
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLDatePeriodLiteral => {
+        return {
+          ...Builder.parserFields(fromParser),
+          type: 'literal',
+          literalType: 'date_period',
+          unit,
+          quantity,
+          value: `${quantity} ${unit}`,
           name: `${quantity} ${unit}`,
         };
       };

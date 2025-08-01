@@ -58,11 +58,6 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
-  visitTimeIntervalLiteral?: (
-    node: types.ESQLTimeInterval,
-    parent: types.ESQLProperNode | undefined,
-    walker: WalkerVisitorApi
-  ) => void;
   visitInlineCast?: (
     node: types.ESQLInlineCast,
     parent: types.ESQLProperNode | undefined,
@@ -709,10 +704,6 @@ export class Walker {
       }
       case 'list': {
         this.walkListLiteral(node, parent);
-        break;
-      }
-      case 'timeInterval': {
-        (options.visitTimeIntervalLiteral ?? options.visitAny)?.(node, parent, this);
         break;
       }
       case 'inlineCast': {

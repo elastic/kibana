@@ -20,7 +20,6 @@ import type {
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
-  ESQLTimeInterval,
 } from '../../../types';
 import * as generic from '../../generic';
 import { isColumn, isFunctionExpression, isParamLiteral } from '../../../ast/is';
@@ -111,7 +110,7 @@ export interface StatsFieldSummary {
   /**
    * A list of terminal nodes that were found in the definition.
    */
-  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList | ESQLTimeInterval>;
+  terminals: Array<ESQLColumn | ESQLLiteral | ESQLList>;
 
   /**
    * A formatted list of field names which were used for new field
@@ -168,9 +167,6 @@ const summarizeField = (query: EsqlQuery, arg: ESQLProperNode): StatsFieldSummar
       usedFields.add(LeafPrinter.column(node));
     },
     visitListLiteral(node) {
-      terminals.push(node);
-    },
-    visitTimeIntervalLiteral(node) {
       terminals.push(node);
     },
   });

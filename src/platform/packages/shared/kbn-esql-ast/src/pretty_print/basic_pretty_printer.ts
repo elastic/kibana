@@ -244,7 +244,7 @@ export class BasicPrettyPrinter {
     })
 
     .on('visitTimeIntervalLiteralExpression', (ctx) => {
-      const formatted = LeafPrinter.timeInterval(ctx.node);
+      const formatted = LeafPrinter.timespan(ctx.node);
       return this.decorateWithComments(ctx.node, formatted);
     })
 

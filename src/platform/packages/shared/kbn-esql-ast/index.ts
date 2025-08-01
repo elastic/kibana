@@ -15,7 +15,7 @@ export type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
-  ESQLTimeInterval,
+  ESQLTimeSpanLiteral as ESQLTimeInterval,
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
