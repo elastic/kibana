@@ -4,44 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { format, UrlObject } from 'url';
+import { Client } from '@elastic/elasticsearch';
 import {
-  SynthtraceClientsManager,
-  SynthtraceClientTypes,
-  GetClientsReturn,
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
+import url, { format, UrlObject } from 'url';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
-  const esClient = getService('es');
+async function getSynthtraceEsClient(client: Client, kibanaClient: ApmSynthtraceKibanaClient) {
+  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  await kibanaClient.installApmPackage(kibanaVersion);
+
+  const esClient = new ApmSynthtraceEsClient({
+    client,
+    logger: createLogger(LogLevel.info),
+    version: kibanaVersion,
+    refreshAfterIndex: true,
+  });
+
+  return esClient;
+}
+
+function getSynthtraceKibanaClient(kibanaServerUrl: string) {
+  const kibanaServerUrlWithAuth = url
+    .format({
+      ...url.parse(kibanaServerUrl),
+    })
+    .slice(0, -1);
+
+  const kibanaClient = new ApmSynthtraceKibanaClient({
+    target: kibanaServerUrlWithAuth,
+    logger: createLogger(LogLevel.debug),
+  });
+
+  return kibanaClient;
+}
+
+export function SynthtraceProvider({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const config = getService('config');
 
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-  const kibanaServerUrlWithAuth = format(kibanaServer);
+  const kibanaServerUrl = format(kibanaServer);
+  const synthtraceKibanaClient = getSynthtraceKibanaClient(kibanaServerUrl);
 
   return {
-    getClients<TClient extends SynthtraceClientTypes>(
-      synthtraceClients: TClient[]
-    ): GetClientsReturn<TClient> {
-      const clientManager = new SynthtraceClientsManager({
-        client: esClient,
-        logger: createLogger(LogLevel.info),
-        refreshAfterIndex: true,
-      });
-
-      const clients = clientManager.getClients({
-        clients: synthtraceClients,
-        kibana: {
-          target: kibanaServerUrlWithAuth,
-          logger: createLogger(LogLevel.debug),
-        },
-      });
-
-      return clients;
+    createSynthtraceKibanaClient: getSynthtraceKibanaClient,
+    async createSynthtraceEsClient() {
+      return getSynthtraceEsClient(es, synthtraceKibanaClient);
     },
   };
 }
