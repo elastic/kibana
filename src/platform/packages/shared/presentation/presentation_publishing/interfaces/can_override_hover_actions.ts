@@ -20,7 +20,9 @@ export interface CanOverrideHoverActions {
 /**
  * A type guard which determines whether or not a given API overrides the hover actions.
  */
-export const canOverrideHoverActions = (unknownApi: unknown): unknownApi is CanOverrideHoverActions => {
+export const canOverrideHoverActions = (
+  unknownApi: unknown
+): unknownApi is CanOverrideHoverActions => {
   return Boolean(
     unknownApi &&
       (unknownApi as CanOverrideHoverActions)?.overrideHoverActions$ !== undefined &&

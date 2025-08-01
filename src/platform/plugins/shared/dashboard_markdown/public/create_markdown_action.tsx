@@ -24,7 +24,10 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    const newMarkdownEmbeddable = await embeddable.addNewPanel<MarkdownEditorSerializedState, MarkdownEditorApi>(
+    const newMarkdownEmbeddable = await embeddable.addNewPanel<
+      MarkdownEditorSerializedState,
+      MarkdownEditorApi
+    >(
       {
         panelType: MARKDOWN_ID,
         serializedState: {
