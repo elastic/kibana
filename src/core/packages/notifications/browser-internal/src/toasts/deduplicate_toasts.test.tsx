@@ -10,6 +10,7 @@
 import React from 'react';
 import { mount, render, shallow } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
+import { render as rtlRender } from '@testing-library/react';
 
 import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
 import { Toast } from '@kbn/core-notifications-browser';
@@ -23,7 +24,7 @@ function toast(title: string | MountPoint, text?: string | MountPoint, id = Math
   };
 }
 
-const fakeMountPoint = () => () => {};
+const fakeMountPoint = () => () => { };
 
 describe('deduplicate toasts', () => {
   it('returns an empty list for an empty input', () => {
@@ -104,11 +105,10 @@ describe('TitleWithBadge component', () => {
     const title = 'Welcome!';
 
     const titleComponent = <TitleWithBadge title={title} counter={5} />;
-    const shallowRender = shallow(titleComponent);
-    const fullRender = mount(titleComponent);
 
-    expect(fullRender.text()).toBe('Welcome! 5');
-    expect(shallowRender).toMatchSnapshot();
+    expect(rtlRender(titleComponent).container.innerHTML).toMatchInlineSnapshot(
+      `"Welcome! <span class=\\"euiNotificationBadge css-1aoydhg-floatTopRight css-rme68u-euiNotificationBadge-m-subdued\\">5</span>"`
+    );
   });
 });
 
