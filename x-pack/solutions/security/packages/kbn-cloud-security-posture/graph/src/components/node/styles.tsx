@@ -15,12 +15,14 @@ import {
   EuiIcon,
   EuiText,
   useEuiBackgroundColor,
-  useEuiTheme,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { rgba } from 'polished';
+import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { DocumentAnalysis } from './label_node/analyze_documents';
 
 /**
  * The width of a node in the graph, in pixels.
@@ -38,7 +40,7 @@ export const NODE_HEIGHT = 100;
  * The width of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 140;
+export const NODE_LABEL_WIDTH = 180;
 
 /**
  * The height of a node label in the graph, in pixels.
@@ -48,9 +50,25 @@ export const NODE_LABEL_HEIGHT = 20;
 
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
-export const LABEL_PADDING_X = 15;
+export const LABEL_PADDING_X = 8;
+
+export const IPS_HEIGHT = 10;
+export const COUNTRY_FLAGS_HEIGHT = 10;
+
+const LABEL_BORDER_RADIUS = 8;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
+
+// const labelNodeShadowStyle = css`
+//   filter: drop-shadow(0px 15px 15px rgba(0, 0, 0, 0.04))
+//     drop-shadow(0px 5.7px 12px rgba(0, 0, 0, 0.05)) drop-shadow(0px 2.6px 8px rgba(0, 0, 0, 0.06))
+//     drop-shadow(0px 0.9px 4px rgba(0, 0, 0, 0.08));
+// `;
+
+const labelNodeShadowStyle = css`
+  box-shadow: 0px 15px 15px rgba(0, 0, 0, 0.04), 0px 5.7px 12px rgba(0, 0, 0, 0.05),
+    0px 2.6px 8px rgba(0, 0, 0, 0.06), 0px 0.9px 4px rgba(0, 0, 0, 0.08);
+`;
 
 export const LabelNodeContainer = styled.div`
   position: relative;
@@ -62,38 +80,42 @@ export const LabelNodeContainer = styled.div`
 `;
 
 interface LabelShapeProps extends EuiTextProps {
-  color: LabelNodeViewModel['color'];
+  textColor?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  isDragging?: boolean;
 }
 
-export const LabelShape = styled(EuiText)<LabelShapeProps>`
-  background: ${(props) => useNodeFillColor(props.color)};
+export const LabelShape = styled(EuiText, {
+  shouldForwardProp(propName) {
+    return !['backgroundColor', 'borderColor', 'textColor', 'isDragging', 'isConnectable'].includes(
+      propName
+    );
+  },
+})<LabelShapeProps>`
+  background-color: ${(props) => props.backgroundColor};
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
   max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `solid ${
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors]
-    } ${LABEL_BORDER_WIDTH}px`;
-  }};
-
-  font-weight: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.weight.semiBold}`;
-  }};
-  font-size: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.scale.xs * 10.5}px`;
-  }};
 
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   padding: 6px ${LABEL_PADDING_X}px;
-  border-radius: 16px;
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   min-height: 100%;
   min-width: 100%;
+
+  &:active {
+    ${labelNodeShadowStyle}
+  }
+
+  ${(props) => props.isDragging && labelNodeShadowStyle}
 `;
 
-export const LabelShapeOnHover = styled.div`
+export const LabelShapeOnHover = styled.div<{ color: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -101,17 +123,11 @@ export const LabelShapeOnHover = styled.div`
 
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `dashed ${rgba(
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors] as string,
-      0.5
-    )} 1px`;
-  }};
-  border-radius: 20px;
+  border: ${(props) => `dashed ${rgba(props.color, 0.5)} 1px`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   background: transparent;
-  width: 108%;
-  height: 134%;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
 
   ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
@@ -121,6 +137,28 @@ export const LabelShapeOnHover = styled.div`
     opacity: 1; /* Show on hover */
   }
 `;
+
+/**
+ * Gets the background, border and text colors for the label based on document analysis
+ */
+export const getLabelColors = (
+  analysis: DocumentAnalysis,
+  euiTheme: EuiThemeComputed
+): { backgroundColor: string; borderColor: string; textColor: string } => {
+  if (analysis.totalAlerts > 0 && analysis.totalEvents === 0) {
+    return {
+      backgroundColor: euiTheme.colors.danger,
+      borderColor: euiTheme.colors.danger,
+      textColor: euiTheme.colors.textInverse,
+    };
+  }
+
+  return {
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
+    borderColor: euiTheme.colors.borderStrongPrimary,
+    textColor: euiTheme.colors.textPrimary,
+  };
+};
 
 export const NodeShapeContainer = styled.div`
   position: relative;
@@ -224,20 +262,25 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 
 export const ExpandButtonSize = 18;
 
-export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
+export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
+  shouldForwardProp: (propName) => propName !== 'backgroundColor',
+})<{ backgroundColor: string }>`
   border-radius: 50%;
-  background-color: ${(_props) => useEuiBackgroundColor('plain')};
+  background-color: ${(props) => props.backgroundColor};
   width: ${ExpandButtonSize}px;
   height: ${ExpandButtonSize}px;
 
   > svg {
-    transform: translate(0.75px, 0.75px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) translate(0.5px, 0.5px);
   }
 
   :hover,
   :focus,
   :active {
-    background-color: ${(_props) => useEuiBackgroundColor('plain')};
+    background-color: ${(props) => props.backgroundColor};
   }
 `;
 
