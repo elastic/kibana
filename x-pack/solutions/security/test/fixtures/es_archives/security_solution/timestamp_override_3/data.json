@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": "myfakeindex-3",
-    "id": "70293585-6d4b-4dc6-8cc5-2f2acb9802ab",
     "source": {
       "message": "hello world 3",
       "@timestamp": "2020-12-16T15:16:18.570Z"
