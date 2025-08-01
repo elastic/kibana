@@ -16,7 +16,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const { timePicker } = getPageObjects(['timePicker']);
 
   describe('lens app - group 2', () => {
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const localFixtures = {
       lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
