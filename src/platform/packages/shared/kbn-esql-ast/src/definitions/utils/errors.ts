@@ -490,4 +490,10 @@ export const errors = {
       validSignatures,
     });
   },
+
+  licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>
+    errors.byId('licenseRequired', fn.location, {
+      name: fn.name.toUpperCase(),
+      requiredLicense: license,
+    }),
 };

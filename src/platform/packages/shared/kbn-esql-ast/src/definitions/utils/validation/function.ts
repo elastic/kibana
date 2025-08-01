@@ -352,6 +352,14 @@ export function validateFunction({
     return [errors.unknownFunction(fn)];
   }
 
+  if (
+    definition.license &&
+    callbacks.hasMinimumLicenseRequired &&
+    !callbacks.hasMinimumLicenseRequired(definition.license.toLowerCase() as ESQLLicenseType)
+  ) {
+    return [errors.licenseRequired(fn, definition.license)];
+  }
+
   const argTypes = fn.args.map((node) =>
     getExpressionType(node, context.fields, context.userDefinedColumns)
   );
@@ -980,7 +988,7 @@ function validateFunctionLicense(
 }
 
 /**
- *
+ * @TODO - is this necessary?
  *
  * Validates license requirements for function signatures based on argument types:
  * 1. Filters signatures to only those that match the actual argument types being used
