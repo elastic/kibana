@@ -66,7 +66,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       enforceAdaptiveAllocations={isServerless}
       currentSolution={currentSolution}
       toasts={toasts}
-      provider={actionTypeModel.id}
+      providerInContext={actionTypeModel.id}
     />
   );
 };
