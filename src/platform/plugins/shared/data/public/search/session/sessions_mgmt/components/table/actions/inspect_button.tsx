@@ -19,7 +19,7 @@ import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
+import { isBackgroundSearchEnabled } from '../../../constants';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
@@ -54,7 +54,7 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
-            {BACKGROUND_SEARCH_ENABLED ? (
+            {isBackgroundSearchEnabled() ? (
               <FormattedMessage
                 id="data.sessions.management.backgroundSearchFlyoutTitle"
                 defaultMessage="Inspect background search"
@@ -72,7 +72,7 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
         <EuiText>
           <EuiText size="xs">
             <p>
-              {BACKGROUND_SEARCH_ENABLED ? (
+              {isBackgroundSearchEnabled() ? (
                 <FormattedMessage
                   id="data.sessions.management.backgroundSearchFlyoutText"
                   defaultMessage="Configuration for this background search"

@@ -16,7 +16,7 @@ import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
 import { UISession } from '../../types';
-import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
+import { isBackgroundSearchEnabled } from '../../../constants';
 
 interface DeleteButtonProps {
   api: SearchSessionsMgmtAPI;
@@ -62,7 +62,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
-      title={BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
+      title={isBackgroundSearchEnabled() ? bgsTitle : title}
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
@@ -75,7 +75,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       defaultFocusedButton="confirm"
       buttonColor="danger"
     >
-      {BACKGROUND_SEARCH_ENABLED ? bgsMessage : message}
+      {isBackgroundSearchEnabled() ? bgsMessage : message}
     </EuiConfirmModal>
   );
 };

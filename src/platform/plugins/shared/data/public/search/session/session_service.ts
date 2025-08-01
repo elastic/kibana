@@ -53,7 +53,7 @@ import {
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { NowProviderInternalContract } from '../../now_provider';
-import { BACKGROUND_SEARCH_ENABLED, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { isBackgroundSearchEnabled, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
@@ -618,7 +618,7 @@ export class SessionService {
         renamed = true;
       } catch (e) {
         this.toastService?.addError(e, {
-          title: BACKGROUND_SEARCH_ENABLED
+          title: isBackgroundSearchEnabled()
             ? i18n.translate('data.searchSessions.sessionService.backgroundSearchEditNameError', {
                 defaultMessage: 'Failed to edit name of the background search',
               })
@@ -715,7 +715,7 @@ export class SessionService {
         }
       } catch (e) {
         this.toastService?.addError(e, {
-          title: BACKGROUND_SEARCH_ENABLED
+          title: isBackgroundSearchEnabled()
             ? i18n.translate(
                 'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
                 {

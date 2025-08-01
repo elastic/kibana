@@ -20,7 +20,7 @@ import { useSearchSessionTour } from './search_session_tour';
 import { SearchUsageCollector } from '../../../collectors';
 import { ISessionService } from '../../session_service';
 import { SearchSessionState } from '../../search_session_state';
-import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
+import { isBackgroundSearchEnabled } from '../../constants';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -69,7 +69,7 @@ export const createConnectedSearchSessionIndicator = ({
 
     if (disableSaveAfterSearchesExpire) {
       saveDisabled = true;
-      saveDisabledReasonText = BACKGROUND_SEARCH_ENABLED
+      saveDisabledReasonText = isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchDisabledDueToTimeoutMessage',
             {
@@ -90,7 +90,7 @@ export const createConnectedSearchSessionIndicator = ({
     // this happens in case there is no app that allows current user to use search session
     if (!sessionService.hasAccess()) {
       managementDisabled = saveDisabled = true;
-      managementDisabledReasonText = saveDisabledReasonText = BACKGROUND_SEARCH_ENABLED
+      managementDisabledReasonText = saveDisabledReasonText = isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchDisabledDueToDisabledGloballyMessage',
             {

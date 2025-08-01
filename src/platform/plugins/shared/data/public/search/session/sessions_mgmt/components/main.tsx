@@ -18,7 +18,7 @@ import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { SearchUsageCollector } from '../../../collectors';
-import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
+import { isBackgroundSearchEnabled } from '../../constants';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
@@ -32,8 +32,8 @@ interface Props {
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
-  if (BACKGROUND_SEARCH_ENABLED) {
+export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
+  if (isBackgroundSearchEnabled()) {
     return (
       <>
         <EuiPageHeader

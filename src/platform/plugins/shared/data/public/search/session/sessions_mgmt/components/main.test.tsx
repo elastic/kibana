@@ -19,10 +19,10 @@ import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
+import { isBackgroundSearchEnabled } from '../../constants';
 
-jest.mock('../../constants', () => ({
-  BACKGROUND_SEARCH_ENABLED: false,
-}));
+jest.mock('../../constants');
+const mockIsBackgroundSearchEnabled = jest.mocked(isBackgroundSearchEnabled);
 
 const setup = async () => {
   const mockCoreSetup = coreMock.createSetup();
@@ -85,24 +85,47 @@ const setup = async () => {
 };
 
 describe('<SearchSessionsMgmtMain />', () => {
-  describe('when Background Search is disabled', () => {
-    it('should render the page title', async () => {
-      await setup();
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Search Sessions');
-    });
+  describe.each([
+    { backgroundSearchEnabled: false, expectedName: 'Search Sessions' },
+    { backgroundSearchEnabled: true, expectedName: 'Background Search' },
+  ])(
+    'when background search is $backgroundSearchEnabled',
+    ({ backgroundSearchEnabled, expectedName }) => {
+      beforeEach(() => {
+        mockIsBackgroundSearchEnabled.mockReturnValue(backgroundSearchEnabled);
+      });
 
+      it('should render the page title', async () => {
+        await setup();
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(expectedName);
+      });
+
+      it('should render the table', async () => {
+        await setup();
+
+        const table = screen.getByTestId('searchSessionsMgmtUiTable');
+        expect(table).toBeVisible();
+      });
+    }
+  );
+
+  describe('when background search is true', () => {
+    it('should NOT render the documentation link', async () => {
+      mockIsBackgroundSearchEnabled.mockReturnValue(true);
+      await setup();
+
+      const docLink = screen.queryByText('Documentation');
+      expect(docLink).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when background search is false', () => {
     it('should render the documentation link', async () => {
+      mockIsBackgroundSearchEnabled.mockReturnValue(false);
       await setup();
 
       const docLink = screen.getByText('Documentation');
-      expect(docLink).toBeVisible();
-    });
-
-    it('should render the table', async () => {
-      await setup();
-
-      const table = screen.getByTestId('searchSessionsMgmtUiTable');
-      expect(table).toBeVisible();
+      expect(docLink).toBeInTheDocument();
     });
   });
 });

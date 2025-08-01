@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { BACKGROUND_SEARCH_ENABLED } from '../../../../constants';
+import { isBackgroundSearchEnabled } from '../../../../constants';
 
 export interface SearchSessionNameProps {
   name: string;
@@ -49,7 +49,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
         iconType={'pencil'}
         color={'text'}
         aria-label={
-          BACKGROUND_SEARCH_ENABLED
+          isBackgroundSearchEnabled()
             ? i18n.translate('data.searchSessionName.backgroundSearchEditAriaLabelText', {
                 defaultMessage: 'Edit background search name',
               })
@@ -66,7 +66,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
       autoFocus={true}
       compressed={true}
       placeholder={
-        BACKGROUND_SEARCH_ENABLED
+        isBackgroundSearchEnabled()
           ? i18n.translate('data.searchSessionName.backgroundSearchPlaceholderText', {
               defaultMessage: 'Enter a name for the background search',
             })
@@ -79,7 +79,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
         setNewName(e.target.value);
       }}
       aria-label={
-        BACKGROUND_SEARCH_ENABLED
+        isBackgroundSearchEnabled()
           ? i18n.translate('data.searchSessionName.backgroundSearchAriaLabelText', {
               defaultMessage: 'Background search name',
             })

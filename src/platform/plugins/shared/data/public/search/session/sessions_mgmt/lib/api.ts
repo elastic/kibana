@@ -17,7 +17,7 @@ import { SearchSessionSavedObject } from '../types';
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
+import { isBackgroundSearchEnabled } from '../../constants';
 
 interface SearchSessionManagementDeps {
   notifications: NotificationsStart;
@@ -53,7 +53,7 @@ export class SearchSessionsMgmtAPI {
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
       tap(() => {
         this.deps.notifications.toasts.addDanger(
-          BACKGROUND_SEARCH_ENABLED
+          isBackgroundSearchEnabled()
             ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchFetchTimeout', {
                 defaultMessage:
                   'Fetching the Background Search info timed out after {timeout} seconds',
@@ -105,7 +105,7 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeleted', {
               defaultMessage: 'The background search was deleted.',
             })
@@ -115,7 +115,7 @@ export class SearchSessionsMgmtAPI {
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchDeletedError', {
               defaultMessage: 'Failed to delete the background search!',
             })
@@ -133,7 +133,7 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.extend(id, expires);
 
       this.deps.notifications.toasts.addSuccess({
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtended', {
               defaultMessage: 'The background search was extended.',
             })
@@ -143,7 +143,7 @@ export class SearchSessionsMgmtAPI {
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchExtendError', {
               defaultMessage: 'Failed to extend the background search!',
             })
@@ -160,7 +160,7 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.rename(id, newName);
 
       this.deps.notifications.toasts.addSuccess({
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRename', {
               defaultMessage: 'The background search was renamed',
             })
@@ -170,7 +170,7 @@ export class SearchSessionsMgmtAPI {
       });
     } catch (err) {
       this.deps.notifications.toasts.addError(err, {
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.mgmt.searchSessions.api.backgroundSearchRenameError', {
               defaultMessage: 'Failed to rename the background search',
             })

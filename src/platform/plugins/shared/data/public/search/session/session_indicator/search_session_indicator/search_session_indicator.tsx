@@ -31,7 +31,7 @@ import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import { SearchSessionName } from './components';
 import { SearchSessionState } from '../../search_session_state';
 import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
-import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
+import { isBackgroundSearchEnabled } from '../../constants';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;
@@ -156,7 +156,7 @@ const searchSessionIndicatorViewStateToProps: {
     button: {
       color: 'text',
       iconType: PartialClock,
-      'aria-label': BACKGROUND_SEARCH_ENABLED
+      'aria-label': isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchLoadingResultsIconAriaLabel',
             {
@@ -166,7 +166,7 @@ const searchSessionIndicatorViewStateToProps: {
         : i18n.translate('data.searchSessionIndicator.loadingResultsIconAriaLabel', {
             defaultMessage: 'Search session loading',
           }),
-      tooltipText: BACKGROUND_SEARCH_ENABLED
+      tooltipText: isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.backgroundSearchIndicator.backgroundSearchLoadingResultsIconTooltipText',
             {
@@ -199,14 +199,14 @@ const searchSessionIndicatorViewStateToProps: {
     button: {
       color: 'text',
       iconType: 'check',
-      'aria-label': BACKGROUND_SEARCH_ENABLED
+      'aria-label': isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchResultsLoadedIconAriaLabel', {
             defaultMessage: 'Background search complete',
           })
         : i18n.translate('data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
             defaultMessage: 'Search session complete',
           }),
-      tooltipText: BACKGROUND_SEARCH_ENABLED
+      tooltipText: isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchResultsLoadedIconTooltipText',
             {
@@ -218,7 +218,7 @@ const searchSessionIndicatorViewStateToProps: {
           }),
     },
     popover: {
-      title: BACKGROUND_SEARCH_ENABLED
+      title: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchResultsLoadedText', {
             defaultMessage: 'Background search complete',
           })
@@ -242,7 +242,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.BackgroundLoading]: {
     button: {
       iconType: EuiLoadingSpinner,
-      'aria-label': BACKGROUND_SEARCH_ENABLED
+      'aria-label': isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchLoadingInTheBackgroundIconAriaLabel',
             {
@@ -252,7 +252,7 @@ const searchSessionIndicatorViewStateToProps: {
         : i18n.translate('data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel', {
             defaultMessage: 'Saved session in progress',
           }),
-      tooltipText: BACKGROUND_SEARCH_ENABLED
+      tooltipText: isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchLoadingInTheBackgroundIconTooltipText',
             {
@@ -302,7 +302,7 @@ const searchSessionIndicatorViewStateToProps: {
       ),
     },
     popover: {
-      title: BACKGROUND_SEARCH_ENABLED
+      title: isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchResultLoadedInTheBackgroundTitleText',
             {
@@ -332,7 +332,7 @@ const searchSessionIndicatorViewStateToProps: {
     button: {
       color: 'success',
       iconType: CheckInEmptyCircle,
-      'aria-label': BACKGROUND_SEARCH_ENABLED
+      'aria-label': isBackgroundSearchEnabled()
         ? i18n.translate(
             'data.searchSessionIndicator.backgroundSearchRestoredResultsIconAriaLabel',
             {
@@ -342,7 +342,7 @@ const searchSessionIndicatorViewStateToProps: {
         : i18n.translate('data.searchSessionIndicator.restoredResultsIconAriaLabel', {
             defaultMessage: 'Saved session restored',
           }),
-      tooltipText: BACKGROUND_SEARCH_ENABLED
+      tooltipText: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchRestoredResultsTooltipText', {
             defaultMessage: 'Background search restored',
           })
@@ -351,7 +351,7 @@ const searchSessionIndicatorViewStateToProps: {
           }),
     },
     popover: {
-      title: BACKGROUND_SEARCH_ENABLED
+      title: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchRestoredTitleText', {
             defaultMessage: 'Background search restored',
           })
@@ -376,14 +376,14 @@ const searchSessionIndicatorViewStateToProps: {
     button: {
       color: 'danger',
       iconType: 'error',
-      'aria-label': BACKGROUND_SEARCH_ENABLED
+      'aria-label': isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledIconAriaLabel', {
             defaultMessage: 'Background search stopped',
           })
         : i18n.translate('data.searchSessionIndicator.canceledIconAriaLabel', {
             defaultMessage: 'Search session stopped',
           }),
-      tooltipText: BACKGROUND_SEARCH_ENABLED
+      tooltipText: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledTooltipText', {
             defaultMessage: 'Background search stopped',
           })
@@ -392,14 +392,14 @@ const searchSessionIndicatorViewStateToProps: {
           }),
     },
     popover: {
-      title: BACKGROUND_SEARCH_ENABLED
+      title: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledTitleText', {
             defaultMessage: 'Background search stopped',
           })
         : i18n.translate('data.searchSessionIndicator.canceledTitleText', {
             defaultMessage: 'Search session stopped',
           }),
-      description: BACKGROUND_SEARCH_ENABLED
+      description: isBackgroundSearchEnabled()
         ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledDescriptionText', {
             defaultMessage: 'You are viewing incomplete data',
           })

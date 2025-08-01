@@ -29,7 +29,7 @@ import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
 import { UISession } from '../../types';
-import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
+import { isBackgroundSearchEnabled } from '../../../constants';
 
 interface RenameButtonProps {
   searchSession: UISession;
@@ -81,13 +81,13 @@ const RenameDialog = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
+          {isBackgroundSearchEnabled() ? bgsTitle : title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
-          <EuiFormRow label={BACKGROUND_SEARCH_ENABLED ? bgsLabel : label}>
+          <EuiFormRow label={isBackgroundSearchEnabled() ? bgsLabel : label}>
             <EuiFieldText
               name="newName"
               placeholder={originalName}

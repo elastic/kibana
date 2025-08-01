@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BACKGROUND_SEARCH_ENABLED } from './constants';
+import { isBackgroundSearchEnabled } from './constants';
 
 /**
  * Message to display in case storing
  * session session is disabled due to turned off capability
  */
-export const noSearchSessionStorageCapabilityMessage = BACKGROUND_SEARCH_ENABLED
+export const noSearchSessionStorageCapabilityMessage = isBackgroundSearchEnabled()
   ? i18n.translate('data.searchSessionIndicator.backgroundSearchNoCapability', {
       defaultMessage: "You don't have permissions to create background searches.",
     })

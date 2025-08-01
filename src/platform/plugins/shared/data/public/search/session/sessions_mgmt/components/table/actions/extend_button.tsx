@@ -19,7 +19,7 @@ import { IClickActionDescriptor } from './types';
 import { OnActionDismiss } from './types';
 import { UISession } from '../../types';
 import extendSessionIcon from '../../icons/extend_session.svg';
-import { BACKGROUND_SEARCH_ENABLED } from '../../../constants';
+import { isBackgroundSearchEnabled } from '../../../constants';
 
 interface ExtendButtonProps {
   searchSession: UISession;
@@ -72,7 +72,7 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
   return (
     <EuiConfirmModal
       aria-labelledby={confirmModalTitleId}
-      title={BACKGROUND_SEARCH_ENABLED ? bgsTitle : title}
+      title={isBackgroundSearchEnabled() ? bgsTitle : title}
       titleProps={{ id: confirmModalTitleId }}
       onCancel={onActionDismiss}
       onConfirm={async () => {
@@ -87,7 +87,7 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
       defaultFocusedButton="confirm"
       buttonColor="primary"
     >
-      {BACKGROUND_SEARCH_ENABLED ? bgsMessage : message}
+      {isBackgroundSearchEnabled() ? bgsMessage : message}
     </EuiConfirmModal>
   );
 };

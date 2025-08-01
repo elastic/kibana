@@ -90,7 +90,7 @@ import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
-import { BACKGROUND_SEARCH_ENABLED } from '../session/constants';
+import { isBackgroundSearchEnabled } from '../session/constants';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -655,7 +655,7 @@ export class SearchInterceptor {
   private showRestoreWarningToast = (_sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
-        title: BACKGROUND_SEARCH_ENABLED
+        title: isBackgroundSearchEnabled()
           ? i18n.translate('data.searchService.backgroundSearchRestoreWarning', {
               defaultMessage: 'Your background search is still running',
             })
