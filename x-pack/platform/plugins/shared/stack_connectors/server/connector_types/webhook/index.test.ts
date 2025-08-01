@@ -351,7 +351,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: missing Access Token URL, Client ID fields"`
+      `"error validating action type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
     );
   });
 });
