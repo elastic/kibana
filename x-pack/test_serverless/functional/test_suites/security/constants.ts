@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const SECURITY_ES_ARCHIVES_DIR = 'x-pack/test/security_solution_cypress/es_archives';
+export const SECURITY_ES_ARCHIVES_DIR =
+  'x-pack/solutions/security/test/security_solution_cypress/es_archives';
 export const SECURITY_SOLUTION_DATA_VIEW = 'Default security data view';
 export const SECURITY_SOLUTION_INDEX_PATTERN =
   '.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*';
