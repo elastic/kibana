@@ -12,19 +12,17 @@ import deepMerge from 'deepmerge';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions, KueryFilterQuery } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import type {
-  ColumnHeaderResult,
-  DataProviderResult,
-  FilterTimelineResult,
-  Note,
-  PinnedEvent,
-  TimelineResponse,
-} from '../../../../common/api/timeline';
 import {
   DataProviderTypeEnum,
   RowRendererValues,
   TimelineStatusEnum,
   type TimelineType,
+  type ColumnHeaderResult,
+  type DataProviderResult,
+  type FilterTimelineResult,
+  type Note,
+  type PinnedEvent,
+  type TimelineResponse,
   TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
