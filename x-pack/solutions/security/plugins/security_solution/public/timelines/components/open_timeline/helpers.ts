@@ -19,8 +19,6 @@ import type {
   DataProviderResult,
   PinnedEvent,
   Note,
-} from '../../../../common/api/timeline';
-import {
   DataProviderTypeEnum,
   RowRendererValues,
   TimelineStatusEnum,
