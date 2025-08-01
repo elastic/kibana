@@ -10246,10 +10246,10 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.34.4":
-  version "1.34.4"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.4.tgz#3282675240a19b838e9b4eb4cd20bd9b61b1bd0b"
-  integrity sha512-seH/GgrjSB1EeOsgJ/4Ct6Jk2N7sh12POn/7G8UQFARMyUMJpe1oHtBwT2ndfp4EFCpgBAbZ/82Iw6dwczNxEA==
+"@redocly/cli@^1.34.5":
+  version "1.34.5"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.5.tgz#c5e04915ef35ccd3b09d52f8add524ecc9a784a7"
+  integrity sha512-5IEwxs7SGP5KEXjBKLU8Ffdz9by/KqNSeBk6YUVQaGxMXK//uYlTJIPntgUXbo1KAGG2d2q2XF8y4iFz6qNeiw==
   dependencies:
     "@opentelemetry/api" "1.9.0"
     "@opentelemetry/exporter-trace-otlp-http" "0.53.0"
@@ -10257,14 +10257,14 @@
     "@opentelemetry/sdk-trace-node" "1.26.0"
     "@opentelemetry/semantic-conventions" "1.27.0"
     "@redocly/config" "^0.22.0"
-    "@redocly/openapi-core" "1.34.4"
-    "@redocly/respect-core" "1.34.4"
+    "@redocly/openapi-core" "1.34.5"
+    "@redocly/respect-core" "1.34.5"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
     core-js "^3.32.1"
     dotenv "16.4.7"
-    form-data "^4.0.0"
+    form-data "^4.0.4"
     get-port-please "^3.0.1"
     glob "^7.1.6"
     handlebars "^4.7.6"
@@ -10283,10 +10283,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/openapi-core@1.34.4", "@redocly/openapi-core@^1.4.0":
-  version "1.34.4"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.4.tgz#0b8b9e1713805575c41f378f4ee77b0cb3dac516"
-  integrity sha512-hf53xEgpXIgWl3b275PgZU3OTpYh1RoD2LHdIfQ1JzBNTWsiNKczTEsI/4Tmh2N1oq9YcphhSMyk3lDh85oDjg==
+"@redocly/openapi-core@1.34.5", "@redocly/openapi-core@^1.4.0":
+  version "1.34.5"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.5.tgz#9c2cf901d1098ceb626e789e2065c762fe63727f"
+  integrity sha512-0EbE8LRbkogtcCXU7liAyC00n9uNG9hJ+eMyHFdUsy9lB/WGqnEBgwjA9q2cyzAVcdTkQqTBBU1XePNnN3OijA==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.22.0"
@@ -10298,20 +10298,20 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@1.34.4":
-  version "1.34.4"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.4.tgz#1c8bae2940385dda57343cd1eedb9be3ed1cc9b6"
-  integrity sha512-MitKyKyQpsizA4qCVv+MjXL4WltfhFQAoiKiAzrVR1Kusro3VhYb6yJuzoXjiJhR0ukLP5QOP19Vcs7qmj9dZg==
+"@redocly/respect-core@1.34.5":
+  version "1.34.5"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.5.tgz#16ff435659a16e27deb5258b0d213ba98cba7657"
+  integrity sha512-GheC/g/QFztPe9UA9LamooSplQuy9pe0Yr8XGTqkz0ahivLDl7svoy/LSQNn1QH3XGtLKwFYMfTwFR2TAYyh5Q==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@redocly/ajv" "8.11.2"
-    "@redocly/openapi-core" "1.34.4"
+    "@redocly/openapi-core" "1.34.5"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     concat-stream "^2.0.0"
     cookie "^0.7.2"
     dotenv "16.4.7"
-    form-data "4.0.0"
+    form-data "^4.0.4"
     jest-diff "^29.3.1"
     jest-matcher-utils "^29.3.1"
     js-yaml "4.1.0"
@@ -19939,15 +19939,6 @@ form-data-encoder@1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/form-data-encoder/-/form-data-encoder-1.7.2.tgz#1f1ae3dccf58ed4690b86d87e4f57c654fbab040"
   integrity sha512-qfqtYan3rxrnCk1VYaA4H+Ms9xdpPqvLZa6xmMgFvhO32x7/3J/ExcTd6qpxM0vH2GdMI+poehyBZvqfMTto8A==
-
-form-data@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
-  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
-  dependencies:
-    asynckit "^0.4.0"
-    combined-stream "^1.0.8"
-    mime-types "^2.1.12"
 
 form-data@^3.0.0:
   version "3.0.4"
