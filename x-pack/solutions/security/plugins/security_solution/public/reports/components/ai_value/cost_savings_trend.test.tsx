@@ -44,7 +44,6 @@ describe('CostSavingsTrend', () => {
         timerange: { from: defaultProps.from, to: defaultProps.to },
         id: expect.stringContaining('CostSavingsTrendQuery-area-embeddable'),
         height: 300,
-        width: '95%',
         inspectTitle: expect.any(String),
         scopeId: expect.any(String),
         withActions: expect.any(Array),

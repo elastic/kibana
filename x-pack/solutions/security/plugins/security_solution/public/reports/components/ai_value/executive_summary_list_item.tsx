@@ -23,9 +23,7 @@ const ExecutiveSummaryListItemComponent: React.FC<Props> = ({ children }) => {
         <EuiIcon css={ICON_PADDING} type="check" color="success" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText size="s">
-          <p>{children}</p>
-        </EuiText>
+        <EuiText size="s">{children}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

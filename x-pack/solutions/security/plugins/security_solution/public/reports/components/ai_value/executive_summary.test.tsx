@@ -75,7 +75,7 @@ describe('ExecutiveSummary', () => {
     expect(screen.getByTestId('executiveSummaryAlertFilteringStat').textContent).toContain('50%');
     expect(screen.getByTestId('executiveSummaryHoursSavedStat').textContent).toContain('10');
     expect(screen.getByTestId('executiveSummaryThreatsDetectedStat').textContent).toContain(
-      ' 66.7% increase in real threats detected, improving detection coverage.'
+      '66.7% increase in real threats detected, improving detection coverage. '
     );
   });
 
