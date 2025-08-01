@@ -17,6 +17,7 @@ import type { RuntimeStateManager } from '../application/main/state_management/r
 import {
   createInternalStateStore,
   createRuntimeStateManager,
+  fromSavedSearchToSavedObjectTab,
   selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
@@ -101,17 +102,14 @@ export function getDiscoverStateMock({
               title: finalSavedSearch.title ?? '',
               description: finalSavedSearch.description ?? '',
               tabs: [
-                {
-                  ...finalSavedSearch,
-                  id: finalSavedSearch.id ?? '',
-                  label: finalSavedSearch.title ?? '',
-                  serializedSearchSource: finalSavedSearch.searchSource.getSerializedFields(),
-                  sort: finalSavedSearch.sort ?? [],
-                  columns: finalSavedSearch.columns ?? [],
-                  grid: finalSavedSearch.grid ?? {},
-                  hideChart: finalSavedSearch.hideChart ?? false,
-                  isTextBasedQuery: finalSavedSearch.isTextBasedQuery ?? false,
-                },
+                fromSavedSearchToSavedObjectTab({
+                  tab: {
+                    id: finalSavedSearch.id ?? '',
+                    label: finalSavedSearch.title ?? '',
+                  },
+                  savedSearch: finalSavedSearch,
+                  services,
+                }),
               ],
             }
           : undefined,

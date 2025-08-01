@@ -10,7 +10,6 @@
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject } from 'lodash';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
   internalStateSlice,
@@ -40,6 +39,7 @@ import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 import type { TabState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -126,38 +126,13 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     const { persistedDiscoverSession } = getState();
     const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
-    const persistedTabSavedSearch: SavedSearch | undefined =
+    const persistedTabSavedSearch =
       persistedDiscoverSession && persistedTab
-        ? {
-            id: persistedDiscoverSession.id,
-            title: persistedDiscoverSession.title,
-            description: persistedDiscoverSession.description,
-            tags: persistedDiscoverSession.tags,
-            managed: persistedDiscoverSession.managed,
-            references: persistedDiscoverSession.references,
-            sharingSavedObjectProps: persistedDiscoverSession.sharingSavedObjectProps,
-            sort: persistedTab.sort,
-            columns: persistedTab.columns,
-            grid: persistedTab.grid,
-            hideChart: persistedTab.hideChart,
-            isTextBasedQuery: persistedTab.isTextBasedQuery,
-            usesAdHocDataView: persistedTab.usesAdHocDataView,
-            searchSource: await services.data.search.searchSource.create(
-              persistedTab.serializedSearchSource
-            ),
-            viewMode: persistedTab.viewMode,
-            hideAggregatedPreview: persistedTab.hideAggregatedPreview,
-            rowHeight: persistedTab.rowHeight,
-            headerRowHeight: persistedTab.headerRowHeight,
-            timeRestore: persistedTab.timeRestore,
-            timeRange: persistedTab.timeRange,
-            refreshInterval: persistedTab.refreshInterval,
-            rowsPerPage: persistedTab.rowsPerPage,
-            sampleSize: persistedTab.sampleSize,
-            breakdownField: persistedTab.breakdownField,
-            density: persistedTab.density,
-            visContext: persistedTab.visContext,
-          }
+        ? await fromSavedObjectTabToSavedSearch({
+            tab: persistedTab,
+            discoverSession: persistedDiscoverSession,
+            services,
+          })
         : undefined;
 
     const urlState = cleanupUrlState(

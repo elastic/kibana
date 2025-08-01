@@ -9,7 +9,11 @@
 
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './discover_state';
-import { internalStateActions, selectTabRuntimeState } from './redux';
+import {
+  fromSavedSearchToSavedObjectTab,
+  internalStateActions,
+  selectTabRuntimeState,
+} from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -90,17 +94,14 @@ async function getState(
             title: savedSearch.title ?? '',
             description: savedSearch.description ?? '',
             tabs: [
-              {
-                ...savedSearch,
-                id: savedSearch.id ?? '',
-                label: savedSearch.title ?? '',
-                serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
-                sort: savedSearch.sort ?? [],
-                columns: savedSearch.columns ?? [],
-                grid: savedSearch.grid ?? {},
-                hideChart: savedSearch.hideChart ?? false,
-                isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-              },
+              fromSavedSearchToSavedObjectTab({
+                tab: {
+                  id: savedSearch.id ?? '',
+                  label: savedSearch.title ?? '',
+                },
+                savedSearch,
+                services: mockServices,
+              }),
             ],
           },
         },
