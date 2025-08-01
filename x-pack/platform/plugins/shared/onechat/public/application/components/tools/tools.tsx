@@ -487,7 +487,7 @@ export const OnechatTools = () => {
   } = useOnechatTools({
     includeSystemTools,
   });
-  const { tags } = useToolTags();
+  const { tags } = useToolTags({ includeSystemTools });
   const [pageIndex, setPageIndex] = useState(0);
   const [tableItems, setTableItems] = useState<ToolDefinitionWithSchema[]>([]);
   const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);

@@ -8,8 +8,12 @@
 import { useMemo } from 'react';
 import { useOnechatTools } from './use_tools';
 
-export const useToolTags = () => {
-  const { tools, isLoading, error } = useOnechatTools();
+export interface UseToolTagsOptions {
+  includeSystemTools?: boolean;
+}
+
+export const useToolTags = ({ includeSystemTools = true }: UseToolTagsOptions = {}) => {
+  const { tools, isLoading, error } = useOnechatTools({ includeSystemTools });
 
   const tags = useMemo((): string[] => {
     if (isLoading || error) return [];
