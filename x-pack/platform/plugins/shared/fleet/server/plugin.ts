@@ -153,7 +153,6 @@ import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task'
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 
-
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
@@ -325,7 +324,6 @@ export class FleetPlugin
   private policyWatcher?: PolicyWatcher;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
-
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -955,8 +953,6 @@ export class FleetPlugin
     );
     return this.packageService!;
   }
-
-
 
   private getLogger(): Logger {
     if (!this.logger) {
