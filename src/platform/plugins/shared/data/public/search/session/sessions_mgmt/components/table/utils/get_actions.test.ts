@@ -8,29 +8,30 @@
  */
 
 import { SearchSessionStatus } from '../../../../../../../common';
+import { ACTION } from '../../../types';
 import { getActions } from './get_actions';
 
 describe('getActions', () => {
   describe.each([
     {
       status: SearchSessionStatus.COMPLETE,
-      expectedActions: ['inspect', 'rename', 'extend', 'delete'],
+      expectedActions: [ACTION.INSPECT, ACTION.RENAME, ACTION.EXTEND, ACTION.DELETE],
     },
     {
       status: SearchSessionStatus.IN_PROGRESS,
-      expectedActions: ['inspect', 'rename', 'extend', 'delete'],
+      expectedActions: [ACTION.INSPECT, ACTION.RENAME, ACTION.EXTEND, ACTION.DELETE],
     },
     {
       status: SearchSessionStatus.ERROR,
-      expectedActions: ['inspect', 'rename', 'delete'],
+      expectedActions: [ACTION.INSPECT, ACTION.RENAME, ACTION.DELETE],
     },
     {
       status: SearchSessionStatus.EXPIRED,
-      expectedActions: ['inspect', 'rename', 'delete'],
+      expectedActions: [ACTION.INSPECT, ACTION.RENAME, ACTION.DELETE],
     },
     {
       status: SearchSessionStatus.CANCELLED,
-      expectedActions: ['inspect', 'rename', 'delete'],
+      expectedActions: [ACTION.INSPECT, ACTION.RENAME, ACTION.DELETE],
     },
   ])('when the status is $status', ({ status, expectedActions }) => {
     it('should return the correct actions', () => {

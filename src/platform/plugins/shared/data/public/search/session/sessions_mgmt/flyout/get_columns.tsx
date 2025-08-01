@@ -8,6 +8,7 @@
  */
 
 import { SearchSessionsMgmtTable, columns } from '../components/table';
+import { ACTION } from '../types';
 
 type GetColumnsFn = React.ComponentProps<typeof SearchSessionsMgmtTable>['getColumns'];
 
@@ -29,6 +30,6 @@ export const getColumns: GetColumnsFn = ({
     core,
     api,
     onActionComplete,
-    allowedActions: ['extend', 'rename', 'delete'],
+    allowedActions: [ACTION.EXTEND, ACTION.RENAME, ACTION.DELETE],
   }),
 ];

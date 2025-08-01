@@ -18,7 +18,7 @@ import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SessionsClient } from '../../../sessions_client';
 import { getSearchSessionSavedObjectMocks } from '../../__mocks__';
-import { SearchSessionSavedObject } from '../../types';
+import { ACTION, SearchSessionSavedObject } from '../../types';
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
 import { columns } from '.';
 
@@ -206,7 +206,7 @@ export const FilteredActions = {
             core,
             api,
             onActionComplete,
-            allowedActions: ['inspect', 'delete'],
+            allowedActions: [ACTION.INSPECT, ACTION.DELETE],
           }),
         ],
       }}

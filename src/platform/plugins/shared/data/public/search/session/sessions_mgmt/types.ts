@@ -9,7 +9,6 @@
 
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../../common';
-import { Action } from './components/table/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 
@@ -27,6 +26,13 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
 
 export type UISearchSessionState = SearchSessionStatus;
 
+export enum ACTION {
+  INSPECT = 'inspect',
+  EXTEND = 'extend',
+  DELETE = 'delete',
+  RENAME = 'rename',
+}
+
 export interface UISession {
   id: string;
   name: string;
@@ -36,7 +42,7 @@ export interface UISession {
   status: UISearchSessionState;
   idMapping: SearchSessionSavedObjectAttributes['idMapping'];
   numSearches: number;
-  actions?: Action[];
+  actions?: ACTION[];
   reloadUrl: string;
   restoreUrl: string;
   initialState: Record<string, unknown>;

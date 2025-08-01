@@ -8,18 +8,17 @@
  */
 
 import { SearchSessionStatus } from '../../../../../../../common';
-import { UISearchSessionState } from '../../../types';
-import { Action } from '../actions';
+import { ACTION, UISearchSessionState } from '../../../types';
 
 export function getActions(status: UISearchSessionState) {
-  const actions: Action[] = [];
+  const actions: ACTION[] = [];
 
-  actions.push('inspect');
-  actions.push('rename');
+  actions.push(ACTION.INSPECT);
+  actions.push(ACTION.RENAME);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
-    actions.push('extend');
+    actions.push(ACTION.EXTEND);
   }
-  actions.push('delete');
+  actions.push(ACTION.DELETE);
 
   return actions;
 }

@@ -11,8 +11,6 @@ import extendSessionIcon from './icons/extend_session.svg';
 export type OnActionComplete = () => void;
 export type OnActionDismiss = () => void;
 
-export type Action = 'inspect' | 'extend' | 'delete' | 'rename';
-
 export interface IClickActionDescriptor {
   label: React.ReactNode;
   iconType: 'trash' | 'cancel' | typeof extendSessionIcon;

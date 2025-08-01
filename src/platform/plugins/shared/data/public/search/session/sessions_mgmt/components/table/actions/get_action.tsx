@@ -10,27 +10,26 @@
 import { CoreStart } from '@kbn/core/public';
 import { IClickActionDescriptor } from './types';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { UISession } from '../../../types';
+import { ACTION, UISession } from '../../../types';
 import { createDeleteActionDescriptor } from './delete_button';
 import { createExtendActionDescriptor } from './extend_button';
 import { createInspectActionDescriptor } from './inspect_button';
-import { Action } from './types';
 import { createRenameActionDescriptor } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
-  actionType: Action,
+  actionType: ACTION,
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor | null => {
   switch (actionType) {
-    case 'inspect':
+    case ACTION.INSPECT:
       return createInspectActionDescriptor(api, uiSession, core);
-    case 'delete':
+    case ACTION.DELETE:
       return createDeleteActionDescriptor(api, uiSession, core);
-    case 'extend':
+    case ACTION.EXTEND:
       return createExtendActionDescriptor(api, uiSession, core);
-    case 'rename':
+    case ACTION.RENAME:
       return createRenameActionDescriptor(api, uiSession, core);
     default:
       // eslint-disable-next-line no-console
