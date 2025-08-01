@@ -472,7 +472,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         createCommandHistoryEntry(
           cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
-            errorMessage: validationResult,
+            errorMessage: <ConsoleCodeBlock>{validationResult}</ConsoleCodeBlock>,
           }),
           false
         )
