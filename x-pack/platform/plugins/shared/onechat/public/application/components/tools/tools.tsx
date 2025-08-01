@@ -88,10 +88,6 @@ const ToolFilterOption = ({ name, matches }: ToolFilterOptionProps) => {
         align-items: center;
         margin-block: ${euiTheme.size.xs};
         width: 100%;
-
-        &:hover .tool-filter-option-name {
-          text-decoration: underline;
-        }
       `}
     >
       <EuiText className="tool-filter-option-name" size="s">
