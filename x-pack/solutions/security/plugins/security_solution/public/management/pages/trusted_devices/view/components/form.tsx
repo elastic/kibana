@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { OperatingSystem, TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -222,7 +222,7 @@ const ConditionsSection = memo<{
             <EuiFormRow label="Field">
               <EuiSuperSelect
                 options={FIELD_OPTIONS}
-                valueOfSelected={currentEntry.field || 'fieldOne'}
+                valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.USERNAME}
                 onChange={handleFieldChange}
                 data-test-subj={getTestId('fieldSelect')}
                 disabled={disabled}
@@ -259,9 +259,26 @@ const ConditionsSection = memo<{
 ConditionsSection.displayName = 'ConditionsSection';
 
 const FIELD_OPTIONS = [
-  { value: 'fieldOne', inputDisplay: CONDITION_FIELD_TITLE.fieldOne },
-  { value: 'fieldTwo', inputDisplay: CONDITION_FIELD_TITLE.fieldTwo },
-  { value: 'fieldThree', inputDisplay: CONDITION_FIELD_TITLE.fieldThree },
+  {
+    value: TrustedDeviceConditionEntryField.USERNAME,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.HOST,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.DEVICE_ID,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.MANUFACTURER,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+  },
+  {
+    value: TrustedDeviceConditionEntryField.PRODUCT_ID,
+    inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+  },
 ];
 
 const OPERATOR_OPTIONS = [
@@ -387,7 +404,12 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           ...item,
           os_types: [value],
           entries: [
-            { field: 'fieldOne', operator: 'included' as const, type: 'match' as const, value: '' },
+            {
+              field: TrustedDeviceConditionEntryField.USERNAME,
+              operator: 'included' as const,
+              type: 'match' as const,
+              value: '',
+            },
           ],
         };
         const validation = validateForm(updatedItem);
@@ -405,7 +427,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const updateConditionField = useCallback(
       (updates: Record<string, string>) => {
         const currentEntry = item.entries?.[0] || {
-          field: 'fieldOne',
+          field: TrustedDeviceConditionEntryField.USERNAME,
           operator: 'included',
           type: 'match',
           value: '',
@@ -467,7 +489,12 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       if (entry && 'value' in entry) {
         return entry;
       }
-      return { field: '', operator: 'included' as const, type: 'match' as const, value: '' };
+      return {
+        field: TrustedDeviceConditionEntryField.USERNAME,
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: '',
+      };
     }, [item.entries]);
 
     return (

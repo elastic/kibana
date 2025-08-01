@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 
 export const DETAILS_HEADER = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.detailsHeader',
@@ -63,44 +64,68 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
 );
 
 // Field definitions (mirroring TA structure)
-export const CONDITION_FIELD_TITLE = {
-  fieldOne: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldOne',
+export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: string } = {
+  [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.username',
     {
-      defaultMessage: 'Field One',
+      defaultMessage: 'Username',
     }
   ),
-  fieldTwo: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldTwo',
+  [TrustedDeviceConditionEntryField.HOST]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.host',
     {
-      defaultMessage: 'Field Two',
+      defaultMessage: 'Host',
     }
   ),
-  fieldThree: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.fieldThree',
+  [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.deviceId',
     {
-      defaultMessage: 'Field Three',
+      defaultMessage: 'Device ID',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.manufacturer',
+    {
+      defaultMessage: 'Manufacturer',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.productId',
+    {
+      defaultMessage: 'Product ID',
     }
   ),
 };
 
-export const CONDITION_FIELD_DESCRIPTION = {
-  fieldOne: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldOne',
+export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryField]: string } = {
+  [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.username',
     {
-      defaultMessage: 'Description for field one',
+      defaultMessage: 'The username of the device user',
     }
   ),
-  fieldTwo: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldTwo',
+  [TrustedDeviceConditionEntryField.HOST]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.host',
     {
-      defaultMessage: 'Description for field two',
+      defaultMessage: 'The hostname of the device',
     }
   ),
-  fieldThree: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.fieldThree',
+  [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceId',
     {
-      defaultMessage: 'Description for field three',
+      defaultMessage: 'The unique identifier of the device',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturer',
+    {
+      defaultMessage: 'The manufacturer of the device',
+    }
+  ),
+  [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
+    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productId',
+    {
+      defaultMessage: 'The product identifier of the device model',
     }
   ),
 };
