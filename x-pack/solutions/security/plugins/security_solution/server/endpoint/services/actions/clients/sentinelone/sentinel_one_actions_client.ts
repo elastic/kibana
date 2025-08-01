@@ -50,7 +50,6 @@ import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
@@ -64,6 +63,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  ResponseActionScriptsApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
@@ -1137,7 +1137,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   async getCustomScripts({
     osType,
-  }: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {}): Promise<CustomScriptsResponse> {
+  }: Omit<
+    CustomScriptsRequestQueryParams,
+    'agentType'
+  > = {}): Promise<ResponseActionScriptsApiResponse> {
     if (
       !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled
     ) {

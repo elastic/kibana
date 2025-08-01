@@ -8,7 +8,10 @@ import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { CustomScript, CustomScriptsResponse } from '../../../../server/endpoint/services';
+import type {
+  ResponseActionScript,
+  ResponseActionScriptsApiResponse,
+} from '../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp } from '../../../common/lib/kibana';
@@ -32,17 +35,17 @@ export interface CustomScriptsErrorType {
 export const useGetCustomScripts = (
   agentType: ResponseActionAgentType,
   options: Omit<
-    UseQueryOptions<CustomScriptsResponse, IHttpFetchError<CustomScriptsErrorType>>,
+    UseQueryOptions<ResponseActionScriptsApiResponse, IHttpFetchError<CustomScriptsErrorType>>,
     'queryKey' | 'queryFn'
   > = {}
-): UseQueryResult<CustomScript[], IHttpFetchError<CustomScriptsErrorType>> => {
+): UseQueryResult<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>> => {
   const http = useHttp();
 
-  return useQuery<CustomScript[], IHttpFetchError<CustomScriptsErrorType>>({
+  return useQuery<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>>({
     queryKey: ['get-custom-scripts', agentType],
     queryFn: () => {
       return http
-        .get<CustomScriptsResponse>(CUSTOM_SCRIPTS_ROUTE, {
+        .get<ResponseActionScriptsApiResponse>(CUSTOM_SCRIPTS_ROUTE, {
           version: '1',
           query: {
             agentType,

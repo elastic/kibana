@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CustomScript } from '../../../../../server/endpoint/services';
+import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import { useConsoleStateDispatch } from '../../console/hooks/state_selectors/use_console_state_dispatch';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
@@ -56,7 +56,9 @@ interface CustomScriptSelectorState {
   isPopoverOpen: boolean;
 }
 
-type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>;
+type SelectableOption = EuiSelectableOption<
+  Partial<{ description: ResponseActionScript['description'] }>
+>;
 
 export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   const CustomScriptSelectorComponent = memo<
@@ -91,7 +93,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     } = useGetCustomScripts(agentType);
 
     const scriptsOptions: SelectableOption[] = useMemo(() => {
-      return data.map((script: CustomScript) => {
+      return data.map((script: ResponseActionScript) => {
         const isChecked = script.name === value;
         return {
           label: script.name,

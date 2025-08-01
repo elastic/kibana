@@ -35,6 +35,7 @@ import type {
 } from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
+  ResponseActionScriptsApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -67,7 +68,6 @@ import {
 } from '../../../errors';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
@@ -776,7 +776,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     return { isPending, isError, message };
   }
 
-  async getCustomScripts(): Promise<CustomScriptsResponse> {
+  async getCustomScripts(): Promise<ResponseActionScriptsApiResponse> {
     try {
       const customScriptsResponse = (await this.sendAction(
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES,
@@ -785,7 +785,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       const scripts = customScriptsResponse.data?.value || [];
 
-      // Transform MS Defender scripts to CustomScriptsResponse format
+      // Transform MS Defender scripts to ResponseActionScriptsApiResponse format
       const data = scripts.map((script) => ({
         // due to External EDR's schema nature - we expect a maybe() everywhere - empty strings are needed
         id: script.fileName || '',
@@ -793,7 +793,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         description: script.description || '',
       }));
 
-      return { data } as CustomScriptsResponse;
+      return { data } as ResponseActionScriptsApiResponse;
     } catch (err) {
       const error = new ResponseActionsClientError(
         `Failed to fetch Microsoft Defender for Endpoint scripts, failed with: ${err.message}`,
