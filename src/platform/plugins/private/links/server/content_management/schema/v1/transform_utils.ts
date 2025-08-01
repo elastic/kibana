@@ -36,7 +36,7 @@ export function savedObjectToItem(
       ...attributes,
       links,
     },
-    references: [],
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
 }
 

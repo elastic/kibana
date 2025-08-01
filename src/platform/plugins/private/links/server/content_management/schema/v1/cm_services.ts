@@ -12,6 +12,7 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   createResultSchema,
+  updateOptionsSchema,
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
@@ -120,6 +121,13 @@ export const linksCreateOptionsSchema = schema.object({
   overwrite: createOptionsSchemas.overwrite,
 });
 
+// update references needed because visualize listing table uses content management
+// to update title/description/tags and tags passes references in this use case
+// TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
+export const linksUpdateOptionsSchema = schema.object({
+  references: updateOptionsSchema.references,
+});
+
 export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
 export const linksCreateResultSchema = createResultSchema(linksSavedObjectSchema);
 
@@ -150,6 +158,9 @@ export const serviceDefinition: ServicesDefinition = {
   },
   update: {
     in: {
+      options: {
+        schema: linksUpdateOptionsSchema,
+      },
       data: {
         schema: linksSchema,
       },

@@ -9,7 +9,11 @@
 
 import type { Logger } from '@kbn/logging';
 import { StorageContext } from '@kbn/content-management-plugin/server';
-import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../common';
@@ -21,6 +25,7 @@ import {
   LinksGetOut,
   savedObjectToItem,
   itemToAttributes,
+  LinksUpdateOptions,
   LinksUpdateOut,
   LinksSearchOptions,
   LinksState,
@@ -169,7 +174,12 @@ export class LinksStorage {
     return value;
   }
 
-  async update(ctx: StorageContext, id: string, data: LinksState): Promise<LinksUpdateOut> {
+  async update(
+    ctx: StorageContext,
+    id: string,
+    data: LinksState,
+    options: LinksUpdateOptions
+  ): Promise<LinksUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
@@ -182,6 +192,14 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
+    const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
+      LinksUpdateOptions,
+      LinksUpdateOptions
+    >(options);
+    if (optionsError) {
+      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
+    }
+
     const { attributes, references } = await itemToAttributes(dataToLatest);
 
     // Save data in DB
@@ -189,7 +207,12 @@ export class LinksStorage {
       LINKS_SAVED_OBJECT_TYPE,
       id,
       attributes,
-      { references }
+      {
+        references: [
+          ...references,
+          ...((optionsToLatest.references as SavedObjectReference[]) ?? []),
+        ],
+      }
     );
 
     const item = savedObjectToItem(partialSavedObject);
