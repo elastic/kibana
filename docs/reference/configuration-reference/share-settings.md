@@ -23,13 +23,13 @@ For {{es}} instances with less than 2 GB RAM, we do not recommend enabling this 
 ::::
 
 `share.url_expiration.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   If `true` the URL expiration feature is enabled. Defaults to `false`
+:   If `true` the URL expiration feature is enabled. Defaults to `false`.
 
 `share.url_expiration.duration` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Controls the expiration threshold. Saved object that have not been accessed in the specified period of time will get deleted. Defaults to `1y` (1 year)
+:   Controls the expiration threshold. Saved object that have not been accessed in the specified period of time will get deleted. Defaults to `1y` (1 year).
 
 `share.url_expiration.check_interval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Controls how often the task runs. Defaults to `7d` (7 days)
+:   Controls how often the task runs. Defaults to `7d` (7 days).
 
 `share.url_expiration.url_limit` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls how many saved objects should be retrieved and scheduled for deletion per one run of the task. Defaults to `10000`.
