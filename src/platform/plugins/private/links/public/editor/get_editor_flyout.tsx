@@ -60,6 +60,7 @@ export function getEditorFlyout({
               ...updateState,
               links: serializeResolvedLinks(newLinks),
             },
+            options: { references: [] },
           });
           onCompleteEdit?.(newState);
           closeFlyout();
