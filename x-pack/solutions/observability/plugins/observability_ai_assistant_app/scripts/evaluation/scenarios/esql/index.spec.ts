@@ -865,8 +865,9 @@ describe('ES|QL query generation', () => {
         question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
         expected: [
           `FROM main
-        | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
-          `FROM main | LOOKUP JOIN suspicious_users ON user_id | KEEP user_id`,
+          | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+          `FROM main 
+          | LOOKUP JOIN suspicious_users ON user_id`,
         ],
         execute: false,
       });

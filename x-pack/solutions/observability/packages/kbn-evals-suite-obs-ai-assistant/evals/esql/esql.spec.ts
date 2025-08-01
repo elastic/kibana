@@ -978,11 +978,9 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             output: {
               expected: [
                 `FROM main
-                | WHERE user_id IN (FROM suspicious_users 
-                | KEEP user_id)`,
+                | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
                 `FROM main 
-                | LOOKUP JOIN suspicious_users ON user_id 
-                | KEEP user_id`,
+                | LOOKUP JOIN suspicious_users ON user_id`,
               ],
               execute: false,
             },
