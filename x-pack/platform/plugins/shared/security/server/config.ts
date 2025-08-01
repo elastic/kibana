@@ -303,6 +303,26 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
+  hardening: schema.object({
+    fs: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      safe_paths: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+      reporting: schema.maybe(
+        schema.object({
+          path_traversal: schema.maybe(schema.boolean({ defaultValue: true })),
+          restricted_write: schema.maybe(schema.boolean({ defaultValue: true })),
+          mime_type: schema.maybe(schema.boolean({ defaultValue: true })),
+          file_extension_mismatch: schema.maybe(schema.boolean({ defaultValue: true })),
+        })
+      ),
+      enforcing: schema.object({
+        path_traversal: schema.maybe(schema.boolean({ defaultValue: true })),
+        restricted_write: schema.maybe(schema.boolean({ defaultValue: true })),
+        mime_type: schema.maybe(schema.boolean({ defaultValue: true })),
+        file_extension_mismatch: schema.maybe(schema.boolean({ defaultValue: true })),
+      }),
+    }),
+  }),
 
   roleManagementEnabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
