@@ -44,8 +44,8 @@ describe('AuthConfig renders', () => {
     expect(screen.queryByTestId('basicAuthFields')).not.toBeInTheDocument();
     expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
     expect(screen.queryByTestId('sslCertFields')).not.toBeInTheDocument();
-    expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
-    expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
+    expect(screen.queryByTestId('authOAuth2')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('OAuth 2.0')).not.toBeInTheDocument();
   });
 
   it('toggles headers as expected', async () => {
@@ -483,7 +483,30 @@ describe('AuthConfig renders', () => {
     });
   });
 
-  describe('AuthConfig with showOAuth2Option', () => {
+  describe('AuthConfig with showOAuth2Option on', () => {
+    it('renders OAuth2 option when showOAuth2Option is explicitly set to true', async () => {
+      const testFormData = {
+        config: {
+          hasAuth: true,
+          authType: 'oauth2',
+          accessTokenUrl: 'https://api.example.com/oauth/token',
+          clientId: 'client_id_123',
+        },
+        secret: {
+          clientSecret: 'secret_123',
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
+        </AuthFormTestProvider>
+      );
+
+      expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
+      expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
+    });
+
     it('renders OAuth2 fields when authType is OAuth2', async () => {
       const testFormData = {
         config: {
@@ -494,7 +517,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -525,7 +548,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -571,7 +594,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -608,7 +631,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -651,7 +674,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={true} />
+          <AuthConfig readOnly={true} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
