@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const pluginConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   cdn: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),

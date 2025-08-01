@@ -67,16 +67,24 @@ export class IndicesMetadataPlugin
     this.config$.subscribe(async (pluginConfig) => {
       this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
 
-      const cdnConfig = this.effectiveCdnConfig(pluginConfig);
-      const info = await core.elasticsearch.client.asInternalUser.info();
-      const artifactService = new ArtifactService(this.logger, info, cdnConfig);
+      if (pluginConfig.enabled) {
+        this.logger.info('Updating indices metadata configuration');
 
-      this.configurationService.start(artifactService, DEFAULT_INDICES_METADATA_CONFIGURATION);
-      this.indicesMetadataService.start(
-        plugin.taskManager,
-        core.analytics,
-        core.elasticsearch.client.asInternalUser
-      );
+        const cdnConfig = this.effectiveCdnConfig(pluginConfig);
+        const info = await core.elasticsearch.client.asInternalUser.info();
+        const artifactService = new ArtifactService(this.logger, info, cdnConfig);
+
+        this.configurationService.start(artifactService, DEFAULT_INDICES_METADATA_CONFIGURATION);
+        this.indicesMetadataService.start(
+          plugin.taskManager,
+          core.analytics,
+          core.elasticsearch.client.asInternalUser
+        );
+      } else {
+        this.logger.info('Indices metadata plugin is disabled, stopping services');
+        this.configurationService.stop();
+        this.indicesMetadataService.stop();
+      }
     });
   }
 
