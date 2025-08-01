@@ -74,7 +74,7 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
     () => [
       {
         title: i18n.translate('xpack.apm.mobileServices.breadcrumb.title', {
-          defaultMessage: 'Services',
+          defaultMessage: 'Service inventory',
         }),
         href: servicesLink,
       },

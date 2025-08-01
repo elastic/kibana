@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESSearchClient } from '../metrics/types';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 
 export const hasData = async (index: string, client: ESSearchClient) => {
   const params = {
