@@ -26,7 +26,9 @@ import {
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
-import { appendAdHocDataViews } from './data_views';
+import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+
+type AdHocDataViewAction = 'copy' | 'replace';
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
   'internalState/saveDiscoverSession',
@@ -56,6 +58,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       string,
       {
         dataViewSpec: DataViewSpec;
+        action: AdHocDataViewAction;
         tabs: DiscoverSessionTab[];
       }
     >();
@@ -79,10 +82,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
             refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
           };
-
-          if (newCopyOnSave) {
-            await tabStateContainer.actions.updateAdHocDataViewId();
-          }
         } else {
           updatedTab = fromTabStateToSavedObjectTab({
             tab,
@@ -98,10 +97,28 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         const dataViewSpec = updatedTab.serializedSearchSource.index;
 
         if (isObject(dataViewSpec) && dataViewSpec.id) {
-          const adHocEntry = adHocDataViews.get(dataViewSpec.id) ?? { dataViewSpec, tabs: [] };
+          let action: AdHocDataViewAction | undefined;
 
-          adHocEntry.tabs.push(updatedTab);
-          adHocDataViews.set(dataViewSpec.id, adHocEntry);
+          if (state.defaultProfileAdHocDataViewIds.includes(dataViewSpec.id)) {
+            // If the Discover session is using a default profile ad hoc data view,
+            // we copy it with a new ID to avoid conflicts with the profile defaults
+            action = 'copy';
+          } else if (newCopyOnSave) {
+            // Otherwise, if we're copying a session with a custom ad hoc data view,
+            // we replace it with a cloned one to avoid ID conflicts across sessions
+            action = 'replace';
+          }
+
+          if (action) {
+            const adHocEntry = adHocDataViews.get(dataViewSpec.id) ?? {
+              dataViewSpec,
+              action,
+              tabs: [],
+            };
+
+            adHocEntry.tabs.push(updatedTab);
+            adHocDataViews.set(dataViewSpec.id, adHocEntry);
+          }
         }
 
         return updatedTab;
@@ -109,16 +126,16 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     );
 
     for (const adHocEntry of adHocDataViews.values()) {
-      const { dataViewSpec, tabs } = adHocEntry;
+      const { dataViewSpec, action, tabs } = adHocEntry;
 
       if (!dataViewSpec.id) {
         continue;
       }
 
-      if (state.defaultProfileAdHocDataViewIds.includes(dataViewSpec.id)) {
-        // If the Discover session is using a default profile ad hoc data view,
-        // we copy it with a new ID to avoid conflicts with the profile defaults
-        const replacementSpec: DataViewSpec & Required<Pick<DataViewSpec, 'id'>> = {
+      let newDataViewSpec: DataViewSpec & Required<Pick<DataViewSpec, 'id'>>;
+
+      if (action === 'copy') {
+        newDataViewSpec = {
           ...dataViewSpec,
           id: uuidv4(),
           name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
@@ -130,25 +147,39 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           }),
         };
 
-        // Update all applicable tabs to use the new data view spec
-        for (const tab of tabs) {
-          tab.serializedSearchSource.index = replacementSpec;
-
-          // If the data view was replaced, we need to update the filter references
-          if (Array.isArray(tab.serializedSearchSource.filter)) {
-            tab.serializedSearchSource.filter = updateFilterReferences(
-              tab.serializedSearchSource.filter,
-              dataViewSpec.id,
-              replacementSpec.id
-            );
-          }
-        }
-
         // Skip field list fetching since the existing data view already has the fields
-        const dataView = await services.dataViews.create(replacementSpec, true);
+        const dataView = await services.dataViews.create(newDataViewSpec, true);
 
         // Make sure our state is aware of the copy so it appears in the UI
         dispatch(appendAdHocDataViews(dataView));
+      } else {
+        newDataViewSpec = {
+          ...dataViewSpec,
+          id: uuidv4(),
+        };
+
+        // Clear out the old data view since it's no longer needed
+        services.dataViews.clearInstanceCache(dataViewSpec.id);
+
+        // Skip field list fetching since the existing data view already has the fields
+        const dataView = await services.dataViews.create(newDataViewSpec, true);
+
+        // Make sure our state is aware of the new data view
+        dispatch(replaceAdHocDataViewWithId(dataViewSpec.id, dataView));
+      }
+
+      // Update all applicable tabs to use the new data view spec
+      for (const tab of tabs) {
+        tab.serializedSearchSource.index = newDataViewSpec;
+
+        // We also need to update the filter references
+        if (Array.isArray(tab.serializedSearchSource.filter)) {
+          tab.serializedSearchSource.filter = updateFilterReferences(
+            tab.serializedSearchSource.filter,
+            dataViewSpec.id,
+            newDataViewSpec.id
+          );
+        }
       }
     }
 
