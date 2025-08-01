@@ -249,7 +249,12 @@ export type CommandExecutionComponent<
 /**
  * The component props for an argument `SelectorComponent`
  */
-export interface CommandArgumentValueSelectorProps<TSelection = any, TState = any> {
+export interface CommandArgumentValueSelectorProps<
+  TSelection = any,
+  TState = any,
+  /** The metadata defined on the Command Definition */
+  TMeta = any
+> {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will
    * be passed on to the command execution as part of the argument's value
@@ -292,7 +297,7 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * The full Command object containing command definition, input, and parsed arguments.
    * This provides context that selector components can use to access command metadata.
    */
-  command: Command;
+  command: Command<CommandDefinition<TMeta>>;
 
   /**
    * Callback to request focus back to the console input after selector operations.
