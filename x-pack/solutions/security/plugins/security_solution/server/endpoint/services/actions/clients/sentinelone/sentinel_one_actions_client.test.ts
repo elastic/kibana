@@ -2156,6 +2156,68 @@ describe('SentinelOneActionsClient class', () => {
     });
   });
 
+  describe('#getCustomScripts()', () => {
+    beforeEach(() => {
+      // @ts-expect-error update readonly property
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        true;
+    });
+
+    it('should throw an error when feature flag is disabled', async () => {
+      // @ts-expect-error update readonly property
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        false;
+
+      await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
+        "'runscript' response action not supported for [sentinel_one]"
+      );
+    });
+
+    it('should retrieve list of scripts from SentinelOne', async () => {
+      await s1ActionsClient.getCustomScripts();
+
+      expect(classConstructorOptions.connectorActions.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'getRemoteScripts',
+          subActionParams: {
+            limit: 1000,
+            sortBy: 'scriptName',
+            sortOrder: 'asc',
+          },
+        },
+      });
+    });
+
+    it('should accept `osType` option', async () => {
+      await s1ActionsClient.getCustomScripts({ osType: 'windows' });
+
+      expect(classConstructorOptions.connectorActions.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'getRemoteScripts',
+          subActionParams: {
+            limit: 1000,
+            sortBy: 'scriptName',
+            sortOrder: 'asc',
+            osTypes: 'windows',
+          },
+        },
+      });
+    });
+
+    it('should return list of scripts', async () => {
+      await expect(s1ActionsClient.getCustomScripts()).resolves.toEqual({
+        data: [
+          {
+            description:
+              'Input instructions: --terminate --processes <processes-name-templates> [-f|--force]',
+            id: '1466645476786791838',
+            name: 'Terminate Processes (Linux/macOS)',
+          },
+        ],
+      });
+    });
+  });
+
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
       // @ts-expect-error assignment to readonly prop
@@ -2301,6 +2363,12 @@ describe('SentinelOneActionsClient class', () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });
         const options = sentinelOneMock.getOptionsForResponseActionMethod(methodName);
+
+        if (methodName === 'runscript') {
+          // @ts-expect-error write to readonly prop
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+            true;
+        }
 
         // @ts-expect-error `options` type is too broad because we're getting it from a helper
         await expect(s1ActionsClient[methodName](options)).rejects.toThrow(

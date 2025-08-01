@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobId);
 

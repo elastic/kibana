@@ -82,7 +82,7 @@ describe(
 
       describe('when ML jobs have run', () => {
         before(() => {
-          cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+          cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
           setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
           forceStartDatafeeds({ jobIds: [jobId] });
           cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });
@@ -90,7 +90,7 @@ describe(
 
         after(() => {
           cy.task('esArchiverUnload', { archiveName: 'anomalies', type: 'ftr' });
-          cy.task('esArchiverUnload', { archiveName: '../auditbeat/hosts', type: 'ftr' });
+          cy.task('esArchiverUnload', { archiveName: 'auditbeat/hosts', type: 'platform' });
         });
 
         describe('when not all jobs are running', () => {
