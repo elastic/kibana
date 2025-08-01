@@ -138,7 +138,7 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes, references } = await itemToAttributes(dataToLatest);
+    const { attributes, references } = itemToAttributes(dataToLatest);
 
     // Save data in DB
     const savedObject = await soClient.create<StoredLinksState>(
@@ -200,7 +200,7 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes, references } = await itemToAttributes(dataToLatest);
+    const { attributes, references } = itemToAttributes(dataToLatest);
 
     // Save data in DB
     const partialSavedObject = await soClient.update<StoredLinksState>(
