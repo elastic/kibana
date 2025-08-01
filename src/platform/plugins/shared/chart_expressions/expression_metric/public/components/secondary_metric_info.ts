@@ -42,6 +42,7 @@ export interface SecondaryMetricInfo {
   label?: string;
   badgeColor?: string;
   description?: string;
+  icon?: string;
 }
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
@@ -192,11 +193,13 @@ function getDynamicColorInfo(
     return { value: '', label: '', badgeColor: '', description: trendDescription };
   }
 
-  const valueContent = `${trendConfig.showValue ? valueToShow : ''}${
-    trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''
-  }${trendConfig.showIcon && icon ? icon : ''}`;
-
-  return { value: valueContent, label, badgeColor: trendColor, description: trendDescription };
+  return {
+    value: trendConfig.showValue ? valueToShow : '',
+    label,
+    badgeColor: trendColor,
+    description: trendDescription,
+    icon: trendConfig.showIcon ? icon : undefined,
+  };
 }
 
 /**
