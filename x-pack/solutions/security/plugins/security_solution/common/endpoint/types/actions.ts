@@ -616,7 +616,7 @@ export interface ResponseActionUploadOutputContent {
 /**
  * A Response Action script
  */
-export interface ResponseActionScript {
+export interface ResponseActionScript<TMeta extends {} = {}> {
   /**
    * Unique identifier for the script
    */
@@ -629,11 +629,17 @@ export interface ResponseActionScript {
    * Description of what the script does
    */
   description: string;
+
+  /**
+   * Additional meta info. about the script. Can be used to store EDR specific
+   * information about the script for use in the UI
+   */
+  meta?: TMeta;
 }
 
 /**
  * API response with list of Response Actions scripts available on the system
  */
-export interface ResponseActionScriptsApiResponse {
-  data: ResponseActionScript[];
+export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
+  data: ResponseActionScript<TMeta>[];
 }
