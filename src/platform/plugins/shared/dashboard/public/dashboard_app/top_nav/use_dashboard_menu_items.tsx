@@ -8,15 +8,16 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
-
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
+import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
+import { ShowAddMenu } from '../../dashboard_renderer/show_add_menu';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { coreServices, shareService } from '../../services/kibana_services';
@@ -110,7 +111,7 @@ export const useDashboardMenuItems = ({
         }
       }, viewMode);
     },
-    [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
+    [dashboardApi, hasUnsavedChanges, isMounted, viewMode]
   );
 
   /**
@@ -215,21 +216,29 @@ export const useDashboardMenuItems = ({
         htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      add: {
+        ...topNavStrings.add,
+        id: 'add',
+        iconType: 'plusInCircle',
+        testId: 'dashboardAddButton',
+        disableButton: disableTopNav,
+        run: (anchorElement: HTMLElement) =>
+          ShowAddMenu({ dashboardApi, anchorElement, coreServices }),
+      },
     };
   }, [
-    disableTopNav,
-    isSaveInProgress,
-    hasUnsavedChanges,
-    lastSavedId,
-    dashboardInteractiveSave,
-    viewMode,
-    showShare,
     dashboardApi,
-    setIsLabsShown,
+    dashboardInteractiveSave,
+    disableTopNav,
+    hasUnsavedChanges,
     isLabsShown,
+    isSaveInProgress,
+    lastSavedId,
     quickSaveDashboard,
-    resetChanges,
-    isResetting,
+    setIsLabsShown,
+    showShare,
+    viewMode,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -247,12 +256,12 @@ export const useDashboardMenuItems = ({
     };
   }, [
     hasOverlays,
+    hasUnsavedChanges,
+    isResetting,
+    isSaveInProgress,
     lastSavedId,
     resetChanges,
     viewMode,
-    isSaveInProgress,
-    hasUnsavedChanges,
-    isResetting,
   ]);
 
   /**
@@ -288,17 +297,17 @@ export const useDashboardMenuItems = ({
       ...editMenuItem,
     ];
   }, [
-    isLabsEnabled,
-    menuItems.labs,
-    menuItems.export,
-    menuItems.share,
-    menuItems.interactiveSave,
-    menuItems.edit,
-    menuItems.fullScreen,
-    hasExportIntegration,
     dashboardApi.isManaged,
-    showResetChange,
+    hasExportIntegration,
+    isLabsEnabled,
+    menuItems.edit,
+    menuItems.export,
+    menuItems.fullScreen,
+    menuItems.interactiveSave,
+    menuItems.labs,
+    menuItems.share,
     resetChangesMenuItem,
+    showResetChange,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -325,25 +334,31 @@ export const useDashboardMenuItems = ({
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
 
-    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+    const editModeTopNavConfigItems = [
+      ...labsMenuItem,
+      menuItems.add,
+      menuItems.settings,
+      ...editModeItems,
+    ];
 
     // insert share menu item before the last item in edit mode
     editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
-    isLabsEnabled,
-    menuItems.labs,
-    menuItems.export,
-    menuItems.share,
-    menuItems.settings,
-    menuItems.interactiveSave,
-    menuItems.switchToViewMode,
-    menuItems.quickSave,
     hasExportIntegration,
+    isLabsEnabled,
     lastSavedId,
-    showResetChange,
+    menuItems.add,
+    menuItems.export,
+    menuItems.interactiveSave,
+    menuItems.labs,
+    menuItems.quickSave,
+    menuItems.settings,
+    menuItems.share,
+    menuItems.switchToViewMode,
     resetChangesMenuItem,
+    showResetChange,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
