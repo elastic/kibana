@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/calculate-auto",
-    "@kbn/core-elasticsearch-server",
     "@kbn/core",
     "@kbn/es-query",
     "@kbn/es-types",

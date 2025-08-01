@@ -8,34 +8,52 @@
 import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
+import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
-import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { kqlQuery, rangeQuery } from '../../routes/internal/esql/query_helpers';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
-const LOOKBACK_DAYS = 7;
+const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
+const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
-export async function generateSignificantEventDefinitions({
-  name,
-  connectorId,
-  currentDate = new Date(),
-  inferenceClient,
-  esClient,
-  logger,
-}: {
+export interface GeneratedSignificantEventQuery {
+  title: string;
+  kql: string;
+}
+
+interface Params {
   name: string;
   connectorId: string;
-  currentDate: Date;
+  currentDate?: Date;
+  shortLookback?: moment.Duration;
+  longLookback?: moment.Duration;
+}
+
+interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
-}): Promise<GeneratedSignificantEventQuery[]> {
+}
+
+export async function generateSignificantEventDefinitions(
+  params: Params,
+  dependencies: Dependencies
+): Promise<GeneratedSignificantEventQuery[]> {
+  const {
+    name,
+    connectorId,
+    currentDate = new Date(),
+    shortLookback = DEFAULT_SHORT_LOOKBACK,
+    longLookback = DEFAULT_LONG_LOOKBACK,
+  } = params;
+  const { inferenceClient, esClient, logger } = dependencies;
+
   const mend = moment(currentDate);
-  const mstart = mend.clone().subtract(24, 'hours');
+  const mstart = mend.clone().subtract(shortLookback);
 
   const start = mstart.valueOf();
   const end = mend.valueOf();
@@ -59,7 +77,7 @@ export async function generateSignificantEventDefinitions({
     ? 'body.text'
     : undefined;
 
-  const lookbackStart = mend.clone().subtract(LOOKBACK_DAYS, 'days').valueOf();
+  const lookbackStart = mend.clone().subtract(longLookback).valueOf();
 
   const logPatterns = categorizationField
     ? await getLogPatterns({
@@ -82,11 +100,7 @@ export async function generateSignificantEventDefinitions({
     logger.debug(() => {
       return `Found ${logPatterns?.length} log patterns:
       
-      ${logPatterns
-        .map((pattern) => {
-          return `- ${pattern.sample} (${pattern.count})`;
-        })
-        .join('\n')}
+      ${logPatterns.map((pattern) => `- ${pattern.sample} (${pattern.count})`).join('\n')}
       `;
     });
   }
@@ -96,7 +110,7 @@ export async function generateSignificantEventDefinitions({
     KQL_GUIDE,
     logPatterns
       ? `## Log patterns
-The following log patterns were found over the last ${LOOKBACK_DAYS} days.
+The following log patterns were found over the last ${longLookback.asDays()} days.
 The field used is \`${categorizationField}\`:
     
 ${JSON.stringify(
@@ -120,11 +134,6 @@ quickly identify when something unusual or problematic is happening in the syste
 Quality over quantity - aim for queries that have high signal-to-noise ratio.
     `,
   ];
-
-  logger.debug(() => {
-    return `Input:
-    ${chunks.filter(Boolean).join('\n\n')}`;
-  });
 
   const { output } = await inferenceClient.output({
     id: 'generate_kql_queries',
@@ -159,18 +168,6 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
 
   if (!queries.length) {
     return [];
-  }
-
-  if (queries.length) {
-    logger.debug(() => {
-      return `Generated queries:
-      
-      ${queries
-        .map((query) => {
-          return `- ${query.kql}`;
-        })
-        .join('\n')}`;
-    });
   }
 
   const limiter = pLimit(10);
@@ -209,11 +206,7 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     logger.debug(() => {
       return `Ran queries:
       
-      ${queriesWithCounts
-        .map((query) => {
-          return `- ${query.kql}: ${query.count}`;
-        })
-        .join('\n')}`;
+      ${queriesWithCounts.map((query) => `- ${query.kql}: ${query.count}`).join('\n')}`;
     });
   }
 
@@ -239,7 +232,7 @@ Now I need you to analyze these results and prioritize the most operationally re
 
 ## Analysis Context
 - Total documents in time period: ${totalCount}
-- Lookback period: ${LOOKBACK_DAYS} days
+- Lookback period: ${longLookback.asDays()} days
 - Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
 
 ## Queries
@@ -289,11 +282,7 @@ ${JSON.stringify(
   logger.debug(() => {
     return `Selected queries:
     
-    ${selected
-      .map((query) => {
-        return `- ${query.kql}`;
-      })
-      .join('\n')}
+    ${selected.map((query) => `- ${query.kql}`).join('\n')}
     `;
   });
 
