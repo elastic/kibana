@@ -8,7 +8,9 @@
 import moment from 'moment';
 import type {
   AnalyticsServiceSetup,
-  type Logger,
+  Logger,
+} from '@kbn/core/server';
+import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type {
