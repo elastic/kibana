@@ -28,6 +28,9 @@ import {
   UpdateEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../../engine/status_service';
+import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
+import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 
 export const monitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -67,7 +70,14 @@ export const monitoringEntitySourceRoute = (
           const body = await client.init(request.body);
 
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          await privMonDataClient.scheduleNow();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          await statusService.scheduleNow();
 
           return response.ok({ body });
         } catch (e) {
@@ -147,8 +157,15 @@ export const monitoringEntitySourceRoute = (
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.update({ ...request.body, id: request.params.id });
 
-          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
-          await privMonDataClient.scheduleNow();
+          const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          await statusService.scheduleNow();
 
           return response.ok({ body });
         } catch (e) {

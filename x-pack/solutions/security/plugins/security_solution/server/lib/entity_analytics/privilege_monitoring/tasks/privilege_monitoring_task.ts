@@ -62,23 +62,23 @@ const getTaskName = (): string => TYPE;
 
 const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
 
-export const registerPrivilegeMonitoringTask = async ({
+export const registerPrivilegeMonitoringTask = ({
   getStartServices,
   logger,
   telemetry,
   taskManager,
   kibanaVersion,
   experimentalFeatures,
-}: RegisterParams): Promise<void> => {
+}: RegisterParams) => {
   if (!taskManager) {
     logger.info(
       '[Privilege Monitoring]  Task Manager is unavailable; skipping privilege monitoring task registration.'
     );
     return;
   }
-  const [core, { taskManager: taskManagerStart, security, encryptedSavedObjects }] =
-    await getStartServices();
   const getPrivilegedUserMonitoringDataClient = async (namespace: string) => {
+    const [core, { taskManager: taskManagerStart, security, encryptedSavedObjects }] =
+      await getStartServices();
     const apiKeyManager = getApiKeyManager({
       core,
       logger,
@@ -116,7 +116,7 @@ export const registerPrivilegeMonitoringTask = async ({
         logger,
         telemetry,
         experimentalFeatures,
-        core,
+        getStartServices,
         getPrivilegedUserMonitoringDataClient,
       }),
     },
@@ -128,7 +128,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     experimentalFeatures: ExperimentalFeatures;
-    core: CoreStart;
+    getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     getPrivilegedUserMonitoringDataClient: (
       namespace: string
     ) => Promise<undefined | PrivilegeMonitoringDataClient>;
@@ -137,16 +137,18 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
-      run: async () =>
-        runPrivilegeMonitoringTask({
+      run: async () => {
+        const [core] = await deps.getStartServices();
+        return runPrivilegeMonitoringTask({
           isCancelled,
           logger: deps.logger,
           telemetry: deps.telemetry,
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
-          core: deps.core,
+          core,
           getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        }),
+        });
+      },
       cancel: async () => {
         cancelled = true;
       },
