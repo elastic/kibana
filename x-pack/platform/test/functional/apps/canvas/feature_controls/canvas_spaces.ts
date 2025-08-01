@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with no features disabled', () => {
-      const canvasDefaultArchive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
+      const canvasDefaultArchive =
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default';
 
       before(async () => {
         // we need to load the following in every situation as deleting

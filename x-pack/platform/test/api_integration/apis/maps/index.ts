@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/maps/data');
     });
@@ -26,7 +26,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
     });
 
