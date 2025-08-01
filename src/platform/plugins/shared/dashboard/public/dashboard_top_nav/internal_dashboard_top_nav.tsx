@@ -41,7 +41,6 @@ import {
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
-import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
@@ -89,7 +88,6 @@ export function InternalDashboardTopNav({
 
   const [
     allDataViews,
-    focusedPanelId,
     fullScreenMode,
     hasUnsavedChanges,
     lastSavedId,
@@ -98,7 +96,6 @@ export function InternalDashboardTopNav({
     viewMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
-    dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId$,
@@ -144,7 +141,7 @@ export function InternalDashboardTopNav({
       getDashboardRecentlyAccessedService().add(fullEditPath, title, lastSavedId); // used to sort the listing table
     }
     return () => subscription.unsubscribe();
-  }, [lastSavedId, viewMode, title]);
+  }, [lastSavedId, title, viewMode]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
@@ -199,12 +196,12 @@ export function InternalDashboardTopNav({
       );
     }
   }, [
-    redirectTo,
-    dashboardTitle,
-    dashboardApi,
-    viewMode,
     customLeadingBreadCrumbs,
+    dashboardApi,
+    dashboardTitle,
+    redirectTo,
     styles.updateIcon,
+    viewMode,
   ]);
 
   /**
@@ -391,7 +388,6 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
