@@ -24,6 +24,7 @@ import type {
   AppPluginStartDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 
 export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
@@ -126,12 +127,13 @@ export class SearchNavigationPlugin
   }
 
   private getSearchHomeBreadcrumb(): ChromeBreadcrumb {
-    // TODO: When search_navigation handles solution nav, use the default
     // home deep link for this breadcrumb's path.
+    const homeHref = this.coreStart?.chrome.navLinks.get(SEARCH_HOMEPAGE)?.href;
     return {
       text: i18n.translate('xpack.searchNavigation.breadcrumbs.home.title', {
         defaultMessage: 'Elasticsearch',
       }),
+      href: homeHref,
     };
   }
 }
