@@ -28,7 +28,7 @@ import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_
 import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
 import type { StateDependencies } from '../types';
 import { getRequiredPermissionsForActions } from './required_permissions';
-import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
+import { translateClassicStreamPipelineActions } from './translate_classic_stream_pipeline_actions';
 import type {
   ActionsByType,
   DeleteComponentTemplateAction,
@@ -81,7 +81,7 @@ export class ExecutionPlan {
     try {
       this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
 
-      await translateUnwiredStreamPipelineActions(
+      await translateClassicStreamPipelineActions(
         this.actionsByType,
         this.dependencies.scopedClusterClient
       );
