@@ -12,7 +12,10 @@ import {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import {
+  PluginStartContract as ActionsPluginStartContract,
+  PluginSetupContract as ActionsPluginSetupContract,
+} from '@kbn/actions-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
@@ -25,6 +28,7 @@ export interface WorkflowsExecutionEnginePluginStart {
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
   taskManager: TaskManagerSetupContract;
+  actions: ActionsPluginSetupContract;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {

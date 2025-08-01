@@ -37,6 +37,7 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
+import { getKeepConnectorTypes } from './keep';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -77,6 +78,9 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
   connectorTypeRegistry.register(getXSOARConnectorType());
+  getKeepConnectorTypes().forEach((connector) => {
+    connectorTypeRegistry.register(connector);
+  });
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());

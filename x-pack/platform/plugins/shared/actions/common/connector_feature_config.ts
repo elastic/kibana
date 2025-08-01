@@ -25,6 +25,7 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
+export const workflowFeatureId = 'workflow';
 export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurity';
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 export const GenerativeAIForSearchPlaygroundConnectorFeatureId = 'generativeAIForSearchPlayground';
@@ -134,6 +135,12 @@ export const EndpointSecurityConnectorFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityEndpointSecurity,
 };
 
+export const workflowFeature: ConnectorFeatureConfig = {
+  id: workflowFeatureId,
+  name: 'Workflow',
+  compatibility: 'Workflow',
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
@@ -143,6 +150,7 @@ const AllAvailableConnectorFeatures = {
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
   [GenerativeAIForSearchPlaygroundFeature.id]: GenerativeAIForSearchPlaygroundFeature,
   [EndpointSecurityConnectorFeature.id]: EndpointSecurityConnectorFeature,
+  [workflowFeature.id]: workflowFeature,
 };
 
 export function areValidFeatures(ids: string[]) {
