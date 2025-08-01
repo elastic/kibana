@@ -10,6 +10,7 @@ import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
 import { esClient } from './support/es_client';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
