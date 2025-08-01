@@ -143,6 +143,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectState(2);
       });
 
+      it('should restore density setting', async () => {
+        const expectState = async (density: string) => {
+          await retry.try(async () => {
+            expect(await dataGrid.getCurrentDensityValue()).to.be(density);
+          });
+        };
+
+        await dataGrid.clickGridSettings();
+        await expectState('Compact');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await dataGrid.changeDensityValue('Normal');
+        await expectState('Normal');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Compact');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Normal');
+      });
+
+      it('should restore row height setting', async () => {
+        const expectState = async (rowHeightValue: string) => {
+          await retry.try(async () => {
+            expect(await dataGrid.getCurrentRowHeightValue('row')).to.be(rowHeightValue);
+          });
+        };
+
+        await dataGrid.clickGridSettings();
+        await expectState('Custom');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await dataGrid.changeRowHeightValue('Auto');
+        await expectState('Auto');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Custom');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickGridSettings();
+        await expectState('Auto');
+      });
+
       it('should restore in-table search', async () => {
         expect(await dataGrid.getCurrentPageNumber()).to.be('1');
 
