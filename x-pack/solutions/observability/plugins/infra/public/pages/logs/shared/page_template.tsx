@@ -67,9 +67,6 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
   const noDataConfig: NoDataConfig | undefined = hasData
     ? undefined
     : {
-        solution: i18n.translate('xpack.infra.logs.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
         action: {
           beats: {
             title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
