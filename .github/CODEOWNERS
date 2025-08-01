@@ -2209,7 +2209,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
 /x-pack/platform/test/functional/services/rules @elastic/response-ops
 /x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/platform/test/functional/fixtures/kbn_archives/cases @elastic/kibana-cases
+/x-pack/platform/test/functional/fixtures/kbn_archives/cases @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases @elastic/kibana-cases
 /x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/platform/plugins/shared/cases @elastic/kibana-cases
