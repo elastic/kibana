@@ -111,6 +111,9 @@ export const IndexName: FC = () => {
       readModeProps={{
         'data-test-subj': 'indexNameReadMode',
       }}
+      onChange={() => {
+        setError([]);
+      }}
       onSave={async (value) => {
         setIsLoading(true);
         const indexExists = await fileUpload.checkIndexExists(value);
