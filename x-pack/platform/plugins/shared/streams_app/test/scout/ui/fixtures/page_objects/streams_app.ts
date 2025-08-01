@@ -111,6 +111,25 @@ export class StreamsApp {
     }
   }
 
+  async fillConditionEditorWithSyntax(condition: string) {
+    // Clean previous content
+    await this.page.getByTestId('streamsAppConditionEditorCodeEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppConditionEditorCodeEditor')
+      .getByRole('textbox')
+      .fill(condition);
+    // Clean trailing content
+    await this.page.keyboard.press('Shift+Control+ArrowDown');
+    await this.page.keyboard.press('Backspace');
+  }
+
+  async toggleConditionEditorWithSyntaxSwitch() {
+    await this.page.getByTestId('streamsAppConditionEditorSwitch').click();
+  }
+
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
     // Focus source item and activate DnD

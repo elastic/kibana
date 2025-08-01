@@ -121,6 +121,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
       })}
       labelAppend={
         <EuiSwitch
+          data-test-subj="streamsAppConditionEditorSwitch"
           label={i18n.translate('xpack.streams.conditionEditor.switch', {
             defaultMessage: 'Syntax editor',
           })}
@@ -140,6 +141,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
     >
       {usingSyntaxEditor ? (
         <CodeEditor
+          dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
           languageId="json"
           value={JSON.stringify(condition, null, 2)}

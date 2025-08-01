@@ -20,7 +20,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await generateLogsData(logsSynthtraceEsClient);
   });
 
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoPartitioningTab('logs');
     await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
@@ -83,6 +83,61 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       operator: 'equals',
       value: 'warn',
     });
+
+    // Verify preview panel updated documents
+    await pageObjects.streams.expectPreviewPanelVisible();
+    const updatedRows = await pageObjects.streams.getPreviewTableRows();
+    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValue({
+        columnName: 'severity_text',
+        rowIndex,
+        value: 'warn',
+      });
+    }
+  });
+
+  test('should allow updating the condition manually by syntax editor', async ({ pageObjects }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('logs.preview-test');
+
+    // Enable syntax editor
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+    // Set condition that should match the test data
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      JSON.stringify(
+        {
+          field: 'severity_text',
+          operator: 'eq',
+          value: 'info',
+        },
+        null,
+        2
+      )
+    );
+
+    // Verify preview panel shows matching documents
+    await pageObjects.streams.expectPreviewPanelVisible();
+    const rows = await pageObjects.streams.getPreviewTableRows();
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValue({
+        columnName: 'severity_text',
+        rowIndex,
+        value: 'info',
+      });
+    }
+
+    // Change condition to match a different value
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      JSON.stringify(
+        {
+          field: 'severity_text',
+          operator: 'eq',
+          value: 'warn',
+        },
+        null,
+        2
+      )
+    );
 
     // Verify preview panel updated documents
     await pageObjects.streams.expectPreviewPanelVisible();
