@@ -1,1 +1,2 @@
+@langchain/langgraph-checkpoint
 @opentelemetry/exporter-metrics-otlp-http
