@@ -10,7 +10,7 @@ import {
 } from '@kbn/onechat-common';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useConversationActions } from '../hooks/use_conversation_actions';
 import { useOnechatServices } from '../hooks/use_onechat_service';
@@ -18,38 +18,9 @@ import { useReportConverseError } from '../hooks/use_report_error';
 import { mutationKeys } from '../mutation_keys';
 import { useAgentId } from '../hooks/use_conversation';
 import { useConversationId } from '../hooks/use_conversation_id';
-
-interface MessagesState {
-  input: string;
-  setInput: (input: string) => void;
-  sendMessage: ({ message }: { message: string }) => void;
-  isResponseLoading: boolean;
-  error: unknown;
-  pendingMessage: string | null;
-  retry: () => void;
-}
-
-const MessagesContext = createContext<MessagesState | null>(null);
-
 interface UseSendMessageMutationProps {
   connectorId?: string;
 }
-
-const showError = (error: unknown) => {
-  // TODO: Should unknown errors have alternative handling?
-  // We shouldn't let them fail silently, so show them
-  if (!isOnechatError(error)) {
-    return true;
-  }
-
-  // If the user manually aborts the request, we don't want to show an error
-  if (isRequestAbortedError(error)) {
-    return false;
-  }
-
-  // All other OneChat errors should be shown
-  return true;
-};
 
 const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
@@ -59,10 +30,17 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const conversationId = useConversationId();
   const agentId = useAgentId();
+  const messageControllerRef = useRef<AbortController | null>(null);
 
   const sendMessage = ({ message }: { message: string }) => {
     return new Promise<void>((resolve, reject) => {
+      const signal = messageControllerRef.current?.signal;
+      if (!signal) {
+        reject(new Error('Abort signal not present'));
+        return;
+      }
       const events$ = chatService.chat({
+        signal,
         input: message,
         conversationId,
         agentId,
@@ -104,17 +82,24 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
           resolve();
         },
         error: (err) => {
+          // If the request is aborted, we don't want to show an error
+          if (messageControllerRef.current?.signal?.aborted) {
+            setIsResponseLoading(false);
+            resolve();
+            return;
+          }
           reject(err);
         },
       });
     });
   };
 
-  const { mutate, error } = useMutation({
+  const { mutate, error, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
     onMutate: ({ message }) => {
       setPendingMessage(message);
+      messageControllerRef.current = new AbortController();
 
       // Batch state changes to prevent multiple renders in legacy React
       // This prevents loading indicator flickering in new round
@@ -125,6 +110,7 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     },
     onSettled: () => {
       conversationActions.invalidateConversation();
+      messageControllerRef.current = null;
     },
     onSuccess: () => {
       setPendingMessage(null);
@@ -135,10 +121,19 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
     },
   });
 
+  const canCancel = isLoading;
+  const cancel = () => {
+    if (!canCancel) {
+      return;
+    }
+    setPendingMessage(null);
+    messageControllerRef.current?.abort();
+  };
+
   return {
     sendMessage: mutate,
     isResponseLoading,
-    error: showError(error) && error,
+    error,
     pendingMessage,
     retry: () => {
       if (
@@ -158,16 +153,48 @@ const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {
 
       mutate({ message: pendingMessage });
     },
+    canCancel,
+    cancel,
   };
 };
 
+interface MessagesState {
+  input: string;
+  setInput: (input: string) => void;
+  sendMessage: ({ message }: { message: string }) => void;
+  isResponseLoading: boolean;
+  error: unknown;
+  pendingMessage: string | null;
+  retry: () => void;
+  canCancel: boolean;
+  cancel: () => void;
+}
+
+const MessagesContext = createContext<MessagesState | null>(null);
+
 export const MessagesProvider = ({ children }: { children: React.ReactNode }) => {
   const [input, setInput] = useState('');
-  const { sendMessage, isResponseLoading, error, pendingMessage, retry } = useSendMessageMutation();
+  const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
+    useSendMessageMutation();
 
   return (
     <MessagesContext.Provider
-      value={{ input, setInput, sendMessage, isResponseLoading, error, pendingMessage, retry }}
+      value={{
+        input,
+        setInput,
+        sendMessage,
+        isResponseLoading,
+        error,
+        pendingMessage,
+        retry,
+        canCancel,
+        cancel: () => {
+          if (pendingMessage) {
+            setInput(pendingMessage);
+          }
+          cancel();
+        },
+      }}
     >
       {children}
     </MessagesContext.Provider>
