@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useBoolean } from '@kbn/react-hooks';
 import React, { useMemo } from 'react';
 import { DiscoverLink, DiscoverLinkDependencies, DiscoverLinkProps } from '../discover_link';
 import {
@@ -54,16 +55,10 @@ export const ControlBar: React.FC<ControlBarProps> = React.memo(
     groupingCapabilities,
     onChangeGrouping,
   }) => {
-    const [areGroupingLicenseDetailsShown, setAreGroupingLicenseDetailsShown] =
-      React.useState(false);
-
-    const showGroupingLicenseDetails = React.useCallback(() => {
-      setAreGroupingLicenseDetailsShown(true);
-    }, []);
-
-    const hideGroupingLicenseDetails = React.useCallback(() => {
-      setAreGroupingLicenseDetailsShown(false);
-    }, []);
+    const [
+      areGroupingLicenseDetailsShown,
+      { on: showGroupingLicenseDetails, off: hideGroupingLicenseDetails },
+    ] = useBoolean(false);
 
     const linkFilters = useMemo(
       () => documentFilters?.map((filter) => ({ filter })),
