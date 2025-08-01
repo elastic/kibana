@@ -77,7 +77,7 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
 
 export const createProductFeaturesServiceMock = (
   /** What features keys should be enabled. Default is all */
-  enabledFeatureKeys: ProductFeatureKeys = [...ALL_PRODUCT_FEATURE_KEYS],
+  enabledProductFeatureKeys: ProductFeatureKeys = [...ALL_PRODUCT_FEATURE_KEYS],
   experimentalFeatures: ExperimentalFeatures = { ...allowedExperimentalValues },
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
   logger: Logger = loggingSystemMock.create().get('productFeatureMock')
@@ -88,133 +88,9 @@ export const createProductFeaturesServiceMock = (
     features: featuresPluginSetupContract,
   } as SecuritySolutionPluginSetupDependencies);
 
-  if (enabledFeatureKeys) {
+  if (enabledProductFeatureKeys) {
     productFeaturesService.setProductFeaturesConfigurator({
-      security: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      cases: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      securityAssistant: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      attackDiscovery: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                  api: [`test-entity-analytics`],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      timeline: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      notes: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  ui: ['entity-analytics'],
-                },
-                read: {
-                  ui: ['entity-analytics'],
-                },
-              },
-            },
-          ])
-        )
-      ),
-      siemMigrations: jest.fn().mockReturnValue(
-        new Map(
-          enabledFeatureKeys.map((key) => [
-            key,
-            {
-              privileges: {
-                all: {
-                  api: ['test-api-action'],
-                  ui: ['test-ui-action'],
-                },
-              },
-            },
-          ])
-        )
-      ),
+      enabledProductFeatureKeys,
     });
   }
 
