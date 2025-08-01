@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual } from 'lodash';
 import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '../../../ast/is';
 import { validateFunction } from './function';
 import { validateOption } from './option';
@@ -24,7 +23,6 @@ export const validateCommandArguments = (
   },
   callbacks: ICommandCallbacks = {}
 ) => {
-  const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
   for (const arg of command.args) {
     if (!Array.isArray(arg)) {
@@ -37,7 +35,6 @@ export const validateCommandArguments = (
             context,
             callbacks,
             parentAst: ast,
-            currentCommandIndex,
           })
         );
       } else if (isOptionNode(arg)) {

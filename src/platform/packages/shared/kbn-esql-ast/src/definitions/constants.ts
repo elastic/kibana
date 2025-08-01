@@ -131,17 +131,3 @@ export const timeUnitsToSuggest: Literals[] = [
 ];
 
 export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'qstr', 'kql'];
-export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([
-  'show',
-  'row',
-  'dissect',
-  'enrich',
-  'eval',
-  'grok',
-  'keep',
-  'mv_expand',
-  'rename',
-  'stats',
-  'limit',
-]);
-export const UNSUPPORTED_COMMANDS_BEFORE_MATCH = new Set(['limit']);
