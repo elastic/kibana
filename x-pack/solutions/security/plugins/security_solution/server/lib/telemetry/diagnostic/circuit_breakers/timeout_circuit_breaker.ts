@@ -11,10 +11,20 @@ import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers
 
 import { BaseCircuitBreaker } from './utils';
 
+/**
+ * Configuration interface for Timeout Circuit Breaker.
+ */
+export interface TimeoutCircuitBreakerConfig {
+  /** Maximum allowed execution time in milliseconds before timeout. */
+  timeoutMillis: number;
+  /** Interval in milliseconds between timeout validations. */
+  validationIntervalMs: number;
+}
+
 export class TimeoutCircuitBreaker extends BaseCircuitBreaker {
   private readonly started: number;
 
-  constructor(private readonly config: { timeoutMillis: number; validationIntervalMs: number }) {
+  constructor(private readonly config: TimeoutCircuitBreakerConfig) {
     super();
     this.started = performance.now();
   }

@@ -12,6 +12,16 @@ import { BaseCircuitBreaker } from './utils';
 
 export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 
+/**
+ * Configuration interface for Event Loop Delay Circuit Breaker.
+ */
+export interface EventLoopDelayCircuitBreakerConfig {
+  /** Threshold in milliseconds for event loop delay before triggering. */
+  thresholdMillis: number;
+  /** Interval in milliseconds between event loop delay measurements. */
+  validationIntervalMs: number;
+}
+
 export class EventLoopDelayCircuitBreaker extends BaseCircuitBreaker {
   private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
@@ -31,7 +41,7 @@ export class EventLoopDelayCircuitBreaker extends BaseCircuitBreaker {
     },
   };
 
-  constructor(private readonly config: { thresholdMillis: number; validationIntervalMs: number }) {
+  constructor(private readonly config: EventLoopDelayCircuitBreakerConfig) {
     super();
     const monitor = monitorEventLoopDelay();
     monitor.enable();

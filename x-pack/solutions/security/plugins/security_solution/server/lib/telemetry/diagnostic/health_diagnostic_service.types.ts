@@ -66,6 +66,16 @@ export interface HealthDiagnosticService {
 }
 
 /**
+ * Configuration interface for Health Diagnostic query execution.
+ */
+export interface HealthDiagnosticQueryConfig {
+  /** Maximum number of documents to process per query execution. Default: 100,000,000 */
+  maxDocuments: number;
+  /** Number of documents to buffer before sending to EBT. Default: 10,000 */
+  bufferSize: number;
+}
+
+/**
  * Defines a health diagnostic query configuration with scheduling and filtering options.
  */
 export interface HealthDiagnosticQuery {

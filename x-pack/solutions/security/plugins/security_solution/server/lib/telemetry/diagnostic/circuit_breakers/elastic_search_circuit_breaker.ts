@@ -10,6 +10,20 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
 import { BaseCircuitBreaker } from './utils';
 
+/**
+ * Configuration interface for Elasticsearch Circuit Breaker.
+ */
+export interface ElasticsearchCircuitBreakerConfig {
+  /** Maximum allowed JVM heap usage percentage. */
+  maxJvmHeapUsedPercent: number;
+  /** Maximum allowed CPU usage percentage. */
+  maxCpuPercent: number;
+  /** Expected cluster health statuses that allow query execution. */
+  expectedClusterHealth: string[];
+  /** Interval in milliseconds between cluster health validations. */
+  validationIntervalMs: number;
+}
+
 export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
   private lastHealth: HealthStatus = 'green';
   private lastJvmStats: Record<string, unknown> | undefined;
@@ -17,12 +31,7 @@ export class ElasticsearchCircuitBreaker extends BaseCircuitBreaker {
   private nodeTimestamps: Record<string, number> = {};
 
   constructor(
-    private readonly config: {
-      maxJvmHeapUsedPercent: number;
-      maxCpuPercent: number;
-      expectedClusterHealth: string[];
-      validationIntervalMs: number;
-    },
+    private readonly config: ElasticsearchCircuitBreakerConfig,
     private readonly client: ElasticsearchClient
   ) {
     super();

@@ -8,17 +8,22 @@
 import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
 import { BaseCircuitBreaker } from './utils';
 
+/**
+ * Configuration interface for RSS Growth Circuit Breaker.
+ */
+export interface RssGrowthCircuitBreakerConfig {
+  /** Maximum allowed RSS growth percentage before triggering the circuit breaker. */
+  maxRssGrowthPercent: number;
+  /** Interval in milliseconds between RSS growth validations. */
+  validationIntervalMs: number;
+}
+
 export class RssGrowthCircuitBreaker extends BaseCircuitBreaker {
   private readonly initialRss: number;
   private maxRss: number;
   private maxPercentGrowth: number;
 
-  constructor(
-    private readonly config: {
-      maxRssGrowthPercent: number;
-      validationIntervalMs: number;
-    }
-  ) {
+  constructor(private readonly config: RssGrowthCircuitBreakerConfig) {
     super();
     if (config.maxRssGrowthPercent < 0 || config.maxRssGrowthPercent > 100) {
       throw new Error('maxRssGrowthPercent must be between 0 and 100');

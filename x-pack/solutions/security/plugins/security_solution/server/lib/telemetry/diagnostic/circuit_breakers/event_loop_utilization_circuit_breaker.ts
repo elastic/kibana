@@ -9,10 +9,20 @@ import { type EventLoopUtilization, performance } from 'perf_hooks';
 import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
 import { BaseCircuitBreaker } from './utils';
 
+/**
+ * Configuration interface for Event Loop Utilization Circuit Breaker.
+ */
+export interface EventLoopUtilizationCircuitBreakerConfig {
+  /** Threshold in milliseconds for event loop utilization before triggering. */
+  thresholdMillis: number;
+  /** Interval in milliseconds between event loop utilization checks. */
+  validationIntervalMs: number;
+}
+
 export class EventLoopUtilizationCircuitBreaker extends BaseCircuitBreaker {
   private readonly startUtilization: EventLoopUtilization;
 
-  constructor(private readonly config: { thresholdMillis: number; validationIntervalMs: number }) {
+  constructor(private readonly config: EventLoopUtilizationCircuitBreakerConfig) {
     super();
     this.startUtilization = performance.eventLoopUtilization();
   }

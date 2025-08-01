@@ -8,11 +8,17 @@
 import os from 'os';
 import type {
   HealthDiagnosticConfiguration,
+  HealthDiagnosticQueryConfig,
   IndicesMetadataConfiguration,
   IngestPipelinesStatsConfiguration,
   PaginationConfiguration,
   TelemetrySenderChannelConfiguration,
 } from './types';
+import type { RssGrowthCircuitBreakerConfig } from './diagnostic/circuit_breakers/rss_growth_circuit_breaker';
+import type { TimeoutCircuitBreakerConfig } from './diagnostic/circuit_breakers/timeout_circuit_breaker';
+import type { EventLoopUtilizationCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_utilization_circuit_breaker';
+import type { EventLoopDelayCircuitBreakerConfig } from './diagnostic/circuit_breakers/event_loop_delay_circuit_breaker';
+import type { ElasticsearchCircuitBreakerConfig } from './diagnostic/circuit_breakers/elastic_search_circuit_breaker';
 
 class TelemetryConfigurationDTO {
   private readonly DEFAULT_TELEMETRY_MAX_BUFFER_SIZE = 100;
@@ -43,33 +49,33 @@ class TelemetryConfigurationDTO {
   private readonly DEFAULT_INGEST_PIPELINES_STATS_CONFIG = {
     enabled: true,
   };
-  private readonly DEFAULT_HEALTH_DIAGNOSTIC_CONFIG = {
+  private readonly DEFAULT_HEALTH_DIAGNOSTIC_CONFIG: HealthDiagnosticConfiguration = {
     query: {
       maxDocuments: 100_000_000,
       bufferSize: 10_000,
-    },
+    } as HealthDiagnosticQueryConfig,
     rssGrowthCircuitBreaker: {
       maxRssGrowthPercent: 40,
       validationIntervalMs: 200,
-    },
+    } as RssGrowthCircuitBreakerConfig,
     timeoutCircuitBreaker: {
       timeoutMillis: 1000,
       validationIntervalMs: 50,
-    },
+    } as TimeoutCircuitBreakerConfig,
     eventLoopUtilizationCircuitBreaker: {
       thresholdMillis: 1000,
       validationIntervalMs: 50,
-    },
+    } as EventLoopUtilizationCircuitBreakerConfig,
     eventLoopDelayCircuitBreaker: {
       thresholdMillis: 100,
       validationIntervalMs: 10,
-    },
+    } as EventLoopDelayCircuitBreakerConfig,
     elasticsearchCircuitBreaker: {
       maxJvmHeapUsedPercent: 80,
       maxCpuPercent: 80,
       expectedClusterHealth: ['green', 'yellow'],
       validationIntervalMs: 1000,
-    },
+    } as ElasticsearchCircuitBreakerConfig,
   };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
