@@ -15,8 +15,10 @@ import {
   LAST_ACTIVITY_VALUE_TEST_ID,
 } from './integration_card';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/use_integration_last_alert_ingested';
 
 jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
 
 const dataTestSubj = 'test-id';
 const integration: PackageListItem = {
@@ -39,13 +41,14 @@ describe('<IntegrationCard />', () => {
   });
 
   it('should render the card with skeleton while loading last activity', () => {
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+      isLoading: true,
+      lastAlertIngested: null,
+      refetch: jest.fn(),
+    });
+
     const { getByTestId, queryByTestId } = render(
-      <IntegrationCard
-        data-test-subj={dataTestSubj}
-        integration={integration}
-        isLoading={true}
-        lastActivity={undefined}
-      />
+      <IntegrationCard data-test-subj={dataTestSubj} integration={integration} />
     );
 
     expect(getByTestId(dataTestSubj)).toHaveTextContent('Splunk');
@@ -56,14 +59,14 @@ describe('<IntegrationCard />', () => {
   });
 
   it('should render the card with last activity value', () => {
-    const lastActivity = 1735711200000; // Wed Jan 01 2025 00:00:00 GMT-0600 (Central Standard Time)
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
+      isLoading: false,
+      lastAlertIngested: 1735711200000, // Wed Jan 01 2025 00:00:00 GMT-0600 (Central Standard Time)
+      refetch: jest.fn(),
+    });
+
     const { getByTestId, queryByTestId } = render(
-      <IntegrationCard
-        data-test-subj={dataTestSubj}
-        integration={integration}
-        isLoading={false}
-        lastActivity={lastActivity}
-      />
+      <IntegrationCard data-test-subj={dataTestSubj} integration={integration} />
     );
 
     expect(
