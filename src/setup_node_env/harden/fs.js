@@ -21,7 +21,7 @@ const dualPath = ['copyFile', 'copyFileSync'];
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const fsEventBus = require('@kbn/security-hardening/fs-event-bus');
+const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
@@ -82,6 +82,7 @@ const devOrCIPaths = [
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
+let hardeningConfig = null;
 
 const realMethods = {
   createWriteStream,
@@ -106,8 +107,10 @@ const realFsMethods = {
 // TODO: propagate here file specified for file logger (it can change in the runtime)
 // Idea 1: Use EventEmitter to propagate file logger path.
 // Checked it, it works, though we need to find a proper folder/package for that event emitter.
-fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
-  safePaths.push(loggerFilePath);
+fsEventBus.on(FS_CONFIG_EVENT, (config) => {
+  console.log('CONFIG', config);
+  hardeningConfig = config;
+  safePaths.push(...config.safe_paths);
 });
 
 const getSafePath = (userPath) => {
@@ -149,6 +152,10 @@ const isMockFsActive = () => {
 const createFsProxy = (fs) => {
   const proxiedFs = new Proxy(fs, {
     get(target, prop) {
+      if (!hardeningConfig?.enabled) {
+        return Reflect.get(target, prop);
+      }
+
       const isSyncMethod = typeof prop === 'string' && prop.endsWith('Sync');
 
       if (isSyncMethod && singlePath.includes(prop)) {

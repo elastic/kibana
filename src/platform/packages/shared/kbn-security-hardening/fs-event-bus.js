@@ -9,5 +9,6 @@
 const { EventEmitter } = require('events');
 
 const fsEventBus = new EventEmitter();
+const FS_CONFIG_EVENT = Symbol('fs_hardening_config');
 
-module.exports = fsEventBus;
+module.exports = { fsEventBus, FS_CONFIG_EVENT };

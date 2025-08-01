@@ -11,7 +11,7 @@ import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { fsEventBus } from '@kbn/security-hardening';
+import { fsEventBus, FS_CONFIG_EVENT } from '@kbn/security-hardening';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -60,9 +60,13 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       // @ts-expect-error
       .map((appender) => appender.fileName);
 
-    if (loggerFilePath.length) {
-      fsEventBus.emit('kbn_config_changed', { loggerFilePath });
-    }
+    const fsHardeningConfig = config?.xpack?.security?.hardening?.fs;
+    const safePaths = fsHardeningConfig?.safe_paths ?? [];
+
+    fsEventBus.emit(FS_CONFIG_EVENT, {
+      ...fsHardeningConfig,
+      safe_paths: [...loggerFilePath, ...safePaths],
+    });
   });
 
   rootLogger.info('Kibana is starting');
