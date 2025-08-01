@@ -16458,6 +16458,22 @@
                             ],
                             "type": "string"
                           },
+                          "last_known_status": {
+                            "enum": [
+                              "offline",
+                              "error",
+                              "online",
+                              "inactive",
+                              "enrolling",
+                              "unenrolling",
+                              "unenrolled",
+                              "updating",
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
+                            ],
+                            "type": "string"
+                          },
                           "local_metadata": {
                             "additionalProperties": {},
                             "type": "object"
@@ -18553,6 +18569,22 @@
                           ],
                           "type": "string"
                         },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
+                          ],
+                          "type": "string"
+                        },
                         "local_metadata": {
                           "additionalProperties": {},
                           "type": "object"
@@ -19027,6 +19059,22 @@
                             "degraded",
                             "updating",
                             "starting"
+                          ],
+                          "type": "string"
+                        },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
