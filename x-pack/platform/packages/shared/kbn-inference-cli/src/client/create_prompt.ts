@@ -44,8 +44,8 @@ export function createPrompt({ connector, kibanaClient, signal }: InferenceCliCl
       retryConfiguration:
         retryConfiguration && typeof retryConfiguration.retryOn === 'string'
           ? {
-            retryOn: retryConfiguration.retryOn,
-          }
+              retryOn: retryConfiguration.retryOn,
+            }
           : undefined,
       prompt,
       input,
