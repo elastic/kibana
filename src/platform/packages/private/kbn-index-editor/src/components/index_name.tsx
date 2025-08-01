@@ -91,7 +91,6 @@ export const IndexName: FC = () => {
   return (
     <EuiInlineEditTitle
       startWithEditOpen={startWithEditOpen}
-      autoFocus={startWithEditOpen}
       heading="h3"
       size={'m'}
       inputAriaLabel={i18n.translate('indexEditor.indexName.inputAriaLabel', {
@@ -107,7 +106,7 @@ export const IndexName: FC = () => {
       editModeProps={{
         formRowProps: { error },
         cancelButtonProps: { onClick: () => setError([]) },
-        inputProps: { readOnly: isLoading },
+        inputProps: { readOnly: isLoading, autoFocus: true },
       }}
       readModeProps={{
         'data-test-subj': 'indexNameReadMode',
