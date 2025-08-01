@@ -50,3 +50,5 @@ export const DATE_PERIOD_UNITS = new Set([
   'days',
   'd',
 ]);
+
+export const TIME_SPAN_UNITS = [...DATE_PERIOD_UNITS, ...TIME_DURATION_UNITS];

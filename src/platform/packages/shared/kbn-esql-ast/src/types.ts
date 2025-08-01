@@ -471,7 +471,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   unquoted?: boolean;
 }
 
-export interface ESQLTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
+export interface ESQLBaseTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
   extends ESQLAstBaseItem {
   type: 'literal';
   literalType: T;
@@ -479,8 +479,9 @@ export interface ESQLTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
   unit: string;
   quantity: number;
 }
-export type ESQLDatePeriodLiteral = ESQLTimeSpanLiteral<'date_period'>;
-export type ESQLTimeDurationLiteral = ESQLTimeSpanLiteral<'time_duration'>;
+export type ESQLDatePeriodLiteral = ESQLBaseTimeSpanLiteral<'date_period'>;
+export type ESQLTimeDurationLiteral = ESQLBaseTimeSpanLiteral<'time_duration'>;
+export type ESQLTimeSpanLiteral = ESQLDatePeriodLiteral | ESQLTimeDurationLiteral;
 
 // @internal
 export interface ESQLParamLiteral<

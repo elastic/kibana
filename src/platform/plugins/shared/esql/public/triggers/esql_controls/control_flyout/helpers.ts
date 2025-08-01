@@ -8,11 +8,11 @@
  */
 import { monaco } from '@kbn/monaco';
 import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
-import { timeUnits } from '@kbn/esql-ast';
+import { TIME_SPAN_UNITS } from '@kbn/esql-ast';
 import { css } from '@emotion/react';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
-  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
+  return TIME_SPAN_UNITS.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
 const getQueryPart = (queryString: string, cursorColumn: number, variable: string) => {

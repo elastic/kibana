@@ -17,7 +17,6 @@ import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
-import { TIME_DURATION_UNITS } from './constants';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
@@ -2344,11 +2343,8 @@ export class CstToAstConverter {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
     const parserFields = this.createParserFields(ctx);
-    const builderMethod = TIME_DURATION_UNITS.has(unit.toLowerCase())
-      ? Builder.expression.literal.timeDuration
-      : Builder.expression.literal.datePeriod;
 
-    return builderMethod(Number(value), unit, parserFields);
+    return Builder.expression.literal.timespan(Number(value), unit, parserFields);
   }
 
   // ---------------------------------------- constant expression: "identifier"

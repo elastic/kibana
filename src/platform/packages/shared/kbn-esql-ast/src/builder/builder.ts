@@ -10,6 +10,7 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
 import { isStringLiteral } from '../ast/is';
+import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
@@ -444,40 +445,19 @@ export namespace Builder {
       };
 
       /**
-       * Constructs time interval literal node.
-       *
-       * @example 1337 milliseconds
+       * Constructs AST nodes from timespan literals (e.g. 1 day, 2s)
        */
-      export const timeDuration = (
+      export const timespan = (
         quantity: ESQLTimeDurationLiteral['quantity'],
         unit: ESQLTimeDurationLiteral['unit'],
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLTimeDurationLiteral => {
+      ): ESQLTimeDurationLiteral | ESQLDatePeriodLiteral => {
         return {
           ...Builder.parserFields(fromParser),
           type: 'literal',
-          literalType: 'time_duration',
-          unit,
-          quantity,
-          value: `${quantity} ${unit}`,
-          name: `${quantity} ${unit}`,
-        };
-      };
-
-      /**
-       * Constructs date period literal node.
-       *
-       * @example 1337 milliseconds
-       */
-      export const datePeriod = (
-        quantity: ESQLTimeDurationLiteral['quantity'],
-        unit: ESQLTimeDurationLiteral['unit'],
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLDatePeriodLiteral => {
-        return {
-          ...Builder.parserFields(fromParser),
-          type: 'literal',
-          literalType: 'date_period',
+          literalType: TIME_DURATION_UNITS.has(unit.toLowerCase())
+            ? 'time_duration'
+            : 'date_period',
           unit,
           quantity,
           value: `${quantity} ${unit}`,

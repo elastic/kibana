@@ -212,14 +212,14 @@ describe('column', () => {
 describe('literal', () => {
   describe('"time intervals"', () => {
     test('a basic time duration node', () => {
-      const node = Builder.expression.literal.timeDuration(42, 'second');
+      const node = Builder.expression.literal.timespan(42, 'second');
       const text = BasicPrettyPrinter.expression(node);
 
       expect(text).toBe('42 second');
     });
 
     test('a basic date period node', () => {
-      const node = Builder.expression.literal.timeDuration(42, 'days');
+      const node = Builder.expression.literal.timespan(42, 'days');
       const text = BasicPrettyPrinter.expression(node);
 
       expect(text).toBe('42 days');
