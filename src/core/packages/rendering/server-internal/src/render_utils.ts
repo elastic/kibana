@@ -75,7 +75,7 @@ export const getThemeStylesheetPaths = ({
         ]
       : [
           `${baseHref}/ui/legacy_light_theme.min.css`,
-          `${baseHref}/ui/charts/theme_light.css`, // EUI Charts' CSS (light theme)
+          `${baseHref}/ui/charts/theme_light.css`, // Elastic Charts' CSS (light theme)
         ]),
   ];
 };
