@@ -169,6 +169,7 @@ describe('ConditionalToolTip', () => {
       currentTime,
       accountId: '',
       region: '',
+      schema: 'ecs',
     } as UseSnapshotRequest);
 
     expect(tooltip).toMatchSnapshot();
