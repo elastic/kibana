@@ -11,8 +11,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -84,7 +83,7 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  // ES|QL variables management
+  // ES|QL controls logic
   const { onSaveControl, onCancelControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
     stateContainer,

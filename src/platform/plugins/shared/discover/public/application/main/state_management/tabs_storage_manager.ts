@@ -148,7 +148,6 @@ export const createTabsStorageManager = ({
   ): TabStateInLocalStorage => {
     const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
       getAppState(tabId) || tabState.initialAppState;
-    // console.log(tabState, 'storage');
 
     return {
       id: tabState.id,

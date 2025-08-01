@@ -12,7 +12,6 @@ import type { SavedObjectModelDataBackfillFn } from '@kbn/core-saved-objects-ser
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type {
-  // SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
   SCHEMA_SEARCH_MODEL_VERSION_7,
 } from '../../server/saved_objects/schema';
