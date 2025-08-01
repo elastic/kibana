@@ -41,5 +41,6 @@
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
     "@kbn/core-user-profile-browser-mocks",
+    "@kbn/deeplinks-security",
   ]
 }
