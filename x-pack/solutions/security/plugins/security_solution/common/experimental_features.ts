@@ -84,6 +84,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
+   * `runscript` response actions for SentinelOne hosts.
+   *
+   * Release: 9.2.0 (earlier for serverless)
+   */
+  responseActionsSentinelOneRunScriptEnabled: false,
+
+  /**
    * Space awareness for Elastic Defend management.
    * Feature depends on Fleet's corresponding features also being enabled:
    * - `subfeaturePrivileges`
