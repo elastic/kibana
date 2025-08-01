@@ -78,7 +78,7 @@ export async function loadHuggingFaceDatasets({
       })
     );
 
-    logger.info(
+    logger.debug(
       `Generating embeddings for ${documents.length} documents in dataset ${dataset.name}`
     );
 
@@ -90,7 +90,7 @@ export async function loadHuggingFaceDatasets({
         logger,
       })
     );
-    logger.info(`Indexing ${docsWithEmbeddings.length} documents with embeddings`);
+    logger.debug(`Indexing ${docsWithEmbeddings.length} documents with embeddings`);
 
     await indexDocuments({
       esClient,

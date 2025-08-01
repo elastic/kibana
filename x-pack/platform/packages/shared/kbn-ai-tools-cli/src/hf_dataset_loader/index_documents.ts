@@ -38,13 +38,7 @@ export async function indexDocuments({
     flushBytes: 1024 * 128,
     onDocument: (document) => {
       const { _id, ...doc } = document;
-      if (!_id) {
-        logger.warn(
-          `Document missing _id, ${JSON.stringify(
-            doc
-          )}. This may lead to duplicate documents in the index.`
-        );
-      }
+
       return [{ index: { _id: String(_id) } }, doc];
     },
     onDrop: (doc) => {

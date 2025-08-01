@@ -21,18 +21,10 @@ function toMb(bytes: number): string {
 
 function convertToDocument(
   rawRecord: Record<string, unknown>,
-  dataset: HuggingFaceDatasetSpec,
-  logger: Logger
+  dataset: HuggingFaceDatasetSpec
 ): Record<string, unknown> {
   const doc = dataset.mapDocument(rawRecord);
   const cleanedDoc = pickBy(doc, (val) => val !== undefined && val !== null && val !== '');
-
-  logger.info(
-    `Processing document with ID: ${cleanedDoc._id}, keys: ${Object.keys(cleanedDoc).join(', ')}`
-  );
-  logger.info(`Original doc: ${JSON.stringify(doc, null, 2)}`);
-  logger.info(`Cleaned doc: ${JSON.stringify(cleanedDoc, null, 2)}`);
-
   return cleanedDoc;
 }
 
@@ -108,11 +100,11 @@ export async function fetchRowsFromDataset({
         rowCount++;
 
         try {
-          const document = convertToDocument(row, dataset, logger);
+          const document = convertToDocument(row, dataset);
           docs.push(document);
 
           if (docs.length >= limit) {
-            logger.info(`Reached limit of ${limit} documents`);
+            logger.debug(`Reached limit of ${limit} documents`);
             csvStream.destroy();
             resolve();
             return;
@@ -144,7 +136,6 @@ export async function fetchRowsFromDataset({
         originalResolve();
       };
 
-      // Pipe the decompressed stream directly to papaparse
       decompressed.pipe(csvStream);
     });
   } else {
@@ -155,11 +146,11 @@ export async function fetchRowsFromDataset({
       if (!line) continue;
       const raw = JSON.parse(line);
 
-      const document = convertToDocument(raw, dataset, logger);
+      const document = convertToDocument(raw, dataset);
       docs.push(document);
 
       if (docs.length >= limit) {
-        logger.info(`Reached limit of ${limit} documents`);
+        logger.debug(`Reached limit of ${limit} documents`);
         break;
       }
     }

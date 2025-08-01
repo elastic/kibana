@@ -24,40 +24,33 @@ interface Flags {
   'kibana-url'?: string;
 }
 
-async function showAvailableDatasets(accessToken: string, log: any, flags: any) {
+async function showAvailableDatasets(accessToken: string, logger: any) {
   let output = 'No datasets specified. Here are the available datasets:\n\n';
 
   output += 'Pre-defined HuggingFace datasets:\n';
   output += STATIC_HUGGING_FACE_DATASETS.map((d, index) => `  ${index + 1}. ${d.name}`).join('\n');
   output += '\n\n';
 
-  try {
-    const oneChatDatasets = await listAllOneChatDatasets(
-      accessToken,
-      toolingLogToLogger({ flags, log })
-    );
-    output += 'OneChat datasets:\n';
-    if (oneChatDatasets.length > 0) {
-      output += oneChatDatasets.map((dataset, index) => `  ${index + 1}. ${dataset}`).join('\n');
-    } else {
-      output += '  (none available)';
-    }
-  } catch (error) {
-    output += 'OneChat datasets:\n';
-    output += '  (failed to fetch - this is normal if not using OneChat)';
-    log.debug('Could not fetch OneChat datasets (this is normal if not using OneChat)');
+  const oneChatDatasets = await listAllOneChatDatasets(accessToken, logger);
+  output += 'OneChat datasets:\n';
+  if (oneChatDatasets.length > 0) {
+    output += oneChatDatasets.map((dataset, index) => `  ${index + 1}. ${dataset}`).join('\n');
+  } else {
+    output +=
+      '  (none available - you may need to join Elastic oranization on HuggingFace to access OneChat datasets)';
   }
 
   output += '\n\n';
   output += 'Usage: Use --datasets to specify which datasets to load\n';
   output += 'Example: --datasets onechat/knowledge-base/wix_knowledge_base';
 
-  log.info(output);
+  logger.info(output);
 }
 
 run(
   async ({ log, flags }) => {
     const signal = new AbortController().signal;
+    const logger = toolingLogToLogger({ flags, log });
 
     const accessToken = process.env.HUGGING_FACE_ACCESS_TOKEN;
 
@@ -87,11 +80,10 @@ run(
     let specs: HuggingFaceDatasetSpec[];
 
     if (datasetNames) {
-      // Use dynamic dataset loading to support OneChat datasets
-      specs = await getDatasetSpecs(accessToken, toolingLogToLogger({ flags, log }), datasetNames);
+      specs = await getDatasetSpecs(accessToken, logger, datasetNames);
     } else {
       // Show available datasets and exit
-      await showAvailableDatasets(accessToken, log, flags);
+      await showAvailableDatasets(accessToken, logger);
       return;
     }
 
@@ -101,7 +93,7 @@ run(
 
     await loadHuggingFaceDatasets({
       esClient: kibanaClient.es,
-      logger: toolingLogToLogger({ flags, log }),
+      logger,
       clear: Boolean(clear),
       limit: !!limit ? Number(limit) : undefined,
       datasets: specs,
