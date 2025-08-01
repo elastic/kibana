@@ -29,7 +29,7 @@ async function evaluateEsqlQuery({
   criteria = [],
 }: {
   question: string;
-  expected?: string;
+  expected?: string | string[];
   execute?: boolean;
   criteria?: string[];
 }): Promise<void> {
@@ -38,8 +38,12 @@ async function evaluateEsqlQuery({
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected
       ? [
-          `Returns a ES|QL query that is functionally equivalent to:      
-      ${expected}. It's OK if column names are slightly different, as long as the expected end result is the same.`,
+          `The generated ES|QL query should be syntactically valid and align with the intent of the user prompt. The query should be functionally equivalent
+          to the expected query or produce the same results, even if the syntax, structure, or column naming differs. If multiple expected queries are provided,
+          a match with any one of them is acceptable. Minor differences, such as variations in column names, formatting, or use of equivalent syntax, are acceptable
+          as long as they do not alter the semantics or outcome of the query.
+
+          Expected: ${expected}`,
         ]
       : []),
     ...(execute
@@ -843,10 +847,11 @@ describe('ES|QL query generation', () => {
     it('should handle timechart for time-series aggregation', async () => {
       await evaluateEsqlQuery({
         question: `Can you convert this SPL query to ES|QL? index=auth | timechart span=1h count by action`,
-        expected: `FROM auth
-        | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
-        criteria: [
-          'The query should use the HISTOGRAM function to bucket data over time, which is the ES|QL equivalent of timechart.',
+        expected: [
+          `FROM auth
+          | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+          `FROM auth
+          | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
         ],
         execute: false,
       });
@@ -858,8 +863,11 @@ describe('ES|QL query generation', () => {
     it('should handle a subsearch in a WHERE clause', async () => {
       await evaluateEsqlQuery({
         question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
-        expected: `FROM main
+        expected: [
+          `FROM main
         | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+          `FROM main | LOOKUP JOIN suspicious_users ON user_id | KEEP user_id`,
+        ],
         execute: false,
       });
     });

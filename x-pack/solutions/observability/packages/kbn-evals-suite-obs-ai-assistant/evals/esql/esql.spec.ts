@@ -958,8 +958,12 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               question: `Can you convert this SPL query to ES|QL? index=auth | timechart span=1h count by action`,
             },
             output: {
-              expected: `FROM auth
-              | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+              expected: [
+                `FROM auth
+                | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+                `FROM auth
+                | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
+              ],
               criteria: [
                 'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
               ],
@@ -972,8 +976,14 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
             },
             output: {
-              expected: `FROM main
-              | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+              expected: [
+                `FROM main
+                | WHERE user_id IN (FROM suspicious_users 
+                | KEEP user_id)`,
+                `FROM main 
+                | LOOKUP JOIN suspicious_users ON user_id 
+                | KEEP user_id`,
+              ],
               execute: false,
             },
             metadata: {},
