@@ -7,32 +7,43 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { samlAuthentication } from './support/saml_auth';
 import { esClient } from './support/es_client';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
   chromeWebSecurity: false,
-  defaultCommandTimeout: 60000,
+  defaultCommandTimeout: 300000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@ess --@skipInEss',
+    grepOmitFiltered: true,
+    grepTags: '@serverless --@skipInServerless --@skipInServerlessMKI',
   },
-  execTimeout: 60000,
-  pageLoadTimeout: 60000,
-  responseTimeout: 60000,
-  screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
+  execTimeout: 300000,
+  pageLoadTimeout: 300000,
+  numTestsKeptInMemory: 0,
+  requestTimeout: 300000,
+  responseTimeout: 300000,
+  retries: {
+    runMode: 1,
+  },
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
-  numTestsKeptInMemory: 10,
   e2e: {
-    experimentalRunAllSpecs: true,
-    experimentalMemoryManagement: true,
+    baseUrl: 'http://localhost:5601',
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
+    experimentalMemoryManagement: true,
+    specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
-      esClient(on, config);
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.name === 'chrome' && browser.isHeadless) {
           launchOptions.args.push('--window-size=1920,1200');
@@ -45,6 +56,9 @@ export default defineCypressConfig({
         }
         return launchOptions;
       });
+      samlAuthentication(on, config);
+      esClient(on, config);
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;
