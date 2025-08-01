@@ -39,14 +39,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
     // dashboard should load properly
     await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
+
+    expect(await PageObjects.dashboard.getIsInViewMode()).to.be(true);
+
     // count of panels rendered completely
     await renderService.waitForRender(8);
     // There should be 0 error embeddables on the dashboard
+
     await PageObjects.dashboard.verifyNoRenderErrors();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/228143
-  describe.skip('should be able to handle multi-space imports correctly', function () {
+  describe('should be able to handle multi-space imports correctly', function () {
     before(async function () {
       await spacesService.create({
         id: 'another_space',
