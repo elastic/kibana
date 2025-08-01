@@ -39,7 +39,12 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [{ allRequired: ['securitySolution'] }],
+          // test this out real quick
+          requiredPrivileges: [
+            {
+              allRequired: [{ anyOf: ['crudRules', 'readRules'] }, 'crudExceptions'],
+            },
+          ],
         },
       },
     })
@@ -296,6 +301,8 @@ export const createAndAssociateDefaultExceptionList = async ({
   //     ],
   //   });
   // } catch (exc) {
+  // if HTTP 404 / 401 / 403 then roll-back exception list creation
+  // from createExceptionList
   //   console.error('exc', exc);
   // }
 

@@ -28,8 +28,11 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
-          // requiredPrivileges: [{ allRequired: ['securitySolution'] }, { allRequired: [] }],
+          requiredPrivileges: [
+            {
+              anyRequired: [{ allOf: ['crudExceptions', 'readRules'] }, 'crudRules'],
+            },
+          ],
         },
       },
     })
