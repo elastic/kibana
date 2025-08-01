@@ -365,6 +365,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
