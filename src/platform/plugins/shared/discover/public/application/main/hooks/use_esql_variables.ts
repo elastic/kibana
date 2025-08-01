@@ -108,6 +108,9 @@ export const useESQLVariables = ({
         const newVariables = getEsqlVariablesFromState(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           dispatch(internalStateActions.setEsqlVariables(newVariables));
+          stateContainer.savedSearchState.updateControlState({
+            nextControlState: currentTabControlState,
+          });
           stateContainer.dataState.fetch();
         }
       }
