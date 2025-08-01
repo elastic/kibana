@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiLink, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
@@ -52,7 +60,9 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
         </h3>
       </EuiTitle>
 
-      {aiFeatures && !aiFeatures.enabled ? (
+      {aiFeatures.loading && <EuiLoadingSpinner size="m" />}
+
+      {!aiFeatures.loading && !aiFeatures.enabled && (
         <EuiToolTip
           content={i18n.translate(
             'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledTooltip',
@@ -85,72 +95,79 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
             </EuiText>
           )}
         </EuiToolTip>
-      ) : null}
+      )}
 
-      <EuiFlexGroup>
-        <EuiButton
-          isLoading={isGenerating}
-          disabled={
-            isSubmitting ||
-            isGenerating ||
-            !aiFeatures ||
-            !aiFeatures.enabled ||
-            !aiFeatures.selectedConnector
-          }
-          iconType="sparkles"
-          onClick={() => {
-            setIsGenerating(true);
-            setGeneratedQueries([]);
-            setSelectedQueries([]);
+      {!aiFeatures.loading && aiFeatures.enabled && (
+        <>
+          <EuiFlexGroup>
+            <EuiButton
+              isLoading={isGenerating}
+              disabled={
+                isSubmitting ||
+                isGenerating ||
+                !aiFeatures ||
+                !aiFeatures.enabled ||
+                !aiFeatures.selectedConnector
+              }
+              iconType="sparkles"
+              onClick={() => {
+                setIsGenerating(true);
+                setGeneratedQueries([]);
+                setSelectedQueries([]);
 
-            const generation$ = generate(aiFeatures?.selectedConnector!);
-            generation$.subscribe({
-              next: (result) => {
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
-                ]);
-              },
-              error: (error) => {
-                notifications.showErrorDialog({
-                  title: i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
-                    { defaultMessage: `Could not generate significant events queries` }
-                  ),
-                  error,
+                const generation$ = generate(aiFeatures?.selectedConnector!);
+                generation$.subscribe({
+                  next: (result) => {
+                    setGeneratedQueries((prev) => [
+                      ...prev,
+                      { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+                    ]);
+                  },
+                  error: (error) => {
+                    notifications.showErrorDialog({
+                      title: i18n.translate(
+                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
+                        { defaultMessage: `Could not generate significant events queries` }
+                      ),
+                      error,
+                    });
+                    setIsGenerating(false);
+                  },
+                  complete: () => {
+                    notifications.toasts.addSuccess({
+                      title: i18n.translate(
+                        'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
+                        { defaultMessage: `Generated significant events queries successfully` }
+                      ),
+                    });
+                    setIsGenerating(false);
+                  },
                 });
-                setIsGenerating(false);
-              },
-              complete: () => {
-                notifications.toasts.addSuccess({
-                  title: i18n.translate(
-                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
-                    { defaultMessage: `Generated significant events queries successfully` }
-                  ),
-                });
-                setIsGenerating(false);
-              },
-            });
-          }}
-        >
-          {isGenerating
-            ? i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                { defaultMessage: 'Generating...' }
-              )
-            : i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel', {
-                defaultMessage: 'Generate',
-              })}
-        </EuiButton>
-      </EuiFlexGroup>
+              }}
+            >
+              {isGenerating
+                ? i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                    { defaultMessage: 'Generating...' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+                    {
+                      defaultMessage: 'Generate',
+                    }
+                  )}
+            </EuiButton>
+          </EuiFlexGroup>
 
-      <SignificantEventsGeneratedTable
-        isSubmitting={isSubmitting}
-        generatedQueries={generatedQueries}
-        selectedQueries={selectedQueries}
-        onSelectionChange={onSelectionChange}
-        definition={definition}
-      />
+          <SignificantEventsGeneratedTable
+            isSubmitting={isSubmitting}
+            generatedQueries={generatedQueries}
+            selectedQueries={selectedQueries}
+            onSelectionChange={onSelectionChange}
+            definition={definition}
+          />
+        </>
+      )}
     </EuiFlexGroup>
   );
 }
