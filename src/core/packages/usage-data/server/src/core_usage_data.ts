@@ -15,7 +15,6 @@ export interface CoreServicesUsageData {
   savedObjects: {
     // scripts/telemetry_check.js does not support parsing Array<{...}> types
     // so we have to disable eslint here and use {...}[]
-    // eslint-disable-next-line @typescript-eslint/array-type
     indices: {
       alias: string;
       docsCount: number;

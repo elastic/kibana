@@ -59,13 +59,11 @@ export const AnalyticsCollectionToolbarLogic = kea<
   reducers: () => ({
     _searchSessionId: [
       null,
-      // @ts-expect-error upgrade typescript v5.1.6
       { setSearchSessionId: (state, { searchSessionId }) => searchSessionId },
     ],
     refreshInterval: [
       DEFAULT_REFRESH_INTERVAL,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setRefreshInterval: (_, { pause, value }) => ({
           pause,
           value,
@@ -75,7 +73,6 @@ export const AnalyticsCollectionToolbarLogic = kea<
     timeRange: [
       DEFAULT_TIME_RANGE,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setTimeRange: (state, { from, to }) => ({
           ...state,
           from,
