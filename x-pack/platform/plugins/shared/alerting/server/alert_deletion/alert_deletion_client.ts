@@ -89,10 +89,7 @@ export class AlertDeletionClient {
             run: async () => {
               return this.runTask(taskInstance, abortController);
             },
-
-            cancel: async () => {
-              abortController.abort('task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
