@@ -11,4 +11,4 @@ export * from './v1/schema/utils';
 
 export * from './latest';
 
-export * as LensV1 from './v1';
+export type * as LensV1 from './v1';

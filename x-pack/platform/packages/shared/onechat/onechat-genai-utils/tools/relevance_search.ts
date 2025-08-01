@@ -34,7 +34,7 @@ export const relevanceSearch = async ({
   // if no index was specified, we use the index explorer to select the best one
   if (!selectedIndex) {
     const { indices } = await indexExplorer({
-      query: term,
+      nlQuery: term,
       esClient,
       model,
     });
