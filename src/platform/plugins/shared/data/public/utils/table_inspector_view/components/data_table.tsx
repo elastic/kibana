@@ -103,7 +103,6 @@ class DataTableFormatClass extends Component<
                   })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
-                  css={cellStyles.dataTableFilter}
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
@@ -137,7 +136,6 @@ class DataTableFormatClass extends Component<
                     )}
                     data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
-                    css={cellStyles.dataTableFilter}
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
@@ -213,7 +211,7 @@ class DataTableFormatClass extends Component<
         sorting={sorting}
         pagination={pagination}
         onTableChange={onTableChange}
-        css={tableStyles.table}
+        css={styles.table}
       />
     );
   }
@@ -225,13 +223,7 @@ export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   initialPageSize: 20,
 });
 
-const cellStyles = {
-  dataTableFilter: css({
-    opacity: 0,
-  }),
-};
-
-const tableStyles = {
+const styles = {
   table: css({
     // Set a min width on each column
     '.euiTableHeaderCell': {
@@ -245,6 +237,9 @@ const tableStyles = {
     // Show filter buttons on row hover or focus
     'tr:hover .insDataTableFormat__filter, .insDataTableFormat__filter:focus': {
       opacity: 1,
+    },
+    '.insDataTableFormat__filter': {
+      opacity: 0,
     },
   }),
 };
