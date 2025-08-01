@@ -6554,7 +6554,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
+  version "0.0.0"
+  uid ""
+
+"@kbn/metrics@link:src/platform/packages/private/opentelemetry/kbn-metrics":
   version "0.0.0"
   uid ""
 
@@ -9492,7 +9500,7 @@
     "@opentelemetry/resources" "2.0.1"
     "@opentelemetry/sdk-metrics" "2.0.1"
 
-"@opentelemetry/exporter-metrics-otlp-http@0.203.0":
+"@opentelemetry/exporter-metrics-otlp-http@0.203.0", "@opentelemetry/exporter-metrics-otlp-http@^0.203.0":
   version "0.203.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-metrics-otlp-http/-/exporter-metrics-otlp-http-0.203.0.tgz#90d6e157ee93f5408a4af52e1c9250e6282ef8d0"
   integrity sha512-HFSW10y8lY6BTZecGNpV3GpoSy7eaO0Z6GATwZasnT4bEsILp8UJXNG5OmEsz4SdwCSYvyCbTJdNbZP3/8LGCQ==
