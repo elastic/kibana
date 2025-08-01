@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, IRouter, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import {
   InferenceConnector,
   isSupportedConnectorType,
   connectorToInference,
 } from '@kbn/inference-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
+
+export async function listConnectors(request: KibanaRequest, actions: ActionsPluginStart) {
+  const client = await actions.getActionsClientWithRequest(request);
+
+  const allConnectors = await client.getAll({
+    includeSystemActions: false,
+  });
+
+  const connectors: InferenceConnector[] = allConnectors
+    .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
+    .map(connectorToInference);
+  return connectors;
+}
 
 export function registerConnectorsRoute({
   coreSetup,
@@ -35,17 +49,7 @@ export function registerConnectorsRoute({
       const actions = await coreSetup
         .getStartServices()
         .then(([_coreStart, pluginsStart]) => pluginsStart.actions);
-
-      const client = await actions.getActionsClientWithRequest(request);
-
-      const allConnectors = await client.getAll({
-        includeSystemActions: false,
-      });
-
-      const connectors: InferenceConnector[] = allConnectors
-        .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
-        .map(connectorToInference);
-
+      const connectors = await listConnectors(request, actions);
       return response.ok({ body: { connectors } });
     }
   );

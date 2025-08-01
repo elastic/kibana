@@ -10,7 +10,12 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  BoundOptions,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -109,6 +114,8 @@ export interface InferenceServerStart {
    * });
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
+
+  getConnectors: (request: KibanaRequest) => Promise<InferenceConnector[]>;
 }
 
 /**

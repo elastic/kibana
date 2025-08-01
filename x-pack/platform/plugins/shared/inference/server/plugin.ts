@@ -27,6 +27,7 @@ import {
   InferenceStartDependencies,
 } from './types';
 import { uiSettings } from '../common/ui_settings';
+import { listConnectors } from './routes/connectors';
 
 export class InferencePlugin
   implements
@@ -108,6 +109,10 @@ export class InferencePlugin
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           logger: this.logger,
         });
+      },
+
+      getConnectors: async (request: KibanaRequest) => {
+        return listConnectors(request, pluginsStart.actions);
       },
     };
   }
