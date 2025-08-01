@@ -27,6 +27,8 @@ import { MalwareProtectionsCard } from './components/cards/malware_protections_c
 import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
+import { DeviceControlCard } from './components/cards/device_control_card';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
@@ -43,10 +45,30 @@ export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
 export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const getTestId = useTestIdGenerator(props['data-test-subj']);
   const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
+  const DeviceControlUpSellingComponent = useGetDeviceControlUpsellComponent();
 
   const { storage } = useKibana().services;
 
-  const { eventCollectionDataReductionBannerEnabled } = useEnableExperimental();
+  const { eventCollectionDataReductionBannerEnabled, trustedDevicesEnabled } =
+    useEnableExperimental();
+
+  const renderDeviceControlSection = () => {
+    if (!trustedDevicesEnabled) {
+      return null;
+    }
+
+    return (
+      <>
+        {DeviceControlUpSellingComponent ? (
+          <DeviceControlUpSellingComponent />
+        ) : (
+          <DeviceControlCard {...props} data-test-subj={getTestId('deviceControl')} />
+        )}
+        <EuiSpacer size="l" />
+      </>
+    );
+  };
+
   const [showEventMergingBanner, setShowEventMergingBanner] = useState(
     eventCollectionDataReductionBannerEnabled &&
       (storage.get('securitySolution.showEventMergingBanner') ?? true)
@@ -103,6 +125,8 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
           <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
           <EuiSpacer size="l" />
+
+          {renderDeviceControlSection()}
         </>
       )}
 

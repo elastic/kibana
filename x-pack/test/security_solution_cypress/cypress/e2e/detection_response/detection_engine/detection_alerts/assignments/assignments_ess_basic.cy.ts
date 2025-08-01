@@ -17,25 +17,13 @@ import {
   cannotAddAssigneesViaDetailsFlyout,
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
+import { downgradeLicenseToBasic } from '../../../../../tasks/license';
 
 describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     login();
-    cy.request({
-      method: 'POST',
-      url: '/api/license/start_basic?acknowledge=true',
-      headers: {
-        'kbn-xsrf': 'cypress-creds',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-    }).then(({ body }) => {
-      cy.log(`body: ${JSON.stringify(body)}`);
-      expect(body).contains({
-        acknowledged: true,
-        basic_was_started: true,
-      });
-    });
+    downgradeLicenseToBasic();
   });
 
   after(() => {
