@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
@@ -95,11 +96,19 @@ export const CustomScriptSelector = memo<
     [onChange, state, value, valueText]
   );
 
+  const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
+    if (agentType === 'sentinel_one' && platform) {
+      return { osType: platform };
+    }
+
+    return {};
+  }, [agentType, platform]);
+
   const {
     data = [],
     isLoading: isLoadingScripts,
     error: scriptsError,
-  } = useGetCustomScripts(agentType, { osType: platform });
+  } = useGetCustomScripts(agentType, scriptsApiQueryParams);
 
   const scriptsOptions: SelectableOption[] = useMemo(() => {
     return data.map((script: ResponseActionScript) => {
