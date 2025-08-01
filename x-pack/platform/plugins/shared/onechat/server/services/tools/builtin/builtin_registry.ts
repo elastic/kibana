@@ -9,7 +9,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { isBuiltinToolId } from '../utils';
 
 export interface BuiltinToolRegistry {
-  register(tool: BuiltinToolDefinition<any, any>): void;
+  register(tool: BuiltinToolDefinition<any>): void;
   has(toolId: string): boolean;
   get(toolId: string): BuiltinToolDefinition | undefined;
   list(): BuiltinToolDefinition[];
