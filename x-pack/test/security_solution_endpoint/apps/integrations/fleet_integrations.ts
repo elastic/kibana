@@ -19,9 +19,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     targetTags(this, ['@ess', '@serverless']);
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/metadata/api_feature', {
-        useCreate: true,
-      });
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/endpoint/metadata/api_feature',
+        {
+          useCreate: true,
+        }
+      );
       await browser.refresh();
     });
     after(async () => {

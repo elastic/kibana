@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
-import type { ICommandContext } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { getExpressionType } from '../../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
@@ -17,7 +17,8 @@ const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
@@ -42,7 +43,7 @@ export const validate = (
     });
   }
 
-  messages.push(...validateCommandArguments(command, ast, context));
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   const targetName = targetField?.name || 'completion';
 
