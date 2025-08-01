@@ -14,8 +14,6 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
   RuleMigrationTranslationResult,
   UpdateRuleMigrationData,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
-import {
   type RuleMigration,
   type RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';

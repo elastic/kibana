@@ -8,8 +8,8 @@
  */
 
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { getIndexForESQLQuery, getInitialESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 

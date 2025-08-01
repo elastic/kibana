@@ -12,20 +12,17 @@ import { cloneDeep, isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
-import { DiscoverDataStateContainer } from '../discover_data_state_container';
+import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
 import { getValidFilters } from '../../../../utils/get_valid_filters';
-import { DiscoverStateContainer, LoadParams } from '../discover_state';
+import type { DiscoverStateContainer, LoadParams } from '../discover_state';
 import { addLog } from '../../../../utils/add_log';
-import { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
-import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
-  getInitialState,
-} from '../discover_app_state_container';
-import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
+import { getInitialState } from '../discover_app_state_container';
+import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
+import type { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 interface LoadSavedSearchDeps {

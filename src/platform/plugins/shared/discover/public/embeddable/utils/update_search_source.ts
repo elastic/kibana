@@ -9,10 +9,10 @@
 
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from '../../build_services';
 
 export const getTimeRangeFromFetchContext = (fetchContext: FetchContext) => {
   const timeRange =

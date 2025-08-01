@@ -8,7 +8,7 @@
  */
 
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const fields = [
   {
