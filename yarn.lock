@@ -5842,11 +5842,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-streams@link:x-pack/platform/packages/private/kbn-evals-suite-streams":
+"@kbn/evals-suite-onechat@link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat":
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-onechat@link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat":
+"@kbn/evals-suite-streams@link:x-pack/platform/packages/private/kbn-evals-suite-streams":
   version "0.0.0"
   uid ""
 
