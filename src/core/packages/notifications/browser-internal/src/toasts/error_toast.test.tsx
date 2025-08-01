@@ -9,7 +9,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent } from '@testing-library/react';
 
 import { ErrorToast } from './error_toast';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
@@ -42,9 +43,9 @@ it('renders matching snapshot', () => {
 });
 
 it('should open a modal when clicking button', () => {
-  const wrapper = mountWithIntl(getErrorToast());
+  const { getByTestId } = renderWithI18n(getErrorToast());
   expect(openModal).not.toHaveBeenCalled();
-  wrapper.find('button').simulate('click');
+  fireEvent.click(getByTestId('errorToastBtn'));
   expect(openModal).toHaveBeenCalled();
 });
 
