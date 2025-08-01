@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 import { useUninstallProductDoc } from './use_uninstall_product_doc';
 import { useInstallProductDoc } from './use_install_product_doc';
 
+/**
+ * Custom hook to get the status of the product documentation installation.
+ * It also provides methods to install and uninstall the product documentation.
+ *
+ * @param inferenceId - The ID of the inference for which to get the product documentation status.
+ * @returns An object containing the status of the product documentation, loading state, and methods to install and uninstall the product documentation.
+ */
 export function useGetProductDoc(inferenceId: string | undefined) {
   const { productDocBase } = useKibana().services;
 
@@ -19,7 +27,7 @@ export function useGetProductDoc(inferenceId: string | undefined) {
 
   const { mutateAsync: uninstallProductDoc, isLoading: isUninstalling } = useUninstallProductDoc();
 
-  const { isLoading, data, refetch } = useQuery({
+  const { isLoading, data, refetch, isRefetching } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],
     queryFn: async () => {
       return productDocBase!.installation.getStatus({ inferenceId });
@@ -32,10 +40,37 @@ export function useGetProductDoc(inferenceId: string | undefined) {
     refetch();
   }, [inferenceId, isInstalling, isUninstalling, refetch]);
 
+  // poll the status if when is installing or uninstalling
+  useEffect(() => {
+    if (!(data?.overall === 'installing' || data?.overall === 'uninstalling')) {
+      return;
+    }
+
+    const interval = setInterval(refetch, 5000);
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refetch, data?.overall]);
+
+  const status: InstallationStatus | undefined = useMemo(() => {
+    if (!inferenceId || data?.inferenceId !== inferenceId) {
+      return undefined;
+    }
+    if (isInstalling) {
+      return 'installing';
+    }
+    if (isUninstalling) {
+      return 'uninstalling';
+    }
+    return data?.overall;
+  }, [inferenceId, isInstalling, isUninstalling, data]);
+
   return {
-    status: data?.inferenceId === inferenceId ? data?.overall : undefined,
+    status,
     refetch,
-    isLoading,
+    isLoading: isLoading || isRefetching,
     installProductDoc,
     uninstallProductDoc,
   };

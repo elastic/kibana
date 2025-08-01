@@ -99,6 +99,14 @@ export class ProductDocInstallClient {
     });
   }
 
+  async setUninstallationStarted(productName: ProductName, inferenceId: string | undefined) {
+    const objectId = getObjectIdFromProductName(productName, inferenceId);
+    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+      installation_status: 'uninstalling',
+      inference_id: inferenceId,
+    });
+  }
+
   async setInstallationSuccessful(
     productName: ProductName,
     indexName: string,
